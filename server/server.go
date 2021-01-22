@@ -2,11 +2,12 @@ package server
 
 import (
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"log"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
+
+	pb "github.com/TUM-Dev/Campus-Backend/api"
 )
 
 type CampusServer struct {
