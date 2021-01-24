@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
-	cronService := cron.CronService{DB: db}
+	cronService := cron.ServiceCron{DB: db}
 	cronService.Init()
 
 	// Start Server
