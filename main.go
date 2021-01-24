@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/cron"
 	"log"
 	"net"
 
@@ -30,7 +31,7 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
-	cronService := server.CronService{DB: db}
+	cronService := cron.CronService{DB: db}
 	cronService.Init()
 
 	// Start Server
