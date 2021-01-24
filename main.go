@@ -30,6 +30,9 @@ func main() {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
+	cronService := server.CronService{DB: db}
+	cronService.Init()
+
 	// Start Server
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
