@@ -1,5 +1,8 @@
 FROM golang:alpine as builder
 
+# Install gcc for cgo
+RUN apk add build-base
+
 COPY ./server $GOPATH/server/
 WORKDIR $GOPATH/server/
 
