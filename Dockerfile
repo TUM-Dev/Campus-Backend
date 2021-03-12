@@ -11,4 +11,4 @@ RUN chmod +x /backend
 
 FROM scratch
 COPY --from=builder /backend /backend
-CMD ["/go-direct"]
+CMD ["/backend"]
