@@ -9,7 +9,6 @@ WORKDIR $GOPATH/server/
 RUN go build -o /backend
 RUN chmod +x /backend
 
-FROM alpine:latest
+FROM scratch
 COPY --from=builder /backend /backend
-
 CMD ["/go-direct"]
