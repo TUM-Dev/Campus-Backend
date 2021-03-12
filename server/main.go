@@ -1,11 +1,10 @@
-package main
+package server
 
 import (
 	"log"
 	"net"
 
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"github.com/TUM-Dev/Campus-Backend/server"
 	"google.golang.org/grpc"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -37,7 +36,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterCampusServer(s, &server.CampusServer{})
+	pb.RegisterCampusServer(s, &CampusServer{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
