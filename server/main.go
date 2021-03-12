@@ -4,9 +4,11 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"log"
 	"net"
+	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -19,7 +21,13 @@ const (
 
 func main() {
 	// Connect to DB
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	var conn gorm.Dialector
+	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
+		conn = mysql.Open(dbHost)
+	} else {
+		conn = sqlite.Open("test.db")
+	}
+	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
