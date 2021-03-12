@@ -1,6 +1,7 @@
-package server
+package main
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/backend"
 	"log"
 	"net"
 
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterCampusServer(s, &CampusServer{})
+	pb.RegisterCampusServer(s, &backend.CampusServer{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
