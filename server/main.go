@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
@@ -16,7 +15,8 @@ import (
 )
 
 const (
-	port = ":50051"
+	httpPort = ":50051"
+	grpcPort = ":50052"
 )
 
 func main() {
@@ -44,21 +44,19 @@ func main() {
 		}
 	}
 
-	// Listen to our configured port
-	lis, err := net.Listen("tcp", port)
+	// Listen to our configured ports
+	httpListener, err := net.Listen("tcp", httpPort)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	grpcListener, err := net.Listen("tcp", grpcPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// Use cmux so we can server http on the same port
-	m := cmux.New(lis)
-	grpcListener := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-	httpListener := m.Match(cmux.HTTP1Fast())
-
 	// Start each server in its own go routine and logs any errors
 	g := new(errgroup.Group)
-	g.Go(func() error { return backend.GRPCServe(grpcListener) })
 	g.Go(func() error { return web.HTTPServe(httpListener) })
-	g.Go(func() error { return m.Serve() })
+	g.Go(func() error { return backend.GRPCServe(grpcListener) })
 	log.Println("run server: ", g.Wait())
 }
