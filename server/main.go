@@ -22,20 +22,24 @@ const (
 func main() {
 	// Connect to DB
 	var conn gorm.Dialector
+	shouldAutoMigrate := false
 	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
 		conn = mysql.Open(dbHost)
 	} else {
 		conn = sqlite.Open("test.db")
+		shouldAutoMigrate = true
 	}
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	// Migrate the schema
-	err = db.AutoMigrate(&model.TopNews{})
-	if err != nil {
-		log.Fatalf("failed to migrate: %v", err)
+	// Migrate the schema only in local development mode
+	if shouldAutoMigrate {
+		err = db.AutoMigrate(&model.TopNews{})
+		if err != nil {
+			log.Fatalf("failed to migrate: %v", err)
+		}
 	}
 
 	// Start Server
