@@ -2,17 +2,17 @@ package main
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/backend"
+	"github.com/TUM-Dev/Campus-Backend/web"
 	"log"
 	"net"
 	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"google.golang.org/grpc"
+	"github.com/soheilhy/cmux"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-
-	pb "github.com/TUM-Dev/Campus-Backend/api"
 )
 
 const (
@@ -24,7 +24,7 @@ func main() {
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
 	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
-		log.Printf("Connecting to dsn: %s", dbHost)
+		log.Printf("Connecting to dsn: %grpcServer", dbHost)
 		conn = mysql.Open(dbHost)
 	} else {
 		conn = sqlite.Open("test.db")
@@ -37,21 +37,28 @@ func main() {
 
 	// Migrate the schema only in local development mode
 	if shouldAutoMigrate {
+		log.Println("Running auto migrations")
 		err = db.AutoMigrate(&model.TopNews{})
 		if err != nil {
 			log.Fatalf("failed to migrate: %v", err)
 		}
 	}
 
-	// Start Server
+	// Listen to our configured port
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
-	pb.RegisterCampusServer(s, &backend.CampusServer{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	// Use cmux so we can server http on the same port
+	m := cmux.New(lis)
+	grpcListener := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpListener := m.Match(cmux.HTTP1Fast())
+
+	// Start each server in its own go routine and logs any errors
+	g := new(errgroup.Group)
+	g.Go(func() error { return backend.GRPCServe(grpcListener) })
+	g.Go(func() error { return web.HTTPServe(httpListener) })
+	g.Go(func() error { return m.Serve() })
+	log.Println("run server: ", g.Wait())
 }

@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	address = "localhost:50051"
+	address = "127.0.0.1:50051"
 )
 
 func main() {
 	// Set up a connection to the server.
+	log.Println("Connecting...")
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -24,6 +25,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
+	log.Println("Trying to fet top news")
 	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
