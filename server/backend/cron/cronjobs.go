@@ -22,7 +22,7 @@ func (c *CronService) Run() error {
 	for {
 		log.Info("Cron: checking for pending")
 		var res *model.Crontab
-		c.db.Where("name = ?", "jinzhu").Scan(res)
+		c.db.Where("interval>0 AND (lastRun+interval) < ?", "jinzhu").Scan(res)
 
 		log.Info("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
