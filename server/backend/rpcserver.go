@@ -4,23 +4,23 @@ import (
 	"context"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"net"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
 
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
-	grpc := grpc.NewServer()
-	pb.RegisterCampusServer(grpc, s)
-	if err := grpc.Serve(l); err != nil {
+	grpcServer := grpc.NewServer()
+	pb.RegisterCampusServer(grpcServer, s)
+	if err := grpcServer.Serve(l); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-	return grpc.Serve(l)
+	return grpcServer.Serve(l)
 }
 
 type CampusServer struct {
@@ -42,17 +42,15 @@ func (s *CampusServer) GetTopNews(ctx context.Context, in *pb.GetTopNewsRequest)
 		log.Error(err)
 	}
 
-	now, _ := ptypes.TimestampProto(time.Now())
 	if res != nil {
 		return &pb.GetTopNewsReply{
-			Name:    "Test Top News",
-			Link:    "https://google.com",
-			Created: now,
-			From:    nil,
-			To:      nil,
+			//ImageUrl: res.Name,
+			Link: res.Link,
+			To:   timestamppb.New(*res.To),
 		}, nil
 	}
 
+	now := timestamppb.New(time.Now())
 	return &pb.GetTopNewsReply{
 		Name:    "Test Top News",
 		Link:    "https://google.com",
