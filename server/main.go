@@ -74,6 +74,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	g := errgroup.Group{}
 	// Start each server in its own go routine and logs any errors
 	g.Go(func() error { return web.HTTPServe(httpListener) })
 	g.Go(func() error { return campusService.GRPCServe(grpcListener) })
