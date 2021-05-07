@@ -25,7 +25,7 @@ func main() {
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
 	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
-		log.Printf("Connecting to dsn: %grpcServer", dbHost)
+		log.Printf("Connecting to dsn")
 		conn = mysql.Open(dbHost)
 	} else {
 		conn = sqlite.Open("test.db")
