@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	address = "127.0.0.1:50052"
+	address = "api.tum.app:50052"
 )
 
 func main() {
