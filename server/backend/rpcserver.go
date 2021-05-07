@@ -37,7 +37,7 @@ func New(db *gorm.DB) *CampusServer {
 func (s *CampusServer) GetTopNews(ctx context.Context, in *pb.GetTopNewsRequest) (*pb.GetTopNewsReply, error) {
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
-	err := s.db.Joins("Company").Where("NOW() between from and to ").Limit(1).First(&res).Error
+	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
 	if err != nil {
 		log.Error(err)
 	} else if res != nil {
