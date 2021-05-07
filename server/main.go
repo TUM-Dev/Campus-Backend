@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/backend"
+	"github.com/TUM-Dev/Campus-Backend/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/web"
 	"log"
 	"net"
@@ -44,6 +45,9 @@ func main() {
 		}
 	}
 
+	// Create any other background services (these shouldn't do any long running work here)
+	cronService := cron.New(db)
+
 	// Listen to our configured ports
 	httpListener, err := net.Listen("tcp", httpPort)
 	if err != nil {
@@ -59,4 +63,7 @@ func main() {
 	g.Go(func() error { return web.HTTPServe(httpListener) })
 	g.Go(func() error { return backend.GRPCServe(grpcListener) })
 	log.Println("run server: ", g.Wait())
+
+	// Setup cron jobs
+	g.Go(func() error { return cronService.Run() })
 }
