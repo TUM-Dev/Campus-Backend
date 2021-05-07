@@ -49,18 +49,22 @@ func (c *CronService) Run() error {
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
 				g.Go(func() error { return c.newsCron() })
-			case MENSA_TYPE:
-				g.Go(func() error { return c.mensaCron() })
-			case CHAT_TYPE:
-				g.Go(func() error { return c.chatCron() })
-			case KINO_TYPE:
-				g.Go(func() error { return c.kinoCron() })
-			case ROOMFINDER_TYPE:
-				g.Go(func() error { return c.roomFinderCron() })
-			case TICKETSALE_TYPE:
-				g.Go(func() error { return c.roomFinderCron() })
-			case ALARM_TYPE:
-				g.Go(func() error { return c.alarmCron() })
+				/*
+					TODO: Implement handlers for other cronjobs
+					case MENSA_TYPE:
+						g.Go(func() error { return c.mensaCron() })
+					case CHAT_TYPE:
+						g.Go(func() error { return c.chatCron() })
+					case KINO_TYPE:
+						g.Go(func() error { return c.kinoCron() })
+					case ROOMFINDER_TYPE:
+						g.Go(func() error { return c.roomFinderCron() })
+					case TICKETSALE_TYPE:
+						g.Go(func() error { return c.roomFinderCron() })
+					case ALARM_TYPE:
+						g.Go(func() error { return c.alarmCron() })
+
+				*/
 			}
 		}
 		err := g.Wait()
