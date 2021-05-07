@@ -37,7 +37,7 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
-			Where("interval > 0 AND (lastRun+interval) < ?", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ?", time.Now().Unix()).
 			Scan(&res)
 		g := new(errgroup.Group)
 		for _, cronjob := range res {
