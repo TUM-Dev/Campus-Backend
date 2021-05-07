@@ -1,5 +1,5 @@
 package cron
 
-func chatCron()  {
-	
+func (c *CronService) chatCron() error {
+	return nil
 }

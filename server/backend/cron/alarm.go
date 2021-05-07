@@ -1,5 +1,5 @@
 package cron
 
-func alarmCron()  {
-	
+func (c *CronService) alarmCron() error {
+	return nil
 }

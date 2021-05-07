@@ -1,5 +1,5 @@
 package cron
 
-func mensaCron()  {
-	
+func (c *CronService) mensaCron() error {
+	return nil
 }

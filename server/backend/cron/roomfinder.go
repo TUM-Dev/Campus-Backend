@@ -1,5 +1,5 @@
 package cron
 
-func roomFinderCron()  {
-
+func (c *CronService) roomFinderCron() error {
+	return nil
 }

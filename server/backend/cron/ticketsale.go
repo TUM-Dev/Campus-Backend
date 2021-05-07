@@ -1,5 +1,5 @@
 package cron
 
-func ticketSaleCron()  {
-	
+func (c *CronService) ticketSaleCron() error {
+	return nil
 }

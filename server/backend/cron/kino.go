@@ -1,5 +1,5 @@
 package cron
 
-func kinoCron()  {
-	
+func (c *CronService) kinoCron() error {
+	return nil
 }

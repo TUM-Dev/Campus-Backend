@@ -3,6 +3,7 @@ package cron
 import (
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 	"time"
 )
@@ -33,25 +34,30 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Where("interval > 0 AND (lastRun+interval) < ?", time.Now().Unix()).Scan(&res)
+		g := new(errgroup.Group)
 		for _, cronjob := range res {
-			switch cronjob.Type.String {
-			case NEWS_TYPE:
-				newsCron()
-			case MENSA_TYPE:
-				mensaCron()
-			case CHAT_TYPE:
-				chatCron()
-			case KINO_TYPE:
-				kinoCron()
-			case ROOMFINDER_TYPE:
-				roomFinderCron()
-			case TICKETSALE_TYPE:
-				ticketSaleCron()
-			case ALARM_TYPE:
-				alarmCron()
-			}
 			cronjob.LastRun = int32(time.Now().Unix())
 			c.db.Save(&cronjob)
+			switch cronjob.Type.String {
+			case NEWS_TYPE:
+				g.Go(func() error { return c.newsCron() })
+			case MENSA_TYPE:
+				g.Go(func() error { return c.mensaCron() })
+			case CHAT_TYPE:
+				g.Go(func() error { return c.chatCron() })
+			case KINO_TYPE:
+				g.Go(func() error { return c.kinoCron() })
+			case ROOMFINDER_TYPE:
+				g.Go(func() error { return c.roomFinderCron() })
+			case TICKETSALE_TYPE:
+				g.Go(func() error { return c.roomFinderCron() })
+			case ALARM_TYPE:
+				g.Go(func() error { return c.alarmCron() })
+			}
+		}
+		err := g.Wait()
+		if err != nil {
+			log.Println("Couldn't run all cron jobs: %v", err)
 		}
 		log.Info("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
