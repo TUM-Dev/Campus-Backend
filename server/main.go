@@ -3,16 +3,15 @@ package main
 import (
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/web"
-	"log"
-	"net"
-	"os"
-
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/web"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"log"
+	"net"
+	"os"
 )
 
 const (
@@ -39,7 +38,10 @@ func main() {
 	// Migrate the schema only in local development mode
 	if shouldAutoMigrate {
 		log.Println("Running auto migrations")
-		err = db.AutoMigrate(&model.TopNews{})
+		err = db.AutoMigrate(
+			&model.TopNews{},
+			&model.Crontab{},
+		)
 		if err != nil {
 			log.Fatalf("failed to migrate: %v", err)
 		}

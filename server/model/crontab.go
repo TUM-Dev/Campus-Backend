@@ -15,6 +15,11 @@ var (
 	_ = uuid.UUID{}
 )
 
+// TableName overrides the table name used by Crontab to `crontab` (Would otherwise auto-migrate to crontabs)
+func (Crontab) TableName() string {
+	return "crontab"
+}
+
 // Crontab struct is a row record of the crontab table in the tca database
 type Crontab struct {
 	//[ 0] cron                                           int                  null: false  primary: true   isArray: false  auto: true   col: int             len: -1      default: []
