@@ -41,6 +41,9 @@ func main() {
 		err = db.AutoMigrate(
 			&model.TopNews{},
 			&model.Crontab{},
+			&model.Files{},
+			&model.NewsSource{},
+			&model.NewsAlert{},
 		)
 		if err != nil {
 			log.Fatalf("failed to migrate: %v", err)
