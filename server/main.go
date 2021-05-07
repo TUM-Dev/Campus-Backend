@@ -5,6 +5,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/TUM-Dev/Campus-Backend/web"
+	"github.com/getsentry/sentry-go"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
@@ -29,6 +30,15 @@ func main() {
 	} else {
 		conn = sqlite.Open("test.db")
 		shouldAutoMigrate = true
+	}
+	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn: os.Getenv("SENTRY_DSN"),
+		}); err != nil {
+			log.Printf("Sentry initialization failed: %v\n", err)
+		}
+	} else {
+		log.Println("continuing without sentry")
 	}
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
@@ -64,7 +74,6 @@ func main() {
 	}
 
 	// Start each server in its own go routine and logs any errors
-	g := new(errgroup.Group)
 	g.Go(func() error { return web.HTTPServe(httpListener) })
 	g.Go(func() error { return backend.GRPCServe(grpcListener) })
 	log.Println("run server: ", g.Wait())

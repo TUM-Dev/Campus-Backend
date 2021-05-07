@@ -2,6 +2,7 @@ package cron
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
@@ -10,6 +11,7 @@ import (
 
 type CronService struct {
 	db *gorm.DB
+	gf *gofeed.Parser
 }
 
 const (
@@ -25,15 +27,18 @@ const (
 func New(db *gorm.DB) *CronService {
 	return &CronService{
 		db: db,
+		gf: gofeed.NewParser(),
 	}
 }
 
 func (c *CronService) Run() error {
-
+	log.Printf("running cron service")
 	for {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
-		c.db.Where("interval > 0 AND (lastRun+interval) < ?", time.Now().Unix()).Scan(&res)
+		c.db.Model(&model.Crontab{}).
+			Where("interval > 0 AND (lastRun+interval) < ?", time.Now().Unix()).
+			Scan(&res)
 		g := new(errgroup.Group)
 		for _, cronjob := range res {
 			cronjob.LastRun = int32(time.Now().Unix())
