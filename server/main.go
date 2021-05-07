@@ -52,6 +52,7 @@ func main() {
 
 	// Create any other background services (these shouldn't do any long running work here)
 	cronService := cron.New(db)
+	campusService := backend.New(db)
 
 	// Listen to our configured ports
 	httpListener, err := net.Listen("tcp", httpPort)
@@ -66,9 +67,10 @@ func main() {
 	// Start each server in its own go routine and logs any errors
 	g := new(errgroup.Group)
 	g.Go(func() error { return web.HTTPServe(httpListener) })
-	g.Go(func() error { return backend.GRPCServe(grpcListener) })
-	log.Println("run server: ", g.Wait())
+	g.Go(func() error { return campusService.GRPCServe(grpcListener) })
 
 	// Setup cron jobs
 	g.Go(func() error { return cronService.Run() })
+
+	log.Println("run server: ", g.Wait())
 }

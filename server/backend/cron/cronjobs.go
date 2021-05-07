@@ -36,8 +36,11 @@ func (c *CronService) Run() error {
 		c.db.Where("interval > 0 AND (lastRun+interval) < ?", time.Now().Unix()).Scan(&res)
 		g := new(errgroup.Group)
 		for _, cronjob := range res {
+			// Persist run to DB right away
 			cronjob.LastRun = int32(time.Now().Unix())
 			c.db.Save(&cronjob)
+
+			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
 				g.Go(func() error { return c.newsCron() })
