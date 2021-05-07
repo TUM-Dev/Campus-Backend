@@ -36,17 +36,15 @@ func New(db *gorm.DB) *CampusServer {
 
 func (s *CampusServer) GetTopNews(ctx context.Context, in *pb.GetTopNewsRequest) (*pb.GetTopNewsReply, error) {
 	log.Printf("Received: get top news")
-	var res *model.TopNews
+	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between from and to ").Limit(1).First(&res).Error
 	if err != nil {
 		log.Error(err)
-	}
-
-	if res != nil {
+	} else if res != nil {
 		return &pb.GetTopNewsReply{
 			//ImageUrl: res.Name,
-			Link: res.Link,
-			To:   timestamppb.New(*res.To),
+			Link: res.Link.String,
+			To:   timestamppb.New(res.To),
 		}, nil
 	}
 
