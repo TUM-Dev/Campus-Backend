@@ -48,7 +48,7 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
-				g.Go(func() error { return c.newsCron() })
+				g.Go(func() error { return c.newsCron(cronjob) })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:
