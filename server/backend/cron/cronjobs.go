@@ -22,6 +22,7 @@ const (
 	ROOMFINDER_TYPE = "roomfinder"
 	TICKETSALE_TYPE = "ticketsale"
 	ALARM_TYPE      = "alarm"
+	STORAGE_DIR     = "/Storage/"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -74,6 +75,4 @@ func (c *CronService) Run() error {
 		log.Info("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
 	}
-
-	return nil
 }

@@ -21,9 +21,9 @@ import (
 	"time"
 )
 
-const IMAGE_DIRECTORY = "/resources"
+const ImageDirectory = "news/newspread/"
 
-var IMAGE_CONTENT_TYPE_REGEX, _ = regexp.Compile("image/[a-z.]+")
+var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
 
 // newsCron fetches news and saves them to the database
 func (c *CronService) newsCron(cronjob model.Crontab) error {
@@ -36,69 +36,77 @@ func (c *CronService) newsCron(cronjob model.Crontab) error {
 	var source model.NewsSource
 	err := c.db.Find(&source, cronjob.ID.Int64).Error
 	if err != nil {
-		log.Printf("error getting news sources from database: %v", err)
+		log.Printf("error getting news source from database: %v", err)
 		sentry.CaptureException(err)
+		return err
 	}
 	// skip sources with null url
 	if source.URL.Valid {
 		// clean up news older than one year
-		log.Printf("Truncating old entries for source %s\n", source.URL.String)
-		if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source.URL.String, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
-			log.Printf("cleaned up %v old news", res.RowsAffected)
-		} else {
-			log.Printf("failed to clean up old news: %v\n", res.Error)
-			sentry.CaptureException(res.Error)
-		}
-		log.Printf("processing source %s\n", source.URL.String)
-		feed, err := c.gf.ParseURL(source.URL.String)
+		err := c.cleanOldNewsForSource(source.URL.String)
 		if err != nil {
-			log.Printf("error parsing rss: %v\n", err)
-			sentry.CaptureException(err)
-		} else {
-			c.parseNewsFeed(feed, source)
+			return err
+		}
+		err = c.parseNewsFeed(source)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *CronService) parseNewsFeed(feed *gofeed.Feed, source model.NewsSource) {
-	log.Println(feed.Title)
+func (c *CronService) parseNewsFeed(source model.NewsSource) error {
+	log.Printf("processing source %s\n", source.URL.String)
+	feed, err := c.gf.ParseURL(source.URL.String)
+	if err != nil {
+		log.Printf("error parsing rss: %v\n", err)
+		sentry.CaptureException(err)
+		return err
+	}
 	// get all news for this source so we only process new ones, using map for performance reasons
 	existingNewsLinksForSource := make([]string, 0)
-	db := c.db.Debug()
-	if err := db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error;
+	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error;
 		err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Printf("failed to fetch existing news: %v", err)
 		sentry.CaptureException(err)
-		return
+		return err
 	}
 	var newNews []model.News
 	for _, item := range feed.Items {
 		if !skipNews(existingNewsLinksForSource, item.Link) {
+			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
+			var enclosureUrl = null.String{NullString: sql.NullString{Valid: false}}
 			for _, enclosure := range item.Enclosures {
-				if IMAGE_CONTENT_TYPE_REGEX.MatchString(enclosure.Type) {
+				if ImageContentTypeRegex.MatchString(enclosure.Type) {
 					pickedEnclosure = enclosure
+					break
 				}
 			}
 			var file = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
 				file = c.downloadAndSaveImage(pickedEnclosure.URL)
+				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			newsItem := model.News{
 				Date:        time.Time{},
 				Created:     time.Now(),
-				Title:       feed.Title,
-				Description: feed.Description,
+				Title:       item.Title,
+				Description: item.Description,
 				Src:         source.Source,
-				Link:        feed.Link,
-				Image:       null.String{},
+				Link:        item.Link,
+				Image:       enclosureUrl,
 				File:        file,
 			}
 			newNews = append(newNews, newsItem)
 		}
 	}
-	db.Save(&newNews)
+	if len(newNews) != 0 {
+		log.Printf("Inserting %v new news", len(newNews))
+		err = c.db.Save(&newNews).Error
+		return err
+	}
+	return nil
 }
 
 // downloadAndSaveImage Downloads an image from the url, converts it to and saves it to the database. returns id of file in db
@@ -135,8 +143,8 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		return null.Int{}
 	}
 	hash := md5.Sum([]byte(url))
-	fileName := fmt.Sprintf("/%x%s", hash, fileExtension)
-	createdFile, err := os.Create(fmt.Sprintf("%s%s", IMAGE_DIRECTORY, fileName))
+	fileName := fmt.Sprintf("%x%s", hash, fileExtension)
+	createdFile, err := os.Create(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
 	if err != nil {
 		log.Printf("couldn't create image file: %v\n", err)
 		sentry.CaptureException(err)
@@ -165,7 +173,7 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	fileForDB := model.Files{Name: fileName, Path: IMAGE_DIRECTORY}
+	fileForDB := model.Files{Name: fileName, Path: ImageDirectory}
 	res := c.db.Create(&fileForDB)
 	if res.Error != nil {
 		log.Printf("couldn't store file to database: %v", res.Error)
@@ -185,4 +193,16 @@ func skipNews(existingLinks []string, link string) bool {
 		}
 	}
 	return false
+}
+
+func (c *CronService) cleanOldNewsForSource(source string) error {
+	log.Printf("Truncating old entries for source %s\n", source)
+	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
+		log.Printf("cleaned up %v old news", res.RowsAffected)
+	} else {
+		log.Printf("failed to clean up old news: %v\n", res.Error)
+		sentry.CaptureException(res.Error)
+		return res.Error
+	}
+	return nil
 }
