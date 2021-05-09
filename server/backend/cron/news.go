@@ -1,7 +1,6 @@
 package cron
 
 import (
-	"bytes"
 	"crypto/md5"
 	"database/sql"
 	"errors"
@@ -11,17 +10,21 @@ import (
 	"github.com/guregu/null"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/gographics/imagick.v2/imagick"
 	"gorm.io/gorm"
-	"image"
-	jpeg "image/jpeg"
-	png "image/png"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
-const ImageDirectory = "news/newspread/"
+const (
+	ImageDirectory = "news/newspread/"
+	NewspreadHook  = "newspread"
+	ImpulsivHook   = "impulsivHook"
+)
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
 
@@ -56,6 +59,9 @@ func (c *CronService) newsCron(cronjob model.Crontab) error {
 }
 
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
+	// initializing here so we don't have to re-init on every image download
+	imagick.Initialize()
+	defer imagick.Terminate()
 	log.Printf("processing source %s\n", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
 	if err != nil {
@@ -74,11 +80,23 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	var newNews []model.News
 	for _, item := range feed.Items {
 		if !skipNews(existingNewsLinksForSource, item.Link) {
+			// execute special actions for some sources:
+			if source.Hook.Valid {
+				switch source.Hook.String {
+				case NewspreadHook:
+					c.newspreadHook(item)
+				case ImpulsivHook:
+					c.impulsivHook(item)
+				}
+			}
 			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
 			var enclosureUrl = null.String{NullString: sql.NullString{Valid: false}}
 			for _, enclosure := range item.Enclosures {
-				if ImageContentTypeRegex.MatchString(enclosure.Type) {
+				if strings.HasSuffix(enclosure.URL, "jpg") ||
+					strings.HasSuffix(enclosure.URL, "jpeg") ||
+					strings.HasSuffix(enclosure.URL, "png") ||
+					ImageContentTypeRegex.MatchString(enclosure.Type) {
 					pickedEnclosure = enclosure
 					break
 				}
@@ -89,7 +107,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			newsItem := model.News{
-				Date:        time.Time{},
+				Date:        *item.PublishedParsed,
 				Created:     time.Now(),
 				Title:       item.Title,
 				Description: item.Description,
@@ -109,37 +127,24 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// downloadAndSaveImage Downloads an image from the url, converts it to and saves it to the database. returns id of file in db
+// downloadAndSaveImage
+// Downloads an image from the url, converts it to 720p width to and saves it to the database.
+// Returns id of file in db, null int otherwise.
 func (c *CronService) downloadAndSaveImage(url string) null.Int {
-	file, err := http.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Could not download image file %v", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	var decodedImage image.Image
-	var fileExtension = ""
-	switch file.Header.Get("Content-type") {
+	fileExtension := ""
+	switch resp.Header.Get("Content-type") {
 	case "image/jpeg":
 		fileExtension = ".jpg"
-		jpegImage, err := jpeg.Decode(file.Body)
-		if err != nil {
-			log.Printf("could not decode image: %err", err)
-			sentry.CaptureException(err)
-			return null.Int{}
-		}
-		decodedImage = jpegImage
 	case "image/png":
 		fileExtension = ".png"
-		pngImage, err := png.Decode(file.Request.Body) //todo: setup compression
-		if err != nil {
-			log.Printf("could not decode image: %err", err)
-			sentry.CaptureException(err)
-			return null.Int{}
-		}
-		decodedImage = pngImage
 	default:
-		log.Printf("unsuported content type for image: %s", file.Header.Get("Content-type"))
+		log.Printf("unsuported content type for image: %s", resp.Header.Get("Content-type"))
 		return null.Int{}
 	}
 	hash := md5.Sum([]byte(url))
@@ -150,26 +155,42 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	buf := new(bytes.Buffer)
-	switch file.Header.Get("Content-type") {
-	case "image/jpeg":
-		err := jpeg.Encode(buf, decodedImage, &jpeg.Options{Quality: 75})
-		if err != nil {
-			log.Printf("Couldn't encode image: %v", err)
-			sentry.CaptureException(err)
-			return null.Int{}
-		}
-	case "image/png":
-		err := png.Encode(buf, decodedImage)
-		if err != nil {
-			log.Printf("Couldn't encode image: %v", err)
-			sentry.CaptureException(err)
-			return null.Int{}
-		}
-	}
-	_, err = createdFile.Write(buf.Bytes())
+	_, err = io.Copy(createdFile, resp.Body)
 	if err != nil {
 		log.Printf("couldn't save image file to disk: %v", err)
+		sentry.CaptureException(err)
+		return null.Int{}
+	}
+	err = createdFile.Close()
+	if err != nil {
+		log.Printf("couldn't close image file: %v\n", err)
+		sentry.CaptureException(err)
+		return null.Int{}
+	}
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	err = mw.ReadImage(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
+	if err != nil {
+		log.Printf("couldn't open file with imagemagick: %v", err)
+		sentry.CaptureException(err)
+		return null.Int{}
+	}
+	newHeight := uint((float32(mw.GetImageHeight()) / float32(mw.GetImageWidth())) * 720.0)
+	err = mw.ResizeImage(720, newHeight, imagick.FILTER_CATROM, 1)
+	if err != nil {
+		log.Printf("couldn't resize image: %v", err)
+		sentry.CaptureException(err)
+		return null.Int{}
+	}
+	err = mw.SetCompressionQuality(75)
+	if err != nil {
+		log.Printf("couldn't compress image: %v", err)
+		sentry.CaptureException(err)
+		return null.Int{}
+	}
+	err = mw.WriteImage(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
+	if err != nil {
+		log.Printf("couldn't save compressed image: %v", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
@@ -205,4 +226,18 @@ func (c *CronService) cleanOldNewsForSource(source string) error {
 		return res.Error
 	}
 	return nil
+}
+
+func (c *CronService) newspreadHook(item *gofeed.Item) {
+
+}
+
+func (c *CronService) impulsivHook(item *gofeed.Item) {
+	// Convert titles such as "123" to "Impulsiv - Ausgabe 123"
+	if match, err := regexp.MatchString("[0-9]+", item.Title); err == nil && match {
+		item.Title = fmt.Sprintf("Impulsiv - Ausgabe %s", item.Title)
+	} else {
+		// convert titles such as "Lösungen zur Ausgabe 137" to "Impulsiv - Lösungen zur Ausgabe 137"
+		item.Title = fmt.Sprintf("Impulsiv - %s", item.Title)
+	}
 }
