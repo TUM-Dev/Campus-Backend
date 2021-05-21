@@ -62,10 +62,10 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 }
 
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
-	log.Printf("processing source %s\n", source.URL.String)
+	log.Printf("processing source %s", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
 	if err != nil {
-		log.Printf("error parsing rss: %v\n", err)
+		log.Printf("error parsing rss: %v", err)
 		sentry.CaptureException(err)
 		return err
 	}
@@ -143,7 +143,7 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 	downloadedImg, _, err := image.Decode(resp.Body)
 	if err != nil {
 		sentry.CaptureException(err)
-		log.Printf("Couldn't decode source image: %v\n", err)
+		log.Printf("Couldn't decode source image: %v", err)
 		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
 	}
 	tempHash := md5.Sum([]byte(url))
@@ -152,13 +152,13 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
 	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
 	if err != nil {
-		log.Printf("Could not save image file: %v\n", err)
+		log.Printf("Could not save image file: %v", err)
 		sentry.CaptureException(err)
 		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
 	}
 	fileForHash, err := os.ReadFile(temporaryFileName)
 	if err != nil {
-		log.Printf("Could not read temporary image file for logging: %v\n", err)
+		log.Printf("Could not read temporary image file for logging: %v", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
@@ -166,7 +166,7 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 	newFileName := fmt.Sprintf("%s%s%x.jpg", STORAGE_DIR, ImageDirectory, newHash)
 	err = os.Rename(temporaryFileName, newFileName)
 	if err != nil {
-		log.Printf("Could not rename compressed image file: %v\n", err)
+		log.Printf("Could not rename compressed image file: %v", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
