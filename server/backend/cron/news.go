@@ -147,7 +147,7 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
 	}
 	tempHash := md5.Sum([]byte(url))
-	temporaryFileName := fmt.Sprintf("%x.jpg", tempHash)
+	temporaryFileName := fmt.Sprintf("%stmp/%x.jpg", STORAGE_DIR, tempHash)
 
 	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
 	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
