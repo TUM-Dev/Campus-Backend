@@ -31,7 +31,7 @@ const (
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
 
 // newsCron fetches news and saves them to the database
-func (c *CronService) newsCron(cronjob model.Crontab) error {
+func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	//check if source id provided for news job is not null
 	if !cronjob.ID.Valid {
 		cronjobJson, _ := json.Marshal(cronjob)
