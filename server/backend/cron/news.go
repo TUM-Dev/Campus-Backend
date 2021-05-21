@@ -6,13 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/disintegration/imaging"
 	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/gographics/imagick.v2/imagick"
 	"gorm.io/gorm"
-	"io"
+	"image"
 	"net/http"
 	"os"
 	"regexp"
@@ -46,7 +47,7 @@ func (c *CronService) newsCron(cronjob model.Crontab) error {
 	// skip sources with null url
 	if source.URL.Valid {
 		// clean up news older than one year
-		err := c.cleanOldNewsForSource(source.URL.String)
+		err := c.cleanOldNewsForSource(source.Source)
 		if err != nil {
 			return err
 		}
@@ -59,9 +60,6 @@ func (c *CronService) newsCron(cronjob model.Crontab) error {
 }
 
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
-	// initializing here so we don't have to re-init on every image download
-	imagick.Initialize()
-	defer imagick.Terminate()
 	log.Printf("processing source %s\n", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
 	if err != nil {
@@ -106,11 +104,14 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				file = c.downloadAndSaveImage(pickedEnclosure.URL)
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
+			bm := bluemonday.StrictPolicy()
+			sanitizedDesc := bm.Sanitize(item.Description)
+
 			newsItem := model.News{
 				Date:        *item.PublishedParsed,
 				Created:     time.Now(),
 				Title:       item.Title,
-				Description: item.Description,
+				Description: sanitizedDesc,
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
@@ -129,7 +130,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 
 // downloadAndSaveImage
 // Downloads an image from the url, converts it to 720p width to and saves it to the database.
-// Returns id of file in db, null int otherwise.
+// Returns id of file in db, null int on error.
 func (c *CronService) downloadAndSaveImage(url string) null.Int {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -137,64 +138,37 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	fileExtension := ""
-	switch resp.Header.Get("Content-type") {
-	case "image/jpeg":
-		fileExtension = ".jpg"
-	case "image/png":
-		fileExtension = ".png"
-	default:
-		log.Printf("unsuported content type for image: %s", resp.Header.Get("Content-type"))
-		return null.Int{}
-	}
-	hash := md5.Sum([]byte(url))
-	fileName := fmt.Sprintf("%x%s", hash, fileExtension)
-	createdFile, err := os.Create(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
+	downloadedImg, _, err := image.Decode(resp.Body)
 	if err != nil {
-		log.Printf("couldn't create image file: %v\n", err)
+		sentry.CaptureException(err)
+		log.Printf("Couldn't decode source image: %v\n", err)
+		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+	}
+	tempHash := md5.Sum([]byte(url))
+	temporaryFileName := fmt.Sprintf("%x.jpg", tempHash)
+
+	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
+	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
+	if err != nil {
+		log.Printf("Could not save image file: %v\n", err)
+		sentry.CaptureException(err)
+		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+	}
+	fileForHash, err := os.ReadFile(temporaryFileName)
+	if err != nil {
+		log.Printf("Could not read temporary image file for logging: %v\n", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	_, err = io.Copy(createdFile, resp.Body)
+	newHash := md5.Sum(fileForHash)
+	newFileName := fmt.Sprintf("%s%s%x.jpg", STORAGE_DIR, ImageDirectory, newHash)
+	err = os.Rename(temporaryFileName, newFileName)
 	if err != nil {
-		log.Printf("couldn't save image file to disk: %v", err)
+		log.Printf("Could not rename compressed image file: %v\n", err)
 		sentry.CaptureException(err)
 		return null.Int{}
 	}
-	err = createdFile.Close()
-	if err != nil {
-		log.Printf("couldn't close image file: %v\n", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
-	err = mw.ReadImage(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
-	if err != nil {
-		log.Printf("couldn't open file with imagemagick: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	newHeight := uint((float32(mw.GetImageHeight()) / float32(mw.GetImageWidth())) * 720.0)
-	err = mw.ResizeImage(720, newHeight, imagick.FILTER_CATROM, 1)
-	if err != nil {
-		log.Printf("couldn't resize image: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	err = mw.SetCompressionQuality(75)
-	if err != nil {
-		log.Printf("couldn't compress image: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	err = mw.WriteImage(fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, fileName))
-	if err != nil {
-		log.Printf("couldn't save compressed image: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	fileForDB := model.Files{Name: fileName, Path: ImageDirectory}
+	fileForDB := model.Files{Name: fmt.Sprintf("%x.jpg", newHash), Path: ImageDirectory}
 	res := c.db.Create(&fileForDB)
 	if res.Error != nil {
 		log.Printf("couldn't store file to database: %v", res.Error)
@@ -216,8 +190,8 @@ func skipNews(existingLinks []string, link string) bool {
 	return false
 }
 
-func (c *CronService) cleanOldNewsForSource(source string) error {
-	log.Printf("Truncating old entries for source %s\n", source)
+func (c *CronService) cleanOldNewsForSource(source int32) error {
+	log.Printf("Truncating old entries for source %d\n", source)
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
 		log.Printf("cleaned up %v old news", res.RowsAffected)
 	} else {
@@ -229,12 +203,23 @@ func (c *CronService) cleanOldNewsForSource(source string) error {
 }
 
 func (c *CronService) newspreadHook(item *gofeed.Item) {
-
+	re := regexp.MustCompile("https://storage.googleapis.com/tum-newspread-de/assets/[a-z\\-0-9]+\\.jpeg")
+	extractedImageSlice := re.FindAllString(item.Content, 1)
+	extractedImageURL := ""
+	if len(extractedImageSlice) != 0 {
+		extractedImageURL = extractedImageSlice[0]
+	}
+	item.Enclosures = []*gofeed.Enclosure{{URL: extractedImageURL}}
+	item.Link = extractedImageURL
+	item.Description = ""
 }
 
+//impulsivHook Converts the title of impulsiv news to a human friendly one
 func (c *CronService) impulsivHook(item *gofeed.Item) {
 	// Convert titles such as "123" to "Impulsiv - Ausgabe 123"
-	if match, err := regexp.MatchString("[0-9]+", item.Title); err == nil && match {
+	re := regexp.MustCompile("[0-9]+")
+	match := re.FindAllString(item.Title, -1)
+	if len(match) == 1 && match[0] == item.Title {
 		item.Title = fmt.Sprintf("Impulsiv - Ausgabe %s", item.Title)
 	} else {
 		// convert titles such as "Lösungen zur Ausgabe 137" to "Impulsiv - Lösungen zur Ausgabe 137"
