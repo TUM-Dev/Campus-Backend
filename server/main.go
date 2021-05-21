@@ -54,6 +54,7 @@ func main() {
 			&model.Files{},
 			&model.NewsSource{},
 			&model.NewsAlert{},
+			&model.News{},
 		)
 		if err != nil {
 			log.Fatalf("failed to migrate: %v", err)

@@ -6,11 +6,12 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.1 // indirect
 	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20210411190303-eaca651a785b
 	github.com/andybalholm/cascadia v1.2.0 // indirect
+	github.com/disintegration/imaging v1.6.2
 	github.com/getsentry/sentry-go v0.10.0
-	github.com/golang/protobuf v1.5.2
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/mmcdole/goxpp v0.0.0-20200921145534-2f3784f67354 // indirect
 	github.com/satori/go.uuid v1.2.0

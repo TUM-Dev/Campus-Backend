@@ -22,6 +22,7 @@ const (
 	ROOMFINDER_TYPE = "roomfinder"
 	TICKETSALE_TYPE = "ticketsale"
 	ALARM_TYPE      = "alarm"
+	STORAGE_DIR     = "/Storage/"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -48,7 +49,7 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
-				g.Go(func() error { return c.newsCron() })
+				g.Go(func() error { return c.newsCron(cronjob) })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:
@@ -74,6 +75,4 @@ func (c *CronService) Run() error {
 		log.Info("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
 	}
-
-	return nil
 }
