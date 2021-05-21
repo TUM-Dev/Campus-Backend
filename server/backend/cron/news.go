@@ -3,6 +3,7 @@ package cron
 import (
 	"crypto/md5"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
@@ -33,7 +34,8 @@ var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
 func (c *CronService) newsCron(cronjob model.Crontab) error {
 	//check if source id provided for news job is not null
 	if !cronjob.ID.Valid {
-		log.Println("skipping news job, id of source is null")
+		cronjobJson, _ := json.Marshal(cronjob)
+		log.Println("skipping news job, id of source is null, cronjob: %s", string(cronjobJson))
 		return nil
 	}
 	// get news source for cronjob
