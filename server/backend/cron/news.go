@@ -79,19 +79,20 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	}
 	var newNews []model.News
 	for _, item := range feed.Items {
-		if !skipNews(existingNewsLinksForSource, item.Link) {
-			// execute special actions for some sources:
-			if source.Hook.Valid {
-				switch source.Hook.String {
-				case NewspreadHook:
-					c.newspreadHook(item)
-				case ImpulsivHook:
-					c.impulsivHook(item)
-				}
+		// execute special actions for some sources:
+		if source.Hook.Valid {
+			switch source.Hook.String {
+			case NewspreadHook:
+				c.newspreadHook(item)
+			case ImpulsivHook:
+				c.impulsivHook(item)
 			}
+		}
+
+		if !skipNews(existingNewsLinksForSource, item.Link) {
 			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
-			var enclosureUrl = null.String{NullString: sql.NullString{Valid: false}}
+			var enclosureUrl = null.String{NullString: sql.NullString{Valid: true, String: ""}}
 			for _, enclosure := range item.Enclosures {
 				if strings.HasSuffix(enclosure.URL, "jpg") ||
 					strings.HasSuffix(enclosure.URL, "jpeg") ||
