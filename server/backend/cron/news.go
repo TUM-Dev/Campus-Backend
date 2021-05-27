@@ -19,6 +19,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -29,6 +30,7 @@ const (
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
+var fileLocks = map[string]*sync.RWMutex{} // locks for filesystem operations. Keys are filenames.
 
 // newsCron fetches news and saves them to the database
 func (c *CronService) newsCron(cronjob *model.Crontab) error {
@@ -61,6 +63,7 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	return nil
 }
 
+// parseNewsFeed processes a single news feed, extracts titles, content etc and saves it to the database
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	log.Printf("processing source %s", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
@@ -149,6 +152,17 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 	}
 	tempHash := md5.Sum([]byte(url))
 	temporaryFileName := fmt.Sprintf("%stmp/%x.jpg", STORAGE_DIR, tempHash)
+
+	// Lock Temp file
+	mutex := fileLocks[temporaryFileName]
+	if mutex != nil {
+		mutex.Lock()
+	} else {
+		mutex = &sync.RWMutex{}
+		fileLocks[temporaryFileName] = mutex
+		mutex.Lock()
+	}
+	defer mutex.Unlock()
 
 	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
 	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
