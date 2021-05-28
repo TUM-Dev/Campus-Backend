@@ -162,7 +162,10 @@ func (c *CronService) downloadAndSaveImage(url string) null.Int {
 		fileLocks[temporaryFileName] = mutex
 		mutex.Lock()
 	}
-	defer mutex.Unlock()
+	defer func() {
+		delete(fileLocks, temporaryFileName)
+		mutex.Unlock()
+	}()
 
 	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
 	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
