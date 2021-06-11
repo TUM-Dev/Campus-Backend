@@ -16,10 +16,8 @@ import (
 	"gorm.io/gorm"
 	"image"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -30,8 +28,6 @@ const (
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
-var fileLocks = map[string]*sync.RWMutex{} // locks for filesystem operations. Keys are filenames.
-var locksMutex = sync.RWMutex{} //lock for fileLocks
 
 // newsCron fetches news and saves them to the database
 func (c *CronService) newsCron(cronjob *model.Crontab) error {
@@ -108,7 +104,10 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			}
 			var file = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
-				file = c.downloadAndSaveImage(pickedEnclosure.URL)
+				file, err = c.getDatabaseEntryForImage(pickedEnclosure.URL)
+				if err != nil {
+					continue // don't store this entry if file download failed.
+				}
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			bm := bluemonday.StrictPolicy()
@@ -135,73 +134,63 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// downloadAndSaveImage
-// Downloads an image from the url, converts it to 720p width to and saves it to the database.
-// Returns id of file in db, null int on error.
-func (c *CronService) downloadAndSaveImage(url string) null.Int {
+// getDatabaseEntryForImage
+// Returns a entry file entry that was saved to the database if it didn't exist already and triggers download of the image
+func (c *CronService) getDatabaseEntryForImage(url string) (null.Int, error) {
+	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
+	var fileId null.Int
+	if err := c.db.Model(model.Files{}).Where("name = ?", targetFileName).Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
+		log.Printf("Couldn't query database for file: %v", err)
+		return null.Int{}, err
+	}
+	if fileId.Valid { // file already in database -> return for current news.
+		return fileId, nil
+	}
+
+	// otherwise store in database:
+	file := model.Files{Name: targetFileName, Path: STORAGE_DIR + ImageDirectory}
+	if err := c.db.Create(&file).Error; err != nil {
+		log.Printf("Could not store new file to database: %v", err)
+		return null.Int{}, err
+	}
+
+	go downloadFile(url, targetFileName, 3)
+	return null.Int{NullInt64: sql.NullInt64{Valid: true, Int64: int64(file.File)}}, nil
+}
+
+// downloadFile tries downloading a file 3 times. After the third failure the corresponding entry is deleted from the database.
+// url: download url of the file
+// name: target name of the file
+// errorCounter: recursively decremented counter for errors.
+func downloadFile(url string, name string, errorCounter int) {
+	if errorCounter == 0 {
+		// todo: delete
+	}
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Printf("Could not download image file %v", err)
+		log.Printf("Could not download image file. Remaining attempts: %d, error: %v", errorCounter, err)
 		sentry.CaptureException(err)
-		return null.Int{}
+		downloadFile(url, name, errorCounter-1)
+		return
 	}
 	downloadedImg, _, err := image.Decode(resp.Body)
 	if err != nil {
 		sentry.CaptureException(err)
-		log.Printf("Couldn't decode source image: %v", err)
-		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+		log.Printf("Couldn't decode source image. Remaining attempts: %d, error: %v", errorCounter, err)
+		downloadFile(url, name, errorCounter-1)
+		return
 	}
-	tempHash := md5.Sum([]byte(url))
-	temporaryFileName := fmt.Sprintf("%stmp/%x.jpg", STORAGE_DIR, tempHash)
 
-	// Lock mutex map
-	locksMutex.Lock()
-	// Lock file operation
-	mutex := fileLocks[temporaryFileName]
-	if mutex != nil {
-		mutex.Lock()
-	} else {
-		mutex = &sync.RWMutex{}
-		fileLocks[temporaryFileName] = mutex
-		mutex.Lock()
-	}
-	// Unlock mutex map and file operation
-	locksMutex.Unlock()
-	defer func() {
-		locksMutex.Lock()
-		delete(fileLocks, temporaryFileName)
-		mutex.Unlock()
-		locksMutex.Unlock()
-	}()
-
+	// in our case resolves to /Storage/news/newspread/1234abc.jpg
+	dstFileName := fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, name)
 	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
+	err = imaging.Save(dstImage, dstFileName, imaging.JPEGQuality(75))
 	if err != nil {
-		log.Printf("Could not save image file: %v", err)
+		log.Printf("Could not save image file. Remaining attempts: %d, error: %v", errorCounter, err)
 		sentry.CaptureException(err)
-		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+		downloadFile(url, name, errorCounter-1)
+		return
 	}
-	fileForHash, err := os.ReadFile(temporaryFileName)
-	if err != nil {
-		log.Printf("Could not read temporary image file for logging: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	newHash := md5.Sum(fileForHash)
-	newFileName := fmt.Sprintf("%s%s%x.jpg", STORAGE_DIR, ImageDirectory, newHash)
-	err = os.Rename(temporaryFileName, newFileName)
-	if err != nil {
-		log.Printf("Could not rename compressed image file: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	fileForDB := model.Files{Name: fmt.Sprintf("%x.jpg", newHash), Path: ImageDirectory}
-	res := c.db.Create(&fileForDB)
-	if res.Error != nil {
-		log.Printf("couldn't store file to database: %v", res.Error)
-		sentry.CaptureException(res.Error)
-	}
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(fileForDB.File), Valid: true}}
 }
 
 //skipNews returns true if link is in existingLinks or link is invalid
