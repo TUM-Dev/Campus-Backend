@@ -22,9 +22,10 @@ import (
 )
 
 const (
-	ImageDirectory = "news/newspread/"
-	NewspreadHook  = "newspread"
-	ImpulsivHook   = "impulsivHook"
+	ImageDirectory   = "news/newspread/"
+	NewspreadHook    = "newspread"
+	ImpulsivHook     = "impulsivHook"
+	MAX_IMAGE_RETRYS = 3
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
@@ -149,35 +150,62 @@ func (c *CronService) getDatabaseEntryForImage(url string) (null.Int, error) {
 
 	// otherwise store in database:
 	file := model.Files{Name: targetFileName, Path: STORAGE_DIR + ImageDirectory}
-	if err := c.db.Create(&file).Error; err != nil {
-		log.Printf("Could not store new file to database: %v", err)
+	if err := c.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&file).Error; err != nil {
+			log.Printf("Could not store new file to database: %v", err)
+			return err
+		}
+		return nil
+	}); err != nil {
 		return null.Int{}, err
 	}
 
-	go downloadFile(url, targetFileName, 3)
+	go c.downloadFile(url, targetFileName, MAX_IMAGE_RETRYS)
 	return null.Int{NullInt64: sql.NullInt64{Valid: true, Int64: int64(file.File)}}, nil
 }
 
-// downloadFile tries downloading a file 3 times. After the third failure the corresponding entry is deleted from the database.
+// downloadFile tries downloading a file MAX_IMAGE_RETRYS times. After the third failure the corresponding entry is deleted from the database.
+//
 // url: download url of the file
 // name: target name of the file
 // errorCounter: recursively decremented counter for errors.
-func downloadFile(url string, name string, errorCounter int) {
+func (c *CronService) downloadFile(url string, name string, errorCounter int) {
+	log.Printf("downloading file %s", url)
 	if errorCounter == 0 {
-		// todo: delete
+		// unable to download image. Delete from database.
+		var newsWithBadFile []model.News
+		if err := c.db.Model(&model.News{}).Joins("JOIN files on files.file = news.file WHERE files.name = ?", name).Scan(&newsWithBadFile).Error; err != nil && err != gorm.ErrRecordNotFound {
+			log.Println("Could not get news with bad files: %v", err)
+			sentry.CaptureException(err)
+			return
+		}
+		for i := range newsWithBadFile {
+			newsWithBadFile[i].File = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			if err := c.db.Save(&newsWithBadFile).Error; err != nil {
+				log.Printf("Couldn't update news entry with bad file: %v", err)
+				sentry.CaptureException(err)
+			}
+		}
+		if err := c.db.Delete(&model.Files{}, "name = ?", name).Error; err != nil {
+			log.Printf("Couldn't delete bad file entry from database: %v", err)
+			sentry.CaptureException(err)
+		}
+		return
 	}
+	// wait before next retry n*10 seconds. e.g. first time: 0s,  1. retry -> 10s 2. -> 20, 3. -> 30
+	time.Sleep(time.Duration((MAX_IMAGE_RETRYS-errorCounter)*10) * time.Second)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Could not download image file. Remaining attempts: %d, error: %v", errorCounter, err)
 		sentry.CaptureException(err)
-		downloadFile(url, name, errorCounter-1)
+		c.downloadFile(url, name, errorCounter-1)
 		return
 	}
 	downloadedImg, _, err := image.Decode(resp.Body)
 	if err != nil {
 		sentry.CaptureException(err)
 		log.Printf("Couldn't decode source image. Remaining attempts: %d, error: %v", errorCounter, err)
-		downloadFile(url, name, errorCounter-1)
+		c.downloadFile(url, name, errorCounter-1)
 		return
 	}
 
@@ -188,7 +216,7 @@ func downloadFile(url string, name string, errorCounter int) {
 	if err != nil {
 		log.Printf("Could not save image file. Remaining attempts: %d, error: %v", errorCounter, err)
 		sentry.CaptureException(err)
-		downloadFile(url, name, errorCounter-1)
+		c.downloadFile(url, name, errorCounter-1)
 		return
 	}
 }
