@@ -105,7 +105,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			}
 			var file = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
-				file, err = c.getDatabaseEntryForImage(pickedEnclosure.URL)
+				file, err = c.getDatabaseIdForImageAndDownload(pickedEnclosure.URL)
 				if err != nil {
 					continue // don't store this entry if file download failed.
 				}
@@ -135,9 +135,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// getDatabaseEntryForImage
-// Returns a entry file entry that was saved to the database if it didn't exist already and triggers download of the image
-func (c *CronService) getDatabaseEntryForImage(url string) (null.Int, error) {
+// getDatabaseIdForImageAndDownload
+// Returns a file id that was saved to the database if it already exists. Otherwise creates it and triggers download of the image
+func (c *CronService) getDatabaseIdForImageAndDownload(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
 	if err := c.db.Model(model.Files{}).Where("name = ?", targetFileName).Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
