@@ -164,7 +164,7 @@ func (c *CronService) getDatabaseIdForImageAndDownload(url string) (null.Int, er
 	return null.Int{NullInt64: sql.NullInt64{Valid: true, Int64: int64(file.File)}}, nil
 }
 
-// downloadFile tries downloading a file MAX_IMAGE_RETRYS times. After the third failure the corresponding entry is deleted from the database.
+// downloadFile tries downloading a file errorCounter times. After the errorCounters failure the corresponding entry is deleted from the database.
 //
 // url: download url of the file
 // name: target name of the file
