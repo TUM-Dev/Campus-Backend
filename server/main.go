@@ -19,6 +19,7 @@ const (
 	httpPort = ":50051"
 	grpcPort = ":50052"
 )
+var Version = "dev"
 
 func main() {
 	// Connect to DB
@@ -34,6 +35,7 @@ func main() {
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn: os.Getenv("SENTRY_DSN"),
+			Release: Version,
 		}); err != nil {
 			log.Printf("Sentry initialization failed: %v\n", err)
 		}
