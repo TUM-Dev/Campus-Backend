@@ -32,12 +32,12 @@ func (m TumDBMigrator) Migrate() error {
 			&model.News{},
 		)
 		return err
-	} else {
-		log.Info("Using manual migration")
-		m := gormigrate.New(m.database, gormigrate.DefaultOptions, []*gormigrate.Migration{
-			m.migrate20210709193000(),
-		})
-		err := m.Migrate()
-		return err
 	}
+	log.Info("Using manual migration")
+	mig := gormigrate.New(m.database, gormigrate.DefaultOptions, []*gormigrate.Migration{
+		m.migrate20210709193000(),
+	})
+	err := mig.Migrate()
+	return err
+
 }

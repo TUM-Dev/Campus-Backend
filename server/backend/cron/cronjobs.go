@@ -14,15 +14,18 @@ type CronService struct {
 	gf *gofeed.Parser
 }
 
+// names for cron jobs as specified in database
 const (
-	NEWS_TYPE       = "news"
-	MENSA_TYPE      = "mensa"
-	CHAT_TYPE       = "chat"
-	KINO_TYPE       = "kino"
-	ROOMFINDER_TYPE = "roomfinder"
-	TICKETSALE_TYPE = "ticketsale"
-	ALARM_TYPE      = "alarm"
-	STORAGE_DIR     = "/Storage/"
+	NEWS_TYPE          = "news"
+	MENSA_TYPE         = "mensa"
+	CHAT_TYPE          = "chat"
+	KINO_TYPE          = "kino"
+	ROOMFINDER_TYPE    = "roomfinder"
+	TICKETSALE_TYPE    = "ticketsale"
+	ALARM_TYPE         = "alarm"
+	FILE_DOWNLOAD_TYPE = "fileDownload"
+
+	STORAGE_DIR = "/Storage/" // target location of files
 )
 
 func New(db *gorm.DB) *CronService {
@@ -38,7 +41,7 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type='news'", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload')", time.Now().Unix()).
 			Scan(&res)
 		g := new(errgroup.Group)
 		for _, cronjob := range res {
@@ -50,6 +53,8 @@ func (c *CronService) Run() error {
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
 				g.Go(func() error { return c.newsCron(&cronjob) })
+			case FILE_DOWNLOAD_TYPE:
+				g.Go(func() error { return c.fileDownloadCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:

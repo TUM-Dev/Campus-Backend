@@ -7,15 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"github.com/disintegration/imaging"
 	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"image"
-	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -103,12 +100,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var file = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
-				file, err = c.getDatabaseIdForImageAndDownload(pickedEnclosure.URL)
-				if err != nil {
-					continue // don't store this entry if file download failed.
-				}
+				fileId, err = c.saveImage(pickedEnclosure.URL)
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			bm := bluemonday.StrictPolicy()
@@ -122,7 +116,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				File:        file,
+				File:        fileId,
 			}
 			newNews = append(newNews, newsItem)
 		}
@@ -135,9 +129,8 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// getDatabaseIdForImageAndDownload
-// Returns a file id that was saved to the database if it already exists. Otherwise creates it and triggers download of the image
-func (c *CronService) getDatabaseIdForImageAndDownload(url string) (null.Int, error) {
+//saveImage Saves an image to the database so it can be downloaded by another cronjob and returns it's id
+func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
 	if err := c.db.Model(model.Files{}).Where("name = ?", targetFileName).Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
@@ -149,76 +142,24 @@ func (c *CronService) getDatabaseIdForImageAndDownload(url string) (null.Int, er
 	}
 
 	// otherwise store in database:
-	file := model.Files{Name: targetFileName, Path: STORAGE_DIR + ImageDirectory}
-	if err := c.db.Transaction(func(tx *gorm.DB) error {
+	file := model.Files{
+		Name:       targetFileName,
+		Path:       STORAGE_DIR + ImageDirectory,
+		URL:        sql.NullString{String: url, Valid: true},
+		Downloaded: sql.NullBool{Bool: false, Valid: true},
+	}
+	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&file).Error; err != nil {
 			log.Printf("Could not store new file to database: %v", err)
 			return err
 		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return null.Int{}, err
 	}
-
-	go c.downloadFile(url, targetFileName, MAX_IMAGE_RETRYS)
-	return null.Int{NullInt64: sql.NullInt64{Valid: true, Int64: int64(file.File)}}, nil
-}
-
-// downloadFile tries downloading a file errorCounter times. After the errorCounters failure the corresponding entry is deleted from the database.
-//
-// url: download url of the file
-// name: target name of the file
-// errorCounter: recursively decremented counter for errors.
-func (c *CronService) downloadFile(url string, name string, errorCounter int) {
-	log.Printf("downloading file %s", url)
-	if errorCounter == 0 {
-		// unable to download image. Delete from database.
-		var newsWithBadFile []model.News
-		if err := c.db.Model(&model.News{}).Joins("JOIN files on files.file = news.file WHERE files.name = ?", name).Scan(&newsWithBadFile).Error; err != nil && err != gorm.ErrRecordNotFound {
-			log.Println("Could not get news with bad files: %v", err)
-			sentry.CaptureException(err)
-			return
-		}
-		for i := range newsWithBadFile {
-			newsWithBadFile[i].File = null.Int{NullInt64: sql.NullInt64{Valid: false}}
-			if err := c.db.Save(&newsWithBadFile).Error; err != nil {
-				log.Printf("Couldn't update news entry with bad file: %v", err)
-				sentry.CaptureException(err)
-			}
-		}
-		if err := c.db.Delete(&model.Files{}, "name = ?", name).Error; err != nil {
-			log.Printf("Couldn't delete bad file entry from database: %v", err)
-			sentry.CaptureException(err)
-		}
-		return
-	}
-	// wait before next retry n*10 seconds. e.g. first time: 0s,  1. retry -> 10s 2. -> 20, 3. -> 30
-	time.Sleep(time.Duration((MAX_IMAGE_RETRYS-errorCounter)*10) * time.Second)
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("Could not download image file. Remaining attempts: %d, error: %v", errorCounter, err)
-		sentry.CaptureException(err)
-		c.downloadFile(url, name, errorCounter-1)
-		return
-	}
-	downloadedImg, _, err := image.Decode(resp.Body)
-	if err != nil {
-		sentry.CaptureException(err)
-		log.Printf("Couldn't decode source image. Remaining attempts: %d, error: %v", errorCounter, err)
-		c.downloadFile(url, name, errorCounter-1)
-		return
-	}
-
-	// in our case resolves to /Storage/news/newspread/1234abc.jpg
-	dstFileName := fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, name)
-	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-	err = imaging.Save(dstImage, dstFileName, imaging.JPEGQuality(75))
-	if err != nil {
-		log.Printf("Could not save image file. Remaining attempts: %d, error: %v", errorCounter, err)
-		sentry.CaptureException(err)
-		c.downloadFile(url, name, errorCounter-1)
-		return
-	}
+	// creating this int is annoying but i'm too afraid to use real ORM in the model
+	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
 }
 
 //skipNews returns true if link is in existingLinks or link is invalid
@@ -246,6 +187,7 @@ func (c *CronService) cleanOldNewsForSource(source int32) error {
 	return nil
 }
 
+//newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
 func (c *CronService) newspreadHook(item *gofeed.Item) {
 	re := regexp.MustCompile("https://storage.googleapis.com/tum-newspread-de/assets/[a-z\\-0-9]+\\.jpeg")
 	extractedImageSlice := re.FindAllString(item.Content, 1)
