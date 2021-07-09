@@ -47,8 +47,9 @@ func (c *CronService) downloadFile(url string, name string) {
 		log.WithError(err).Warn("Unable to read http body")
 		return
 	}
+
+	// resize if file is image
 	mime := mimetype.Detect(body)
-	log.Println(mime.String())
 	if strings.HasPrefix(mime.String(), "image/") {
 		downloadedImg, _, err := image.Decode(bytes.NewReader(body))
 		if err != nil {
