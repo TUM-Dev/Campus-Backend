@@ -29,7 +29,7 @@ func main() {
 		conn = mysql.Open(dbHost)
 	} else {
 		conn = sqlite.Open("test.db")
-		shouldAutoMigrate = false
+		shouldAutoMigrate = true
 	}
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
