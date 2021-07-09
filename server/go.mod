@@ -8,6 +8,7 @@ require (
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/disintegration/imaging v1.6.2
 	github.com/getsentry/sentry-go v0.10.0
+	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
