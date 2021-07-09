@@ -133,7 +133,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
-	if err := c.db.Model(model.Files{}).Where("name = ?", targetFileName).Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
+	if err := c.db.Model(model.Files{}).
+		Where("name = ?", targetFileName).
+		Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
 		log.Printf("Couldn't query database for file: %v", err)
 		return null.Int{}, err
 	}
@@ -150,7 +152,7 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 	}
 	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&file).Error; err != nil {
-			log.Printf("Could not store new file to database: %v", err)
+			log.WithError(err).Error("Could not store new file to database")
 			return err
 		}
 		return nil
@@ -178,9 +180,9 @@ func skipNews(existingLinks []string, link string) bool {
 func (c *CronService) cleanOldNewsForSource(source int32) error {
 	log.Printf("Truncating old entries for source %d\n", source)
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
-		log.Printf("cleaned up %v old news", res.RowsAffected)
+		log.Info("cleaned up %v old news", res.RowsAffected)
 	} else {
-		log.Printf("failed to clean up old news: %v\n", res.Error)
+		log.WithError(res.Error).Error("failed to clean up old news")
 		sentry.CaptureException(res.Error)
 		return res.Error
 	}
