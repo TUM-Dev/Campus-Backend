@@ -24,16 +24,20 @@ func (c *CronService) fileDownloadCron() error {
 	}
 	for i := range files {
 		if files[i].URL.Valid {
-			c.downloadFile(files[i].URL.String, files[i].Name)
+			c.downloadFile(files[i])
 		}
 	}
 	return nil
 }
 
-// downloadFile tries downloading a file errorCounter times. After the errorCounters failure the corresponding entry is deleted from the database.
+// downloadFile Downloads a file, marks it downloaded and resizes it if it's an image.
 // url: download url of the file
 // name: target name of the file
-func (c *CronService) downloadFile(url string, name string) {
+func (c *CronService) downloadFile(file model.Files) {
+	if !file.URL.Valid {
+		log.WithField("fileId", file.File).Info("skipping file without url")
+	}
+	url := file.URL.String
 	log.WithField("url", url).Info("downloading file")
 	resp, err := http.Get(url)
 	if err != nil {
@@ -59,7 +63,7 @@ func (c *CronService) downloadFile(url string, name string) {
 		}
 
 		// in our case resolves to /Storage/news/newspread/1234abc.jpg
-		dstFileName := fmt.Sprintf("%s%s%s", STORAGE_DIR, ImageDirectory, name)
+		dstFileName := fmt.Sprintf("%s%s", file.Path, file.Name)
 		dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
 		err = imaging.Save(dstImage, dstFileName, imaging.JPEGQuality(75))
 		if err != nil {
@@ -69,7 +73,7 @@ func (c *CronService) downloadFile(url string, name string) {
 		}
 	} else {
 		// save without resizing image
-		err = ioutil.WriteFile(fmt.Sprintf("%s%s", STORAGE_DIR, name), body, 0644)
+		err = ioutil.WriteFile(fmt.Sprintf("%s%s", file.Path, file.Name), body, 0644)
 		if err != nil {
 			sentry.CaptureException(err)
 			log.WithError(err).Error("Can't save file to disk")
