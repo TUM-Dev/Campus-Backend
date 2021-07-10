@@ -180,7 +180,7 @@ func skipNews(existingLinks []string, link string) bool {
 func (c *CronService) cleanOldNewsForSource(source int32) error {
 	log.Printf("Truncating old entries for source %d\n", source)
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
-		log.Info("cleaned up %v old news", res.RowsAffected)
+		log.Infof("cleaned up %v old news", res.RowsAffected)
 	} else {
 		log.WithError(res.Error).Error("failed to clean up old news")
 		sentry.CaptureException(res.Error)
