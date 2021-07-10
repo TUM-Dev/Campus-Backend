@@ -7,25 +7,22 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"github.com/disintegration/imaging"
 	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"image"
-	"net/http"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 )
 
 const (
-	ImageDirectory = "news/newspread/"
-	NewspreadHook  = "newspread"
-	ImpulsivHook   = "impulsivHook"
+	ImageDirectory   = "news/newspread/"
+	NewspreadHook    = "newspread"
+	ImpulsivHook     = "impulsivHook"
+	MAX_IMAGE_RETRYS = 3
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
@@ -61,6 +58,7 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	return nil
 }
 
+// parseNewsFeed processes a single news feed, extracts titles, content etc and saves it to the database
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	log.Printf("processing source %s", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
@@ -102,9 +100,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var file = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
-				file = c.downloadAndSaveImage(pickedEnclosure.URL)
+				fileId, err = c.saveImage(pickedEnclosure.URL)
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			bm := bluemonday.StrictPolicy()
@@ -118,7 +116,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				File:        file,
+				File:        fileId,
 			}
 			newNews = append(newNews, newsItem)
 		}
@@ -131,53 +129,39 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// downloadAndSaveImage
-// Downloads an image from the url, converts it to 720p width to and saves it to the database.
-// Returns id of file in db, null int on error.
-func (c *CronService) downloadAndSaveImage(url string) null.Int {
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("Could not download image file %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
+//saveImage Saves an image to the database so it can be downloaded by another cronjob and returns it's id
+func (c *CronService) saveImage(url string) (null.Int, error) {
+	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
+	var fileId null.Int
+	if err := c.db.Model(model.Files{}).
+		Where("name = ?", targetFileName).
+		Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
+		log.Printf("Couldn't query database for file: %v", err)
+		return null.Int{}, err
 	}
-	downloadedImg, _, err := image.Decode(resp.Body)
-	if err != nil {
-		sentry.CaptureException(err)
-		log.Printf("Couldn't decode source image: %v", err)
-		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+	if fileId.Valid { // file already in database -> return for current news.
+		return fileId, nil
 	}
-	tempHash := md5.Sum([]byte(url))
-	temporaryFileName := fmt.Sprintf("%stmp/%x.jpg", STORAGE_DIR, tempHash)
 
-	dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-	err = imaging.Save(dstImage, temporaryFileName, imaging.JPEGQuality(75))
+	// otherwise store in database:
+	file := model.Files{
+		Name:       targetFileName,
+		Path:       STORAGE_DIR + ImageDirectory,
+		URL:        sql.NullString{String: url, Valid: true},
+		Downloaded: sql.NullBool{Bool: false, Valid: true},
+	}
+	err := c.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&file).Error; err != nil {
+			log.WithError(err).Error("Could not store new file to database")
+			return err
+		}
+		return nil
+	})
 	if err != nil {
-		log.Printf("Could not save image file: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{NullInt64: sql.NullInt64{Valid: false}}
+		return null.Int{}, err
 	}
-	fileForHash, err := os.ReadFile(temporaryFileName)
-	if err != nil {
-		log.Printf("Could not read temporary image file for logging: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	newHash := md5.Sum(fileForHash)
-	newFileName := fmt.Sprintf("%s%s%x.jpg", STORAGE_DIR, ImageDirectory, newHash)
-	err = os.Rename(temporaryFileName, newFileName)
-	if err != nil {
-		log.Printf("Could not rename compressed image file: %v", err)
-		sentry.CaptureException(err)
-		return null.Int{}
-	}
-	fileForDB := model.Files{Name: fmt.Sprintf("%x.jpg", newHash), Path: ImageDirectory}
-	res := c.db.Create(&fileForDB)
-	if res.Error != nil {
-		log.Printf("couldn't store file to database: %v", res.Error)
-		sentry.CaptureException(res.Error)
-	}
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(fileForDB.File), Valid: true}}
+	// creating this int is annoying but i'm too afraid to use real ORM in the model
+	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
 }
 
 //skipNews returns true if link is in existingLinks or link is invalid
@@ -196,15 +180,16 @@ func skipNews(existingLinks []string, link string) bool {
 func (c *CronService) cleanOldNewsForSource(source int32) error {
 	log.Printf("Truncating old entries for source %d\n", source)
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
-		log.Printf("cleaned up %v old news", res.RowsAffected)
+		log.Infof("cleaned up %v old news", res.RowsAffected)
 	} else {
-		log.Printf("failed to clean up old news: %v\n", res.Error)
+		log.WithError(res.Error).Error("failed to clean up old news")
 		sentry.CaptureException(res.Error)
 		return res.Error
 	}
 	return nil
 }
 
+//newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
 func (c *CronService) newspreadHook(item *gofeed.Item) {
 	re := regexp.MustCompile("https://storage.googleapis.com/tum-newspread-de/assets/[a-z\\-0-9]+\\.jpeg")
 	extractedImageSlice := re.FindAllString(item.Content, 1)
