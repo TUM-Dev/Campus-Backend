@@ -146,7 +146,7 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 	// otherwise store in database:
 	file := model.Files{
 		Name:       targetFileName,
-		Path:       STORAGE_DIR + ImageDirectory,
+		Path:       StorageDir + ImageDirectory,
 		URL:        sql.NullString{String: url, Valid: true},
 		Downloaded: sql.NullBool{Bool: false, Valid: true},
 	}

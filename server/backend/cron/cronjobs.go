@@ -16,16 +16,17 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE          = "news"
-	MENSA_TYPE         = "mensa"
-	CHAT_TYPE          = "chat"
-	KINO_TYPE          = "kino"
-	ROOMFINDER_TYPE    = "roomfinder"
-	TICKETSALE_TYPE    = "ticketsale"
-	ALARM_TYPE         = "alarm"
-	FILE_DOWNLOAD_TYPE = "fileDownload"
+	NewsType                = "news"
+	MensaType               = "mensa"
+	ChatType                = "chat"
+	KinoType                = "kino"
+	RoomfinderType          = "roomfinder"
+	TicketsaleType          = "ticketsale"
+	AlarmType               = "alarm"
+	FileDownloadType        = "fileDownload"
+	LibraryReservationsType = "libraryReservations"
 
-	STORAGE_DIR = "/Storage/" // target location of files
+	StorageDir = "/Storage/" // target location of files
 )
 
 func New(db *gorm.DB) *CronService {
@@ -36,6 +37,7 @@ func New(db *gorm.DB) *CronService {
 }
 
 func (c *CronService) Run() error {
+	c.libraryReservationsCron()
 	log.Printf("running cron service")
 	for {
 		log.Info("Cron: checking for pending")
@@ -51,10 +53,12 @@ func (c *CronService) Run() error {
 
 			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
-			case NEWS_TYPE:
+			case NewsType:
 				g.Go(func() error { return c.newsCron(&cronjob) })
-			case FILE_DOWNLOAD_TYPE:
+			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
+			case LibraryReservationsType:
+				g.Go(func() error { return c.libraryReservationsCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:
@@ -80,3 +84,4 @@ func (c *CronService) Run() error {
 		time.Sleep(60 * time.Second)
 	}
 }
+
