@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/backend/migration"
 	"github.com/TUM-Dev/Campus-Backend/web"
 	"github.com/getsentry/sentry-go"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"log"
 	"net"
 	"os"
 )
@@ -25,7 +25,7 @@ func main() {
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
 	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
-		log.Printf("Connecting to dsn")
+		log.Info("Connecting to dsn")
 		conn = mysql.Open(dbHost)
 	} else {
 		conn = sqlite.Open("test.db")
@@ -35,7 +35,7 @@ func main() {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn: os.Getenv("SENTRY_DSN"),
 		}); err != nil {
-			log.Printf("Sentry initialization failed: %v\n", err)
+			log.WithError(err).Error("Sentry initialization failed")
 		}
 	} else {
 		log.Println("continuing without sentry")
@@ -45,20 +45,12 @@ func main() {
 		panic("failed to connect database")
 	}
 
-	// Migrate the schema only in local development mode
-	if shouldAutoMigrate {
-		log.Println("Running auto migrations")
-		err = db.AutoMigrate(
-			&model.TopNews{},
-			&model.Crontab{},
-			&model.Files{},
-			&model.NewsSource{},
-			&model.NewsAlert{},
-			&model.News{},
-		)
-		if err != nil {
-			log.Fatalf("failed to migrate: %v", err)
-		}
+	// Migrate the schema
+	tumMigrator := migration.New(db, shouldAutoMigrate)
+	err = tumMigrator.Migrate()
+	if err != nil {
+		log.WithError(err).Fatal("Failed to migrate database")
+		return
 	}
 
 	// Create any other background services (these shouldn't do any long running work here)
