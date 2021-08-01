@@ -20,6 +20,8 @@ const (
 	grpcPort = ":50052"
 )
 
+var Version = "dev"
+
 func main() {
 	// Connect to DB
 	var conn gorm.Dialector
@@ -31,9 +33,16 @@ func main() {
 		conn = sqlite.Open("test.db")
 		shouldAutoMigrate = true
 	}
+
+	environment := "development"
+	if Version != "dev" {
+		environment = "production"
+	}
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn: os.Getenv("SENTRY_DSN"),
+			Dsn:         os.Getenv("SENTRY_DSN"),
+			Release:     Version,
+			Environment: environment,
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}

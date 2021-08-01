@@ -17,8 +17,10 @@ RUN GO111MODULE=on go mod download
 # Copy source code
 COPY ./server $GOPATH/server/
 
+# bundle version into binary if specified in build-args, dev otherwise.
+ARG version=dev
 # Compile statically
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-w -extldflags "-static"' -o /backend main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
 RUN chmod +x /backend
 
 FROM scratch
