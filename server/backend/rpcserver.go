@@ -50,10 +50,10 @@ func (s *CampusServer) GetTopNews(ctx context.Context, in *pb.GetTopNewsRequest)
 
 	now := timestamppb.New(time.Now())
 	return &pb.GetTopNewsReply{
-		Name:    "Test Top News",
-		Link:    "https://google.com",
-		Created: now,
-		From:    nil,
-		To:      nil,
+		ImageUrl: "",
+		Link:     "https://google.com",
+		Created:  now,
+		From:     nil,
+		To:       nil,
 	}, nil
 }
