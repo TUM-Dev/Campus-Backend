@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
-	GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 }
 
 type campusClient struct {
@@ -29,7 +30,7 @@ func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
 }
 
-func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
+func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
 	out := new(GetTopNewsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetTopNews", in, out, opts...)
 	if err != nil {
@@ -42,7 +43,7 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, op
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
-	GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error)
+	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -50,7 +51,7 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
-func (UnimplementedCampusServer) GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error) {
+func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
@@ -67,7 +68,7 @@ func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 }
 
 func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTopNewsRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/api.Campus/GetTopNews",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTopNews(ctx, req.(*GetTopNewsRequest))
+		return srv.(CampusServer).GetTopNews(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

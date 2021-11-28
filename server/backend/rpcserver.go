@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"net"
@@ -34,7 +35,7 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
-func (s *CampusServer) GetTopNews(ctx context.Context, in *pb.GetTopNewsRequest) (*pb.GetTopNewsReply, error) {
+func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
