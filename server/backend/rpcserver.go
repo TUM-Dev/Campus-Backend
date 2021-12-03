@@ -4,6 +4,9 @@ import (
 	"context"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
@@ -13,6 +16,10 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	pb "github.com/TUM-Dev/Campus-Backend/api"
+)
+
+var (
+	ErrNoDeviceID = status.Error(codes.PermissionDenied, "no device id")
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -36,6 +43,10 @@ func New(db *gorm.DB) *CampusServer {
 }
 
 func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
+	if check := checkDevice(ctx); !check {
+		return nil, ErrNoDeviceID
+
+	}
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
@@ -57,4 +68,17 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 		From:     nil,
 		To:       nil,
 	}, nil
+}
+
+// checkDevice checks if the device is approved (TODO: implement)
+func checkDevice(ctx context.Context) bool {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return false
+	}
+	if len(md["x-device-id"]) == 0 {
+		return false
+	}
+	log.WithField("DeviceID", md["x-device-id"]).Info("Request from device")
+	return true
 }
