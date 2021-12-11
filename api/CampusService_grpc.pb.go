@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Campus_GetNewsSourcesClient, error)
 }
 
 type campusClient struct {
@@ -39,11 +40,44 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts .
 	return out, nil
 }
 
+func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (Campus_GetNewsSourcesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], "/api.Campus/GetNewsSources", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &campusGetNewsSourcesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Campus_GetNewsSourcesClient interface {
+	Recv() (*NewsSource, error)
+	grpc.ClientStream
+}
+
+type campusGetNewsSourcesClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusGetNewsSourcesClient) Recv() (*NewsSource, error) {
+	m := new(NewsSource)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
+	GetNewsSources(*emptypb.Empty, Campus_GetNewsSourcesServer) error
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -53,6 +87,9 @@ type UnimplementedCampusServer struct {
 
 func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
+}
+func (UnimplementedCampusServer) GetNewsSources(*emptypb.Empty, Campus_GetNewsSourcesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -85,6 +122,27 @@ func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetNewsSources_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CampusServer).GetNewsSources(m, &campusGetNewsSourcesServer{stream})
+}
+
+type Campus_GetNewsSourcesServer interface {
+	Send(*NewsSource) error
+	grpc.ServerStream
+}
+
+type campusGetNewsSourcesServer struct {
+	grpc.ServerStream
+}
+
+func (x *campusGetNewsSourcesServer) Send(m *NewsSource) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -97,6 +155,12 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetTopNews_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetNewsSources",
+			Handler:       _Campus_GetNewsSources_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "CampusService.proto",
 }

@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -42,10 +43,34 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
+func (s *CampusServer) GetNewsSources(_ *emptypb.Empty, streamServer pb.Campus_GetNewsSourcesServer) error {
+	/*if check := checkDevice(ctx); !check {
+		return nil, ErrNoDeviceID
+	}*/
+
+	var sources []model.NewsSource
+	if err := s.db.Find(&sources).Error; err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	for _, source := range sources {
+		var icon model.Files
+		if err := s.db.Where("file = ?", source.Icon).First(&icon).Error; err != nil {
+			icon = model.Files{File: 0}
+		}
+		log.Info("sending news source", source.Title)
+		streamServer.Send(&pb.NewsSource{
+			Source: fmt.Sprintf("%d", source.Source),
+			Title:  source.Title,
+			Icon:   fmt.Sprintf("%d", icon.File),
+		})
+	}
+	return nil
+}
+
 func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
 	if check := checkDevice(ctx); !check {
 		return nil, ErrNoDeviceID
-
 	}
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert

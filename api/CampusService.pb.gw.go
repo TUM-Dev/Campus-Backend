@@ -50,6 +50,23 @@ func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
+func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (Campus_GetNewsSourcesClient, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	stream, err := client.GetNewsSources(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+
+}
+
 // RegisterCampusHandlerServer registers the http handlers for service Campus to "mux".
 // UnaryRPC     :call CampusServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -77,6 +94,13 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 		forward_Campus_GetTopNews_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
+	})
+
+	mux.Handle("GET", pattern_Campus_GetNewsSources_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
@@ -140,13 +164,37 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
+	mux.Handle("GET", pattern_Campus_GetNewsSources_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNewsSources", runtime.WithHTTPPathPattern("/news/sources"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Campus_GetNewsSources_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetNewsSources_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
 var (
 	pattern_Campus_GetTopNews_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"topnews"}, ""))
+
+	pattern_Campus_GetNewsSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "sources"}, ""))
 )
 
 var (
 	forward_Campus_GetTopNews_0 = runtime.ForwardResponseMessage
+
+	forward_Campus_GetNewsSources_0 = runtime.ForwardResponseStream
 )

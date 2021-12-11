@@ -12,5 +12,6 @@ plugins:
     out: .
     opt:
       - paths=source_relative
+      - allow_repeated_fields_in_body=true
   - name: openapiv2
     out: gen/openapiv2

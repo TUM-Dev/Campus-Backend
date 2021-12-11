@@ -16,6 +16,37 @@
     "application/json"
   ],
   "paths": {
+    "/news/sources": {
+      "get": {
+        "operationId": "Campus_GetNewsSources",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/apiNewsSource"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of apiNewsSource"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/topnews": {
       "get": {
         "operationId": "Campus_GetTopNews",
@@ -60,6 +91,20 @@
         "to": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "apiNewsSource": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
         }
       }
     },

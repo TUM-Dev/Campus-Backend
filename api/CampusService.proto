@@ -17,6 +17,19 @@ service Campus {
       get: "/topnews"
     };
   }
+
+  rpc GetNewsSources (google.protobuf.Empty) returns (stream NewsSource) {
+    option (google.api.http) = {
+      get: "/news/sources",
+      response_body: "*"
+    };
+  }
+}
+
+message NewsSource {
+  string source = 1;
+  string title = 2;
+  string icon = 3;
 }
 
 message GetTopNewsReply {
