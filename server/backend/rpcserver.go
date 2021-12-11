@@ -69,8 +69,8 @@ func (s *CampusServer) GetNewsSources(_ *emptypb.Empty, streamServer pb.Campus_G
 }
 
 func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
-	if check := checkDevice(ctx); !check {
-		return nil, ErrNoDeviceID
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
 	}
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
@@ -96,14 +96,14 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 }
 
 // checkDevice checks if the device is approved (TODO: implement)
-func checkDevice(ctx context.Context) bool {
+func (s *CampusServer) checkDevice(ctx context.Context) error {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return false
+		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
 	if len(md["x-device-id"]) == 0 {
-		return false
+		return ErrNoDeviceID
 	}
 	log.WithField("DeviceID", md["x-device-id"]).Info("Request from device")
-	return true
+	return nil
 }
