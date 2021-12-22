@@ -31,5 +31,3 @@ require (
 	gorm.io/driver/sqlite v1.2.6
 	gorm.io/gorm v1.22.4
 )
-
-replace github.com/TUM-Dev/Campus-Backend/api => /home/joscha/GolandProjects/Campus-Backend/api
