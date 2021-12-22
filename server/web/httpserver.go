@@ -36,7 +36,7 @@ func errorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.
 	httpResponse := "Internal Server Error"
 	if errors.Is(err, backend.ErrNoDeviceID) {
 		httpStatus = http.StatusForbidden
-		httpResponse = "No device id"
+		httpResponse = "Not Authorized"
 	}
 	w.WriteHeader(httpStatus)
 	// Marshal won't fail, we know all inputs.
