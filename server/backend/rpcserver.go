@@ -43,29 +43,30 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
-func (s *CampusServer) GetNewsSources(_ *emptypb.Empty, streamServer pb.Campus_GetNewsSourcesServer) error {
-	/*if check := checkDevice(ctx); !check {
-		return nil, ErrNoDeviceID
-	}*/
+func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (newsSources *pb.NewsSourceArray, err error) {
+	if err = s.checkDevice(ctx); err != nil {
+		return
+	}
 
 	var sources []model.NewsSource
 	if err := s.db.Find(&sources).Error; err != nil {
-		return status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	var resp []*pb.NewsSource
 	for _, source := range sources {
 		var icon model.Files
 		if err := s.db.Where("file = ?", source.Icon).First(&icon).Error; err != nil {
 			icon = model.Files{File: 0}
 		}
 		log.Info("sending news source", source.Title)
-		streamServer.Send(&pb.NewsSource{
+		resp = append(resp, &pb.NewsSource{
 			Source: fmt.Sprintf("%d", source.Source),
 			Title:  source.Title,
 			Icon:   fmt.Sprintf("%d", icon.File),
 		})
 	}
-	return nil
+	return &pb.NewsSourceArray{Sources: resp}, nil
 }
 
 func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {

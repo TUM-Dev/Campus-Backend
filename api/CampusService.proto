@@ -18,12 +18,16 @@ service Campus {
     };
   }
 
-  rpc GetNewsSources (google.protobuf.Empty) returns (stream NewsSource) {
+  rpc GetNewsSources (google.protobuf.Empty) returns (NewsSourceArray) {
     option (google.api.http) = {
       get: "/news/sources",
-      response_body: "*"
+      response_body: "sources"
     };
   }
+}
+
+message NewsSourceArray {
+  repeated NewsSource sources = 1;
 }
 
 message NewsSource {
