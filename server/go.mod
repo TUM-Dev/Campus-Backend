@@ -12,7 +12,6 @@ require (
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/json-iterator/go v1.1.11 // indirect
-	github.com/mattn/go-sqlite3 v1.14.7 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.5
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/mmcdole/goxpp v0.0.0-20200921145534-2f3784f67354 // indirect
@@ -25,6 +24,6 @@ require (
 	google.golang.org/grpc v1.37.0
 	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/mysql v1.0.6
-	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.21.9
+	gorm.io/driver/sqlite v1.2.6
+	gorm.io/gorm v1.22.3
 )
