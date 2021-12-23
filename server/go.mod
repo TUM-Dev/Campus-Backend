@@ -13,12 +13,11 @@ require (
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.5
+	github.com/microcosm-cc/bluemonday v1.0.16
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/mmcdole/goxpp v0.0.0-20200921145534-2f3784f67354 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
-	golang.org/x/net v0.0.0-20210505214959-0714010a04ed // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
 	google.golang.org/genproto v0.0.0-20210506142907-4a47615972c2 // indirect
