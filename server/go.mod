@@ -23,7 +23,7 @@ require (
 	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
 	google.golang.org/genproto v0.0.0-20210506142907-4a47615972c2 // indirect
 	google.golang.org/grpc v1.37.0
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.27.1
 	gorm.io/driver/mysql v1.0.6
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.9
