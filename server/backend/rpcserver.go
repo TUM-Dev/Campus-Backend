@@ -63,7 +63,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (ne
 		resp = append(resp, &pb.NewsSource{
 			Source: fmt.Sprintf("%d", source.Source),
 			Title:  source.Title,
-			Icon:   fmt.Sprintf("%d", icon.URL),
+			Icon:   icon.URL.String,
 		})
 	}
 	return &pb.NewsSourceArray{Sources: resp}, nil

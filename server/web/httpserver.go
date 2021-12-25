@@ -14,14 +14,19 @@ import (
 )
 
 func HTTPServe(l net.Listener, grpcPort string) error {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
 		func(s string) (string, bool) {
+			// don't filter headers (pass all to gRPC handlers)
 			return s, true
 		}),
 		runtime.WithErrorHandler(errorHandler),
 	)
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := gw.RegisterCampusHandlerFromEndpoint(context.TODO(), mux, grpcPort, opts)
+	err := gw.RegisterCampusHandlerFromEndpoint(ctx, mux, grpcPort, opts)
 	if err != nil {
 		return err
 	}
@@ -39,8 +44,11 @@ func errorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.
 		httpResponse = "Not Authorized"
 	}
 	w.WriteHeader(httpStatus)
-	// Marshal won't fail, we know all inputs.
-	resp, _ := json.Marshal(errorResponse{Error: httpResponse})
+	resp, err := json.Marshal(errorResponse{Error: httpResponse})
+	if err != nil {
+		log.WithError(err).Error("Marshal error response failed, Kordian was right (ofc...)")
+		return
+	}
 	_, err = w.Write(resp)
 	if err != nil {
 		log.WithError(err).Error("Error writing response")
