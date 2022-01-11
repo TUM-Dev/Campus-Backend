@@ -21,18 +21,12 @@
         "operationId": "Campus_GetNewsSources",
         "responses": {
           "200": {
-            "description": "A successful response.(streaming responses)",
+            "description": "",
             "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/apiNewsSource"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of apiNewsSource"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/apiNewsSource"
+              }
             }
           },
           "default": {
@@ -105,6 +99,17 @@
         },
         "icon": {
           "type": "string"
+        }
+      }
+    },
+    "apiNewsSourceArray": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiNewsSource"
+          }
         }
       }
     },

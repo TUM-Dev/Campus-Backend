@@ -15,3 +15,5 @@ plugins:
       - allow_repeated_fields_in_body=true
   - name: openapiv2
     out: gen/openapiv2
+    opt:
+      - allow_repeated_fields_in_body=true

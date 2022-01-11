@@ -50,20 +50,21 @@ func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (Campus_GetNewsSourcesClient, runtime.ServerMetadata, error) {
+func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
 
-	stream, err := client.GetNewsSources(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
+	msg, err := client.GetNewsSources(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.GetNewsSources(ctx, &protoReq)
+	return msg, metadata, err
 
 }
 
@@ -97,10 +98,26 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 	})
 
 	mux.Handle("GET", pattern_Campus_GetNewsSources_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNewsSources", runtime.WithHTTPPathPattern("/news/sources"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Campus_GetNewsSources_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetNewsSources_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetNewsSources_0{resp}, mux.GetForwardResponseOptions()...)
+
 	})
 
 	return nil
@@ -133,7 +150,7 @@ func RegisterCampusHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMu
 
 // RegisterCampusHandler registers the http handlers for service Campus to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCampusHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
+func RegisterCampusHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return RegisterCampusHandlerClient(ctx, mux, NewCampusClient(conn))
 }
 
@@ -180,11 +197,20 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_GetNewsSources_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetNewsSources_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetNewsSources_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
+}
+
+type response_Campus_GetNewsSources_0 struct {
+	proto.Message
+}
+
+func (m response_Campus_GetNewsSources_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*NewsSourceArray)
+	return response.Sources
 }
 
 var (
@@ -196,5 +222,5 @@ var (
 var (
 	forward_Campus_GetTopNews_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetNewsSources_0 = runtime.ForwardResponseStream
+	forward_Campus_GetNewsSources_0 = runtime.ForwardResponseMessage
 )
