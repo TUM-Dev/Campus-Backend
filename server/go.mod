@@ -3,7 +3,7 @@ module github.com/TUM-Dev/Campus-Backend
 go 1.17
 
 require (
-	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20210801172406-da72d5c73717
+	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220111101300-556ff6d4d215
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/getsentry/sentry-go v0.11.0
