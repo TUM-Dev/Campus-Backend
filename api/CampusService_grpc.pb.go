@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,7 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
-	GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
 }
 
 type campusClient struct {
@@ -29,9 +31,18 @@ func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
 }
 
-func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
+func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
 	out := new(GetTopNewsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetTopNews", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error) {
+	out := new(NewsSourceArray)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetNewsSources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +53,8 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, op
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
-	GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error)
+	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
+	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -50,8 +62,11 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
-func (UnimplementedCampusServer) GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error) {
+func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
+}
+func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -67,7 +82,7 @@ func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 }
 
 func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTopNewsRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +94,25 @@ func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/api.Campus/GetTopNews",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTopNews(ctx, req.(*GetTopNewsRequest))
+		return srv.(CampusServer).GetTopNews(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNewsSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNewsSources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetNewsSources",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNewsSources(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -94,6 +127,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTopNews",
 			Handler:    _Campus_GetTopNews_Handler,
+		},
+		{
+			MethodName: "GetNewsSources",
+			Handler:    _Campus_GetNewsSources_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

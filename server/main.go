@@ -67,19 +67,19 @@ func main() {
 	campusService := backend.New(db)
 
 	// Listen to our configured ports
-	httpListener, err := net.Listen("tcp", httpPort)
+	grpcListener, err := net.Listen("tcp", grpcPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	grpcListener, err := net.Listen("tcp", grpcPort)
+	httpListener, err := net.Listen("tcp", httpPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	g := errgroup.Group{}
 	// Start each server in its own go routine and logs any errors
-	g.Go(func() error { return web.HTTPServe(httpListener) })
 	g.Go(func() error { return campusService.GRPCServe(grpcListener) })
+	g.Go(func() error { return web.HTTPServe(httpListener, grpcPort) })
 
 	// Setup cron jobs
 	g.Go(func() error { return cronService.Run() })
