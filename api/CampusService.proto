@@ -32,7 +32,7 @@ service Campus {
     };
   }
 
-  rpc GetLocations (LocationsRequest) returns (LocationsReply) {
+  rpc GetLocations (GetLocationsRequest) returns (GetLocationsReply) {
     option (google.api.http) = {
       get: "/locations/{location}",
       response_body: "locations"
@@ -102,11 +102,11 @@ message GetAvailableMapsReply {
   repeated Map maps = 1;
 }
 
-message LocationsRequest {
+message GetLocationsRequest {
   string location = 1;
 }
 
-message LocationsReply {
+message GetLocationsReply {
   message Location {
     string location = 1;
     string name = 2;

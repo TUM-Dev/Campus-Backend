@@ -22,7 +22,7 @@ type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
-	GetLocations(ctx context.Context, in *LocationsRequest, opts ...grpc.CallOption) (*LocationsReply, error)
+	GetLocations(ctx context.Context, in *GetLocationsRequest, opts ...grpc.CallOption) (*GetLocationsReply, error)
 	GetAvailableMaps(ctx context.Context, in *GetAvailableMapsRequest, opts ...grpc.CallOption) (*GetAvailableMapsReply, error)
 	GetCoordinates(ctx context.Context, in *GetCoordinatesRequest, opts ...grpc.CallOption) (*GetCoordinatesReply, error)
 	GetRoomSchedule(ctx context.Context, in *GetRoomScheduleRequest, opts ...grpc.CallOption) (*GetRoomScheduleReply, error)
@@ -63,8 +63,8 @@ func (c *campusClient) SearchRooms(ctx context.Context, in *SearchRoomsRequest, 
 	return out, nil
 }
 
-func (c *campusClient) GetLocations(ctx context.Context, in *LocationsRequest, opts ...grpc.CallOption) (*LocationsReply, error) {
-	out := new(LocationsReply)
+func (c *campusClient) GetLocations(ctx context.Context, in *GetLocationsRequest, opts ...grpc.CallOption) (*GetLocationsReply, error) {
+	out := new(GetLocationsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetLocations", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
-	GetLocations(context.Context, *LocationsRequest) (*LocationsReply, error)
+	GetLocations(context.Context, *GetLocationsRequest) (*GetLocationsReply, error)
 	GetAvailableMaps(context.Context, *GetAvailableMapsRequest) (*GetAvailableMapsReply, error)
 	GetCoordinates(context.Context, *GetCoordinatesRequest) (*GetCoordinatesReply, error)
 	GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error)
@@ -126,7 +126,7 @@ func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty)
 func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
 }
-func (UnimplementedCampusServer) GetLocations(context.Context, *LocationsRequest) (*LocationsReply, error) {
+func (UnimplementedCampusServer) GetLocations(context.Context, *GetLocationsRequest) (*GetLocationsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLocations not implemented")
 }
 func (UnimplementedCampusServer) GetAvailableMaps(context.Context, *GetAvailableMapsRequest) (*GetAvailableMapsReply, error) {
@@ -206,7 +206,7 @@ func _Campus_SearchRooms_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _Campus_GetLocations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LocationsRequest)
+	in := new(GetLocationsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func _Campus_GetLocations_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/api.Campus/GetLocations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetLocations(ctx, req.(*LocationsRequest))
+		return srv.(CampusServer).GetLocations(ctx, req.(*GetLocationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

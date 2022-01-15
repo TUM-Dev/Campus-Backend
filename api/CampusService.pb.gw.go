@@ -121,7 +121,7 @@ func local_request_Campus_SearchRooms_0(ctx context.Context, marshaler runtime.M
 }
 
 func request_Campus_GetLocations_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq LocationsRequest
+	var protoReq GetLocationsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -147,7 +147,7 @@ func request_Campus_GetLocations_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Campus_GetLocations_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq LocationsRequest
+	var protoReq GetLocationsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -742,7 +742,7 @@ type response_Campus_GetLocations_0 struct {
 }
 
 func (m response_Campus_GetLocations_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*LocationsReply)
+	response := m.Message.(*GetLocationsReply)
 	return response.Locations
 }
 

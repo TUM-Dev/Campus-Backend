@@ -25,7 +25,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/apiLocationsReplyLocation"
+                "$ref": "#/definitions/apiGetLocationsReplyLocation"
               }
             }
           },
@@ -313,6 +313,37 @@
         }
       }
     },
+    "apiGetLocationsReply": {
+      "type": "object",
+      "properties": {
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiGetLocationsReplyLocation"
+          }
+        }
+      }
+    },
+    "apiGetLocationsReplyLocation": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "lon": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "string"
+        },
+        "radius": {
+          "type": "string"
+        }
+      }
+    },
     "apiGetRoomScheduleReply": {
       "type": "object",
       "properties": {
@@ -344,37 +375,6 @@
         "to": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "apiLocationsReply": {
-      "type": "object",
-      "properties": {
-        "locations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiLocationsReplyLocation"
-          }
-        }
-      }
-    },
-    "apiLocationsReplyLocation": {
-      "type": "object",
-      "properties": {
-        "location": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "lon": {
-          "type": "string"
-        },
-        "lat": {
-          "type": "string"
-        },
-        "radius": {
-          "type": "string"
         }
       }
     },
