@@ -42,5 +42,3 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
 )
-
-replace github.com/TUM-Dev/Campus-Backend/api => /home/joschahenningsen/GolandProjects/Campus-Backend/api
