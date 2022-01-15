@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
+	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 }
 
 type campusClient struct {
@@ -49,12 +50,22 @@ func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, op
 	return out, nil
 }
 
+func (c *campusClient) SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error) {
+	out := new(SearchRoomsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/SearchRooms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
+	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -67,6 +78,9 @@ func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*G
 }
 func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
+}
+func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -117,6 +131,24 @@ func _Campus_GetNewsSources_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_SearchRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).SearchRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/SearchRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).SearchRooms(ctx, req.(*SearchRoomsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +163,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetNewsSources",
 			Handler:    _Campus_GetNewsSources_Handler,
+		},
+		{
+			MethodName: "SearchRooms",
+			Handler:    _Campus_SearchRooms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -24,6 +24,33 @@ service Campus {
       response_body: "sources"
     };
   }
+
+  rpc SearchRooms (SearchRoomsRequest) returns (SearchRoomsReply) {
+    option (google.api.http) = {
+      get: "/rooms/search",
+      response_body: "rooms"
+    };
+  }
+}
+
+message SearchRoomsRequest {
+  string q = 1;
+}
+
+message SearchRoomsReply {
+  repeated Room rooms = 1;
+}
+
+message Room {
+  string room_id = 1;
+  string room_code = 2;
+  string building_nr = 3;
+  string arch_id = 4;
+  string info = 5;
+  string address = 6;
+  string purpose = 7;
+  string campus = 8;
+  string name = 9;
 }
 
 message NewsSourceArray {

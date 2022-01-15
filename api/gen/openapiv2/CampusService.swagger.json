@@ -41,6 +41,39 @@
         ]
       }
     },
+    "/rooms/search": {
+      "get": {
+        "operationId": "Campus_SearchRooms",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/apiRoom"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/topnews": {
       "get": {
         "operationId": "Campus_GetTopNews",
@@ -109,6 +142,49 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiNewsSource"
+          }
+        }
+      }
+    },
+    "apiRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string"
+        },
+        "roomCode": {
+          "type": "string"
+        },
+        "buildingNr": {
+          "type": "string"
+        },
+        "archId": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "campus": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSearchRoomsReply": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoom"
           }
         }
       }

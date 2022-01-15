@@ -69,8 +69,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	}
 	// get all news for this source so we only process new ones, using map for performance reasons
 	existingNewsLinksForSource := make([]string, 0)
-	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error;
-		err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Printf("failed to fetch existing news: %v", err)
 		sentry.CaptureException(err)
 		return err
