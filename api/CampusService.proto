@@ -27,14 +27,98 @@ service Campus {
 
   rpc SearchRooms (SearchRoomsRequest) returns (SearchRoomsReply) {
     option (google.api.http) = {
-      get: "/rooms/search",
+      get: "/roomfinder/room/search/{query}",
       response_body: "rooms"
+    };
+  }
+
+  rpc GetLocations (LocationsRequest) returns (LocationsReply) {
+    option (google.api.http) = {
+      get: "/locations/{location}",
+      response_body: "locations"
+    };
+  }
+
+  rpc GetAvailableMaps (GetAvailableMapsRequest) returns (GetAvailableMapsReply) {
+    option (google.api.http) = {
+      get: "/roomfinder/room/availableMaps/{arch_id}",
+      response_body: "maps"
+    };
+  }
+
+  rpc GetCoordinates (GetCoordinatesRequest) returns (GetCoordinatesReply) {
+    option (google.api.http) = {
+      get: "/roomfinder/room/coordinates/{arch_id}",
+    };
+  }
+
+  rpc GetRoomSchedule (GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
+    option (google.api.http) = {
+      get: "/roomfinder/room/scheduleById/{room_id}/{start}/{end}",
+      response_body: "events"
     };
   }
 }
 
+message GetRoomScheduleRequest {
+  int32 room_id = 1;
+  string start = 2; // yyyyMMdd
+  string end = 3; // yyyyMMdd
+}
+
+message GetRoomScheduleReply {
+  message RoomScheduleEvent {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+    string title = 3;
+    string event_id = 4;
+    string course_code = 5;
+  }
+  repeated RoomScheduleEvent events = 1;
+}
+
+message GetCoordinatesRequest {
+  string arch_id = 1;
+}
+
+message GetCoordinatesReply {
+  string utm_zone = 1;
+  float utm_easting = 2;
+  float utm_northing = 3;
+}
+
+message GetAvailableMapsRequest {
+  string arch_id = 1;
+}
+
+message GetAvailableMapsReply {
+  message Map {
+    int64 map_id = 1;
+    string description = 2;
+    int64 scale = 3;
+    int64 width = 4;
+    int64 height = 5;
+  };
+  repeated Map maps = 1;
+}
+
+message LocationsRequest {
+  string location = 1;
+}
+
+message LocationsReply {
+  message Location {
+    string location = 1;
+    string name = 2;
+    string lon = 3;
+    string lat = 4;
+    string radius = 5;
+  }
+  repeated Location locations = 1;
+}
+
 message SearchRoomsRequest {
-  string q = 1;
+  string query = 1;
 }
 
 message SearchRoomsReply {
