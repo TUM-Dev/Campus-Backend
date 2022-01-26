@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"errors"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
@@ -17,6 +18,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -28,6 +30,9 @@ const (
 )
 
 var Version = "dev"
+
+//go:embed swagger
+var swagfs embed.FS
 
 func main() {
 	// Connect to DB
@@ -84,10 +89,12 @@ func main() {
 
 	// HTTP Stuff
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	httpServer := &http.Server{Handler: mux}
+	mux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("Hello, world!"))
 	})
-	httpServer := &http.Server{Handler: mux}
+	static, _ := fs.Sub(swagfs, "swagger")
+	mux.Handle("/", http.FileServer(http.FS(static)))
 
 	// Main GRPC Server
 	grpcS := grpc.NewServer()
