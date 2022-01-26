@@ -16,6 +16,40 @@
     "application/json"
   ],
   "paths": {
+    "/locations/{location}": {
+      "get": {
+        "summary": "a location is a campus location/building, e.g. \"Garching Forschungszentrum\"",
+        "operationId": "Campus_GetLocations",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/apiGetLocationsReplyLocation"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "location",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/news/sources": {
       "get": {
         "operationId": "Campus_GetNewsSources",
@@ -62,9 +96,295 @@
           "Campus"
         ]
       }
+    },
+    "/roomfinder/maps": {
+      "post": {
+        "operationId": "Campus_GetRoomMaps",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GetRoomMapsReplyMap"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomMapsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/roomfinder/room/coordinates": {
+      "post": {
+        "operationId": "Campus_GetRoomCoordinates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomCoordinatesReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomCoordinatesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/roomfinder/room/scheduleById": {
+      "post": {
+        "operationId": "Campus_GetRoomSchedule",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GetRoomScheduleReplyRoomScheduleEvent"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomScheduleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/roomfinder/room/search": {
+      "post": {
+        "operationId": "Campus_SearchRooms",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/apiRoom"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSearchRoomsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
     }
   },
   "definitions": {
+    "GetRoomMapsReplyMap": {
+      "type": "object",
+      "properties": {
+        "mapId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "scale": {
+          "type": "string",
+          "format": "int64"
+        },
+        "width": {
+          "type": "string",
+          "format": "int64"
+        },
+        "height": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "GetRoomScheduleReplyRoomScheduleEvent": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "title": {
+          "type": "string"
+        },
+        "eventId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "courseCode": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetLocationsReply": {
+      "type": "object",
+      "properties": {
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiGetLocationsReplyLocation"
+          }
+        }
+      }
+    },
+    "apiGetLocationsReplyLocation": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "lon": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "string"
+        },
+        "radius": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetRoomCoordinatesReply": {
+      "type": "object",
+      "properties": {
+        "utmZone": {
+          "type": "string"
+        },
+        "utmEasting": {
+          "type": "number",
+          "format": "float"
+        },
+        "utmNorthing": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "apiGetRoomCoordinatesRequest": {
+      "type": "object",
+      "properties": {
+        "archId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetRoomMapsReply": {
+      "type": "object",
+      "properties": {
+        "maps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GetRoomMapsReplyMap"
+          }
+        }
+      }
+    },
+    "apiGetRoomMapsRequest": {
+      "type": "object",
+      "properties": {
+        "archId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetRoomScheduleReply": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GetRoomScheduleReplyRoomScheduleEvent"
+          }
+        }
+      }
+    },
+    "apiGetRoomScheduleRequest": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "apiGetTopNewsReply": {
       "type": "object",
       "properties": {
@@ -110,6 +430,57 @@
           "items": {
             "$ref": "#/definitions/apiNewsSource"
           }
+        }
+      }
+    },
+    "apiRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string"
+        },
+        "roomCode": {
+          "type": "string"
+        },
+        "buildingNr": {
+          "type": "string"
+        },
+        "archId": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "campus": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSearchRoomsReply": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoom"
+          }
+        }
+      }
+    },
+    "apiSearchRoomsRequest": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
         }
       }
     },
