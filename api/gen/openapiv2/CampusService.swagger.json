@@ -18,7 +18,7 @@
   "paths": {
     "/locations/{location}": {
       "get": {
-        "summary": "a location is a campus, e.g. \"Garching Forschungszentrum\"",
+        "summary": "a location is a campus location/building, e.g. \"Garching Forschungszentrum\"",
         "operationId": "Campus_GetLocations",
         "responses": {
           "200": {
@@ -75,8 +75,8 @@
         ]
       }
     },
-    "/roomfinder/room/availableMaps/{archId}": {
-      "get": {
+    "/roomfinder/maps": {
+      "post": {
         "operationId": "Campus_GetRoomMaps",
         "responses": {
           "200": {
@@ -97,10 +97,12 @@
         },
         "parameters": [
           {
-            "name": "archId",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomMapsRequest"
+            }
           }
         ],
         "tags": [
@@ -347,6 +349,14 @@
         }
       }
     },
+    "apiGetRoomMapsRequest": {
+      "type": "object",
+      "properties": {
+        "archId": {
+          "type": "string"
+        }
+      }
+    },
     "apiGetRoomScheduleReply": {
       "type": "object",
       "properties": {
@@ -361,7 +371,7 @@
     "apiGetRoomScheduleRequest": {
       "type": "object",
       "properties": {
-        "roomId": {
+        "room": {
           "type": "integer",
           "format": "int32"
         },

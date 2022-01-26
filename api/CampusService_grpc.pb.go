@@ -22,7 +22,7 @@ type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
-	// a location is a campus, e.g. "Garching Forschungszentrum"
+	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(ctx context.Context, in *GetLocationsRequest, opts ...grpc.CallOption) (*GetLocationsReply, error)
 	GetRoomMaps(ctx context.Context, in *GetRoomMapsRequest, opts ...grpc.CallOption) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(ctx context.Context, in *GetRoomCoordinatesRequest, opts ...grpc.CallOption) (*GetRoomCoordinatesReply, error)
@@ -107,7 +107,7 @@ type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
-	// a location is a campus, e.g. "Garching Forschungszentrum"
+	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(context.Context, *GetLocationsRequest) (*GetLocationsReply, error)
 	GetRoomMaps(context.Context, *GetRoomMapsRequest) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(context.Context, *GetRoomCoordinatesRequest) (*GetRoomCoordinatesReply, error)
