@@ -4,6 +4,7 @@ import (
 	"context"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"log"
 	"time"
 )
@@ -22,8 +23,12 @@ func main() {
 	defer conn.Close()
 	c := pb.NewCampusClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	// Add header metadata
+	md := metadata.New(map[string]string{"x-device-id": "grpc-tests"})
+	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Println("Trying to fetch top news")
 	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
