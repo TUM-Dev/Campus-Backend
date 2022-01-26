@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220111101300-556ff6d4d215
 	github.com/disintegration/imaging v1.6.2
+	github.com/flowchartsman/swaggerui v0.0.0-20210303154956-0e71c297862e
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
@@ -14,6 +15,7 @@ require (
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/soheilhy/cmux v0.1.5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
