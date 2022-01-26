@@ -25,6 +25,122 @@ service Campus {
       response_body: "sources"
     };
   }
+
+  rpc SearchRooms (SearchRoomsRequest) returns (SearchRoomsReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/search",
+      body: "*",
+      response_body: "rooms"
+    };
+  }
+
+  // a location is a campus location/building, e.g. "Garching Forschungszentrum"
+  rpc GetLocations (GetLocationsRequest) returns (GetLocationsReply) {
+    option (google.api.http) = {
+      get: "/locations/{location}",
+      response_body: "locations"
+    };
+  }
+
+  rpc GetRoomMaps (GetRoomMapsRequest) returns (GetRoomMapsReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/maps",
+      body: "*",
+      response_body: "maps"
+    };
+  }
+
+  rpc GetRoomCoordinates (GetRoomCoordinatesRequest) returns (GetRoomCoordinatesReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/coordinates",
+      body: "*"
+    };
+  }
+
+  rpc GetRoomSchedule (GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/scheduleById",
+      body: "*",
+      response_body: "events"
+    };
+  }
+}
+
+message GetRoomScheduleRequest {
+  int32 room = 1;
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
+}
+
+message GetRoomScheduleReply {
+  message RoomScheduleEvent {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+    string title = 3;
+    int32 event_id = 4;
+    string course_code = 5;
+  }
+  repeated RoomScheduleEvent events = 1;
+}
+
+message GetRoomCoordinatesRequest {
+  string arch_id = 1;
+}
+
+message GetRoomCoordinatesReply {
+  string utm_zone = 1;
+  float utm_easting = 2;
+  float utm_northing = 3;
+}
+
+message GetRoomMapsRequest {
+  string arch_id = 1;
+}
+
+message GetRoomMapsReply {
+  message Map {
+    int64 map_id = 1;
+    string description = 2;
+    int64 scale = 3;
+    int64 width = 4;
+    int64 height = 5;
+  };
+  repeated Map maps = 1;
+}
+
+message GetLocationsRequest {
+  string location = 1;
+}
+
+message GetLocationsReply {
+  message Location {
+    string location = 1;
+    string name = 2;
+    string lon = 3;
+    string lat = 4;
+    string radius = 5;
+  }
+  repeated Location locations = 1;
+}
+
+message SearchRoomsRequest {
+  string query = 1;
+}
+
+message SearchRoomsReply {
+  repeated Room rooms = 1;
+}
+
+message Room {
+  string room_id = 1;
+  string room_code = 2;
+  string building_nr = 3;
+  string arch_id = 4;
+  string info = 5;
+  string address = 6;
+  string purpose = 7;
+  string campus = 8;
+  string name = 9;
 }
 
 message NewsSourceArray {
