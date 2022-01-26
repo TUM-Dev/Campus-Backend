@@ -33,7 +33,7 @@ service Campus {
     };
   }
 
-  // a location is a campus, e.g. "Garching Forschungszentrum"
+  // a location is a campus location/building, e.g. "Garching Forschungszentrum"
   rpc GetLocations (GetLocationsRequest) returns (GetLocationsReply) {
     option (google.api.http) = {
       get: "/locations/{location}",
