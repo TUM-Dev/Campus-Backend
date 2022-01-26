@@ -41,7 +41,7 @@
         ]
       }
     },
-    "/topnews": {
+    "/news/top": {
       "get": {
         "operationId": "Campus_GetTopNews",
         "responses": {

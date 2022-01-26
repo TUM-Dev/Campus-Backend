@@ -14,6 +14,7 @@ require (
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/soheilhy/cmux v0.1.5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1

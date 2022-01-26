@@ -15,7 +15,7 @@ import "google/protobuf/timestamp.proto";
 service Campus {
   rpc GetTopNews (google.protobuf.Empty) returns (GetTopNewsReply) {
     option (google.api.http) = {
-      get: "/topnews"
+      get: "/news/top"
     };
   }
 

@@ -1,23 +1,30 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/backend/migration"
-	"github.com/TUM-Dev/Campus-Backend/web"
 	"github.com/getsentry/sentry-go"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
+	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"net"
+	"net/http"
+	"net/textproto"
 	"os"
 )
 
 const (
 	httpPort = ":50051"
-	grpcPort = ":50052"
 )
 
 var Version = "dev"
@@ -67,22 +74,80 @@ func main() {
 	campusService := backend.New(db)
 
 	// Listen to our configured ports
-	grpcListener, err := net.Listen("tcp", grpcPort)
+	listener, err := net.Listen("tcp", httpPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	httpListener, err := net.Listen("tcp", httpPort)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	m := cmux.New(listener)
+	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := m.Match(cmux.HTTP1Fast())
 
-	g := errgroup.Group{}
+	// HTTP Stuff
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("Hello, world!"))
+	})
+	httpServer := &http.Server{Handler: mux}
+
+	// Main GRPC Server
+	grpcS := grpc.NewServer()
+	pb.RegisterCampusServer(grpcS, campusService)
+
+	// GRPC Gateway for HTTP REST -> GRPC
+	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
+		func(key string) (string, bool) {
+			key = textproto.CanonicalMIMEHeaderKey(key)
+			if key == "X-Device-Id" {
+				return key, true
+			}
+			// don't filter headers (pass all to gRPC handlers)
+			return runtime.DefaultHeaderMatcher(key)
+		}),
+		runtime.WithErrorHandler(errorHandler),
+	)
+	ctx := context.Background()
+	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithUserAgent("internal")}
+	if err := pb.RegisterCampusHandlerFromEndpoint(ctx, grpcGatewayMux, httpPort, opts); err != nil {
+		panic(err)
+	}
+	restPrefix := "/v1"
+	mux.Handle("/v1/", http.StripPrefix(restPrefix, grpcGatewayMux))
+
 	// Start each server in its own go routine and logs any errors
-	g.Go(func() error { return campusService.GRPCServe(grpcListener) })
-	g.Go(func() error { return web.HTTPServe(httpListener, grpcPort) })
+	g := errgroup.Group{}
+	g.Go(func() error { return grpcS.Serve(grpcListener) })
+	g.Go(func() error { return httpServer.Serve(httpListener) })
+	g.Go(func() error { return m.Serve() })
+	g.Go(func() error { return cronService.Run() }) // Setup cron jobs
 
-	// Setup cron jobs
-	g.Go(func() error { return cronService.Run() })
+	log.Println("running server")
+	err = g.Wait()
+	if err != nil {
+		log.Error(err)
+	}
+}
 
-	log.Println("run server: ", g.Wait())
+// errorHandler translates gRPC raised by the backend into HTTP errors.
+func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
+	httpStatus := http.StatusInternalServerError
+	httpResponse := "Internal Server Error"
+	if errors.Is(err, backend.ErrNoDeviceID) {
+		httpStatus = http.StatusForbidden
+		httpResponse = "Not Authorized"
+	}
+	log.Errorf("Failed to pass through to gRPC: %s", err)
+	w.WriteHeader(httpStatus)
+	resp, err := json.Marshal(errorResponse{Error: httpResponse})
+	if err != nil {
+		log.WithError(err).Error("Marshal error response failed, Kordian was right (ofc...)")
+		return
+	}
+	_, err = w.Write(resp)
+	if err != nil {
+		log.WithError(err).Error("Error writing response")
+	}
+}
+
+type errorResponse struct {
+	Error string `json:"error"`
 }
