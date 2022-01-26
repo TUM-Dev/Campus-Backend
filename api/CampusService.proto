@@ -43,7 +43,8 @@ service Campus {
 
   rpc GetRoomMaps (GetRoomMapsRequest) returns (GetRoomMapsReply) {
     option (google.api.http) = {
-      get: "/roomfinder/room/availableMaps/{arch_id}",
+      post: "/roomfinder/maps",
+      body: "*",
       response_body: "maps"
     };
   }
@@ -65,7 +66,7 @@ service Campus {
 }
 
 message GetRoomScheduleRequest {
-  int32 room_id = 1;
+  int32 room = 1;
   google.protobuf.Timestamp start = 2;
   google.protobuf.Timestamp end = 3;
 }
