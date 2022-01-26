@@ -4,6 +4,7 @@ option go_package = "github.com/TUM-Dev/Campus-Backend/api";
 option java_multiple_files = true;
 option java_package = "app.tum.campus.api";
 option java_outer_classname = "CampusApiProto";
+option csharp_namespace = "CampusApiProto";
 
 package api;
 
