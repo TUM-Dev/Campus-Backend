@@ -75,6 +75,28 @@
         ]
       }
     },
+    "/news/top": {
+      "get": {
+        "operationId": "Campus_GetTopNews",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetTopNewsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/roomfinder/maps": {
       "post": {
         "operationId": "Campus_GetRoomMaps",
@@ -207,28 +229,6 @@
             }
           }
         ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/topnews": {
-      "get": {
-        "operationId": "Campus_GetTopNews",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetTopNewsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "tags": [
           "Campus"
         ]
