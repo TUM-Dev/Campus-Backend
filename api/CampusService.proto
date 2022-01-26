@@ -27,11 +27,13 @@ service Campus {
 
   rpc SearchRooms (SearchRoomsRequest) returns (SearchRoomsReply) {
     option (google.api.http) = {
-      get: "/roomfinder/room/search/{query}",
+      post: "/roomfinder/room/search",
+      body: "*",
       response_body: "rooms"
     };
   }
 
+  // a location is a campus, e.g. "Garching Forschungszentrum"
   rpc GetLocations (GetLocationsRequest) returns (GetLocationsReply) {
     option (google.api.http) = {
       get: "/locations/{location}",
@@ -39,22 +41,24 @@ service Campus {
     };
   }
 
-  rpc GetAvailableMaps (GetAvailableMapsRequest) returns (GetAvailableMapsReply) {
+  rpc GetRoomMaps (GetRoomMapsRequest) returns (GetRoomMapsReply) {
     option (google.api.http) = {
       get: "/roomfinder/room/availableMaps/{arch_id}",
       response_body: "maps"
     };
   }
 
-  rpc GetCoordinates (GetCoordinatesRequest) returns (GetCoordinatesReply) {
+  rpc GetRoomCoordinates (GetRoomCoordinatesRequest) returns (GetRoomCoordinatesReply) {
     option (google.api.http) = {
-      get: "/roomfinder/room/coordinates/{arch_id}",
+      post: "/roomfinder/room/coordinates",
+      body: "*"
     };
   }
 
   rpc GetRoomSchedule (GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
     option (google.api.http) = {
-      get: "/roomfinder/room/scheduleById/{room_id}/{start}/{end}",
+      post: "/roomfinder/room/scheduleById",
+      body: "*",
       response_body: "events"
     };
   }
@@ -62,8 +66,8 @@ service Campus {
 
 message GetRoomScheduleRequest {
   int32 room_id = 1;
-  string start = 2; // yyyyMMdd
-  string end = 3; // yyyyMMdd
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
 }
 
 message GetRoomScheduleReply {
@@ -71,27 +75,27 @@ message GetRoomScheduleReply {
     google.protobuf.Timestamp start = 1;
     google.protobuf.Timestamp end = 2;
     string title = 3;
-    string event_id = 4;
+    int32 event_id = 4;
     string course_code = 5;
   }
   repeated RoomScheduleEvent events = 1;
 }
 
-message GetCoordinatesRequest {
+message GetRoomCoordinatesRequest {
   string arch_id = 1;
 }
 
-message GetCoordinatesReply {
+message GetRoomCoordinatesReply {
   string utm_zone = 1;
   float utm_easting = 2;
   float utm_northing = 3;
 }
 
-message GetAvailableMapsRequest {
+message GetRoomMapsRequest {
   string arch_id = 1;
 }
 
-message GetAvailableMapsReply {
+message GetRoomMapsReply {
   message Map {
     int64 map_id = 1;
     string description = 2;

@@ -18,6 +18,7 @@
   "paths": {
     "/locations/{location}": {
       "get": {
+        "summary": "a location is a campus, e.g. \"Garching Forschungszentrum\"",
         "operationId": "Campus_GetLocations",
         "responses": {
           "200": {
@@ -76,14 +77,14 @@
     },
     "/roomfinder/room/availableMaps/{archId}": {
       "get": {
-        "operationId": "Campus_GetAvailableMaps",
+        "operationId": "Campus_GetRoomMaps",
         "responses": {
           "200": {
             "description": "",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/GetAvailableMapsReplyMap"
+                "$ref": "#/definitions/GetRoomMapsReplyMap"
               }
             }
           },
@@ -107,14 +108,14 @@
         ]
       }
     },
-    "/roomfinder/room/coordinates/{archId}": {
-      "get": {
-        "operationId": "Campus_GetCoordinates",
+    "/roomfinder/room/coordinates": {
+      "post": {
+        "operationId": "Campus_GetRoomCoordinates",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetCoordinatesReply"
+              "$ref": "#/definitions/apiGetRoomCoordinatesReply"
             }
           },
           "default": {
@@ -126,10 +127,12 @@
         },
         "parameters": [
           {
-            "name": "archId",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomCoordinatesRequest"
+            }
           }
         ],
         "tags": [
@@ -137,8 +140,8 @@
         ]
       }
     },
-    "/roomfinder/room/scheduleById/{roomId}/{start}/{end}": {
-      "get": {
+    "/roomfinder/room/scheduleById": {
+      "post": {
         "operationId": "Campus_GetRoomSchedule",
         "responses": {
           "200": {
@@ -159,23 +162,12 @@
         },
         "parameters": [
           {
-            "name": "roomId",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "start",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "end",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/apiGetRoomScheduleRequest"
+            }
           }
         ],
         "tags": [
@@ -183,8 +175,8 @@
         ]
       }
     },
-    "/roomfinder/room/search/{query}": {
-      "get": {
+    "/roomfinder/room/search": {
+      "post": {
         "operationId": "Campus_SearchRooms",
         "responses": {
           "200": {
@@ -205,10 +197,12 @@
         },
         "parameters": [
           {
-            "name": "query",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/apiSearchRoomsRequest"
+            }
           }
         ],
         "tags": [
@@ -240,7 +234,7 @@
     }
   },
   "definitions": {
-    "GetAvailableMapsReplyMap": {
+    "GetRoomMapsReplyMap": {
       "type": "object",
       "properties": {
         "mapId": {
@@ -279,37 +273,11 @@
           "type": "string"
         },
         "eventId": {
-          "type": "string"
+          "type": "integer",
+          "format": "int32"
         },
         "courseCode": {
           "type": "string"
-        }
-      }
-    },
-    "apiGetAvailableMapsReply": {
-      "type": "object",
-      "properties": {
-        "maps": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/GetAvailableMapsReplyMap"
-          }
-        }
-      }
-    },
-    "apiGetCoordinatesReply": {
-      "type": "object",
-      "properties": {
-        "utmZone": {
-          "type": "string"
-        },
-        "utmEasting": {
-          "type": "number",
-          "format": "float"
-        },
-        "utmNorthing": {
-          "type": "number",
-          "format": "float"
         }
       }
     },
@@ -344,6 +312,41 @@
         }
       }
     },
+    "apiGetRoomCoordinatesReply": {
+      "type": "object",
+      "properties": {
+        "utmZone": {
+          "type": "string"
+        },
+        "utmEasting": {
+          "type": "number",
+          "format": "float"
+        },
+        "utmNorthing": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "apiGetRoomCoordinatesRequest": {
+      "type": "object",
+      "properties": {
+        "archId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetRoomMapsReply": {
+      "type": "object",
+      "properties": {
+        "maps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GetRoomMapsReplyMap"
+          }
+        }
+      }
+    },
     "apiGetRoomScheduleReply": {
       "type": "object",
       "properties": {
@@ -352,6 +355,23 @@
           "items": {
             "$ref": "#/definitions/GetRoomScheduleReplyRoomScheduleEvent"
           }
+        }
+      }
+    },
+    "apiGetRoomScheduleRequest": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -443,6 +463,14 @@
           "items": {
             "$ref": "#/definitions/apiRoom"
           }
+        }
+      }
+    },
+    "apiSearchRoomsRequest": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
         }
       }
     },

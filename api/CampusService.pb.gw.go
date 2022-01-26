@@ -72,21 +72,12 @@ func request_Campus_SearchRooms_0(ctx context.Context, marshaler runtime.Marshal
 	var protoReq SearchRoomsRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["query"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "query")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-
-	protoReq.Query, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "query", err)
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := client.SearchRooms(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -98,21 +89,12 @@ func local_request_Campus_SearchRooms_0(ctx context.Context, marshaler runtime.M
 	var protoReq SearchRoomsRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["query"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "query")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-
-	protoReq.Query, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "query", err)
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := server.SearchRooms(ctx, &protoReq)
@@ -172,8 +154,8 @@ func local_request_Campus_GetLocations_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_Campus_GetAvailableMaps_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAvailableMapsRequest
+func request_Campus_GetRoomMaps_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetRoomMapsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -193,13 +175,13 @@ func request_Campus_GetAvailableMaps_0(ctx context.Context, marshaler runtime.Ma
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "arch_id", err)
 	}
 
-	msg, err := client.GetAvailableMaps(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetRoomMaps(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetAvailableMaps_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAvailableMapsRequest
+func local_request_Campus_GetRoomMaps_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetRoomMapsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -219,59 +201,41 @@ func local_request_Campus_GetAvailableMaps_0(ctx context.Context, marshaler runt
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "arch_id", err)
 	}
 
-	msg, err := server.GetAvailableMaps(ctx, &protoReq)
+	msg, err := server.GetRoomMaps(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-func request_Campus_GetCoordinates_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetCoordinatesRequest
+func request_Campus_GetRoomCoordinates_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetRoomCoordinatesRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["arch_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "arch_id")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	protoReq.ArchId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "arch_id", err)
-	}
-
-	msg, err := client.GetCoordinates(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetRoomCoordinates(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetCoordinates_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetCoordinatesRequest
+func local_request_Campus_GetRoomCoordinates_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetRoomCoordinatesRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["arch_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "arch_id")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	protoReq.ArchId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "arch_id", err)
-	}
-
-	msg, err := server.GetCoordinates(ctx, &protoReq)
+	msg, err := server.GetRoomCoordinates(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -280,41 +244,12 @@ func request_Campus_GetRoomSchedule_0(ctx context.Context, marshaler runtime.Mar
 	var protoReq GetRoomScheduleRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["room_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "room_id")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-
-	protoReq.RoomId, err = runtime.Int32(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "room_id", err)
-	}
-
-	val, ok = pathParams["start"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "start")
-	}
-
-	protoReq.Start, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "start", err)
-	}
-
-	val, ok = pathParams["end"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "end")
-	}
-
-	protoReq.End, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "end", err)
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := client.GetRoomSchedule(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -326,41 +261,12 @@ func local_request_Campus_GetRoomSchedule_0(ctx context.Context, marshaler runti
 	var protoReq GetRoomScheduleRequest
 	var metadata runtime.ServerMetadata
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["room_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "room_id")
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-
-	protoReq.RoomId, err = runtime.Int32(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "room_id", err)
-	}
-
-	val, ok = pathParams["start"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "start")
-	}
-
-	protoReq.Start, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "start", err)
-	}
-
-	val, ok = pathParams["end"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "end")
-	}
-
-	protoReq.End, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "end", err)
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := server.GetRoomSchedule(ctx, &protoReq)
@@ -420,13 +326,13 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("GET", pattern_Campus_SearchRooms_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_SearchRooms_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/SearchRooms", runtime.WithHTTPPathPattern("/roomfinder/room/search/{query}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/SearchRooms", runtime.WithHTTPPathPattern("/roomfinder/room/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -466,18 +372,18 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetAvailableMaps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetRoomMaps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableMaps", runtime.WithHTTPPathPattern("/roomfinder/room/availableMaps/{arch_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetRoomMaps", runtime.WithHTTPPathPattern("/roomfinder/room/availableMaps/{arch_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetAvailableMaps_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetRoomMaps_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -485,22 +391,22 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetAvailableMaps_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetAvailableMaps_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetRoomMaps_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetRoomMaps_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetCoordinates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_GetRoomCoordinates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCoordinates", runtime.WithHTTPPathPattern("/roomfinder/room/coordinates/{arch_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetRoomCoordinates", runtime.WithHTTPPathPattern("/roomfinder/room/coordinates"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetCoordinates_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetRoomCoordinates_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -508,17 +414,17 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetCoordinates_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetRoomCoordinates_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetRoomSchedule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_GetRoomSchedule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetRoomSchedule", runtime.WithHTTPPathPattern("/roomfinder/room/scheduleById/{room_id}/{start}/{end}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetRoomSchedule", runtime.WithHTTPPathPattern("/roomfinder/room/scheduleById"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -616,11 +522,11 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("GET", pattern_Campus_SearchRooms_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_SearchRooms_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/SearchRooms", runtime.WithHTTPPathPattern("/roomfinder/room/search/{query}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/SearchRooms", runtime.WithHTTPPathPattern("/roomfinder/room/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -656,51 +562,51 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetAvailableMaps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetRoomMaps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableMaps", runtime.WithHTTPPathPattern("/roomfinder/room/availableMaps/{arch_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetRoomMaps", runtime.WithHTTPPathPattern("/roomfinder/room/availableMaps/{arch_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetAvailableMaps_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetRoomMaps_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetAvailableMaps_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetAvailableMaps_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetRoomMaps_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetRoomMaps_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetCoordinates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_GetRoomCoordinates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCoordinates", runtime.WithHTTPPathPattern("/roomfinder/room/coordinates/{arch_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetRoomCoordinates", runtime.WithHTTPPathPattern("/roomfinder/room/coordinates"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetCoordinates_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetRoomCoordinates_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetCoordinates_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetRoomCoordinates_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetRoomSchedule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_GetRoomSchedule_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetRoomSchedule", runtime.WithHTTPPathPattern("/roomfinder/room/scheduleById/{room_id}/{start}/{end}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetRoomSchedule", runtime.WithHTTPPathPattern("/roomfinder/room/scheduleById"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -746,12 +652,12 @@ func (m response_Campus_GetLocations_0) XXX_ResponseBody() interface{} {
 	return response.Locations
 }
 
-type response_Campus_GetAvailableMaps_0 struct {
+type response_Campus_GetRoomMaps_0 struct {
 	proto.Message
 }
 
-func (m response_Campus_GetAvailableMaps_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetAvailableMapsReply)
+func (m response_Campus_GetRoomMaps_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetRoomMapsReply)
 	return response.Maps
 }
 
@@ -769,15 +675,15 @@ var (
 
 	pattern_Campus_GetNewsSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "sources"}, ""))
 
-	pattern_Campus_SearchRooms_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"roomfinder", "room", "search", "query"}, ""))
+	pattern_Campus_SearchRooms_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"roomfinder", "room", "search"}, ""))
 
 	pattern_Campus_GetLocations_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"locations", "location"}, ""))
 
-	pattern_Campus_GetAvailableMaps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"roomfinder", "room", "availableMaps", "arch_id"}, ""))
+	pattern_Campus_GetRoomMaps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"roomfinder", "room", "availableMaps", "arch_id"}, ""))
 
-	pattern_Campus_GetCoordinates_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"roomfinder", "room", "coordinates", "arch_id"}, ""))
+	pattern_Campus_GetRoomCoordinates_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"roomfinder", "room", "coordinates"}, ""))
 
-	pattern_Campus_GetRoomSchedule_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"roomfinder", "room", "scheduleById", "room_id", "start", "end"}, ""))
+	pattern_Campus_GetRoomSchedule_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"roomfinder", "room", "scheduleById"}, ""))
 )
 
 var (
@@ -789,9 +695,9 @@ var (
 
 	forward_Campus_GetLocations_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetAvailableMaps_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetRoomMaps_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetCoordinates_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetRoomCoordinates_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetRoomSchedule_0 = runtime.ForwardResponseMessage
 )
