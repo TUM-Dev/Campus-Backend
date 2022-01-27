@@ -437,7 +437,8 @@
       "type": "object",
       "properties": {
         "roomId": {
-          "type": "string"
+          "type": "integer",
+          "format": "int32"
         },
         "roomCode": {
           "type": "string"
