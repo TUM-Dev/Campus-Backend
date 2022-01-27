@@ -453,7 +453,7 @@ func RegisterCampusHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMu
 
 // RegisterCampusHandler registers the http handlers for service Campus to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCampusHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
+func RegisterCampusHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return RegisterCampusHandlerClient(ctx, mux, NewCampusClient(conn))
 }
 
