@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"errors"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
@@ -23,6 +22,7 @@ import (
 	"net/http"
 	"net/textproto"
 	"os"
+	"strings"
 )
 
 const (
@@ -138,7 +138,7 @@ func main() {
 func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
 	httpStatus := http.StatusInternalServerError
 	httpResponse := "Internal Server Error"
-	if errors.Is(err, backend.ErrNoDeviceID) {
+	if strings.HasPrefix(err.Error(), "no device id") {
 		httpStatus = http.StatusForbidden
 		httpResponse = "Not Authorized"
 	}
@@ -146,7 +146,7 @@ func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w
 	w.WriteHeader(httpStatus)
 	resp, err := json.Marshal(errorResponse{Error: httpResponse})
 	if err != nil {
-		log.WithError(err).Error("Marshal error response failed, Kordian was right (ofc...)")
+		log.WithError(err).Error("Marshal error response failed")
 		return
 	}
 	_, err = w.Write(resp)
