@@ -99,7 +99,7 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
 	if len(md["x-device-id"]) == 0 && md["x-forwarded-for"][0] != "::1" && md["x-forwarded-for"][0] != "127.0.0.1" {
-		return status.Errorf(codes.PermissionDenied, "no device id: %s (%s)", md["x-device-id"][0], md["x-forwarded-for"][0])
+		return status.Errorf(codes.PermissionDenied, "no device id: %s", md["x-forwarded-for"][0])
 	}
 	log.WithField("DeviceID", md["x-device-id"]).Info("Request from device")
 	return nil
