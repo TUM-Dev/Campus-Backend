@@ -2,8 +2,10 @@ package backend
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -12,9 +14,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"net"
-	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 )
@@ -72,8 +71,8 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
-	if err != nil {
-		log.Error(err)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Errorf("Failed to fetch top news: %w", err)
 	} else if res != nil {
 		return &pb.GetTopNewsReply{
 			//ImageUrl: res.Name,
@@ -81,15 +80,7 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 			To:   timestamppb.New(res.To),
 		}, nil
 	}
-
-	now := timestamppb.New(time.Now())
-	return &pb.GetTopNewsReply{
-		ImageUrl: "",
-		Link:     "https://google.com",
-		Created:  now,
-		From:     nil,
-		To:       nil,
-	}, nil
+	return &pb.GetTopNewsReply{}, nil
 }
 
 // checkDevice checks if the device is approved (TODO: implement)
@@ -98,8 +89,8 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	if !ok {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
-	if len(md["x-device-id"]) == 0 && md["x-forwarded-for"][0] != "::1" && md["x-forwarded-for"][0] != "127.0.0.1" {
-		return status.Errorf(codes.PermissionDenied, "no device id: %s", md["x-forwarded-for"][0])
+	if len(md["x-device-id"]) == 0 && len(md["grpcgateway-referer"]) == 0 && md["x-forwarded-for"][0] != "::1" {
+		return status.Errorf(codes.PermissionDenied, "no device id")
 	}
 	log.WithField("DeviceID", md["x-device-id"]).Info("Request from device")
 	return nil
