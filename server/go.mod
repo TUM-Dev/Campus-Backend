@@ -8,7 +8,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.3
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.17
 	github.com/mmcdole/gofeed v1.1.3
@@ -42,7 +42,7 @@ require (
 	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
+	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5 // indirect
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
