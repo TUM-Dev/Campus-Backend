@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"errors"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -71,6 +72,8 @@ func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	b.devices = make(map[string]*model.Devices)
 	return nil
 }
+
+var ErrNoDeviceID = errors.New("no device id")
 
 // checkDevice checks if the device is approved (TODO: implement)
 func (s *CampusServer) checkDevice(ctx context.Context) error {

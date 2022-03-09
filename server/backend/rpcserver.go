@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,14 +16,6 @@ import (
 	"net"
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
-
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-)
-
-var (
-	ErrNoDeviceID = status.Error(codes.PermissionDenied, "no device id")
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -123,8 +117,8 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	log.Printf("Received: get top news")
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
-	if err != nil {
-		log.Error(err)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Errorf("Failed to fetch top news: %w", err)
 	} else if res != nil {
 		return &pb.GetTopNewsReply{
 			//ImageUrl: res.Name,
@@ -132,13 +126,5 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 			To:   timestamppb.New(res.To),
 		}, nil
 	}
-
-	now := timestamppb.New(time.Now())
-	return &pb.GetTopNewsReply{
-		ImageUrl: "",
-		Link:     "https://google.com",
-		Created:  now,
-		From:     nil,
-		To:       nil,
-	}, nil
+	return &pb.GetTopNewsReply{}, nil
 }

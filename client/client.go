@@ -2,21 +2,27 @@ package main
 
 import (
 	"context"
+	"crypto/x509"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"log"
 	"time"
 )
 
 const (
-	address = "api.tum.app:50052"
+	address = "api-grpc.tum.app:443"
 )
 
 func main() {
 	// Set up a connection to the server.
 	log.Println("Connecting...")
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	pool, _ := x509.SystemCertPool()
+	// error handling omitted
+	creds := credentials.NewClientTLSFromCert(pool, "")
+
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
