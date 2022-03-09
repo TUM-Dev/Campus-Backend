@@ -75,6 +75,9 @@ func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsReque
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
+	if req.Query == "" {
+		return &pb.SearchRoomsReply{Rooms: make([]*pb.Room, 0)}, nil
+	}
 	var res []struct { // struct to scan database query into
 		model.RoomfinderRooms
 		Campus string
