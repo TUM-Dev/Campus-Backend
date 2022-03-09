@@ -33,6 +33,9 @@ type CampusServer struct {
 	deviceBuf *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
 }
 
+// Verify that CampusServer implements the pb.CampusServer interface
+var _ pb.CampusServer = (*CampusServer)(nil)
+
 func New(db *gorm.DB) *CampusServer {
 	return &CampusServer{
 		db: db,
