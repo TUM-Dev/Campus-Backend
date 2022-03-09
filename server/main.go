@@ -141,7 +141,7 @@ func main() {
 	}
 }
 
-// addMethodNameInterceptor is a gRPC unary interceptor that adds the method name to the metadata as x-campus-method for later use.
+// addMethodNameInterceptor adds the method name (e.g. "GetNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
 func addMethodNameInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-campus-method", method)
 	return invoker(ctx, method, req, reply, cc, opts...)

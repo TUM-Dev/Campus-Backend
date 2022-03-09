@@ -14,6 +14,6 @@ plugins:
       - paths=source_relative
       - allow_repeated_fields_in_body=true
   - name: openapiv2
-    out: ../server/swagger
+    out: gen/openapiv2
     opt:
       - allow_repeated_fields_in_body=true

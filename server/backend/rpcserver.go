@@ -39,7 +39,7 @@ func New(db *gorm.DB) *CampusServer {
 		deviceBuf: &deviceBuffer{
 			lock:     sync.Mutex{},
 			devices:  make(map[string]*model.Devices),
-			interval: time.Second * 10,
+			interval: time.Minute,
 		},
 	}
 }
@@ -85,7 +85,7 @@ func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsReque
 		"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
 		"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return &pb.SearchRoomsReply{Rooms: make([]*pb.Room, 0)}, nil
 	}
 	if err != nil {
 		log.WithError(err).Error("failed to search rooms")

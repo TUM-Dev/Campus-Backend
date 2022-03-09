@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-	"errors"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -24,20 +23,27 @@ type deviceBuffer struct {
 func (s *CampusServer) RunDeviceFlusher() error {
 	for {
 		time.Sleep(s.deviceBuf.interval)
-		err := s.deviceBuf.flush(s.db)
-		if err != nil {
+		if err := s.deviceBuf.flush(s.db); err != nil {
 			log.WithError(err).Error("Error flushing device buffer")
 		}
 	}
 }
 
-func (b *deviceBuffer) add(device model.Devices) {
+// 	s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
+func (b *deviceBuffer) add(deviceID string, method string, osVersion string, appVersion string) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	if _, exists := b.devices[device.UUID]; exists {
-		b.devices[device.UUID].Counter++
+	if _, exists := b.devices[deviceID]; exists {
+		b.devices[deviceID].Counter++
 	} else {
-		b.devices[device.UUID] = &device
+		b.devices[deviceID] = &model.Devices{
+			UUID:       deviceID,
+			LastAccess: time.Now(),
+			LastAPI:    method,
+			OsVersion:  osVersion,
+			AppVersion: appVersion,
+			Counter:    1,
+		}
 	}
 }
 
@@ -73,7 +79,7 @@ func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	return nil
 }
 
-var ErrNoDeviceID = errors.New("no device id")
+var ErrNoDeviceID = status.Errorf(codes.PermissionDenied, "no device id")
 
 // checkDevice checks if the device is approved (TODO: implement)
 func (s *CampusServer) checkDevice(ctx context.Context) error {
@@ -82,10 +88,11 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
 	log.Println()
-	if len(md["x-device-id"]) == 0 && md["x-forwarded-for"][0] != "::1" {
+	if len(md["x-device-id"]) == 0 && len(md["grpcgateway-referer"]) == 0 && md["x-forwarded-for"][0] != "::1" {
 		return ErrNoDeviceID
 	}
 
+	// check method header added by middleware. This should always exist.
 	method := md["x-campus-method"]
 	if len(method) == 0 {
 		return status.Error(codes.Internal, "can't extract method from request")
@@ -101,13 +108,6 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	}
 
 	// log device to db
-	s.deviceBuf.add(model.Devices{
-		UUID:       md["x-device-id"][0],
-		LastAPI:    method[0],
-		LastAccess: time.Now(),
-		OsVersion:  osVersion,
-		AppVersion: appVersion,
-		Counter:    1, // initially 1 call, incremented on subsequent calls
-	})
+	s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
 	return nil
 }
