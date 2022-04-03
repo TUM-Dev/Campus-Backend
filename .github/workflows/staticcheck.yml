@@ -2,9 +2,9 @@ name: "staticcheck"
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ dev ]
+    branches: [ main ]
 
 jobs:
   ci:
@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix: { dir: ['./api', './client', './server'] }
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - uses: dominikh/staticcheck-action@v1.2.0
