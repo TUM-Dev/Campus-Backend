@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	ImageDirectory   = "news/newspread/"
-	NewspreadHook    = "newspread"
-	ImpulsivHook     = "impulsivHook"
-	MAX_IMAGE_RETRYS = 3
+	ImageDirectory = "news/newspread/"
+	NewspreadHook  = "newspread"
+	ImpulsivHook   = "impulsivHook"
+	//MAX_IMAGE_RETRYS = 3
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
@@ -102,6 +102,10 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
 				fileId, err = c.saveImage(pickedEnclosure.URL)
+				if err != nil {
+					log.WithError(err).Error("error saving image")
+					sentry.CaptureException(err)
+				}
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			bm := bluemonday.StrictPolicy()
@@ -190,7 +194,7 @@ func (c *CronService) cleanOldNewsForSource(source int32) error {
 
 //newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
 func (c *CronService) newspreadHook(item *gofeed.Item) {
-	re := regexp.MustCompile("https://storage.googleapis.com/tum-newspread-de/assets/[a-z\\-0-9]+\\.jpeg")
+	re := regexp.MustCompile(`https://storage.googleapis.com/tum-newspread-de/assets/[a-z\-0-9]+\.jpeg`)
 	extractedImageSlice := re.FindAllString(item.Content, 1)
 	extractedImageURL := ""
 	if len(extractedImageSlice) != 0 {

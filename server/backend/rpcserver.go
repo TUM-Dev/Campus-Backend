@@ -4,18 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"net"
-
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	"sync"
+	"time"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -29,12 +29,21 @@ func (s *CampusServer) GRPCServe(l net.Listener) error {
 
 type CampusServer struct {
 	pb.UnimplementedCampusServer
-	db *gorm.DB
+	db        *gorm.DB
+	deviceBuf *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
 }
+
+// Verify that CampusServer implements the pb.CampusServer interface
+var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	return &CampusServer{
 		db: db,
+		deviceBuf: &deviceBuffer{
+			lock:     sync.Mutex{},
+			devices:  make(map[string]*model.Devices),
+			interval: time.Minute,
+		},
 	}
 }
 
@@ -64,6 +73,49 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (ne
 	return &pb.NewsSourceArray{Sources: resp}, nil
 }
 
+// SearchRooms returns all rooms that match the given search query.
+func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsRequest) (*pb.SearchRoomsReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
+	if req.Query == "" {
+		return &pb.SearchRoomsReply{Rooms: make([]*pb.Room, 0)}, nil
+	}
+	var res []struct { // struct to scan database query into
+		model.RoomfinderRooms
+		Campus string
+		Name   string
+	}
+	err := s.db.Raw("SELECT r.*, a.campus, a.name "+
+		"FROM roomfinder_rooms r "+
+		"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
+		"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return &pb.SearchRoomsReply{Rooms: make([]*pb.Room, 0)}, nil
+	}
+	if err != nil {
+		log.WithError(err).Error("failed to search rooms")
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	response := &pb.SearchRoomsReply{
+		Rooms: make([]*pb.Room, len(res)),
+	}
+	for i, row := range res {
+		response.Rooms[i] = &pb.Room{
+			RoomId:     row.RoomID,
+			RoomCode:   row.RoomCode.String,
+			BuildingNr: row.BuildingNr.String,
+			ArchId:     row.ArchID.String,
+			Info:       row.Info.String,
+			Address:    row.Address.String,
+			Purpose:    row.Purpose.String,
+			Campus:     row.Campus,
+			Name:       row.Name,
+		}
+	}
+	return response, nil
+}
+
 func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
@@ -81,17 +133,4 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 		}, nil
 	}
 	return &pb.GetTopNewsReply{}, nil
-}
-
-// checkDevice checks if the device is approved (TODO: implement)
-func (s *CampusServer) checkDevice(ctx context.Context) error {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return status.Error(codes.Internal, "can't extract metadata from request")
-	}
-	if len(md["x-device-id"]) == 0 && len(md["grpcgateway-referer"]) == 0 && md["x-forwarded-for"][0] != "::1" {
-		return status.Errorf(codes.PermissionDenied, "no device id")
-	}
-	log.WithField("DeviceID", md["x-device-id"]).Info("Request from device")
-	return nil
 }
