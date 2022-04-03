@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	ImageDirectory   = "news/newspread/"
-	NewspreadHook    = "newspread"
-	ImpulsivHook     = "impulsivHook"
-	MAX_IMAGE_RETRYS = 3
+	ImageDirectory = "news/newspread/"
+	NewspreadHook  = "newspread"
+	ImpulsivHook   = "impulsivHook"
+	//MAX_IMAGE_RETRYS = 3
 )
 
 var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
@@ -102,6 +102,10 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
 			if pickedEnclosure != nil {
 				fileId, err = c.saveImage(pickedEnclosure.URL)
+				if err != nil {
+					log.WithError(err).Error("error saving image")
+					sentry.CaptureException(err)
+				}
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
 			bm := bluemonday.StrictPolicy()
