@@ -36,6 +36,7 @@ func (m TumDBMigrator) Migrate() error {
 	log.Info("Using manual migration")
 	mig := gormigrate.New(m.database, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		m.migrate20210709193000(),
+		m.migrate20220126230000(),
 	})
 	err := mig.Migrate()
 	return err

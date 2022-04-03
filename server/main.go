@@ -14,6 +14,8 @@ import (
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -113,7 +115,11 @@ func main() {
 		runtime.WithErrorHandler(errorHandler),
 	)
 	ctx := context.Background()
-	opts := []grpc.DialOption{grpc.WithInsecure(), grpc.WithUserAgent("internal")}
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUserAgent("internal"),
+		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
+	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(ctx, grpcGatewayMux, httpPort, opts); err != nil {
 		panic(err)
 	}
@@ -125,13 +131,20 @@ func main() {
 	g.Go(func() error { return grpcS.Serve(grpcListener) })
 	g.Go(func() error { return httpServer.Serve(httpListener) })
 	g.Go(func() error { return m.Serve() })
-	g.Go(func() error { return cronService.Run() }) // Setup cron jobs
+	g.Go(func() error { return cronService.Run() })                // Setup cron jobs
+	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
 	log.Println("running server")
 	err = g.Wait()
 	if err != nil {
 		log.Error(err)
 	}
+}
+
+// addMethodNameInterceptor adds the method name (e.g. "GetNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
+func addMethodNameInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-campus-method", method)
+	return invoker(ctx, method, req, reply, cc, opts...)
 }
 
 // errorHandler translates gRPC raised by the backend into HTTP errors.
