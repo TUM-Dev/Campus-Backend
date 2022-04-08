@@ -87,15 +87,15 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	if !ok {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
-	log.Println()
-	if len(md["x-device-id"]) == 0 && len(md["grpcgateway-referer"]) == 0 && md["x-forwarded-for"][0] != "::1" {
-		return ErrNoDeviceID
+	if len(md["x-device-id"]) == 0 {
+		md["x-device-id"] = []string{"unknown"}
 	}
 
 	// check method header added by middleware. This should always exist.
 	method := md["x-campus-method"]
 	if len(method) == 0 {
-		return status.Error(codes.Internal, "can't extract method from request")
+		log.Info("no method header found for request")
+		md["x-campus-method"] = []string{"unknown"}
 	}
 
 	osVersion := "unknown"
