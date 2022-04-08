@@ -83,19 +83,21 @@ var ErrNoDeviceID = status.Errorf(codes.PermissionDenied, "no device id")
 
 // checkDevice checks if the device is approved (TODO: implement)
 func (s *CampusServer) checkDevice(ctx context.Context) error {
+	var deviceID, method string
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
 	if len(md["x-device-id"]) == 0 {
-		md["x-device-id"] = []string{"unknown"}
+		deviceID = "unknown"
+		md["x-device-id"] = []string{deviceID}
 	}
 
 	// check method header added by middleware. This should always exist.
-	method := md["x-campus-method"]
-	if len(method) == 0 {
+	if len(md["x-campus-method"]) == 0 {
 		log.Info("no method header found for request")
-		md["x-campus-method"] = []string{"unknown"}
+		method = "unknown"
+		md["x-campus-method"] = []string{method}
 	}
 
 	osVersion := "unknown"
@@ -108,6 +110,6 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	}
 
 	// log device to db
-	s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
+	s.deviceBuf.add(deviceID, method, osVersion, appVersion)
 	return nil
 }
