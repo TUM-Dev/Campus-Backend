@@ -14,8 +14,10 @@ import (
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -155,7 +157,17 @@ func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w
 		httpStatus = http.StatusForbidden
 		httpResponse = "Not Authorized"
 	}
-	log.Errorf("Failed to pass through to gRPC: %s", err)
+	if s, ok := status.FromError(err); ok {
+		switch s.Code() {
+		case codes.NotFound:
+			httpStatus = http.StatusNotFound
+			httpResponse = "Not Found"
+		case codes.Unimplemented:
+			httpStatus = http.StatusNotImplemented
+			httpResponse = "Not Implemented"
+		}
+	}
+
 	w.WriteHeader(httpStatus)
 	resp, err := json.Marshal(errorResponse{Error: httpResponse})
 	if err != nil {
