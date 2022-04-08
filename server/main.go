@@ -166,8 +166,6 @@ func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w
 			httpStatus = http.StatusNotImplemented
 			httpResponse = "Not Implemented"
 		}
-	} else {
-		s.Code()
 	}
 
 	w.WriteHeader(httpStatus)
