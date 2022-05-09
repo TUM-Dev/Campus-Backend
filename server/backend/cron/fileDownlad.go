@@ -65,7 +65,7 @@ func (c *CronService) downloadFile(file model.Files) {
 		// in our case resolves to /Storage/news/newspread/1234abc.jpg
 		dstFileName := fmt.Sprintf("%s%s", file.Path, file.Name)
 		dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-		err = imaging.Save(dstImage, dstFileName, imaging.JPEGQuality(75))
+		err = imaging.Save(dstImage, STORAGE_DIR+dstFileName, imaging.JPEGQuality(75))
 		if err != nil {
 			log.WithError(err).WithField("url", url).Warn("Could not save image file")
 			sentry.CaptureException(err)
