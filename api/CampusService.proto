@@ -64,6 +64,12 @@ service Campus {
       response_body: "events"
     };
   }
+
+  rpc GetMensaRating (google.protobuf.Empty) returns (GetMensaRatingReply) {
+    option (google.api.http) = {
+      get: "/mensa/getAll"
+    };
+  }
 }
 
 message GetRoomScheduleRequest {
@@ -159,4 +165,9 @@ message GetTopNewsReply {
   google.protobuf.Timestamp created = 3;
   google.protobuf.Timestamp from = 4;
   google.protobuf.Timestamp to = 5;
+}
+
+
+message GetMensaRatingReply {
+  string arch_id = 1;
 }
