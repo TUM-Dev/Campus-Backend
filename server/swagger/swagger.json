@@ -17,6 +17,365 @@
     "application/json"
   ],
   "paths": {
+    "/cafeteriaRating/Cafeteria/newCafeteriaRating": {
+      "get": {
+        "operationId": "Campus_NewCafeteriaRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "meal",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "image",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "CafeteriaVisitedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "identifierOfUser",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/cafeteria/getAll": {
+      "get": {
+        "operationId": "Campus_GetCafeteriaRatingAll",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/cafeteria/getLastThree": {
+      "get": {
+        "summary": "Messages for Cafeteria and Dish rating",
+        "operationId": "Campus_GetCafeteriaRatingLastThree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/cafeteria/getToday": {
+      "get": {
+        "operationId": "Campus_GetCafeteriaRatingToday",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/dish/getAll": {
+      "get": {
+        "operationId": "Campus_GetDishRatingAll",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tokenizedDish",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/dish/getLastThree": {
+      "get": {
+        "operationId": "Campus_GetDishRatingLastThree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tokenizedDish",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/dish/getToday": {
+      "get": {
+        "operationId": "Campus_GetDishRatingToday",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tokenizedDish",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/dish/newDishRating": {
+      "get": {
+        "operationId": "Campus_NewDishRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "cafeteria",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "meal",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "image",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "CafeteriaVisitedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "identifierOfUser",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/locations/{location}": {
       "get": {
         "summary": "a location is a campus location/building, e.g. \"Garching Forschungszentrum\"",
@@ -281,6 +640,98 @@
         },
         "courseCode": {
           "type": "string"
+        }
+      }
+    },
+    "apiCafeteriaRatingGet": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cafeteria": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "image": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "CafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "apiDishRatingGet": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cafeteria": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "meal": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "image": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "CafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetCafeteriaRatingReply": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCafeteriaRatingGet"
+          }
+        },
+        "averageRating": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "apiGetDishRatingReply": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiDishRatingGet"
+          }
+        },
+        "averageRating": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

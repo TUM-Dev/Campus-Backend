@@ -31,7 +31,15 @@ type CampusClient interface {
 	GetRoomMaps(ctx context.Context, in *GetRoomMapsRequest, opts ...grpc.CallOption) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(ctx context.Context, in *GetRoomCoordinatesRequest, opts ...grpc.CallOption) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(ctx context.Context, in *GetRoomScheduleRequest, opts ...grpc.CallOption) (*GetRoomScheduleReply, error)
-	GetMensaRating(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMensaRatingReply, error)
+	//Messages for Cafeteria and Dish rating
+	GetCafeteriaRatingLastThree(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error)
+	GetCafeteriaRatingToday(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error)
+	GetCafeteriaRatingAll(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error)
+	GetDishRatingLastThree(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error)
+	GetDishRatingToday(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error)
+	GetDishRatingAll(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error)
+	NewCafeteriaRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	NewDishRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type campusClient struct {
@@ -105,9 +113,72 @@ func (c *campusClient) GetRoomSchedule(ctx context.Context, in *GetRoomScheduleR
 	return out, nil
 }
 
-func (c *campusClient) GetMensaRating(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMensaRatingReply, error) {
-	out := new(GetMensaRatingReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetMensaRating", in, out, opts...)
+func (c *campusClient) GetCafeteriaRatingLastThree(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error) {
+	out := new(GetCafeteriaRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatingLastThree", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetCafeteriaRatingToday(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error) {
+	out := new(GetCafeteriaRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatingToday", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetCafeteriaRatingAll(ctx context.Context, in *Cafeteria, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error) {
+	out := new(GetCafeteriaRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatingAll", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetDishRatingLastThree(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error) {
+	out := new(GetDishRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetDishRatingLastThree", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetDishRatingToday(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error) {
+	out := new(GetDishRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetDishRatingToday", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetDishRatingAll(ctx context.Context, in *DishInCafeteria, opts ...grpc.CallOption) (*GetDishRatingReply, error) {
+	out := new(GetDishRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetDishRatingAll", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) NewCafeteriaRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.Campus/NewCafeteriaRating", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) NewDishRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/api.Campus/NewDishRating", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +197,15 @@ type CampusServer interface {
 	GetRoomMaps(context.Context, *GetRoomMapsRequest) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(context.Context, *GetRoomCoordinatesRequest) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error)
-	GetMensaRating(context.Context, *emptypb.Empty) (*GetMensaRatingReply, error)
+	//Messages for Cafeteria and Dish rating
+	GetCafeteriaRatingLastThree(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error)
+	GetCafeteriaRatingToday(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error)
+	GetCafeteriaRatingAll(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error)
+	GetDishRatingLastThree(context.Context, *DishInCafeteria) (*GetDishRatingReply, error)
+	GetDishRatingToday(context.Context, *DishInCafeteria) (*GetDishRatingReply, error)
+	GetDishRatingAll(context.Context, *DishInCafeteria) (*GetDishRatingReply, error)
+	NewCafeteriaRating(context.Context, *NewRating) (*emptypb.Empty, error)
+	NewDishRating(context.Context, *NewRating) (*emptypb.Empty, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -155,8 +234,29 @@ func (UnimplementedCampusServer) GetRoomCoordinates(context.Context, *GetRoomCoo
 func (UnimplementedCampusServer) GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoomSchedule not implemented")
 }
-func (UnimplementedCampusServer) GetMensaRating(context.Context, *emptypb.Empty) (*GetMensaRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMensaRating not implemented")
+func (UnimplementedCampusServer) GetCafeteriaRatingLastThree(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented")
+}
+func (UnimplementedCampusServer) GetCafeteriaRatingToday(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingToday not implemented")
+}
+func (UnimplementedCampusServer) GetCafeteriaRatingAll(context.Context, *Cafeteria) (*GetCafeteriaRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingAll not implemented")
+}
+func (UnimplementedCampusServer) GetDishRatingLastThree(context.Context, *DishInCafeteria) (*GetDishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatingLastThree not implemented")
+}
+func (UnimplementedCampusServer) GetDishRatingToday(context.Context, *DishInCafeteria) (*GetDishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatingToday not implemented")
+}
+func (UnimplementedCampusServer) GetDishRatingAll(context.Context, *DishInCafeteria) (*GetDishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatingAll not implemented")
+}
+func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewRating) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented")
+}
+func (UnimplementedCampusServer) NewDishRating(context.Context, *NewRating) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewDishRating not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -297,20 +397,146 @@ func _Campus_GetRoomSchedule_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetMensaRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+func _Campus_GetCafeteriaRatingLastThree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Cafeteria)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetMensaRating(ctx, in)
+		return srv.(CampusServer).GetCafeteriaRatingLastThree(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetMensaRating",
+		FullMethod: "/api.Campus/GetCafeteriaRatingLastThree",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMensaRating(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetCafeteriaRatingLastThree(ctx, req.(*Cafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetCafeteriaRatingToday_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Cafeteria)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetCafeteriaRatingToday(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetCafeteriaRatingToday",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetCafeteriaRatingToday(ctx, req.(*Cafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetCafeteriaRatingAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Cafeteria)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetCafeteriaRatingAll(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetCafeteriaRatingAll",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetCafeteriaRatingAll(ctx, req.(*Cafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetDishRatingLastThree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DishInCafeteria)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetDishRatingLastThree(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetDishRatingLastThree",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetDishRatingLastThree(ctx, req.(*DishInCafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetDishRatingToday_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DishInCafeteria)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetDishRatingToday(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetDishRatingToday",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetDishRatingToday(ctx, req.(*DishInCafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetDishRatingAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DishInCafeteria)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetDishRatingAll(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetDishRatingAll",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetDishRatingAll(ctx, req.(*DishInCafeteria))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_NewCafeteriaRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewRating)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).NewCafeteriaRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/NewCafeteriaRating",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).NewCafeteriaRating(ctx, req.(*NewRating))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_NewDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewRating)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).NewDishRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/NewDishRating",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).NewDishRating(ctx, req.(*NewRating))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -351,8 +577,36 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetRoomSchedule_Handler,
 		},
 		{
-			MethodName: "GetMensaRating",
-			Handler:    _Campus_GetMensaRating_Handler,
+			MethodName: "GetCafeteriaRatingLastThree",
+			Handler:    _Campus_GetCafeteriaRatingLastThree_Handler,
+		},
+		{
+			MethodName: "GetCafeteriaRatingToday",
+			Handler:    _Campus_GetCafeteriaRatingToday_Handler,
+		},
+		{
+			MethodName: "GetCafeteriaRatingAll",
+			Handler:    _Campus_GetCafeteriaRatingAll_Handler,
+		},
+		{
+			MethodName: "GetDishRatingLastThree",
+			Handler:    _Campus_GetDishRatingLastThree_Handler,
+		},
+		{
+			MethodName: "GetDishRatingToday",
+			Handler:    _Campus_GetDishRatingToday_Handler,
+		},
+		{
+			MethodName: "GetDishRatingAll",
+			Handler:    _Campus_GetDishRatingAll_Handler,
+		},
+		{
+			MethodName: "NewCafeteriaRating",
+			Handler:    _Campus_NewCafeteriaRating_Handler,
+		},
+		{
+			MethodName: "NewDishRating",
+			Handler:    _Campus_NewDishRating_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
