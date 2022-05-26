@@ -66,40 +66,18 @@ service Campus {
   }
 
 
-  //Messages for Cafeteria and Dish rating
-  rpc GetCafeteriaRatingLastThree (Cafeteria) returns (GetCafeteriaRatingReply) {
+  rpc GetCafeteriaRatingLastThree (GetCafeteriaRating) returns (GetCafeteriaRatingReply) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/cafeteria/getLastThree"
+      post: "/cafeteriaRating/cafeteria/get:cafeteriaName?limit=3"
+      body: "*",
     };
   }
 
-  rpc GetCafeteriaRatingToday (Cafeteria) returns (GetCafeteriaRatingReply) {
-    option (google.api.http) = {
-      post: "/cafeteriaRating/cafeteria/getToday"
-    };
-  }
 
-  rpc GetCafeteriaRatingAll (Cafeteria) returns (GetCafeteriaRatingReply) {
+  rpc GetMealRatingLastThree (GetMealInCafeteriaRating) returns (GetMealInCafeteriaRatingReply) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/cafeteria/getAll"
-    };
-  }
-
-  rpc GetDishRatingLastThree (DishInCafeteria) returns (GetDishRatingReply) {
-    option (google.api.http) = {
-      post: "/cafeteriaRating/dish/getLastThree"
-    };
-  }
-
-  rpc GetDishRatingToday (DishInCafeteria) returns (GetDishRatingReply) {
-    option (google.api.http) = {
-      post: "/cafeteriaRating/dish/getToday"
-    };
-  }
-
-  rpc GetDishRatingAll (DishInCafeteria) returns (GetDishRatingReply) {
-    option (google.api.http) = {
-      post: "/cafeteriaRating/dish/getAll"
+      post: "/cafeteriaRating/dish/get:cafeteriaName?limit=3"
+      body: "*",
     };
   }
 
@@ -107,13 +85,27 @@ service Campus {
 
   rpc NewCafeteriaRating (NewRating) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/Cafeteria/newCafeteriaRating"
+      post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
+      body: "*",
     };
   }
 
-  rpc NewDishRating (NewRating) returns (google.protobuf.Empty) {
+  rpc NewMealRating (NewRating) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/dish/newDishRating"
+      post: "/cafeteriaRating/meal/newMealRating"
+      body: "*",
+    };
+  }
+
+  rpc GetAvailableMealTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/meal/allTags",
+    };
+  }
+
+  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/cafeteria/allTags",
     };
   }
 
@@ -215,59 +207,69 @@ message GetTopNewsReply {
 }
 
 
-message Cafeteria {
-  string cafeteria = 1;
+message GetCafeteriaRating {
+  string cafeteriaName = 1;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  int32 limit = 5;
 }
 
-message DishInCafeteria {
-  string cafeteria = 1;
-  string tokenizedDish = 2;
+message GetMealInCafeteriaRating {
+  string cafeteriaName = 1;
+  string meal = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  int32 limit = 5;
 }
 
 message GetCafeteriaRatingReply {
-  repeated CafeteriaRatingGet rating = 1;
-  int32 averageRating = 2;
+  repeated CafeteriaRating rating = 1;
+  double averageRating = 2;
 }
 
 
-message GetDishRatingReply {
-  repeated DishRatingGet rating = 1;
-  int32 averageRating = 2;
-  repeated TagRating tagRating=3;
+message GetMealInCafeteriaRatingReply {
+  repeated MealRating rating = 1;
+  double averageRating = 2;
+  repeated TagRating tagRating = 3;
 }
 
 message TagRating {
   string tag = 1;
-  int32 rating = 2;
+  double rating = 2;
 }
 
-message CafeteriaRatingGet{
-  int32 rating = 1;
-  int32 cafeteria = 2;
-  string image = 3;
+message CafeteriaRating{
+  double rating = 1;
+  string cafeteriaName = 2;
+  bytes image = 3;
   repeated string tags = 4;
-  google.protobuf.Timestamp CafeteriaVisitedAt = 5;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
   string comment = 6;
 }
 
 
-message DishRatingGet{
+message MealRating{
   int32 rating = 1;
-  int32 cafeteria = 2;
-  int32 meal = 3;
-  string image = 4;
+  string cafeteriaName = 2;
+  string meal = 3;
+  bytes image = 4;
   repeated string tags = 5;
-  google.protobuf.Timestamp CafeteriaVisitedAt = 6;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
   string comment = 7;
 }
 
 message NewRating{
   int32 rating = 1;
-  int32 cafeteria = 2;
-  int32 meal = 3;
+  string cafeteriaName = 2;
+  string meal = 3;
   string image = 4;
   repeated string tags = 5;
-  google.protobuf.Timestamp CafeteriaVisitedAt = 6;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
   string identifierOfUser = 7;
   string comment = 8;
+}
+
+message GetRatingTagsReply{
+  repeated string tags=1;
 }
