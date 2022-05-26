@@ -18,7 +18,7 @@
   ],
   "paths": {
     "/cafeteriaRating/Cafeteria/newCafeteriaRating": {
-      "get": {
+      "post": {
         "operationId": "Campus_NewCafeteriaRating",
         "responses": {
           "200": {
@@ -98,7 +98,7 @@
       }
     },
     "/cafeteriaRating/cafeteria/getAll": {
-      "get": {
+      "post": {
         "operationId": "Campus_GetCafeteriaRatingAll",
         "responses": {
           "200": {
@@ -128,7 +128,7 @@
       }
     },
     "/cafeteriaRating/cafeteria/getLastThree": {
-      "get": {
+      "post": {
         "summary": "Messages for Cafeteria and Dish rating",
         "operationId": "Campus_GetCafeteriaRatingLastThree",
         "responses": {
@@ -159,7 +159,7 @@
       }
     },
     "/cafeteriaRating/cafeteria/getToday": {
-      "get": {
+      "post": {
         "operationId": "Campus_GetCafeteriaRatingToday",
         "responses": {
           "200": {
@@ -189,7 +189,7 @@
       }
     },
     "/cafeteriaRating/dish/getAll": {
-      "get": {
+      "post": {
         "operationId": "Campus_GetDishRatingAll",
         "responses": {
           "200": {
@@ -225,7 +225,7 @@
       }
     },
     "/cafeteriaRating/dish/getLastThree": {
-      "get": {
+      "post": {
         "operationId": "Campus_GetDishRatingLastThree",
         "responses": {
           "200": {
@@ -261,7 +261,7 @@
       }
     },
     "/cafeteriaRating/dish/getToday": {
-      "get": {
+      "post": {
         "operationId": "Campus_GetDishRatingToday",
         "responses": {
           "200": {
@@ -297,7 +297,7 @@
       }
     },
     "/cafeteriaRating/dish/newDishRating": {
-      "get": {
+      "post": {
         "operationId": "Campus_NewDishRating",
         "responses": {
           "200": {
@@ -732,6 +732,12 @@
         "averageRating": {
           "type": "integer",
           "format": "int32"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
         }
       }
     },
@@ -934,6 +940,18 @@
       "properties": {
         "query": {
           "type": "string"
+        }
+      }
+    },
+    "apiTagRating": {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

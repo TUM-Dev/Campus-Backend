@@ -69,37 +69,37 @@ service Campus {
   //Messages for Cafeteria and Dish rating
   rpc GetCafeteriaRatingLastThree (Cafeteria) returns (GetCafeteriaRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/cafeteria/getLastThree"
+      post: "/cafeteriaRating/cafeteria/getLastThree"
     };
   }
 
   rpc GetCafeteriaRatingToday (Cafeteria) returns (GetCafeteriaRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/cafeteria/getToday"
+      post: "/cafeteriaRating/cafeteria/getToday"
     };
   }
 
   rpc GetCafeteriaRatingAll (Cafeteria) returns (GetCafeteriaRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/cafeteria/getAll"
+      post: "/cafeteriaRating/cafeteria/getAll"
     };
   }
 
   rpc GetDishRatingLastThree (DishInCafeteria) returns (GetDishRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/dish/getLastThree"
+      post: "/cafeteriaRating/dish/getLastThree"
     };
   }
 
   rpc GetDishRatingToday (DishInCafeteria) returns (GetDishRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/dish/getToday"
+      post: "/cafeteriaRating/dish/getToday"
     };
   }
 
   rpc GetDishRatingAll (DishInCafeteria) returns (GetDishRatingReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/dish/getAll"
+      post: "/cafeteriaRating/dish/getAll"
     };
   }
 
@@ -107,13 +107,13 @@ service Campus {
 
   rpc NewCafeteriaRating (NewRating) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/Cafeteria/newCafeteriaRating"
+      post: "/cafeteriaRating/Cafeteria/newCafeteriaRating"
     };
   }
 
   rpc NewDishRating (NewRating) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/dish/newDishRating"
+      post: "/cafeteriaRating/dish/newDishRating"
     };
   }
 
@@ -233,8 +233,13 @@ message GetCafeteriaRatingReply {
 message GetDishRatingReply {
   repeated DishRatingGet rating = 1;
   int32 averageRating = 2;
+  repeated TagRating tagRating=3;
 }
 
+message TagRating {
+  string tag = 1;
+  int32 rating = 2;
+}
 
 message CafeteriaRatingGet{
   int32 rating = 1;
