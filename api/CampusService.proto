@@ -234,6 +234,9 @@ message GetMealInCafeteriaRatingReply {
   repeated TagRating tagRating = 3;
 }
 
+
+
+
 message TagRating {
   string tag = 1;
   double rating = 2;
@@ -246,8 +249,8 @@ message CafeteriaRating{
   repeated string tags = 4;
   google.protobuf.Timestamp cafeteriaVisitedAt = 5;
   string comment = 6;
+  repeated TagRating tagRating = 7;
 }
-
 
 message MealRating{
   int32 rating = 1;
@@ -257,6 +260,7 @@ message MealRating{
   repeated string tags = 5;
   google.protobuf.Timestamp cafeteriaVisitedAt = 6;
   string comment = 7;
+  repeated TagRating tagRating = 8;
 }
 
 message NewRating{

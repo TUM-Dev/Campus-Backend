@@ -482,6 +482,12 @@
         },
         "comment": {
           "type": "string"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
         }
       }
     },
@@ -729,6 +735,12 @@
         },
         "comment": {
           "type": "string"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
         }
       }
     },
