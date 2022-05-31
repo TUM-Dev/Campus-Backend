@@ -609,7 +609,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/cafeteria/get:cafeteriaName?limit=3"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/cafeteria/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -633,7 +633,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetMealRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/dish/get:cafeteriaName?limit=3"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetMealRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/dish/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -939,7 +939,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/cafeteria/get:cafeteriaName?limit=3"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/cafeteria/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -960,7 +960,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetMealRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/dish/get:cafeteriaName?limit=3"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetMealRatingLastThree", runtime.WithHTTPPathPattern("/cafeteriaRating/dish/get"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1123,9 +1123,9 @@ var (
 
 	pattern_Campus_GetRoomSchedule_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"roomfinder", "room", "scheduleById"}, ""))
 
-	pattern_Campus_GetCafeteriaRatingLastThree_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteriaRating", "cafeteria", "get"}, "cafeteriaName?limit=3"))
+	pattern_Campus_GetCafeteriaRatingLastThree_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteriaRating", "cafeteria", "get"}, ""))
 
-	pattern_Campus_GetMealRatingLastThree_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteriaRating", "dish", "get"}, "cafeteriaName?limit=3"))
+	pattern_Campus_GetMealRatingLastThree_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteriaRating", "dish", "get"}, ""))
 
 	pattern_Campus_NewCafeteriaRating_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteriaRating", "cafeteria", "newCafeteriaRating"}, ""))
 
