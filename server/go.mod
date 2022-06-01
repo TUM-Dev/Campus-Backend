@@ -7,7 +7,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/getsentry/sentry-go v0.13.0
-	github.com/go-gormigrate/gormigrate/v2 v2.0.0
+	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.18
@@ -19,8 +19,8 @@ require (
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 	gorm.io/driver/mysql v1.3.3
-	gorm.io/driver/sqlite v1.3.1
-	gorm.io/gorm v1.23.4
+	gorm.io/driver/sqlite v1.3.2
+	gorm.io/gorm v1.23.5
 )
 
 require (
