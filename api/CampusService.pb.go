@@ -32,6 +32,9 @@ type GetRoomScheduleRequest struct {
 	Start *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=start,proto3" json:"start,omitempty"`
 	End   *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=end,proto3" json:"end,omitempty"`
 }
+type Test struct {
+	State uint
+}
 
 func (x *GetRoomScheduleRequest) Reset() {
 	*x = GetRoomScheduleRequest{}
