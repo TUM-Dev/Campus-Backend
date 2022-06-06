@@ -2,10 +2,12 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/model/mensa_rating_models"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -13,7 +15,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"net"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -134,3 +139,142 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	}
 	return &pb.GetTopNewsReply{}, nil
 }
+
+func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.GetCafeteriaRating) (*pb.GetCafeteriaRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented but I am working on it")
+}
+func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, _ *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatingLastThree not implemented but I am working on it")
+}
+func (s *CampusServer) NewCafeteriaRating(ctx context.Context, _ *pb.NewRating) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented but I am working on it")
+}
+func (s *CampusServer) NewMealRating(ctx context.Context, _ *pb.NewRating) (*emptypb.Empty, error) {
+
+	//Add cafeteriaRating
+	rating := mensa_rating_models.CafeteriaRating{Comment: "comment", Meal: "meal form text2", Timestamp: time.Now()}
+	s.db.Table("mensa_garching_rating").Create(&rating)
+
+	var parentid = 1
+	//Add Tag Ratings for the first cafeteria
+	for i := 0; i < 5; i++ {
+		rating := mensa_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(i), Tagname: "frische"}
+		s.db.Table("mensa_garching_tags").Create(&rating)
+	}
+
+	var retrieved *mensa_rating_models.CafeteriaRating
+	s.db.Table("mensa_garching_rating").First(&retrieved)
+	log.Println("First comment: ")
+	log.Println(retrieved.Comment)
+	//	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);").Scan(&result)
+	//result := s.db.Table("mensa_garching_rating").Create()
+	return nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented but I am working on it")
+}
+
+type MultiLanguageTags struct {
+	MultiLanguageTags []Tag `json:"tags"`
+}
+type Tag struct {
+	TagNameEnglish string `json:"tagNameEnglish"`
+	TagNameGerman  string `json:"tagNameGerman"`
+}
+
+func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
+	absPath, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
+	tags := generateTagListFromFile(absPath)
+
+	return &pb.GetRatingTagsReply{
+		Tags: tags,
+	}, nil
+}
+
+func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
+	absPath, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
+	tags := generateTagListFromFile(absPath)
+
+	return &pb.GetRatingTagsReply{
+		Tags: tags,
+	}, nil
+}
+
+func generateTagListFromFile(path string) []string {
+	jsonFile, err := os.Open(path)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer jsonFile.Close()
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var tags MultiLanguageTags
+	json.Unmarshal(byteValue, &tags)
+
+	var helper = len(tags.MultiLanguageTags)
+	y := make([]string, helper)
+	for i := 0; i < len(tags.MultiLanguageTags); i++ {
+		y[i] = tags.MultiLanguageTags[i].TagNameEnglish
+	}
+	return y
+}
+
+/*
+func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
+	log.Printf("Received: get top news adaption")
+	var res *model.NewsAlert
+	//s.db.Table("roles")
+	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);")
+
+	test := s.db.Table("roles").First("roles")
+	log.Println(test.Error)
+	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Errorf("Failed to fetch top news: %w", err)
+	} else if res != nil {
+		return &pb.GetTopNewsReply{
+			//ImageUrl: res.Name,
+			Link: res.Link.String,
+			To:   timestamppb.New(res.To),
+		}, nil
+	}
+
+	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);")
+	return &pb.GetTopNewsReply{}, nil
+}*/
+
+/*
+type GetMensaRatingReply struct {
+	arch_id string
+}
+*/
+/*func (s *CampusServer) GetMensaRating(ctx context.Context, _ *emptypb.Empty) (*pb.GetRoomCoordinatesRequest, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
+	log.Printf("Received: mensa rating")
+	var res *model.NewsAlert
+	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Errorf("Failed to fetch top news: %w", err)
+	} else if res != nil {
+		return &pb.GetRoomCoordinatesRequest{
+			//ImageUrl: res.Name,
+			ArchId: string("abcdefg"),
+		}, nil
+	}
+	return &pb.GetRoomCoordinatesRequest{}, nil
+}*/
+/*
+func (s *CampusServer) GetMensaRating(context.Context, *emptypb.Empty) (*pb.GetRoomCoordinatesRequest, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMensaRating not implemented ahhh")
+}
+
+func (s *CampusServer) GetRoomSchedule(context.Context, *pb.GetRoomScheduleRequest) (*pb.GetRoomScheduleReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoomSchedule not implemented but I am working on it")
+}*/

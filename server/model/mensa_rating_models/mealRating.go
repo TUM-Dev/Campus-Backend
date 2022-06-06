@@ -1,0 +1,1 @@
+package mensa_rating_models

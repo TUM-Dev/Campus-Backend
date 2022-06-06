@@ -1,0 +1,20 @@
+{
+  "tags": [
+    {
+      "tagNameGerman": "Füllgrad",
+      "tagNameEnglish": "Saltiness"
+    },
+    {
+      "tagNameGerman": "Sauberkeit",
+      "tagNameEnglish": "Sweetness"
+    },
+    {
+      "tagNameGerman": "Verfügbarkeit der Gerichte",
+      "tagNameEnglish": "Spicy"
+    },
+    {
+      "tagNameGerman": "Anzahl an Plätzen",
+      "tagNameEnglish": "Consistency"
+    }
+  ]
+}

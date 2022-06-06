@@ -1,0 +1,587 @@
+{
+  "tags": [
+    {
+      "tagNameEnglish": "Beef",
+      "tagNameGerman": "Rindfleisch",
+      "canbeincluded": [
+        "rind",
+        "beef"
+      ],
+      "notincluded": [
+        "strindberg"
+      ]
+    },
+    {
+      "tagNameEnglish": "Pork",
+      "tagNameGerman": "Schweinefleisch",
+      "canbeincluded": [
+        "schwein"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Veal",
+      "tagNameGerman": "Kalbsfleisch",
+      "canbeincluded": [
+        "kalb"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Pizza",
+      "tagNameGerman": "Pizza",
+      "canbeincluded": [
+        "pizza"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Curry",
+      "tagNameGerman": "Curry",
+      "canbeincluded": [
+        "curry"
+      ],
+      "notincluded": [
+        "wurst"
+      ]
+    },
+    {
+      "tagNameEnglish": "Tofu",
+      "tagNameGerman": "Tofu",
+      "canbeincluded": [
+        "tofu"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Rice",
+      "tagNameGerman": "Reis",
+      "canbeincluded": [
+        "reis"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Turkey",
+      "tagNameGerman": "Putenfleisch",
+      "canbeincluded": [
+        "pute"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Turkey",
+      "tagNameGerman": "Truthahnfleisch",
+      "canbeincluded": [
+        "truthahn"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Chicken",
+      "tagNameGerman": "Hühnerfleisch",
+      "canbeincluded": [
+        "hähnchen",
+        "hühn",
+        "huhn",
+        "hendl",
+        "chicken"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Goose",
+      "tagNameGerman": "Gänsefleisch",
+      "canbeincluded": [
+        "gans",
+        "gänse"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Lamb",
+      "tagNameGerman": "Lammfleisch",
+      "canbeincluded": [
+        "lamm"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Piglet",
+      "tagNameGerman": "Ferkelfleisch",
+      "canbeincluded": [
+        "ferkel"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Duck",
+      "tagNameGerman": "Entenfleisch",
+      "canbeincluded": [
+        "ente"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Sausage",
+      "tagNameGerman": "Wurst",
+      "canbeincluded": [
+        "wurst",
+        "käsekrainer",
+        "würst",
+        "wiener"
+      ],
+      "notincluded": [
+        "schnitzel"
+      ]
+    },
+    {
+      "tagNameEnglish": "Fleischpflanzerl",
+      "tagNameGerman": "Fleischpflanzerl",
+      "canbeincluded": [
+        "fleischpflanzerl"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Schnitzel",
+      "tagNameGerman": "Schnitzel",
+      "canbeincluded": [
+        "schnitzel"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cevapcici",
+      "tagNameGerman": "Cevapcici",
+      "canbeincluded": [
+        "cevapcici"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cordon Bleu",
+      "tagNameGerman": "Cordon Bleu",
+      "canbeincluded": [
+        "cordon bleu"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Chili con Carne",
+      "tagNameGerman": "Chili con Carne",
+      "canbeincluded": [
+        "chili con carne"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Schaschlik",
+      "tagNameGerman": "Schaschlik",
+      "canbeincluded": [
+        "schaschlik"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Burger",
+      "tagNameGerman": "Burger",
+      "canbeincluded": [
+        "burger"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cream Sauce",
+      "tagNameGerman": "Rahmsauce",
+      "canbeincluded": [
+        "rahmsauce"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cheese",
+      "tagNameGerman": "Käse",
+      "canbeincluded": [
+        "käse",
+        "gorgonzola",
+        "emmentaler"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Salmon",
+      "tagNameGerman": "Lachs",
+      "canbeincluded": [
+        "lachs"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Trout",
+      "tagNameGerman": "Forelle",
+      "canbeincluded": [
+        "forelle"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Fish (unspecific)",
+      "tagNameGerman": "Fisch (unspezifisch)",
+      "canbeincluded": [
+        "fisch",
+        "fish"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cod fish",
+      "tagNameGerman": "Kabeljau",
+      "canbeincluded": [
+        "kabeljau"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Plaice",
+      "tagNameGerman": "Scholle",
+      "canbeincluded": [
+        "scholle"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Calamarie",
+      "tagNameGerman": "Calamari",
+      "canbeincluded": [
+        "calamari"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Shrimp",
+      "tagNameGerman": "Garnelen",
+      "canbeincluded": [
+        "garnelen"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Zander",
+      "tagNameGerman": "Zander",
+      "canbeincluded": [
+        "zander"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Pasta",
+      "tagNameGerman": "Pasta",
+      "canbeincluded": [
+        "penne",
+        "pasta",
+        "nudel",
+        "spaghetti",
+        "farfalle",
+        "gnocchi"
+      ],
+      "notincluded": [
+        "dampf"
+      ]
+    },
+    {
+      "tagNameEnglish": "Pasta (stuffed)",
+      "tagNameGerman": "Pasta (gefüllt)",
+      "canbeincluded": [
+        "tortellini",
+        "ravioli",
+        "maultaschen",
+        "tortelloni",
+        "cannelloni"
+      ],
+      "notincluded": [
+        "dampf"
+      ]
+    },
+    {
+      "tagNameEnglish": "Spätzle",
+      "tagNameGerman": "Spätzle",
+      "canbeincluded": [
+        "spätzle",
+        "knöpfle"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Bulgur",
+      "tagNameGerman": "Bulgur",
+      "canbeincluded": [
+        "bulgur"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Couscous",
+      "tagNameGerman": "Couscous",
+      "canbeincluded": [
+        "couscous"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Puff Pastry",
+      "tagNameGerman": "Blätterteig",
+      "canbeincluded": [
+        "blätterteig"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Polenta",
+      "tagNameGerman": "Polenta",
+      "canbeincluded": [
+        "polenta"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Potato",
+      "tagNameGerman": "Kartoffel",
+      "canbeincluded": [
+        "kartoffel",
+        "potato"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Peas",
+      "tagNameGerman": "Erbsen",
+      "canbeincluded": [
+        "erbs"
+      ],
+      "notincluded": [
+        "kicher"
+      ]
+    },
+    {
+      "tagNameEnglish": "Lentils",
+      "tagNameGerman": "Linsen",
+      "canbeincluded": [
+        "linsen"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Mushrooms",
+      "tagNameGerman": "pilze",
+      "canbeincluded": [
+        "pilze",
+        "schwammerl"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "French Fries",
+      "tagNameGerman": "Pommes",
+      "canbeincluded": [
+        "pommes"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Wedges",
+      "tagNameGerman": "Wedges",
+      "canbeincluded": [
+        "wedges"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Croquettes",
+      "tagNameGerman": "Kroketten",
+      "canbeincluded": [
+        "kroketten"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Knödel",
+      "tagNameGerman": "Knödel",
+      "canbeincluded": [
+        "knödel"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Asparagus",
+      "tagNameGerman": "Spargel",
+      "canbeincluded": [
+        "spargel"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Pumkin",
+      "tagNameGerman": "Kürbis",
+      "canbeincluded": [
+        "kürbis"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Beans",
+      "tagNameGerman": "Bohnen",
+      "canbeincluded": [
+        "bohne"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Spinach",
+      "tagNameGerman": "Spinat",
+      "canbeincluded": [
+        "spinat"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Cauliflower",
+      "tagNameGerman": "Blumenkohl",
+      "canbeincluded": [
+        "blumenkohl"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Broccoli",
+      "tagNameGerman": "Broccoli",
+      "canbeincluded": [
+        "broccoli"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Brussels sprouts",
+      "tagNameGerman": "Rosenkohl",
+      "canbeincluded": [
+        "rosenkohl"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Soy",
+      "tagNameGerman": "Soja",
+      "canbeincluded": [
+        "soja"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Spring Roll",
+      "tagNameGerman": "Frühlingsrolle",
+      "canbeincluded": [
+        "frühlingsrolle"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Casserole",
+      "tagNameGerman": "Auflauf",
+      "canbeincluded": [
+        "auflauf"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Falafel",
+      "tagNameGerman": "Falafel",
+      "canbeincluded": [
+        "falafel"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Halloumi",
+      "tagNameGerman": "Halloumi",
+      "canbeincluded": [
+        "halloumi"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Dessert",
+      "tagNameGerman": "Dessert",
+      "canbeincluded": [
+        "dessert"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Herbal Dip",
+      "tagNameGerman": "Kräuterdip",
+      "canbeincluded": [
+        "kräuterdip"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Humus",
+      "tagNameGerman": "Hummus",
+      "canbeincluded": [
+        "hummus"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Vegetables",
+      "tagNameGerman": "Gemüse",
+      "canbeincluded": [
+        "gemüse"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Stew",
+      "tagNameGerman": "Eintopf",
+      "canbeincluded": [
+        "eintopf"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Soup",
+      "tagNameGerman": "Suppe",
+      "canbeincluded": [
+        "suppe"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Apple",
+      "tagNameGerman": "Apfel",
+      "canbeincluded": [
+        "pfel"
+      ],
+      "notincluded": [
+        "käsespätzle",
+        "kartoffeln"
+      ]
+    },
+    {
+      "tagNameEnglish": "Vanilla sauce",
+      "tagNameGerman": "Vanillesauce",
+      "canbeincluded": [
+        "vanillesauce"
+      ],
+      "notincluded": []
+    },
+    {
+      "tagNameEnglish": "Curd (Topfen)",
+      "tagNameGerman": "Topfen",
+      "canbeincluded": [
+        "topfen"
+      ],
+      "notincluded": []
+    }
+  ]
+}
