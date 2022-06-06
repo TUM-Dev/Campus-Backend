@@ -64,6 +64,51 @@ service Campus {
       response_body: "events"
     };
   }
+
+
+  rpc GetCafeteriaRatingLastThree (GetCafeteriaRating) returns (GetCafeteriaRatingReply) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/cafeteria/get"
+      body: "*",
+    };
+  }
+
+
+  rpc GetMealRatingLastThree (GetMealInCafeteriaRating) returns (GetMealInCafeteriaRatingReply) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/dish/get"
+      body: "*",
+    };
+  }
+
+
+
+  rpc NewCafeteriaRating (NewRating) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
+      body: "*",
+    };
+  }
+
+  rpc NewMealRating (NewRating) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/meal/newMealRating"
+      body: "*",
+    };
+  }
+
+  rpc GetAvailableMealTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/meal/allTags",
+    };
+  }
+
+  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/cafeteria/allTags",
+    };
+  }
+
 }
 
 message GetRoomScheduleRequest {
@@ -159,4 +204,76 @@ message GetTopNewsReply {
   google.protobuf.Timestamp created = 3;
   google.protobuf.Timestamp from = 4;
   google.protobuf.Timestamp to = 5;
+}
+
+
+message GetCafeteriaRating {
+  string cafeteriaName = 1;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  int32 limit = 5;
+}
+
+message GetMealInCafeteriaRating {
+  string cafeteriaName = 1;
+  string meal = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  int32 limit = 5;
+}
+
+message GetCafeteriaRatingReply {
+  repeated CafeteriaRating rating = 1;
+  double averageRating = 2;
+}
+
+
+message GetMealInCafeteriaRatingReply {
+  repeated MealRating rating = 1;
+  double averageRating = 2;
+  repeated TagRating tagRating = 3;
+}
+
+
+
+
+message TagRating {
+  string tag = 1;
+  double rating = 2;
+}
+
+message CafeteriaRating{
+  double rating = 1;
+  string cafeteriaName = 2;
+  bytes image = 3;
+  repeated string tags = 4;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
+  string comment = 6;
+  repeated TagRating tagRating = 7;
+}
+
+message MealRating{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  string meal = 3;
+  bytes image = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
+  string comment = 7;
+  repeated TagRating tagRating = 8;
+}
+
+message NewRating{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  string meal = 3;
+  string image = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
+  string identifierOfUser = 7;
+  string comment = 8;
+}
+
+message GetRatingTagsReply{
+  repeated string tags=1;
 }

@@ -17,6 +17,178 @@
     "application/json"
   ],
   "paths": {
+    "/cafeteriaRating/cafeteria/allTags": {
+      "get": {
+        "operationId": "Campus_GetAvailableCafeteriaTags",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetRatingTagsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/cafeteria/get": {
+      "post": {
+        "operationId": "Campus_GetCafeteriaRatingLastThree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaRating"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/cafeteria/newCafeteriaRating": {
+      "post": {
+        "operationId": "Campus_NewCafeteriaRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiNewRating"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/dish/get": {
+      "post": {
+        "operationId": "Campus_GetMealRatingLastThree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetMealInCafeteriaRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetMealInCafeteriaRating"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/meal/allTags": {
+      "get": {
+        "operationId": "Campus_GetAvailableMealTags",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetRatingTagsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/cafeteriaRating/meal/newMealRating": {
+      "post": {
+        "operationId": "Campus_NewMealRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiNewRating"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/locations/{location}": {
       "get": {
         "summary": "a location is a campus location/building, e.g. \"Garching Forschungszentrum\"",
@@ -284,6 +456,76 @@
         }
       }
     },
+    "apiCafeteriaRating": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "number",
+          "format": "double"
+        },
+        "cafeteriaName": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
+        }
+      }
+    },
+    "apiGetCafeteriaRating": {
+      "type": "object",
+      "properties": {
+        "cafeteriaName": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "apiGetCafeteriaRatingReply": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCafeteriaRating"
+          }
+        },
+        "averageRating": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "apiGetLocationsReply": {
       "type": "object",
       "properties": {
@@ -312,6 +554,61 @@
         },
         "radius": {
           "type": "string"
+        }
+      }
+    },
+    "apiGetMealInCafeteriaRating": {
+      "type": "object",
+      "properties": {
+        "cafeteriaName": {
+          "type": "string"
+        },
+        "meal": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "apiGetMealInCafeteriaRatingReply": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMealRating"
+          }
+        },
+        "averageRating": {
+          "type": "number",
+          "format": "double"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
+        }
+      }
+    },
+    "apiGetRatingTagsReply": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -409,6 +706,78 @@
         }
       }
     },
+    "apiMealRating": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cafeteriaName": {
+          "type": "string"
+        },
+        "meal": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRating"
+          }
+        }
+      }
+    },
+    "apiNewRating": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cafeteriaName": {
+          "type": "string"
+        },
+        "meal": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "identifierOfUser": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
     "apiNewsSource": {
       "type": "object",
       "properties": {
@@ -483,6 +852,18 @@
       "properties": {
         "query": {
           "type": "string"
+        }
+      }
+    },
+    "apiTagRating": {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "format": "double"
         }
       }
     },
