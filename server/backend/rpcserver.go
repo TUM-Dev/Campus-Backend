@@ -149,26 +149,54 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, _ *pb.GetMeal
 func (s *CampusServer) NewCafeteriaRating(ctx context.Context, _ *pb.NewRating) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented but I am working on it")
 }
-func (s *CampusServer) NewMealRating(ctx context.Context, _ *pb.NewRating) (*emptypb.Empty, error) {
+
+func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
 
 	//Add cafeteriaRating
-	rating := mensa_rating_models.CafeteriaRating{Comment: "comment", Meal: "meal form text2", Timestamp: time.Now()}
+	if input.Rating > 10 || input.Rating < 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+	}
+
+	if len(input.Image) > 131100 {
+		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
+	}
+
+	if input.Meal == "" || len(input.Meal) > 128 { //todo check if it actually exists in the daily meal names
+		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
+	}
+
+	var result *model.Mensa
+	test := s.db.Model(model.Mensa{Name: input.CafeteriaName}).First(&result)
+
+	if test.RowsAffected != 1 {
+		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
+	}
+
+	rating := mensa_rating_models.CafeteriaRating{
+		Comment:   input.Comment,
+		Meal:      input.Meal,
+		Rating:    input.Rating,
+		Timestamp: time.Now()}
+
 	s.db.Table("mensa_garching_rating").Create(&rating)
 
-	var parentid = 1
+	var parentid = rating.Id
 	//Add Tag Ratings for the first cafeteria
-	for i := 0; i < 5; i++ {
-		rating := mensa_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(i), Tagname: "frische"}
+
+	for i := 0; i < len(input.Tags); i++ {
+
+		//todo add rating once the proto file is fixed
+		rating := mensa_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(5), Tagname: input.Tags[i]}
 		s.db.Table("mensa_garching_tags").Create(&rating)
 	}
 
-	var retrieved *mensa_rating_models.CafeteriaRating
-	s.db.Table("mensa_garching_rating").First(&retrieved)
-	log.Println("First comment: ")
-	log.Println(retrieved.Comment)
+	/*	var retrieved *mensa_rating_models.CafeteriaRating
+		s.db.Table("mensa_garching_rating").First(&retrieved)
+		log.Println("First comment: ")
+		log.Println(retrieved.Comment)*/
 	//	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);").Scan(&result)
 	//result := s.db.Table("mensa_garching_rating").Create()
-	return nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented but I am working on it")
+	return &emptypb.Empty{}, nil //nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented but I am working on it")
 }
 
 type MultiLanguageTags struct {

@@ -16,16 +16,16 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE          = "news"
-	MENSA_TYPE         = "mensa"
-	CHAT_TYPE          = "chat"
-	KINO_TYPE          = "kino"
-	ROOMFINDER_TYPE    = "roomfinder"
-	TICKETSALE_TYPE    = "ticketsale"
-	ALARM_TYPE         = "alarm"
-	FILE_DOWNLOAD_TYPE = "fileDownload"
-
-	STORAGE_DIR = "/Storage/" // target location of files
+	NEWS_TYPE                   = "news"
+	MENSA_TYPE                  = "mensa"
+	CHAT_TYPE                   = "chat"
+	KINO_TYPE                   = "kino"
+	ROOMFINDER_TYPE             = "roomfinder"
+	TICKETSALE_TYPE             = "ticketsale"
+	ALARM_TYPE                  = "alarm"
+	FILE_DOWNLOAD_TYPE          = "fileDownload"
+	CAFETERIA_MEAL_GREPPER_TYPE = "mealNamesDownload"
+	STORAGE_DIR                 = "/Storage/" // target location of files
 )
 
 func New(db *gorm.DB) *CronService {
@@ -41,9 +41,10 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload')", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'mealNamesDownload')", time.Now().Unix()).
 			Scan(&res)
 		g := new(errgroup.Group)
+
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			cronjob.LastRun = int32(time.Now().Unix())
@@ -53,8 +54,13 @@ func (c *CronService) Run() error {
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
 				g.Go(func() error { return c.newsCron(&cronjob) })
+				break
 			case FILE_DOWNLOAD_TYPE:
 				g.Go(func() error { return c.fileDownloadCron() })
+				break
+				/*	case CAFETERIA_MEAL_GREPPER_TYPE:
+					g.Go(func() error { return c.mealNameDownloadCron() })
+					break*/
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:
@@ -72,6 +78,10 @@ func (c *CronService) Run() error {
 				*/
 			}
 		}
+		log.Printf("Time: %i", time.Now().Unix())
+
+		g.Go(func() error { return c.mealNameDownloadCron() })
+
 		err := g.Wait()
 		if err != nil {
 			log.Println("Couldn't run all cron jobs: %v", err)
