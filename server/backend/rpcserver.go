@@ -141,13 +141,52 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 }
 
 func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.GetCafeteriaRating) (*pb.GetCafeteriaRatingReply, error) {
+	/*	var retrieved *mensa_rating_models.CafeteriaRating
+		s.db.Table("mensa_garching_rating").First(&retrieved)
+		log.Println("First comment: ")
+		log.Println(retrieved.Comment)*/
+	//	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);").Scan(&result)
+	//result := s.db.Table("mensa_garching_rating").Create()
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented but I am working on it")
 }
 func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, _ *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatingLastThree not implemented but I am working on it")
 }
-func (s *CampusServer) NewCafeteriaRating(ctx context.Context, _ *pb.NewRating) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented but I am working on it")
+func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
+	//Add cafeteriaRating
+	if input.Rating > 10 || input.Rating < 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+	}
+
+	if len(input.Image) > 131100 {
+		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
+	}
+
+	var result *model.Mensa
+	testCanteen := s.db.Model(model.Mensa{Name: input.CafeteriaName}).First(&result)
+
+	if testCanteen.RowsAffected != 1 {
+		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
+	}
+
+	rating := mensa_rating_models.CafeteriaRating{
+		Comment:   input.Comment,
+		Rating:    input.Rating,
+		Timestamp: time.Now()}
+
+	s.db.Table("mensa_rating").Create(&rating)
+
+	var parentid = rating.Id
+	//Add Tag Ratings for the first cafeteria
+
+	for i := 0; i < len(input.Tags); i++ {
+		//todo tag must be included in the tag lists
+		//todo add rating once the proto file is fixed
+		rating := mensa_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(5), Tagname: input.Tags[i]}
+		s.db.Table("mensa_rating_tags").Create(&rating)
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
@@ -161,42 +200,39 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
 	}
 
-	if input.Meal == "" || len(input.Meal) > 128 { //todo check if it actually exists in the daily meal names
-		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
-	}
-
 	var result *model.Mensa
-	test := s.db.Model(model.Mensa{Name: input.CafeteriaName}).First(&result)
+	testCanteen := s.db.Model(model.Mensa{Name: input.CafeteriaName}).First(&result)
 
-	if test.RowsAffected != 1 {
+	if testCanteen.RowsAffected != 1 {
 		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
 	}
 
-	rating := mensa_rating_models.CafeteriaRating{
+	var dish *model.Dish
+	testDish := s.db.Model(model.Dish{Name: input.Meal, Canteen: input.CafeteriaName}).First(&dish)
+
+	if testDish.RowsAffected != 1 {
+		return nil, status.Errorf(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+	}
+
+	rating := mensa_rating_models.MealRating{
 		Comment:   input.Comment,
 		Meal:      input.Meal,
 		Rating:    input.Rating,
 		Timestamp: time.Now()}
 
-	s.db.Table("mensa_garching_rating").Create(&rating)
+	s.db.Table("dish_rating").Create(&rating)
 
 	var parentid = rating.Id
 	//Add Tag Ratings for the first cafeteria
 
 	for i := 0; i < len(input.Tags); i++ {
-
+		//todo tag must be included in the tag lists
 		//todo add rating once the proto file is fixed
 		rating := mensa_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(5), Tagname: input.Tags[i]}
-		s.db.Table("mensa_garching_tags").Create(&rating)
+		s.db.Table("dish_rating_tags").Create(&rating)
 	}
 
-	/*	var retrieved *mensa_rating_models.CafeteriaRating
-		s.db.Table("mensa_garching_rating").First(&retrieved)
-		log.Println("First comment: ")
-		log.Println(retrieved.Comment)*/
-	//	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);").Scan(&result)
-	//result := s.db.Table("mensa_garching_rating").Create()
-	return &emptypb.Empty{}, nil //nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented but I am working on it")
+	return &emptypb.Empty{}, nil
 }
 
 type MultiLanguageTags struct {
@@ -248,61 +284,3 @@ func generateTagListFromFile(path string) []string {
 	}
 	return y
 }
-
-/*
-func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
-	if err := s.checkDevice(ctx); err != nil {
-		return nil, err
-	}
-	log.Printf("Received: get top news adaption")
-	var res *model.NewsAlert
-	//s.db.Table("roles")
-	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);")
-
-	test := s.db.Table("roles").First("roles")
-	log.Println(test.Error)
-	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Errorf("Failed to fetch top news: %w", err)
-	} else if res != nil {
-		return &pb.GetTopNewsReply{
-			//ImageUrl: res.Name,
-			Link: res.Link.String,
-			To:   timestamppb.New(res.To),
-		}, nil
-	}
-
-	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);")
-	return &pb.GetTopNewsReply{}, nil
-}*/
-
-/*
-type GetMensaRatingReply struct {
-	arch_id string
-}
-*/
-/*func (s *CampusServer) GetMensaRating(ctx context.Context, _ *emptypb.Empty) (*pb.GetRoomCoordinatesRequest, error) {
-	if err := s.checkDevice(ctx); err != nil {
-		return nil, err
-	}
-	log.Printf("Received: mensa rating")
-	var res *model.NewsAlert
-	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Errorf("Failed to fetch top news: %w", err)
-	} else if res != nil {
-		return &pb.GetRoomCoordinatesRequest{
-			//ImageUrl: res.Name,
-			ArchId: string("abcdefg"),
-		}, nil
-	}
-	return &pb.GetRoomCoordinatesRequest{}, nil
-}*/
-/*
-func (s *CampusServer) GetMensaRating(context.Context, *emptypb.Empty) (*pb.GetRoomCoordinatesRequest, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMensaRating not implemented ahhh")
-}
-
-func (s *CampusServer) GetRoomSchedule(context.Context, *pb.GetRoomScheduleRequest) (*pb.GetRoomScheduleReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRoomSchedule not implemented but I am working on it")
-}*/
