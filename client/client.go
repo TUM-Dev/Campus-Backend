@@ -59,8 +59,8 @@ func createCafeteriaRatingSampleData() {
 	}
 
 	_, errRequest := c.NewCafeteriaRating(ctx, &pb.NewRating{
-		Rating:        int32(4),
-		CafeteriaName: "MENSA_GARCHING",
+		Rating:        int32(8),
+		CafeteriaName: "MENSA_ARCISSTR",
 		Comment:       "Alles Hähnchen",
 		Tags:          y,
 	})

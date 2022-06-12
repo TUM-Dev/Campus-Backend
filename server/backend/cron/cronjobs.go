@@ -16,16 +16,15 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE                   = "news"
-	MENSA_TYPE                  = "mensa"
-	CHAT_TYPE                   = "chat"
-	KINO_TYPE                   = "kino"
-	ROOMFINDER_TYPE             = "roomfinder"
-	TICKETSALE_TYPE             = "ticketsale"
-	ALARM_TYPE                  = "alarm"
-	FILE_DOWNLOAD_TYPE          = "fileDownload"
-	CAFETERIA_MEAL_GREPPER_TYPE = "mealNamesDownload"
-	STORAGE_DIR                 = "/Storage/" // target location of files
+	NEWS_TYPE          = "news"
+	MENSA_TYPE         = "mensa"
+	CHAT_TYPE          = "chat"
+	KINO_TYPE          = "kino"
+	ROOMFINDER_TYPE    = "roomfinder"
+	TICKETSALE_TYPE    = "ticketsale"
+	ALARM_TYPE         = "alarm"
+	FILE_DOWNLOAD_TYPE = "fileDownload"
+	STORAGE_DIR        = "/Storage/" // target location of files
 )
 
 func New(db *gorm.DB) *CronService {
@@ -76,7 +75,6 @@ func (c *CronService) Run() error {
 				*/
 			}
 		}
-		log.Printf("Time: %i", time.Now().Unix())
 
 		//todo call once a week
 		//	g.Go(func() error { return c.mealNameDownloadCron() })
