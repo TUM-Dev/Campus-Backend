@@ -2,7 +2,7 @@ package cron
 
 import (
 	"encoding/json"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -46,35 +46,40 @@ func (c *CronService) mealNameDownloadCron() error {
 
 func downloadDailyMeals(c *CronService) {
 
-	c.db.Where("1=1").Delete(&model.Dish{}) //Remove all meals of the previous week
+	c.db.Where("1=1").Delete(&cafeteria_rating_models.Dish{}) //Remove all meals of the previous week
 
 	var result []string
-	c.db.Table("mensa").Select("name").Scan(&result)
+
+	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
+	//c.db.Table(&cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
 	for _, v := range result {
 
-		canteenName := strings.Replace(strings.ToLower(v), "_", "-", 10)
-		log.Println(canteenName)
+		cafeteriaName := strings.Replace(strings.ToLower(v), "_", "-", 10)
+		log.Println(cafeteriaName)
 		y, w := time.Now().UTC().ISOWeek()
 
-		req := "https://tum-dev.github.io/eat-api/" + canteenName + "/" + strconv.Itoa(y) + "/" + strconv.Itoa(w) + ".json"
+		req := "https://tum-dev.github.io/eat-api/" + cafeteriaName + "/" + strconv.Itoa(y) + "/" + strconv.Itoa(w) + ".json"
 		println(req)
 		var resp, err = http.Get(req)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		body, err := ioutil.ReadAll(resp.Body)
-
-		var meals Days
-		errjson := json.Unmarshal(body, &meals)
-		if errjson != nil {
-			log.Println("Error in Parsing")
-			log.Fatalln(errjson)
-		}
-		log.Println("Meals:")
-		for i := 0; i < len(meals.Days); i++ {
-			for u := 0; u < len(meals.Days[i].Dates); u++ {
-				meal := model.Dish{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Canteen: v}
-				c.db.Create(&meal)
+		if body[0] == '<' {
+			log.Println("Mealplan for", v, "does not exist error 404 returned.")
+		} else {
+			var meals Days
+			errjson := json.Unmarshal(body, &meals)
+			if errjson != nil {
+				log.Println("Error in Parsing")
+				log.Fatalln(errjson)
+			}
+			log.Println("Meals:")
+			for i := 0; i < len(meals.Days); i++ {
+				for u := 0; u < len(meals.Days[i].Dates); u++ {
+					meal := cafeteria_rating_models.Dish{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v}
+					c.db.Create(&meal)
+				}
 			}
 		}
 	}
@@ -90,17 +95,17 @@ func downloadCanteenNames(c *CronService) {
 		log.Fatalln(err)
 	}
 
-	var canteens []CafeteriaName
-	errjson := json.Unmarshal(body, &canteens)
+	var cafeteriaNames []CafeteriaName
+	errjson := json.Unmarshal(body, &cafeteriaNames)
 	if errjson != nil {
 		log.Println("Error in Parsing")
 		log.Fatalln(errjson)
 	}
 
 	// store canteen information in mensa db
-	for i := 0; i < len(canteens); i++ {
-		mensa := model.Mensa{Id: int32(i), Name: canteens[i].Name, Address: canteens[i].Location.Address, Latitude: canteens[i].Location.Latitude, Longitude: canteens[i].Location.Longitude}
-		if c.db.Model(&mensa).Where("name = ?", canteens[i].Name).Updates(&mensa).RowsAffected == 0 {
+	for i := 0; i < len(cafeteriaNames); i++ {
+		mensa := cafeteria_rating_models.Cafeteria{Id: int32(i), Name: cafeteriaNames[i].Name, Address: cafeteriaNames[i].Location.Address, Latitude: cafeteriaNames[i].Location.Latitude, Longitude: cafeteriaNames[i].Location.Longitude}
+		if c.db.Model(&mensa).Where("name = ?", cafeteriaNames[i].Name).Updates(&mensa).RowsAffected == 0 {
 			c.db.Create(&mensa)
 		}
 	}

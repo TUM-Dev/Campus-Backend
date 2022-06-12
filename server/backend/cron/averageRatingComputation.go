@@ -1,10 +1,13 @@
 package cron
 
+import log "github.com/sirupsen/logrus"
+
 //fileDownloadCron Downloads all files that are not marked as finished in the database.
 func (c *CronService) averageRatingComputation() error {
 
-	//res := c.db.Table("mensa_rating").Group("meal").Select()
-
+	res := c.db.Table("cafeteria_rating").Raw("SELECT cafeteria,id,name, AVG(rating) AS avgrating \nFROM cafeteria_rating \nGROUP BY cafeteria;") //.Group("cafeterianame")
+	log.Println("Number of affected rows", res.RowsAffected)
+	//todo in welcher form bekomme ich ergebnisse
 	/*
 	   raw sql
 	      DECLARE

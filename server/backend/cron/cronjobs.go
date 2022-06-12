@@ -79,7 +79,7 @@ func (c *CronService) Run() error {
 		log.Printf("Time: %i", time.Now().Unix())
 
 		//todo call once a week
-		g.Go(func() error { return c.mealNameDownloadCron() })
+		//	g.Go(func() error { return c.mealNameDownloadCron() })
 
 		//todo cal every five minutes between 11AM and 4 PM on weekdays
 		g.Go(func() error { return c.averageRatingComputation() })

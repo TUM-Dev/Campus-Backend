@@ -1,4 +1,4 @@
-package model
+package cafeteria_rating_models
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ var (
 )
 
 // News struct is a row record of the mensa table in the tca database
-type Mensa struct {
+type Cafeteria struct {
 	Mensa     int32   `gorm:"primary_key;AUTO_INCREMENT;column:mensa;type:int;" json:"mensa"`
 	Id        int32   `gorm:"column:id;type:int;" json:"id" `
 	Name      string  `gorm:"column:name;type:mediumtext;" json:"name" `
@@ -21,6 +21,6 @@ type Mensa struct {
 }
 
 // TableName sets the insert table name for this struct type
-func (n *Mensa) TableName() string {
+func (n *Cafeteria) TableName() string {
 	return "mensa"
 }
