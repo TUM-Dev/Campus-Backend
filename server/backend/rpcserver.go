@@ -42,6 +42,9 @@ type CampusServer struct {
 var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
+	log.Println("Server starting up")
+	initTagRatingOptions(db)
+
 	return &CampusServer{
 		db: db,
 		deviceBuf: &deviceBuffer{
@@ -49,6 +52,34 @@ func New(db *gorm.DB) *CampusServer {
 			devices:  make(map[string]*model.Devices),
 			interval: time.Minute,
 		},
+	}
+}
+
+/*
+Writes all available tags from the json file into tables in order to make them easier to use
+*/
+func initTagRatingOptions(db *gorm.DB) {
+	absPathMeal, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
+	absPathCafeteria, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
+	tagsMeal := generateTagListFromFile(absPathMeal)
+	tagsCafeteria := generateTagListFromFile(absPathCafeteria)
+
+	//delete all existing values to prevent any inconsistencies with ids
+	db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}) //Remove all meals of the previous week
+	db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})      //Remove all meals of the previous week
+
+	for _, v := range tagsMeal.MultiLanguageTags {
+		db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).
+			Create(&cafeteria_rating_models.MealRatingsTagsOptions{
+				NameDE: v.TagNameGerman,
+				NameEN: v.TagNameEnglish})
+	}
+
+	for _, v := range tagsCafeteria.MultiLanguageTags {
+		db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
+			Create(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{
+				NameDE: v.TagNameGerman,
+				NameEN: v.TagNameEnglish})
 	}
 }
 
@@ -154,7 +185,7 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
 	}
 
-	//todo add nametag ratings
+	//todo add nametag ratings to the reply
 	if err.RowsAffected > 0 {
 		ratings := queryLastRatings(input, s)
 
@@ -185,6 +216,7 @@ func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb
 		ratingResults := make([]*pb.MealRating, len(ratings))
 
 		//todo add timestamp
+		//todo add meal tags which were added to this rating
 		for i, v := range ratings {
 			ratingResults[i] = &pb.MealRating{
 				Rating:        v.Rating,
@@ -230,7 +262,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 	for i := 0; i < len(input.Tags); i++ {
 		//todo tag must be included in the tag lists
 		//todo add rating once the proto file is fixed
-		rating := cafeteria_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(5), Tagname: input.Tags[i]}
+		rating := cafeteria_rating_models.CafeteriaTagRating{ParentRating: int32(parentid), Rating: int32(5), TagID: i}
 		s.db.Table("cafeteria_rating_tags").Create(&rating)
 	}
 
@@ -270,14 +302,17 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 
 	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
 
-	var parentid = rating.Id
-	//Add Tag Ratings for the first cafeteria
+	if len(input.Tags) > 0 {
+		//todo tags immer in deutsch speichern -
+		//fixme tags in db apspeichern -< beim startup eintragen -> jeder tag hat eine id -> mit dieser tagie abspeichern und zurückgeben
+		for i := 0; i < len(input.Tags); i++ {
+			//todo add rating to each tag once the proto file is fixed
+			//todo check whether the tag is actually included in the json file
+			//todo retrieve tag id
 
-	for i := 0; i < len(input.Tags); i++ {
-		//todo tag must be included in the tag lists
-		//todo add rating once the proto file is fixed
-		rating := cafeteria_rating_models.TagRating{ParentRating: int32(parentid), Rating: int32(5), Tagname: input.Tags[i]}
-		s.db.Table("meal_rating_tags").Create(&rating)
+			rating := cafeteria_rating_models.CafeteriaTagRating{ParentRating: int32(rating.Id), Rating: int32(5), TagID: i}
+			s.db.Table("meal_rating_tags").Create(&rating)
+		}
 	}
 
 	return &emptypb.Empty{}, nil
@@ -292,24 +327,23 @@ type Tag struct {
 }
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	absPath, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
-	tags := generateTagListFromFile(absPath)
+	//absPath, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
+	//tags := generateTagListFromFile(absPath)
 
-	return &pb.GetRatingTagsReply{
-		Tags: tags,
-	}, nil
+	//todo adapt to query from db
 }
 
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	absPath, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
-	tags := generateTagListFromFile(absPath)
-
-	return &pb.GetRatingTagsReply{
-		Tags: tags,
-	}, nil
+	//absPath, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
+	//tags := generateTagListFromFile(absPath)
+	//todo adapt to query from db
+	/*
+		return &pb.GetRatingTagsReply{
+			Tags: tags,
+		}, nil*/
 }
 
-func generateTagListFromFile(path string) []string {
+func generateTagListFromFile(path string) MultiLanguageTags {
 	jsonFile, err := os.Open(path)
 
 	if err != nil {
@@ -325,10 +359,5 @@ func generateTagListFromFile(path string) []string {
 	var tags MultiLanguageTags
 	json.Unmarshal(byteValue, &tags)
 
-	var helper = len(tags.MultiLanguageTags)
-	y := make([]string, helper)
-	for i := 0; i < len(tags.MultiLanguageTags); i++ {
-		y[i] = tags.MultiLanguageTags[i].TagNameEnglish
-	}
-	return y
+	return tags
 }
