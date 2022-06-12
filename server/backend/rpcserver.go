@@ -141,17 +141,64 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 }
 
 func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.GetCafeteriaRating) (*pb.GetCafeteriaRatingReply, error) {
-	/*	var retrieved *cafeteria_rating_models.CafeteriaRating
-		s.db.Table("mensa_garching_rating").First(&retrieved)
-		log.Println("First comment: ")
-		log.Println(retrieved.Comment)*/
-	//	s.db.Table("mensa_garching_rating").Raw("INSERT INTO mensa_garching_rating (rating, comment)  VALUES (`ratingFirst`,`comment);").Scan(&result)
-	//result := s.db.Table("mensa_garching_rating").Create()
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented")
 }
-func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, _ *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatingLastThree not implemented")
+
+func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
+	var result cafeteria_rating_models.MealRatingResult
+	err := s.db.Model(&cafeteria_rating_models.MealRatingResult{}).
+		Where("cafeteria = ?", input.CafeteriaName).
+		Where("meal = ?", input.Meal).First(&result)
+
+	if err.Error != nil {
+		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
+	}
+
+	//todo add nametag ratings
+	if err.RowsAffected > 0 {
+		ratings := queryLastRatings(input, s)
+
+		return &pb.GetMealInCafeteriaRatingReply{
+			AverageRating: float64(result.Average),
+			Rating:        ratings,
+		}, nil
+	} else {
+		return &pb.GetMealInCafeteriaRatingReply{
+			AverageRating: -1,
+		}, nil
+	}
+
 }
+
+func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb.MealRating {
+	var ratings []cafeteria_rating_models.MealRating
+	if input.Limit > 0 {
+		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
+			Where("cafeteria = ?", input.CafeteriaName).
+			Where("meal = ?", input.Meal).First(&ratings).
+			Limit(int(input.Limit)).
+			Find(ratings)
+
+		if errRatings.Error != nil {
+			return make([]*pb.MealRating, 0)
+		}
+		ratingResults := make([]*pb.MealRating, len(ratings))
+
+		//todo add timestamp
+		for i, v := range ratings {
+			ratingResults[i] = &pb.MealRating{
+				Rating:        v.Rating,
+				Meal:          v.Meal,
+				CafeteriaName: v.Cafeteria,
+				Comment:       v.Comment,
+			}
+		}
+		return ratingResults
+	} else {
+		return make([]*pb.MealRating, 0)
+	}
+}
+
 func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
 	//Add cafeteriaRating
 	if input.Rating > 10 || input.Rating < 0 {

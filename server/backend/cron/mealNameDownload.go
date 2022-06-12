@@ -51,7 +51,7 @@ func downloadDailyMeals(c *CronService) {
 	var result []string
 
 	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
-	//c.db.Table(&cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
+
 	for _, v := range result {
 
 		cafeteriaName := strings.Replace(strings.ToLower(v), "_", "-", 10)
