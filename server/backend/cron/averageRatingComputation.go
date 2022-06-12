@@ -49,7 +49,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 		log.Println(res.Error)
 	} else {
 		for _, v := range results {
-			cafeteria := cafeteria_rating_models.MealRatingResult{
+			cafeteria := cafeteria_rating_models.MealRatingsAverage{
 				Cafeteria: v.Cafeteria,
 				Average:   v.Average,
 				Meal:      v.Meal,
@@ -57,8 +57,8 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				Max:       v.Max,
 			}
 
-			var existing *cafeteria_rating_models.MealRatingResult
-			testDish := c.db.Model(cafeteria_rating_models.MealRatingResult{}).
+			var existing *cafeteria_rating_models.MealRatingsAverage
+			testDish := c.db.Model(cafeteria_rating_models.MealRatingsAverage{}).
 				Where("cafeteria = ?", cafeteria.Cafeteria).
 				Where("meal = ?", cafeteria.Meal).
 				First(&existing)

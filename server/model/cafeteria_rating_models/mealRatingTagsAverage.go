@@ -14,7 +14,7 @@ var (
 type MealRatingTagsResults struct {
 	Id        int32   `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id" `
 	Cafeteria string  `gorm:"column:cafeteria;type:mediumtext;" json:"cafeteria"`
-	Tagname   string  `gorm:"column:tagname;type:varchar;size:32" json:"tagname" :"tagname"`
+	Tagname   string  `gorm:"column:tagname;type:varchar;size:32" json:"tagname"`
 	Meal      string  `gorm:"column:meal;type:mediumtext;" json:"meal"`
 	Average   float32 `gorm:"column:average;type:float;" json:"average" `
 	Min       int     `gorm:"column:min;type:int;" json:"min"`

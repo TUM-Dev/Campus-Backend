@@ -11,7 +11,7 @@ var (
 )
 
 // News struct is a row record of the mensa table in the tca database
-type MealRatingResult struct {
+type MealRatingsAverage struct {
 	Id        int32   `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id" `
 	Cafeteria string  `gorm:"column:cafeteria;type:mediumtext;" json:"cafeteria"`
 	Meal      string  `gorm:"column:meal;type:mediumtext;" json:"meal"`
@@ -21,6 +21,6 @@ type MealRatingResult struct {
 }
 
 // TableName sets the insert table name for this struct type
-func (n *MealRatingResult) TableName() string {
+func (n *MealRatingsAverage) TableName() string {
 	return "meal_rating_results"
 }

@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -64,9 +65,10 @@ func initTagRatingOptions(db *gorm.DB) {
 	tagsMeal := generateTagListFromFile(absPathMeal)
 	tagsCafeteria := generateTagListFromFile(absPathCafeteria)
 
-	//delete all existing values to prevent any inconsistencies with ids
-	db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}) //Remove all meals of the previous week
-	db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})      //Remove all meals of the previous week
+	//todo do not delete old values(new filed in json, whether the tagis stillin use, if it does not exist
+	//-> add it to the table -> old tags in the db must not be removed to keep the ids valid)
+	db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+	db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})
 
 	for _, v := range tagsMeal.MultiLanguageTags {
 		db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).
@@ -176,8 +178,8 @@ func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.Ge
 }
 
 func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
-	var result cafeteria_rating_models.MealRatingResult
-	err := s.db.Model(&cafeteria_rating_models.MealRatingResult{}).
+	var result cafeteria_rating_models.MealRatingsAverage
+	err := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
 		Where("cafeteria = ?", input.CafeteriaName).
 		Where("meal = ?", input.Meal).First(&result)
 
@@ -256,14 +258,25 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 
 	s.db.Model(cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
 
-	var parentid = rating.Id
-	//Add Tag Ratings for the first cafeteria
+	if len(input.Tags) > 0 {
+		for _, tag := range input.Tags {
+			//todo add rating to each tag once the proto file is fixed
 
-	for i := 0; i < len(input.Tags); i++ {
-		//todo tag must be included in the tag lists
-		//todo add rating once the proto file is fixed
-		rating := cafeteria_rating_models.CafeteriaTagRating{ParentRating: int32(parentid), Rating: int32(5), TagID: i}
-		s.db.Table("cafeteria_rating_tags").Create(&rating)
+			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
+			var currentTag *cafeteria_rating_models.CafeteriaRatingsTagsOptions
+			exists := s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
+				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
+			if exists.RowsAffected > 0 {
+
+				s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
+					Create(&cafeteria_rating_models.CafeteriaTagRating{
+						ParentRating: rating.Id,
+						Rating:       int32(5),
+						TagID:        int(currentTag.Id)})
+			} else {
+				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
+			}
+		}
 	}
 
 	return &emptypb.Empty{}, nil
@@ -303,15 +316,22 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
 
 	if len(input.Tags) > 0 {
-		//todo tags immer in deutsch speichern -
-		//fixme tags in db apspeichern -< beim startup eintragen -> jeder tag hat eine id -> mit dieser tagie abspeichern und zurückgeben
-		for i := 0; i < len(input.Tags); i++ {
+		for _, tag := range input.Tags {
 			//todo add rating to each tag once the proto file is fixed
-			//todo check whether the tag is actually included in the json file
-			//todo retrieve tag id
 
-			rating := cafeteria_rating_models.CafeteriaTagRating{ParentRating: int32(rating.Id), Rating: int32(5), TagID: i}
-			s.db.Table("meal_rating_tags").Create(&rating)
+			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
+			var currentTag *cafeteria_rating_models.MealRatingsTagsOptions
+			exists := s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
+				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
+			if exists.RowsAffected > 0 {
+				s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
+					Create(&cafeteria_rating_models.MealRatingsTags{
+						ParentRating: rating.Id,
+						Rating:       int32(5),
+						TagID:        int(currentTag.Id)})
+			} else {
+				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
+			}
 		}
 	}
 
@@ -327,20 +347,21 @@ type Tag struct {
 }
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	//absPath, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
-	//tags := generateTagListFromFile(absPath)
+	var result []string
+	s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE").Scan(&result)
 
-	//todo adapt to query from db
+	return &pb.GetRatingTagsReply{
+		Tags: result,
+	}, nil
 }
 
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	//absPath, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
-	//tags := generateTagListFromFile(absPath)
-	//todo adapt to query from db
-	/*
-		return &pb.GetRatingTagsReply{
-			Tags: tags,
-		}, nil*/
+	var result []string
+	s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE").Scan(&result)
+
+	return &pb.GetRatingTagsReply{
+		Tags: result,
+	}, nil
 }
 
 func generateTagListFromFile(path string) MultiLanguageTags {
@@ -350,14 +371,22 @@ func generateTagListFromFile(path string) MultiLanguageTags {
 		fmt.Println(err)
 	}
 
-	defer jsonFile.Close()
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.Error("Error in parsing json:", err)
+		}
+	}(jsonFile)
+
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	var tags MultiLanguageTags
-	json.Unmarshal(byteValue, &tags)
-
+	errorUnmarshal := json.Unmarshal(byteValue, &tags)
+	if errorUnmarshal != nil {
+		log.Error("Error in parsing json:", errorUnmarshal)
+	}
 	return tags
 }
