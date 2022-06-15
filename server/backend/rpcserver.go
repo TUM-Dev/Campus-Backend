@@ -52,9 +52,9 @@ func (s *CampusServer) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*p
 	return &pb.AccessPoint{Name: "response"}, nil
 }
 
-func (s *CampusServer) ListAccessPoints(ctx context.Context, in *pb.APRequest) (*pb.Campus_ListAccessPointsClient, error) {
+func (s *CampusServer) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessPointsServer) error {
 	log.Println("Requesting list")
-	return nil, nil
+	return nil
 }
 
 func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (newsSources *pb.NewsSourceArray, err error) {
