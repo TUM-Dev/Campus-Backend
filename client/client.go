@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"crypto/x509"
+	"log"
+	"time"
+
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
-	"log"
-	"time"
+	// "google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
@@ -37,9 +39,11 @@ func main() {
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Println("Trying to fetch top news")
-	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
+	request := pb.APRequest{Name: "apa05-0mg",Timestamp: "2022-06-15 22"}
+	r, err := c.GetAccessPoint(ctx, &request)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("Greeting: %s", r.String())
+
+	log.Printf("Greeting: %s", r.Name)
 }

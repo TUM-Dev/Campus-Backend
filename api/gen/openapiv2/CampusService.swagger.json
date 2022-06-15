@@ -1,5 +1,4 @@
 {
-"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "CampusService.proto",
@@ -17,6 +16,87 @@
     "application/json"
   ],
   "paths": {
+    "/accesspoints/heatmap": {
+      "get": {
+        "operationId": "Campus_ListAccessPoints",
+        "responses": {
+          "200": {
+            "description": "(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/apiAccessPoint"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of apiAPResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/accesspoints/heatmap/{name}": {
+      "get": {
+        "operationId": "Campus_GetAccessPoint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiAccessPoint"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/cafeteriaRating/cafeteria/allTags": {
       "get": {
         "operationId": "Campus_GetAvailableCafeteriaTags",
@@ -453,6 +533,40 @@
         },
         "courseCode": {
           "type": "string"
+        }
+      }
+    },
+    "apiAPResponse": {
+      "type": "object",
+      "properties": {
+        "accesspoint": {
+          "$ref": "#/definitions/apiAccessPoint"
+        }
+      }
+    },
+    "apiAccessPoint": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "string"
+        },
+        "long": {
+          "type": "string"
+        },
+        "intensity": {
+          "type": "string",
+          "format": "int64"
+        },
+        "max": {
+          "type": "string",
+          "format": "int64"
+        },
+        "min": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

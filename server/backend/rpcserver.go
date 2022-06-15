@@ -34,7 +34,7 @@ type CampusServer struct {
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
-var _ pb.CampusServer = (*CampusServer)(nil)
+// var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	return &CampusServer{
@@ -45,6 +45,16 @@ func New(db *gorm.DB) *CampusServer {
 			interval: time.Minute,
 		},
 	}
+}
+
+func (s *CampusServer) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*pb.AccessPoint, error) {
+	log.Printf("Received request for AP with name: %s and timestamp: %s", in.Name, in.Timestamp)
+	return &pb.AccessPoint{Name: "response"}, nil
+}
+
+func (s *CampusServer) ListAccessPoints(ctx context.Context, in *pb.APRequest) (*pb.Campus_ListAccessPointsClient, error) {
+	log.Println("Requesting list")
+	return nil, nil
 }
 
 func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (newsSources *pb.NewsSourceArray, err error) {

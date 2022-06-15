@@ -37,6 +37,8 @@ type CampusClient interface {
 	NewMealRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAvailableMealTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
+	GetAccessPoint(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (*AccessPoint, error)
+	ListAccessPoints(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (Campus_ListAccessPointsClient, error)
 }
 
 type campusClient struct {
@@ -164,6 +166,47 @@ func (c *campusClient) GetAvailableCafeteriaTags(ctx context.Context, in *emptyp
 	return out, nil
 }
 
+func (c *campusClient) GetAccessPoint(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (*AccessPoint, error) {
+	out := new(AccessPoint)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetAccessPoint", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) ListAccessPoints(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (Campus_ListAccessPointsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], "/api.Campus/ListAccessPoints", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &campusListAccessPointsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Campus_ListAccessPointsClient interface {
+	Recv() (*APResponse, error)
+	grpc.ClientStream
+}
+
+type campusListAccessPointsClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusListAccessPointsClient) Recv() (*APResponse, error) {
+	m := new(APResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
@@ -182,6 +225,8 @@ type CampusServer interface {
 	NewMealRating(context.Context, *NewRating) (*emptypb.Empty, error)
 	GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
+	GetAccessPoint(context.Context, *APRequest) (*AccessPoint, error)
+	ListAccessPoints(*APRequest, Campus_ListAccessPointsServer) error
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -227,6 +272,12 @@ func (UnimplementedCampusServer) GetAvailableMealTags(context.Context, *emptypb.
 }
 func (UnimplementedCampusServer) GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableCafeteriaTags not implemented")
+}
+func (UnimplementedCampusServer) GetAccessPoint(context.Context, *APRequest) (*AccessPoint, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccessPoint not implemented")
+}
+func (UnimplementedCampusServer) ListAccessPoints(*APRequest, Campus_ListAccessPointsServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListAccessPoints not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -475,6 +526,45 @@ func _Campus_GetAvailableCafeteriaTags_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetAccessPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(APRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetAccessPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetAccessPoint",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetAccessPoint(ctx, req.(*APRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_ListAccessPoints_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(APRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CampusServer).ListAccessPoints(m, &campusListAccessPointsServer{stream})
+}
+
+type Campus_ListAccessPointsServer interface {
+	Send(*APResponse) error
+	grpc.ServerStream
+}
+
+type campusListAccessPointsServer struct {
+	grpc.ServerStream
+}
+
+func (x *campusListAccessPointsServer) Send(m *APResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -534,7 +624,17 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetAvailableCafeteriaTags",
 			Handler:    _Campus_GetAvailableCafeteriaTags_Handler,
 		},
+		{
+			MethodName: "GetAccessPoint",
+			Handler:    _Campus_GetAccessPoint_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ListAccessPoints",
+			Handler:       _Campus_ListAccessPoints_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "CampusService.proto",
 }
