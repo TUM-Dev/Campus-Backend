@@ -30,12 +30,21 @@ func (c *CronService) averageRatingComputation() error {
 }
 
 func computeAverageCafeteriaTags(c *CronService) {
+
 	/*
-		Todo
-		alle ratings einer cafeteria sammeln -> nur die IDs merken, diese dann acuf das tagrating tabelle anwednne
-		-> alle tagratings zu einer cafeteria in einer Gruppe
-		-> pro gruppe nach den tags gruppieren und den Durchscnitt bereschnen und in einemr result tabelle Speichern
+					Todo
+					alle ratings einer cafeteria sammeln -> nur die IDs merken, diese dann auf das tagrating tabelle anwenden - join
+					-> alle tagratings zu einer cafeteria in einer Gruppe
+					-> pro gruppe nach den tags gruppieren und den Durchschnitt bereschnen und in einemr result tabelle Speichern
+
+
+				für alle drei tagarten berechnen
+			nameratingtag ist das komplizierte, die beiden anderen können auf der tagrating tabelle bestimmt werden
+		-> zusammenführen durch das parent rating um zu erfahren, zu welcher mensa die gerichte gehören
 	*/
+
+	//nach der tagID gruppieren
+
 }
 
 func computeAverageForMealsInCafeterias(c *CronService) {
@@ -55,7 +64,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				Meal:      v.Meal,
 				Min:       v.Min,
 				Max:       v.Max,
-			}
+			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.MealRatingsAverage
 			testDish := c.db.Model(cafeteria_rating_models.MealRatingsAverage{}).
@@ -99,7 +108,7 @@ func computeAverageForCafeteria(c *CronService) {
 				Average:   v.Average,
 				Min:       v.Min,
 				Max:       v.Max,
-			}
+			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.CafeteriaRatingResult
 			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingResult{}).Where("cafeteria = ?", cafeteria.Cafeteria).First(&existing)

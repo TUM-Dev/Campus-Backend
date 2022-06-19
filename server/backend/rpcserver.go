@@ -262,17 +262,20 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 		for _, tag := range input.Tags {
 			//todo add rating to each tag once the proto file is fixed
 
+			usedTagIds := make(map[int]int)
 			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
 			var currentTag *cafeteria_rating_models.CafeteriaRatingsTagsOptions
 			exists := s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
 				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
-			if exists.RowsAffected > 0 {
+
+			if exists.RowsAffected > 0 && usedTagIds[int(currentTag.Id)] == 0 {
 
 				s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
 					Create(&cafeteria_rating_models.CafeteriaTagRating{
 						ParentRating: rating.Id,
 						Rating:       int32(5),
 						TagID:        int(currentTag.Id)})
+				usedTagIds[int(currentTag.Id)] = 1
 			} else {
 				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
 			}
@@ -316,6 +319,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
 
 	if len(input.Tags) > 0 {
+		usedTagIds := make(map[int]int)
 		for _, tag := range input.Tags {
 			//todo add rating to each tag once the proto file is fixed
 
@@ -323,12 +327,13 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 			var currentTag *cafeteria_rating_models.MealRatingsTagsOptions
 			exists := s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
 				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
-			if exists.RowsAffected > 0 {
+			if exists.RowsAffected > 0 && usedTagIds[int(currentTag.Id)] == 0 {
 				s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
 					Create(&cafeteria_rating_models.MealRatingsTags{
 						ParentRating: rating.Id,
 						Rating:       int32(5),
 						TagID:        int(currentTag.Id)})
+				usedTagIds[int(currentTag.Id)] = 1
 			} else {
 				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
 			}

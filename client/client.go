@@ -55,7 +55,7 @@ func createCafeteriaRatingSampleData() {
 
 	y := make([]string, 3)
 	for i := 0; i < 3; i++ {
-		y[i] = "edf" + strconv.Itoa(i)
+		y[i] = "Spicy" + strconv.Itoa(i)
 	}
 
 	_, errRequest := c.NewCafeteriaRating(ctx, &pb.NewRating{
