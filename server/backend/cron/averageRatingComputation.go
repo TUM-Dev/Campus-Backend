@@ -31,16 +31,15 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageCafeteriaTags(c *CronService) {
 
-	/*
-					Todo
-					alle ratings einer cafeteria sammeln -> nur die IDs merken, diese dann auf das tagrating tabelle anwenden - join
-					-> alle tagratings zu einer cafeteria in einer Gruppe
-					-> pro gruppe nach den tags gruppieren und den Durchschnitt bereschnen und in einemr result tabelle Speichern
+	/*Todo
+				alle ratings einer cafeteria sammeln -> nur die IDs merken, diese dann auf das tagrating tabelle anwenden - join
+				-> alle tagratings zu einer cafeteria in einer Gruppe
+				-> pro gruppe nach den tags gruppieren und den Durchschnitt bereschnen und in einemr result tabelle Speichern
 
 
-				für alle drei tagarten berechnen
-			nameratingtag ist das komplizierte, die beiden anderen können auf der tagrating tabelle bestimmt werden
-		-> zusammenführen durch das parent rating um zu erfahren, zu welcher mensa die gerichte gehören
+			für alle drei tagarten berechnen
+		nameratingtag ist das komplizierte, die beiden anderen können auf der tagrating tabelle bestimmt werden
+	-> zusammenführen durch das parent rating um zu erfahren, zu welcher mensa die gerichte gehören
 	*/
 
 	//nach der tagID gruppieren

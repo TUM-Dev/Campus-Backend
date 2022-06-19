@@ -62,10 +62,12 @@ Writes all available tags from the json file into tables in order to make them e
 func initTagRatingOptions(db *gorm.DB) {
 	absPathMeal, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
 	absPathCafeteria, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
-	tagsMeal := generateTagListFromFile(absPathMeal)
-	tagsCafeteria := generateTagListFromFile(absPathCafeteria)
+	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
+	tagsMeal := generateRatingTagListFromFile(absPathMeal)
+	tagsCafeteria := generateRatingTagListFromFile(absPathCafeteria)
+	tagsNames := generateNameTagListFromFile(absPathMealNames)
 
-	//todo do not delete old values(new filed in json, whether the tagis stillin use, if it does not exist
+	//todo do not delete old values(new filed in json, whether the tag is still in use, if it does not exist
 	//-> add it to the table -> old tags in the db must not be removed to keep the ids valid)
 	db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
 	db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})
@@ -82,6 +84,27 @@ func initTagRatingOptions(db *gorm.DB) {
 			Create(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{
 				NameDE: v.TagNameGerman,
 				NameEN: v.TagNameEnglish})
+	}
+
+	//Meal Name Tags in Tables
+	for _, v := range tagsNames.MultiLanguageNameTags {
+		parent := cafeteria_rating_models.MealRatingsTagsOptions{
+			NameDE: v.TagNameGerman,
+			NameEN: v.TagNameEnglish}
+		db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
+			Create(&parent)
+		for _, u := range v.Canbeincluded {
+			db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+				Create(&cafeteria_rating_models.MealNameTagOptionsIncluded{
+					Expression: u,
+					NameTagID:  parent.Id})
+		}
+		for _, u := range v.Notincluded {
+			db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+				Create(&cafeteria_rating_models.MealNameTagOptionsExcluded{
+					Expression: u,
+					NameTagID:  parent.Id})
+		}
 	}
 }
 
@@ -343,14 +366,6 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	return &emptypb.Empty{}, nil
 }
 
-type MultiLanguageTags struct {
-	MultiLanguageTags []Tag `json:"tags"`
-}
-type Tag struct {
-	TagNameEnglish string `json:"tagNameEnglish"`
-	TagNameGerman  string `json:"tagNameGerman"`
-}
-
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []string
 	s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE").Scan(&result)
@@ -369,7 +384,47 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb
 	}, nil
 }
 
-func generateTagListFromFile(path string) MultiLanguageTags {
+type MultiLanguageTags struct {
+	MultiLanguageTags []Tag `json:"tags"`
+}
+type Tag struct {
+	TagNameEnglish string `json:"tagNameEnglish"`
+	TagNameGerman  string `json:"tagNameGerman"`
+}
+
+type MultiLanguageNameTags struct {
+	MultiLanguageNameTags []NameTag `json:"tags"`
+}
+type NameTag struct {
+	TagNameEnglish string   `json:"tagNameEnglish"`
+	TagNameGerman  string   `json:"tagNameGerman"`
+	Notincluded    []string `json:"notincluded"`
+	Canbeincluded  []string `json:"canbeincluded"`
+}
+
+func generateRatingTagListFromFile(path string) MultiLanguageTags {
+	byteValue := readFromFile(path)
+
+	var tags MultiLanguageTags
+	errorUnmarshal := json.Unmarshal(byteValue, &tags)
+	if errorUnmarshal != nil {
+		log.Error("Error in parsing json:", errorUnmarshal)
+	}
+	return tags
+}
+
+func generateNameTagListFromFile(path string) MultiLanguageNameTags {
+	byteValue := readFromFile(path)
+
+	var tags MultiLanguageNameTags
+	errorUnmarshal := json.Unmarshal(byteValue, &tags)
+	if errorUnmarshal != nil {
+		log.Error("Error in parsing json:", errorUnmarshal)
+	}
+	return tags
+}
+
+func readFromFile(path string) []byte {
 	jsonFile, err := os.Open(path)
 
 	if err != nil {
@@ -387,11 +442,5 @@ func generateTagListFromFile(path string) MultiLanguageTags {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	var tags MultiLanguageTags
-	errorUnmarshal := json.Unmarshal(byteValue, &tags)
-	if errorUnmarshal != nil {
-		log.Error("Error in parsing json:", errorUnmarshal)
-	}
-	return tags
+	return byteValue
 }
