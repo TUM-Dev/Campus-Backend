@@ -68,4 +68,16 @@ func createCafeteriaRatingSampleData() {
 	if errRequest != nil {
 		log.Println(err)
 	}
+
+	c.NewMealRating(ctx, &pb.NewRating{
+		Rating:        int32(8),
+		CafeteriaName: "MENSA_ARCISSTR",
+		Meal:          "rinder",
+		Comment:       "Alles Hähnchen",
+		Tags:          y,
+	})
+
+	if errRequest != nil {
+		log.Println(err)
+	}
 }

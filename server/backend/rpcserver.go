@@ -363,6 +363,30 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		}
 	}
 
+	//todo alle passenden tags bestimmen und mit abspeichern
+	/*
+		1. Alle einträge sammeln, auf die included/excluded zutrifft
+		2. besonderen join nehmen -> alles subtrahieren aus der excluded version
+		3. in der tagbelle mit nametagratings abspeichern mit der meal id und der
+	*/
+	//todo potentiell ein to lowercase für den namen ausführen
+	var includedTags []int
+	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
+		Select("nameTagID").
+		Scan(&includedTags)
+	//s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+	//	Raw()
+
+	/*errIncludes := s.db.Raw("SELECT m.nameTagID"+
+	"FROM meal_name_tag_options_included m "+
+	"WHERE expression LIKE ?", input.Meal).Scan(&includedTags).Error
+	*/
+	/*if errIncludes != nil {
+		log.Println("Error occurred while querying")
+	}*/
+	log.Println(len(includedTags))
+
 	return &emptypb.Empty{}, nil
 }
 

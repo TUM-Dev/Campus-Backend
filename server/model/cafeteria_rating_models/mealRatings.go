@@ -18,7 +18,7 @@ type MealRating struct {
 	Rating    int32     `gorm:"column:rating;type:int;" json:"rating"`
 	Meal      string    `gorm:"column:meal;type:varchar;size:128;" json:"meal"`
 	Comment   string    `gorm:"column:comment;type:varchar;size:256;" json:"comment"`
-	Cafeteria string    `gorm:"column:canteen;type:mediumtext;" json:"canteen"`
+	Cafeteria string    `gorm:"column:cafeteria;type:mediumtext;" json:"cafeteria"`
 	Timestamp time.Time `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;" json:"timestamp"`
 	//	Image     null.String `gorm:"column:image;type:text;size:65535;" json:"image" :"image"`
 }

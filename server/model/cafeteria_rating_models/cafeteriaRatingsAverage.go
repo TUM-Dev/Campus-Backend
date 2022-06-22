@@ -1,15 +1,5 @@
 package cafeteria_rating_models
 
-import (
-	"database/sql"
-	"github.com/guregu/null"
-)
-
-var (
-	_ = sql.LevelDefault
-	_ = null.Bool{}
-)
-
 // News struct is a row record of the mensa table in the tca database
 type CafeteriaRatingResult struct {
 	Id        int32   `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id" `

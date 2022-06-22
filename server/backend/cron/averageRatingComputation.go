@@ -42,6 +42,13 @@ func computeAverageCafeteriaTags(c *CronService) {
 	-> zusammenführen durch das parent rating um zu erfahren, zu welcher mensa die gerichte gehören
 	*/
 
+	/*
+		err := s.db.Raw("SELECT r.*, a.campus, a.name "+
+				"FROM roomfinder_rooms r "+
+				"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
+				"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error
+	*/
+
 	//nach der tagID gruppieren
 
 }
@@ -59,7 +66,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.MealRatingsAverage{
 				Cafeteria: v.Cafeteria,
-				Average:   v.Average,
+				Average:   float32(v.Average),
 				Meal:      v.Meal,
 				Min:       v.Min,
 				Max:       v.Max,
@@ -72,7 +79,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				First(&existing)
 
 			if testDish.RowsAffected == 1 {
-				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingResult{}).
+				errUpdate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
 					Where("cafeteria = ?", cafeteria.Cafeteria).
 					Where("meal = ?", cafeteria.Meal).
 					Updates(cafeteria)
@@ -81,7 +88,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 					log.Println(errUpdate.Error)
 				}
 			} else {
-				log.Println("New rating will be created for cafeteria: ", v.Cafeteria)
+				log.Println("New average rating will be created for cafeteria: ", v.Cafeteria)
 				errCreate := c.db.Create(&cafeteria)
 				if errCreate.Error != nil {
 					log.Println(errCreate.Error)
