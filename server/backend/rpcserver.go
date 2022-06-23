@@ -20,6 +20,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -362,8 +363,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 }
 
 func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
-	s.db.Where("1=1").Delete(&cafeteria_rating_models.MealRating{})
-	//Add cafeteriaRating
+
 	if input.Rating > 10 || input.Rating < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
@@ -394,9 +394,20 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 
 	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
 
-	if len(input.Tags) > 0 {
+	storeMealRatingTags(s, rating, input.Tags)
+	extractAndStoreMealNameTags(s, rating)
+
+	return &emptypb.Empty{}, nil
+}
+
+/*
+Checks whether the rating-tag name is a valid option and if so,
+it will be saved with a reference to the rating
+*/
+func storeMealRatingTags(s *CampusServer, rating cafeteria_rating_models.MealRating, tags []string) {
+	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
-		for _, tag := range input.Tags {
+		for _, tag := range tags {
 			//todo add rating to each tag once the proto file is fixed
 
 			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
@@ -411,21 +422,27 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 						TagID:        int(currentTag.Id)})
 				usedTagIds[int(currentTag.Id)] = 1
 			} else {
-				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
+				log.Println("Invalid Tag Name, Tag", tag, "was not saved. Each Rating tag must be used at most once in a rating.")
 			}
 		}
 	}
+}
 
-	//todo potentiell ein to lowercase für den namen ausführen
+/*
+Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
+The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
+*/
+func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating) {
+	lowercaseMeal := strings.ToLower(rating.Meal)
 	var includedTags []int
 	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&includedTags)
 
 	var excludedTags []int
 	s.db.Model(cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&excludedTags)
 
@@ -442,15 +459,15 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	}
 
 	for _, a := range includedTags {
-		s.db.Model(&cafeteria_rating_models.MealNameTags{}).
-			Create(&cafeteria_rating_models.MealNameTags{
-				ParentRating: rating.Id,
-				Rating:       input.Rating,
-				TagID:        a,
-			})
+		if a != -1 {
+			s.db.Model(&cafeteria_rating_models.MealNameTags{}).
+				Create(&cafeteria_rating_models.MealNameTags{
+					ParentRating: rating.Id,
+					Rating:       rating.Rating,
+					TagNameID:    a,
+				})
+		}
 	}
-
-	return &emptypb.Empty{}, nil
 }
 
 func contains(s []int, e int) int {

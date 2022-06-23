@@ -6,7 +6,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -55,7 +54,7 @@ func createCafeteriaRatingSampleData() {
 
 	y := make([]string, 3)
 	for i := 0; i < 3; i++ {
-		y[i] = "Spicy" + strconv.Itoa(i)
+		y[i] = "Spicy"
 	}
 
 	_, errRequest := c.NewCafeteriaRating(ctx, &pb.NewRating{
