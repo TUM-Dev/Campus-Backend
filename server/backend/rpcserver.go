@@ -67,23 +67,40 @@ func initTagRatingOptions(db *gorm.DB) {
 	tagsCafeteria := generateRatingTagListFromFile(absPathCafeteria)
 	tagsNames := generateNameTagListFromFile(absPathMealNames)
 
-	//todo do not delete old values(new filed in json, whether the tag is still in use, if it does not exist
-	//-> add it to the table -> old tags in the db must not be removed to keep the ids valid)
-	db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
-	db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})
+	//db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+	//db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})
 
 	for _, v := range tagsMeal.MultiLanguageTags {
-		db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).
-			Create(&cafeteria_rating_models.MealRatingsTagsOptions{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish})
+		var result int32
+		potentialTag := db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
+			Where("nameEN LIKE ?", v.TagNameEnglish).
+			Where("nameDE LIKE ?", v.TagNameGerman).
+			Select("id").
+			Scan(&result)
+
+		if potentialTag.RowsAffected == 0 {
+			println("New entry inserted to Meal Rating Tag Options")
+			db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
+				Create(&cafeteria_rating_models.MealRatingsTagsOptions{
+					NameDE: v.TagNameGerman,
+					NameEN: v.TagNameEnglish})
+		}
 	}
 
 	for _, v := range tagsCafeteria.MultiLanguageTags {
-		db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
-			Create(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish})
+		var result int32
+		potentialTag := db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
+			Where("nameEN LIKE ?", v.TagNameEnglish).
+			Where("nameDE LIKE ?", v.TagNameGerman).
+			Select("id").Scan(&result)
+
+		if potentialTag.RowsAffected == 0 {
+			println("New entry inserted to Cafeteria Rating Tag Options")
+			db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
+				Create(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{
+					NameDE: v.TagNameGerman,
+					NameEN: v.TagNameEnglish})
+		}
 	}
 
 	//Meal Name Tags in Tables
@@ -363,7 +380,6 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		}
 	}
 
-	//todo alle passenden tags bestimmen und mit abspeichern
 	/*
 		1. Alle einträge sammeln, auf die included/excluded zutrifft
 		2. besonderen join nehmen -> alles subtrahieren aus der excluded version
@@ -375,16 +391,14 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
 		Select("nameTagID").
 		Scan(&includedTags)
-	//s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-	//	Raw()
 
-	/*errIncludes := s.db.Raw("SELECT m.nameTagID"+
-	"FROM meal_name_tag_options_included m "+
-	"WHERE expression LIKE ?", input.Meal).Scan(&includedTags).Error
-	*/
-	/*if errIncludes != nil {
-		log.Println("Error occurred while querying")
-	}*/
+	var excludedTags []int
+	s.db.Model(cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
+		Select("nameTagID").
+		Scan(&excludedTags)
+	//todo den join verwenden, bei dem nur die einträge übrig bleiben, die nicht im anderen enthalten sind
+
 	log.Println(len(includedTags))
 
 	return &emptypb.Empty{}, nil
