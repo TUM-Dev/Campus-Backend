@@ -81,7 +81,7 @@ func downloadDailyMeals(c *CronService) {
 			log.Println("Meals:")
 			for i := 0; i < len(meals.Days); i++ {
 				for u := 0; u < len(meals.Days[i].Dates); u++ {
-					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v.Id}
+					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, CafeteriaID: v.Id}
 					c.db.Create(&meal)
 				}
 			}

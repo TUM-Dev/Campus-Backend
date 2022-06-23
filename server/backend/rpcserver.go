@@ -423,19 +423,27 @@ func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 }
 
 func getNameForCafeteriaID(id int32, db *gorm.DB) string {
-	return "test123"
+	var result string
+	db.Model(&cafeteria_rating_models.Cafeteria{}).Where("id = ?", id).Select("name").First(&result)
+	return result
 }
 
 func getNameForMealID(id int32, db *gorm.DB) string {
-	return "test123"
+	var result string
+	db.Model(&cafeteria_rating_models.Meal{}).Where("id = ?", id).Select("name").First(&result) //Scan(&result)
+	return result
 }
 
 func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
-	return 0
+	var result int32
+	db.Model(cafeteria_rating_models.Cafeteria{}).Where("name LIKE ?", name).Select("id").Scan(&result)
+	return result
 }
 
 func getIDForMealName(name string, db *gorm.DB) int32 {
-	return 0
+	var result int32
+	db.Model(cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("id").Scan(&result)
+	return result
 }
 
 /*
