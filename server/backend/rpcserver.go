@@ -63,30 +63,63 @@ const CAFETERIA_TAG = 2
 Writes all available tags from the json file into tables in order to make them easier to use
 */
 func initTagRatingOptions(db *gorm.DB) {
-	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
-	tagsNames := generateNameTagListFromFile(absPathMealNames)
-
 	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL_TAG)
 	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA_TAG)
+	updateNameTagOptions(db)
+}
 
-	//Meal Name Tags in Tables
+/*
+Updates the list of mealtags.
+
+*/
+func updateNameTagOptions(db *gorm.DB) {
+	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
+	tagsNames := generateNameTagListFromFile(absPathMealNames)
+	var elementID int32
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		parent := cafeteria_rating_models.MealRatingsTagsOptions{
-			NameDE: v.TagNameGerman,
-			NameEN: v.TagNameEnglish}
-		db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
-			Create(&parent)
+		var parentID int32
+
+		potentialTag := db.Model(cafeteria_rating_models.MealNameTagOptions{}).
+			Where("nameEN LIKE ?", v.TagNameEnglish).
+			Where("nameDE LIKE ?", v.TagNameGerman).
+			Select("id").
+			Scan(&parentID)
+
+		if potentialTag.RowsAffected == 0 {
+			parent := cafeteria_rating_models.MealRatingsTagsOptions{
+				NameDE: v.TagNameGerman,
+				NameEN: v.TagNameEnglish}
+
+			db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
+				Create(&parent)
+			parentID = parent.Id
+		}
+
 		for _, u := range v.Canbeincluded {
-			db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-				Create(&cafeteria_rating_models.MealNameTagOptionsIncluded{
-					Expression: u,
-					NameTagID:  parent.Id})
+			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+				Where("expression LIKE ?", v.TagNameEnglish).
+				Where("NameTagID = ?", parentID).
+				Select("id").
+				Scan(&elementID)
+			if resultIncluded.RowsAffected == 0 {
+				db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+					Create(&cafeteria_rating_models.MealNameTagOptionsIncluded{
+						Expression: u,
+						NameTagID:  parentID})
+			}
 		}
 		for _, u := range v.Notincluded {
-			db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-				Create(&cafeteria_rating_models.MealNameTagOptionsExcluded{
-					Expression: u,
-					NameTagID:  parent.Id})
+			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+				Where("expression LIKE ?", v.TagNameEnglish).
+				Where("NameTagID = ?", parentID).
+				Select("id").
+				Scan(&elementID)
+			if resultIncluded.RowsAffected == 0 {
+				db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+					Create(&cafeteria_rating_models.MealNameTagOptionsExcluded{
+						Expression: u,
+						NameTagID:  parentID})
+			}
 		}
 	}
 }
