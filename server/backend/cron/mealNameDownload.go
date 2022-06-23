@@ -46,7 +46,7 @@ func (c *CronService) mealNameDownloadCron() error {
 
 func downloadDailyMeals(c *CronService) {
 
-	c.db.Where("1=1").Delete(&cafeteria_rating_models.Dish{}) //Remove all meals of the previous week
+	c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
 
 	var result []string
 	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
@@ -76,7 +76,7 @@ func downloadDailyMeals(c *CronService) {
 			log.Println("Meals:")
 			for i := 0; i < len(meals.Days); i++ {
 				for u := 0; u < len(meals.Days[i].Dates); u++ {
-					meal := cafeteria_rating_models.Dish{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v}
+					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v}
 					c.db.Create(&meal)
 				}
 			}

@@ -109,18 +109,18 @@ func computeAverageForCafeteria(c *CronService) {
 		log.Println(res.Error)
 	} else {
 		for _, v := range results {
-			cafeteria := cafeteria_rating_models.CafeteriaRatingResult{
+			cafeteria := cafeteria_rating_models.CafeteriaRatingsAverage{
 				Cafeteria: v.Cafeteria,
 				Average:   v.Average,
 				Min:       v.Min,
 				Max:       v.Max,
 			} //todo add standard deviation
 
-			var existing *cafeteria_rating_models.CafeteriaRatingResult
-			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingResult{}).Where("cafeteria = ?", cafeteria.Cafeteria).First(&existing)
+			var existing *cafeteria_rating_models.CafeteriaRatingsAverage
+			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteria = ?", cafeteria.Cafeteria).First(&existing)
 
 			if testDish.RowsAffected == 1 {
-				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingResult{}).
+				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
 					Where("cafeteria = ?", cafeteria.Cafeteria).
 					Updates(cafeteria)
 

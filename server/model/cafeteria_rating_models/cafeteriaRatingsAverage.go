@@ -1,7 +1,7 @@
 package cafeteria_rating_models
 
 // News struct is a row record of the mensa table in the tca database
-type CafeteriaRatingResult struct {
+type CafeteriaRatingsAverage struct {
 	Id        int32   `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id" `
 	Cafeteria string  `gorm:"column:cafeteria;type:mediumtext;" json:"cafeteria"`
 	Average   float32 `gorm:"column:average;type:float;" json:"average" `
@@ -10,6 +10,6 @@ type CafeteriaRatingResult struct {
 }
 
 // TableName sets the insert table name for this struct type
-func (n *CafeteriaRatingResult) TableName() string {
+func (n *CafeteriaRatingsAverage) TableName() string {
 	return "cafeteria_rating_results"
 }

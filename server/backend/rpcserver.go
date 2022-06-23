@@ -57,15 +57,15 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
-const MEAL_TAG = 1
-const CAFETERIA_TAG = 2
+const MEAL = 1
+const CAFETERIA = 2
 
 /*
 Writes all available tags from the json file into tables in order to make them easier to use
 */
 func initTagRatingOptions(db *gorm.DB) {
-	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL_TAG)
-	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA_TAG)
+	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL)
+	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
 }
 
@@ -133,11 +133,11 @@ The TagType is used to identify the corresponding model
 func updateTagTable(path string, db *gorm.DB, tagType int) {
 	absPathMeal, _ := filepath.Abs(path)
 	tagsMeal := generateRatingTagListFromFile(absPathMeal)
-	insertModel := getModelByTag(tagType, db)
+	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsMeal.MultiLanguageTags {
 		var result int32
 
-		potentialTag := getModelByTag(tagType, db).
+		potentialTag := getTagModel(tagType, db).
 			Where("nameEN LIKE ?", v.TagNameEnglish).
 			Where("nameDE LIKE ?", v.TagNameGerman).
 			Select("id").
@@ -154,8 +154,8 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 	}
 }
 
-func getModelByTag(tagType int, db *gorm.DB) *gorm.DB {
-	if tagType == MEAL_TAG {
+func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
+	if tagType == MEAL {
 		return db.Model(cafeteria_rating_models.MealRatingsTagsOptions{})
 	} else {
 		return db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
@@ -334,30 +334,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 		Timestamp: time.Now()}
 
 	s.db.Model(cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
-
-	if len(input.Tags) > 0 {
-		for _, tag := range input.Tags {
-			//todo add rating to each tag once the proto file is fixed
-
-			usedTagIds := make(map[int]int)
-			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
-			var currentTag *cafeteria_rating_models.CafeteriaRatingsTagsOptions
-			exists := s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
-				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
-
-			if exists.RowsAffected > 0 && usedTagIds[int(currentTag.Id)] == 0 {
-
-				s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
-					Create(&cafeteria_rating_models.CafeteriaTagRating{
-						ParentRating: rating.Id,
-						Rating:       int32(5),
-						TagID:        int(currentTag.Id)})
-				usedTagIds[int(currentTag.Id)] = 1
-			} else {
-				log.Println("Invalid Tag Name, Tag", tag, "was not saved")
-			}
-		}
-	}
+	storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 
 	return &emptypb.Empty{}, nil
 }
@@ -379,11 +356,11 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
 	}
 
-	var dish *cafeteria_rating_models.Dish
-	testDish := s.db.Model(cafeteria_rating_models.Dish{Name: input.Meal, Cafeteria: input.CafeteriaName}).First(&dish)
+	var dish *cafeteria_rating_models.Meal
+	testDish := s.db.Model(cafeteria_rating_models.Meal{Name: input.Meal, Cafeteria: input.CafeteriaName}).First(&dish)
 
 	if testDish.RowsAffected != 1 {
-		return nil, status.Errorf(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
 	rating := cafeteria_rating_models.MealRating{
@@ -394,7 +371,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 
 	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
 
-	storeMealRatingTags(s, rating, input.Tags)
+	storeRatingTags(s, rating.Id, input.Tags, MEAL)
 	extractAndStoreMealNameTags(s, rating)
 
 	return &emptypb.Empty{}, nil
@@ -404,27 +381,44 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 Checks whether the rating-tag name is a valid option and if so,
 it will be saved with a reference to the rating
 */
-func storeMealRatingTags(s *CampusServer, rating cafeteria_rating_models.MealRating, tags []string) {
+func storeRatingTags(s *CampusServer, parentRatingID int32, tags []string, tagType int) {
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
+		insertModel := getModelStoreTag(tagType, s.db)
 		for _, tag := range tags {
-			//todo add rating to each tag once the proto file is fixed
+			var currentTag int
+			exists := getModelStoreTagOption(tagType, s.db).
+				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).
+				Select("id").
+				First(&currentTag)
 
-			// check if either the english or the german name exist in the available tags -> get the corresponding tag id and save entry to db
-			var currentTag *cafeteria_rating_models.MealRatingsTagsOptions
-			exists := s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
-				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).First(&currentTag)
-			if exists.RowsAffected > 0 && usedTagIds[int(currentTag.Id)] == 0 {
-				s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
+			if exists.RowsAffected > 0 && usedTagIds[currentTag] == 0 {
+				insertModel.
 					Create(&cafeteria_rating_models.MealRatingsTags{
-						ParentRating: rating.Id,
+						ParentRating: parentRatingID,
 						Rating:       int32(5),
-						TagID:        int(currentTag.Id)})
-				usedTagIds[int(currentTag.Id)] = 1
+						TagID:        currentTag})
+				usedTagIds[currentTag] = 1
 			} else {
 				log.Println("Invalid Tag Name, Tag", tag, "was not saved. Each Rating tag must be used at most once in a rating.")
 			}
 		}
+	}
+}
+
+func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
+	if tagType == MEAL {
+		return db.Model(cafeteria_rating_models.MealRatingsTagsOptions{})
+	} else {
+		return db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+	}
+}
+
+func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
+	if tagType == MEAL {
+		return db.Model(cafeteria_rating_models.MealRatingsTags{})
+	} else {
+		return db.Model(cafeteria_rating_models.CafeteriaRatingTags{})
 	}
 }
 
