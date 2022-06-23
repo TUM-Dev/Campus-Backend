@@ -56,52 +56,18 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
+const MEAL_TAG = 1
+const CAFETERIA_TAG = 2
+
 /*
 Writes all available tags from the json file into tables in order to make them easier to use
 */
 func initTagRatingOptions(db *gorm.DB) {
-	absPathMeal, _ := filepath.Abs("backend/static_data/mealRatingTags.json")
-	absPathCafeteria, _ := filepath.Abs("backend/static_data/cafeteriaRatingTags.json")
 	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
-	tagsMeal := generateRatingTagListFromFile(absPathMeal)
-	tagsCafeteria := generateRatingTagListFromFile(absPathCafeteria)
 	tagsNames := generateNameTagListFromFile(absPathMealNames)
 
-	//db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
-	//db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsTagsOptions{})
-
-	for _, v := range tagsMeal.MultiLanguageTags {
-		var result int32
-		potentialTag := db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
-			Where("nameEN LIKE ?", v.TagNameEnglish).
-			Where("nameDE LIKE ?", v.TagNameGerman).
-			Select("id").
-			Scan(&result)
-
-		if potentialTag.RowsAffected == 0 {
-			println("New entry inserted to Meal Rating Tag Options")
-			db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).
-				Create(&cafeteria_rating_models.MealRatingsTagsOptions{
-					NameDE: v.TagNameGerman,
-					NameEN: v.TagNameEnglish})
-		}
-	}
-
-	for _, v := range tagsCafeteria.MultiLanguageTags {
-		var result int32
-		potentialTag := db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
-			Where("nameEN LIKE ?", v.TagNameEnglish).
-			Where("nameDE LIKE ?", v.TagNameGerman).
-			Select("id").Scan(&result)
-
-		if potentialTag.RowsAffected == 0 {
-			println("New entry inserted to Cafeteria Rating Tag Options")
-			db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).
-				Create(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{
-					NameDE: v.TagNameGerman,
-					NameEN: v.TagNameEnglish})
-		}
-	}
+	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL_TAG)
+	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA_TAG)
 
 	//Meal Name Tags in Tables
 	for _, v := range tagsNames.MultiLanguageNameTags {
@@ -122,6 +88,43 @@ func initTagRatingOptions(db *gorm.DB) {
 					Expression: u,
 					NameTagID:  parent.Id})
 		}
+	}
+}
+
+/*
+Reads the json file at the given path and checks whether the values have already been inserted into the corresponding table.
+If an entry with the same German and English name exists, the entry won't be added.
+The TagType is used to identify the corresponding model
+*/
+func updateTagTable(path string, db *gorm.DB, tagType int) {
+	absPathMeal, _ := filepath.Abs(path)
+	tagsMeal := generateRatingTagListFromFile(absPathMeal)
+	insertModel := getModelByTag(tagType, db)
+	for _, v := range tagsMeal.MultiLanguageTags {
+		var result int32
+
+		potentialTag := getModelByTag(tagType, db).
+			Where("nameEN LIKE ?", v.TagNameEnglish).
+			Where("nameDE LIKE ?", v.TagNameGerman).
+			Select("id").
+			Scan(&result)
+
+		if potentialTag.RowsAffected == 0 {
+			println("New entry inserted to Rating Tag Options")
+			element := cafeteria_rating_models.MealRatingsTagsOptions{
+				NameDE: v.TagNameGerman,
+				NameEN: v.TagNameEnglish}
+			insertModel.
+				Create(&element)
+		}
+	}
+}
+
+func getModelByTag(tagType int, db *gorm.DB) *gorm.DB {
+	if tagType == MEAL_TAG {
+		return db.Model(cafeteria_rating_models.MealRatingsTagsOptions{})
+	} else {
+		return db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
 	}
 }
 
