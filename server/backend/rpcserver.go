@@ -299,8 +299,8 @@ func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb
 		for i, v := range ratings {
 			ratingResults[i] = &pb.MealRating{
 				Rating:        v.Rating,
-				Meal:          v.Meal,
-				CafeteriaName: v.Cafeteria,
+				Meal:          getNameForMealID(v.MealID, s.db),
+				CafeteriaName: getNameForCafeteriaID(v.CafeteriaID, s.db),
 				Comment:       v.Comment,
 			}
 		}
@@ -328,10 +328,10 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 	}
 
 	rating := cafeteria_rating_models.CafeteriaRating{
-		Comment:   input.Comment,
-		Rating:    input.Rating,
-		Cafeteria: input.CafeteriaName,
-		Timestamp: time.Now()}
+		Comment:     input.Comment,
+		Rating:      input.Rating,
+		CafeteriaID: getIDForCafeteriaName(input.CafeteriaName, s.db),
+		Timestamp:   time.Now()}
 
 	s.db.Model(cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
 	storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
@@ -357,15 +357,15 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	}
 
 	var dish *cafeteria_rating_models.Meal
-	testDish := s.db.Model(cafeteria_rating_models.Meal{Name: input.Meal, Cafeteria: input.CafeteriaName}).First(&dish)
 
+	testDish := s.db.Model(cafeteria_rating_models.Meal{Name: input.Meal, CafeteriaID: getIDForCafeteriaName(input.CafeteriaName, s.db)}).First(&dish)
 	if testDish.RowsAffected != 1 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
 	rating := cafeteria_rating_models.MealRating{
 		Comment:   input.Comment,
-		Meal:      input.Meal,
+		MealID:    getIDForMealName(input.Meal, s.db),
 		Rating:    input.Rating,
 		Timestamp: time.Now()}
 
@@ -422,12 +422,28 @@ func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 	}
 }
 
+func getNameForCafeteriaID(id int32, db *gorm.DB) string {
+	return "test123"
+}
+
+func getNameForMealID(id int32, db *gorm.DB) string {
+	return "test123"
+}
+
+func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
+	return 0
+}
+
+func getIDForMealName(name string, db *gorm.DB) int32 {
+	return 0
+}
+
 /*
 Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
 The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
 */
 func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating) {
-	lowercaseMeal := strings.ToLower(rating.Meal)
+	lowercaseMeal := strings.ToLower(getNameForMealID(rating.MealID, s.db))
 	var includedTags []int
 	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).

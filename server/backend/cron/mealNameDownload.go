@@ -16,6 +16,11 @@ type CafeteriaName struct {
 	Location Location `json:"location"`
 }
 
+type CafeteriaWithID struct {
+	Name string `json:"name"`
+	Id   int32  `json:"id"`
+}
+
 type Location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
@@ -48,12 +53,12 @@ func downloadDailyMeals(c *CronService) {
 
 	c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
 
-	var result []string
-	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name").Scan(&result)
+	var result []CafeteriaWithID
+	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
 
 	for _, v := range result {
 
-		cafeteriaName := strings.Replace(strings.ToLower(v), "_", "-", 10)
+		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 		log.Println(cafeteriaName)
 		y, w := time.Now().UTC().ISOWeek()
 
@@ -76,7 +81,7 @@ func downloadDailyMeals(c *CronService) {
 			log.Println("Meals:")
 			for i := 0; i < len(meals.Days); i++ {
 				for u := 0; u < len(meals.Days[i].Dates); u++ {
-					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v}
+					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, Cafeteria: v.Id}
 					c.db.Create(&meal)
 				}
 			}
@@ -101,6 +106,7 @@ func downloadCanteenNames(c *CronService) {
 		log.Fatalln(errjson)
 	}
 
+	//todo add correct update syntax, only insert if it did not exist yet
 	// store canteen information in mensa db
 	for i := 0; i < len(cafeteriaNames); i++ {
 		mensa := cafeteria_rating_models.Cafeteria{Id: int32(i), Name: cafeteriaNames[i].Name, Address: cafeteriaNames[i].Location.Address, Latitude: cafeteriaNames[i].Location.Latitude, Longitude: cafeteriaNames[i].Location.Longitude}

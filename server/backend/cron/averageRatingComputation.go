@@ -6,18 +6,18 @@ import (
 )
 
 type averageRatingForCafeteria struct {
-	Cafeteria string  `json:"cafeteria"`
-	Average   float32 `json:"average"`
-	Min       int     `json:"min"`
-	Max       int     `json:"max"`
+	CafeteriaID int32   `json:"cafeteria"`
+	Average     float32 `json:"average"`
+	Min         int8    `json:"min"`
+	Max         int8    `json:"max"`
 }
 
 type averageRatingForMealInCafeteria struct {
-	Cafeteria string  `json:"cafeteria"`
-	Meal      string  `json:"meal"`
-	Average   float32 `json:"average"`
-	Min       int     `json:"min"`
-	Max       int     `json:"max"`
+	CafeteriaID int32   `json:"cafeteria"`
+	MealID      int32   `json:"meal"`
+	Average     float32 `json:"average"`
+	Min         int8    `json:"min"`
+	Max         int8    `json:"max"`
 }
 
 //regularly computes the average rating for every cafeteria
@@ -51,6 +51,26 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 	//nach der tagID gruppieren
 
+	/*c.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+	Select("id,rating,cafeteria").
+	Joins("left join emails on emails.user_id = users.id").
+	Scan(&result{})
+	*/
+	/*res, err := c.db.Model(cafeteria_rating_models.MealRatingsTags{}).
+	Select("cafeteria, meal, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
+	Group("cafeteria,meal").Joins().Rows()
+	*/
+	/*
+			Schtitte; erstmal das jion verstehen
+		Meal anme tags passen noch nciht ganz -> sollten final keinen namen enthalten, sondern nur den key
+	*/
+
+	/*if err != nil {
+		println("Error in query")
+	}
+
+	println(res.ColumnTypes())
+	*/
 }
 
 func computeAverageForMealsInCafeterias(c *CronService) {
@@ -65,30 +85,30 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 	} else {
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.MealRatingsAverage{
-				Cafeteria: v.Cafeteria,
-				Average:   float32(v.Average),
-				Meal:      v.Meal,
-				Min:       v.Min,
-				Max:       v.Max,
+				CafeteriaID: v.CafeteriaID,
+				Average:     float32(v.Average),
+				MealID:      v.MealID,
+				Min:         v.Min,
+				Max:         v.Max,
 			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.MealRatingsAverage
 			testDish := c.db.Model(cafeteria_rating_models.MealRatingsAverage{}).
-				Where("cafeteria = ?", cafeteria.Cafeteria).
-				Where("meal = ?", cafeteria.Meal).
+				Where("cafeteria = ?", cafeteria.CafeteriaID).
+				Where("meal = ?", cafeteria.MealID).
 				First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-					Where("cafeteria = ?", cafeteria.Cafeteria).
-					Where("meal = ?", cafeteria.Meal).
+					Where("cafeteria = ?", cafeteria.CafeteriaID).
+					Where("meal = ?", cafeteria.MealID).
 					Updates(cafeteria)
 
 				if errUpdate.Error != nil {
 					log.Println(errUpdate.Error)
 				}
 			} else {
-				log.Println("New average rating will be created for cafeteria: ", v.Cafeteria)
+				log.Println("New average rating will be created for cafeteria with ID: ", v.CafeteriaID)
 				errCreate := c.db.Create(&cafeteria)
 				if errCreate.Error != nil {
 					log.Println(errCreate.Error)
@@ -110,25 +130,25 @@ func computeAverageForCafeteria(c *CronService) {
 	} else {
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.CafeteriaRatingsAverage{
-				Cafeteria: v.Cafeteria,
-				Average:   v.Average,
-				Min:       v.Min,
-				Max:       v.Max,
+				CafeteriaID: v.CafeteriaID,
+				Average:     v.Average,
+				Min:         v.Min,
+				Max:         v.Max,
 			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.CafeteriaRatingsAverage
-			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteria = ?", cafeteria.Cafeteria).First(&existing)
+			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteria = ?", cafeteria.CafeteriaID).First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
-					Where("cafeteria = ?", cafeteria.Cafeteria).
+					Where("cafeteria = ?", cafeteria.CafeteriaID).
 					Updates(cafeteria)
 
 				if errUpdate.Error != nil {
 					log.Println(errUpdate.Error)
 				}
 			} else {
-				log.Println("New rating will be created for cafeteria: ", v.Cafeteria)
+				log.Println("New rating will be created for cafeteria: ", v.CafeteriaID)
 				errCreate := c.db.Create(&cafeteria)
 				if errCreate.Error != nil {
 					log.Println(errCreate.Error)
