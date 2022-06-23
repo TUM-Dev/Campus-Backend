@@ -416,11 +416,6 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		}
 	}
 
-	/*
-		1. Alle einträge sammeln, auf die included/excluded zutrifft
-		2. besonderen join nehmen -> alles subtrahieren aus der excluded version
-		3. in der tagbelle mit nametagratings abspeichern mit der meal id und der
-	*/
 	//todo potentiell ein to lowercase für den namen ausführen
 	var includedTags []int
 	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
@@ -433,11 +428,38 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		Where("? LIKE CONCAT('%', expression ,'%')", input.Meal).
 		Select("nameTagID").
 		Scan(&excludedTags)
-	//todo den join verwenden, bei dem nur die einträge übrig bleiben, die nicht im anderen enthalten sind
 
 	log.Println(len(includedTags))
 
+	//set all entries in included to -1 if the excluded tag was recognised ffor this tag rating.
+	if len(excludedTags) > 0 {
+		for _, a := range excludedTags {
+			i := contains(includedTags, a)
+			if i != -1 {
+				includedTags[i] = -1
+			}
+		}
+	}
+
+	for _, a := range includedTags {
+		s.db.Model(&cafeteria_rating_models.MealNameTags{}).
+			Create(&cafeteria_rating_models.MealNameTags{
+				ParentRating: rating.Id,
+				Rating:       input.Rating,
+				TagID:        a,
+			})
+	}
+
 	return &emptypb.Empty{}, nil
+}
+
+func contains(s []int, e int) int {
+	for i, a := range s {
+		if a == e {
+			return i
+		}
+	}
+	return -1
 }
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
