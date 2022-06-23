@@ -9,5 +9,5 @@ type MealRatingsTags struct {
 
 // TableName sets the insert table name for this struct type
 func (n *MealRatingsTags) TableName() string {
-	return "meal_rating_tags_options"
+	return "meal_rating_tags"
 }

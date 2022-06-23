@@ -7,3 +7,8 @@ type CafeteriaRatingTags struct {
 	Rating       int32 `gorm:"column:rating;type:int;" json:"rating"`
 	TagID        int   `gorm:"foreignKey:tagRatingID;column:tagID;type:int" json:"tagID"`
 }
+
+// TableName sets the insert table name for this struct type
+func (n *CafeteriaRatingTags) TableName() string {
+	return "cafeteria_rating_tags"
+}

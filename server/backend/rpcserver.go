@@ -321,10 +321,11 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{Name: input.CafeteriaName}).First(&result)
-
-	if testCanteen.RowsAffected != 1 {
-		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
+	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{}).
+		Where("name LIKE ?", input.CafeteriaName).
+		First(&result)
+	if testCanteen.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
 	rating := cafeteria_rating_models.CafeteriaRating{
@@ -350,16 +351,20 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{Name: input.CafeteriaName}).First(&result)
-
-	if testCanteen.RowsAffected != 1 {
-		return nil, status.Errorf(codes.InvalidArgument, "Mensa does not exist. Rating has not been saved.")
+	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{}).
+		Where("name LIKE ?", input.CafeteriaName).
+		First(&result)
+	if testCanteen.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
 	var dish *cafeteria_rating_models.Meal
 
-	testDish := s.db.Model(cafeteria_rating_models.Meal{Name: input.Meal, CafeteriaID: getIDForCafeteriaName(input.CafeteriaName, s.db)}).First(&dish)
-	if testDish.RowsAffected != 1 {
+	testDish := s.db.Model(cafeteria_rating_models.Meal{}).
+		Where("name LIKE ?", input.Meal).
+		Where("cafeteriaID == ", getIDForCafeteriaName(input.CafeteriaName, s.db)).
+		First(&dish)
+	if testDish.RowsAffected == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
@@ -369,10 +374,10 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		Rating:    input.Rating,
 		Timestamp: time.Now()}
 
-	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating)
+	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating) //todo durcheinander mit meal und dish -< potentiell überall anpassen
 
 	storeRatingTags(s, rating.Id, input.Tags, MEAL)
-	extractAndStoreMealNameTags(s, rating)
+	extractAndStoreMealNameTags(s, rating, input.Meal)
 
 	return &emptypb.Empty{}, nil
 }
@@ -430,7 +435,7 @@ func getNameForCafeteriaID(id int32, db *gorm.DB) string {
 
 func getNameForMealID(id int32, db *gorm.DB) string {
 	var result string
-	db.Model(&cafeteria_rating_models.Meal{}).Where("id = ?", id).Select("name").First(&result) //Scan(&result)
+	db.Model(&cafeteria_rating_models.Meal{}).Where("dish = ?", id).Select("name").First(&result) //Scan(&result)
 	return result
 }
 
@@ -441,8 +446,8 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 }
 
 func getIDForMealName(name string, db *gorm.DB) int32 {
-	var result int32
-	db.Model(cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("id").Scan(&result)
+	var result int32 = -1
+	db.Model(cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("dish").Scan(&result)
 	return result
 }
 
@@ -450,8 +455,8 @@ func getIDForMealName(name string, db *gorm.DB) int32 {
 Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
 The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
 */
-func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating) {
-	lowercaseMeal := strings.ToLower(getNameForMealID(rating.MealID, s.db))
+func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
+	lowercaseMeal := strings.ToLower(meal)
 	var includedTags []int
 	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).

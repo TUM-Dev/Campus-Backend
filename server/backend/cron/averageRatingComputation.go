@@ -6,15 +6,15 @@ import (
 )
 
 type averageRatingForCafeteria struct {
-	CafeteriaID int32   `json:"cafeteria"`
+	CafeteriaID int32   `json:"cafeteriaID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
 }
 
 type averageRatingForMealInCafeteria struct {
-	CafeteriaID int32   `json:"cafeteria"`
-	MealID      int32   `json:"meal"`
+	CafeteriaID int32   `json:"cafeteriaID"`
+	MealID      int32   `json:"mealID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
@@ -76,8 +76,8 @@ func computeAverageCafeteriaTags(c *CronService) {
 func computeAverageForMealsInCafeterias(c *CronService) {
 	var results []averageRatingForMealInCafeteria
 	res := c.db.Model(cafeteria_rating_models.MealRating{}).
-		Select("cafeteria, meal, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
-		Group("cafeteria,meal").Find(&results)
+		Select("cafeteriaID, mealID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
+		Group("cafeteriaID,mealID").Find(&results)
 
 	if res.Error != nil {
 		log.Println("Error in query")
@@ -121,8 +121,8 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 func computeAverageForCafeteria(c *CronService) {
 	var results []averageRatingForCafeteria
 	res := c.db.Model(cafeteria_rating_models.CafeteriaRating{}).
-		Select("cafeteria, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
-		Group("cafeteria").Find(&results)
+		Select("cafeteriaID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
+		Group("cafeteriaID").Find(&results)
 
 	if res.Error != nil {
 		log.Println("Error in query")
@@ -137,11 +137,11 @@ func computeAverageForCafeteria(c *CronService) {
 			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.CafeteriaRatingsAverage
-			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteria = ?", cafeteria.CafeteriaID).First(&existing)
+			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteriaID = ?", cafeteria.CafeteriaID).First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
-					Where("cafeteria = ?", cafeteria.CafeteriaID).
+					Where("cafeteriaID = ?", cafeteria.CafeteriaID).
 					Updates(cafeteria)
 
 				if errUpdate.Error != nil {

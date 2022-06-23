@@ -12,7 +12,7 @@ var (
 
 // News struct is a row record of the mensa table in the tca database
 type Meal struct {
-	Id          int32  `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id"`
+	Dish        int32  `gorm:"primary_key;AUTO_INCREMENT;column:dish;type:int;" json:"dish"`
 	Name        string `gorm:"column:name;type:varchar;size:150;;" json:"name" `
 	Type        string `gorm:"column:type;type:varchar;size:20;" json:"type" `
 	CafeteriaID int32  `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`

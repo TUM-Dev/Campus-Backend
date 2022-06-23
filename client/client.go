@@ -70,13 +70,9 @@ func createCafeteriaRatingSampleData() {
 
 	c.NewMealRating(ctx, &pb.NewRating{
 		Rating:        int32(8),
-		CafeteriaName: "MENSA_ARCISSTR",
-		Meal:          "rinder",
+		CafeteriaName: "MENSA_GARCHING",
+		Meal:          "Karottengemüse",
 		Comment:       "Alles Hähnchen",
 		Tags:          y,
 	})
-
-	if errRequest != nil {
-		log.Println(err)
-	}
 }
