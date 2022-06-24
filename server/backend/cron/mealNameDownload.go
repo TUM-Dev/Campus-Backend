@@ -106,12 +106,25 @@ func downloadCanteenNames(c *CronService) {
 		log.Fatalln(errjson)
 	}
 
-	//todo add correct update syntax, only insert if it did not exist yet
-	// store canteen information in mensa db
 	for i := 0; i < len(cafeteriaNames); i++ {
-		mensa := cafeteria_rating_models.Cafeteria{Id: int32(i), Name: cafeteriaNames[i].Name, Address: cafeteriaNames[i].Location.Address, Latitude: cafeteriaNames[i].Location.Latitude, Longitude: cafeteriaNames[i].Location.Longitude}
-		if c.db.Model(&mensa).Where("name = ?", cafeteriaNames[i].Name).Updates(&mensa).RowsAffected == 0 {
-			c.db.Create(&mensa)
+
+		mensa := cafeteria_rating_models.Cafeteria{
+			Id:        int32(i),
+			Name:      cafeteriaNames[i].Name,
+			Address:   cafeteriaNames[i].Location.Address,
+			Latitude:  cafeteriaNames[i].Location.Latitude,
+			Longitude: cafeteriaNames[i].Location.Longitude,
+		}
+		var cafetriaResult cafeteria_rating_models.Cafeteria
+		res := c.db.Model(&cafeteria_rating_models.Cafeteria{}).
+			Where("name = ?", cafeteriaNames[i].Name).
+			First(&cafetriaResult)
+		if res.RowsAffected == 0 {
+			c.db.Model(&cafeteria_rating_models.Cafeteria{}).Create(&mensa)
+		} else {
+			c.db.Model(&cafeteria_rating_models.Cafeteria{}).
+				Where("name = ?", cafeteriaNames[i].Name).
+				Updates(&mensa)
 		}
 	}
 
