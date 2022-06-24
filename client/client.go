@@ -52,27 +52,48 @@ func createCafeteriaRatingSampleData() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING")
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Tagessuppe")
+
+}
+
+func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string) {
 	y := make([]string, 3)
-	for i := 0; i < 3; i++ {
-		y[i] = "Spicy"
-	}
+	y[0] = "Füllgrad"
+	y[1] = "Sauberkeit"
+	y[2] = "Anzahl an Plätzen"
 
-	_, errRequest := c.NewCafeteriaRating(ctx, &pb.NewRating{
-		Rating:        int32(8),
-		CafeteriaName: "MENSA_ARCISSTR",
-		Comment:       "Alles Hähnchen",
+	_, err := c.NewCafeteriaRating(ctx, &pb.NewRating{
+		Rating:        int32(2),
+		CafeteriaName: cafeteria,
+		Comment:       "Alles super, 2 Sterne",
 		Tags:          y,
 	})
 
-	if errRequest != nil {
+	if err != nil {
 		log.Println(err)
+	} else {
+		log.Println("Request successfully: Cafeteria Rating should be stored")
 	}
+}
 
-	c.NewMealRating(ctx, &pb.NewRating{
+func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string, meal string) {
+	y := make([]string, 3)
+	y[0] = "Spicy"
+	y[1] = "Salz"
+	y[2] = "Preis"
+
+	_, err := c.NewMealRating(ctx, &pb.NewRating{
 		Rating:        int32(8),
-		CafeteriaName: "MENSA_GARCHING",
-		Meal:          "Karottengemüse",
+		CafeteriaName: cafeteria,
+		Meal:          meal,
 		Comment:       "Alles Hähnchen",
 		Tags:          y,
 	})
+
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("Request successfully: Meal Rating should be stored")
+	}
 }

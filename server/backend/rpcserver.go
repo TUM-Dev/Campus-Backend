@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -80,9 +79,8 @@ func updateNameTagOptions(db *gorm.DB) {
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		var parentID int32
 
-		potentialTag := db.Model(cafeteria_rating_models.MealNameTagOptions{}).
-			Where("nameEN LIKE ?", v.TagNameEnglish).
-			Where("nameDE LIKE ?", v.TagNameGerman).
+		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
+			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("id").
 			Scan(&parentID)
 
@@ -156,9 +154,9 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 
 func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(cafeteria_rating_models.MealRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
 	} else {
-		return db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
 	}
 }
 
@@ -321,7 +319,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{}).
+	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
 		Where("name LIKE ?", input.CafeteriaName).
 		First(&result)
 	if testCanteen.RowsAffected == 0 {
@@ -334,7 +332,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 		CafeteriaID: getIDForCafeteriaName(input.CafeteriaName, s.db),
 		Timestamp:   time.Now()}
 
-	s.db.Model(cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
+	s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
 	storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 
 	return &emptypb.Empty{}, nil
@@ -351,7 +349,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(cafeteria_rating_models.Cafeteria{}).
+	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
 		Where("name LIKE ?", input.CafeteriaName).
 		First(&result)
 	if testCanteen.RowsAffected == 0 {
@@ -359,10 +357,9 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	}
 
 	var dish *cafeteria_rating_models.Meal
-
-	testDish := s.db.Model(cafeteria_rating_models.Meal{}).
-		Where("name LIKE ?", input.Meal).
-		Where("cafeteriaID == ", getIDForCafeteriaName(input.CafeteriaName, s.db)).
+	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
+	testDish := s.db.Model(&cafeteria_rating_models.Meal{}).
+		Where("name LIKE ? AND cafeteriaID = ?", input.Meal, cafeteriaID).
 		First(&dish)
 	if testDish.RowsAffected == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
@@ -374,7 +371,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		Rating:    input.Rating,
 		Timestamp: time.Now()}
 
-	s.db.Model(cafeteria_rating_models.MealRating{}).Create(&rating) //todo durcheinander mit meal und dish -< potentiell überall anpassen
+	s.db.Model(&cafeteria_rating_models.MealRating{}).Create(&rating)
 
 	storeRatingTags(s, rating.Id, input.Tags, MEAL)
 	extractAndStoreMealNameTags(s, rating, input.Meal)
@@ -392,8 +389,9 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []string, tagTy
 		insertModel := getModelStoreTag(tagType, s.db)
 		for _, tag := range tags {
 			var currentTag int
+			log.Println("tag: ", tag)
 			exists := getModelStoreTagOption(tagType, s.db).
-				Where("nameEN = @name OR nameDE = @name", sql.Named("name", tag)).
+				Where("nameEN LIKE ? OR nameDE LIKE ?", tag, tag).
 				Select("id").
 				First(&currentTag)
 
@@ -413,17 +411,17 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []string, tagTy
 
 func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(cafeteria_rating_models.MealRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
 	} else {
-		return db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
 	}
 }
 
 func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(cafeteria_rating_models.MealRatingsTags{})
+		return db.Model(&cafeteria_rating_models.MealRatingsTags{})
 	} else {
-		return db.Model(cafeteria_rating_models.CafeteriaRatingTags{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingTags{})
 	}
 }
 
@@ -441,13 +439,13 @@ func getNameForMealID(id int32, db *gorm.DB) string {
 
 func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	var result int32
-	db.Model(cafeteria_rating_models.Cafeteria{}).Where("name LIKE ?", name).Select("id").Scan(&result)
+	db.Model(&cafeteria_rating_models.Cafeteria{}).Where("name LIKE ?", name).Select("id").Scan(&result)
 	return result
 }
 
 func getIDForMealName(name string, db *gorm.DB) int32 {
 	var result int32 = -1
-	db.Model(cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("dish").Scan(&result)
+	db.Model(&cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("dish").Scan(&result)
 	return result
 }
 
@@ -458,13 +456,13 @@ The corresponding tags for all identified MealNames will be saved in the table M
 func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
 	lowercaseMeal := strings.ToLower(meal)
 	var includedTags []int
-	s.db.Model(cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+	s.db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&includedTags)
 
 	var excludedTags []int
-	s.db.Model(cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+	s.db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&excludedTags)
@@ -504,7 +502,7 @@ func contains(s []int, e int) int {
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []string
-	s.db.Model(cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE").Scan(&result)
+	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE").Scan(&result)
 
 	return &pb.GetRatingTagsReply{
 		Tags: result,
@@ -513,7 +511,7 @@ func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empt
 
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []string
-	s.db.Model(cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE").Scan(&result)
+	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE").Scan(&result)
 
 	return &pb.GetRatingTagsReply{
 		Tags: result,

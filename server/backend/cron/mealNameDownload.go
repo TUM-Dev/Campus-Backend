@@ -54,7 +54,7 @@ func downloadDailyMeals(c *CronService) {
 	c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
 
 	var result []CafeteriaWithID
-	c.db.Model(cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
+	c.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
 
 	for _, v := range result {
 

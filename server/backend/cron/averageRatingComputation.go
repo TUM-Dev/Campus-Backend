@@ -75,7 +75,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 func computeAverageForMealsInCafeterias(c *CronService) {
 	var results []averageRatingForMealInCafeteria
-	res := c.db.Model(cafeteria_rating_models.MealRating{}).
+	res := c.db.Model(&cafeteria_rating_models.MealRating{}).
 		Select("cafeteriaID, mealID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
 		Group("cafeteriaID,mealID").Find(&results)
 
@@ -93,15 +93,15 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.MealRatingsAverage
-			testDish := c.db.Model(cafeteria_rating_models.MealRatingsAverage{}).
-				Where("cafeteria = ?", cafeteria.CafeteriaID).
-				Where("meal = ?", cafeteria.MealID).
+			testDish := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
+				Where("cafeteriaID = ?", cafeteria.CafeteriaID).
+				Where("mealID = ?", cafeteria.MealID).
 				First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-					Where("cafeteria = ?", cafeteria.CafeteriaID).
-					Where("meal = ?", cafeteria.MealID).
+					Where("cafeteriaID = ?", cafeteria.CafeteriaID).
+					Where("mealID = ?", cafeteria.MealID).
 					Updates(cafeteria)
 
 				if errUpdate.Error != nil {
@@ -109,7 +109,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				}
 			} else {
 				log.Println("New average rating will be created for cafeteria with ID: ", v.CafeteriaID)
-				errCreate := c.db.Create(&cafeteria)
+				errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria)
 				if errCreate.Error != nil {
 					log.Println(errCreate.Error)
 				}
@@ -120,7 +120,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 
 func computeAverageForCafeteria(c *CronService) {
 	var results []averageRatingForCafeteria
-	res := c.db.Model(cafeteria_rating_models.CafeteriaRating{}).
+	res := c.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
 		Select("cafeteriaID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
 		Group("cafeteriaID").Find(&results)
 
@@ -137,7 +137,7 @@ func computeAverageForCafeteria(c *CronService) {
 			} //todo add standard deviation
 
 			var existing *cafeteria_rating_models.CafeteriaRatingsAverage
-			testDish := c.db.Model(cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteriaID = ?", cafeteria.CafeteriaID).First(&existing)
+			testDish := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteriaID = ?", cafeteria.CafeteriaID).First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
