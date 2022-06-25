@@ -6,14 +6,14 @@ import (
 )
 
 type averageRatingForCafeteria struct {
-	CafeteriaID int32   `json:"cafeteriaID"`
+	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
 }
 
 type averageRatingForMealInCafeteria struct {
-	CafeteriaID int32   `json:"cafeteriaID"`
+	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	MealID      int32   `json:"mealID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
@@ -30,9 +30,11 @@ type averageCafeteriaTags struct {
 
 //regularly computes the average rating for every cafeteria
 func (c *CronService) averageRatingComputation() error {
-	computeAverageForCafeteria(c)
-	computeAverageForMealsInCafeterias(c)
 	computeAverageCafeteriaTags(c)
+	computeAverageForMealsInCafeterias(c)
+	computeAverageForCafeteria(c)
+
+	//	computeAverageCafeteriaTags(c)
 	return nil
 }
 
@@ -42,7 +44,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.rating) as average, MAX(crt.rating) as max, MIN(crt.rating) as min" +
 		" FROM cafeteria_rating cr" +
 		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
-		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results)
+		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results).Error
 
 	if err != nil {
 		log.Println(err)
@@ -109,7 +111,7 @@ func computeAverageForCafeteria(c *CronService) {
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.CafeteriaRatingsAverage{
 				CafeteriaID: v.CafeteriaID,
-				Average:     v.Average,
+				Average:     float32(v.Average),
 				Min:         v.Min,
 				Max:         v.Max,
 			} //todo add standard deviation
