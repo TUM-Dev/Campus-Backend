@@ -20,11 +20,24 @@ type averageRatingForMealInCafeteria struct {
 	Max         int8    `json:"max"`
 }
 
+type averageCafeteriaTags struct {
+	cafeteria_rating_models.Cafeteria
+	Id          int
+	CafeteriaID int `gorm:"ForeignKey:mensaID"`
+	Rating      int
+}
+
+type averageCafeteriaTagsTest struct {
+	CafeteriaID int32   `json:"cafeteria_rating.cafeteriaID"`
+	TagID       int32   `json:"cafeteria_rating_tags.tagID"`
+	Average     float32 `json:"cafeteria_rating_tags.rating"`
+}
+
 //regularly computes the average rating for every cafeteria
 func (c *CronService) averageRatingComputation() error {
 
-	computeAverageForCafeteria(c)
-	computeAverageForMealsInCafeterias(c)
+	//computeAverageForCafeteria(c)
+	//computeAverageForMealsInCafeterias(c)
 	computeAverageCafeteriaTags(c)
 	return nil
 }
@@ -71,13 +84,82 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 	println(res.ColumnTypes())
 	*/
+
+	/*
+		todo
+		cafeteriarating x prating tags um anhand der parent rating idceafeteriRating.id jedem tagrating eine mensa id zuzuordnen, dann zweimal gruppieren
+		(erst nach mensa,dann anch dem tag) und jweeils den durchschnitt bestimmen
+
+
+		join:
+		aus dem normalen rating muss nur die id as cafeteriaID übernimen werden, aus dem rating_tags alles bis auf das parent rating
+	*/
+
+	//cafeteria_rating_tags.rating, cafeteria_rating_tags.id,
+	/*	var results []averageCafeteriaTags
+		err := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
+			Select("cafeteria_rating.cafeteriaID as cafeteriaID,AVG(cafeteria_rating_tags.rating) as average").
+			Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
+			Group("cafeteria_rating_tags.tagID").
+			Find(&results)*/
+
+	//todo erstmal die tabelle vorbereiten, dann daraus mit dem average querien.
+	/*var results []averageCafeteriaTags
+	err := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
+		Select("cafeteria_rating_tags.tagID as tagID,AVG(cafeteria_rating_tags.rating) as average").
+		Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
+		Group("tagID,cafeteria_rating.cafeteriaID").
+		Scan(&results)*/
+
+	/*	db := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
+			Select("cafeteria_rating_tags.*, cafeteria_rating.*").
+			Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
+			Group("tagID,cafeteria_rating.cafeteriaID")
+		//zweiter teil des groups: cafeteria_rating.cafeteriaID,cafeteria_rating_tags.id
+
+		var result []averageCafeteriaTagsTest
+		test := db.First(&result)
+		println(test.Error)
+		println(result)*/
+
+	/*var res []averageCafeteriaTags
+	err := c.db.Raw("SELECT cr.cafeteriaID, crt.tagID, AVG(crt.rating) as average " +
+		"FROM cafeteria_rating cr " +
+		"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
+		"GROUP BY cr.cafeteriaID").Scan(&res).Error*/
+
+	var res []averageCafeteriaTagsTest
+	err := c.db.Raw("SELECT cafeteriaID, tagID, AVG(rating) as average" +
+		" FROM (SELECT * FROM cafeteria_rating cr" +
+		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table").Scan(&res).Error
+
+	/*
+		+
+				" GROUP BY cafeteriaID"
+	*/
+	/*	var res []averageCafeteriaTags
+		err := c.db.Debug().Raw("SELECT cr.id, cr.cafeteriaID, cr.rating" +
+			" FROM cafeteria_rating cr" +
+			" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table" +
+			" WHERE cr.cafeteriaID = 1").Scan(&res)
+	*/
+	/*
+		todo lässt es sich nur nicht auslesen, da es ein foreing key ist?
+	*/
+	/*
+		 +
+				"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating"
+	*/
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func computeAverageForMealsInCafeterias(c *CronService) {
 	var results []averageRatingForMealInCafeteria
 	res := c.db.Model(&cafeteria_rating_models.MealRating{}).
 		Select("cafeteriaID, mealID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
-		Group("cafeteriaID,mealID").Find(&results)
+		Group("cafeteriaID,mealID").Scan(&results)
 
 	if res.Error != nil {
 		log.Println("Error in query")
@@ -94,14 +176,12 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 
 			var existing *cafeteria_rating_models.MealRatingsAverage
 			testDish := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-				Where("cafeteriaID = ?", cafeteria.CafeteriaID).
-				Where("mealID = ?", cafeteria.MealID).
+				Where("cafeteriaID = ? AND mealID = ?", cafeteria.CafeteriaID, cafeteria.MealID).
 				First(&existing)
 
 			if testDish.RowsAffected == 1 {
 				errUpdate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-					Where("cafeteriaID = ?", cafeteria.CafeteriaID).
-					Where("mealID = ?", cafeteria.MealID).
+					Where("cafeteriaID = ? AND mealID = ?", cafeteria.CafeteriaID, cafeteria.MealID).
 					Updates(cafeteria)
 
 				if errUpdate.Error != nil {

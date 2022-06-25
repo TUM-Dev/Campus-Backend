@@ -96,8 +96,7 @@ func updateNameTagOptions(db *gorm.DB) {
 
 		for _, u := range v.Canbeincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-				Where("expression LIKE ?", v.TagNameEnglish).
-				Where("NameTagID = ?", parentID).
+				Where("expression LIKE ? AND NameTagID = ?", v.TagNameEnglish, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
@@ -109,8 +108,7 @@ func updateNameTagOptions(db *gorm.DB) {
 		}
 		for _, u := range v.Notincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-				Where("expression LIKE ?", v.TagNameEnglish).
-				Where("NameTagID = ?", parentID).
+				Where("expression LIKE ? AND NameTagID = ?", v.TagNameEnglish, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
@@ -136,8 +134,7 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 		var result int32
 
 		potentialTag := getTagModel(tagType, db).
-			Where("nameEN LIKE ?", v.TagNameEnglish).
-			Where("nameDE LIKE ?", v.TagNameGerman).
+			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("id").
 			Scan(&result)
 
@@ -255,8 +252,8 @@ func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.Ge
 func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
 	var result cafeteria_rating_models.MealRatingsAverage
 	err := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-		Where("cafeteria = ?", input.CafeteriaName).
-		Where("meal = ?", input.Meal).First(&result)
+		Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
+		First(&result)
 
 	if err.Error != nil {
 		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
@@ -282,8 +279,8 @@ func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb
 	var ratings []cafeteria_rating_models.MealRating
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
-			Where("cafeteria = ?", input.CafeteriaName).
-			Where("meal = ?", input.Meal).First(&ratings).
+			Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
+			First(&ratings).
 			Limit(int(input.Limit)).
 			Find(ratings)
 
@@ -389,7 +386,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []string, tagTy
 		insertModel := getModelStoreTag(tagType, s.db)
 		for _, tag := range tags {
 			var currentTag int
-			log.Println("tag: ", tag)
+
 			exists := getModelStoreTagOption(tagType, s.db).
 				Where("nameEN LIKE ? OR nameDE LIKE ?", tag, tag).
 				Select("id").
@@ -427,25 +424,37 @@ func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 
 func getNameForCafeteriaID(id int32, db *gorm.DB) string {
 	var result string
-	db.Model(&cafeteria_rating_models.Cafeteria{}).Where("id = ?", id).Select("name").First(&result)
+	db.Model(&cafeteria_rating_models.Cafeteria{}).
+		Where("id = ?", id).
+		Select("name").
+		First(&result)
 	return result
 }
 
 func getNameForMealID(id int32, db *gorm.DB) string {
 	var result string
-	db.Model(&cafeteria_rating_models.Meal{}).Where("dish = ?", id).Select("name").First(&result) //Scan(&result)
+	db.Model(&cafeteria_rating_models.Meal{}).
+		Where("dish = ?", id).
+		Select("name").
+		First(&result) //Scan(&result)
 	return result
 }
 
 func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	var result int32
-	db.Model(&cafeteria_rating_models.Cafeteria{}).Where("name LIKE ?", name).Select("id").Scan(&result)
+	db.Model(&cafeteria_rating_models.Cafeteria{}).
+		Where("name LIKE ?", name).
+		Select("id").
+		Scan(&result)
 	return result
 }
 
 func getIDForMealName(name string, db *gorm.DB) int32 {
 	var result int32 = -1
-	db.Model(&cafeteria_rating_models.Meal{}).Where("name LIKE ?", name).Select("dish").Scan(&result)
+	db.Model(&cafeteria_rating_models.Meal{}).
+		Where("name LIKE ?", name).
+		Select("dish").
+		Scan(&result)
 	return result
 }
 
