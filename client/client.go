@@ -52,13 +52,16 @@ func createCafeteriaRatingSampleData() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 1)
+	/*generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 1)
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
-	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Tagessuppe")
+	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)*/
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Tagessuppe", 1)
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Tagessuppe", 3)
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Curcumareis", 5)
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Curcumareis", 7)
 
 }
 
@@ -82,14 +85,14 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 	}
 }
 
-func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string, meal string) {
+func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string, meal string, rating int32) {
 	y := make([]string, 3)
 	y[0] = "Spicy"
 	y[1] = "Salz"
 	y[2] = "Preis"
 
 	_, err := c.NewMealRating(ctx, &pb.NewRating{
-		Rating:        int32(8),
+		Rating:        rating,
 		CafeteriaName: cafeteria,
 		Meal:          meal,
 		Comment:       "Alles Hähnchen",

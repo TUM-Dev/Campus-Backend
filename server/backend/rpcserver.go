@@ -96,7 +96,7 @@ func updateNameTagOptions(db *gorm.DB) {
 
 		for _, u := range v.Canbeincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", v.TagNameEnglish, parentID).
+				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
@@ -108,7 +108,7 @@ func updateNameTagOptions(db *gorm.DB) {
 		}
 		for _, u := range v.Notincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", v.TagNameEnglish, parentID).
+				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
@@ -331,20 +331,21 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 		return nil, validInput
 	}
 
-	var dish *cafeteria_rating_models.Meal
+	var meal *cafeteria_rating_models.Meal
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
 	testDish := s.db.Model(&cafeteria_rating_models.Meal{}).
 		Where("name LIKE ? AND cafeteriaID = ?", input.Meal, cafeteriaID).
-		First(&dish)
+		First(&meal)
 	if testDish.RowsAffected == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
 	rating := cafeteria_rating_models.MealRating{
-		Comment:   input.Comment,
-		MealID:    getIDForMealName(input.Meal, s.db),
-		Rating:    input.Rating,
-		Timestamp: time.Now()}
+		Comment:     input.Comment,
+		CafeteriaID: cafeteriaID,
+		MealID:      getIDForMealName(input.Meal, s.db),
+		Rating:      input.Rating,
+		Timestamp:   time.Now()}
 
 	s.db.Model(&cafeteria_rating_models.MealRating{}).Create(&rating)
 
@@ -440,7 +441,7 @@ func getNameForCafeteriaID(id int32, db *gorm.DB) string {
 func getNameForMealID(id int32, db *gorm.DB) string {
 	var result string
 	db.Model(&cafeteria_rating_models.Meal{}).
-		Where("dish = ?", id).
+		Where("id = ?", id).
 		Select("name").
 		First(&result) //Scan(&result)
 	return result
@@ -459,7 +460,7 @@ func getIDForMealName(name string, db *gorm.DB) int32 {
 	var result int32 = -1
 	db.Model(&cafeteria_rating_models.Meal{}).
 		Where("name LIKE ?", name).
-		Select("dish").
+		Select("id").
 		Scan(&result)
 	return result
 }
