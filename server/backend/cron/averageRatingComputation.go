@@ -2,7 +2,6 @@ package cron
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
-	"gorm.io/gorm"
 	"log"
 )
 
@@ -22,21 +21,11 @@ type averageRatingForMealInCafeteria struct {
 }
 
 type averageCafeteriaTags struct {
-	gorm.Model
-	Id           int
-	CafeteriaID  int `gorm:"foreignKey:cafeteriaId"`
-	Rating       int
-	Comment      string
-	ParentRating int `gorm:"ForeignKey:id"`
-	TagID        int
-}
-
-type averageCafeteriaTagsTest struct {
-	Id           int32 `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id"`
-	CafeteriaID  int32 `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	Rating       int
-	Comment      string
-	ParentRating int32 `gorm:"foreignKey:cafeteriaRatingID;column:parentRating;type:int;" json:"parentRating"`
+	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
+	TagID       int32   `gorm:"foreignKey:tagRatingID;column:tagID;type:int" json:"tagID"`
+	Average     float32 `json:"average"`
+	Min         int8    `json:"min"`
+	Max         int8    `json:"max"`
 }
 
 //regularly computes the average rating for every cafeteria
@@ -50,10 +39,11 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageCafeteriaTags(c *CronService) {
 
-	var res []averageCafeteriaTagsTest
-	err := c.db.Raw("SELECT cr.*, crt.*" +
+	var res []averageCafeteriaTags
+	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.rating) as average, MAX(crt.rating) as max, MIN(crt.rating) as min" +
 		" FROM cafeteria_rating cr" +
-		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating").Scan(&res)
+		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
+		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&res)
 
 	if err != nil {
 		log.Println(err)
