@@ -306,21 +306,10 @@ func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb
 }
 
 func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
-	//Add cafeteriaRating
-	if input.Rating > 10 || input.Rating < 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
-	}
 
-	if len(input.Image) > 131100 {
-		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
-	}
-
-	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
-		Where("name LIKE ?", input.CafeteriaName).
-		First(&result)
-	if testCanteen.RowsAffected == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+	validInput := inputSanitization(input, s)
+	if validInput != nil {
+		return nil, validInput
 	}
 
 	rating := cafeteria_rating_models.CafeteriaRating{
@@ -337,20 +326,9 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 
 func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
 
-	if input.Rating > 10 || input.Rating < 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
-	}
-
-	if len(input.Image) > 131100 {
-		return nil, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
-	}
-
-	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
-		Where("name LIKE ?", input.CafeteriaName).
-		First(&result)
-	if testCanteen.RowsAffected == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+	validInput := inputSanitization(input, s)
+	if validInput != nil {
+		return nil, validInput
 	}
 
 	var dish *cafeteria_rating_models.Meal
@@ -374,6 +352,34 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	extractAndStoreMealNameTags(s, rating, input.Meal)
 
 	return &emptypb.Empty{}, nil
+}
+
+func inputSanitization(input *pb.NewRating, s *CampusServer) error {
+	if input.Rating > 10 || input.Rating < 0 {
+		return status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+	}
+
+	if len(input.Image) > 131100 {
+		return status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
+	}
+
+	if len(input.Comment) > 256 {
+		return status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
+	}
+
+	if strings.Contains(input.Comment, "@") {
+		return status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+	}
+
+	var result *cafeteria_rating_models.Cafeteria
+	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
+		Where("name LIKE ?", input.CafeteriaName).
+		First(&result)
+	if testCanteen.RowsAffected == 0 {
+		return status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+	}
+
+	return nil
 }
 
 /*
