@@ -30,23 +30,39 @@ type averageCafeteriaTags struct {
 
 //regularly computes the average rating for every cafeteria
 func (c *CronService) averageRatingComputation() error {
-
-	//computeAverageForCafeteria(c)
-	//computeAverageForMealsInCafeterias(c)
+	computeAverageForCafeteria(c)
+	computeAverageForMealsInCafeterias(c)
 	computeAverageCafeteriaTags(c)
 	return nil
 }
 
 func computeAverageCafeteriaTags(c *CronService) {
 
-	var res []averageCafeteriaTags
+	var results []averageCafeteriaTags
 	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.rating) as average, MAX(crt.rating) as max, MIN(crt.rating) as min" +
 		" FROM cafeteria_rating cr" +
 		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
-		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&res)
+		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results)
 
 	if err != nil {
 		log.Println(err)
+	} else {
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingTagsAverage{})
+		for _, v := range results {
+			cafeteria := cafeteria_rating_models.CafeteriaRatingTagsAverage{
+				CafeteriaID: v.CafeteriaID,
+				Average:     v.Average,
+				TagID:       v.TagID,
+				Min:         v.Min,
+				Max:         v.Max,
+			} //todo add standard deviation
+
+			errCreate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).Create(&cafeteria).Error
+			if errCreate != nil {
+				log.Println(errCreate)
+			}
+
+		}
 	}
 }
 
@@ -60,35 +76,21 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 		log.Println("Error in query")
 		log.Println(res.Error)
 	} else {
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsAverage{})
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.MealRatingsAverage{
 				CafeteriaID: v.CafeteriaID,
-				Average:     float32(v.Average),
+				Average:     v.Average,
 				MealID:      v.MealID,
 				Min:         v.Min,
 				Max:         v.Max,
 			} //todo add standard deviation
 
-			var existing *cafeteria_rating_models.MealRatingsAverage
-			testDish := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-				Where("cafeteriaID = ? AND mealID = ?", cafeteria.CafeteriaID, cafeteria.MealID).
-				First(&existing)
-
-			if testDish.RowsAffected == 1 {
-				errUpdate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-					Where("cafeteriaID = ? AND mealID = ?", cafeteria.CafeteriaID, cafeteria.MealID).
-					Updates(cafeteria)
-
-				if errUpdate.Error != nil {
-					log.Println(errUpdate.Error)
-				}
-			} else {
-				log.Println("New average rating will be created for cafeteria with ID: ", v.CafeteriaID)
-				errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria)
-				if errCreate.Error != nil {
-					log.Println(errCreate.Error)
-				}
+			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria)
+			if errCreate.Error != nil {
+				log.Println(errCreate.Error)
 			}
+
 		}
 	}
 }
@@ -103,6 +105,7 @@ func computeAverageForCafeteria(c *CronService) {
 		log.Println("Error in query")
 		log.Println(res.Error)
 	} else {
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.CafeteriaRatingsAverage{})
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.CafeteriaRatingsAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -111,24 +114,11 @@ func computeAverageForCafeteria(c *CronService) {
 				Max:         v.Max,
 			} //todo add standard deviation
 
-			var existing *cafeteria_rating_models.CafeteriaRatingsAverage
-			testDish := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).Where("cafeteriaID = ?", cafeteria.CafeteriaID).First(&existing)
-
-			if testDish.RowsAffected == 1 {
-				errUpdate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
-					Where("cafeteriaID = ?", cafeteria.CafeteriaID).
-					Updates(cafeteria)
-
-				if errUpdate.Error != nil {
-					log.Println(errUpdate.Error)
-				}
-			} else {
-				log.Println("New rating will be created for cafeteria: ", v.CafeteriaID)
-				errCreate := c.db.Create(&cafeteria)
-				if errCreate.Error != nil {
-					log.Println(errCreate.Error)
-				}
+			errCreate := c.db.Create(&cafeteria)
+			if errCreate.Error != nil {
+				log.Println(errCreate.Error)
 			}
+
 		}
 	}
 }
