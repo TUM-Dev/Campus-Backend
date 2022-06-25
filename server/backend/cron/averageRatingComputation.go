@@ -2,6 +2,7 @@ package cron
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -21,16 +22,21 @@ type averageRatingForMealInCafeteria struct {
 }
 
 type averageCafeteriaTags struct {
-	cafeteria   cafeteria_rating_models.Cafeteria `gorm:"foreignKey:cafeteriaID"`
-	Id          int
-	CafeteriaID int
-	Rating      int
+	gorm.Model
+	Id           int
+	CafeteriaID  int `gorm:"foreignKey:cafeteriaId"`
+	Rating       int
+	Comment      string
+	ParentRating int `gorm:"ForeignKey:id"`
+	TagID        int
 }
 
 type averageCafeteriaTagsTest struct {
-	CafeteriaID int32   `json:"cafeteria_rating.cafeteriaID"`
-	TagID       int32   `json:"cafeteria_rating_tags.tagID"`
-	Average     float32 `json:"cafeteria_rating_tags.rating"`
+	Id           int32 `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id"`
+	CafeteriaID  int32 `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
+	Rating       int
+	Comment      string
+	ParentRating int32 `gorm:"foreignKey:cafeteriaRatingID;column:parentRating;type:int;" json:"parentRating"`
 }
 
 //regularly computes the average rating for every cafeteria
@@ -44,52 +50,11 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageCafeteriaTags(c *CronService) {
 
-	//todo erstmal die tabelle vorbereiten, dann daraus mit dem average querien.
-	/*var results []averageCafeteriaTags
-	err := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
-		Select("cafeteria_rating_tags.tagID as tagID,AVG(cafeteria_rating_tags.rating) as average").
-		Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
-		Group("tagID,cafeteria_rating.cafeteriaID").
-		Scan(&results)*/
-
-	/*	db := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
-			Select("cafeteria_rating_tags.*, cafeteria_rating.*").
-			Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
-			Group("tagID,cafeteria_rating.cafeteriaID")
-		//zweiter teil des groups: cafeteria_rating.cafeteriaID,cafeteria_rating_tags.id
-
-		var result []averageCafeteriaTagsTest
-		test := db.First(&result)
-		println(test.Error)
-		println(result)*/
-
-	/*var res []averageCafeteriaTags
-	err := c.db.Raw("SELECT cr.cafeteriaID, crt.tagID, AVG(crt.rating) as average " +
-		"FROM cafeteria_rating cr " +
-		"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
-		"GROUP BY cr.cafeteriaID").Scan(&res).Error*/
-
-	/*var res []averageCafeteriaTagsTest
-	err := c.db.Raw("SELECT cafeteriaID, tagID, AVG(rating) as average" +
-		" FROM (SELECT * FROM cafeteria_rating cr" +
-		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table"+
-		" GROUP BY cafeteriaID").Scan(&res).Error
-	*/
-	var res []averageCafeteriaTags
-	err := c.db.Debug().Raw("SELECT cr.id, cr.cafeteriaID, cr.rating" +
+	var res []averageCafeteriaTagsTest
+	err := c.db.Raw("SELECT cr.*, crt.*" +
 		" FROM cafeteria_rating cr" +
 		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating").Scan(&res)
 
-	/*
-		todo lässt es sich nur nicht auslesen, da es ein foreing key ist?
-	*/
-	/*
-		+
-					" WHERE cr.cafeteriaID = 1"
-
-			 +
-					"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating"
-	*/
 	if err != nil {
 		log.Println(err)
 	}
