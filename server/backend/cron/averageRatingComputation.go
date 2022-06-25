@@ -21,9 +21,9 @@ type averageRatingForMealInCafeteria struct {
 }
 
 type averageCafeteriaTags struct {
-	cafeteria_rating_models.Cafeteria
+	cafeteria   cafeteria_rating_models.Cafeteria `gorm:"foreignKey:cafeteriaID"`
 	Id          int
-	CafeteriaID int `gorm:"ForeignKey:mensaID"`
+	CafeteriaID int
 	Rating      int
 }
 
@@ -43,65 +43,6 @@ func (c *CronService) averageRatingComputation() error {
 }
 
 func computeAverageCafeteriaTags(c *CronService) {
-
-	/*Todo
-				alle ratings einer cafeteria sammeln -> nur die IDs merken, diese dann auf das tagrating tabelle anwenden - join
-				-> alle tagratings zu einer cafeteria in einer Gruppe
-				-> pro gruppe nach den tags gruppieren und den Durchschnitt bereschnen und in einemr result tabelle Speichern
-
-
-			für alle drei tagarten berechnen
-		nameratingtag ist das komplizierte, die beiden anderen können auf der tagrating tabelle bestimmt werden
-	-> zusammenführen durch das parent rating um zu erfahren, zu welcher mensa die gerichte gehören
-	*/
-
-	/*
-		err := s.db.Raw("SELECT r.*, a.campus, a.name "+
-				"FROM roomfinder_rooms r "+
-				"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
-				"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error
-	*/
-
-	//nach der tagID gruppieren
-
-	/*c.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
-	Select("id,rating,cafeteria").
-	Joins("left join emails on emails.user_id = users.id").
-	Scan(&result{})
-	*/
-	/*res, err := c.db.Model(cafeteria_rating_models.MealRatingsTags{}).
-	Select("cafeteria, meal, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min").
-	Group("cafeteria,meal").Joins().Rows()
-	*/
-	/*
-			Schtitte; erstmal das jion verstehen
-		Meal anme tags passen noch nciht ganz -> sollten final keinen namen enthalten, sondern nur den key
-	*/
-
-	/*if err != nil {
-		println("Error in query")
-	}
-
-	println(res.ColumnTypes())
-	*/
-
-	/*
-		todo
-		cafeteriarating x prating tags um anhand der parent rating idceafeteriRating.id jedem tagrating eine mensa id zuzuordnen, dann zweimal gruppieren
-		(erst nach mensa,dann anch dem tag) und jweeils den durchschnitt bestimmen
-
-
-		join:
-		aus dem normalen rating muss nur die id as cafeteriaID übernimen werden, aus dem rating_tags alles bis auf das parent rating
-	*/
-
-	//cafeteria_rating_tags.rating, cafeteria_rating_tags.id,
-	/*	var results []averageCafeteriaTags
-		err := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTags{}).
-			Select("cafeteria_rating.cafeteriaID as cafeteriaID,AVG(cafeteria_rating_tags.rating) as average").
-			Joins("JOIN cafeteria_rating ON cafeteria_rating.Id = cafeteria_rating_tags.parentRating").
-			Group("cafeteria_rating_tags.tagID").
-			Find(&results)*/
 
 	//todo erstmal die tabelle vorbereiten, dann daraus mit dem average querien.
 	/*var results []averageCafeteriaTags
@@ -128,27 +69,26 @@ func computeAverageCafeteriaTags(c *CronService) {
 		"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
 		"GROUP BY cr.cafeteriaID").Scan(&res).Error*/
 
-	var res []averageCafeteriaTagsTest
+	/*var res []averageCafeteriaTagsTest
 	err := c.db.Raw("SELECT cafeteriaID, tagID, AVG(rating) as average" +
 		" FROM (SELECT * FROM cafeteria_rating cr" +
-		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table").Scan(&res).Error
+		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table"+
+		" GROUP BY cafeteriaID").Scan(&res).Error
+	*/
+	var res []averageCafeteriaTags
+	err := c.db.Debug().Raw("SELECT cr.id, cr.cafeteriaID, cr.rating" +
+		" FROM cafeteria_rating cr" +
+		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating").Scan(&res)
 
-	/*
-		+
-				" GROUP BY cafeteriaID"
-	*/
-	/*	var res []averageCafeteriaTags
-		err := c.db.Debug().Raw("SELECT cr.id, cr.cafeteriaID, cr.rating" +
-			" FROM cafeteria_rating cr" +
-			" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating) table" +
-			" WHERE cr.cafeteriaID = 1").Scan(&res)
-	*/
 	/*
 		todo lässt es sich nur nicht auslesen, da es ein foreing key ist?
 	*/
 	/*
-		 +
-				"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating"
+		+
+					" WHERE cr.cafeteriaID = 1"
+
+			 +
+					"JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating"
 	*/
 	if err != nil {
 		log.Println(err)

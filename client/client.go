@@ -52,19 +52,24 @@ func createCafeteriaRatingSampleData() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING")
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 1)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
+	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
+	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Tagessuppe")
 
 }
 
-func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string) {
+func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
 	y := make([]string, 3)
 	y[0] = "Füllgrad"
 	y[1] = "Sauberkeit"
 	y[2] = "Anzahl an Plätzen"
 
 	_, err := c.NewCafeteriaRating(ctx, &pb.NewRating{
-		Rating:        int32(2),
+		Rating:        rating,
 		CafeteriaName: cafeteria,
 		Comment:       "Alles super, 2 Sterne",
 		Tags:          y,

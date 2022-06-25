@@ -109,7 +109,6 @@ func downloadCanteenNames(c *CronService) {
 	for i := 0; i < len(cafeteriaNames); i++ {
 
 		mensa := cafeteria_rating_models.Cafeteria{
-			Id:        int32(i),
 			Name:      cafeteriaNames[i].Name,
 			Address:   cafeteriaNames[i].Location.Address,
 			Latitude:  cafeteriaNames[i].Location.Latitude,
