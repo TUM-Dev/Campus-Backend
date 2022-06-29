@@ -17,6 +17,20 @@ const (
 	address = "api-grpc.tum.app:443"
 )
 
+type CampusClient struct {
+	pb.CampusClient
+}
+
+func (cc *CampusClient) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*pb.AccessPoint, error) {
+	log.Println("client get")
+	return &pb.AccessPoint{Name: "client test"}, nil
+}
+
+func (cc *CampusClient) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessPointsClient) error {
+	log.Println("client list")
+	return nil
+}
+
 func main() {
 	// Set up a connection to the server.
 	log.Println("Connecting...")
