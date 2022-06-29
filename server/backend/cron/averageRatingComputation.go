@@ -14,7 +14,7 @@ type averageRatingForCafeteria struct {
 
 type averageRatingForMealInCafeteria struct {
 	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	MealID      int32   `json:"mealID"`
+	MealID      int32   `gorm:"column:mealID;foreignKey:id;type:int;" json:"mealID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
@@ -30,8 +30,16 @@ type averageCafeteriaTags struct {
 
 type averageMealTags struct {
 	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID       int32   `gorm:"foreignKey:tagRatingID;column:tagID;type:int" json:"tagID"`
+	TagID       int32   `gorm:"foreignKey:id;column:tagID;type:int" json:"tagID"`
 	MealID      int32   `gorm:"column:mealID;foreignKey:id;type:int;" json:"mealID"`
+	Average     float32 `json:"average"`
+	Min         int8    `json:"min"`
+	Max         int8    `json:"max"`
+}
+
+type averageMealNameTags struct {
+	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
+	TagID       int32   `gorm:"foreignKey:id;column:tagID;type:int" json:"tagID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
@@ -41,15 +49,40 @@ type averageMealTags struct {
 func (c *CronService) averageRatingComputation() error {
 	computeAverageForCafeteria(c)
 	computeAverageForMealsInCafeterias(c)
-
 	computeAverageCafeteriaTags(c)
 	computeAverageForMealsInCafeteriasTags(c)
 	computeAverageNameTags(c)
+
 	return nil
 }
 
 func computeAverageNameTags(c *CronService) {
 
+	var results []averageMealNameTags
+	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
+		" FROM meal_rating mr" +
+		" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
+		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
+
+	if err != nil {
+		log.Println(err)
+	} else {
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealNameTagsAverage{})
+		for _, v := range results {
+			cafeteria := cafeteria_rating_models.MealNameTagsAverage{
+				CafeteriaID: v.CafeteriaID,
+				Average:     v.Average,
+				TagID:       v.TagID,
+				Min:         v.Min,
+				Max:         v.Max,
+			} //todo add standard deviation
+
+			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria).Error
+			if errCreate != nil {
+				log.Println(errCreate)
+			}
+		}
+	}
 }
 
 func computeAverageForMealsInCafeteriasTags(c *CronService) {
@@ -63,6 +96,7 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 		log.Println(err)
 	} else {
 		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingTagsAverage{})
+
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.MealRatingTagsAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -77,7 +111,6 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 			if errCreate != nil {
 				log.Println(errCreate)
 			}
-
 		}
 	}
 }
@@ -135,7 +168,6 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 			if errCreate.Error != nil {
 				log.Println(errCreate.Error)
 			}
-
 		}
 	}
 }
