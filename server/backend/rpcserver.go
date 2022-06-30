@@ -263,6 +263,7 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 		ratings := queryLastRatingsWithLimit(input, s)
 		//todo query tagRatings name + meal
 		mealTags := queryMealTags(s.db)
+		//nameTags := queryNameTags(s.db)
 
 		return &pb.GetMealInCafeteriaRatingReply{
 			AverageRating: float64(result.Average),
@@ -278,6 +279,25 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 }
 
 func queryMealTags(db *gorm.DB) []*pb.TagRating {
+
+	var results []*pb.TagRating
+
+	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
+		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
+		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Scan(&results).Error
+	/*err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
+	" FROM meal_rating mr" +
+	" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
+	" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
+	*/
+	if res != nil {
+		log.Println(res)
+	}
+	return results
+}
+
+func queryNameTags(db *gorm.DB) []*pb.TagRating {
 
 	var results []*pb.TagRating
 
@@ -363,7 +383,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	rating := cafeteria_rating_models.MealRating{
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
-		MealID:      getIDForMealName(input.Meal, s.db),
+		MealID:      getIDForMealName(input.Meal, input.CafeteriaName, s.db),
 		Rating:      input.Rating,
 		Timestamp:   time.Now()}
 
@@ -476,10 +496,11 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	return result
 }
 
-func getIDForMealName(name string, db *gorm.DB) int32 {
+func getIDForMealName(name string, cafeteriaName string, db *gorm.DB) int32 {
 	var result int32 = -1
 	db.Model(&cafeteria_rating_models.Meal{}).
 		Where("name LIKE ?", name).
+		Where("cafeteriaID LIKE ?", cafeteriaName).
 		Select("id").
 		Scan(&result)
 	return result

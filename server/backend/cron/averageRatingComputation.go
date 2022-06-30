@@ -77,7 +77,7 @@ func computeAverageNameTags(c *CronService) {
 				Max:         v.Max,
 			} //todo add standard deviation
 
-			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria).Error
+			errCreate := c.db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
 				log.Println(errCreate)
 			}
@@ -107,7 +107,7 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 				Max:         v.Max,
 			} //todo add standard deviation
 
-			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria).Error
+			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
 				log.Println(errCreate)
 			}
