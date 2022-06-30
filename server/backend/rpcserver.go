@@ -250,22 +250,24 @@ func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.Ge
 }
 
 func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
-	var result cafeteria_rating_models.MealRatingsAverage
-	err := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
+	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
+	res := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
 		Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
 		First(&result)
 
-	if err.Error != nil {
+	if res.Error != nil {
 		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
 	}
 
-	//todo add nametag ratings to the reply
-	if err.RowsAffected > 0 {
-		ratings := queryLastRatings(input, s)
+	if res.RowsAffected > 0 {
+		ratings := queryLastRatingsWithLimit(input, s)
+		//todo query tagRatings name + meal
+		mealTags := queryMealTags(s.db)
 
 		return &pb.GetMealInCafeteriaRatingReply{
 			AverageRating: float64(result.Average),
 			Rating:        ratings,
+			TagRating:     mealTags,
 		}, nil
 	} else {
 		return &pb.GetMealInCafeteriaRatingReply{
@@ -275,7 +277,26 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 
 }
 
-func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb.MealRating {
+func queryMealTags(db *gorm.DB) []*pb.TagRating {
+
+	var results []*pb.TagRating
+
+	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
+		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
+		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Scan(&results).Error
+	/*err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
+	" FROM meal_rating mr" +
+	" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
+	" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
+	*/
+	if res != nil {
+		log.Println(res)
+	}
+	return results
+}
+
+func queryLastRatingsWithLimit(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
@@ -306,7 +327,6 @@ func queryLastRatings(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb
 }
 
 func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
-
 	validInput := inputSanitization(input, s)
 	if validInput != nil {
 		return nil, validInput

@@ -51,8 +51,11 @@ func (c *CronService) mealNameDownloadCron() error {
 
 func downloadDailyMeals(c *CronService) {
 
-	c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
+	//err := c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
 
+	/*if err.Error != nil {
+		println(err.Error)
+	}*/
 	var result []CafeteriaWithID
 	c.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
 
@@ -81,8 +84,24 @@ func downloadDailyMeals(c *CronService) {
 			log.Println("Meals:")
 			for i := 0; i < len(meals.Days); i++ {
 				for u := 0; u < len(meals.Days[i].Dates); u++ {
-					meal := cafeteria_rating_models.Meal{Name: meals.Days[i].Dates[u].Name, Type: meals.Days[i].Dates[u].DishType, CafeteriaID: v.Id}
-					c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
+
+					meal := cafeteria_rating_models.Meal{
+						Name:        meals.Days[i].Dates[u].Name,
+						Type:        meals.Days[i].Dates[u].DishType,
+						CafeteriaID: v.Id,
+					}
+
+					res := c.db.Model(&cafeteria_rating_models.Meal{}).
+						Where("name = ? AND cafeteriaID = ?", meal.Name, meal.CafeteriaID)
+
+					if res.RowsAffected == 0 {
+						c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
+					} /*else {		//todo potentially add update logic for the weekly meals
+						c.db.Model(&cafeteria_rating_models.Cafeteria{}).
+							Where("name = ?", cafeteriaNames[i].Name).
+							Updates(&mensa)
+					}*/
+					//c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
 				}
 			}
 		}

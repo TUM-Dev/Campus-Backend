@@ -1,20 +1,40 @@
 {
   "tags": [
     {
-      "tagNameGerman": "Füllgrad",
-      "tagNameEnglish": "Saltiness"
+      "tagNameGerman": "Ausgabe Gut Koordinert",
+      "tagNameEnglish": "Output Well Coordinated"
+    },
+    {
+      "tagNameGerman": "Wartezeit",
+      "tagNameEnglish": "Waitingtime"
     },
     {
       "tagNameGerman": "Sauberkeit",
-      "tagNameEnglish": "Sweetness"
+      "tagNameEnglish": "Cleanliness "
     },
     {
       "tagNameGerman": "Verfügbarkeit der Gerichte",
-      "tagNameEnglish": "Spicy"
+      "tagNameEnglish": "Availability"
     },
     {
-      "tagNameGerman": "Anzahl an Plätzen",
-      "tagNameEnglish": "Consistency"
+      "tagNameGerman": "Genügen freie Plätze",
+      "tagNameEnglish": "Enough Free Tables"
+    },
+    {
+      "tagNameGerman": "Auswahl Vegan",
+      "tagNameEnglish": "Variety Vegan"
+    },
+    {
+      "tagNameGerman": "Auswahl Vegetarisch",
+      "tagNameEnglish": "Variety Vegetarian"
+    },
+    {
+      "tagNameGerman": "Auswahl Allgemein",
+      "tagNameEnglish": "Variety General"
+    },
+    {
+      "tagNameGerman": "Glaubhaftigkeit des Speiseplans",
+      "tagNameEnglish": "Credibility of the menu"
     }
   ]
 }
