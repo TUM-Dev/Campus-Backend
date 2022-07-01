@@ -20,7 +20,7 @@ require (
 	google.golang.org/protobuf v1.28.0
 	gorm.io/driver/mysql v1.3.4
 	gorm.io/driver/sqlite v1.3.2
-	gorm.io/gorm v1.23.5
+	gorm.io/gorm v1.23.7
 )
 
 require (
