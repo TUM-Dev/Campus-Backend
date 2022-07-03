@@ -66,18 +66,17 @@ service Campus {
   }
 
 
-  // This endpoint retrieves Cafeteria Ratings from the Backend.
-  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingReply) {
+  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
     option (google.api.http) = {
-      post: "/cafeteria/rating/get",
+      post: "/cafeteriaRating/cafeteria/get"
       body: "*",
     };
   }
 
 
-  rpc GetDishRatings (DishRatingRequest) returns (DishRatingReply) {
+  rpc GetMealRatings (MealRatingsRequest) returns (MealRatingsResponse) {
     option (google.api.http) = {
-      post: "/dish/rating/get",
+      post: "/cafeteriaRating/dish/get"
       body: "*",
     };
   }
@@ -86,284 +85,36 @@ service Campus {
 
   rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteria/rating/new",
+      post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
       body: "*",
     };
   }
 
-  rpc NewDishRating (NewDishRatingRequest) returns (google.protobuf.Empty) {
+  rpc NewMealRating (NewMealRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/dish/rating/new",
+      post: "/cafeteriaRating/meal/newMealRating"
       body: "*",
     };
   }
 
-  rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+  rpc GetAvailableMealTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
-      get: "/dish/rating/allTags",
-      response_body: "ratingTags"
+      get: "/cafeteriaRating/meal/allTags",
     };
   }
 
   rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteria/rating/allTags",
-      response_body: "ratingTags"
+      get: "/cafeteriaRating/cafeteria/allTags",
     };
   }
 
-  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaReply) {
+  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaResponse) {
     option (google.api.http) = {
-      get: "/cafeteria/allCafeterias",
-      response_body: "cafeteria"
+      get: "/cafeteriaRating/cafeteria/allCafeterias",
     };
   }
 
-
-  rpc GetDishes (GetDishesRequest) returns (GetDishesReply) {
-    option (google.api.http) = {
-      get: "/dish/allDishes",
-      response_body: "dish"
-    };
-  }
-
-
-  rpc GetResponsiblePerson (google.protobuf.Empty) returns (GetResponsiblePersonReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/contacts",
-    };
-  }
-
-  rpc GetBuilding2Gps (google.protobuf.Empty) returns (GetBuilding2GpsReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/getBuilding2Gps",
-    };
-  }
-
-  rpc GetAreaFacilitiesByBuildingNr (GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/nerby",
-    };
-  }
-
-  rpc GetListOfToilets (google.protobuf.Empty) returns (GetListOfToiletsReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/listOfToilets",
-    };
-  }
-
-  rpc GetListOfElevators (google.protobuf.Empty) returns (GetListOfElevatorsReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/listOfElevators",
-    };
-  }
-
-  rpc GetMoreInformation (google.protobuf.Empty) returns (GetMoreInformationReply) {
-    option (google.api.http) = {
-      get: "/barrierfree/moreInformation",
-    };
-  }
-
-
-  rpc GetOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesReply) {
-    option (google.api.http) = {
-      get: "/openingtimes/{language}",
-    };
-  }
-
-
-  rpc GetUpdateNote (GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
-    option (google.api.http) = {
-      get: "/updatenote/{version}",
-    };
-  }
-
-
-  rpc GetStudyRoomList (google.protobuf.Empty) returns (GetStudyRoomListReply) {
-    option (google.api.http) = {
-      get: "/studyroom/list",
-    };
-  }
-
-  rpc GetEventList(GetEventListRequest) returns (GetEventListReply) {
-    option (google.api.http) = {
-      get: "/event/list",
-    };
-  }
-
-  rpc GetPurchasedTickets(google.protobuf.Empty) returns (GetPurchasedTicketsReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/my",
-    };
-  }
-
-  rpc GetMyTicket(GetTicketRequest) returns (EventListMsgElement) {
-    option (google.api.http) = {
-      post: "/event/ticket/{id}",
-    };
-  }
-
-  rpc GetTicketType(GetTicketRequest) returns (GetEventTicketTypeReply) {
-    option (google.api.http) = {
-      get: "/event/ticket/type/{id}",
-    };
-  }
-
-  rpc ReserveMultipleTickets(ReserveMultipleTicketsRequest) returns (ReserveMultipleTicketsReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/reserve/multiple",
-    };
-  }
-
-  rpc PurchaseTicketStripe(google.protobuf.Empty) returns (PurchaseTicketStripeReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/payment/stripe/purchase/multiple",
-    };
-  }
-
-  rpc GetEphemeralKey(google.protobuf.Empty) returns (GetEphemeralKeyReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/payment/stripe/ephemeralkey",
-    };
-  }
-
-  rpc GetTicketStatus(GetTicketStatusRequest) returns (GetTicketStatusReply) {
-    option (google.api.http) = {
-      get: "/event/ticket/status/{eventId}",
-    };
-  }
-
-  rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
-    option (google.api.http) = {
-      get: "/kino/{lastId}",
-    };
-  }
-
-  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackImageReply) {
-    option (google.api.http) = {
-      post: "/feedback",
-    };
-  }
-
-  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
-    option (google.api.http) = {
-      post: "/feedback/{id}/{imageNr}",
-    };
-  }
-
-
-  rpc RegisterDevice(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/register",
-    };
-  }
-
-  rpc VerifyKey(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      get: "/device/verifyKey",
-    };
-  }
-
-  rpc DeviceUploadGcmToken(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/addGcmToken",
-    };
-  }
-
-  rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
-    option (google.api.http) = {
-      get: "/device/uploaded/{lrzId}",
-    };
-  }
-
-
-  rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
-    option (google.api.http) = {
-      get: "/notifications",
-    };
-  }
-
-  rpc GetNotificationConfirm(NotificationsRequest) returns (GetNotificationsConfirmReply) {
-    option (google.api.http) = {
-      get: "/notifications/confirm/{notificationId}",
-    };
-  }
-
-  rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
-    option (google.api.http) = {
-      get: "/members/{lrzId}",
-    };
-  }
-
-
-  rpc GetChatRooms(google.protobuf.Empty) returns (GetChatRoomsReply) {
-    option (google.api.http) = {
-      post: "/chat/rooms",
-      body: "*"
-    };
-  }
-
-  rpc GetChatRoomById(GetChatRoomByIdRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      get: "/chat/rooms/{roomId}",
-    };
-  }
-
-  rpc LeaveChatRoom(LeaveChatRoomRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/leave",
-    };
-  }
-  rpc AddUserToChatRoom(AddUserToChatRoomRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/add/{memberId}",
-    };
-  }
-
-  rpc SendChatMessage(SendChatMessageRequest) returns (ChatMessageModelMsgElement) {
-    option (google.api.http) = {
-      put: "/chat/rooms/{roomId}/message",
-    };
-  }
-
-  rpc UpdateChatMessage(UpdateChatMessageRequest) returns (ChatMessageModelMsgElement) {
-    option (google.api.http) = {
-      put: "/chat/rooms/{roomId}/message/{messageId}",
-    };
-  }
-
-
-  rpc GetChatMessages(GetChatMessagesRequest) returns (ChatMessageModelMsg) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/messages/{pageId}",
-    };
-  }
-
-
-
-  rpc CreateChatMember(ChatMemberMsgElement) returns (ChatMemberMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/members",
-    };
-  }
-
-  rpc GetChatMemberByLrzId(GetChatMemberRequest) returns (ChatMemberMsgElement) {
-    option (google.api.http) = {
-      get: "/chat/members/{lrzId}",
-    };
-  }
-
-  rpc SearchMemberByName(SearchMemberByNameRequest) returns (ChatMemberMsg) {
-    option (google.api.http) = {
-      get: "/chat/members/search/{query}",
-    };
-  }
-
-  rpc GetMemberRooms(GetMemberRoomsRequest) returns (GetMemberRoomsReply) {
-    option (google.api.http) = {
-      post: "/chat/members/{memberId}/rooms",
-    };
-  }
 }
 
 message GetRoomScheduleRequest {
@@ -432,7 +183,7 @@ message SearchRoomsReply {
 }
 
 message Room {
-  int32  roomId = 1;
+  int32 room_id = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -462,555 +213,113 @@ message GetTopNewsReply {
 }
 
 
-
 message CafeteriaRatingRequest {
-  // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
-  string cafeteriaId = 1;
-  // Optional Parameter to define an interval for the ratings (Lower bound)
+  string cafeteriaName = 1;
   google.protobuf.Timestamp from = 2;
-  // Optional Parameter to define an interval for the ratings (Upper bound)
   google.protobuf.Timestamp to = 3;
-  // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
 
-message DishRatingRequest {
-  // Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
-  string cafeteriaId = 1;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string dish = 2;
-  // Optional Parameter to define an interval for the ratings (Lower bound)
+message MealRatingsRequest {
+  string cafeteriaName = 1;
+  string meal = 2;
   google.protobuf.Timestamp from = 3;
-  // Optional Parameter to define an interval for the ratings (Upper bound)
   google.protobuf.Timestamp to = 4;
-  // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 5;
 }
 
-message CafeteriaRatingReply {
-  repeated SingleRatingReply rating = 1;
-  double avg = 2;
-  double std = 3;
-  int32 min = 4;
-  int32 max = 5;
-  repeated RatingTagResult ratingTags = 6;
+message CafeteriaRatingResponse {
+  repeated CafeteriaRating rating = 1;
+  double averageRating = 2;
+  int32 minRating = 3;
+  int32 maxRating = 4;
+  repeated TagRatingsResult ratingTags = 5;
 }
 
 
-message DishRatingReply {
-  repeated SingleRatingReply rating = 1;
-  double avg = 2;
-  double std = 3;
-  int32 min = 4;
-  int32 max = 5;
-  repeated RatingTagResult ratingTags = 6;
-  repeated RatingTagResult nameTags = 7;
+message MealRatingsResponse {
+  repeated MealRating rating = 1;
+  double averageRating = 2;
+  int32 minRating = 3;
+  int32 maxRating = 4;
+  repeated TagRatingsResult ratingTags = 5;
+  repeated TagRatingsResult nameTags = 6;
 }
 
 
-message SingleRatingReply{
-  // number in the range 1-5
-  int32 points = 1;
-  // Optional JPEG image in Base64
-  bytes image = 2;
-  // Optional comment (max 256 chars)
-  string comment = 3;
-  repeated RatingTagNewRequest ratingTags = 4;
-  google.protobuf.Timestamp visited = 5;
+
+
+message CafeteriaRating{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  bytes image = 3;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 4;
+  string comment = 5;
+  repeated TagRatingOverview tagRating = 6;
+}
+
+message MealRating{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  string meal = 3;
+  bytes image = 4;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
+  string comment = 6;
+  repeated TagRatingOverview tagRating = 7;
 }
 
 
 message NewCafeteriaRatingRequest{
-  // number in the range 1-5
-  int32 points = 1;
-  string cafeteriaId = 2;
+  int32 rating = 1;
+  string cafeteriaName = 2;
   bytes image = 3;
-  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags
-  repeated RatingTag ratingTags = 4;
-  // Optional comment (max 256 chars)
+  repeated TagRating tags = 4;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
   string comment = 6;
 }
 
-message NewDishRatingRequest{
-  // number in the range 1-5
-  int32 points = 1;
-  // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
-  string cafeteriaId = 2;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string dish = 3;
-  // Optional JPEG image in Base64
+message NewMealRatingRequest{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  string meal = 3;
   bytes image = 4;
-  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags
-  repeated RatingTag ratingTags = 5;
-  // Optional comment (max 256 chars)
+  repeated TagRating tags = 5;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
   string comment = 7;
 }
 
 message GetRatingTagsReply{
-  repeated RatingTagsOverview ratingTags = 1;
+  repeated TagRatingOverview tags=1;
 }
 
-
-message RatingTagsOverview {
-  int32 tagId = 1;
-  string de = 2;
-  string en = 3;
-}
-
-message RatingTag {
-  int32 tagId = 1;
-  double points = 2;
-}
-
-message RatingTagNewRequest {
-  int32 tagId = 1;
-  int32 points = 2;
-}
-
-message RatingTagResult {
-  int32 tagId = 1;
-  double avg = 2;
-  double std = 3;
-  int32 min = 4;
-  int32 max = 5;
-}
-
-
-
-message GetCafeteriaReply{
-  repeated Cafeteria cafeteria = 1;
-}
-
-message Cafeteria{
-  string id = 1;
-  string address = 2;
-  double longitude = 3;
-  double latitude = 4;
-}
-
-
-message GetDishesRequest{
-  string cafeteriaId = 1;
-  int32 year = 2;
-  int32 month = 3;
-  int32 day = 4;
-}
-
-message GetDishesReply{
-  repeated string dish = 1;
-}
-
-
-
-
-
-
-message GetResponsiblePersonReply {
-  repeated ResponsiblePersonElement responsiblePerson = 1;
-}
-
-message ResponsiblePersonElement{
-  string name = 1;
-  string telephone = 2;
-  string email = 3;
-  string faculty = 4;
-  string tumID = 5;
-
-}
-
-message GetBuilding2GpsReply {
-  repeated Building2GpsElement building2Gps = 1;
-}
-
-message Building2GpsElement{
-  string id = 1;
-  string latitude = 2;
-  string longitude = 3;
-
-}
-
-message GetAreaFacilitiesByBuildingNrReply {
-  repeated RoomInformationElement areaFacilitiesByBuildingNr = 1;
-}
-
-
-
-message GetAreaFacilitiesByBuildingNrRequest {
-  string building_nr = 1;
-}
-
-message GetListOfToiletsReply {
-  repeated RoomInformationElement listOfToilets = 1;
-}
-
-message RoomInformationElement{
-  int32  roomId = 1;
-  string room_code = 2;
-  string building_nr = 3;
-  string arch_id = 4;
-  string info = 5;
-  string address = 6;
-  string purpose = 7;
-  string campus = 8;
-  string name = 9;
-}
-
-message GetListOfElevatorsReply {
-  repeated RoomInformationElement listOfElevators = 1;
-}
-
-
-
-message GetMoreInformationReply {
-  repeated MoreInformationElement information = 1;
-}
-
-message MoreInformationElement{
-  string title = 1;
-  string category = 2;
-  string url = 3;
-}
-
-
-message GetOpeningTimesRequest{
-  string language = 1;
-}
-
-
-
-message GetOpeningTimesReply{
-  repeated OpeningTimesMsgElement facilities = 1;
-
-}
-
-message OpeningTimesMsgElement{
-  int32 id = 1;
-  string category = 2;
-  string  name = 3;
-  string address = 4;
-  string  room = 5;
-  string transport_station = 6;
-  string opening_hours = 7;
-  string infos = 8;
-  string  url = 9;
-  string language = 10;
-  int32 reference_id = 11;
-}
-
-message GetUpdateNoteRequest{
-  int32 version = 1;
-}
-
-message GetUpdateNoteReply{
-  string message = 1;
-}
-
-message GetStudyRoomListReply{
-  repeated StudyRoomMsgElement rooms = 1;
-
-}
-message StudyRoomMsgElement{
-  int32 id = 1;
-  string    name = 2;
-  string    details = 3;
-  repeated StudyRoom rooms = 4;
-}
-
-message StudyRoom{
-  int32 group_id = 1;
-  int32  roomId = 2;
-  string room_code = 3;
-  string room_name = 4;
-  string building_name = 5;
-}
-
-message GetEventListRequest{
-  // optional parameter, will return all events if no id is specified
-  int32 eventId = 1;
-}
-
-message GetEventListReply{
-  repeated EventListMsgElement events = 1;
-}
-
-message EventListMsgElement{
-  string name = 1;
-  string path = 2;
-  int32 event = 3;
-  int32 news = 4;
-  int32 kino = 5;
-  int32 file = 6;
-  string title = 7;
-  string description = 8;
-  string locality = 9;
-  string  link = 10;
-  google.protobuf.Timestamp start = 11;
-  google.protobuf.Timestamp end = 12;
-  int32 ticket_group = 13;
-}
-
-
-message GetPurchasedTicketsReply{
-  repeated EventTicketMyMsgElement myTickets = 1;
-}
-
-message EventTicketMyMsgElement{
-  int32 ticket_history = 1;
-  int32 ticket_type = 2;
-  google.protobuf.Timestamp redemption = 3;
-  string code = 4;
-  int32 event = 5;
-}
-
-message GetTicketRequest {
-  int32 id = 1;
+message TagRatingOverview {
+  string nameDE = 1;
+  string nameEN = 2;
+  double rating = 3;
 }
 
-message GetEventTicketTypeReply{
-  repeated EventTicketTypeMsgElement eventTickets = 1;
-
-}
-message EventTicketTypeMsgElement{
-  int32 ticket_type = 1;
-  int32 event = 2;
-  int32 ticket_payment = 3;
-  int32 price = 4;
-  int32 contingent = 5;
-  string description = 6;
-  EventTicketPaymentMsg payment = 7;
-  int32 sold = 8;
-}
-
-message EventTicketPaymentMsg{
-  string stripe_publishable_key = 1;
-  string  terms = 2;
-  int32 minTickets = 3;
-  int32 maxTickets = 4;
-}
-
-message ReserveMultipleTicketsRequest{
-  repeated int32 ticketTypes = 1;
-  repeated int32 amounts = 2;
-}
-
-message ReserveMultipleTicketsReply{
-  repeated EventTicketReserveMultipleMsgElement tickets = 1;
-}
-
-message EventTicketReserveMultipleMsgElement{
-  int32 ticket_ids = 1;
-}
-
-message GetKinoRequest{
-  int32 lastId = 1;
-}
-
-message GetKinoReply{
-  repeated KinoMsgElement kinos = 1;
-}
-
-message KinoMsgElement{
-  string name = 1;
-  string path = 2;
-  int32 kino = 3;
-  google.protobuf.Timestamp date = 4;
-  google.protobuf.Timestamp created = 5;
-  string title = 6;
-  string year = 7;
-  string runtime = 8;
-  string genre = 9;
-  string director = 10;
-  string actors = 11;
-  string rating = 12;
-  string description = 13;
-  int32 cover = 14;
-  string trailer = 15;
-  string link = 16;
-}
-
-message SendFeedbackRequest{
-  string topic = 1;
-  string email = 2;
-  string emailId = 3;
-  string message = 4;
-  int32 image_count = 5;
-  double latitude = 6;
-  double longitude = 7;
-  string osVersion = 8;
-  string appVersion = 9;
-}
-
-message SendFeedbackImageReply{
-  string status = 1;
-}
-
-message SendFeedbackImageRequest{
-  int32 id = 1;
-  int32 imageNr = 2;
-  //todo where does the file come from?
-}
-
-
-message GetMembersRequest{
-  string lrzId = 1;
-}
-
-message GetMembersReply{
-  string lrzId = 1;
-  string name = 2;
-  int32 memberId = 3;
-}
-
-
-
-message GetChatRoomsReply{
-  repeated ChatRoomsMsgElement rooms = 1;
-}
-
-message ChatRoomsMsgElement{
-  int32 id = 1;
-  string name = 2;
-  string semester = 3;
-  string title = 4;
-  int32 members = 5;
-}
-
-message GetChatRoomByIdRequest{
-  int32 roomId = 1;
-}
-
-
-message LeaveChatRoomRequest{
-  int32 roomId = 1;
-}
-
-message AddUserToChatRoomRequest{
-  int32 roomId = 1;
-  int32 memberId = 2;
-}
-
-message SendChatMessageRequest{
-  int32 roomId = 1;
+message TagRating {
+  string tag = 1;
+  double rating = 2;
 }
 
-message UpdateChatMessageRequest{
-  int32 roomId = 1;
-  int32 messageId = 2;
+message TagRatingsResult {
+  string nameDE = 1;
+  string nameEN = 2;
+  double averageRating = 3;
+  int32 minRating = 4;
+  int32 maxRating = 5;
 }
 
 
-message ChatMessageModelMsg{
-  repeated ChatMessageModelMsgElement messages = 1;
-}
-
-message ChatMessageModelMsgElement{
-  int32 id = 1;
-  int32 previous = 2;
-  int32 room = 3;
-  string text = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  string signature = 6;
-  int32 memberId = 7;
-  int32 sendingStatus = 8;
-}
-
-message GetChatMessagesRequest{
-  int32 roomId = 1;
-  int32 pageId = 2;
-}
-
-message ChatMemberMsg{
-  repeated ChatMemberMsgElement members = 1;
-}
-
-message ChatMemberMsgElement{
-  int32 id = 1;
-  string lrzId = 2;
-  string displayName = 3;
-  string signature = 4;
-}
-
-
-message GetChatMemberRequest{
-  string lrzId = 1;
-}
-
-
-message SearchMemberByNameRequest{
-  string query = 1;
-}
-
-message GetMemberRoomsRequest{
-  int32 memberId = 1;
-}
-
-message GetMemberRoomsReply{
-  repeated ChatRoomsMsgElement chatRooms = 1;
-}
-
-
-message PurchaseTicketStripeReply{
-  repeated TicketMessageElement tickets = 1;
-}
-
-message TicketMessageElement{
-  int32 id = 1;
-  int32 eventId = 2;
-  string code = 3;
-  int32 ticketTypeId = 4;
-  google.protobuf.Timestamp redemption = 5;
-}
-
-
-message GetEphemeralKeyReply{
-  //todo How does this look?
-}
-
-
-message GetTicketStatusRequest{
-  int32 eventId = 1;
-}
-
 
-message GetTicketStatusReply{
-  repeated TicketStatus status = 1;
-}
-
-message TicketStatus{
-  int32 ticketType = 1;
-  int32 contingent = 2;
-  int32 sold = 3;
-}
-
-message TUMCabeStatus{
-  string status = 1;
-}
+message GetCafeteriaResponse{
+  string name=1;
+  string adress=2;
+  double longitude=3;
+  double latitude=4;
 
-message GetUploadStatusRequest{
-  string lrzId = 1;
 }
 
-message GetUploadStatusReply{
-  string fcm_token = 1;
-  string public_key = 2;
-  bool student_id = 3;
-  bool employee_id = 4;
-  bool external_id = 5;
-}
-
-message GetNotificationsReply{
-  int32 notificationId=1;
-  int32 type=2;
-  string title=3;
-  string description=4;
-  string signature=5;
-}
 
 
-message NotificationsRequest{
-  int32 notificationId=1;
-}
-
-message GetNotificationsConfirmReply{
-  string status=1;
-}
