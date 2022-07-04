@@ -21,6 +21,24 @@ import (
 const MEAL = 1
 const CAFETERIA = 2
 
+type MultiLanguageTags struct {
+	MultiLanguageTags []Tag `json:"tags"`
+}
+type Tag struct {
+	TagNameEnglish string `json:"tagNameEnglish"`
+	TagNameGerman  string `json:"tagNameGerman"`
+}
+
+type MultiLanguageNameTags struct {
+	MultiLanguageNameTags []NameTag `json:"tags"`
+}
+type NameTag struct {
+	TagNameEnglish string   `json:"tagNameEnglish"`
+	TagNameGerman  string   `json:"tagNameGerman"`
+	Notincluded    []string `json:"notincluded"`
+	Canbeincluded  []string `json:"canbeincluded"`
+}
+
 /*
 Writes all available tags from the json file into tables in order to make them easier to use
 */
@@ -135,8 +153,8 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 
 	if res.RowsAffected > 0 {
 		ratings := queryLastRatingsWithLimit(input, s)
-		//todo query tagRatings name + meal
-		mealTags := queryMealTags(s.db)
+		//todo query tagRatings name + meal -> noch wird nicht auf ein bestimmtes gericht/eine bestimmte mensa gefiltert
+		mealTags := queryMealTags(s.db, input.CafeteriaName, input.Meal)
 		//nameTags := queryNameTags(s.db)
 
 		return &pb.GetMealInCafeteriaRatingReply{
@@ -152,19 +170,31 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 
 }
 
-func queryMealTags(db *gorm.DB) []*pb.TagRating {
-
+func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.TagRating {
+	//todo where nach cafeteria ID und meal ID
 	var results []*pb.TagRating
-
 	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
 		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
 		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Where("meal_rating_tags_results.mealID =? AND meal_rating_tags_results.cafeteriaID = ?", getIDForMealName(mealName, cafeteriaName, db), getIDForCafeteriaName(cafeteriaName, db)).
 		Scan(&results).Error
-	/*err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
-	" FROM meal_rating mr" +
-	" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
-	" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
-	*/
+
+	if res != nil {
+		log.Println(res)
+	}
+	return results
+}
+
+func queryCafeteriaTags(db *gorm.DB, cafeteriaName string) []*pb.TagRating {
+
+	var results []*pb.TagRating
+
+	res := db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).
+		Joins("join cafeteria_rating_tags_options on cafeteria_rating_tags_options.id = cafeteria_rating_tags_results.tagID").
+		Select("cafeteria_rating_tags_options.nameDE, cafeteria_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Where("cafeteria_rating_tags_results.cafeteriaID = ?", getIDForCafeteriaName(cafeteriaName, db)).
+		Scan(&results).Error
+
 	if res != nil {
 		log.Println(res)
 	}
@@ -173,17 +203,14 @@ func queryMealTags(db *gorm.DB) []*pb.TagRating {
 
 func queryNameTags(db *gorm.DB) []*pb.TagRating {
 
+	//todo darf nicht auf der options tabelle ansetzten, sondern auf einer unteranfrage, die nur nochalle übrig lässt, die auch im namen enthalten sind
 	var results []*pb.TagRating
 
-	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
-		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
-		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+	res := db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).
+		Joins("join meal_name_tags_options on meal_name_tags_options.id = meal_name_tags_results.tagID").
+		Select("meal_name_tags_options.nameDE, meal_name_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
 		Scan(&results).Error
-	/*err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
-	" FROM meal_rating mr" +
-	" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
-	" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
-	*/
+	//todo only nametags for the current meal -> wieder excluded und included mappen
 	if res != nil {
 		log.Println(res)
 	}
@@ -209,8 +236,8 @@ func queryLastRatingsWithLimit(input *pb.GetMealInCafeteriaRating, s *CampusServ
 		for i, v := range ratings {
 			ratingResults[i] = &pb.MealRating{
 				Rating:        v.Rating,
-				Meal:          getNameForMealID(v.MealID, s.db),
-				CafeteriaName: getNameForCafeteriaID(v.CafeteriaID, s.db),
+				Meal:          input.Meal,
+				CafeteriaName: input.CafeteriaName,
 				Comment:       v.Comment,
 			}
 		}
@@ -398,7 +425,7 @@ func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models
 		Select("nameTagID").
 		Scan(&excludedTags)
 
-	log.Println(len(includedTags))
+	log.Println("Number of included tags: ", len(includedTags))
 
 	//set all entries in included to -1 if the excluded tag was recognised ffor this tag rating.
 	if len(excludedTags) > 0 {
@@ -447,24 +474,6 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb
 	return &pb.GetRatingTagsReply{
 		Tags: result,
 	}, nil
-}
-
-type MultiLanguageTags struct {
-	MultiLanguageTags []Tag `json:"tags"`
-}
-type Tag struct {
-	TagNameEnglish string `json:"tagNameEnglish"`
-	TagNameGerman  string `json:"tagNameGerman"`
-}
-
-type MultiLanguageNameTags struct {
-	MultiLanguageNameTags []NameTag `json:"tags"`
-}
-type NameTag struct {
-	TagNameEnglish string   `json:"tagNameEnglish"`
-	TagNameGerman  string   `json:"tagNameGerman"`
-	Notincluded    []string `json:"notincluded"`
-	Canbeincluded  []string `json:"canbeincluded"`
 }
 
 func generateRatingTagListFromFile(path string) MultiLanguageTags {
