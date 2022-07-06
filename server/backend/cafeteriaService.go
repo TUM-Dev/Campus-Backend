@@ -137,14 +137,11 @@ func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	}
 }
 
-func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, _ *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented")
-}
-
-func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
-	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
-	res := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
-		Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
+func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
+	var result cafeteria_rating_models.CafeteriaRatingsAverage //get the average rating for this specific cafeteria
+	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
+	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
+		Where("cafeteriaID = ?", cafeteriaID).
 		First(&result)
 
 	if res.Error != nil {
@@ -152,9 +149,72 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 	}
 
 	if res.RowsAffected > 0 {
-		ratings := queryLastRatingsWithLimit(input, s)
-		//todo query tagRatings name + meal -> noch wird nicht auf ein bestimmtes gericht/eine bestimmte mensa gefiltert
-		//todo add again mealTags := queryMealTags(s.db, input.CafeteriaName, input.Meal)
+		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaID, s)
+		cafeteriaTags := queryCafeteriaTags(s.db, input.CafeteriaName)
+
+		return &pb.CafeteriaRatingResponse{
+			AverageRating: float64(result.Average),
+			MinRating:     int32(result.Min),
+			MaxRating:     int32(result.Max),
+			Rating:        ratings,
+			RatingTags:    cafeteriaTags,
+			//NameTags: nameTags,
+		}, nil
+	} else {
+		return &pb.CafeteriaRatingResponse{
+			AverageRating: -1,
+			MinRating:     -1,
+			MaxRating:     -1,
+		}, nil
+	}
+}
+
+func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
+	var ratings []cafeteria_rating_models.CafeteriaRating
+	if input.Limit > 0 {
+		errRatings := s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+			Where("cafeteriaID = ?", cafeteriaID).
+			First(&ratings).
+			Limit(int(input.Limit)).
+			Find(ratings)
+
+		if errRatings.Error != nil {
+			return make([]*pb.CafeteriaRating, 0)
+		}
+		ratingResults := make([]*pb.CafeteriaRating, len(ratings))
+
+		//todo add timestamp
+		//todo add meal tags which were added to this rating
+		for i, v := range ratings {
+			ratingResults[i] = &pb.CafeteriaRating{
+				Rating:        v.Rating,
+				CafeteriaName: input.CafeteriaName,
+				Comment:       v.Comment,
+				//Image: v.Image,
+				//CafeteriaVisitedAt: v.Timestamp,
+				//TagRating
+			}
+		}
+		return ratingResults
+	} else {
+		return make([]*pb.CafeteriaRating, 0)
+	}
+}
+
+func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
+	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
+	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
+	res := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
+		Where("cafeteriaID = ? AND meal = ?", cafeteriaID, input.Meal).
+		First(&result)
+
+	if res.Error != nil {
+		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
+	}
+
+	if res.RowsAffected > 0 {
+		ratings := queryLastMealRatingsWithLimit(input, cafeteriaID, s)
+		mealTags := queryMealTags(s.db, input.CafeteriaName, input.Meal)
 		//nameTags := queryNameTags(s.db)
 
 		return &pb.MealRatingsResponse{
@@ -162,7 +222,7 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 			MinRating:     int32(result.Min),
 			MaxRating:     int32(result.Max),
 			Rating:        ratings,
-			//RatingTags:     mealTags,
+			RatingTags:    mealTags,
 			//NameTags: nameTags,
 		}, nil
 	} else {
@@ -175,13 +235,14 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 
 }
 
-func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.TagRating {
+func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.TagRatingsResult {
 	//todo where nach cafeteria ID und meal ID
 	cafeteriaID := getIDForCafeteriaName(cafeteriaName, db)
-	var results []*pb.TagRating
+	var results []*pb.TagRatingsResult
 	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
 		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
-		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"+
+			"meal_rating_tags_options.nameEN, meal_rating_tags_results.min, meal_rating_tags_results.max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
 		Where("meal_rating_tags_results.mealID =? AND meal_rating_tags_results.cafeteriaID = ?", getIDForMealName(mealName, cafeteriaID, db), cafeteriaID).
 		Scan(&results).Error
 
@@ -191,13 +252,14 @@ func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.Tag
 	return results
 }
 
-func queryCafeteriaTags(db *gorm.DB, cafeteriaName string) []*pb.TagRating {
+func queryCafeteriaTags(db *gorm.DB, cafeteriaName string) []*pb.TagRatingsResult {
 
-	var results []*pb.TagRating
+	var results []*pb.TagRatingsResult
 
 	res := db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).
 		Joins("join cafeteria_rating_tags_options on cafeteria_rating_tags_options.id = cafeteria_rating_tags_results.tagID").
-		Select("cafeteria_rating_tags_options.nameDE, cafeteria_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Select("cafeteria_rating_tags_options.nameDE, cafeteria_rating_tags_results.average, "+
+			"cafeteria_rating_tags_options.nameEN, cafeteria_rating_tags_results.min, cafeteria_rating_tags_results.max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
 		Where("cafeteria_rating_tags_results.cafeteriaID = ?", getIDForCafeteriaName(cafeteriaName, db)).
 		Scan(&results).Error
 
@@ -223,11 +285,12 @@ func queryNameTags(db *gorm.DB) []*pb.TagRating {
 	return results
 }
 
-func queryLastRatingsWithLimit(input *pb.MealRatingsRequest, s *CampusServer) []*pb.MealRating {
+func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
+	mealID := getIDForMealName(input.Meal, cafeteriaID, s.db)
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
-			Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
+			Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
 			First(&ratings).
 			Limit(int(input.Limit)).
 			Find(ratings)

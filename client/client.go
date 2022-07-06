@@ -64,8 +64,16 @@ func createCafeteriaRatingSampleData() {
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)*/
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
 
+		CafeteriaName: "MENSA_GARCHING",
+		Limit:         3,
+	})
+	println(res.AverageRating)
+	if err != nil {
+		println(err)
+	}
 }
 
 func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
