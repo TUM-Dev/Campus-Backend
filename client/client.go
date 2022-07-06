@@ -70,7 +70,27 @@ func createCafeteriaRatingSampleData() {
 		CafeteriaName: "MENSA_GARCHING",
 		Limit:         3,
 	})
-	println(res.AverageRating)
+
+	println("Result: ")
+	println("averagerating: ", res.AverageRating)
+	println("min", res.MinRating)
+	println("max", res.MaxRating)
+	println("Number of individual Ratings", len(res.Rating))
+	for _, v := range res.Rating {
+		println("\nRating: ", v.Rating)
+		println("Cafeteria Name: ", v.CafeteriaName)
+		println("Comment ", v.Comment)
+		println("Number of Tag Ratings: ", len(v.TagRating))
+		println("Timestamp: ", v.CafeteriaVisitedAt)
+	}
+
+	for _, v := range res.RatingTags {
+		println("\nNameDE: ", v.NameDE)
+		println("NameEN: ", v.NameEN)
+		println("averagerating: ", v.AverageRating)
+		println("min", v.MinRating)
+		println("max", v.MaxRating)
+	}
 	if err != nil {
 		println(err)
 	}

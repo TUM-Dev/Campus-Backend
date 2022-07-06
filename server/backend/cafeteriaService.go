@@ -39,6 +39,14 @@ type NameTag struct {
 	Canbeincluded  []string `json:"canbeincluded"`
 }
 
+type QueryRatingTag struct {
+	NameEN  string  `json:"nameEN"`
+	NameDE  string  `json:"nameDE"`
+	Average float64 `json:"average"`
+	Min     int32   `json:"min"`
+	Max     int32   `json:"max"`
+}
+
 /*
 Writes all available tags from the json file into tables in order to make them easier to use
 */
@@ -174,9 +182,8 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
 			Where("cafeteriaID = ?", cafeteriaID).
-			First(&ratings).
 			Limit(int(input.Limit)).
-			Find(ratings)
+			Find(&ratings)
 
 		if errRatings.Error != nil {
 			return make([]*pb.CafeteriaRating, 0)
@@ -254,19 +261,30 @@ func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.Tag
 
 func queryCafeteriaTags(db *gorm.DB, cafeteriaName string) []*pb.TagRatingsResult {
 
-	var results []*pb.TagRatingsResult
+	var results []QueryRatingTag
 
+	//todo der name wird noch nciht korrekt geladen - wird noch nicht im sql gefunden
 	res := db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).
 		Joins("join cafeteria_rating_tags_options on cafeteria_rating_tags_options.id = cafeteria_rating_tags_results.tagID").
-		Select("cafeteria_rating_tags_options.nameDE, cafeteria_rating_tags_results.average, "+
-			"cafeteria_rating_tags_options.nameEN, cafeteria_rating_tags_results.min, cafeteria_rating_tags_results.max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Select("cafeteria_rating_tags_options.nameDE as nameDE, cafeteria_rating_tags_results.average as average, "+
+			"cafeteria_rating_tags_options.nameEN as nameEN, cafeteria_rating_tags_results.min as min, cafeteria_rating_tags_results.max as max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
 		Where("cafeteria_rating_tags_results.cafeteriaID = ?", getIDForCafeteriaName(cafeteriaName, db)).
 		Scan(&results).Error
 
+	elements := make([]*pb.TagRatingsResult, len(results))
+	for i, v := range results {
+		elements[i] = &pb.TagRatingsResult{
+			NameDE:        v.NameDE,
+			NameEN:        v.NameEN,
+			AverageRating: v.Average,
+			MinRating:     v.Min,
+			MaxRating:     v.Max,
+		}
+	}
 	if res != nil {
 		log.Println(res)
 	}
-	return results
+	return elements
 }
 
 func queryNameTags(db *gorm.DB) []*pb.TagRating {
@@ -291,9 +309,8 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
 			Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
-			First(&ratings).
 			Limit(int(input.Limit)).
-			Find(ratings)
+			Find(&ratings)
 
 		if errRatings.Error != nil {
 			return make([]*pb.MealRating, 0)
