@@ -58,16 +58,18 @@ func createCafeteriaRatingSampleData() {
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)*/
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
+	/*generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 3)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 5)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)*/
+
+	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
 }
 
 func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
-	y := make([]*pb.TagRating, 3)
+	y := make([]*pb.TagRating, 2)
 	y[0] = &pb.TagRating{
 		Rating: 4,
 		Tag:    "Sauberkeit",
@@ -103,7 +105,7 @@ func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string
 	}
 	y[2] = &pb.TagRating{
 		Rating: 2,
-		Tag:    "Preis",
+		Tag:    "Aussehen",
 	}
 
 	_, err := c.NewMealRating(ctx, &pb.NewMealRatingRequest{

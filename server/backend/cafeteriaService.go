@@ -177,11 +177,12 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 
 func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.TagRating {
 	//todo where nach cafeteria ID und meal ID
+	cafeteriaID := getIDForCafeteriaName(cafeteriaName, db)
 	var results []*pb.TagRating
 	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
 		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
 		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
-		Where("meal_rating_tags_results.mealID =? AND meal_rating_tags_results.cafeteriaID = ?", getIDForMealName(mealName, cafeteriaName, db), getIDForCafeteriaName(cafeteriaName, db)).
+		Where("meal_rating_tags_results.mealID =? AND meal_rating_tags_results.cafeteriaID = ?", getIDForMealName(mealName, cafeteriaID, db), cafeteriaID).
 		Scan(&results).Error
 
 	if res != nil {
@@ -289,7 +290,7 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatin
 	rating := cafeteria_rating_models.MealRating{
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
-		MealID:      getIDForMealName(input.Meal, input.CafeteriaName, s.db),
+		MealID:      getIDForMealName(input.Meal, cafeteriaID, s.db),
 		Rating:      input.Rating,
 		Timestamp:   time.Now()}
 
@@ -341,7 +342,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 			var currentTag int
 
 			exists := getModelStoreTagOption(tagType, s.db).
-				Where("nameEN LIKE ? OR nameDE LIKE ?", tag, tag).
+				Where("nameEN LIKE ? OR nameDE LIKE ?", tag.Tag, tag.Tag).
 				Select("id").
 				First(&currentTag)
 
@@ -349,7 +350,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 				insertModel.
 					Create(&cafeteria_rating_models.MealRatingsTags{
 						ParentRating: parentRatingID,
-						Rating:       int32(5),
+						Rating:       int32(tag.Rating),
 						TagID:        currentTag})
 				usedTagIds[currentTag] = 1
 			} else {
@@ -402,13 +403,13 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	return result
 }
 
-func getIDForMealName(name string, cafeteriaName string, db *gorm.DB) int32 {
+func getIDForMealName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	var result int32 = -1
 	db.Model(&cafeteria_rating_models.Meal{}).
-		Where("name LIKE ?", name).
-		Where("cafeteriaID LIKE ?", cafeteriaName).
+		Where("name LIKE ? AND cafeteriaID = ?", name, cafeteriaID). //todo darf nicht auf den namen vergleichen, sondern nur auf der id
 		Select("id").
 		Scan(&result)
+
 	return result
 }
 
@@ -464,20 +465,30 @@ func contains(s []int, e int) int {
 }
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*pb.TagRatingOverview
+	var result []*cafeteria_rating_models.MealRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE, nameEN").Scan(&result)
 
+	elements := make([]*pb.TagRatingOverview, len(result))
+	for i, a := range result {
+		elements[i] = &pb.TagRatingOverview{NameEN: a.NameEN, NameDE: a.NameDE}
+	}
+
 	return &pb.GetRatingTagsReply{
-		Tags: result,
+		Tags: elements,
 	}, nil
 }
 
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*pb.TagRatingOverview
+	var result []*cafeteria_rating_models.CafeteriaRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE,nameEN").Scan(&result)
 
+	elements := make([]*pb.TagRatingOverview, len(result))
+	for i, a := range result {
+		elements[i] = &pb.TagRatingOverview{NameEN: a.NameEN, NameDE: a.NameDE}
+	}
+
 	return &pb.GetRatingTagsReply{
-		Tags: result,
+		Tags: elements,
 	}, nil
 }
 
