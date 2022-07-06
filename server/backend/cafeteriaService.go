@@ -137,11 +137,11 @@ func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	}
 }
 
-func (s *CampusServer) GetCafeteriaRatingLastThree(ctx context.Context, _ *pb.GetCafeteriaRating) (*pb.GetCafeteriaRatingReply, error) {
+func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, _ *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented")
 }
 
-func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.GetMealInCafeteriaRating) (*pb.GetMealInCafeteriaRatingReply, error) {
+func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
 	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
 	res := s.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).
 		Where("cafeteria = ? AND meal = ?", input.CafeteriaName, input.Meal).
@@ -154,17 +154,22 @@ func (s *CampusServer) GetMealRatingLastThree(ctx context.Context, input *pb.Get
 	if res.RowsAffected > 0 {
 		ratings := queryLastRatingsWithLimit(input, s)
 		//todo query tagRatings name + meal -> noch wird nicht auf ein bestimmtes gericht/eine bestimmte mensa gefiltert
-		mealTags := queryMealTags(s.db, input.CafeteriaName, input.Meal)
+		//todo add again mealTags := queryMealTags(s.db, input.CafeteriaName, input.Meal)
 		//nameTags := queryNameTags(s.db)
 
-		return &pb.GetMealInCafeteriaRatingReply{
+		return &pb.MealRatingsResponse{
 			AverageRating: float64(result.Average),
+			MinRating:     int32(result.Min),
+			MaxRating:     int32(result.Max),
 			Rating:        ratings,
-			TagRating:     mealTags,
+			//RatingTags:     mealTags,
+			//NameTags: nameTags,
 		}, nil
 	} else {
-		return &pb.GetMealInCafeteriaRatingReply{
+		return &pb.MealRatingsResponse{
 			AverageRating: -1,
+			MinRating:     -1,
+			MaxRating:     -1,
 		}, nil
 	}
 
@@ -217,7 +222,7 @@ func queryNameTags(db *gorm.DB) []*pb.TagRating {
 	return results
 }
 
-func queryLastRatingsWithLimit(input *pb.GetMealInCafeteriaRating, s *CampusServer) []*pb.MealRating {
+func queryLastRatingsWithLimit(input *pb.MealRatingsRequest, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
@@ -247,8 +252,8 @@ func queryLastRatingsWithLimit(input *pb.GetMealInCafeteriaRating, s *CampusServ
 	}
 }
 
-func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
-	validInput := inputSanitization(input, s)
+func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
+	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
 	if validInput != nil {
 		return nil, validInput
 	}
@@ -265,9 +270,9 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewRati
 	return &emptypb.Empty{}, nil
 }
 
-func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (*emptypb.Empty, error) {
+func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
 
-	validInput := inputSanitization(input, s)
+	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
 	if validInput != nil {
 		return nil, validInput
 	}
@@ -296,26 +301,26 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewRating) (
 	return &emptypb.Empty{}, nil
 }
 
-func inputSanitization(input *pb.NewRating, s *CampusServer) error {
-	if input.Rating > 10 || input.Rating < 0 {
+func inputSanitization(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) error {
+	if rating > 10 || rating < 0 {
 		return status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
 
-	if len(input.Image) > 131100 {
+	if len(image) > 131100 {
 		return status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
 	}
 
-	if len(input.Comment) > 256 {
+	if len(comment) > 256 {
 		return status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
 
-	if strings.Contains(input.Comment, "@") {
+	if strings.Contains(comment, "@") {
 		return status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
 	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
-		Where("name LIKE ?", input.CafeteriaName).
+		Where("name LIKE ?", cafeteriaName).
 		First(&result)
 	if testCanteen.RowsAffected == 0 {
 		return status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
@@ -328,11 +333,11 @@ func inputSanitization(input *pb.NewRating, s *CampusServer) error {
 Checks whether the rating-tag name is a valid option and if so,
 it will be saved with a reference to the rating
 */
-func storeRatingTags(s *CampusServer, parentRatingID int32, tags []string, tagType int) {
+func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType int) {
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
 		insertModel := getModelStoreTag(tagType, s.db)
-		for _, tag := range tags {
+		for _, tag := range tags { //todo adapt to new version of tags
 			var currentTag int
 
 			exists := getModelStoreTagOption(tagType, s.db).
@@ -459,8 +464,8 @@ func contains(s []int, e int) int {
 }
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []string
-	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE").Scan(&result)
+	var result []*pb.TagRatingOverview
+	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE, nameEN").Scan(&result)
 
 	return &pb.GetRatingTagsReply{
 		Tags: result,
@@ -468,13 +473,15 @@ func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empt
 }
 
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []string
-	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE").Scan(&result)
+	var result []*pb.TagRatingOverview
+	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE,nameEN").Scan(&result)
 
 	return &pb.GetRatingTagsReply{
 		Tags: result,
 	}, nil
 }
+
+//todo add getmensen rpc
 
 func generateRatingTagListFromFile(path string) MultiLanguageTags {
 	byteValue := readFromFile(path)
