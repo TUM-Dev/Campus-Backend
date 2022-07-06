@@ -481,7 +481,18 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb
 	}, nil
 }
 
-//todo add getmensen rpc
+//fixme add repeated to the proto File
+func (s *CampusServer) GetCafeterias(ctx context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaResponse, error) {
+	var result []*pb.GetCafeteriaResponse
+	s.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result)
+
+	return &pb.GetCafeteriaResponse{
+		Name:      result[0].Name,
+		Adress:    result[0].Adress,
+		Latitude:  result[0].Latitude,
+		Longitude: result[0].Longitude,
+	}, nil
+}
 
 func generateRatingTagListFromFile(path string) MultiLanguageTags {
 	byteValue := readFromFile(path)
