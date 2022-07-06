@@ -6,6 +6,8 @@ github.com/PuerkitoBio/goquery v1.8.0 h1:PJTF7AmFCFKk1N6V6jmKfrNH9tV5pNE6lZMkG0g
 github.com/PuerkitoBio/goquery v1.8.0/go.mod h1:ypIiRMtY7COPGk+I/YbZLbxsxn9g5ejnI2HSMtkjZvI=
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220606093721-fc96ef507f0d h1:eXmdhhckSUxWpVkCEwARtYzdoOh/thypZ1Hhcsy/bg4=
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220606093721-fc96ef507f0d/go.mod h1:JZZ55exX5eEez3g9QfO++6iZr+/NFf5suMfuJXdW+rU=
+github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220706072527-47c0066cde1d h1:c8udvZlDh/WHwrQMyNPsankO67zKESv0sARD/QwPnHo=
+github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220706072527-47c0066cde1d/go.mod h1:L89agVWSUfXFCryvX5FrZxLVwbAcmK8eQn0u04ZPbF4=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=
 github.com/andybalholm/cascadia v1.3.1/go.mod h1:R4bJ1UQfqADjvDa4P6HZHLh/3OxWWEqc0Sk8XGwHqvA=
