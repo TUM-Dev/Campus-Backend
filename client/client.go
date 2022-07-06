@@ -3,33 +3,17 @@ package main
 import (
 	"context"
 	"crypto/x509"
-	"log"
-	"time"
-
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
-	// "google.golang.org/protobuf/types/known/emptypb"
+	"log"
+	"time"
 )
 
 const (
 	address = "api-grpc.tum.app:443"
 )
-
-type CampusClient struct {
-	pb.CampusClient
-}
-
-func (cc *CampusClient) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*pb.AccessPoint, error) {
-	log.Println("client get")
-	return &pb.AccessPoint{Name: "client test"}, nil
-}
-
-func (cc *CampusClient) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessPointsClient) error {
-	log.Println("client list")
-	return nil
-}
 
 func main() {
 	// Set up a connection to the server.
@@ -53,11 +37,9 @@ func main() {
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Println("Trying to fetch top news")
-	request := pb.APRequest{Name: "apa05-0mg",Timestamp: "2022-06-15 22"}
-	r, err := c.GetAccessPoint(ctx, &request)
+	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-
-	log.Printf("Greeting: %s", r.Name)
+	log.Printf("Greeting: %s", r.String())
 }
