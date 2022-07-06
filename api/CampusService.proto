@@ -66,7 +66,7 @@ service Campus {
   }
 
 
-  rpc GetCafeteriaRatingLastThree (GetCafeteriaRating) returns (GetCafeteriaRatingReply) {
+  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
     option (google.api.http) = {
       post: "/cafeteriaRating/cafeteria/get"
       body: "*",
@@ -74,7 +74,7 @@ service Campus {
   }
 
 
-  rpc GetMealRatingLastThree (GetMealInCafeteriaRating) returns (GetMealInCafeteriaRatingReply) {
+  rpc GetMealRatings (MealRatingsRequest) returns (MealRatingsResponse) {
     option (google.api.http) = {
       post: "/cafeteriaRating/dish/get"
       body: "*",
@@ -83,14 +83,14 @@ service Campus {
 
 
 
-  rpc NewCafeteriaRating (NewRating) returns (google.protobuf.Empty) {
+  rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
       body: "*",
     };
   }
 
-  rpc NewMealRating (NewRating) returns (google.protobuf.Empty) {
+  rpc NewMealRating (NewMealRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/cafeteriaRating/meal/newMealRating"
       body: "*",
@@ -109,15 +109,9 @@ service Campus {
     };
   }
 
-  rpc GetAccessPoint (APRequest) returns (AccessPoint) {
+  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaResponse) {
     option (google.api.http) = {
-      get: "/accesspoints/heatmap/{name}"
-    };
-  }
-  rpc ListAccessPoints (APRequest) returns (stream APResponse) {
-    option (google.api.http) = {
-      get: "/accesspoints/heatmap",
-      response_body: "accesspoint"
+      get: "/cafeteriaRating/cafeteria/allCafeterias",
     };
   }
 
@@ -219,14 +213,14 @@ message GetTopNewsReply {
 }
 
 
-message GetCafeteriaRating {
+message CafeteriaRatingRequest {
   string cafeteriaName = 1;
-  google.protobuf.Timestamp from = 3;
-  google.protobuf.Timestamp to = 4;
-  int32 limit = 5;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+  int32 limit = 4;
 }
 
-message GetMealInCafeteriaRating {
+message MealRatingsRequest {
   string cafeteriaName = 1;
   string meal = 2;
   google.protobuf.Timestamp from = 3;
@@ -234,34 +228,34 @@ message GetMealInCafeteriaRating {
   int32 limit = 5;
 }
 
-message GetCafeteriaRatingReply {
+message CafeteriaRatingResponse {
   repeated CafeteriaRating rating = 1;
   double averageRating = 2;
+  int32 minRating = 3;
+  int32 maxRating = 4;
+  repeated TagRatingsResult ratingTags = 5;
 }
 
 
-message GetMealInCafeteriaRatingReply {
+message MealRatingsResponse {
   repeated MealRating rating = 1;
   double averageRating = 2;
-  repeated TagRating tagRating = 3;
+  int32 minRating = 3;
+  int32 maxRating = 4;
+  repeated TagRatingsResult ratingTags = 5;
+  repeated TagRatingsResult nameTags = 6;
 }
 
 
 
-
-message TagRating {
-  string tag = 1;
-  double rating = 2;
-}
 
 message CafeteriaRating{
-  double rating = 1;
+  int32 rating = 1;
   string cafeteriaName = 2;
   bytes image = 3;
-  repeated string tags = 4;
-  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
-  string comment = 6;
-  repeated TagRating tagRating = 7;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 4;
+  string comment = 5;
+  repeated TagRatingOverview tagRating = 6;
 }
 
 message MealRating{
@@ -269,41 +263,63 @@ message MealRating{
   string cafeteriaName = 2;
   string meal = 3;
   bytes image = 4;
-  repeated string tags = 5;
-  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
-  string comment = 7;
-  repeated TagRating tagRating = 8;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
+  string comment = 6;
+  repeated TagRatingOverview tagRating = 7;
 }
 
-message NewRating{
+
+message NewCafeteriaRatingRequest{
+  int32 rating = 1;
+  string cafeteriaName = 2;
+  bytes image = 3;
+  repeated TagRating tags = 4;
+  google.protobuf.Timestamp cafeteriaVisitedAt = 5;
+  string comment = 6;
+}
+
+message NewMealRatingRequest{
   int32 rating = 1;
   string cafeteriaName = 2;
   string meal = 3;
-  string image = 4;
-  repeated string tags = 5;
+  bytes image = 4;
+  repeated TagRating tags = 5;
   google.protobuf.Timestamp cafeteriaVisitedAt = 6;
-  string identifierOfUser = 7;
-  string comment = 8;
+  string comment = 7;
 }
 
 message GetRatingTagsReply{
-  repeated string tags=1;
+  repeated TagRatingOverview tags=1;
 }
 
-message AccessPoint {
-  string name = 1;
-  string lat  = 2;
-  string long = 3;
-  int64 intensity = 4;
-  int64 max = 5;
-  int64 min = 6;
+message TagRatingOverview {
+  string nameDE = 1;
+  string nameEN = 2;
+  double rating = 3;
 }
 
-message APRequest {
-  string name = 1;
-  string timestamp = 2;
+message TagRating {
+  string tag = 1;
+  double rating = 2;
 }
 
-message APResponse {
-  AccessPoint accesspoint = 1;
+message TagRatingsResult {
+  string nameDE = 1;
+  string nameEN = 2;
+  double averageRating = 3;
+  int32 minRating = 4;
+  int32 maxRating = 5;
 }
+
+
+
+message GetCafeteriaResponse{
+  string name=1;
+  string adress=2;
+  double longitude=3;
+  double latitude=4;
+
+}
+
+
+

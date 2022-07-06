@@ -31,14 +31,13 @@ type CampusClient interface {
 	GetRoomMaps(ctx context.Context, in *GetRoomMapsRequest, opts ...grpc.CallOption) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(ctx context.Context, in *GetRoomCoordinatesRequest, opts ...grpc.CallOption) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(ctx context.Context, in *GetRoomScheduleRequest, opts ...grpc.CallOption) (*GetRoomScheduleReply, error)
-	GetCafeteriaRatingLastThree(ctx context.Context, in *GetCafeteriaRating, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error)
-	GetMealRatingLastThree(ctx context.Context, in *GetMealInCafeteriaRating, opts ...grpc.CallOption) (*GetMealInCafeteriaRatingReply, error)
-	NewCafeteriaRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	NewMealRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingResponse, error)
+	GetMealRatings(ctx context.Context, in *MealRatingsRequest, opts ...grpc.CallOption) (*MealRatingsResponse, error)
+	NewCafeteriaRating(ctx context.Context, in *NewCafeteriaRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	NewMealRating(ctx context.Context, in *NewMealRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAvailableMealTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
-	GetAccessPoint(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (*AccessPoint, error)
-	ListAccessPoints(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (Campus_ListAccessPointsClient, error)
+	GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaResponse, error)
 }
 
 type campusClient struct {
@@ -112,25 +111,25 @@ func (c *campusClient) GetRoomSchedule(ctx context.Context, in *GetRoomScheduleR
 	return out, nil
 }
 
-func (c *campusClient) GetCafeteriaRatingLastThree(ctx context.Context, in *GetCafeteriaRating, opts ...grpc.CallOption) (*GetCafeteriaRatingReply, error) {
-	out := new(GetCafeteriaRatingReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatingLastThree", in, out, opts...)
+func (c *campusClient) GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingResponse, error) {
+	out := new(CafeteriaRatingResponse)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetMealRatingLastThree(ctx context.Context, in *GetMealInCafeteriaRating, opts ...grpc.CallOption) (*GetMealInCafeteriaRatingReply, error) {
-	out := new(GetMealInCafeteriaRatingReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetMealRatingLastThree", in, out, opts...)
+func (c *campusClient) GetMealRatings(ctx context.Context, in *MealRatingsRequest, opts ...grpc.CallOption) (*MealRatingsResponse, error) {
+	out := new(MealRatingsResponse)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetMealRatings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) NewCafeteriaRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *campusClient) NewCafeteriaRating(ctx context.Context, in *NewCafeteriaRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/api.Campus/NewCafeteriaRating", in, out, opts...)
 	if err != nil {
@@ -139,7 +138,7 @@ func (c *campusClient) NewCafeteriaRating(ctx context.Context, in *NewRating, op
 	return out, nil
 }
 
-func (c *campusClient) NewMealRating(ctx context.Context, in *NewRating, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *campusClient) NewMealRating(ctx context.Context, in *NewMealRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/api.Campus/NewMealRating", in, out, opts...)
 	if err != nil {
@@ -166,45 +165,13 @@ func (c *campusClient) GetAvailableCafeteriaTags(ctx context.Context, in *emptyp
 	return out, nil
 }
 
-func (c *campusClient) GetAccessPoint(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (*AccessPoint, error) {
-	out := new(AccessPoint)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetAccessPoint", in, out, opts...)
+func (c *campusClient) GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaResponse, error) {
+	out := new(GetCafeteriaResponse)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeterias", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
-}
-
-func (c *campusClient) ListAccessPoints(ctx context.Context, in *APRequest, opts ...grpc.CallOption) (Campus_ListAccessPointsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], "/api.Campus/ListAccessPoints", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &campusListAccessPointsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Campus_ListAccessPointsClient interface {
-	Recv() (*APResponse, error)
-	grpc.ClientStream
-}
-
-type campusListAccessPointsClient struct {
-	grpc.ClientStream
-}
-
-func (x *campusListAccessPointsClient) Recv() (*APResponse, error) {
-	m := new(APResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 // CampusServer is the server API for Campus service.
@@ -219,14 +186,13 @@ type CampusServer interface {
 	GetRoomMaps(context.Context, *GetRoomMapsRequest) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(context.Context, *GetRoomCoordinatesRequest) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error)
-	GetCafeteriaRatingLastThree(context.Context, *GetCafeteriaRating) (*GetCafeteriaRatingReply, error)
-	GetMealRatingLastThree(context.Context, *GetMealInCafeteriaRating) (*GetMealInCafeteriaRatingReply, error)
-	NewCafeteriaRating(context.Context, *NewRating) (*emptypb.Empty, error)
-	NewMealRating(context.Context, *NewRating) (*emptypb.Empty, error)
+	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error)
+	GetMealRatings(context.Context, *MealRatingsRequest) (*MealRatingsResponse, error)
+	NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error)
+	NewMealRating(context.Context, *NewMealRatingRequest) (*emptypb.Empty, error)
 	GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
-	GetAccessPoint(context.Context, *APRequest) (*AccessPoint, error)
-	ListAccessPoints(*APRequest, Campus_ListAccessPointsServer) error
+	GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaResponse, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -255,16 +221,16 @@ func (UnimplementedCampusServer) GetRoomCoordinates(context.Context, *GetRoomCoo
 func (UnimplementedCampusServer) GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoomSchedule not implemented")
 }
-func (UnimplementedCampusServer) GetCafeteriaRatingLastThree(context.Context, *GetCafeteriaRating) (*GetCafeteriaRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatingLastThree not implemented")
+func (UnimplementedCampusServer) GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatings not implemented")
 }
-func (UnimplementedCampusServer) GetMealRatingLastThree(context.Context, *GetMealInCafeteriaRating) (*GetMealInCafeteriaRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatingLastThree not implemented")
+func (UnimplementedCampusServer) GetMealRatings(context.Context, *MealRatingsRequest) (*MealRatingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatings not implemented")
 }
-func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewRating) (*emptypb.Empty, error) {
+func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented")
 }
-func (UnimplementedCampusServer) NewMealRating(context.Context, *NewRating) (*emptypb.Empty, error) {
+func (UnimplementedCampusServer) NewMealRating(context.Context, *NewMealRatingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented")
 }
 func (UnimplementedCampusServer) GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
@@ -273,11 +239,8 @@ func (UnimplementedCampusServer) GetAvailableMealTags(context.Context, *emptypb.
 func (UnimplementedCampusServer) GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableCafeteriaTags not implemented")
 }
-func (UnimplementedCampusServer) GetAccessPoint(context.Context, *APRequest) (*AccessPoint, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAccessPoint not implemented")
-}
-func (UnimplementedCampusServer) ListAccessPoints(*APRequest, Campus_ListAccessPointsServer) error {
-	return status.Errorf(codes.Unimplemented, "method ListAccessPoints not implemented")
+func (UnimplementedCampusServer) GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCafeterias not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -418,44 +381,44 @@ func _Campus_GetRoomSchedule_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetCafeteriaRatingLastThree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCafeteriaRating)
+func _Campus_GetCafeteriaRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CafeteriaRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetCafeteriaRatingLastThree(ctx, in)
+		return srv.(CampusServer).GetCafeteriaRatings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetCafeteriaRatingLastThree",
+		FullMethod: "/api.Campus/GetCafeteriaRatings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetCafeteriaRatingLastThree(ctx, req.(*GetCafeteriaRating))
+		return srv.(CampusServer).GetCafeteriaRatings(ctx, req.(*CafeteriaRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetMealRatingLastThree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMealInCafeteriaRating)
+func _Campus_GetMealRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MealRatingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetMealRatingLastThree(ctx, in)
+		return srv.(CampusServer).GetMealRatings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetMealRatingLastThree",
+		FullMethod: "/api.Campus/GetMealRatings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMealRatingLastThree(ctx, req.(*GetMealInCafeteriaRating))
+		return srv.(CampusServer).GetMealRatings(ctx, req.(*MealRatingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_NewCafeteriaRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewRating)
+	in := new(NewCafeteriaRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -467,13 +430,13 @@ func _Campus_NewCafeteriaRating_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/api.Campus/NewCafeteriaRating",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).NewCafeteriaRating(ctx, req.(*NewRating))
+		return srv.(CampusServer).NewCafeteriaRating(ctx, req.(*NewCafeteriaRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_NewMealRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewRating)
+	in := new(NewMealRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -485,7 +448,7 @@ func _Campus_NewMealRating_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/api.Campus/NewMealRating",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).NewMealRating(ctx, req.(*NewRating))
+		return srv.(CampusServer).NewMealRating(ctx, req.(*NewMealRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -526,43 +489,22 @@ func _Campus_GetAvailableCafeteriaTags_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetAccessPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(APRequest)
+func _Campus_GetCafeterias_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetAccessPoint(ctx, in)
+		return srv.(CampusServer).GetCafeterias(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetAccessPoint",
+		FullMethod: "/api.Campus/GetCafeterias",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetAccessPoint(ctx, req.(*APRequest))
+		return srv.(CampusServer).GetCafeterias(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ListAccessPoints_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(APRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(CampusServer).ListAccessPoints(m, &campusListAccessPointsServer{stream})
-}
-
-type Campus_ListAccessPointsServer interface {
-	Send(*APResponse) error
-	grpc.ServerStream
-}
-
-type campusListAccessPointsServer struct {
-	grpc.ServerStream
-}
-
-func (x *campusListAccessPointsServer) Send(m *APResponse) error {
-	return x.ServerStream.SendMsg(m)
 }
 
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
@@ -601,12 +543,12 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetRoomSchedule_Handler,
 		},
 		{
-			MethodName: "GetCafeteriaRatingLastThree",
-			Handler:    _Campus_GetCafeteriaRatingLastThree_Handler,
+			MethodName: "GetCafeteriaRatings",
+			Handler:    _Campus_GetCafeteriaRatings_Handler,
 		},
 		{
-			MethodName: "GetMealRatingLastThree",
-			Handler:    _Campus_GetMealRatingLastThree_Handler,
+			MethodName: "GetMealRatings",
+			Handler:    _Campus_GetMealRatings_Handler,
 		},
 		{
 			MethodName: "NewCafeteriaRating",
@@ -625,15 +567,8 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetAvailableCafeteriaTags_Handler,
 		},
 		{
-			MethodName: "GetAccessPoint",
-			Handler:    _Campus_GetAccessPoint_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "ListAccessPoints",
-			Handler:       _Campus_ListAccessPoints_Handler,
-			ServerStreams: true,
+			MethodName: "GetCafeterias",
+			Handler:    _Campus_GetCafeterias_Handler,
 		},
 	},
 	Metadata: "CampusService.proto",
