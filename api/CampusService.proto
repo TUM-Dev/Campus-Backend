@@ -115,6 +115,47 @@ service Campus {
     };
   }
 
+  rpc GetAccessPoint (APRequest) returns (AccessPoint) {
+    option (google.api.http) = {
+      get: "/accesspoints/heatmap/{name}"
+    };
+  }
+  rpc ListAccessPoints (APRequest) returns (stream APResponse) {
+    option (google.api.http) = {
+      get: "/accesspoints/heatmap",
+      response_body: "accesspoint"
+    };
+  }
+
+  rpc ListAllAPNames (google.protobuf.Empty) returns (stream APName) {
+    option (google.api.http) = {
+      get: "/accesspoints/all-names",
+      response_body: "name"
+    };
+  }
+
+}
+
+message APName {
+  string name = 1;
+}
+
+message AccessPoint {
+  string name = 1;
+  string lat  = 2;
+  string long = 3;
+  int64 intensity = 4;
+  int64 max = 5;
+  int64 min = 6;
+}
+
+message APRequest {
+  string name = 1;
+  string timestamp = 2;
+}
+
+message APResponse {
+  AccessPoint accesspoint = 1;
 }
 
 message GetRoomScheduleRequest {
