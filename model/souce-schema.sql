@@ -529,44 +529,6 @@ create or replace index card_box
 create or replace index member
     on members_card_answer_history (member);
 
-create or replace table mensa
-(
-    mensa     int auto_increment
-        primary key,
-    id        int                           null,
-    name      mediumtext                    not null,
-    address   mediumtext                    not null,
-    latitude  float(10, 6) default 0.000000 not null,
-    longitude float(10, 6) default 0.000000 not null,
-    constraint id
-        unique (id)
-)
-    collate = utf8mb4_unicode_ci
-    auto_increment = 17;
-
-create or replace table dish2mensa
-(
-    dish2mensa int auto_increment
-        primary key,
-    mensa      int                                                       not null,
-    dish       int                                                       not null,
-    date       date                                                      not null,
-    created    datetime /* mariadb-5.3 */                                not null,
-    modifierd  timestamp /* mariadb-5.3 */ default '0000-00-00 00:00:00' not null on update current_timestamp(),
-    constraint dish2mensa_ibfk_1
-        foreign key (mensa) references mensa (mensa)
-            on update cascade on delete cascade,
-    constraint dish2mensa_ibfk_2
-        foreign key (dish) references dish (dish)
-            on update cascade on delete cascade
-)
-    collate = utf8mb4_unicode_ci;
-
-create or replace index dish
-    on dish2mensa (dish);
-
-create or replace index mensa
-    on dish2mensa (mensa);
 
 create or replace table mensaplan_mensa
 (
@@ -1309,3 +1271,209 @@ create or replace table wifi_measurement
 )
     collate = utf8mb4_unicode_ci;
 
+
+create or replace table cafeteria
+(
+    id int auto_increment primary key,
+    name      mediumtext                    not null,
+    address   mediumtext                    not null,
+    latitude  float(10, 6) default 0.000000 not null,
+    longitude float(10, 6) default 0.000000 not null,
+    constraint id
+        unique (id)
+)
+    collate = utf8mb4_unicode_ci
+    auto_increment = 17;
+
+ 
+create or replace table cafeteria_rating
+(
+    id        int auto_increment primary key,
+    rating    int        default 5 not null,
+    cafeteriaID      int  not null,
+    comment   varchar(256) null,
+    timestamp timestamp default current_timestamp() not null,
+    foreign key (cafeteriaID) references cafeteria(id)
+);
+
+ 
+create or replace table cafeteria_rating_tags_options
+(
+    id        int auto_increment primary key,
+    nameDE    mediumtext not null,
+    nameEN      mediumtext not null
+);
+
+ 
+create or replace table cafeteria_rating_tags
+(
+    id        int auto_increment primary key,
+    parentRating int not null,
+    rating    int not null,
+    tagID      int not null,
+    foreign key (parentRating) references cafeteria_rating(id),
+    foreign key (tagID) references cafeteria_rating_tags_options(id)
+);
+
+
+
+
+ 
+create or replace table cafeteria_rating_results
+(
+    id        int auto_increment primary key,
+    cafeteriaID   int null,
+    average    float        not null,
+    min    int        not null,
+    max    int  not null,
+    foreign key (cafeteriaID) references cafeteria(id)
+);
+
+ 
+create or replace table cafeteria_rating_tags_results
+(
+    id        int auto_increment primary key,
+    tagID      int not null,
+    cafeteriaID   int null,
+    average    float       not null,
+    min    int      not  null,
+    max    int       not null,
+    foreign key (cafeteriaID) references cafeteria(id),
+    foreign key (tagID) references cafeteria_rating_tags_options(id)
+);
+
+
+create or replace table meal
+(
+    id int auto_increment
+        primary key,
+    name varchar(150) not null,
+    type varchar(20)  not null,
+    cafeteriaID   int not null,
+    foreign key (cafeteriaID) references cafeteria(id)
+);
+
+ 
+create or replace table meal_rating
+(
+    id        int auto_increment primary key,
+    rating    int        null,
+    comment   varchar(256)    null,
+    cafeteriaID   int null,
+    mealID      int null,
+    timestamp TIMESTAMP  null,
+    foreign key (cafeteriaID) references cafeteria(id),
+    foreign key (mealID) references meal(id)
+);
+
+
+ 
+create or replace table meal_rating_tags_options
+(
+    id        int auto_increment primary key,
+    nameDE    varchar(32) not null,
+    nameEN      varchar(32) not null
+);
+
+ 
+create or replace table meal_rating_tags
+(
+    id        int auto_increment primary key,
+    parentRating int not null,
+    rating    int   not null,
+    tagID      int  not null,
+    foreign key (parentRating) references meal_rating(id),
+    foreign key (tagID) references meal_rating_tags_options(id)
+);
+
+
+ 
+create or replace table meal_rating_results
+(
+    id        int auto_increment primary key,
+    cafeteriaID   int not null,
+    mealID      int not null ,
+    average    float      not  null,
+    min    int       not null,
+    max    int        not null,
+    foreign key (cafeteriaID) references cafeteria(id),
+    foreign key (mealID) references meal(id)
+);
+
+
+ 
+create or replace table meal_rating_tags_results
+(
+    id        int auto_increment primary key,
+    tagID      int not null,
+    cafeteriaID   int not null,
+    mealID      int not null,
+    average    float        not null,
+    min    int       not null,
+    max    int       not null,
+    foreign key (cafeteriaID) references cafeteria(id),
+    foreign key (mealID) references meal(id),
+    foreign key (tagID) references meal_rating_tags_options(id)
+);
+
+ 
+create or replace table meal_name_tag_options
+(
+    id        int auto_increment primary key,
+    nameDE    varchar(32) not null,
+    nameEN      varchar(32) not null
+);
+
+ 
+create or replace table meal_name_tag_options_included
+(
+    id        int auto_increment primary key,
+    nameTagID int not null,
+    expression mediumtext not null,
+    foreign key (nameTagID) references meal_name_tag_options(id)
+);
+
+ 
+create or replace table meal_name_tag_options_excluded
+(
+    id        int auto_increment primary key,
+    nameTagID int not null,
+    expression mediumtext not null,
+    foreign key (nameTagID) references meal_name_tag_options(id)
+);
+
+
+ 
+create or replace table meal_name_tags
+(
+    id        int auto_increment primary key,
+    parentRating int not null,
+    rating    int       not null,
+    tagnameID      int  not null,
+    foreign key (parentRating) references meal_rating(id),
+    foreign key (tagnameID) references meal_name_tag_options(id)
+);
+
+
+ 
+create or replace table meal_name_tags_results
+(
+    id        int auto_increment primary key,
+    tagID      int not null,
+    cafeteriaID   int not null,
+    average    float        not null,
+    min    int       not null,
+    max    int       not null,
+    foreign key (cafeteriaID) references cafeteria(id),
+    foreign key (tagID) references meal_name_tag_options(id)
+);
+
+ 
+create or replace table meal_to_meal_name_tags
+(
+    id        int auto_increment primary key,
+    nameTagID int not null,
+    mealID int not null,
+    foreign key (nameTagID) references meal_name_tag_options(id),
+    foreign key (mealID) references meal(id)
+);
