@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
@@ -188,6 +189,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
 			Where("cafeteriaID = ?", cafeteriaID).
+			Order("timestamp desc, id desc").
 			Limit(int(input.Limit)).
 			Find(&ratings)
 
@@ -196,16 +198,16 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 		}
 		ratingResults := make([]*pb.CafeteriaRating, len(ratings))
 
-		//todo add timestamp
 		for i, v := range ratings {
+
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, CAFETERIA)
 			ratingResults[i] = &pb.CafeteriaRating{
 				Rating:        v.Rating,
 				CafeteriaName: input.CafeteriaName,
 				Comment:       v.Comment,
-				//Image: v.Image,
-				//CafeteriaVisitedAt: v.Timestamp,
-				TagRating: tagRatings,
+				//Image:              v.Image,
+				CafeteriaVisitedAt: timestamppb.New(v.Timestamp),
+				TagRating:          tagRatings,
 			}
 		}
 		return ratingResults
@@ -297,57 +299,13 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 	return elements
 }
 
-/*func queryCafeteriaTags(db *gorm.DB, cafeteriaID int32) []*pb.TagRatingsResult {
-	var results []QueryRatingTag
-
-	res := db.Table("cafeteria_rating_tags_options options").
-		Joins("JOIN cafeteria_rating_tags_results results ON options.id = results.tagID").
-		Select("options.nameDE as nameDE, results.average as average, "+
-			"options.nameEN as nameEN, results.min as min, results.max as max").
-		Where("results.cafeteriaID = ?", cafeteriaID).
-		Scan(&results).Error
-
-	elements := make([]*pb.TagRatingsResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
-	for i, v := range results {
-		elements[i] = &pb.TagRatingsResult{
-			NameDE:        v.NameDE,
-			NameEN:        v.NameEN,
-			AverageRating: v.Average,
-			MinRating:     v.Min,
-			MaxRating:     v.Max,
-		}
-	}
-	if res != nil {
-		log.Println(res)
-	}
-	return elements
-}*/
-
-/*
-func queryNameTags(db *gorm.DB) []*pb.TagRatingsResult {
-
-	/*
-		zu der meal id alle nametags ermitteln -> join in der tabelle - für jedes davon den namen bestimmen und in die objekte eintragen
-
-	var results []*pb.TagRatingsResult
-
-	res := db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).
-		Joins("join meal_name_tags_options on meal_name_tags_options.id = meal_name_tags_results.tagID").
-		Select("meal_name_tags_options.nameDE, meal_name_tags_results.average"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
-		Scan(&results).Error
-	//todo only nametags for the current meal -> wieder excluded und included mappen
-	if res != nil {
-		log.Println(res)
-	}
-	return results
-}*/
-
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
 			Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
+			Order("timestamp desc, id desc").
 			Limit(int(input.Limit)).
 			Find(&ratings)
 
@@ -356,16 +314,16 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 		}
 		ratingResults := make([]*pb.MealRating, len(ratings))
 
-		//todo add timestamp
 		for i, v := range ratings {
 
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, MEAL)
 			ratingResults[i] = &pb.MealRating{
-				Rating:        v.Rating,
-				Meal:          input.Meal,
-				CafeteriaName: input.CafeteriaName,
-				Comment:       v.Comment,
-				TagRating:     tagRatings,
+				Rating:             v.Rating,
+				Meal:               input.Meal,
+				CafeteriaName:      input.CafeteriaName,
+				Comment:            v.Comment,
+				TagRating:          tagRatings,
+				CafeteriaVisitedAt: timestamppb.New(v.Timestamp),
 			}
 		}
 		return ratingResults
@@ -373,32 +331,6 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 		return make([]*pb.MealRating, 0)
 	}
 }
-
-/*
-Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews
-*/
-/*func queryMealTagRatingsOverviewForRating(s *CampusServer, mealID int32) []*pb.TagRatingOverview {
-	var results []QueryOverviewRatingTag
-
-	res := s.db.Table("meal_rating_tags_options options").
-		Joins("JOIN meal_rating_tags rating ON options.id = rating.tagID").
-		Where("rating.parentRating = ?", mealID).
-		Select("options.nameDE as nameDE, options.nameEN as nameEN, rating.rating as rating").
-		Scan(&results).Error
-
-	if res != nil {
-		log.Error(res)
-	}
-	elements := make([]*pb.TagRatingOverview, len(results))
-	for i, a := range results {
-		elements[i] = &pb.TagRatingOverview{
-			NameEN: a.NameEN,
-			NameDE: a.NameDE,
-			Rating: float64(a.Rating),
-		}
-	}
-	return elements
-}*/
 
 /*
 Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews

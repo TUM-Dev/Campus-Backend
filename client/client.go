@@ -67,8 +67,8 @@ func createCafeteriaRatingSampleData() {
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
-	//	queryCafeteria("MENSA_GARCHING", c, ctx)
-	queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
+	queryCafeteria("MENSA_GARCHING", c, ctx)
+	//queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
 
 }
 
