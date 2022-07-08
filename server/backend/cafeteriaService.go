@@ -40,8 +40,8 @@ type NameTag struct {
 }
 
 type QueryRatingTag struct {
-	NameEN  string  `json:"nameEN"`
-	NameDE  string  `json:"nameDE"`
+	NameEN  string  `gorm:"column:nameEN;type:mediumtext;" json:"nameEN"`
+	NameDE  string  `gorm:"column:nameDE;type:mediumtext;" json:"nameDE"`
 	Average float64 `json:"average"`
 	Min     int32   `json:"min"`
 	Max     int32   `json:"max"`
@@ -158,7 +158,7 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.Cafete
 
 	if res.RowsAffected > 0 {
 		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaID, s)
-		cafeteriaTags := queryCafeteriaTags(s.db, input.CafeteriaName)
+		cafeteriaTags := queryCafeteriaTags(s.db, cafeteriaID)
 
 		return &pb.CafeteriaRatingResponse{
 			AverageRating: float64(result.Average),
@@ -259,18 +259,29 @@ func queryMealTags(db *gorm.DB, cafeteriaName string, mealName string) []*pb.Tag
 	return results
 }
 
-func queryCafeteriaTags(db *gorm.DB, cafeteriaName string) []*pb.TagRatingsResult {
+func queryCafeteriaTags(db *gorm.DB, cafeteriaID int32) []*pb.TagRatingsResult {
 
 	var results []QueryRatingTag
 
-	//todo der name wird noch nciht korrekt geladen - wird noch nicht im sql gefunden
-	res := db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).
+	/*	res := db.Table("cafeteria_rating_tags_results").
 		Joins("join cafeteria_rating_tags_options on cafeteria_rating_tags_options.id = cafeteria_rating_tags_results.tagID").
 		Select("cafeteria_rating_tags_options.nameDE as nameDE, cafeteria_rating_tags_results.average as average, "+
 			"cafeteria_rating_tags_options.nameEN as nameEN, cafeteria_rating_tags_results.min as min, cafeteria_rating_tags_results.max as max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
-		Where("cafeteria_rating_tags_results.cafeteriaID = ?", getIDForCafeteriaName(cafeteriaName, db)).
+		Where("cafeteria_rating_tags_results.cafeteriaID = ?", cafeteriaID).
 		Scan(&results).Error
-
+	*/
+	res := db.Table("cafeteria_rating_tags_options").
+		Joins("JOIN cafeteria_rating_tags_results ON cafeteria_rating_tags_options.id = cafeteria_rating_tags_results.tagID").
+		Select("cafeteria_rating_tags_options.nameDE as nameDE, cafeteria_rating_tags_results.average as average, "+
+			"cafeteria_rating_tags_options.nameEN as nameEN, cafeteria_rating_tags_results.min as min, cafeteria_rating_tags_results.max as max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
+		Where("cafeteria_rating_tags_results.cafeteriaID = ?", cafeteriaID).
+		Scan(&results).Error
+	/*	res := db.Raw("SELECT  options.nameDE as nameDE, results.average as average, options.nameEN as nameEN, results.min as min, results.max as max, options.id as testID"+
+		" FROM cafeteria_rating_tags_results results, "+
+		" JOIN cafeteria_rating_tags_options options ON  results.tagID = options.id "+
+		" WHERE results.cafeteriaID = ? ", cafeteriaID).Scan(&results).Error
+	*/
+	//fixme: erstmal als raw anfrage wie beim preprocessing durchführen
 	elements := make([]*pb.TagRatingsResult, len(results))
 	for i, v := range results {
 		elements[i] = &pb.TagRatingsResult{
@@ -346,9 +357,8 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewCafe
 		Timestamp:   time.Now()}
 
 	s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
-	storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 
-	return &emptypb.Empty{}, nil
+	return storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 }
 
 func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
@@ -376,10 +386,9 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatin
 
 	s.db.Model(&cafeteria_rating_models.MealRating{}).Create(&rating)
 
-	storeRatingTags(s, rating.Id, input.Tags, MEAL)
 	extractAndStoreMealNameTags(s, rating, input.Meal)
 
-	return &emptypb.Empty{}, nil
+	return storeRatingTags(s, rating.Id, input.Tags, MEAL)
 }
 
 func inputSanitization(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) error {
@@ -414,7 +423,8 @@ func inputSanitization(rating int32, image []byte, comment string, cafeteriaName
 Checks whether the rating-tag name is a valid option and if so,
 it will be saved with a reference to the rating
 */
-func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType int) {
+func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType int) (*emptypb.Empty, error) {
+	var errorOccured = ""
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
 		insertModel := getModelStoreTag(tagType, s.db)
@@ -426,18 +436,30 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 				Select("id").
 				First(&currentTag)
 
-			if exists.RowsAffected > 0 && usedTagIds[currentTag] == 0 {
-				insertModel.
-					Create(&cafeteria_rating_models.MealRatingsTags{
-						ParentRating: parentRatingID,
-						Rating:       int32(tag.Rating),
-						TagID:        currentTag})
-				usedTagIds[currentTag] = 1
+			if exists.Error != nil || exists.RowsAffected == 0 {
+				log.Println("Tag with tagname ", tag.Tag, "does not exist")
+				errorOccured = errorOccured + ", " + tag.Tag
 			} else {
-				log.Println("Invalid Tag Name, Tag", tag, "was not saved. Each Rating tag must be used at most once in a rating.")
+				if usedTagIds[currentTag] == 0 {
+					insertModel.
+						Create(&cafeteria_rating_models.MealRatingsTags{
+							ParentRating: parentRatingID,
+							Rating:       int32(tag.Rating),
+							TagID:        currentTag})
+					usedTagIds[currentTag] = 1
+				} else {
+					log.Println("Each Rating tag must be used at most once in a rating.")
+				}
 			}
 		}
 	}
+
+	if len(errorOccured) > 0 {
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag "+errorOccured+" does not exist. Remaining rating was saved without this rating tag")
+	} else {
+		return &emptypb.Empty{}, nil
+	}
+
 }
 
 func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {

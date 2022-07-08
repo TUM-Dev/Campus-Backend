@@ -53,11 +53,11 @@ func createCafeteriaRatingSampleData() {
 	defer cancel()
 
 	/*generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 1)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 3)
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
-	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)
-	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 5)*/
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 7)
+	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 4)
+	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 6)*/
 	/*generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 3)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 5)
@@ -65,9 +65,15 @@ func createCafeteriaRatingSampleData() {
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+
+	queryCafeteria("MENSA_GARCHING", c, ctx)
+
+}
+
+func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
 
-		CafeteriaName: "MENSA_GARCHING",
+		CafeteriaName: s,
 		Limit:         3,
 	})
 
@@ -104,7 +110,7 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 	}
 	y[1] = &pb.TagRating{
 		Rating: 2,
-		Tag:    "Anzahl an Plätzen",
+		Tag:    "Enough Free Tables",
 	}
 
 	_, err := c.NewCafeteriaRating(ctx, &pb.NewCafeteriaRatingRequest{
