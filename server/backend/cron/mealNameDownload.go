@@ -161,7 +161,7 @@ func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
 		Select("nameTagID").
 		Scan(&excludedTags)
 
-	log.Println("Number of included tags: ", len(includedTags))
+	//log.Println("Number of included tags: ", len(includedTags))
 
 	//set all entries in included to -1 if the excluded tag was recognised ffor this tag rating.
 	if len(excludedTags) > 0 {

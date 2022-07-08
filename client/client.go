@@ -58,16 +58,17 @@ func createCafeteriaRatingSampleData() {
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 7)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 4)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 6)*/
-	/*generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 3)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 5)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)
+	/*	generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 1)
+		generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 3)
+		generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 5)
 	*/
+	//	generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 1)
+
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
 	//	queryCafeteria("MENSA_GARCHING", c, ctx)
-	queryMeal("MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", c, ctx)
+	queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
 
 }
 
@@ -92,6 +93,14 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 	}
 
 	for _, v := range res.RatingTags {
+		println("\nNameDE: ", v.NameDE)
+		println("NameEN: ", v.NameEN)
+		println("averagerating: ", v.AverageRating)
+		println("min", v.MinRating)
+		println("max", v.MaxRating)
+	}
+	log.Println("nameTags: ")
+	for _, v := range res.NameTags {
 		println("\nNameDE: ", v.NameDE)
 		println("NameEN: ", v.NameEN)
 		println("averagerating: ", v.AverageRating)
@@ -138,11 +147,11 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
 	y := make([]*pb.TagRating, 2)
 	y[0] = &pb.TagRating{
-		Rating: 4,
+		Rating: float64(1 + rating),
 		Tag:    "Sauberkeit",
 	}
 	y[1] = &pb.TagRating{
-		Rating: 2,
+		Rating: float64(2 + rating),
 		Tag:    "Enough Free Tables",
 	}
 
@@ -163,15 +172,15 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string, meal string, rating int32) {
 	y := make([]*pb.TagRating, 3)
 	y[0] = &pb.TagRating{
-		Rating: 2,
+		Rating: float64(1 + rating),
 		Tag:    "Spicy",
 	}
 	y[1] = &pb.TagRating{
-		Rating: 2,
+		Rating: float64(2 + rating),
 		Tag:    "Salz",
 	}
 	y[2] = &pb.TagRating{
-		Rating: 2,
+		Rating: float64(3 + rating),
 		Tag:    "Aussehen",
 	}
 

@@ -160,7 +160,7 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.Cafete
 		First(&result)
 
 	if res.Error != nil {
-		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
+		return nil, status.Errorf(codes.Internal, "This cafeteria has not yet been rated.")
 	}
 
 	if res.RowsAffected > 0 {
@@ -224,7 +224,7 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 		First(&result)
 
 	if res.Error != nil {
-		return nil, status.Errorf(codes.Internal, "Something went wrong while accessing the database")
+		return nil, status.Errorf(codes.Internal, "This meal has not yet been rated.")
 	}
 
 	if res.RowsAffected > 0 {
@@ -272,12 +272,10 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 		res = db.Table("meal_to_meal_name_tags mapping").
 			Where("mapping.mealID = ?", mealID).
 			Select("mapping.nameTagID as tag").
-			Joins("JOIN meal_name_tags_results results ON tag = results.tagID").
-			Joins("JOIN meal_name_tags_options options ON tag = options.id").
-			//Joins("JOIN meal_name_tags_options options ON options.id = results.tagID").
+			Joins("JOIN meal_name_tags_results results ON mapping.nameTagID = results.tagID").
+			Joins("JOIN meal_name_tag_options options ON mapping.nameTagID = options.id").
 			Select("options.nameDE as nameDE, results.average as average, " +
 				"options.nameEN as nameEN, results.min as min, results.max as max").
-			//Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
 	}
 
@@ -435,7 +433,7 @@ func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType 
 	}
 	return elements
 }
-func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
+func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
 	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
 	if validInput != nil {
 		return nil, validInput
@@ -452,7 +450,7 @@ func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewCafe
 	return storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 }
 
-func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
+func (s *CampusServer) NewMealRating(_ context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
 
 	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
 	if validInput != nil {
@@ -492,7 +490,7 @@ func assignMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRati
 		log.Error(err)
 	} else {
 		for _, tagID := range result {
-			s.db.Model(&cafeteria_rating_models.MealNameTags{
+			s.db.Model(&cafeteria_rating_models.MealNameTags{}).Create(&cafeteria_rating_models.MealNameTags{
 				ParentRating: rating.Id,
 				Rating:       rating.Rating,
 				TagNameID:    tagID,
@@ -538,7 +536,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
 		insertModel := getModelStoreTag(tagType, s.db)
-		for _, tag := range tags { //todo adapt to new version of tags
+		for _, tag := range tags {
 			var currentTag int
 
 			exists := getModelStoreTagOption(tagType, s.db).
@@ -588,24 +586,6 @@ func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 	}
 }
 
-func getNameForCafeteriaID(id int32, db *gorm.DB) string {
-	var result string
-	db.Model(&cafeteria_rating_models.Cafeteria{}).
-		Where("id = ?", id).
-		Select("name").
-		First(&result)
-	return result
-}
-
-func getNameForMealID(id int32, db *gorm.DB) string {
-	var result string
-	db.Model(&cafeteria_rating_models.Meal{}).
-		Where("id = ?", id).
-		Select("name").
-		First(&result) //Scan(&result)
-	return result
-}
-
 func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	var result int32
 	db.Model(&cafeteria_rating_models.Cafeteria{}).
@@ -618,64 +598,12 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 func getIDForMealName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	var result int32 = -1
 	db.Model(&cafeteria_rating_models.Meal{}).
-		Where("name LIKE ? AND cafeteriaID = ?", name, cafeteriaID). //todo darf nicht auf den namen vergleichen, sondern nur auf der id
+		Where("name LIKE ? AND cafeteriaID = ?", name, cafeteriaID).
 		Select("id").
 		Scan(&result)
 
 	return result
 }
-
-/*
-Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
-The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
-*/
-//todo replace with a lookup in the mapping Table
-/*func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
-	lowercaseMeal := strings.ToLower(meal)
-	var includedTags []int
-	s.db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
-		Select("nameTagID").
-		Scan(&includedTags)
-
-	var excludedTags []int
-	s.db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
-		Select("nameTagID").
-		Scan(&excludedTags)
-
-	log.Println("Number of included tags: ", len(includedTags))
-
-	//set all entries in included to -1 if the excluded tag was recognised ffor this tag rating.
-	if len(excludedTags) > 0 {
-		for _, a := range excludedTags {
-			i := contains(includedTags, a)
-			if i != -1 {
-				includedTags[i] = -1
-			}
-		}
-	}
-
-	for _, a := range includedTags {
-		if a != -1 {
-			s.db.Model(&cafeteria_rating_models.MealNameTags{}).
-				Create(&cafeteria_rating_models.MealNameTags{
-					ParentRating: rating.Id,
-					Rating:       rating.Rating,
-					TagNameID:    a,
-				})
-		}
-	}
-}
-
-func contains(s []int, e int) int {
-	for i, a := range s {
-		if a == e {
-			return i
-		}
-	}
-	return -1
-}*/
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.MealRatingsTagsOptions

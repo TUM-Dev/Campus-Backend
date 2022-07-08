@@ -57,7 +57,6 @@ func (c *CronService) averageRatingComputation() error {
 }
 
 func computeAverageNameTags(c *CronService) {
-
 	var results []averageMealNameTags
 	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min" +
 		" FROM meal_rating mr" +
