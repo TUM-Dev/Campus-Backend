@@ -47,6 +47,12 @@ type QueryRatingTag struct {
 	Max     int32   `json:"max"`
 }
 
+type QueryOverviewRatingTag struct {
+	NameEN string `gorm:"column:nameEN;type:mediumtext;" json:"nameEN"`
+	NameDE string `gorm:"column:nameDE;type:mediumtext;" json:"nameDE"`
+	Rating int32  `gorm:"column:rating;type:mediumtext;"  json:"rating"`
+}
+
 /*
 Writes all available tags from the json file into tables in order to make them easier to use
 */
@@ -191,15 +197,16 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 		ratingResults := make([]*pb.CafeteriaRating, len(ratings))
 
 		//todo add timestamp
-		//todo add meal tags which were added to this rating
+
 		for i, v := range ratings {
+			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, CAFETERIA)
 			ratingResults[i] = &pb.CafeteriaRating{
 				Rating:        v.Rating,
 				CafeteriaName: input.CafeteriaName,
 				Comment:       v.Comment,
 				//Image: v.Image,
 				//CafeteriaVisitedAt: v.Timestamp,
-				//TagRating
+				TagRating: tagRatings,
 			}
 		}
 		return ratingResults
@@ -315,7 +322,7 @@ func queryNameTags(db *gorm.DB) []*pb.TagRating {
 
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
-	//mealID := getIDForMealName(input.Meal, cafeteriaID, s.db)
+
 	if input.Limit > 0 {
 		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
 			Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
@@ -328,13 +335,15 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 		ratingResults := make([]*pb.MealRating, len(ratings))
 
 		//todo add timestamp
-		//todo add meal tags which were added to this rating
 		for i, v := range ratings {
+
+			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, MEAL)
 			ratingResults[i] = &pb.MealRating{
 				Rating:        v.Rating,
 				Meal:          input.Meal,
 				CafeteriaName: input.CafeteriaName,
 				Comment:       v.Comment,
+				TagRating:     tagRatings,
 			}
 		}
 		return ratingResults
@@ -343,6 +352,65 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 	}
 }
 
+/*
+Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews
+*/
+/*func queryMealTagRatingsOverviewForRating(s *CampusServer, mealID int32) []*pb.TagRatingOverview {
+	var results []QueryOverviewRatingTag
+
+	res := s.db.Table("meal_rating_tags_options options").
+		Joins("JOIN meal_rating_tags rating ON options.id = rating.tagID").
+		Where("rating.parentRating = ?", mealID).
+		Select("options.nameDE as nameDE, options.nameEN as nameEN, rating.rating as rating").
+		Scan(&results).Error
+
+	if res != nil {
+		log.Error(res)
+	}
+	elements := make([]*pb.TagRatingOverview, len(results))
+	for i, a := range results {
+		elements[i] = &pb.TagRatingOverview{
+			NameEN: a.NameEN,
+			NameDE: a.NameDE,
+			Rating: float64(a.Rating),
+		}
+	}
+	return elements
+}*/
+
+/*
+Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews
+*/
+func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType int32) []*pb.TagRatingOverview {
+	var results []QueryOverviewRatingTag
+	var res error
+	if ratingType == MEAL {
+		res = s.db.Table("meal_rating_tags_options options").
+			Joins("JOIN meal_rating_tags rating ON options.id = rating.tagID").
+			Where("rating.parentRating = ?", mealID).
+			Select("options.nameDE as nameDE, options.nameEN as nameEN, rating.rating as rating").
+			Scan(&results).Error
+	} else {
+		res = s.db.Table("cafeteria_rating_tags_options options").
+			Joins("JOIN cafeteria_rating_tags rating ON options.id = rating.tagID").
+			Where("rating.parentRating = ?", mealID).
+			Select("options.nameDE as nameDE, options.nameEN as nameEN, rating.rating as rating").
+			Scan(&results).Error
+	}
+
+	if res != nil {
+		log.Error(res)
+	}
+	elements := make([]*pb.TagRatingOverview, len(results))
+	for i, a := range results {
+		elements[i] = &pb.TagRatingOverview{
+			NameEN: a.NameEN,
+			NameDE: a.NameDE,
+			Rating: float64(a.Rating),
+		}
+	}
+	return elements
+}
 func (s *CampusServer) NewCafeteriaRating(ctx context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
 	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
 	if validInput != nil {
@@ -386,9 +454,27 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatin
 
 	s.db.Model(&cafeteria_rating_models.MealRating{}).Create(&rating)
 
-	extractAndStoreMealNameTags(s, rating, input.Meal)
-
+	assignMealNameTags(s, rating, meal.Id)
 	return storeRatingTags(s, rating.Id, input.Tags, MEAL)
+}
+
+/*
+Query all name tags for this specific meal and generate the MealNameTag Ratings ffor each name tag
+*/
+func assignMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, mealID int32) {
+	var result []int
+	err := s.db.Model(&cafeteria_rating_models.MealToMealNameTags{}).Where("mealID = ? ", mealID).Select("nameTagID").Scan(&result).Error
+	if err != nil {
+		log.Error(err)
+	} else {
+		for _, tagID := range result {
+			s.db.Model(&cafeteria_rating_models.MealNameTags{
+				ParentRating: rating.Id,
+				Rating:       rating.Rating,
+				TagNameID:    tagID,
+			})
+		}
+	}
 }
 
 func inputSanitization(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) error {
@@ -520,7 +606,7 @@ Checks whether the meal name includes one of the expressions for the excluded ta
 The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
 */
 //todo replace with a lookup in the mapping Table
-func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
+/*func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
 	lowercaseMeal := strings.ToLower(meal)
 	var includedTags []int
 	s.db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
@@ -565,7 +651,7 @@ func contains(s []int, e int) int {
 		}
 	}
 	return -1
-}
+}*/
 
 func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.MealRatingsTagsOptions
