@@ -246,15 +246,6 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 
 func queryMealTags(db *gorm.DB, cafeteriaID int32, mealID int32) []*pb.TagRatingsResult {
 
-	/*cafeteriaID := getIDForCafeteriaName(cafeteriaName, db)
-	var results []*pb.TagRatingsResult
-	res := db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).
-		Joins("join meal_rating_tags_options on meal_rating_tags_options.id = meal_rating_tags_results.tagID").
-		Select("meal_rating_tags_options.nameDE, meal_rating_tags_results.average"+
-			"meal_rating_tags_options.nameEN, meal_rating_tags_results.min, meal_rating_tags_results.max"). //+ meal_rating_tags_options.nameDE, meal_rating_tags_results.min, meal_rating_tags_results.max
-		Where("meal_rating_tags_results.mealID =? AND meal_rating_tags_results.cafeteriaID = ?", getIDForMealName(mealName, cafeteriaID, db), cafeteriaID).
-		Scan(&results).Error*/
-
 	var results []QueryRatingTag
 
 	res := db.Table("meal_rating_tags_options options").
@@ -378,17 +369,18 @@ func (s *CampusServer) NewMealRating(ctx context.Context, input *pb.NewMealRatin
 
 	var meal *cafeteria_rating_models.Meal
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
-	testDish := s.db.Model(&cafeteria_rating_models.Meal{}).
+	mealExists := s.db.Model(&cafeteria_rating_models.Meal{}).
 		Where("name LIKE ? AND cafeteriaID = ?", input.Meal, cafeteriaID).
-		First(&meal)
-	if testDish.RowsAffected == 0 {
+		First(&meal).RowsAffected
+
+	if mealExists == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
 	rating := cafeteria_rating_models.MealRating{
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
-		MealID:      getIDForMealName(input.Meal, cafeteriaID, s.db),
+		MealID:      meal.Id,
 		Rating:      input.Rating,
 		Timestamp:   time.Now()}
 
@@ -527,6 +519,7 @@ func getIDForMealName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
 The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
 */
+//todo replace with a lookup in the mapping Table
 func extractAndStoreMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRating, meal string) {
 	lowercaseMeal := strings.ToLower(meal)
 	var includedTags []int

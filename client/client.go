@@ -58,11 +58,11 @@ func createCafeteriaRatingSampleData() {
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 7)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 4)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 6)*/
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
+	/*generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 3)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 5)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)
-
+	*/
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 

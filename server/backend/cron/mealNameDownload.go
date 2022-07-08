@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -50,12 +51,6 @@ func (c *CronService) mealNameDownloadCron() error {
 }
 
 func downloadDailyMeals(c *CronService) {
-
-	//err := c.db.Where("1=1").Delete(&cafeteria_rating_models.Meal{}) //Remove all meals of the previous week
-
-	/*if err.Error != nil {
-		println(err.Error)
-	}*/
 	var result []CafeteriaWithID
 	c.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
 
@@ -96,6 +91,7 @@ func downloadDailyMeals(c *CronService) {
 
 					if res.RowsAffected == 0 {
 						c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
+						addMealTagsToMapping(meal.Id, meal.Name, c.db)
 					} /*else {		//todo potentially add update logic for the weekly meals
 						c.db.Model(&cafeteria_rating_models.Cafeteria{}).
 							Where("name = ?", cafeteriaNames[i].Name).
@@ -145,5 +141,52 @@ func downloadCanteenNames(c *CronService) {
 				Updates(&mensa)
 		}
 	}
+}
 
+/*
+Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
+The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
+*/
+func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
+	lowercaseMeal := strings.ToLower(mealName)
+	var includedTags []int32
+	db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
+		Select("nameTagID").
+		Scan(&includedTags)
+
+	var excludedTags []int32
+	db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
+		Select("nameTagID").
+		Scan(&excludedTags)
+
+	log.Println("Number of included tags: ", len(includedTags))
+
+	//set all entries in included to -1 if the excluded tag was recognised ffor this tag rating.
+	if len(excludedTags) > 0 {
+		for _, a := range excludedTags {
+			i := contains(includedTags, a)
+			if i != -1 {
+				includedTags[i] = -1
+			}
+		}
+	}
+
+	for _, a := range includedTags {
+		if a != -1 {
+			db.Model(&cafeteria_rating_models.MealToMealNameTags{}).Create(&cafeteria_rating_models.MealToMealNameTags{
+				MealID:    mealID,
+				NameTagID: a,
+			})
+		}
+	}
+}
+func contains(s []int32, e int32) int32 {
+	for i, a := range s {
+		if a == e {
+			return int32(i)
+		}
+	}
+	return -1
 }
