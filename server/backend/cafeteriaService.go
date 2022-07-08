@@ -20,6 +20,7 @@ import (
 
 const MEAL = 1
 const CAFETERIA = 2
+const NAME = 3
 
 type MultiLanguageTags struct {
 	MultiLanguageTags []Tag `json:"tags"`
@@ -164,7 +165,7 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.Cafete
 
 	if res.RowsAffected > 0 {
 		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaID, s)
-		cafeteriaTags := queryCafeteriaTags(s.db, cafeteriaID)
+		cafeteriaTags := queryTags(s.db, cafeteriaID, -1, CAFETERIA)
 
 		return &pb.CafeteriaRatingResponse{
 			AverageRating: float64(result.Average),
@@ -172,7 +173,6 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.Cafete
 			MaxRating:     int32(result.Max),
 			Rating:        ratings,
 			RatingTags:    cafeteriaTags,
-			//NameTags: nameTags,
 		}, nil
 	} else {
 		return &pb.CafeteriaRatingResponse{
@@ -197,7 +197,6 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 		ratingResults := make([]*pb.CafeteriaRating, len(ratings))
 
 		//todo add timestamp
-
 		for i, v := range ratings {
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, CAFETERIA)
 			ratingResults[i] = &pb.CafeteriaRating{
@@ -230,8 +229,8 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 
 	if res.RowsAffected > 0 {
 		ratings := queryLastMealRatingsWithLimit(input, cafeteriaID, mealID, s)
-		mealTags := queryMealTags(s.db, cafeteriaID, mealID)
-		//nameTags := queryNameTags(s.db)
+		mealTags := queryTags(s.db, cafeteriaID, mealID, MEAL)
+		nameTags := queryTags(s.db, cafeteriaID, mealID, NAME)
 
 		return &pb.MealRatingsResponse{
 			AverageRating: float64(result.Average),
@@ -239,7 +238,7 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 			MaxRating:     int32(result.Max),
 			Rating:        ratings,
 			RatingTags:    mealTags,
-			//NameTags: nameTags,
+			NameTags:      nameTags,
 		}, nil
 	} else {
 		return &pb.MealRatingsResponse{
@@ -251,16 +250,40 @@ func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatings
 
 }
 
-func queryMealTags(db *gorm.DB, cafeteriaID int32, mealID int32) []*pb.TagRatingsResult {
+func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) []*pb.TagRatingsResult {
 
 	var results []QueryRatingTag
+	var res error
+	if ratingType == MEAL {
+		res = db.Table("meal_rating_tags_options options").
+			Joins("JOIN meal_rating_tags_results results ON options.id = results.tagID").
+			Select("options.nameDE as nameDE, results.average as average, "+
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			Where("results.cafeteriaID = ? AND results.mealID = ?", cafeteriaID, mealID).
+			Scan(&results).Error
+	} else if ratingType == CAFETERIA {
+		res = db.Table("cafeteria_rating_tags_options options").
+			Joins("JOIN cafeteria_rating_tags_results results ON options.id = results.tagID").
+			Select("options.nameDE as nameDE, results.average as average, "+
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			Where("results.cafeteriaID = ?", cafeteriaID).
+			Scan(&results).Error
+	} else { //Query for name tags
+		res = db.Table("meal_to_meal_name_tags mapping").
+			Where("mapping.mealID = ?", mealID).
+			Select("mapping.nameTagID as tag").
+			Joins("JOIN meal_name_tags_results results ON tag = results.tagID").
+			Joins("JOIN meal_name_tags_options options ON tag = options.id").
+			//Joins("JOIN meal_name_tags_options options ON options.id = results.tagID").
+			Select("options.nameDE as nameDE, results.average as average, " +
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			//Where("results.cafeteriaID = ?", cafeteriaID).
+			Scan(&results).Error
+	}
 
-	res := db.Table("meal_rating_tags_options options").
-		Joins("JOIN meal_rating_tags_results results ON options.id = results.tagID").
-		Select("options.nameDE as nameDE, results.average as average, "+
-			"options.nameEN as nameEN, results.min as min, results.max as max").
-		Where("results.cafeteriaID = ? AND results.mealID = ?", cafeteriaID, mealID).
-		Scan(&results).Error
+	if res != nil {
+		log.Println(res)
+	}
 
 	elements := make([]*pb.TagRatingsResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
 	for i, v := range results {
@@ -272,13 +295,11 @@ func queryMealTags(db *gorm.DB, cafeteriaID int32, mealID int32) []*pb.TagRating
 			MaxRating:     v.Max,
 		}
 	}
-	if res != nil {
-		log.Println(res)
-	}
+
 	return elements
 }
 
-func queryCafeteriaTags(db *gorm.DB, cafeteriaID int32) []*pb.TagRatingsResult {
+/*func queryCafeteriaTags(db *gorm.DB, cafeteriaID int32) []*pb.TagRatingsResult {
 	var results []QueryRatingTag
 
 	res := db.Table("cafeteria_rating_tags_options options").
@@ -302,12 +323,15 @@ func queryCafeteriaTags(db *gorm.DB, cafeteriaID int32) []*pb.TagRatingsResult {
 		log.Println(res)
 	}
 	return elements
-}
+}*/
 
-func queryNameTags(db *gorm.DB) []*pb.TagRating {
+/*
+func queryNameTags(db *gorm.DB) []*pb.TagRatingsResult {
 
-	//todo darf nicht auf der options tabelle ansetzten, sondern auf einer unteranfrage, die nur nochalle übrig lässt, die auch im namen enthalten sind
-	var results []*pb.TagRating
+	/*
+		zu der meal id alle nametags ermitteln -> join in der tabelle - für jedes davon den namen bestimmen und in die objekte eintragen
+
+	var results []*pb.TagRatingsResult
 
 	res := db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).
 		Joins("join meal_name_tags_options on meal_name_tags_options.id = meal_name_tags_results.tagID").
@@ -318,7 +342,7 @@ func queryNameTags(db *gorm.DB) []*pb.TagRating {
 		log.Println(res)
 	}
 	return results
-}
+}*/
 
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
