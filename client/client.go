@@ -58,16 +58,49 @@ func createCafeteriaRatingSampleData() {
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 7)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 4)
 	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 6)*/
-	/*generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 1)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 3)
 	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 5)
-	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)*/
+	generateMealRating(c, ctx, "MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", 7)
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
-	queryCafeteria("MENSA_GARCHING", c, ctx)
+	//	queryCafeteria("MENSA_GARCHING", c, ctx)
+	queryMeal("MENSA_GARCHING", "Bio-Pasta mit Bio-Tomaten-Frischkäse-Sauce", c, ctx)
 
+}
+
+func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Context) {
+	res, err := c.GetMealRatings(ctx, &pb.MealRatingsRequest{
+		Meal:          meal,
+		CafeteriaName: cafeteria,
+		Limit:         3,
+	})
+
+	println("Result: ")
+	println("averagerating: ", res.AverageRating)
+	println("min", res.MinRating)
+	println("max", res.MaxRating)
+	println("Number of individual Ratings", len(res.Rating))
+	for _, v := range res.Rating {
+		println("\nRating: ", v.Rating)
+		println("Cafeteria Name: ", v.CafeteriaName)
+		println("Comment ", v.Comment)
+		println("Number of Tag Ratings: ", len(v.TagRating))
+		println("Timestamp: ", v.CafeteriaVisitedAt)
+	}
+
+	for _, v := range res.RatingTags {
+		println("\nNameDE: ", v.NameDE)
+		println("NameEN: ", v.NameEN)
+		println("averagerating: ", v.AverageRating)
+		println("min", v.MinRating)
+		println("max", v.MaxRating)
+	}
+	if err != nil {
+		println(err)
+	}
 }
 
 func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
