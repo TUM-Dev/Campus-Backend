@@ -186,14 +186,37 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.Cafete
 
 func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
 	var ratings []cafeteria_rating_models.CafeteriaRating
+	var errRatings error
 	if input.Limit > 0 {
-		errRatings := s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
-			Where("cafeteriaID = ?", cafeteriaID).
-			Order("timestamp desc, id desc").
-			Limit(int(input.Limit)).
-			Find(&ratings)
+		if input.From != nil || input.To != nil {
+			var from time.Time
+			var to time.Time
+			if input.From == nil {
+				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
+			} else {
+				from = input.From.AsTime()
+			}
 
-		if errRatings.Error != nil {
+			if input.To == nil {
+				to = time.Now()
+			} else {
+				to = input.To.AsTime()
+			}
+			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+				Where("cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).
+				Order("timestamp desc, id desc").
+				Limit(int(input.Limit)).
+				Find(&ratings).Error
+		} else {
+			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+				Where("cafeteriaID = ?", cafeteriaID).
+				Order("timestamp desc, id desc").
+				Limit(int(input.Limit)).
+				Find(&ratings).Error
+		}
+
+		if errRatings != nil {
+			log.Error(errRatings)
 			return make([]*pb.CafeteriaRating, 0)
 		}
 		ratingResults := make([]*pb.CafeteriaRating, len(ratings))
@@ -301,15 +324,37 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
-
+	var errRatings error
 	if input.Limit > 0 {
-		errRatings := s.db.Model(&cafeteria_rating_models.MealRating{}).
-			Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
-			Order("timestamp desc, id desc").
-			Limit(int(input.Limit)).
-			Find(&ratings)
+		if input.From != nil || input.To != nil {
+			var from time.Time
+			var to time.Time
+			if input.From == nil {
+				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
+			} else {
+				from = input.From.AsTime()
+			}
 
-		if errRatings.Error != nil {
+			if input.To == nil {
+				to = time.Now()
+			} else {
+				to = input.To.AsTime()
+			}
+
+			errRatings = s.db.Model(&cafeteria_rating_models.MealRating{}).
+				Where("cafeteriaID = ? AND mealID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, mealID, to, from).
+				Order("timestamp desc, id desc").
+				Limit(int(input.Limit)).
+				Find(&ratings).Error
+		} else {
+			errRatings = s.db.Model(&cafeteria_rating_models.MealRating{}).
+				Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
+				Order("timestamp desc, id desc").
+				Limit(int(input.Limit)).
+				Find(&ratings).Error
+		}
+
+		if errRatings != nil {
 			return make([]*pb.MealRating, 0)
 		}
 		ratingResults := make([]*pb.MealRating, len(ratings))

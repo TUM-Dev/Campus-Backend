@@ -5,6 +5,7 @@ import (
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"time"
 )
@@ -117,6 +118,10 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 
 		CafeteriaName: s,
 		Limit:         3,
+		From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),
+		To:            timestamppb.New(time.Date(2022, 7, 8, 17, 0, 0, 0, time.Local)),
+		//From:          timestamppb.New(time.Date(2021, 7, 8, 16, 0, 0, 0, time.Local)),
+		//To:            timestamppb.New(time.Date(2021, 7, 8, 17, 0, 0, 0, time.Local)),
 	})
 
 	println("Result: ")
