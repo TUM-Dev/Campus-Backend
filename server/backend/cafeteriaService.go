@@ -2,8 +2,6 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
 	log "github.com/sirupsen/logrus"
@@ -12,9 +10,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -22,24 +17,6 @@ import (
 const MEAL = 1
 const CAFETERIA = 2
 const NAME = 3
-
-type MultiLanguageTags struct {
-	MultiLanguageTags []Tag `json:"tags"`
-}
-type Tag struct {
-	TagNameEnglish string `json:"tagNameEnglish"`
-	TagNameGerman  string `json:"tagNameGerman"`
-}
-
-type MultiLanguageNameTags struct {
-	MultiLanguageNameTags []NameTag `json:"tags"`
-}
-type NameTag struct {
-	TagNameEnglish string   `json:"tagNameEnglish"`
-	TagNameGerman  string   `json:"tagNameGerman"`
-	Notincluded    []string `json:"notincluded"`
-	Canbeincluded  []string `json:"canbeincluded"`
-}
 
 type QueryRatingTag struct {
 	NameEN  string  `gorm:"column:nameEN;type:mediumtext;" json:"nameEN"`
@@ -55,105 +32,7 @@ type QueryOverviewRatingTag struct {
 	Rating int32  `gorm:"column:rating;type:mediumtext;"  json:"rating"`
 }
 
-/*
-Writes all available tags from the json file into tables in order to make them easier to use
-*/
-func initTagRatingOptions(db *gorm.DB) {
-	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL)
-	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
-	updateNameTagOptions(db)
-}
-
-/*
-Updates the list of mealtags.
-
-*/
-func updateNameTagOptions(db *gorm.DB) {
-	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
-	tagsNames := generateNameTagListFromFile(absPathMealNames)
-	var elementID int32
-	for _, v := range tagsNames.MultiLanguageNameTags {
-		var parentID int32
-
-		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
-			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-			Select("id").
-			Scan(&parentID)
-
-		if potentialTag.RowsAffected == 0 {
-			parent := cafeteria_rating_models.MealRatingsTagsOptions{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish}
-
-			db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
-				Create(&parent)
-			parentID = parent.Id
-		}
-
-		for _, u := range v.Canbeincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("id").
-				Scan(&elementID)
-			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionsIncluded{
-						Expression: u,
-						NameTagID:  parentID})
-			}
-		}
-		for _, u := range v.Notincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("id").
-				Scan(&elementID)
-			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionsExcluded{
-						Expression: u,
-						NameTagID:  parentID})
-			}
-		}
-	}
-}
-
-/*
-Reads the json file at the given path and checks whether the values have already been inserted into the corresponding table.
-If an entry with the same German and English name exists, the entry won't be added.
-The TagType is used to identify the corresponding model
-*/
-func updateTagTable(path string, db *gorm.DB, tagType int) {
-	absPathMeal, _ := filepath.Abs(path)
-	tagsMeal := generateRatingTagListFromFile(absPathMeal)
-	insertModel := getTagModel(tagType, db)
-	for _, v := range tagsMeal.MultiLanguageTags {
-		var result int32
-
-		potentialTag := getTagModel(tagType, db).
-			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-			Select("id").
-			Scan(&result)
-
-		if potentialTag.RowsAffected == 0 {
-			println("New entry inserted to Rating Tag Options")
-			element := cafeteria_rating_models.MealRatingsTagsOptions{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish}
-			insertModel.
-				Create(&element)
-		}
-	}
-}
-
-func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
-	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
-	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
-	}
-}
-
-func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
+func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
 	var result cafeteria_rating_models.CafeteriaRatingsAverage //get the average rating for this specific cafeteria
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
 	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
@@ -239,7 +118,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	}
 }
 
-func (s *CampusServer) GetMealRatings(ctx context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
+func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
 	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
 	mealID := getIDForMealName(input.Meal, cafeteriaID, s.db)
@@ -582,7 +461,7 @@ func getIDForMealName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	return result
 }
 
-func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
+func (s *CampusServer) GetAvailableMealTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.MealRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE, nameEN").Scan(&result)
 
@@ -596,7 +475,7 @@ func (s *CampusServer) GetAvailableMealTags(ctx context.Context, _ *emptypb.Empt
 	}, nil
 }
 
-func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
+func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.CafeteriaRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE,nameEN").Scan(&result)
 
@@ -611,7 +490,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *emptypb
 }
 
 //fixme add repeated to the proto File
-func (s *CampusServer) GetCafeterias(ctx context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaResponse, error) {
+func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaResponse, error) {
 	var result []*pb.GetCafeteriaResponse
 	s.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result)
 
@@ -621,47 +500,4 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *emptypb.Empty) (*pb
 		Latitude:  result[0].Latitude,
 		Longitude: result[0].Longitude,
 	}, nil
-}
-
-func generateRatingTagListFromFile(path string) MultiLanguageTags {
-	byteValue := readFromFile(path)
-
-	var tags MultiLanguageTags
-	errorUnmarshal := json.Unmarshal(byteValue, &tags)
-	if errorUnmarshal != nil {
-		log.Error("Error in parsing json:", errorUnmarshal)
-	}
-	return tags
-}
-
-func generateNameTagListFromFile(path string) MultiLanguageNameTags {
-	byteValue := readFromFile(path)
-
-	var tags MultiLanguageNameTags
-	errorUnmarshal := json.Unmarshal(byteValue, &tags)
-	if errorUnmarshal != nil {
-		log.Error("Error in parsing json:", errorUnmarshal)
-	}
-	return tags
-}
-
-func readFromFile(path string) []byte {
-	jsonFile, err := os.Open(path)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
-			log.Error("Error in parsing json:", err)
-		}
-	}(jsonFile)
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return byteValue
 }
