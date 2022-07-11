@@ -1,9 +1,12 @@
 package backend
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -37,6 +40,24 @@ func initTagRatingOptions(db *gorm.DB) {
 	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL)
 	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
+	addEntriesForCronJob(db, "averageRatingComputation", 300)
+	addEntriesForCronJob(db, "mealNameDownload", 302400) //run twice every week
+}
+
+func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
+	var crontab model.Crontab
+	res := db.Model(&model.Crontab{}).
+		Where("type LIKE ?", cronName).
+		First(&crontab)
+	if res.Error != nil {
+		log.Error(res.Error)
+	} else if res.RowsAffected == 0 {
+		db.Create(&model.Crontab{
+			Interval: interval,
+			Type:     null.String{NullString: sql.NullString{String: cronName, Valid: true}},
+			LastRun:  0,
+		})
+	}
 }
 
 /*
