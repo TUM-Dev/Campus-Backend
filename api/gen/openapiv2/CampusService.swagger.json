@@ -17,6 +17,28 @@
     "application/json"
   ],
   "paths": {
+    "/cafeteriaRating/cafeteria/allCafeterias": {
+      "get": {
+        "operationId": "Campus_GetCafeterias",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCafeteriaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/cafeteriaRating/cafeteria/allTags": {
       "get": {
         "operationId": "Campus_GetAvailableCafeteriaTags",
@@ -41,12 +63,13 @@
     },
     "/cafeteriaRating/cafeteria/get": {
       "post": {
-        "operationId": "Campus_GetCafeteriaRatingLastThree",
+        "summary": "This endpoint retrieves Cafeteria Ratings from the Backend.",
+        "operationId": "Campus_GetCafeteriaRatings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetCafeteriaRatingReply"
+              "$ref": "#/definitions/apiCafeteriaRatingResponse"
             }
           },
           "default": {
@@ -62,7 +85,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiGetCafeteriaRating"
+              "$ref": "#/definitions/apiCafeteriaRatingRequest"
             }
           }
         ],
@@ -94,7 +117,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiNewRating"
+              "$ref": "#/definitions/apiNewCafeteriaRatingRequest"
             }
           }
         ],
@@ -105,12 +128,12 @@
     },
     "/cafeteriaRating/dish/get": {
       "post": {
-        "operationId": "Campus_GetMealRatingLastThree",
+        "operationId": "Campus_GetMealRatings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetMealInCafeteriaRatingReply"
+              "$ref": "#/definitions/apiMealRatingResponse"
             }
           },
           "default": {
@@ -126,7 +149,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiGetMealInCafeteriaRating"
+              "$ref": "#/definitions/apiMealRatingRequest"
             }
           }
         ],
@@ -180,7 +203,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiNewRating"
+              "$ref": "#/definitions/apiNewMealRatingRequest"
             }
           }
         ],
@@ -456,62 +479,83 @@
         }
       }
     },
-    "apiCafeteriaRating": {
+    "apiCafeteria": {
       "type": "object",
       "properties": {
-        "rating": {
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "longitude": {
           "type": "number",
           "format": "double"
         },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "apiCafeteriaRating": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
-          "format": "byte"
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
         },
-        "tags": {
+        "comment": {
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
+        },
+        "tagRating": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/apiTagRatingResult"
           }
         },
         "cafeteriaVisitedAt": {
           "type": "string",
           "format": "date-time"
-        },
-        "comment": {
-          "type": "string"
-        },
-        "tagRating": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTagRating"
-          }
         }
       }
     },
-    "apiGetCafeteriaRating": {
+    "apiCafeteriaRatingRequest": {
       "type": "object",
       "properties": {
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "cafeteriaName Mandatory Name of the cafeteria (EAT-API naming scheme)"
         },
         "from": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
         },
         "to": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
         },
         "limit": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
         }
       }
     },
-    "apiGetCafeteriaRatingReply": {
+    "apiCafeteriaRatingResponse": {
       "type": "object",
       "properties": {
         "rating": {
@@ -520,9 +564,38 @@
             "$ref": "#/definitions/apiCafeteriaRating"
           }
         },
-        "averageRating": {
+        "averagePoints": {
           "type": "number",
           "format": "double"
+        },
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxPoints": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRatingsResult"
+          }
+        }
+      }
+    },
+    "apiGetCafeteriaResponse": {
+      "type": "object",
+      "properties": {
+        "cafeteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCafeteria"
+          }
         }
       }
     },
@@ -557,57 +630,13 @@
         }
       }
     },
-    "apiGetMealInCafeteriaRating": {
-      "type": "object",
-      "properties": {
-        "cafeteriaName": {
-          "type": "string"
-        },
-        "meal": {
-          "type": "string"
-        },
-        "from": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "to": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiGetMealInCafeteriaRatingReply": {
-      "type": "object",
-      "properties": {
-        "rating": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiMealRating"
-          }
-        },
-        "averageRating": {
-          "type": "number",
-          "format": "double"
-        },
-        "tagRating": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTagRating"
-          }
-        }
-      }
-    },
     "apiGetRatingTagsReply": {
       "type": "object",
       "properties": {
         "tags": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/apiTagRatingOverview"
           }
         }
       }
@@ -709,14 +738,116 @@
     "apiMealRating": {
       "type": "object",
       "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
+        "cafeteriaName": {
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+        },
+        "meal": {
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
+        },
+        "comment": {
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
+        },
+        "tagRating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRatingResult"
+          }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "apiMealRatingRequest": {
+      "type": "object",
+      "properties": {
+        "cafeteriaName": {
+          "type": "string",
+          "title": "Mandatory Name of the cafeteria (EAT-API naming scheme)"
+        },
+        "meal": {
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
+        }
+      }
+    },
+    "apiMealRatingResponse": {
+      "type": "object",
+      "properties": {
         "rating": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMealRating"
+          }
+        },
+        "averagePoints": {
+          "type": "number",
+          "format": "double"
+        },
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
           "type": "integer",
           "format": "int32"
         },
-        "cafeteriaName": {
-          "type": "string"
+        "maxPoints": {
+          "type": "integer",
+          "format": "int32"
         },
-        "meal": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRatingsResult"
+          }
+        },
+        "nameTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagRatingsResult"
+          }
+        }
+      }
+    },
+    "apiNewCafeteriaRatingRequest": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
+        "cafeteriaName": {
           "type": "string"
         },
         "image": {
@@ -726,55 +857,47 @@
         "tags": {
           "type": "array",
           "items": {
-            "type": "string"
-          }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
+            "$ref": "#/definitions/apiTagRating"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags"
         },
         "comment": {
-          "type": "string"
-        },
-        "tagRating": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTagRating"
-          }
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         }
       }
     },
-    "apiNewRating": {
+    "apiNewMealRatingRequest": {
       "type": "object",
       "properties": {
-        "rating": {
+        "points": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "meal": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
-          "type": "string"
+          "type": "string",
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
         },
         "tags": {
           "type": "array",
           "items": {
-            "type": "string"
-          }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "identifierOfUser": {
-          "type": "string"
+            "$ref": "#/definitions/apiTagRating"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of mealRatingTags"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         }
       }
     },
@@ -861,9 +984,62 @@
         "tag": {
           "type": "string"
         },
-        "rating": {
+        "points": {
           "type": "number",
           "format": "double"
+        }
+      }
+    },
+    "apiTagRatingOverview": {
+      "type": "object",
+      "properties": {
+        "DE": {
+          "type": "string"
+        },
+        "EN": {
+          "type": "string"
+        }
+      }
+    },
+    "apiTagRatingResult": {
+      "type": "object",
+      "properties": {
+        "DE": {
+          "type": "string"
+        },
+        "EN": {
+          "type": "string"
+        },
+        "points": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "apiTagRatingsResult": {
+      "type": "object",
+      "properties": {
+        "DE": {
+          "type": "string"
+        },
+        "EN": {
+          "type": "string"
+        },
+        "averagePoints": {
+          "type": "number",
+          "format": "double"
+        },
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxPoints": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
