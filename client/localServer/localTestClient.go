@@ -17,41 +17,14 @@ import (
 )
 
 const (
-	address = "api-grpc.tum.app:443"
+	localAddress = "127.0.0.1:50051"
 )
 
 func main() {
-	// Set up a connection to the server.
+	// Set up a connection to the local server.
 	log.Println("Connecting...")
-	/*pool, _ := x509.SystemCertPool()
-	// error handling omitted
-	creds := credentials.NewClientTLSFromCert(pool, "")
 
-	conn, err := grpc.Dial("127.0.0.1:50051", grpc.WithTransportCredentials(creds))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := pb.NewCampusClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	// Add header metadata
-	md := metadata.New(map[string]string{"x-device-id": "grpc-tests"})
-	ctx = metadata.NewOutgoingContext(ctx, md)
-
-	/*log.Println("Trying to fetch top news")
-	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Greeting: %s", r.String())*/
-	createCafeteriaRatingSampleData()
-}
-
-func createCafeteriaRatingSampleData() {
-	conn, err := grpc.Dial("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Println(err)
 	}
@@ -59,29 +32,25 @@ func createCafeteriaRatingSampleData() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	/*generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 1)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 3)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 5)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 7)
-	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 4)
-	generateCafeteriaRating(c, ctx, "FMI_BISTRO", 6)*/
-	/*	generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 1)
-		generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 3)
-		generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 5)
-	*/
-	//	generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 1)
-
-	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
-	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
-
-	queryCafeteria("MENSA_GARCHING", c, ctx)
-	//queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
+	cafeteriaRatingTools(c, ctx)
 
 }
 
-func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Context) {
+func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
+
+	currentCafeteria := "MENSA_GARCHING"
+	currentMeal := "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen" //must be in the meal table
+	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	generateMealRating(c, ctx, currentCafeteria, currentMeal, 1)
+
+	queryCafeteria(currentCafeteria, c, ctx, false)
+	queryMeal(currentCafeteria, currentMeal, c, ctx, false)
+
+}
+
+func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
 	res, err := c.GetMealRatings(ctx, &pb.MealRatingsRequest{
 		Meal:          meal,
 		CafeteriaName: cafeteria,
@@ -96,12 +65,17 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 		println("min", res.MinRating)
 		println("max", res.MaxRating)
 		println("Number of individual Ratings", len(res.Rating))
+		path := fmt.Sprintf("%s%d%s", "./testImages/meals/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
 			println("\nRating: ", v.Rating)
 			println("Cafeteria Name: ", v.CafeteriaName)
 			println("Comment ", v.Comment)
 			println("Number of Tag Ratings: ", len(v.TagRating))
 			println("Timestamp: ", v.CafeteriaVisitedAt)
+			println("ImageLength:", len(v.Image))
+			if imageShouldBeStored {
+				storeImage(path, v.Image)
+			}
 		}
 
 		for _, v := range res.RatingTags {
@@ -122,7 +96,7 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 	}
 }
 
-func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
+func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
 	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
 		CafeteriaName: s,
 		Limit:         3,
@@ -138,7 +112,7 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 		println("min", res.MinRating)
 		println("max", res.MaxRating)
 		println("Number of individual Ratings", len(res.Rating))
-		path := fmt.Sprintf("%s%d%s", "./testImages/", time.Now().Unix(), "/")
+		path := fmt.Sprintf("%s%d%s", "./testImages/cafeteria/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
 			println("\nRating: ", v.Rating)
 			println("Cafeteria Name: ", v.CafeteriaName)
@@ -146,8 +120,9 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 			println("Number of Tag Ratings: ", len(v.TagRating))
 			println("Timestamp: ", v.CafeteriaVisitedAt)
 			println("ImageLength:", len(v.Image))
-
-			storeImage(path, v.Image)
+			if imageShouldBeStored {
+				storeImage(path, v.Image)
+			}
 		}
 
 		for _, v := range res.RatingTags {
