@@ -384,6 +384,10 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 	return storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 }
 
+/*
+stores an image and returns teh path to this image.
+if needed, a new directory will be created and the path is extended until it is unique
+*/
 func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
@@ -392,7 +396,20 @@ func storeImage(path string, i []byte) (string, error) {
 		}
 	}
 	img, _, _ := image.Decode(bytes.NewReader(i))
-	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".jpeg")
+	currentTime := time.Now().Unix()
+	var imgPath = fmt.Sprintf("%s%d%s", path, currentTime, ".jpeg")
+	var f, _ = os.Stat(imgPath)
+	var counter = 1
+	for {
+		if f == nil {
+			break
+		} else {
+			imgPath = fmt.Sprintf("%s%d%s%d%s", path, currentTime, "v", counter, ".jpeg")
+			counter++
+			f, _ = os.Stat(imgPath)
+		}
+	}
+
 	out, errFile := os.Create(imgPath)
 	defer out.Close()
 	var opts jpeg.Options

@@ -2,12 +2,15 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"image"
+	"image/jpeg"
 	"log"
 	"os"
 	"time"
@@ -70,6 +73,8 @@ func createCafeteriaRatingSampleData() {
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
 	queryCafeteria("MENSA_GARCHING", c, ctx)
 	//queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
@@ -83,72 +88,75 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 		Limit:         3,
 	})
 
-	println("Result: ")
-	println("averagerating: ", res.AverageRating)
-	println("min", res.MinRating)
-	println("max", res.MaxRating)
-	println("Number of individual Ratings", len(res.Rating))
-	for _, v := range res.Rating {
-		println("\nRating: ", v.Rating)
-		println("Cafeteria Name: ", v.CafeteriaName)
-		println("Comment ", v.Comment)
-		println("Number of Tag Ratings: ", len(v.TagRating))
-		println("Timestamp: ", v.CafeteriaVisitedAt)
-	}
-
-	for _, v := range res.RatingTags {
-		println("\nNameDE: ", v.NameDE)
-		println("NameEN: ", v.NameEN)
-		println("averagerating: ", v.AverageRating)
-		println("min", v.MinRating)
-		println("max", v.MaxRating)
-	}
-	log.Println("nameTags: ")
-	for _, v := range res.NameTags {
-		println("\nNameDE: ", v.NameDE)
-		println("NameEN: ", v.NameEN)
-		println("averagerating: ", v.AverageRating)
-		println("min", v.MinRating)
-		println("max", v.MaxRating)
-	}
 	if err != nil {
 		println(err)
+	} else {
+		println("Result: ")
+		println("averagerating: ", res.AverageRating)
+		println("min", res.MinRating)
+		println("max", res.MaxRating)
+		println("Number of individual Ratings", len(res.Rating))
+		for _, v := range res.Rating {
+			println("\nRating: ", v.Rating)
+			println("Cafeteria Name: ", v.CafeteriaName)
+			println("Comment ", v.Comment)
+			println("Number of Tag Ratings: ", len(v.TagRating))
+			println("Timestamp: ", v.CafeteriaVisitedAt)
+		}
+
+		for _, v := range res.RatingTags {
+			println("\nNameDE: ", v.NameDE)
+			println("NameEN: ", v.NameEN)
+			println("averagerating: ", v.AverageRating)
+			println("min", v.MinRating)
+			println("max", v.MaxRating)
+		}
+		log.Println("nameTags: ")
+		for _, v := range res.NameTags {
+			println("\nNameDE: ", v.NameDE)
+			println("NameEN: ", v.NameEN)
+			println("averagerating: ", v.AverageRating)
+			println("min", v.MinRating)
+			println("max", v.MaxRating)
+		}
 	}
 }
 
 func queryCafeteria(s string, c pb.CampusClient, ctx context.Context) {
 	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
-
 		CafeteriaName: s,
 		Limit:         3,
-		From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),
-		To:            timestamppb.New(time.Date(2022, 7, 8, 17, 0, 0, 0, time.Local)),
-		//From:          timestamppb.New(time.Date(2021, 7, 8, 16, 0, 0, 0, time.Local)),
-		//To:            timestamppb.New(time.Date(2021, 7, 8, 17, 0, 0, 0, time.Local)),
+		//	From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),
+		//	To:            timestamppb.New(time.Date(2022, 7, 8, 17, 0, 0, 0, time.Local)),
 	})
 
-	println("Result: ")
-	println("averagerating: ", res.AverageRating)
-	println("min", res.MinRating)
-	println("max", res.MaxRating)
-	println("Number of individual Ratings", len(res.Rating))
-	for _, v := range res.Rating {
-		println("\nRating: ", v.Rating)
-		println("Cafeteria Name: ", v.CafeteriaName)
-		println("Comment ", v.Comment)
-		println("Number of Tag Ratings: ", len(v.TagRating))
-		println("Timestamp: ", v.CafeteriaVisitedAt)
-	}
-
-	for _, v := range res.RatingTags {
-		println("\nNameDE: ", v.NameDE)
-		println("NameEN: ", v.NameEN)
-		println("averagerating: ", v.AverageRating)
-		println("min", v.MinRating)
-		println("max", v.MaxRating)
-	}
 	if err != nil {
 		println(err)
+	} else {
+		println("Result: ")
+		println("averagerating: ", res.AverageRating)
+		println("min", res.MinRating)
+		println("max", res.MaxRating)
+		println("Number of individual Ratings", len(res.Rating))
+		path := fmt.Sprintf("%s%d%s", "./testImages/", time.Now().Unix(), "/")
+		for _, v := range res.Rating {
+			println("\nRating: ", v.Rating)
+			println("Cafeteria Name: ", v.CafeteriaName)
+			println("Comment ", v.Comment)
+			println("Number of Tag Ratings: ", len(v.TagRating))
+			println("Timestamp: ", v.CafeteriaVisitedAt)
+			println("ImageLength:", len(v.Image))
+
+			storeImage(path, v.Image)
+		}
+
+		for _, v := range res.RatingTags {
+			println("\nNameDE: ", v.NameDE)
+			println("NameEN: ", v.NameEN)
+			println("averagerating: ", v.AverageRating)
+			println("min", v.MinRating)
+			println("max", v.MaxRating)
+		}
 	}
 }
 
@@ -226,5 +234,35 @@ func getImageToBytes(path string) []byte {
 
 	buffer := bufio.NewReader(file)
 	_, err = buffer.Read(bytes)
+	println("Length of the image as bytes: ", len(bytes))
 	return bytes
+}
+
+func storeImage(path string, i []byte) (string, error) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	img, _, _ := image.Decode(bytes.NewReader(i))
+	var imgPath = fmt.Sprintf("%s%d%s", path, 3, ".jpeg") //time.Now().Unix()		//use three to force file name collisions
+	var f, _ = os.Stat(imgPath)
+	var counter = 1
+	for {
+		if f == nil {
+			break
+		} else {
+			imgPath = fmt.Sprintf("%s%d%s%d%s", path, 3, "v", counter, ".jpeg") //time.Now().Unix()
+			counter++
+			f, _ = os.Stat(imgPath)
+		}
+	}
+
+	out, errFile := os.Create(imgPath)
+	defer out.Close()
+	var opts jpeg.Options
+	opts.Quality = 100
+	errFile = jpeg.Encode(out, img, &opts)
+	return imgPath, errFile
 }
