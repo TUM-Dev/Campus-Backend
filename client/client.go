@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
+	"os"
 	"time"
 )
 
@@ -66,30 +69,7 @@ func createCafeteriaRatingSampleData() {
 	//	generateMealRating(c, ctx, "MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", 1)
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
-	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
-	//images/cafeteria/_cafeteriaID_/_(mealID)_/timestamp.png
-	/*path := fmt.Sprintf("%s%d%s%d%s", "../secondimages/meals/", 23, "/", 12, "/")
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".png")
-	out, err := os.Create(imgPath)
-	err = png.Encode(out, img)
-	/*	out, err := os.Create(path)
-		if err != nil {
-			pathDir := fmt.Sprintf("%s%d%s%d%s", "../images/meals/", 23, "/", 12, "/")
-			mkerr := os.MkdirAll(pathDir, os.ModePerm)
-			if mkerr != nil {
-				println(mkerr)
-			}
-		}
-	println(path)*/
-	//out.Name()
-	//img, _, _ := image.Decode(bytes.NewReader(input.Image))
-	//	out, err := os.Create("./.png")
+	generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
 
 	queryCafeteria("MENSA_GARCHING", c, ctx)
 	//queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)
@@ -188,6 +168,7 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 		CafeteriaName: cafeteria,
 		Comment:       "Alles super, 2 Sterne",
 		Tags:          y,
+		Image:         getImageToBytes("../images/sampleimage.jpeg"),
 	})
 
 	if err != nil {
@@ -218,6 +199,7 @@ func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string
 		Meal:          meal,
 		Comment:       "Alles Hähnchen",
 		Tags:          y,
+		Image:         getImageToBytes("../images/sampleimage.jpeg"),
 	})
 
 	if err != nil {
@@ -225,4 +207,24 @@ func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string
 	} else {
 		log.Println("Request successfully: Meal Rating should be stored")
 	}
+}
+
+func getImageToBytes(path string) []byte {
+
+	file, err := os.Open(path)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+	var size int64 = fileInfo.Size()
+	bytes := make([]byte, size)
+
+	buffer := bufio.NewReader(file)
+	_, err = buffer.Read(bytes)
+	return bytes
 }

@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -14,7 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"image"
-	"image/png"
+	"image/jpeg"
 	"os"
 	"strings"
 	"time"
@@ -55,6 +56,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
 		Where("cafeteriaID = ?", cafeteriaID).
 		First(&result)
+	//todo error handling if not existant
 
 	if res.Error != nil {
 		return nil, status.Errorf(codes.Internal, "This cafeteria has not yet been rated.")
@@ -124,10 +126,10 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, CAFETERIA)
 			ratingResults[i] = &pb.CafeteriaRating{
-				Rating:        v.Rating,
-				CafeteriaName: input.CafeteriaName,
-				Comment:       v.Comment,
-				//Image:              v.Image,
+				Rating:             v.Rating,
+				CafeteriaName:      input.CafeteriaName,
+				Comment:            v.Comment,
+				Image:              getImageToBytes(v.Image),
 				CafeteriaVisitedAt: timestamppb.New(v.Timestamp),
 				TagRating:          tagRatings,
 			}
@@ -235,6 +237,7 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 				CafeteriaName:      input.CafeteriaName,
 				Comment:            v.Comment,
 				TagRating:          tagRatings,
+				Image:              getImageToBytes(v.Image),
 				CafeteriaVisitedAt: timestamppb.New(v.Timestamp),
 			}
 		}
@@ -242,6 +245,26 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 	} else {
 		return make([]*pb.MealRating, 0)
 	}
+}
+
+func getImageToBytes(path string) []byte {
+
+	file, err := os.Open(path)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+	var size int64 = fileInfo.Size()
+	bytes := make([]byte, size)
+
+	buffer := bufio.NewReader(file)
+	_, err = buffer.Read(bytes)
+	return bytes
 }
 
 /*
@@ -341,7 +364,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		return nil, errorRes
 	}
 
-	path := fmt.Sprintf("%s%d%s%d%s", "../images/cafeterias/", cafeteriaID, "/")
+	path := fmt.Sprintf("%s%d%s", "../images/cafeterias/", cafeteriaID, "/")
 	respath, reserror := storeImage(path, input.Image)
 
 	if reserror != nil {
@@ -369,9 +392,12 @@ func storeImage(path string, i []byte) (string, error) {
 		}
 	}
 	img, _, _ := image.Decode(bytes.NewReader(i))
-	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".png")
+	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".jpeg")
 	out, errFile := os.Create(imgPath)
-	errFile = png.Encode(out, img)
+	defer out.Close()
+	var opts jpeg.Options
+	opts.Quality = 100
+	errFile = jpeg.Encode(out, img, &opts)
 	return imgPath, errFile
 }
 
