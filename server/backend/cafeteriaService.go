@@ -1,7 +1,10 @@
 package backend
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
 	log "github.com/sirupsen/logrus"
@@ -10,6 +13,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
+	"image"
+	"image/png"
+	"os"
 	"strings"
 	"time"
 )
@@ -335,15 +341,38 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		return nil, errorRes
 	}
 
+	path := fmt.Sprintf("%s%d%s%d%s", "../images/cafeterias/", cafeteriaID, "/")
+	respath, reserror := storeImage(path, input.Image)
+
+	if reserror != nil {
+		println("storing an image did not succeed")
+	}
+
 	rating := cafeteria_rating_models.CafeteriaRating{
 		Comment:     input.Comment,
 		Rating:      input.Rating,
 		CafeteriaID: cafeteriaID,
-		Timestamp:   time.Now()}
+		Timestamp:   time.Now(),
+		Image:       respath,
+	}
 
 	s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
 
 	return storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
+}
+
+func storeImage(path string, i []byte) (string, error) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	img, _, _ := image.Decode(bytes.NewReader(i))
+	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".png")
+	out, errFile := os.Create(imgPath)
+	errFile = png.Encode(out, img)
+	return imgPath, errFile
 }
 
 /*
@@ -371,12 +400,21 @@ func (s *CampusServer) NewMealRating(_ context.Context, input *pb.NewMealRatingR
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
+	path := fmt.Sprintf("%s%d%s%d%s", "../images/meals/", cafeteriaID, "/", meal.Id, "/")
+	respath, reserror := storeImage(path, input.Image)
+
+	if reserror != nil {
+		println("storing an image did not succeed")
+	}
+
 	rating := cafeteria_rating_models.MealRating{
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
 		MealID:      meal.Id,
 		Rating:      input.Rating,
-		Timestamp:   time.Now()}
+		Timestamp:   time.Now(),
+		Image:       respath,
+	}
 
 	s.db.Model(&cafeteria_rating_models.MealRating{}).Create(&rating)
 

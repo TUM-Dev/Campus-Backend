@@ -67,6 +67,29 @@ func createCafeteriaRatingSampleData() {
 
 	//generateMealRating(c, ctx, "MENSA_GARCHING", "Pasta all'arrabiata", 2)
 	//generateCafeteriaRating(c, ctx, "MENSA_GARCHING", 2)
+	//images/cafeteria/_cafeteriaID_/_(mealID)_/timestamp.png
+	/*path := fmt.Sprintf("%s%d%s%d%s", "../secondimages/meals/", 23, "/", 12, "/")
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	imgPath := fmt.Sprintf("%s%d%s", path, time.Now().Unix(), ".png")
+	out, err := os.Create(imgPath)
+	err = png.Encode(out, img)
+	/*	out, err := os.Create(path)
+		if err != nil {
+			pathDir := fmt.Sprintf("%s%d%s%d%s", "../images/meals/", 23, "/", 12, "/")
+			mkerr := os.MkdirAll(pathDir, os.ModePerm)
+			if mkerr != nil {
+				println(mkerr)
+			}
+		}
+	println(path)*/
+	//out.Name()
+	//img, _, _ := image.Decode(bytes.NewReader(input.Image))
+	//	out, err := os.Create("./.png")
 
 	queryCafeteria("MENSA_GARCHING", c, ctx)
 	//queryMeal("MENSA_GARCHING", "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen", c, ctx)

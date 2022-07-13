@@ -19,7 +19,7 @@ type CafeteriaRating struct {
 	Comment     string    `gorm:"column:comment;type:varchar;size:256;" json:"comment" `
 	CafeteriaID int32     `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;" json:"timestamp" `
-	//	Image     null.String `gorm:"column:image;type:text;size:65535;" json:"image" :"image"`
+	Image       string    `gorm:"column:image;type:mediumtext;" json:"image"`
 }
 
 // TableName sets the insert table name for this struct type
