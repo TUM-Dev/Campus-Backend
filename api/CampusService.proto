@@ -66,6 +66,224 @@ service Campus {
   }
 
 
+
+  // This endpoint retrieves Cafeteria Ratings from the Backend.
+  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/cafeteria/get"
+      body: "*",
+    };
+  }
+
+
+
+  rpc GetMealRatings (MealRatingRequest) returns (MealRatingResponse) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/dish/get"
+      body: "*",
+    };
+  }
+
+
+
+  rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
+      body: "*",
+    };
+  }
+
+  rpc NewMealRating (NewMealRatingRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/cafeteriaRating/meal/newMealRating"
+      body: "*",
+    };
+  }
+
+  rpc GetAvailableMealTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/meal/allTags",
+    };
+  }
+
+  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/cafeteria/allTags",
+    };
+  }
+
+  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaResponse) {
+    option (google.api.http) = {
+      get: "/cafeteriaRating/cafeteria/allCafeterias",
+    };
+  }
+
+}
+
+message GetRoomScheduleRequest {
+  int32 room = 1;
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
+}
+
+message GetRoomScheduleReply {
+  message RoomScheduleEvent {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+    string title = 3;
+    int32 event_id = 4;
+    string course_code = 5;
+  }
+  repeated RoomScheduleEvent events = 1;
+}
+
+message GetRoomCoordinatesRequest {
+  string arch_id = 1;
+}
+
+message GetRoomCoordinatesReply {
+  string utm_zone = 1;
+  float utm_easting = 2;
+  float utm_northing = 3;
+}
+
+message GetRoomMapsRequest {
+  string arch_id = 1;
+}
+
+message GetRoomMapsReply {
+  message Map {
+    int64 map_id = 1;
+    string description = 2;
+    int64 scale = 3;
+    int64 width = 4;
+    int64 height = 5;
+  };
+  repeated Map maps = 1;
+}
+
+message GetLocationsRequest {
+  string location = 1;
+}
+
+message GetLocationsReply {
+  message Location {
+    string location = 1;
+    string name = 2;
+    string lon = 3;
+    string lat = 4;
+    string radius = 5;
+  }
+  repeated Location locations = 1;
+}
+
+message SearchRoomsRequest {
+  string query = 1;
+}
+
+message SearchRoomsReply {
+  repeated Room rooms = 1;
+}
+
+message Room {
+  int32 room_id = 1;
+  string room_code = 2;
+  string building_nr = 3;
+  string arch_id = 4;
+  string info = 5;
+  string address = 6;
+  string purpose = 7;
+  string campus = 8;
+  string name = 9;
+}
+
+message NewsSourceArray {
+  repeated NewsSource sources = 1;
+}
+
+message NewsSource {
+  string source = 1;
+  string title = 2;
+  string icon = 3;
+}
+
+message GetTopNewsReply {
+  string image_url = 1;
+  string link = 2;
+  google.protobuf.Timestamp created = 3;
+  google.protobuf.Timestamp from = 4;
+  google.protobuf.Timestamp to = 5;
+}
+
+
+syntax = "proto3";
+
+option go_package = "github.com/TUM-Dev/Campus-Backend/api";
+option java_multiple_files = true;
+option java_package = "app.tum.campus.api";
+option java_outer_classname = "CampusApiProto";
+option csharp_namespace = "CampusApiProto";
+
+package api;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service Campus {
+  rpc GetTopNews (google.protobuf.Empty) returns (GetTopNewsReply) {
+    option (google.api.http) = {
+      get: "/news/top"
+    };
+  }
+
+  rpc GetNewsSources (google.protobuf.Empty) returns (NewsSourceArray) {
+    option (google.api.http) = {
+      get: "/news/sources",
+      response_body: "sources"
+    };
+  }
+
+  rpc SearchRooms (SearchRoomsRequest) returns (SearchRoomsReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/search",
+      body: "*",
+      response_body: "rooms"
+    };
+  }
+
+  // a location is a campus location/building, e.g. "Garching Forschungszentrum"
+  rpc GetLocations (GetLocationsRequest) returns (GetLocationsReply) {
+    option (google.api.http) = {
+      get: "/locations/{location}",
+      response_body: "locations"
+    };
+  }
+
+  rpc GetRoomMaps (GetRoomMapsRequest) returns (GetRoomMapsReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/maps",
+      body: "*",
+      response_body: "maps"
+    };
+  }
+
+  rpc GetRoomCoordinates (GetRoomCoordinatesRequest) returns (GetRoomCoordinatesReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/coordinates",
+      body: "*"
+    };
+  }
+
+  rpc GetRoomSchedule (GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
+    option (google.api.http) = {
+      post: "/roomfinder/room/scheduleById",
+      body: "*",
+      response_body: "events"
+    };
+  }
+
+
   // This endpoint retrieves Cafeteria Ratings from the Backend.
   rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
     option (google.api.http) = {
@@ -212,6 +430,7 @@ message GetTopNewsReply {
   google.protobuf.Timestamp from = 4;
   google.protobuf.Timestamp to = 5;
 }
+
 
 
 message CafeteriaRatingRequest {
