@@ -45,18 +45,23 @@ func initTagRatingOptions(db *gorm.DB) {
 }
 
 func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
-	var crontab model.Crontab
+	var exists bool
 	res := db.Model(&model.Crontab{}).
+		Select("count(*) > 0").
 		Where("type LIKE ?", cronName).
-		First(&crontab)
-	if res.Error != nil {
+		Find(&exists).
+		Error
+
+	if res != nil {
 		log.Error(res.Error)
-	} else if res.RowsAffected == 0 {
-		db.Create(&model.Crontab{
-			Interval: interval,
-			Type:     null.String{NullString: sql.NullString{String: cronName, Valid: true}},
-			LastRun:  0,
-		})
+	} else if !exists {
+
+		db.Model(&model.Crontab{}).
+			Create(&model.Crontab{
+				Interval: interval,
+				Type:     null.String{NullString: sql.NullString{String: cronName, Valid: true}},
+				LastRun:  0,
+			})
 	}
 }
 

@@ -536,7 +536,7 @@
       "tagNameEnglish": "Vegetables",
       "tagNameGerman": "Gemüse",
       "canbeincluded": [
-        "gemüse"
+        "gemüse","leipziger"
       ],
       "notincluded": []
     },
