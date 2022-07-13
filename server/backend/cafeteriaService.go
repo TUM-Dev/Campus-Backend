@@ -88,8 +88,13 @@ Queries the actual ratings for a cafeteria and attaches the tag ratings which be
 func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
 	var ratings []cafeteria_rating_models.CafeteriaRating
 	var errRatings error
-	if input.Limit > 0 {
+	var limit = int(input.Limit)
+	if limit > 100 {
+		limit = 100
+	}
+	if limit > 0 {
 		if input.From != nil || input.To != nil {
+
 			var from time.Time
 			var to time.Time
 			if input.From == nil {
@@ -106,13 +111,13 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
 				Where("cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).
 				Order("timestamp desc, id desc").
-				Limit(int(input.Limit)).
+				Limit(limit).
 				Find(&ratings).Error
 		} else {
 			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
 				Where("cafeteriaID = ?", cafeteriaID).
 				Order("timestamp desc, id desc").
-				Limit(int(input.Limit)).
+				Limit(limit).
 				Find(&ratings).Error
 		}
 
@@ -194,7 +199,11 @@ Queries the actual ratings for a meal in a cafeteria and attaches the tag rating
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 	var errRatings error
-	if input.Limit > 0 {
+	var limit = int(input.Limit)
+	if limit > 100 {
+		limit = 100
+	}
+	if limit > 0 {
 		if input.From != nil || input.To != nil {
 			var from time.Time
 			var to time.Time
@@ -213,13 +222,13 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 			errRatings = s.db.Model(&cafeteria_rating_models.MealRating{}).
 				Where("cafeteriaID = ? AND mealID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, mealID, to, from).
 				Order("timestamp desc, id desc").
-				Limit(int(input.Limit)).
+				Limit(limit).
 				Find(&ratings).Error
 		} else {
 			errRatings = s.db.Model(&cafeteria_rating_models.MealRating{}).
 				Where("cafeteriaID = ? AND mealID = ?", cafeteriaID, mealID).
 				Order("timestamp desc, id desc").
-				Limit(int(input.Limit)).
+				Limit(limit).
 				Find(&ratings).Error
 		}
 

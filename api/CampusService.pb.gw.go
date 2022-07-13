@@ -291,7 +291,7 @@ func local_request_Campus_GetCafeteriaRatings_0(ctx context.Context, marshaler r
 }
 
 func request_Campus_GetMealRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MealRatingsRequest
+	var protoReq MealRatingRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -308,7 +308,7 @@ func request_Campus_GetMealRatings_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Campus_GetMealRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MealRatingsRequest
+	var protoReq MealRatingRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
