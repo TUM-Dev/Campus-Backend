@@ -32,6 +32,17 @@ type QueryOverviewRatingTag struct {
 	Rating int32  `gorm:"column:rating;type:mediumtext;"  json:"rating"`
 }
 
+/*
+RPC Endpoint
+Allows to query ratings for a specific cafeteria.
+It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
+all cafeteria rating tags which were used to rate this cafeteria.
+
+The parameter limit defines how many actual ratings should be returned.
+
+The optional parameters from and to can define a interval in which the queried ratings have been stored.
+If these aren't specified, the newest ratings will be returnes as the default
+*/
 func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
 	var result cafeteria_rating_models.CafeteriaRatingsAverage //get the average rating for this specific cafeteria
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
@@ -63,6 +74,9 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 	}
 }
 
+/*
+Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
+*/
 func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
 	var ratings []cafeteria_rating_models.CafeteriaRating
 	var errRatings error
@@ -118,6 +132,18 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	}
 }
 
+/*
+RPC Endpoint
+Allows to query ratings for a specific meal in a specific cafeteria.
+It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
+all meal rating tags which were used to rate this meal in this cafeteria. Additionally the average, max/min are
+returned for every name tag which matches the nemae of the meal.
+
+The parameter limit defines how many actual ratings should be returned.
+
+The optional parameters from and to can define a interval in which the queried ratings have been stored.
+If these aren't specified, the newest ratings will be returnes as the default
+*/
 func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
 	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
@@ -154,53 +180,9 @@ func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRe
 
 }
 
-func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) []*pb.TagRatingsResult {
-
-	var results []QueryRatingTag
-	var res error
-	if ratingType == MEAL {
-		res = db.Table("meal_rating_tags_options options").
-			Joins("JOIN meal_rating_tags_results results ON options.id = results.tagID").
-			Select("options.nameDE as nameDE, results.average as average, "+
-				"options.nameEN as nameEN, results.min as min, results.max as max").
-			Where("results.cafeteriaID = ? AND results.mealID = ?", cafeteriaID, mealID).
-			Scan(&results).Error
-	} else if ratingType == CAFETERIA {
-		res = db.Table("cafeteria_rating_tags_options options").
-			Joins("JOIN cafeteria_rating_tags_results results ON options.id = results.tagID").
-			Select("options.nameDE as nameDE, results.average as average, "+
-				"options.nameEN as nameEN, results.min as min, results.max as max").
-			Where("results.cafeteriaID = ?", cafeteriaID).
-			Scan(&results).Error
-	} else { //Query for name tags
-		res = db.Table("meal_to_meal_name_tags mapping").
-			Where("mapping.mealID = ?", mealID).
-			Select("mapping.nameTagID as tag").
-			Joins("JOIN meal_name_tags_results results ON mapping.nameTagID = results.tagID").
-			Joins("JOIN meal_name_tag_options options ON mapping.nameTagID = options.id").
-			Select("options.nameDE as nameDE, results.average as average, " +
-				"options.nameEN as nameEN, results.min as min, results.max as max").
-			Scan(&results).Error
-	}
-
-	if res != nil {
-		log.Println(res)
-	}
-
-	elements := make([]*pb.TagRatingsResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
-	for i, v := range results {
-		elements[i] = &pb.TagRatingsResult{
-			NameDE:        v.NameDE,
-			NameEN:        v.NameEN,
-			AverageRating: v.Average,
-			MinRating:     v.Min,
-			MaxRating:     v.Max,
-		}
-	}
-
-	return elements
-}
-
+/*
+Queries the actual ratings for a meal in a cafeteria and attaches the tag ratings which belong to the ratings
+*/
 func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 	var errRatings error
@@ -257,6 +239,56 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 }
 
 /*
+Queries the average ratings for either cafeteriaRatingTags, mealRatingTags or NameTags.
+Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
+*/
+func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) []*pb.TagRatingsResult {
+	var results []QueryRatingTag
+	var res error
+	if ratingType == MEAL {
+		res = db.Table("meal_rating_tags_options options").
+			Joins("JOIN meal_rating_tags_results results ON options.id = results.tagID").
+			Select("options.nameDE as nameDE, results.average as average, "+
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			Where("results.cafeteriaID = ? AND results.mealID = ?", cafeteriaID, mealID).
+			Scan(&results).Error
+	} else if ratingType == CAFETERIA {
+		res = db.Table("cafeteria_rating_tags_options options").
+			Joins("JOIN cafeteria_rating_tags_results results ON options.id = results.tagID").
+			Select("options.nameDE as nameDE, results.average as average, "+
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			Where("results.cafeteriaID = ?", cafeteriaID).
+			Scan(&results).Error
+	} else { //Query for name tags
+		res = db.Table("meal_to_meal_name_tags mapping").
+			Where("mapping.mealID = ?", mealID).
+			Select("mapping.nameTagID as tag").
+			Joins("JOIN meal_name_tags_results results ON mapping.nameTagID = results.tagID").
+			Joins("JOIN meal_name_tag_options options ON mapping.nameTagID = options.id").
+			Select("options.nameDE as nameDE, results.average as average, " +
+				"options.nameEN as nameEN, results.min as min, results.max as max").
+			Scan(&results).Error
+	}
+
+	if res != nil {
+		log.Println(res)
+	}
+
+	elements := make([]*pb.TagRatingsResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
+	for i, v := range results {
+		elements[i] = &pb.TagRatingsResult{
+			NameDE:        v.NameDE,
+			NameEN:        v.NameEN,
+			AverageRating: v.Average,
+			MinRating:     v.Min,
+			MaxRating:     v.Max,
+		}
+	}
+
+	return elements
+}
+
+/*
 Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews
 */
 func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType int32) []*pb.TagRatingOverview {
@@ -289,16 +321,24 @@ func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType 
 	}
 	return elements
 }
+
+/*
+RPC Endpoint
+Allows to store a new cafeteria Rating.
+If one of the parameters is invalid, an error will be returned. Otherwise the rating will be saved.
+All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
+invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to sucessfully store tags
+*/
 func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
-	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
-	if validInput != nil {
-		return nil, validInput
+	cafeteriaID, errorRes := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
+	if errorRes != nil {
+		return nil, errorRes
 	}
 
 	rating := cafeteria_rating_models.CafeteriaRating{
 		Comment:     input.Comment,
 		Rating:      input.Rating,
-		CafeteriaID: getIDForCafeteriaName(input.CafeteriaName, s.db),
+		CafeteriaID: cafeteriaID,
 		Timestamp:   time.Now()}
 
 	s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
@@ -306,18 +346,26 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 	return storeRatingTags(s, rating.Id, input.Tags, CAFETERIA)
 }
 
+/*
+RPC Endpoint
+Allows to store a new meal Rating.
+If one of the parameters is invalid, an error will be returned. Otherwise the rating will be saved.
+The ratingNumber will be saved for each corresponding Mealnametag.
+All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
+invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to sucessfully store tags
+*/
 func (s *CampusServer) NewMealRating(_ context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
 
-	validInput := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
-	if validInput != nil {
-		return nil, validInput
+	cafeteriaID, errorRes := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
+	if errorRes != nil {
+		return nil, errorRes
 	}
 
 	var meal *cafeteria_rating_models.Meal
-	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
-	mealExists := s.db.Model(&cafeteria_rating_models.Meal{}).
-		Where("name LIKE ? AND cafeteriaID = ?", input.Meal, cafeteriaID).
-		First(&meal).RowsAffected
+	//cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
+	mealExists := s.db.Model(&cafeteria_rating_models.Meal{}). //Meal must exist in the given mensa
+									Where("name LIKE ? AND cafeteriaID = ?", input.Meal, cafeteriaID).
+									First(&meal).RowsAffected
 
 	if mealExists == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Meal is not offered in this week in this canteen. Rating has not been saved.")
@@ -355,32 +403,36 @@ func assignMealNameTags(s *CampusServer, rating cafeteria_rating_models.MealRati
 	}
 }
 
-func inputSanitization(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) error {
-	if rating > 10 || rating < 0 {
-		return status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+/*
+Checks parameters of the new rating for all cafeteria and meal ratings.
+Additionally, queries the cafeteria ID, since it checks whether the cafeteria actually exists.
+*/
+func inputSanitization(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) (int32, error) {
+	if rating > 5 || rating < 0 {
+		return -1, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
 
 	if len(image) > 131100 {
-		return status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
+		return -1, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
 	}
 
 	if len(comment) > 256 {
-		return status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
+		return -1, status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
 
 	if strings.Contains(comment, "@") {
-		return status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+		return -1, status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
 	var result *cafeteria_rating_models.Cafeteria
 	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
 		Where("name LIKE ?", cafeteriaName).
 		First(&result)
-	if testCanteen.RowsAffected == 0 {
-		return status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+	if testCanteen.Error != nil || testCanteen.RowsAffected == 0 {
+		return -1, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
-	return nil
+	return result.Id, nil
 }
 
 /*
@@ -426,6 +478,9 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 
 }
 
+/*
+Returns the db model of the option toable to reduce code duplicates
+*/
 func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
 		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
@@ -461,6 +516,10 @@ func getIDForMealName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	return result
 }
 
+/*
+RPC Endpoint
+Retunrs all valid Tags to quickly rate meals in english and german
+*/
 func (s *CampusServer) GetAvailableMealTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.MealRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE, nameEN").Scan(&result)
@@ -475,6 +534,10 @@ func (s *CampusServer) GetAvailableMealTags(_ context.Context, _ *emptypb.Empty)
 	}, nil
 }
 
+/*
+RPC Endpoint
+Retunrs all valid Tags to quickly rate meals in english and german
+*/
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*cafeteria_rating_models.CafeteriaRatingsTagsOptions
 	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE,nameEN").Scan(&result)

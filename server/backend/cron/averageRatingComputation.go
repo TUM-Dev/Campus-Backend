@@ -82,7 +82,8 @@ func computeAverageNameTags(c *CronService) {
 				TagID:       v.TagID,
 				Min:         v.Min,
 				Max:         v.Max,
-			} //todo add standard deviation
+				Std:         v.Std,
+			}
 
 			errCreate := c.db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
@@ -112,7 +113,8 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 				TagID:       v.TagID,
 				Min:         v.Min,
 				Max:         v.Max,
-			} //todo add standard deviation
+				Std:         v.Std,
+			}
 
 			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
@@ -140,7 +142,8 @@ func computeAverageCafeteriaTags(c *CronService) {
 				TagID:       v.TagID,
 				Min:         v.Min,
 				Max:         v.Max,
-			} //todo add standard deviation
+				Std:         v.Std,
+			}
 
 			errCreate := c.db.Model(&cafeteria_rating_models.CafeteriaRatingTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
@@ -169,7 +172,8 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				MealID:      v.MealID,
 				Min:         v.Min,
 				Max:         v.Max,
-			} //todo add standard deviation
+				Std:         v.Std,
+			}
 
 			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria)
 			if errCreate.Error != nil {
@@ -193,10 +197,11 @@ func computeAverageForCafeteria(c *CronService) {
 		for _, v := range results {
 			cafeteria := cafeteria_rating_models.CafeteriaRatingsAverage{
 				CafeteriaID: v.CafeteriaID,
-				Average:     float32(v.Average),
+				Average:     v.Average,
 				Min:         v.Min,
 				Max:         v.Max,
-			} //todo add standard deviation
+				Std:         v.Std,
+			}
 
 			errCreate := c.db.Create(&cafeteria)
 			if errCreate.Error != nil {

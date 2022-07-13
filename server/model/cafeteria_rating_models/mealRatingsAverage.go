@@ -8,6 +8,7 @@ type MealRatingsAverage struct {
 	Average     float32 `gorm:"column:average;type:float;" json:"average" `
 	Min         int8    `gorm:"column:min;type:int;" json:"min"`
 	Max         int8    `gorm:"column:max;type:int;" json:"max"`
+	Std         float32 `gorm:"column:std;type:float;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
