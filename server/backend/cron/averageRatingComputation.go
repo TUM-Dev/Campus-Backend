@@ -66,17 +66,17 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageNameTags(c *CronService) {
 	var results []averageMealNameTags
-	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.rating) as average, MAX(mnt.rating) as max, MIN(mnt.rating) as min, STD(mnt.rating) as std" +
+	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
 		" FROM meal_rating mr" +
-		" JOIN meal_name_tags mnt ON mr.id = mnt.parentRating" +
+		" JOIN meal_name_tag mnt ON mr.id = mnt.parentRating" +
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
 
 	if err != nil {
 		log.Println(err)
 	} else {
-		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealNameTagsAverage{})
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealNameTagAverage{})
 		for _, v := range results {
-			cafeteria := cafeteria_rating_models.MealNameTagsAverage{
+			cafeteria := cafeteria_rating_models.MealNameTagAverage{
 				CafeteriaID: v.CafeteriaID,
 				Average:     v.Average,
 				TagID:       v.TagID,
@@ -85,7 +85,7 @@ func computeAverageNameTags(c *CronService) {
 				Std:         v.Std,
 			}
 
-			errCreate := c.db.Model(&cafeteria_rating_models.MealNameTagsAverage{}).Create(&cafeteria).Error
+			errCreate := c.db.Model(&cafeteria_rating_models.MealNameTagAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
 				log.Println(errCreate)
 			}
@@ -95,9 +95,9 @@ func computeAverageNameTags(c *CronService) {
 
 func computeAverageForMealsInCafeteriasTags(c *CronService) {
 	var results []averageMealTags
-	err := c.db.Raw("SELECT mr.mealID as mealID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.rating) as average, MAX(mrt.rating) as max, MIN(mrt.rating) as min, STD(mrt.rating) as std" +
+	err := c.db.Raw("SELECT mr.mealID as mealID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std" +
 		" FROM meal_rating mr" +
-		" JOIN meal_rating_tags mrt ON mr.id = mrt.parentRating" +
+		" JOIN meal_rating_tag mrt ON mr.id = mrt.parentRating" +
 		" GROUP BY mr.cafeteriaID, mrt.tagID, mr.mealID").Scan(&results).Error
 
 	if err != nil {
@@ -126,9 +126,9 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 
 func computeAverageCafeteriaTags(c *CronService) {
 	var results []averageCafeteriaTags
-	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.rating) as average, MAX(crt.rating) as max, MIN(crt.rating) as min, STD(crt.rating) as std" +
+	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.points) as average, MAX(crt.points) as max, MIN(crt.points) as min, STD(crt.points) as std" +
 		" FROM cafeteria_rating cr" +
-		" JOIN cafeteria_rating_tags crt ON cr.id = crt.parentRating" +
+		" JOIN cafeteria_rating_tag crt ON cr.id = crt.parentRating" +
 		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results).Error
 
 	if err != nil {
@@ -157,16 +157,16 @@ func computeAverageCafeteriaTags(c *CronService) {
 func computeAverageForMealsInCafeterias(c *CronService) {
 	var results []averageRatingForMealInCafeteria
 	res := c.db.Model(&cafeteria_rating_models.MealRating{}).
-		Select("cafeteriaID, mealID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min, STD(rating) as std").
+		Select("cafeteriaID, mealID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
 		Group("cafeteriaID,mealID").Scan(&results)
 
 	if res.Error != nil {
 		log.Println("Error in query")
 		log.Println(res.Error)
 	} else {
-		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingsAverage{})
+		c.db.Where("1=1").Delete(&cafeteria_rating_models.MealRatingAverage{})
 		for _, v := range results {
-			cafeteria := cafeteria_rating_models.MealRatingsAverage{
+			cafeteria := cafeteria_rating_models.MealRatingAverage{
 				CafeteriaID: v.CafeteriaID,
 				Average:     v.Average,
 				MealID:      v.MealID,
@@ -175,7 +175,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 				Std:         v.Std,
 			}
 
-			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingsAverage{}).Create(&cafeteria)
+			errCreate := c.db.Model(&cafeteria_rating_models.MealRatingAverage{}).Create(&cafeteria)
 			if errCreate.Error != nil {
 				log.Println(errCreate.Error)
 			}
@@ -186,7 +186,7 @@ func computeAverageForMealsInCafeterias(c *CronService) {
 func computeAverageForCafeteria(c *CronService) {
 	var results []averageRatingForCafeteria
 	res := c.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
-		Select("cafeteriaID, AVG(rating) as average, MAX(rating) as max, MIN(rating) as min, STD(rating) as std").
+		Select("cafeteriaID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
 		Group("cafeteriaID").Find(&results)
 
 	if res.Error != nil {

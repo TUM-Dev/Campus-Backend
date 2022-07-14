@@ -1,7 +1,7 @@
 package cafeteria_rating_models
 
-// MealNameTagsAverage stores all precomputed values for the MealName ratings
-type MealNameTagsAverage struct {
+// MealNameTagAverage stores all precomputed values for the MealName ratings
+type MealNameTagAverage struct {
 	MealNameTagAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:mealNameTagAverage;type:int;" json:"mealNameTagAverage" `
 	CafeteriaID        int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	TagID              int32   `gorm:"column:tagID;foreignKey:tagID;type:int;" json:"tagID"`
@@ -12,6 +12,6 @@ type MealNameTagsAverage struct {
 }
 
 // TableName sets the insert table name for this struct type
-func (n *MealNameTagsAverage) TableName() string {
+func (n *MealNameTagAverage) TableName() string {
 	return "meal_name_tag_average"
 }

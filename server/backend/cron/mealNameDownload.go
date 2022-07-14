@@ -18,8 +18,8 @@ type CafeteriaName struct {
 }
 
 type CafeteriaWithID struct {
-	Name string `json:"name"`
-	Id   int32  `json:"id"`
+	Name      string `json:"name"`
+	Cafeteria int32  `json:"cafeteria"`
 }
 
 type Location struct {
@@ -83,7 +83,7 @@ func downloadDailyMeals(c *CronService) {
 					meal := cafeteria_rating_models.Meal{
 						Name:        meals.Days[i].Dates[u].Name,
 						Type:        meals.Days[i].Dates[u].DishType,
-						CafeteriaID: v.Id,
+						CafeteriaID: v.Cafeteria,
 					}
 
 					res := c.db.Model(&cafeteria_rating_models.Meal{}).
@@ -91,7 +91,7 @@ func downloadDailyMeals(c *CronService) {
 
 					if res.RowsAffected == 0 {
 						c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
-						addMealTagsToMapping(meal.Id, meal.Name, c.db)
+						addMealTagsToMapping(meal.Meal, meal.Name, c.db)
 					} /*else {		//todo potentially add update logic for the weekly meals
 						c.db.Model(&cafeteria_rating_models.Cafeteria{}).
 							Where("name = ?", cafeteriaNames[i].Name).
@@ -175,7 +175,7 @@ func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
 
 	for _, a := range includedTags {
 		if a != -1 {
-			db.Model(&cafeteria_rating_models.MealToMealNameTags{}).Create(&cafeteria_rating_models.MealToMealNameTags{
+			db.Model(&cafeteria_rating_models.MealToMealNameTag{}).Create(&cafeteria_rating_models.MealToMealNameTag{
 				MealID:    mealID,
 				NameTagID: a,
 			})

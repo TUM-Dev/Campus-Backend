@@ -24,14 +24,14 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&cafeteria_rating_models.MealNameTagOption{},
 				&cafeteria_rating_models.MealNameTagOptionIncluded{},
 				&cafeteria_rating_models.MealNameTagOptionExcluded{},
-				&cafeteria_rating_models.MealNameTags{},
-				&cafeteria_rating_models.MealNameTagsAverage{},
+				&cafeteria_rating_models.MealNameTag{},
+				&cafeteria_rating_models.MealNameTagAverage{},
 				&cafeteria_rating_models.MealRating{},
-				&cafeteria_rating_models.MealRatingsAverage{},
-				&cafeteria_rating_models.MealRatingsTags{},
+				&cafeteria_rating_models.MealRatingAverage{},
+				&cafeteria_rating_models.MealRatingTag{},
 				&cafeteria_rating_models.MealRatingTagAverage{},
 				&cafeteria_rating_models.MealRatingTagOption{},
-				&cafeteria_rating_models.MealToMealNameTags{},
+				&cafeteria_rating_models.MealToMealNameTag{},
 			); err != nil {
 				return err
 			}
