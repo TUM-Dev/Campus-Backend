@@ -29,6 +29,7 @@ type QueryRatingTag struct {
 	NameEN  string  `gorm:"column:nameEN;type:mediumtext;" json:"nameEN"`
 	NameDE  string  `gorm:"column:nameDE;type:mediumtext;" json:"nameDE"`
 	Average float64 `json:"average"`
+	Std     float64 `json:"std"`
 	Min     int32   `json:"min"`
 	Max     int32   `json:"max"`
 }
@@ -67,17 +68,19 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 		cafeteriaTags := queryTags(s.db, cafeteriaID, -1, CAFETERIA)
 
 		return &pb.CafeteriaRatingResponse{
-			AverageRating: float64(result.Average),
-			MinRating:     int32(result.Min),
-			MaxRating:     int32(result.Max),
-			Rating:        ratings,
-			RatingTags:    cafeteriaTags,
+			AveragePoints:     float64(result.Average),
+			StandardDeviation: float64(result.Std),
+			MinPoints:         int32(result.Min),
+			MaxPoints:         int32(result.Max),
+			Rating:            ratings,
+			RatingTags:        cafeteriaTags,
 		}, nil
 	} else {
 		return &pb.CafeteriaRatingResponse{
-			AverageRating: -1,
-			MinRating:     -1,
-			MaxRating:     -1,
+			AveragePoints:     -1,
+			StandardDeviation: -1,
+			MinPoints:         -1,
+			MaxPoints:         -1,
 		}, nil
 	}
 }
@@ -131,7 +134,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, CAFETERIA)
 			ratingResults[i] = &pb.CafeteriaRating{
-				Rating:             v.Rating,
+				Points:             v.Points,
 				CafeteriaName:      input.CafeteriaName,
 				Comment:            v.Comment,
 				Image:              getImageToBytes(v.Image),
@@ -157,7 +160,7 @@ The parameter limit defines how many actual ratings should be returned.
 The optional parameters from and to can define a interval in which the queried ratings have been stored.
 If these aren't specified, the newest ratings will be returnes as the default
 */
-func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRequest) (*pb.MealRatingsResponse, error) {
+func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingRequest) (*pb.MealRatingResponse, error) {
 	var result cafeteria_rating_models.MealRatingsAverage //get the average rating for this specific meal
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
 	mealID := getIDForMealName(input.Meal, cafeteriaID, s.db)
@@ -175,19 +178,21 @@ func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRe
 		mealTags := queryTags(s.db, cafeteriaID, mealID, MEAL)
 		nameTags := queryTags(s.db, cafeteriaID, mealID, NAME)
 
-		return &pb.MealRatingsResponse{
-			AverageRating: float64(result.Average),
-			MinRating:     int32(result.Min),
-			MaxRating:     int32(result.Max),
-			Rating:        ratings,
-			RatingTags:    mealTags,
-			NameTags:      nameTags,
+		return &pb.MealRatingResponse{
+			AveragePoints:     float64(result.Average),
+			StandardDeviation: float64(result.Std),
+			MinPoints:         int32(result.Min),
+			MaxPoints:         int32(result.Max),
+			Rating:            ratings,
+			RatingTags:        mealTags,
+			NameTags:          nameTags,
 		}, nil
 	} else {
-		return &pb.MealRatingsResponse{
-			AverageRating: -1,
-			MinRating:     -1,
-			MaxRating:     -1,
+		return &pb.MealRatingResponse{
+			AveragePoints:     -1,
+			MinPoints:         -1,
+			MaxPoints:         -1,
+			StandardDeviation: -1,
 		}, nil
 	}
 
@@ -196,7 +201,7 @@ func (s *CampusServer) GetMealRatings(_ context.Context, input *pb.MealRatingsRe
 /*
 Queries the actual ratings for a meal in a cafeteria and attaches the tag ratings which belong to the ratings
 */
-func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
+func queryLastMealRatingsWithLimit(input *pb.MealRatingRequest, cafeteriaID int32, mealID int32, s *CampusServer) []*pb.MealRating {
 	var ratings []cafeteria_rating_models.MealRating
 	var errRatings error
 	var limit = int(input.Limit)
@@ -241,7 +246,7 @@ func queryLastMealRatingsWithLimit(input *pb.MealRatingsRequest, cafeteriaID int
 
 			tagRatings := queryTagRatingsOverviewForRating(s, v.Id, MEAL)
 			ratingResults[i] = &pb.MealRating{
-				Rating:             v.Rating,
+				Points:             v.Rating,
 				Meal:               input.Meal,
 				CafeteriaName:      input.CafeteriaName,
 				Comment:            v.Comment,
@@ -287,14 +292,14 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 		res = db.Table("meal_rating_tags_options options").
 			Joins("JOIN meal_rating_tags_results results ON options.id = results.tagID").
 			Select("options.nameDE as nameDE, results.average as average, "+
-				"options.nameEN as nameEN, results.min as min, results.max as max").
+				"options.nameEN as nameEN, results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.mealID = ?", cafeteriaID, mealID).
 			Scan(&results).Error
 	} else if ratingType == CAFETERIA {
 		res = db.Table("cafeteria_rating_tags_options options").
 			Joins("JOIN cafeteria_rating_tags_results results ON options.id = results.tagID").
 			Select("options.nameDE as nameDE, results.average as average, "+
-				"options.nameEN as nameEN, results.min as min, results.max as max").
+				"options.nameEN as nameEN, results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
 	} else { //Query for name tags
@@ -304,7 +309,7 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 			Joins("JOIN meal_name_tags_results results ON mapping.nameTagID = results.tagID").
 			Joins("JOIN meal_name_tag_options options ON mapping.nameTagID = options.id").
 			Select("options.nameDE as nameDE, results.average as average, " +
-				"options.nameEN as nameEN, results.min as min, results.max as max").
+				"options.nameEN as nameEN, results.min as min, results.max as max, results.std as std").
 			Scan(&results).Error
 	}
 
@@ -315,11 +320,12 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 	elements := make([]*pb.TagRatingsResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
 	for i, v := range results {
 		elements[i] = &pb.TagRatingsResult{
-			NameDE:        v.NameDE,
-			NameEN:        v.NameEN,
-			AverageRating: v.Average,
-			MinRating:     v.Min,
-			MaxRating:     v.Max,
+			DE:                v.NameDE,
+			EN:                v.NameEN,
+			AveragePoints:     v.Average,
+			StandardDeviation: v.Std,
+			MinPoints:         v.Min,
+			MaxPoints:         v.Max,
 		}
 	}
 
@@ -329,7 +335,7 @@ func queryTags(db *gorm.DB, cafeteriaID int32, mealID int32, ratingType int32) [
 /*
 Query all rating tags which belong to a specific rating given with an ID and return it as TagratingOverviews
 */
-func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType int32) []*pb.TagRatingOverview {
+func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType int32) []*pb.TagRatingResult {
 	var results []QueryOverviewRatingTag
 	var res error
 	if ratingType == MEAL {
@@ -349,12 +355,12 @@ func queryTagRatingsOverviewForRating(s *CampusServer, mealID int32, ratingType 
 	if res != nil {
 		log.Error(res)
 	}
-	elements := make([]*pb.TagRatingOverview, len(results))
+	elements := make([]*pb.TagRatingResult, len(results))
 	for i, a := range results {
-		elements[i] = &pb.TagRatingOverview{
-			NameEN: a.NameEN,
-			NameDE: a.NameDE,
-			Rating: float64(a.Rating),
+		elements[i] = &pb.TagRatingResult{
+			EN:     a.NameEN,
+			DE:     a.NameDE,
+			Points: a.Rating,
 		}
 	}
 	return elements
@@ -368,7 +374,7 @@ All rating tags which were given with the new rating are stored if they are vali
 invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to sucessfully store tags
 */
 func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
-	cafeteriaID, errorRes := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
+	cafeteriaID, errorRes := inputSanitization(input.Points, input.Image, input.Comment, input.CafeteriaName, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -382,7 +388,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 
 	rating := cafeteria_rating_models.CafeteriaRating{
 		Comment:     input.Comment,
-		Rating:      input.Rating,
+		Points:      input.Points,
 		CafeteriaID: cafeteriaID,
 		Timestamp:   time.Now(),
 		Image:       respath,
@@ -437,7 +443,7 @@ invalid, an error is returned, all valid ratings tags will be stored nevertheles
 */
 func (s *CampusServer) NewMealRating(_ context.Context, input *pb.NewMealRatingRequest) (*emptypb.Empty, error) {
 
-	cafeteriaID, errorRes := inputSanitization(input.Rating, input.Image, input.Comment, input.CafeteriaName, s)
+	cafeteriaID, errorRes := inputSanitization(input.Points, input.Image, input.Comment, input.CafeteriaName, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -463,7 +469,7 @@ func (s *CampusServer) NewMealRating(_ context.Context, input *pb.NewMealRatingR
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
 		MealID:      meal.Id,
-		Rating:      input.Rating,
+		Rating:      input.Points,
 		Timestamp:   time.Now(),
 		Image:       respath,
 	}
@@ -550,7 +556,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 					insertModel.
 						Create(&cafeteria_rating_models.MealRatingsTags{
 							ParentRating: parentRatingID,
-							Rating:       int32(tag.Rating),
+							Rating:       int32(tag.Points),
 							TagID:        currentTag})
 					usedTagIds[currentTag] = 1
 				} else {
@@ -616,7 +622,7 @@ func (s *CampusServer) GetAvailableMealTags(_ context.Context, _ *emptypb.Empty)
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {
-		elements[i] = &pb.TagRatingOverview{NameEN: a.NameEN, NameDE: a.NameDE}
+		elements[i] = &pb.TagRatingOverview{EN: a.NameEN, DE: a.NameDE}
 	}
 
 	return &pb.GetRatingTagsReply{
@@ -634,7 +640,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {
-		elements[i] = &pb.TagRatingOverview{NameEN: a.NameEN, NameDE: a.NameDE}
+		elements[i] = &pb.TagRatingOverview{EN: a.NameEN, DE: a.NameDE}
 	}
 
 	return &pb.GetRatingTagsReply{
@@ -642,15 +648,22 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 	}, nil
 }
 
-//fixme add repeated to the proto File
 func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaResponse, error) {
-	var result []*pb.GetCafeteriaResponse
+	var result []*pb.Cafeteria
 	s.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result)
 
+	ratingResults := make([]*pb.Cafeteria, len(result))
+
+	for i, v := range result {
+
+		ratingResults[i] = &pb.Cafeteria{
+			Name:      v.Name,
+			Address:   v.Address,
+			Latitude:  v.Latitude,
+			Longitude: v.Longitude,
+		}
+	}
 	return &pb.GetCafeteriaResponse{
-		Name:      result[0].Name,
-		Adress:    result[0].Adress,
-		Latitude:  result[0].Latitude,
-		Longitude: result[0].Longitude,
+		Cafeteria: ratingResults,
 	}, nil
 }

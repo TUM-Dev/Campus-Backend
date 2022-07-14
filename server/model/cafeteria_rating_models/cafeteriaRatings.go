@@ -15,7 +15,7 @@ var (
 // News struct is a row record of the news table in the tca database
 type CafeteriaRating struct {
 	Id          int32     `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id"`
-	Rating      int32     `gorm:"column:rating;type:int;" json:"rating"`
+	Points      int32     `gorm:"column:rating;type:int;" json:"rating"`
 	Comment     string    `gorm:"column:comment;type:varchar;size:256;" json:"comment" `
 	CafeteriaID int32     `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;" json:"timestamp" `
