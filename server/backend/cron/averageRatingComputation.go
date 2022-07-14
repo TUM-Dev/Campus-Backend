@@ -68,7 +68,7 @@ func computeAverageNameTags(c *CronService) {
 	var results []averageMealNameTags
 	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
 		" FROM meal_rating mr" +
-		" JOIN meal_name_tag mnt ON mr.id = mnt.parentRating" +
+		" JOIN meal_name_tag mnt ON mr.mealRating = mnt.parentRating" +
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
 
 	if err != nil {
@@ -97,7 +97,7 @@ func computeAverageForMealsInCafeteriasTags(c *CronService) {
 	var results []averageMealTags
 	err := c.db.Raw("SELECT mr.mealID as mealID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std" +
 		" FROM meal_rating mr" +
-		" JOIN meal_rating_tag mrt ON mr.id = mrt.parentRating" +
+		" JOIN meal_rating_tag mrt ON mr.mealRating = mrt.parentRating" +
 		" GROUP BY mr.cafeteriaID, mrt.tagID, mr.mealID").Scan(&results).Error
 
 	if err != nil {
@@ -128,7 +128,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 	var results []averageCafeteriaTags
 	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.points) as average, MAX(crt.points) as max, MIN(crt.points) as min, STD(crt.points) as std" +
 		" FROM cafeteria_rating cr" +
-		" JOIN cafeteria_rating_tag crt ON cr.id = crt.parentRating" +
+		" JOIN cafeteria_rating_tag crt ON cr.cafeteriaRating = crt.correspondingRating" +
 		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results).Error
 
 	if err != nil {

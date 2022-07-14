@@ -13,8 +13,8 @@ var (
 // Meal represents one meal fin a specific cafeteria
 type Meal struct {
 	Meal        int32  `gorm:"primary_key;AUTO_INCREMENT;column:meal;type:int;" json:"meal"`
-	Name        string `gorm:"column:name;type:varchar;size:150;;" json:"name" `
-	Type        string `gorm:"column:type;type:varchar;size:20;" json:"type" `
+	Name        string `gorm:"column:name;type:text;" json:"name" `
+	Type        string `gorm:"column:type;type:text;" json:"type" `
 	CafeteriaID int32  `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 }
 

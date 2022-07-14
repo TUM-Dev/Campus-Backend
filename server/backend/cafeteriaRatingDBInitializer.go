@@ -78,24 +78,24 @@ func updateNameTagOptions(db *gorm.DB) {
 		var parentID int32
 
 		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOption{}).
-			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-			Select("id").
+			Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
+			Select("MealNameTagOption").
 			Scan(&parentID)
 
 		if potentialTag.RowsAffected == 0 {
 			parent := cafeteria_rating_models.MealRatingTagOption{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish}
+				DE: v.TagNameGerman,
+				EN: v.TagNameEnglish}
 
 			db.Model(&cafeteria_rating_models.MealNameTagOption{}).
 				Create(&parent)
-			parentID = parent.Id
+			parentID = parent.MealRatingTagOption
 		}
 
 		for _, u := range v.Canbeincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("id").
+				Select("MealNameTagOptionIncluded").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
 				db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
@@ -107,7 +107,7 @@ func updateNameTagOptions(db *gorm.DB) {
 		for _, u := range v.Notincluded {
 			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("id").
+				Select("MealNameTagOptionExcluded").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
 				db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
@@ -130,17 +130,24 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsMeal.MultiLanguageTags {
 		var result int32
+		var affectedRows = 0
+		if tagType == CAFETERIA {
+			affectedRows = int(db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{}).
+				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
+				Select("cafeteriaRatingTagOption").
+				Scan(&result).RowsAffected)
+		} else {
+			affectedRows = int(db.Model(&cafeteria_rating_models.MealRatingTagOption{}).
+				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
+				Select("mealRatingTagOption").
+				Scan(&result).RowsAffected)
+		}
 
-		potentialTag := getTagModel(tagType, db).
-			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-			Select("id").
-			Scan(&result)
-
-		if potentialTag.RowsAffected == 0 {
+		if affectedRows == 0 {
 			println("New entry inserted to Rating Tag Options")
 			element := cafeteria_rating_models.MealRatingTagOption{
-				NameDE: v.TagNameGerman,
-				NameEN: v.TagNameEnglish}
+				DE: v.TagNameGerman,
+				EN: v.TagNameEnglish}
 			insertModel.
 				Create(&element)
 		}
