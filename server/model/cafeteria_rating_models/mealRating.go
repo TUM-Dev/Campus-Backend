@@ -12,15 +12,14 @@ var (
 	_ = null.Bool{}
 )
 
-// News struct is a row record of the news table in the tca database
 type MealRating struct {
-	Id          int32     `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id"`
-	Rating      int32     `gorm:"column:rating;type:int;" json:"rating"`
+	MealRating  int32     `gorm:"primary_key;AUTO_INCREMENT;column:mealRating;type:int;" json:"mealRating"`
+	Points      int32     `gorm:"column:points;type:int;" json:"points"`
 	CafeteriaID int32     `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	MealID      int32     `gorm:"column:mealID;foreignKey:id;type:int;" json:"mealID"`
 	Comment     string    `gorm:"column:comment;type:varchar;size:256;" json:"comment"`
-	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;" json:"timestamp"`
-	Image       string    `gorm:"column:image;type:mediumtext;" json:"image"`
+	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;" json:"timestamp"`
+	Image       string    `gorm:"column:image;type:text;" json:"image"`
 }
 
 // TableName sets the insert table name for this struct type

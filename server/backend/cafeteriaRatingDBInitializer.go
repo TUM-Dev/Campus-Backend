@@ -77,41 +77,41 @@ func updateNameTagOptions(db *gorm.DB) {
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		var parentID int32
 
-		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
+		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOption{}).
 			Where("nameEN LIKE ? AND nameDE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("id").
 			Scan(&parentID)
 
 		if potentialTag.RowsAffected == 0 {
-			parent := cafeteria_rating_models.MealRatingsTagsOptions{
+			parent := cafeteria_rating_models.MealRatingTagOption{
 				NameDE: v.TagNameGerman,
 				NameEN: v.TagNameEnglish}
 
-			db.Model(&cafeteria_rating_models.MealNameTagOptions{}).
+			db.Model(&cafeteria_rating_models.MealNameTagOption{}).
 				Create(&parent)
 			parentID = parent.Id
 		}
 
 		for _, u := range v.Canbeincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionsIncluded{
+				db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
+					Create(&cafeteria_rating_models.MealNameTagOptionIncluded{
 						Expression: u,
 						NameTagID:  parentID})
 			}
 		}
 		for _, u := range v.Notincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
 				Select("id").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionsExcluded{
+				db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
+					Create(&cafeteria_rating_models.MealNameTagOptionExcluded{
 						Expression: u,
 						NameTagID:  parentID})
 			}
@@ -138,7 +138,7 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 
 		if potentialTag.RowsAffected == 0 {
 			println("New entry inserted to Rating Tag Options")
-			element := cafeteria_rating_models.MealRatingsTagsOptions{
+			element := cafeteria_rating_models.MealRatingTagOption{
 				NameDE: v.TagNameGerman,
 				NameEN: v.TagNameEnglish}
 			insertModel.
@@ -149,9 +149,9 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 
 func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.MealRatingTagOption{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{})
 	}
 }
 

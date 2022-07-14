@@ -52,9 +52,9 @@ The optional parameters from and to can define a interval in which the queried r
 If these aren't specified, the newest ratings will be returnes as the default
 */
 func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
-	var result cafeteria_rating_models.CafeteriaRatingsAverage //get the average rating for this specific cafeteria
+	var result cafeteria_rating_models.CafeteriaRatingAverage //get the average rating for this specific cafeteria
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
-	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingsAverage{}).
+	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingAverage{}).
 		Where("cafeteriaID = ?", cafeteriaID).
 		First(&result)
 	//todo error handling if not existant
@@ -579,9 +579,9 @@ Returns the db model of the option toable to reduce code duplicates
 */
 func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.MealRatingTagOption{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{})
 	}
 }
 
@@ -589,7 +589,7 @@ func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
 		return db.Model(&cafeteria_rating_models.MealRatingsTags{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingTags{})
+		return db.Model(&cafeteria_rating_models.CafeteriaRatingTag{})
 	}
 }
 
@@ -617,8 +617,8 @@ RPC Endpoint
 Retunrs all valid Tags to quickly rate meals in english and german
 */
 func (s *CampusServer) GetAvailableMealTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*cafeteria_rating_models.MealRatingsTagsOptions
-	s.db.Model(&cafeteria_rating_models.MealRatingsTagsOptions{}).Select("nameDE, nameEN").Scan(&result)
+	var result []*cafeteria_rating_models.MealRatingTagOption
+	s.db.Model(&cafeteria_rating_models.MealRatingTagOption{}).Select("nameDE, nameEN").Scan(&result)
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {
@@ -635,8 +635,8 @@ RPC Endpoint
 Retunrs all valid Tags to quickly rate meals in english and german
 */
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*cafeteria_rating_models.CafeteriaRatingsTagsOptions
-	s.db.Model(&cafeteria_rating_models.CafeteriaRatingsTagsOptions{}).Select("nameDE,nameEN").Scan(&result)
+	var result []*cafeteria_rating_models.CafeteriaRatingTagOption
+	s.db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{}).Select("nameDE,nameEN").Scan(&result)
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {

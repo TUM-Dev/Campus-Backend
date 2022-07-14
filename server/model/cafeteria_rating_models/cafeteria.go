@@ -10,11 +10,11 @@ var (
 	_ = null.Bool{}
 )
 
-// News struct is a row record of the mensa table in the tca database
+// Cafeteria stores all Available cafeterias in the format of the eat-api
 type Cafeteria struct {
-	Id        int32   `gorm:"primary_key;AUTO_INCREMENT;column:id;type:int;" json:"id" `
+	Cafeteria int32   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteria;type:int;" json:"cafeteria" `
 	Name      string  `gorm:"column:name;type:mediumtext;" json:"name" `
-	Address   string  `gorm:"column:address;type:mediumtext" json:"address" `
+	Address   string  `gorm:"column:address;type:text" json:"address" `
 	Latitude  float32 `gorm:"column:latitude;type:float;" json:"latitude" `
 	Longitude float32 `gorm:"column:longitude;type:float;" json:"longitude"`
 }

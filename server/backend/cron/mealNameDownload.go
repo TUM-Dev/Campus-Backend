@@ -150,13 +150,13 @@ The corresponding tags for all identified MealNames will be saved in the table M
 func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
 	lowercaseMeal := strings.ToLower(mealName)
 	var includedTags []int32
-	db.Model(&cafeteria_rating_models.MealNameTagOptionsIncluded{}).
+	db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&includedTags)
 
 	var excludedTags []int32
-	db.Model(&cafeteria_rating_models.MealNameTagOptionsExcluded{}).
+	db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
 		Select("nameTagID").
 		Scan(&excludedTags)
