@@ -15,7 +15,7 @@ type Meal struct {
 	Meal        int32  `gorm:"primary_key;AUTO_INCREMENT;column:meal;type:int;" json:"meal"`
 	Name        string `gorm:"column:name;type:text;" json:"name" `
 	Type        string `gorm:"column:type;type:text;" json:"type" `
-	CafeteriaID int32  `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
+	CafeteriaID int32  `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;" json:"cafeteriaID"`
 }
 
 // TableName sets the insert table name for this struct type

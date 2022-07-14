@@ -1,7 +1,7 @@
 package cafeteria_rating_models
 
 type MealNameTagOption struct {
-	MealNameTagOption int32  `gorm:"primary_key;AUTO_INCREMENT;column:mealNameTagOption;type:int;" json:"mealNameTagOption"`
+	MealNameTagOption int32  `gorm:"column:mealNameTagOption;type:int;primary_key;AUTO_INCREMENT;" json:"mealNameTagOption"`
 	DE                string `gorm:"column:DE;type:text" json:"DE"`
 	EN                string `gorm:"column:EN;type:text" json:"EN"`
 }

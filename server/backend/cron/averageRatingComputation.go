@@ -68,7 +68,7 @@ func computeAverageNameTags(c *CronService) {
 	var results []averageMealNameTags
 	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
 		" FROM meal_rating mr" +
-		" JOIN meal_name_tag mnt ON mr.mealRating = mnt.parentRating" +
+		" JOIN meal_name_tag mnt ON mr.mealRating = mnt.correspondingRating" +
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
 
 	if err != nil {

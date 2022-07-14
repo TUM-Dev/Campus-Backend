@@ -13,8 +13,8 @@ var (
 // CafeteriaRatingTagsAverage stores all precomputed values for the cafeteria ratings
 type CafeteriaRatingTagsAverage struct {
 	CafeteriaRatingTagsAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagsAverage;type:int;" json:"cafeteriaRatingTagsAverage" `
-	CafeteriaID                int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID                      int32   `gorm:"column:tagID;foreignKey:tagID;type:int;" json:"tagID"`
+	CafeteriaID                int32   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;" json:"cafeteriaID"`
+	TagID                      int32   `gorm:"column:tagID;foreignKey:cafeteriaRatingTagOption;type:int;" json:"tagID"`
 	Average                    float32 `gorm:"column:average;type:float;" json:"average" `
 	Min                        int8    `gorm:"column:min;type:int;" json:"min"`
 	Max                        int8    `gorm:"column:max;type:int;" json:"max"`

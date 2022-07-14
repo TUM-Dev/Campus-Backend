@@ -51,7 +51,7 @@ func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 }
 
 func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
-	res, err := c.GetMealRatings(ctx, &pb.MealRatingsRequest{
+	res, err := c.GetMealRatings(ctx, &pb.MealRatingRequest{
 		Meal:          meal,
 		CafeteriaName: cafeteria,
 		Limit:         3,
@@ -61,13 +61,13 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 		println(err)
 	} else {
 		println("Result: ")
-		println("averagerating: ", res.AverageRating)
-		println("min", res.MinRating)
-		println("max", res.MaxRating)
+		println("averagerating: ", res.AveragePoints)
+		println("min", res.MinPoints)
+		println("max", res.MaxPoints)
 		println("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/meals/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
-			println("\nRating: ", v.Rating)
+			println("\nRating: ", v.Points)
 			println("Cafeteria Name: ", v.CafeteriaName)
 			println("Comment ", v.Comment)
 			println("Number of Tag Ratings: ", len(v.TagRating))
@@ -79,19 +79,19 @@ func queryMeal(cafeteria string, meal string, c pb.CampusClient, ctx context.Con
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nNameDE: ", v.NameDE)
-			println("NameEN: ", v.NameEN)
-			println("averagerating: ", v.AverageRating)
-			println("min", v.MinRating)
-			println("max", v.MaxRating)
+			println("\nNameDE: ", v.DE)
+			println("NameEN: ", v.EN)
+			println("averagerating: ", v.AveragePoints)
+			println("min", v.MinPoints)
+			println("max", v.MaxPoints)
 		}
 		log.Println("nameTags: ")
 		for _, v := range res.NameTags {
-			println("\nNameDE: ", v.NameDE)
-			println("NameEN: ", v.NameEN)
-			println("averagerating: ", v.AverageRating)
-			println("min", v.MinRating)
-			println("max", v.MaxRating)
+			println("\nNameDE: ", v.DE)
+			println("NameEN: ", v.EN)
+			println("averagerating: ", v.AveragePoints)
+			println("min", v.MinPoints)
+			println("max", v.MaxPoints)
 		}
 	}
 }
@@ -108,13 +108,13 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 		println(err)
 	} else {
 		println("Result: ")
-		println("averagerating: ", res.AverageRating)
-		println("min", res.MinRating)
-		println("max", res.MaxRating)
+		println("averagerating: ", res.AveragePoints)
+		println("min", res.MinPoints)
+		println("max", res.MaxPoints)
 		println("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/cafeteria/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
-			println("\nRating: ", v.Rating)
+			println("\nRating: ", v.Points)
 			println("Cafeteria Name: ", v.CafeteriaName)
 			println("Comment ", v.Comment)
 			println("Number of Tag Ratings: ", len(v.TagRating))
@@ -126,11 +126,11 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nNameDE: ", v.NameDE)
-			println("NameEN: ", v.NameEN)
-			println("averagerating: ", v.AverageRating)
-			println("min", v.MinRating)
-			println("max", v.MaxRating)
+			println("\nNameDE: ", v.DE)
+			println("NameEN: ", v.EN)
+			println("averagerating: ", v.AveragePoints)
+			println("min", v.MinPoints)
+			println("max", v.MaxPoints)
 		}
 	}
 }
@@ -138,16 +138,16 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
 	y := make([]*pb.TagRating, 2)
 	y[0] = &pb.TagRating{
-		Rating: float64(1 + rating),
+		Points: float64(1 + rating),
 		Tag:    "Sauberkeit",
 	}
 	y[1] = &pb.TagRating{
-		Rating: float64(2 + rating),
+		Points: float64(2 + rating),
 		Tag:    "Enough Free Tables",
 	}
 
 	_, err := c.NewCafeteriaRating(ctx, &pb.NewCafeteriaRatingRequest{
-		Rating:        rating,
+		Points:        rating,
 		CafeteriaName: cafeteria,
 		Comment:       "Alles super, 2 Sterne",
 		Tags:          y,
@@ -164,20 +164,20 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 func generateMealRating(c pb.CampusClient, ctx context.Context, cafeteria string, meal string, rating int32) {
 	y := make([]*pb.TagRating, 3)
 	y[0] = &pb.TagRating{
-		Rating: float64(1 + rating),
+		Points: float64(1 + rating),
 		Tag:    "Spicy",
 	}
 	y[1] = &pb.TagRating{
-		Rating: float64(2 + rating),
+		Points: float64(2 + rating),
 		Tag:    "Salz",
 	}
 	y[2] = &pb.TagRating{
-		Rating: float64(3 + rating),
+		Points: float64(3 + rating),
 		Tag:    "Aussehen",
 	}
 
 	_, err := c.NewMealRating(ctx, &pb.NewMealRatingRequest{
-		Rating:        rating,
+		Points:        rating,
 		CafeteriaName: cafeteria,
 		Meal:          meal,
 		Comment:       "Alles Hähnchen",

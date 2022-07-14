@@ -3,8 +3,8 @@ package cafeteria_rating_models
 // MealNameTagAverage stores all precomputed values for the MealName ratings
 type MealNameTagAverage struct {
 	MealNameTagAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:mealNameTagAverage;type:int;" json:"mealNameTagAverage" `
-	CafeteriaID        int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID              int32   `gorm:"column:tagID;foreignKey:tagID;type:int;" json:"tagID"`
+	CafeteriaID        int32   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;" json:"cafeteriaID"`
+	TagID              int32   `gorm:"column:tagID;foreignKey:MealNameTagOption;type:int;" json:"tagID"`
 	Average            float32 `gorm:"column:average;type:float;" json:"average" `
 	Min                int8    `gorm:"column:min;type:int;" json:"min"`
 	Max                int8    `gorm:"column:max;type:int;" json:"max"`

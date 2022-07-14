@@ -13,7 +13,7 @@ var (
 // CafeteriaRatingTagsAverage stores all precomputed values for the cafeteria ratings
 type MealRatingTagAverage struct {
 	MealRatingTagsAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:mealRatingTagsAverage;type:int;" json:"mealRatingTagsAverage" `
-	CafeteriaID           int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
+	CafeteriaID           int32   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;" json:"cafeteriaID"`
 	TagID                 int32   `gorm:"column:tagID;foreignKey:tagID;type:int;" json:"tagID"`
 	MealID                int32   `gorm:"column:mealID;foreignKey:mealID;type:int;" json:"mealID"`
 	Average               float32 `gorm:"column:average;type:float;" json:"average" `

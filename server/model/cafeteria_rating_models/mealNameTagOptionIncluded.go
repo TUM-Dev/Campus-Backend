@@ -2,7 +2,7 @@ package cafeteria_rating_models
 
 type MealNameTagOptionIncluded struct {
 	MealNameTagOptionIncluded int32  `gorm:"primary_key;AUTO_INCREMENT;column:mealNameTagOptionIncluded;type:int;" json:"mealNameTagOptionIncluded"`
-	NameTagID                 int32  `gorm:"foreignKey:Id;column:nameTagID;type:int" json:"nameTagID"`
+	NameTagID                 int32  `gorm:"foreignKey:mealNameTagOption;column:nameTagID;type:int" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text" json:"expression"`
 }
 
