@@ -116,6 +116,43 @@ service Campus {
     };
   }
 
+
+
+  rpc getResponsiblePerson (google.protobuf.Empty) returns (getResponsiblePersonResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/contacts",
+    };
+  }
+
+  rpc getBuilding2Gps (google.protobuf.Empty) returns (getBuilding2GpsResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/getBuilding2Gps",
+    };
+  }
+
+  rpc getAreaFacilitiesByBuildingNr (getAreaFacilitiesByBuildingNrRequest) returns (getAreaFacilitiesByBuildingNrResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/nerby",
+    };
+  }
+
+  rpc getListOfToilets (google.protobuf.Empty) returns (getListOfToiletsResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/listOfToilets",
+    };
+  }
+
+  rpc getListOfElevators (google.protobuf.Empty) returns (getListOfElevatorsResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/listOfElevators",
+    };
+  }
+
+  rpc getMoreInformation (google.protobuf.Empty) returns (getMoreInformationResponse) {
+    option (google.api.http) = {
+      get: "/barrierfree/moreInformation",
+    };
+  }
 }
 
 message GetRoomScheduleRequest {
@@ -358,6 +395,74 @@ message Cafeteria{
   string address = 2;
   double longitude = 3;
   double latitude = 4;
+}
+
+
+
+message getResponsiblePersonResponse {
+  repeated ResponsiblePersonElement responsiblePerson = 1;
+}
+
+message ResponsiblePersonElement{
+  string name = 1;
+  string telephone = 2;
+  string email = 3;
+  string faculty = 4;
+  string tumID = 5;
+
+}
+
+message getBuilding2GpsResponse {
+  repeated Building2GpsElement building2Gps = 1;
+}
+
+message Building2GpsElement{
+    string id=1;
+    string latitude=2;
+    string longitude=3;
+
+}
+
+message getAreaFacilitiesByBuildingNrResponse {
+  repeated RoomInformationElement areaFacilitiesByBuildingNr = 1;
+}
+
+
+
+message getAreaFacilitiesByBuildingNrRequest {
+  string building_nr = 1;
+}
+
+message getListOfToiletsResponse {
+  repeated RoomInformationElement listOfToilets = 1;
+}
+
+message RoomInformationElement{
+  int32 room_id = 1;
+  string room_code = 2;
+  string building_nr = 3;
+  string arch_id = 4;
+  string info = 5;
+  string address = 6;
+  string purpose = 7;
+  string campus = 8;
+  string name = 9;
+}
+
+message getListOfElevatorsResponse {
+  repeated RoomInformationElement listOfElevators = 1;
+}
+
+
+
+message getMoreInformationResponse {
+  repeated MoreInformationElement information = 1;
+}
+
+message MoreInformationElement{
+  string title = 1;
+  string category = 2;
+  string url = 3;
 }
 
 

@@ -17,6 +17,146 @@
     "application/json"
   ],
   "paths": {
+    "/barrierfree/contacts": {
+      "get": {
+        "operationId": "Campus_getResponsiblePerson",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetResponsiblePersonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/getBuilding2Gps": {
+      "get": {
+        "operationId": "Campus_getBuilding2Gps",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetBuilding2GpsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/listOfElevators": {
+      "get": {
+        "operationId": "Campus_getListOfElevators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetListOfElevatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/listOfToilets": {
+      "get": {
+        "operationId": "Campus_getListOfToilets",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetListOfToiletsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/moreInformation": {
+      "get": {
+        "operationId": "Campus_getMoreInformation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetMoreInformationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/nerby": {
+      "get": {
+        "operationId": "Campus_getAreaFacilitiesByBuildingNr",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetAreaFacilitiesByBuildingNrResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "buildingNr",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/cafeteriaRating/cafeteria/allCafeterias": {
       "get": {
         "operationId": "Campus_GetCafeterias",
@@ -63,6 +203,7 @@
     },
     "/cafeteriaRating/cafeteria/get": {
       "post": {
+        "summary": "This endpoint retrieves Cafeteria Ratings from the Backend.",
         "operationId": "Campus_GetCafeteriaRatings",
         "responses": {
           "200": {
@@ -132,7 +273,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiMealRatingsResponse"
+              "$ref": "#/definitions/apiMealRatingResponse"
             }
           },
           "default": {
@@ -148,7 +289,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiMealRatingsRequest"
+              "$ref": "#/definitions/apiMealRatingRequest"
             }
           }
         ],
@@ -478,32 +619,69 @@
         }
       }
     },
+    "apiBuilding2GpsElement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCafeteria": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "apiCafeteriaRating": {
       "type": "object",
       "properties": {
-        "rating": {
+        "points": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
-          "format": "byte"
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         },
         "tagRating": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiTagRatingOverview"
+            "$ref": "#/definitions/apiTagRatingResult"
           }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -511,19 +689,23 @@
       "type": "object",
       "properties": {
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "cafeteriaName Mandatory Name of the cafeteria (EAT-API naming scheme)"
         },
         "from": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
         },
         "to": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
         },
         "limit": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
         }
       }
     },
@@ -536,15 +718,19 @@
             "$ref": "#/definitions/apiCafeteriaRating"
           }
         },
-        "averageRating": {
+        "averagePoints": {
           "type": "number",
           "format": "double"
         },
-        "minRating": {
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
           "type": "integer",
           "format": "int32"
         },
-        "maxRating": {
+        "maxPoints": {
           "type": "integer",
           "format": "int32"
         },
@@ -559,19 +745,11 @@
     "apiGetCafeteriaResponse": {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string"
-        },
-        "adress": {
-          "type": "string"
-        },
-        "longitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "latitude": {
-          "type": "number",
-          "format": "double"
+        "cafeteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCafeteria"
+          }
         }
       }
     },
@@ -714,59 +892,69 @@
     "apiMealRating": {
       "type": "object",
       "properties": {
-        "rating": {
+        "points": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "meal": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
-          "format": "byte"
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         },
         "tagRating": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiTagRatingOverview"
+            "$ref": "#/definitions/apiTagRatingResult"
           }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
-    "apiMealRatingsRequest": {
+    "apiMealRatingRequest": {
       "type": "object",
       "properties": {
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the cafeteria (EAT-API naming scheme)"
         },
         "meal": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "from": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
         },
         "to": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
         },
         "limit": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
         }
       }
     },
-    "apiMealRatingsResponse": {
+    "apiMealRatingResponse": {
       "type": "object",
       "properties": {
         "rating": {
@@ -775,15 +963,19 @@
             "$ref": "#/definitions/apiMealRating"
           }
         },
-        "averageRating": {
+        "averagePoints": {
           "type": "number",
           "format": "double"
         },
-        "minRating": {
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
           "type": "integer",
           "format": "int32"
         },
-        "maxRating": {
+        "maxPoints": {
           "type": "integer",
           "format": "int32"
         },
@@ -801,12 +993,27 @@
         }
       }
     },
+    "apiMoreInformationElement": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
     "apiNewCafeteriaRatingRequest": {
       "type": "object",
       "properties": {
-        "rating": {
+        "points": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "cafeteriaName": {
           "type": "string"
@@ -819,46 +1026,46 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiTagRating"
-          }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         }
       }
     },
     "apiNewMealRatingRequest": {
       "type": "object",
       "properties": {
-        "rating": {
+        "points": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "cafeteriaName": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "meal": {
-          "type": "string"
+          "type": "string",
+          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
-          "format": "byte"
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
         },
         "tags": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiTagRating"
-          }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of mealRatingTags"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
         }
       }
     },
@@ -887,7 +1094,60 @@
         }
       }
     },
+    "apiResponsiblePersonElement": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "telephone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "faculty": {
+          "type": "string"
+        },
+        "tumID": {
+          "type": "string"
+        }
+      }
+    },
     "apiRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "roomCode": {
+          "type": "string"
+        },
+        "buildingNr": {
+          "type": "string"
+        },
+        "archId": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "campus": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRoomInformationElement": {
       "type": "object",
       "properties": {
         "roomId": {
@@ -945,7 +1205,7 @@
         "tag": {
           "type": "string"
         },
-        "rating": {
+        "points": {
           "type": "number",
           "format": "double"
         }
@@ -954,38 +1214,119 @@
     "apiTagRatingOverview": {
       "type": "object",
       "properties": {
-        "nameDE": {
+        "DE": {
           "type": "string"
         },
-        "nameEN": {
+        "EN": {
+          "type": "string"
+        }
+      }
+    },
+    "apiTagRatingResult": {
+      "type": "object",
+      "properties": {
+        "DE": {
           "type": "string"
         },
-        "rating": {
-          "type": "number",
-          "format": "double"
+        "EN": {
+          "type": "string"
+        },
+        "points": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
     "apiTagRatingsResult": {
       "type": "object",
       "properties": {
-        "nameDE": {
+        "DE": {
           "type": "string"
         },
-        "nameEN": {
+        "EN": {
           "type": "string"
         },
-        "averageRating": {
+        "averagePoints": {
           "type": "number",
           "format": "double"
         },
-        "minRating": {
+        "standardDeviation": {
+          "type": "number",
+          "format": "double"
+        },
+        "minPoints": {
           "type": "integer",
           "format": "int32"
         },
-        "maxRating": {
+        "maxPoints": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "apigetAreaFacilitiesByBuildingNrResponse": {
+      "type": "object",
+      "properties": {
+        "areaFacilitiesByBuildingNr": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetBuilding2GpsResponse": {
+      "type": "object",
+      "properties": {
+        "building2Gps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiBuilding2GpsElement"
+          }
+        }
+      }
+    },
+    "apigetListOfElevatorsResponse": {
+      "type": "object",
+      "properties": {
+        "listOfElevators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetListOfToiletsResponse": {
+      "type": "object",
+      "properties": {
+        "listOfToilets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetMoreInformationResponse": {
+      "type": "object",
+      "properties": {
+        "information": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMoreInformationElement"
+          }
+        }
+      }
+    },
+    "apigetResponsiblePersonResponse": {
+      "type": "object",
+      "properties": {
+        "responsiblePerson": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiResponsiblePersonElement"
+          }
         }
       }
     },
