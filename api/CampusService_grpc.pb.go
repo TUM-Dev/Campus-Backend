@@ -31,8 +31,9 @@ type CampusClient interface {
 	GetRoomMaps(ctx context.Context, in *GetRoomMapsRequest, opts ...grpc.CallOption) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(ctx context.Context, in *GetRoomCoordinatesRequest, opts ...grpc.CallOption) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(ctx context.Context, in *GetRoomScheduleRequest, opts ...grpc.CallOption) (*GetRoomScheduleReply, error)
+	// This endpoint retrieves Cafeteria Ratings from the Backend.
 	GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingResponse, error)
-	GetMealRatings(ctx context.Context, in *MealRatingsRequest, opts ...grpc.CallOption) (*MealRatingsResponse, error)
+	GetMealRatings(ctx context.Context, in *MealRatingRequest, opts ...grpc.CallOption) (*MealRatingResponse, error)
 	NewCafeteriaRating(ctx context.Context, in *NewCafeteriaRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	NewMealRating(ctx context.Context, in *NewMealRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetAvailableMealTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
@@ -120,8 +121,8 @@ func (c *campusClient) GetCafeteriaRatings(ctx context.Context, in *CafeteriaRat
 	return out, nil
 }
 
-func (c *campusClient) GetMealRatings(ctx context.Context, in *MealRatingsRequest, opts ...grpc.CallOption) (*MealRatingsResponse, error) {
-	out := new(MealRatingsResponse)
+func (c *campusClient) GetMealRatings(ctx context.Context, in *MealRatingRequest, opts ...grpc.CallOption) (*MealRatingResponse, error) {
+	out := new(MealRatingResponse)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetMealRatings", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -186,8 +187,9 @@ type CampusServer interface {
 	GetRoomMaps(context.Context, *GetRoomMapsRequest) (*GetRoomMapsReply, error)
 	GetRoomCoordinates(context.Context, *GetRoomCoordinatesRequest) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error)
+	// This endpoint retrieves Cafeteria Ratings from the Backend.
 	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error)
-	GetMealRatings(context.Context, *MealRatingsRequest) (*MealRatingsResponse, error)
+	GetMealRatings(context.Context, *MealRatingRequest) (*MealRatingResponse, error)
 	NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error)
 	NewMealRating(context.Context, *NewMealRatingRequest) (*emptypb.Empty, error)
 	GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
@@ -224,7 +226,7 @@ func (UnimplementedCampusServer) GetRoomSchedule(context.Context, *GetRoomSchedu
 func (UnimplementedCampusServer) GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatings not implemented")
 }
-func (UnimplementedCampusServer) GetMealRatings(context.Context, *MealRatingsRequest) (*MealRatingsResponse, error) {
+func (UnimplementedCampusServer) GetMealRatings(context.Context, *MealRatingRequest) (*MealRatingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatings not implemented")
 }
 func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
@@ -400,7 +402,7 @@ func _Campus_GetCafeteriaRatings_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _Campus_GetMealRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MealRatingsRequest)
+	in := new(MealRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -412,7 +414,7 @@ func _Campus_GetMealRatings_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/api.Campus/GetMealRatings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMealRatings(ctx, req.(*MealRatingsRequest))
+		return srv.(CampusServer).GetMealRatings(ctx, req.(*MealRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
