@@ -17,6 +17,146 @@
     "application/json"
   ],
   "paths": {
+    "/barrierfree/contacts": {
+      "get": {
+        "operationId": "Campus_getResponsiblePerson",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetResponsiblePersonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/getBuilding2Gps": {
+      "get": {
+        "operationId": "Campus_getBuilding2Gps",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetBuilding2GpsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/listOfElevators": {
+      "get": {
+        "operationId": "Campus_getListOfElevators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetListOfElevatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/listOfToilets": {
+      "get": {
+        "operationId": "Campus_getListOfToilets",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetListOfToiletsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/moreInformation": {
+      "get": {
+        "operationId": "Campus_getMoreInformation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetMoreInformationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/nerby": {
+      "get": {
+        "operationId": "Campus_getAreaFacilitiesByBuildingNr",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apigetAreaFacilitiesByBuildingNrResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "buildingNr",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/cafeteriaRating/cafeteria/allCafeterias": {
       "get": {
         "operationId": "Campus_GetCafeterias",
@@ -479,6 +619,20 @@
         }
       }
     },
+    "apiBuilding2GpsElement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        }
+      }
+    },
     "apiCafeteria": {
       "type": "object",
       "properties": {
@@ -839,6 +993,20 @@
         }
       }
     },
+    "apiMoreInformationElement": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
     "apiNewCafeteriaRatingRequest": {
       "type": "object",
       "properties": {
@@ -926,7 +1094,60 @@
         }
       }
     },
+    "apiResponsiblePersonElement": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "telephone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "faculty": {
+          "type": "string"
+        },
+        "tumID": {
+          "type": "string"
+        }
+      }
+    },
     "apiRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "roomCode": {
+          "type": "string"
+        },
+        "buildingNr": {
+          "type": "string"
+        },
+        "archId": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "campus": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRoomInformationElement": {
       "type": "object",
       "properties": {
         "roomId": {
@@ -1040,6 +1261,72 @@
         "maxPoints": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "apigetAreaFacilitiesByBuildingNrResponse": {
+      "type": "object",
+      "properties": {
+        "areaFacilitiesByBuildingNr": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetBuilding2GpsResponse": {
+      "type": "object",
+      "properties": {
+        "building2Gps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiBuilding2GpsElement"
+          }
+        }
+      }
+    },
+    "apigetListOfElevatorsResponse": {
+      "type": "object",
+      "properties": {
+        "listOfElevators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetListOfToiletsResponse": {
+      "type": "object",
+      "properties": {
+        "listOfToilets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRoomInformationElement"
+          }
+        }
+      }
+    },
+    "apigetMoreInformationResponse": {
+      "type": "object",
+      "properties": {
+        "information": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiMoreInformationElement"
+          }
+        }
+      }
+    },
+    "apigetResponsiblePersonResponse": {
+      "type": "object",
+      "properties": {
+        "responsiblePerson": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiResponsiblePersonElement"
+          }
         }
       }
     },
