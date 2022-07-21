@@ -360,13 +360,13 @@ message GetRatingTagsReply{
 
 
 message TagRatingOverview {
-  string DE = 1;
-  string EN = 2;
+  string de = 1;
+  string en = 2;
 }
 
 message TagRatingResult {
-  string DE = 1;
-  string EN = 2;
+  string de = 1;
+  string en = 2;
   int32 points = 3;
 }
 
@@ -376,8 +376,8 @@ message TagRating {
 }
 
 message TagRatingsResult {
-  string DE = 1;
-  string EN = 2;
+  string de = 1;
+  string en = 2;
   double averagePoints = 3;
   double standardDeviation = 4;
   int32 minPoints = 5;
