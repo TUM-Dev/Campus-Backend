@@ -67,7 +67,7 @@ service Campus {
 
 
   // This endpoint retrieves Cafeteria Ratings from the Backend.
-  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
+  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingReply) {
     option (google.api.http) = {
       post: "/cafeteria/rating/get",
       body: "*",
@@ -75,7 +75,7 @@ service Campus {
   }
 
 
-  rpc GetDishRatings (DishRatingRequest) returns (DishRatingResponse) {
+  rpc GetDishRatings (DishRatingRequest) returns (DishRatingReply) {
     option (google.api.http) = {
       post: "/dish/rating/get",
       body: "*",
@@ -114,7 +114,7 @@ service Campus {
     };
   }
 
-  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaResponse) {
+  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaReply) {
     option (google.api.http) = {
       get: "/cafeteria/allCafeterias",
       body: "*",
@@ -123,7 +123,7 @@ service Campus {
   }
 
 
-  rpc GetDishes (GetDishesRequest) returns (GetDishesResponse) {
+  rpc GetDishes (GetDishesRequest) returns (GetDishesReply) {
     option (google.api.http) = {
       get: "/dish/allDishes",
       body: "*",
@@ -133,130 +133,244 @@ service Campus {
 
 
 
-  rpc getResponsiblePerson (google.protobuf.Empty) returns (getResponsiblePersonResponse) {
+  rpc GetResponsiblePerson (google.protobuf.Empty) returns (GetResponsiblePersonReply) {
     option (google.api.http) = {
       get: "/barrierfree/contacts",
     };
   }
 
-  rpc getBuilding2Gps (google.protobuf.Empty) returns (getBuilding2GpsResponse) {
+  rpc GetBuilding2Gps (google.protobuf.Empty) returns (GetBuilding2GpsReply) {
     option (google.api.http) = {
       get: "/barrierfree/getBuilding2Gps",
     };
   }
 
-  rpc getAreaFacilitiesByBuildingNr (getAreaFacilitiesByBuildingNrRequest) returns (getAreaFacilitiesByBuildingNrResponse) {
+  rpc GetAreaFacilitiesByBuildingNr (GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
     option (google.api.http) = {
       get: "/barrierfree/nerby",
     };
   }
 
-  rpc getListOfToilets (google.protobuf.Empty) returns (getListOfToiletsResponse) {
+  rpc GetListOfToilets (google.protobuf.Empty) returns (GetListOfToiletsReply) {
     option (google.api.http) = {
       get: "/barrierfree/listOfToilets",
     };
   }
 
-  rpc getListOfElevators (google.protobuf.Empty) returns (getListOfElevatorsResponse) {
+  rpc GetListOfElevators (google.protobuf.Empty) returns (GetListOfElevatorsReply) {
     option (google.api.http) = {
       get: "/barrierfree/listOfElevators",
     };
   }
 
-  rpc getMoreInformation (google.protobuf.Empty) returns (getMoreInformationResponse) {
+  rpc GetMoreInformation (google.protobuf.Empty) returns (GetMoreInformationReply) {
     option (google.api.http) = {
       get: "/barrierfree/moreInformation",
     };
   }
 
 
-  rpc getOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesResponse) {
+  rpc GetOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesReply) {
     option (google.api.http) = {
-      get: "/openingtimes/:language",
+      Get: "/openingtimes/{language}",
     };
   }
 
 
-  rpc getUpdateNote (GetUpdateNoteRequest) returns (GetUpdateNoteResponse) {
+  rpc GetUpdateNote (GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
     option (google.api.http) = {
-      get: "/updatenote/:version",
+      get: "/updatenote/{version}",
     };
   }
 
 
-  rpc getStudyRoomList (GetStudyRoomListRequest) returns (GetStudyRoomListResponse) {
+  rpc GetStudyRoomList (GetStudyRoomListRequest) returns (GetStudyRoomListReply) {
     option (google.api.http) = {
       get: "/studyroom/list",
     };
   }
 
-  rpc getEventList(GetEventListRequest) returns (GetEventListResponse) {
+  rpc GetEventList(GetEventListRequest) returns (GetEventListReply) {
     option (google.api.http) = {
       get: "/event/list",
     };
   }
 
-  rpc postEventTicketMy(PostEventTicketMyRequest) returns (PostEventTicketMyResponse) {
+  rpc PostEventTicketMy(PostEventTicketMyRequest) returns (PostEventTicketMyReply) {
     option (google.api.http) = {
       post: "/event/ticket/my",
     };
   }
 
-  rpc postEventTicket(PostEventTicketRequest) returns (PostEventTicketResponse) {
+  rpc PostEventTicket(PostEventTicketRequest) returns (PostEventTicketReply) {
     option (google.api.http) = {
-      post: "/event/ticket/:ticket_id",
+      post: "/event/ticket/{ticket_id}",
     };
   }
 
-  rpc getEventTicketType(GetEventTicketTypeRequest) returns (GetEventTicketTypeResponse) {
+  rpc GetEventTicketType(GetEventTicketTypeRequest) returns (GetEventTicketTypeReply) {
     option (google.api.http) = {
-      get: "/event/ticket/type/:event_id",
+      get: "/event/ticket/type/{event_id}",
     };
   }
 
-  rpc postEventTicketReserveMultiple(PostEventTicketReserveMultipleRequest) returns (PostEventTicketReserveMultipleResponse) {
+  rpc PostEventTicketReserveMultiple(PostEventTicketReserveMultipleRequest) returns (PostEventTicketReserveMultipleReply) {
     option (google.api.http) = {
       post: "/event/ticket/reserve/multiple",
     };
   }
 
-  rpc postEventTicketPaymentStripePurchaseMultiple(PostEventTicketPaymentStripePurchaseMultiple) returns (PostEventTicketPaymentStripePurchaseMultiple) {
+  rpc PostEventTicketPaymentStripePurchaseMultiple(PostEventTicketPaymentStripePurchaseMultiple) returns (PostEventTicketPaymentStripePurchaseMultiple) {
     option (google.api.http) = {
       post: "/event/ticket/payment/stripe/purchase/multiple",
     };
   }
 
-  rpc postEventTicketPaymentStripeEphermalKeyTicket(PostEventTicketPaymentStripeEphermalKeyRequest) returns (PostEventTicketPaymentStripeEphermalKeyResponse) {
+  rpc PostEventTicketPaymentStripeEphermalKeyTicket(PostEventTicketPaymentStripeEphermalKeyRequest) returns (PostEventTicketPaymentStripeEphermalKeyReply) {
     option (google.api.http) = {
       post: "/event/ticket/payment/stripe/ephemeralkey",
     };
   }
 
-  rpc getEventTicketStatus(GetEventTicketStatusRequest) returns (GetEventTicketStatusResponse) {
+  rpc GetEventTicketStatus(GetEventTicketStatusRequest) returns (GetEventTicketStatusReply) {
     option (google.api.http) = {
-      get: "/event/ticket/status/:event_id",
+      get: "/event/ticket/status/{event_id}",
     };
   }
 
-  rpc getKino(GetKinoRequest) returns (GetKinoResponse) {
+  rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
     option (google.api.http) = {
-      get: "/kino/:last_id",
+      get: "/kino/{last_id}",
     };
   }
 
-  rpc postFeedback(PostFeedbackRequest) returns (PostFeedbackResponse) {
+  rpc PostFeedback(PostFeedbackRequest) returns (PostFeedbackReply) {
     option (google.api.http) = {
       post: "/feedback",
     };
   }
 
-  rpc postFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackIDImageNrResponse) {
+  rpc PostFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackIDImageNrReply) {
     option (google.api.http) = {
-      post: "/feedback/:id/:image_nr",
+      post: "/feedback/{id}/{image_nr}",
     };
   }
 
 
+  rpc PostDeviceRegister(PostDeviceRegisterRequest) returns (PostDeviceRegisterReply) {
+    option (google.api.http) = {
+      post: "/device/register",
+    };
+  }
+
+  rpc GetDeviceVerifyKey(GetDeviceVerifyKeyRequest) returns (GetDeviceVerifyKeyReply) {
+    option (google.api.http) = {
+      get: "/device/verifyKey",
+    };
+  }
+
+  rpc PostDeviceAddGcmToken(PostDeviceAddGcmTokenRequest) returns (PostDeviceAddGcmTokenReply) {
+    option (google.api.http) = {
+      post: "/device/addGcmToken",
+    };
+  }
+
+  rpc GetDeviceUploaded(GetDeviceUploadedRequest) returns (GetDeviceUploadedReply) {
+    option (google.api.http) = {
+      get: "/device/uploaded/{lrz_id}",
+    };
+  }
+
+
+  rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsReply) {
+    option (google.api.http) = {
+      get: "/notifications",
+    };
+  }
+
+  rpc GetNotificationsConfirm(GetNotificationsConfirmRequest) returns (GetNotificationsConfirmReply) {
+    option (google.api.http) = {
+      get: "/notifications/confirm/{notification_id}",
+    };
+  }
+
+  rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
+    option (google.api.http) = {
+      get: "/members/{lrz_id}",
+    };
+  }
+
+  rpc PostChatRooms(PostChatRoomsRequest) returns (PostChatRoomsReply) {
+    option (google.api.http) = {
+      post: "/chat/rooms/",
+    };
+  }
+
+  rpc GetChatRoomsRoomId(GetChatRoomsRoomIdRequest) returns (GetChatRoomsRoomIdReply) {
+    option (google.api.http) = {
+      get: "/chat/rooms/{room_id}",
+    };
+  }
+
+  rpc PostChatRoomsRoomIdLeave(PostChatRoomsRoomIdLeaveRequest) returns (PostChatRoomsRoomIdLeaveReply) {
+    option (google.api.http) = {
+      post: "/chat/rooms/{room_id}/leave",
+    };
+  }
+  rpc PostChatRoomsRoomIdAdd(PostChatRoomsRoomIdAddRequest) returns (PostChatRoomsRoomIdAddReply) {
+    option (google.api.http) = {
+      post: "/chat/rooms/{room_id}",
+    };
+  }
+
+  rpc PutChatRoomsRoomIdMessage(PutChatRoomsRoomIdMessageRequest) returns (PutChatRoomsIdRoomMessageReply) {
+    option (google.api.http) = {
+      put: "/chat/rooms/{room_id}/message/",
+    };
+  }
+
+  rpc PutChatRoomsRoomIdMessageMessageId(PutChatRoomsRoomIdMessageMessageIdRequest) returns (PutChatRoomsRoomIdMessageMessageIdReply) {
+    option (google.api.http) = {
+      put: "/chat/rooms/{room_id}/message/{message_id}",
+    };
+  }
+
+  rpc PostChatRoomsRoomIdMessagesPage(PostChatRoomsRoomIdMessagesPageRequest) returns (PostChatRoomsRoomIdMessagesPageReply) {
+    option (google.api.http) = {
+      post: "/chat/rooms/{room_id}/messages/{page}",
+    };
+  }
+
+  rpc PostChatRoomsRoomIdMessages(PostChatRoomsRoomIdMessagesRequest) returns (PostChatRoomsRoomIdMessagesReply) {
+    option (google.api.http) = {
+      post: "/chat/rooms/{room_id}/messages",
+    };
+  }
+
+
+  rpc PostChatMembers(PostChatMembersRequest) returns (PostChatMembersReply) {
+    option (google.api.http) = {
+      post: "/chat/members",
+    };
+  }
+
+  rpc GetChatMembersLrzId(GetChatMembersLrzIdRequest) returns (GetChatMembersLrzIdReply) {
+    option (google.api.http) = {
+      get: "/chat/members/{lrz_id}",
+    };
+  }
+
+  rpc GetChatMembersSearch(GetChatMembersSearchRequest) returns (GetChatMembersSearchReply) {
+    option (google.api.http) = {
+      get: "/chat/members/search/{query}",
+    };
+  }
+
+  rpc PostChatMembersUserIdRooms(PostChatMembersUserIdRoomsRequest) returns (PostChatMembersUserIdRoomsReply) {
+    option (google.api.http) = {
+      post: "/chat/members/{user_id}/rooms",
+    };
+  }
 }
 
 message GetRoomScheduleRequest {
@@ -380,8 +494,8 @@ message DishRatingRequest {
   int32 limit = 5;
 }
 
-message CafeteriaRatingResponse {
-  repeated SingleRatingResponse rating = 1;
+message CafeteriaRatingReply {
+  repeated SingleRatingReply rating = 1;
   double avg = 2;
   double std = 3;
   int32 min = 4;
@@ -390,8 +504,8 @@ message CafeteriaRatingResponse {
 }
 
 
-message DishRatingResponse {
-  repeated SingleRatingResponse rating = 1;
+message DishRatingReply {
+  repeated SingleRatingReply rating = 1;
   double avg = 2;
   double std = 3;
   int32 min = 4;
@@ -401,7 +515,7 @@ message DishRatingResponse {
 }
 
 
-message SingleRatingResponse{
+message SingleRatingReply{
   // number in the range 1-5
   int32 points = 1;
   // Optional JPEG image in Base64
@@ -470,7 +584,7 @@ message RatingTagResult {
 
 
 
-message GetCafeteriaResponse{
+message GetCafeteriaReply{
   repeated Cafeteria cafeteria = 1;
 }
 
@@ -489,7 +603,7 @@ message GetDishesRequestRequest{
   int32 day = 4;
 }
 
-message GetDishesRequestResponse{
+message GetDishesRequestReply{
   repeated string dish = 1;
 }
 
@@ -498,7 +612,7 @@ message GetDishesRequestResponse{
 
 
 
-message getResponsiblePersonResponse {
+message GetResponsiblePersonReply {
   repeated ResponsiblePersonElement responsiblePerson = 1;
 }
 
@@ -511,7 +625,7 @@ message ResponsiblePersonElement{
 
 }
 
-message getBuilding2GpsResponse {
+message GetBuilding2GpsReply {
   repeated Building2GpsElement building2Gps = 1;
 }
 
@@ -522,17 +636,17 @@ message Building2GpsElement{
 
 }
 
-message getAreaFacilitiesByBuildingNrResponse {
+message GetAreaFacilitiesByBuildingNrReply {
   repeated RoomInformationElement areaFacilitiesByBuildingNr = 1;
 }
 
 
 
-message getAreaFacilitiesByBuildingNrRequest {
+message GetAreaFacilitiesByBuildingNrRequest {
   string building_nr = 1;
 }
 
-message getListOfToiletsResponse {
+message GetListOfToiletsReply {
   repeated RoomInformationElement listOfToilets = 1;
 }
 
@@ -548,13 +662,13 @@ message RoomInformationElement{
   string name = 9;
 }
 
-message getListOfElevatorsResponse {
+message GetListOfElevatorsReply {
   repeated RoomInformationElement listOfElevators = 1;
 }
 
 
 
-message getMoreInformationResponse {
+message GetMoreInformationReply {
   repeated MoreInformationElement information = 1;
 }
 
