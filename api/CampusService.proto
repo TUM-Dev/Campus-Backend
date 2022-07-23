@@ -257,38 +257,38 @@ service Campus {
   }
 
 
-  rpc PostDeviceRegister(PostDeviceRegisterRequest) returns (PostDeviceRegisterReply) {
+  rpc RegisterDevice(google.protobuf.Empty) returns (TUMCabeStatus) {
     option (google.api.http) = {
       post: "/device/register",
     };
   }
 
-  rpc GetDeviceVerifyKey(GetDeviceVerifyKeyRequest) returns (GetDeviceVerifyKeyReply) {
+  rpc VerifyKey(google.protobuf.Empty) returns (TUMCabeStatus) {
     option (google.api.http) = {
       get: "/device/verifyKey",
     };
   }
 
-  rpc PostDeviceAddGcmToken(PostDeviceAddGcmTokenRequest) returns (PostDeviceAddGcmTokenReply) {
+  rpc DeviceUploadGcmToken(google.protobuf.Empty) returns (TUMCabeStatus) {
     option (google.api.http) = {
       post: "/device/addGcmToken",
     };
   }
 
-  rpc GetDeviceUploaded(GetDeviceUploadedRequest) returns (GetDeviceUploadedReply) {
+  rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
     option (google.api.http) = {
       get: "/device/uploaded/{lrz_id}",
     };
   }
 
 
-  rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsReply) {
+  rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
     option (google.api.http) = {
       get: "/notifications",
     };
   }
 
-  rpc GetNotificationsConfirm(GetNotificationsConfirmRequest) returns (GetNotificationsConfirmReply) {
+  rpc GetNotificationConfirm(NotificationsRequest) returns (GetNotificationsConfirmReply) {
     option (google.api.http) = {
       get: "/notifications/confirm/{notification_id}",
     };
@@ -928,7 +928,7 @@ message PostChatRoomsGetMessagesRequest{
 }
 
 message ChatMemberMsg{
-  repeated ChatMemberMsgElement members=1;
+  repeated ChatMemberMsgElement members = 1;
 }
 
 message ChatMemberMsgElement{
@@ -940,33 +940,33 @@ message ChatMemberMsgElement{
 
 
 message GetChatMemberRequest{
-  string lrzId=1;
+  string lrzId = 1;
 }
 
 
 message SearchMemberByNameRequest{
-  string nameQuery=1;
+  string nameQuery = 1;
 }
 
 message GetMemberRoomsRequest{
-  int32 memberId=1;
+  int32 memberId = 1;
 }
 
 message GetMemberRoomsReply{
-repeated ChatRoomsMsgElement chatRooms=1;
+  repeated ChatRoomsMsgElement chatRooms = 1;
 }
 
 
 message PurchaseTicketStripeReply{
-  repeated TicketMessageElement tickets=1;
+  repeated TicketMessageElement tickets = 1;
 }
 
 message TicketMessageElement{
-  int32 id= 1;
-  int32 eventId= 2;
-  string code= 3;
-  int32 ticketTypeId= 4;
-  google.protobuf.Timestamp redemption= 5;
+  int32 id = 1;
+  int32 eventId = 2;
+  string code = 3;
+  int32 ticketTypeId = 4;
+  google.protobuf.Timestamp redemption = 5;
 }
 
 
@@ -976,16 +976,49 @@ message RetrieveEphemeralKeyReply{
 
 
 message GetEventTicketStatusRequest{
-  int32 event =1;
+  int32 event = 1;
 }
 
 
 message GetEventTicketStatusReply{
-  repeated TicketStatus status=1;
+  repeated TicketStatus status = 1;
 }
 
 message TicketStatus{
-  int32 ticketType=1;
-  int32 contingent=2;
-  int32 sold=3;
+  int32 ticketType = 1;
+  int32 contingent = 2;
+  int32 sold = 3;
+}
+
+message TUMCabeStatus{
+  string status = 1;
+}
+
+message GetUploadStatusRequest{
+  string lrzId = 1;
+}
+
+message GetUploadStatusReply{
+  string fcm_token = 1;
+  string public_key = 2;
+  bool student_id = 3;
+  bool employee_id = 4;
+  bool external_id = 5;
+}
+
+message GetNotificationsReply{
+  int32 notification=1;
+  int32 type=2;
+  string title=3;
+  string description=4;
+  string signature=5;
+}
+
+
+message NotificationsRequest{
+  int32 notificationId=1;
+}
+
+message GetNotificationsConfirmReply{
+  string status=1;
 }
