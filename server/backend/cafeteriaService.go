@@ -16,6 +16,7 @@ import (
 	"gorm.io/gorm"
 	"image"
 	"image/jpeg"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -40,6 +41,7 @@ type QueryOverviewRatingTag struct {
 	Points int32  `gorm:"column:points;type:text;"  json:"rating"`
 }
 
+// GetCafeteriaRatings
 /*
 RPC Endpoint
 Allows to query ratings for a specific cafeteria.
@@ -90,9 +92,10 @@ Queries the actual ratings for a cafeteria and attaches the tag ratings which be
 func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
 	var ratings []cafeteria_rating_models.CafeteriaRating
 	var errRatings error
+
 	var limit = int(input.Limit)
-	if limit > 100 {
-		limit = 100
+	if limit == -1 {
+		limit = math.MaxInt32
 	}
 	if limit > 0 {
 		if input.From != nil || input.To != nil {
@@ -147,6 +150,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	}
 }
 
+//GetDishRatings
 /*
 RPC Endpoint
 Allows to query ratings for a specific dish in a specific cafeteria.
@@ -269,17 +273,23 @@ func getImageToBytes(path string) []byte {
 		os.Exit(1)
 	}
 
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(file)
 
 	fileInfo, _ := file.Stat()
-	var size int64 = fileInfo.Size()
-	bytes := make([]byte, size)
+	var size = fileInfo.Size()
+	imageAsBytes := make([]byte, size)
 
 	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(bytes)
-	return bytes
+	_, err = buffer.Read(imageAsBytes)
+	return imageAsBytes
 }
 
+//queryTags
 /*
 Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
@@ -365,6 +375,7 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	return elements
 }
 
+//NewCafeteriaRating
 /*
 RPC Endpoint
 Allows to store a new cafeteria Rating.
@@ -425,13 +436,19 @@ func storeImage(path string, i []byte) (string, error) {
 	}
 
 	out, errFile := os.Create(imgPath)
-	defer out.Close()
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(out)
 	var opts jpeg.Options
 	opts.Quality = 100
 	errFile = jpeg.Encode(out, img, &opts)
 	return imgPath, errFile
 }
 
+// NewDishRating
 /*
 RPC Endpoint
 Allows to store a new dish Rating.
@@ -611,6 +628,7 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	return result
 }
 
+//GetAvailableDishTags
 /*
 RPC Endpoint
 Retunrs all valid Tags to quickly rate dishes in english and german
@@ -629,6 +647,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 	}, nil
 }
 
+//GetAvailableCafeteriaTags
 /*
 RPC Endpoint
 Retunrs all valid Tags to quickly rate dishes in english and german
