@@ -101,7 +101,6 @@ service Campus {
   rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allTags",
-      body: "*",
       response_body: "ratingTags"
     };
   }
@@ -109,7 +108,6 @@ service Campus {
   rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
       get: "/cafeteria/rating/allTags",
-      body: "*",
       response_body: "ratingTags"
     };
   }
@@ -117,7 +115,6 @@ service Campus {
   rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaReply) {
     option (google.api.http) = {
       get: "/cafeteria/allCafeterias",
-      body: "*",
       response_body: "cafeteria"
     };
   }
@@ -126,7 +123,6 @@ service Campus {
   rpc GetDishes (GetDishesRequest) returns (GetDishesReply) {
     option (google.api.http) = {
       get: "/dish/allDishes",
-      body: "*",
       response_body: "dish"
     };
   }
@@ -171,7 +167,7 @@ service Campus {
 
   rpc GetOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesReply) {
     option (google.api.http) = {
-      Get: "/openingtimes/{language}",
+      get: "/openingtimes/{language}",
     };
   }
 
@@ -204,13 +200,13 @@ service Campus {
 
   rpc PostEventTicket(PostEventTicketRequest) returns (EventListMsgElement) {
     option (google.api.http) = {
-      post: "/event/ticket/{ticket_id}",
+      post: "/event/ticket/{id}",
     };
   }
 
   rpc GetEventTicketType(PostEventTicketRequest) returns (GetEventTicketTypeReply) {
     option (google.api.http) = {
-      get: "/event/ticket/type/{event_id}",
+      get: "/event/ticket/type/{id}",
     };
   }
 
@@ -234,13 +230,13 @@ service Campus {
 
   rpc GetEventTicketStatus(GetEventTicketStatusRequest) returns (GetEventTicketStatusReply) {
     option (google.api.http) = {
-      get: "/event/ticket/status/{event_id}",
+      get: "/event/ticket/status/{eventId}",
     };
   }
 
   rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
     option (google.api.http) = {
-      get: "/kino/{last_id}",
+      get: "/kino/{lastId}",
     };
   }
 
@@ -252,7 +248,7 @@ service Campus {
 
   rpc PostFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackReply) {
     option (google.api.http) = {
-      post: "/feedback/{id}/{image_nr}",
+      post: "/feedback/{id}/{imageNr}",
     };
   }
 
@@ -277,7 +273,7 @@ service Campus {
 
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
     option (google.api.http) = {
-      get: "/device/uploaded/{lrz_id}",
+      get: "/device/uploaded/{lrzId}",
     };
   }
 
@@ -290,60 +286,61 @@ service Campus {
 
   rpc GetNotificationConfirm(NotificationsRequest) returns (GetNotificationsConfirmReply) {
     option (google.api.http) = {
-      get: "/notifications/confirm/{notification_id}",
+      get: "/notifications/confirm/{notificationId}",
     };
   }
 
   rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
     option (google.api.http) = {
-      get: "/members/{lrz_id}",
+      get: "/members/{lrzId}",
     };
   }
 
   rpc PostChatRooms(google.protobuf.Empty) returns (PostChatRoomsReply) {
     option (google.api.http) = {
-      post: "/chat/rooms/",
+      post: "/chat/rooms",
+      body: "*"
     };
   }
 
   rpc GetChatRoomsRoomId(GetChatRoomsRoomIdRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
-      get: "/chat/rooms/{room_id}",
+      get: "/chat/rooms/{roomId}",
     };
   }
 
   rpc PostChatRoomsRoomIdLeave(PostChatRoomsRoomIdLeaveRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
-      post: "/chat/rooms/{room_id}/leave",
+      post: "/chat/rooms/{roomId}/leave",
     };
   }
   rpc PostChatRoomsRoomIdAdd(PostChatRoomsRoomIdAddRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
-      post: "/chat/rooms/{room_id}/add/{member}",
+      post: "/chat/rooms/{roomId}/add/{memberId}",
     };
   }
 
   rpc PutChatRoomsSendMessage(PutChatRoomsSendRoomIdRequest) returns (ChatMessageModelMsgElement) {
     option (google.api.http) = {
-      put: "/chat/rooms/{room_id}/message/",
+      put: "/chat/rooms/{roomId}/message",
     };
   }
 
   rpc PutChatRoomsUpdateMessage(PutChatRoomsUpdateMessageRequest) returns (ChatMessageModelMsgElement) {
     option (google.api.http) = {
-      put: "/chat/rooms/{room_id}/message/{message_id}",
+      put: "/chat/rooms/{roomId}/message/{messageId}",
     };
   }
 
   rpc PostChatRoomsGetMessages(PostChatRoomsGetMessagesRequest) returns (ChatMessageModelMsg) {//get messageModel returnen
     option (google.api.http) = {
-      post: "/chat/rooms/{room_id}/messages/{page}",
+      post: "/chat/rooms/{roomId}/messages/{pageId}",
     };
   }
 
   rpc PostChatRoomsGetNewMessages(PutChatRoomsSendRoomIdRequest) returns (ChatMessageModelMsg) {
     option (google.api.http) = {
-      post: "/chat/rooms/{room_id}/messages",
+      post: "/chat/rooms/{roomId}/messages",
     };
   }
 
@@ -351,13 +348,12 @@ service Campus {
   rpc PostChatCreateMember(ChatMemberMsgElement) returns (ChatMemberMsgElement) {
     option (google.api.http) = {
       post: "/chat/members",
-      body: "ChatMember",
     };
   }
 
   rpc GetChatMemberByLrzId(GetChatMemberRequest) returns (ChatMemberMsgElement) {
     option (google.api.http) = {
-      get: "/chat/members/{lrz_id}",
+      get: "/chat/members/{lrzId}",
     };
   }
 
@@ -369,7 +365,7 @@ service Campus {
 
   rpc GetMemberRooms(GetMemberRoomsRequest) returns (GetMemberRoomsReply) {
     option (google.api.http) = {
-      post: "/chat/members/{member_id}/rooms",
+      post: "/chat/members/{memberId}/rooms",
     };
   }
 }
@@ -440,7 +436,7 @@ message SearchRoomsReply {
 }
 
 message Room {
-  int32 room_id = 1;
+  int32  roomId = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -652,7 +648,7 @@ message GetListOfToiletsReply {
 }
 
 message RoomInformationElement{
-  int32 room_id = 1;
+  int32  roomId = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -706,7 +702,7 @@ message OpeningTimesMsgElement{
 }
 
 message GetUpdateNoteRequest{
-  int32 versionCode = 1;
+  int32 version = 1;
 }
 
 message GetUpdateNoteReply{
@@ -726,7 +722,7 @@ message StudyRoomMsgElement{
 
 message StudyRoom{
   int32 group_id = 1;
-  int32 room_id = 2;
+  int32  roomId = 2;
   string room_code = 3;
   string room_name = 4;
   string building_name = 5;
@@ -810,7 +806,7 @@ message EventTicketReserveMultipleMsgElement{
 }
 
 message GetKinoRequest{
-  int32 id = 1;
+  int32 lastId = 1;
 }
 
 message GetKinoReply{
@@ -893,7 +889,7 @@ message PostChatRoomsRoomIdLeaveRequest{
 }
 
 message PostChatRoomsRoomIdAddRequest{
-  int32 room = 1;
+  int32 roomId = 1;
   int32 memberId = 2;
 }
 
@@ -945,7 +941,7 @@ message GetChatMemberRequest{
 
 
 message SearchMemberByNameRequest{
-  string nameQuery = 1;
+  string query = 1;
 }
 
 message GetMemberRoomsRequest{
@@ -976,7 +972,7 @@ message RetrieveEphemeralKeyReply{
 
 
 message GetEventTicketStatusRequest{
-  int32 event = 1;
+  int32 eventId = 1;
 }
 
 
@@ -1007,7 +1003,7 @@ message GetUploadStatusReply{
 }
 
 message GetNotificationsReply{
-  int32 notification=1;
+  int32 notificationId=1;
   int32 type=2;
   string title=3;
   string description=4;

@@ -32,19 +32,54 @@ type CampusClient interface {
 	GetRoomCoordinates(ctx context.Context, in *GetRoomCoordinatesRequest, opts ...grpc.CallOption) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(ctx context.Context, in *GetRoomScheduleRequest, opts ...grpc.CallOption) (*GetRoomScheduleReply, error)
 	// This endpoint retrieves Cafeteria Ratings from the Backend.
-	GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingResponse, error)
-	GetMealRatings(ctx context.Context, in *MealRatingRequest, opts ...grpc.CallOption) (*MealRatingResponse, error)
+	GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingReply, error)
+	GetDishRatings(ctx context.Context, in *DishRatingRequest, opts ...grpc.CallOption) (*DishRatingReply, error)
 	NewCafeteriaRating(ctx context.Context, in *NewCafeteriaRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	NewMealRating(ctx context.Context, in *NewMealRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetAvailableMealTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
+	NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
-	GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaResponse, error)
-	GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonResponse, error)
-	GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsResponse, error)
-	GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrResponse, error)
-	GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsResponse, error)
-	GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsResponse, error)
-	GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationResponse, error)
+	GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaReply, error)
+	GetDishes(ctx context.Context, in *GetDishesRequest, opts ...grpc.CallOption) (*GetDishesReply, error)
+	GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error)
+	GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsReply, error)
+	GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrReply, error)
+	GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsReply, error)
+	GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsReply, error)
+	GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationReply, error)
+	GetOpeningTimes(ctx context.Context, in *GetOpeningTimesRequest, opts ...grpc.CallOption) (*GetOpeningTimesReply, error)
+	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
+	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
+	GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error)
+	// todo check again
+	PostEventTicketMy(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PostEventTicketMyReply, error)
+	PostEventTicket(ctx context.Context, in *PostEventTicketRequest, opts ...grpc.CallOption) (*EventListMsgElement, error)
+	GetEventTicketType(ctx context.Context, in *PostEventTicketRequest, opts ...grpc.CallOption) (*GetEventTicketTypeReply, error)
+	PostEventTicketReserveMultiple(ctx context.Context, in *PostEventTicketReserveMultipleRequest, opts ...grpc.CallOption) (*PostEventTicketReserveMultipleReply, error)
+	PurchaseTicketStripe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PurchaseTicketStripeReply, error)
+	RetrieveEphemeralKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RetrieveEphemeralKeyReply, error)
+	GetEventTicketStatus(ctx context.Context, in *GetEventTicketStatusRequest, opts ...grpc.CallOption) (*GetEventTicketStatusReply, error)
+	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
+	PostFeedback(ctx context.Context, in *PostFeedbackRequest, opts ...grpc.CallOption) (*PostFeedbackReply, error)
+	PostFeedbackIDImageNr(ctx context.Context, in *PostFeedbackIDImageNrRequest, opts ...grpc.CallOption) (*PostFeedbackReply, error)
+	RegisterDevice(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
+	VerifyKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
+	DeviceUploadGcmToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
+	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
+	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
+	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
+	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
+	PostChatRooms(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PostChatRoomsReply, error)
+	GetChatRoomsRoomId(ctx context.Context, in *GetChatRoomsRoomIdRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error)
+	PostChatRoomsRoomIdLeave(ctx context.Context, in *PostChatRoomsRoomIdLeaveRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error)
+	PostChatRoomsRoomIdAdd(ctx context.Context, in *PostChatRoomsRoomIdAddRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error)
+	PutChatRoomsSendMessage(ctx context.Context, in *PutChatRoomsSendRoomIdRequest, opts ...grpc.CallOption) (*ChatMessageModelMsgElement, error)
+	PutChatRoomsUpdateMessage(ctx context.Context, in *PutChatRoomsUpdateMessageRequest, opts ...grpc.CallOption) (*ChatMessageModelMsgElement, error)
+	PostChatRoomsGetMessages(ctx context.Context, in *PostChatRoomsGetMessagesRequest, opts ...grpc.CallOption) (*ChatMessageModelMsg, error)
+	PostChatRoomsGetNewMessages(ctx context.Context, in *PutChatRoomsSendRoomIdRequest, opts ...grpc.CallOption) (*ChatMessageModelMsg, error)
+	PostChatCreateMember(ctx context.Context, in *ChatMemberMsgElement, opts ...grpc.CallOption) (*ChatMemberMsgElement, error)
+	GetChatMemberByLrzId(ctx context.Context, in *GetChatMemberRequest, opts ...grpc.CallOption) (*ChatMemberMsgElement, error)
+	SearchMemberByName(ctx context.Context, in *SearchMemberByNameRequest, opts ...grpc.CallOption) (*ChatMemberMsg, error)
+	GetMemberRooms(ctx context.Context, in *GetMemberRoomsRequest, opts ...grpc.CallOption) (*GetMemberRoomsReply, error)
 }
 
 type campusClient struct {
@@ -118,8 +153,8 @@ func (c *campusClient) GetRoomSchedule(ctx context.Context, in *GetRoomScheduleR
 	return out, nil
 }
 
-func (c *campusClient) GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingResponse, error) {
-	out := new(CafeteriaRatingResponse)
+func (c *campusClient) GetCafeteriaRatings(ctx context.Context, in *CafeteriaRatingRequest, opts ...grpc.CallOption) (*CafeteriaRatingReply, error) {
+	out := new(CafeteriaRatingReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeteriaRatings", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -127,9 +162,9 @@ func (c *campusClient) GetCafeteriaRatings(ctx context.Context, in *CafeteriaRat
 	return out, nil
 }
 
-func (c *campusClient) GetMealRatings(ctx context.Context, in *MealRatingRequest, opts ...grpc.CallOption) (*MealRatingResponse, error) {
-	out := new(MealRatingResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetMealRatings", in, out, opts...)
+func (c *campusClient) GetDishRatings(ctx context.Context, in *DishRatingRequest, opts ...grpc.CallOption) (*DishRatingReply, error) {
+	out := new(DishRatingReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetDishRatings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,18 +180,18 @@ func (c *campusClient) NewCafeteriaRating(ctx context.Context, in *NewCafeteriaR
 	return out, nil
 }
 
-func (c *campusClient) NewMealRating(ctx context.Context, in *NewMealRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/api.Campus/NewMealRating", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.Campus/NewDishRating", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetAvailableMealTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error) {
+func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error) {
 	out := new(GetRatingTagsReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetAvailableMealTags", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetAvailableDishTags", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +207,8 @@ func (c *campusClient) GetAvailableCafeteriaTags(ctx context.Context, in *emptyp
 	return out, nil
 }
 
-func (c *campusClient) GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaResponse, error) {
-	out := new(GetCafeteriaResponse)
+func (c *campusClient) GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaReply, error) {
+	out := new(GetCafeteriaReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetCafeterias", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -181,54 +216,360 @@ func (c *campusClient) GetCafeterias(ctx context.Context, in *emptypb.Empty, opt
 	return out, nil
 }
 
-func (c *campusClient) GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonResponse, error) {
-	out := new(GetResponsiblePersonResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getResponsiblePerson", in, out, opts...)
+func (c *campusClient) GetDishes(ctx context.Context, in *GetDishesRequest, opts ...grpc.CallOption) (*GetDishesReply, error) {
+	out := new(GetDishesReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetDishes", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsResponse, error) {
-	out := new(GetBuilding2GpsResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getBuilding2Gps", in, out, opts...)
+func (c *campusClient) GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error) {
+	out := new(GetResponsiblePersonReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetResponsiblePerson", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrResponse, error) {
-	out := new(GetAreaFacilitiesByBuildingNrResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getAreaFacilitiesByBuildingNr", in, out, opts...)
+func (c *campusClient) GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsReply, error) {
+	out := new(GetBuilding2GpsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetBuilding2Gps", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsResponse, error) {
-	out := new(GetListOfToiletsResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getListOfToilets", in, out, opts...)
+func (c *campusClient) GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrReply, error) {
+	out := new(GetAreaFacilitiesByBuildingNrReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetAreaFacilitiesByBuildingNr", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsResponse, error) {
-	out := new(GetListOfElevatorsResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getListOfElevators", in, out, opts...)
+func (c *campusClient) GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsReply, error) {
+	out := new(GetListOfToiletsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetListOfToilets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationResponse, error) {
-	out := new(GetMoreInformationResponse)
-	err := c.cc.Invoke(ctx, "/api.Campus/getMoreInformation", in, out, opts...)
+func (c *campusClient) GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsReply, error) {
+	out := new(GetListOfElevatorsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetListOfElevators", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationReply, error) {
+	out := new(GetMoreInformationReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetMoreInformation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetOpeningTimes(ctx context.Context, in *GetOpeningTimesRequest, opts ...grpc.CallOption) (*GetOpeningTimesReply, error) {
+	out := new(GetOpeningTimesReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetOpeningTimes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
+	out := new(GetUpdateNoteReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetUpdateNote", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error) {
+	out := new(GetStudyRoomListReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetStudyRoomList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error) {
+	out := new(GetEventListReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetEventList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostEventTicketMy(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PostEventTicketMyReply, error) {
+	out := new(PostEventTicketMyReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostEventTicketMy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostEventTicket(ctx context.Context, in *PostEventTicketRequest, opts ...grpc.CallOption) (*EventListMsgElement, error) {
+	out := new(EventListMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostEventTicket", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetEventTicketType(ctx context.Context, in *PostEventTicketRequest, opts ...grpc.CallOption) (*GetEventTicketTypeReply, error) {
+	out := new(GetEventTicketTypeReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetEventTicketType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostEventTicketReserveMultiple(ctx context.Context, in *PostEventTicketReserveMultipleRequest, opts ...grpc.CallOption) (*PostEventTicketReserveMultipleReply, error) {
+	out := new(PostEventTicketReserveMultipleReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostEventTicketReserveMultiple", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PurchaseTicketStripe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PurchaseTicketStripeReply, error) {
+	out := new(PurchaseTicketStripeReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PurchaseTicketStripe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) RetrieveEphemeralKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RetrieveEphemeralKeyReply, error) {
+	out := new(RetrieveEphemeralKeyReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/RetrieveEphemeralKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetEventTicketStatus(ctx context.Context, in *GetEventTicketStatusRequest, opts ...grpc.CallOption) (*GetEventTicketStatusReply, error) {
+	out := new(GetEventTicketStatusReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetEventTicketStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error) {
+	out := new(GetKinoReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetKino", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostFeedback(ctx context.Context, in *PostFeedbackRequest, opts ...grpc.CallOption) (*PostFeedbackReply, error) {
+	out := new(PostFeedbackReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostFeedback", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostFeedbackIDImageNr(ctx context.Context, in *PostFeedbackIDImageNrRequest, opts ...grpc.CallOption) (*PostFeedbackReply, error) {
+	out := new(PostFeedbackReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostFeedbackIDImageNr", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) RegisterDevice(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
+	out := new(TUMCabeStatus)
+	err := c.cc.Invoke(ctx, "/api.Campus/RegisterDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) VerifyKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
+	out := new(TUMCabeStatus)
+	err := c.cc.Invoke(ctx, "/api.Campus/VerifyKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) DeviceUploadGcmToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
+	out := new(TUMCabeStatus)
+	err := c.cc.Invoke(ctx, "/api.Campus/DeviceUploadGcmToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
+	out := new(GetUploadStatusReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetUploadStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error) {
+	out := new(GetNotificationsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetNotification", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error) {
+	out := new(GetNotificationsConfirmReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetNotificationConfirm", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error) {
+	out := new(GetMembersReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetMembers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatRooms(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PostChatRoomsReply, error) {
+	out := new(PostChatRoomsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatRooms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetChatRoomsRoomId(ctx context.Context, in *GetChatRoomsRoomIdRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error) {
+	out := new(ChatRoomsMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetChatRoomsRoomId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatRoomsRoomIdLeave(ctx context.Context, in *PostChatRoomsRoomIdLeaveRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error) {
+	out := new(ChatRoomsMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatRoomsRoomIdLeave", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatRoomsRoomIdAdd(ctx context.Context, in *PostChatRoomsRoomIdAddRequest, opts ...grpc.CallOption) (*ChatRoomsMsgElement, error) {
+	out := new(ChatRoomsMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatRoomsRoomIdAdd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PutChatRoomsSendMessage(ctx context.Context, in *PutChatRoomsSendRoomIdRequest, opts ...grpc.CallOption) (*ChatMessageModelMsgElement, error) {
+	out := new(ChatMessageModelMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PutChatRoomsSendMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PutChatRoomsUpdateMessage(ctx context.Context, in *PutChatRoomsUpdateMessageRequest, opts ...grpc.CallOption) (*ChatMessageModelMsgElement, error) {
+	out := new(ChatMessageModelMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PutChatRoomsUpdateMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatRoomsGetMessages(ctx context.Context, in *PostChatRoomsGetMessagesRequest, opts ...grpc.CallOption) (*ChatMessageModelMsg, error) {
+	out := new(ChatMessageModelMsg)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatRoomsGetMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatRoomsGetNewMessages(ctx context.Context, in *PutChatRoomsSendRoomIdRequest, opts ...grpc.CallOption) (*ChatMessageModelMsg, error) {
+	out := new(ChatMessageModelMsg)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatRoomsGetNewMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) PostChatCreateMember(ctx context.Context, in *ChatMemberMsgElement, opts ...grpc.CallOption) (*ChatMemberMsgElement, error) {
+	out := new(ChatMemberMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/PostChatCreateMember", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetChatMemberByLrzId(ctx context.Context, in *GetChatMemberRequest, opts ...grpc.CallOption) (*ChatMemberMsgElement, error) {
+	out := new(ChatMemberMsgElement)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetChatMemberByLrzId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) SearchMemberByName(ctx context.Context, in *SearchMemberByNameRequest, opts ...grpc.CallOption) (*ChatMemberMsg, error) {
+	out := new(ChatMemberMsg)
+	err := c.cc.Invoke(ctx, "/api.Campus/SearchMemberByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetMemberRooms(ctx context.Context, in *GetMemberRoomsRequest, opts ...grpc.CallOption) (*GetMemberRoomsReply, error) {
+	out := new(GetMemberRoomsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetMemberRooms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -248,19 +589,54 @@ type CampusServer interface {
 	GetRoomCoordinates(context.Context, *GetRoomCoordinatesRequest) (*GetRoomCoordinatesReply, error)
 	GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error)
 	// This endpoint retrieves Cafeteria Ratings from the Backend.
-	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error)
-	GetMealRatings(context.Context, *MealRatingRequest) (*MealRatingResponse, error)
+	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingReply, error)
+	GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error)
 	NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error)
-	NewMealRating(context.Context, *NewMealRatingRequest) (*emptypb.Empty, error)
-	GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
+	NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error)
+	GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
 	GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
-	GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaResponse, error)
-	GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonResponse, error)
-	GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsResponse, error)
-	GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrResponse, error)
-	GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsResponse, error)
-	GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsResponse, error)
-	GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationResponse, error)
+	GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaReply, error)
+	GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error)
+	GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonReply, error)
+	GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsReply, error)
+	GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrReply, error)
+	GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsReply, error)
+	GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsReply, error)
+	GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationReply, error)
+	GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error)
+	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
+	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
+	GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error)
+	// todo check again
+	PostEventTicketMy(context.Context, *emptypb.Empty) (*PostEventTicketMyReply, error)
+	PostEventTicket(context.Context, *PostEventTicketRequest) (*EventListMsgElement, error)
+	GetEventTicketType(context.Context, *PostEventTicketRequest) (*GetEventTicketTypeReply, error)
+	PostEventTicketReserveMultiple(context.Context, *PostEventTicketReserveMultipleRequest) (*PostEventTicketReserveMultipleReply, error)
+	PurchaseTicketStripe(context.Context, *emptypb.Empty) (*PurchaseTicketStripeReply, error)
+	RetrieveEphemeralKey(context.Context, *emptypb.Empty) (*RetrieveEphemeralKeyReply, error)
+	GetEventTicketStatus(context.Context, *GetEventTicketStatusRequest) (*GetEventTicketStatusReply, error)
+	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
+	PostFeedback(context.Context, *PostFeedbackRequest) (*PostFeedbackReply, error)
+	PostFeedbackIDImageNr(context.Context, *PostFeedbackIDImageNrRequest) (*PostFeedbackReply, error)
+	RegisterDevice(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
+	VerifyKey(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
+	DeviceUploadGcmToken(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
+	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
+	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
+	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
+	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
+	PostChatRooms(context.Context, *emptypb.Empty) (*PostChatRoomsReply, error)
+	GetChatRoomsRoomId(context.Context, *GetChatRoomsRoomIdRequest) (*ChatRoomsMsgElement, error)
+	PostChatRoomsRoomIdLeave(context.Context, *PostChatRoomsRoomIdLeaveRequest) (*ChatRoomsMsgElement, error)
+	PostChatRoomsRoomIdAdd(context.Context, *PostChatRoomsRoomIdAddRequest) (*ChatRoomsMsgElement, error)
+	PutChatRoomsSendMessage(context.Context, *PutChatRoomsSendRoomIdRequest) (*ChatMessageModelMsgElement, error)
+	PutChatRoomsUpdateMessage(context.Context, *PutChatRoomsUpdateMessageRequest) (*ChatMessageModelMsgElement, error)
+	PostChatRoomsGetMessages(context.Context, *PostChatRoomsGetMessagesRequest) (*ChatMessageModelMsg, error)
+	PostChatRoomsGetNewMessages(context.Context, *PutChatRoomsSendRoomIdRequest) (*ChatMessageModelMsg, error)
+	PostChatCreateMember(context.Context, *ChatMemberMsgElement) (*ChatMemberMsgElement, error)
+	GetChatMemberByLrzId(context.Context, *GetChatMemberRequest) (*ChatMemberMsgElement, error)
+	SearchMemberByName(context.Context, *SearchMemberByNameRequest) (*ChatMemberMsg, error)
+	GetMemberRooms(context.Context, *GetMemberRoomsRequest) (*GetMemberRoomsReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -289,44 +665,146 @@ func (UnimplementedCampusServer) GetRoomCoordinates(context.Context, *GetRoomCoo
 func (UnimplementedCampusServer) GetRoomSchedule(context.Context, *GetRoomScheduleRequest) (*GetRoomScheduleReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoomSchedule not implemented")
 }
-func (UnimplementedCampusServer) GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error) {
+func (UnimplementedCampusServer) GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeteriaRatings not implemented")
 }
-func (UnimplementedCampusServer) GetMealRatings(context.Context, *MealRatingRequest) (*MealRatingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMealRatings not implemented")
+func (UnimplementedCampusServer) GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatings not implemented")
 }
 func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewCafeteriaRating not implemented")
 }
-func (UnimplementedCampusServer) NewMealRating(context.Context, *NewMealRatingRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewMealRating not implemented")
+func (UnimplementedCampusServer) NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NewDishRating not implemented")
 }
-func (UnimplementedCampusServer) GetAvailableMealTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableMealTags not implemented")
+func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableDishTags not implemented")
 }
 func (UnimplementedCampusServer) GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableCafeteriaTags not implemented")
 }
-func (UnimplementedCampusServer) GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaResponse, error) {
+func (UnimplementedCampusServer) GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCafeterias not implemented")
 }
-func (UnimplementedCampusServer) GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonResponse, error) {
+func (UnimplementedCampusServer) GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishes not implemented")
+}
+func (UnimplementedCampusServer) GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResponsiblePerson not implemented")
 }
-func (UnimplementedCampusServer) GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsResponse, error) {
+func (UnimplementedCampusServer) GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBuilding2Gps not implemented")
 }
-func (UnimplementedCampusServer) GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrResponse, error) {
+func (UnimplementedCampusServer) GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAreaFacilitiesByBuildingNr not implemented")
 }
-func (UnimplementedCampusServer) GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsResponse, error) {
+func (UnimplementedCampusServer) GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListOfToilets not implemented")
 }
-func (UnimplementedCampusServer) GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsResponse, error) {
+func (UnimplementedCampusServer) GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListOfElevators not implemented")
 }
-func (UnimplementedCampusServer) GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationResponse, error) {
+func (UnimplementedCampusServer) GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMoreInformation not implemented")
+}
+func (UnimplementedCampusServer) GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOpeningTimes not implemented")
+}
+func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
+}
+func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudyRoomList not implemented")
+}
+func (UnimplementedCampusServer) GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventList not implemented")
+}
+func (UnimplementedCampusServer) PostEventTicketMy(context.Context, *emptypb.Empty) (*PostEventTicketMyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostEventTicketMy not implemented")
+}
+func (UnimplementedCampusServer) PostEventTicket(context.Context, *PostEventTicketRequest) (*EventListMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostEventTicket not implemented")
+}
+func (UnimplementedCampusServer) GetEventTicketType(context.Context, *PostEventTicketRequest) (*GetEventTicketTypeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventTicketType not implemented")
+}
+func (UnimplementedCampusServer) PostEventTicketReserveMultiple(context.Context, *PostEventTicketReserveMultipleRequest) (*PostEventTicketReserveMultipleReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostEventTicketReserveMultiple not implemented")
+}
+func (UnimplementedCampusServer) PurchaseTicketStripe(context.Context, *emptypb.Empty) (*PurchaseTicketStripeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PurchaseTicketStripe not implemented")
+}
+func (UnimplementedCampusServer) RetrieveEphemeralKey(context.Context, *emptypb.Empty) (*RetrieveEphemeralKeyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RetrieveEphemeralKey not implemented")
+}
+func (UnimplementedCampusServer) GetEventTicketStatus(context.Context, *GetEventTicketStatusRequest) (*GetEventTicketStatusReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventTicketStatus not implemented")
+}
+func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKino not implemented")
+}
+func (UnimplementedCampusServer) PostFeedback(context.Context, *PostFeedbackRequest) (*PostFeedbackReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostFeedback not implemented")
+}
+func (UnimplementedCampusServer) PostFeedbackIDImageNr(context.Context, *PostFeedbackIDImageNrRequest) (*PostFeedbackReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostFeedbackIDImageNr not implemented")
+}
+func (UnimplementedCampusServer) RegisterDevice(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterDevice not implemented")
+}
+func (UnimplementedCampusServer) VerifyKey(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyKey not implemented")
+}
+func (UnimplementedCampusServer) DeviceUploadGcmToken(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeviceUploadGcmToken not implemented")
+}
+func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
+}
+func (UnimplementedCampusServer) GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNotification not implemented")
+}
+func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNotificationConfirm not implemented")
+}
+func (UnimplementedCampusServer) GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMembers not implemented")
+}
+func (UnimplementedCampusServer) PostChatRooms(context.Context, *emptypb.Empty) (*PostChatRoomsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatRooms not implemented")
+}
+func (UnimplementedCampusServer) GetChatRoomsRoomId(context.Context, *GetChatRoomsRoomIdRequest) (*ChatRoomsMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatRoomsRoomId not implemented")
+}
+func (UnimplementedCampusServer) PostChatRoomsRoomIdLeave(context.Context, *PostChatRoomsRoomIdLeaveRequest) (*ChatRoomsMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatRoomsRoomIdLeave not implemented")
+}
+func (UnimplementedCampusServer) PostChatRoomsRoomIdAdd(context.Context, *PostChatRoomsRoomIdAddRequest) (*ChatRoomsMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatRoomsRoomIdAdd not implemented")
+}
+func (UnimplementedCampusServer) PutChatRoomsSendMessage(context.Context, *PutChatRoomsSendRoomIdRequest) (*ChatMessageModelMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutChatRoomsSendMessage not implemented")
+}
+func (UnimplementedCampusServer) PutChatRoomsUpdateMessage(context.Context, *PutChatRoomsUpdateMessageRequest) (*ChatMessageModelMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutChatRoomsUpdateMessage not implemented")
+}
+func (UnimplementedCampusServer) PostChatRoomsGetMessages(context.Context, *PostChatRoomsGetMessagesRequest) (*ChatMessageModelMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatRoomsGetMessages not implemented")
+}
+func (UnimplementedCampusServer) PostChatRoomsGetNewMessages(context.Context, *PutChatRoomsSendRoomIdRequest) (*ChatMessageModelMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatRoomsGetNewMessages not implemented")
+}
+func (UnimplementedCampusServer) PostChatCreateMember(context.Context, *ChatMemberMsgElement) (*ChatMemberMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostChatCreateMember not implemented")
+}
+func (UnimplementedCampusServer) GetChatMemberByLrzId(context.Context, *GetChatMemberRequest) (*ChatMemberMsgElement, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatMemberByLrzId not implemented")
+}
+func (UnimplementedCampusServer) SearchMemberByName(context.Context, *SearchMemberByNameRequest) (*ChatMemberMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchMemberByName not implemented")
+}
+func (UnimplementedCampusServer) GetMemberRooms(context.Context, *GetMemberRoomsRequest) (*GetMemberRoomsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMemberRooms not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -485,20 +963,20 @@ func _Campus_GetCafeteriaRatings_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetMealRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MealRatingRequest)
+func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DishRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetMealRatings(ctx, in)
+		return srv.(CampusServer).GetDishRatings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetMealRatings",
+		FullMethod: "/api.Campus/GetDishRatings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMealRatings(ctx, req.(*MealRatingRequest))
+		return srv.(CampusServer).GetDishRatings(ctx, req.(*DishRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -521,38 +999,38 @@ func _Campus_NewCafeteriaRating_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_NewMealRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewMealRatingRequest)
+func _Campus_NewDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewDishRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).NewMealRating(ctx, in)
+		return srv.(CampusServer).NewDishRating(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/NewMealRating",
+		FullMethod: "/api.Campus/NewDishRating",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).NewMealRating(ctx, req.(*NewMealRatingRequest))
+		return srv.(CampusServer).NewDishRating(ctx, req.(*NewDishRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetAvailableMealTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Campus_GetAvailableDishTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetAvailableMealTags(ctx, in)
+		return srv.(CampusServer).GetAvailableDishTags(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/GetAvailableMealTags",
+		FullMethod: "/api.Campus/GetAvailableDishTags",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetAvailableMealTags(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetAvailableDishTags(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -593,6 +1071,24 @@ func _Campus_GetCafeterias_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetDishes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDishesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetDishes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetDishes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetDishes(ctx, req.(*GetDishesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Campus_GetResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -603,7 +1099,7 @@ func _Campus_GetResponsiblePerson_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getResponsiblePerson",
+		FullMethod: "/api.Campus/GetResponsiblePerson",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetResponsiblePerson(ctx, req.(*emptypb.Empty))
@@ -621,7 +1117,7 @@ func _Campus_GetBuilding2Gps_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getBuilding2Gps",
+		FullMethod: "/api.Campus/GetBuilding2Gps",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetBuilding2Gps(ctx, req.(*emptypb.Empty))
@@ -639,7 +1135,7 @@ func _Campus_GetAreaFacilitiesByBuildingNr_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getAreaFacilitiesByBuildingNr",
+		FullMethod: "/api.Campus/GetAreaFacilitiesByBuildingNr",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetAreaFacilitiesByBuildingNr(ctx, req.(*GetAreaFacilitiesByBuildingNrRequest))
@@ -657,7 +1153,7 @@ func _Campus_GetListOfToilets_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getListOfToilets",
+		FullMethod: "/api.Campus/GetListOfToilets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetListOfToilets(ctx, req.(*emptypb.Empty))
@@ -675,7 +1171,7 @@ func _Campus_GetListOfElevators_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getListOfElevators",
+		FullMethod: "/api.Campus/GetListOfElevators",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetListOfElevators(ctx, req.(*emptypb.Empty))
@@ -693,10 +1189,604 @@ func _Campus_GetMoreInformation_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/getMoreInformation",
+		FullMethod: "/api.Campus/GetMoreInformation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetMoreInformation(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOpeningTimesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetOpeningTimes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetOpeningTimes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetOpeningTimes(ctx, req.(*GetOpeningTimesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUpdateNoteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetUpdateNote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetUpdateNote",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetUpdateNote(ctx, req.(*GetUpdateNoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetStudyRoomList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetStudyRoomList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetStudyRoomList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetStudyRoomList(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetEventList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetEventList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetEventList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetEventList(ctx, req.(*GetEventListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostEventTicketMy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostEventTicketMy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostEventTicketMy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostEventTicketMy(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostEventTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostEventTicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostEventTicket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostEventTicket",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostEventTicket(ctx, req.(*PostEventTicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetEventTicketType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostEventTicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetEventTicketType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetEventTicketType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetEventTicketType(ctx, req.(*PostEventTicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostEventTicketReserveMultiple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostEventTicketReserveMultipleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostEventTicketReserveMultiple(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostEventTicketReserveMultiple",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostEventTicketReserveMultiple(ctx, req.(*PostEventTicketReserveMultipleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PurchaseTicketStripe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PurchaseTicketStripe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PurchaseTicketStripe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PurchaseTicketStripe(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_RetrieveEphemeralKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).RetrieveEphemeralKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/RetrieveEphemeralKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).RetrieveEphemeralKey(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetEventTicketStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventTicketStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetEventTicketStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetEventTicketStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetEventTicketStatus(ctx, req.(*GetEventTicketStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetKino_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKinoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetKino(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetKino",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetKino(ctx, req.(*GetKinoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostFeedback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostFeedbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostFeedback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostFeedback",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostFeedback(ctx, req.(*PostFeedbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostFeedbackIDImageNr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostFeedbackIDImageNrRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostFeedbackIDImageNr(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostFeedbackIDImageNr",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostFeedbackIDImageNr(ctx, req.(*PostFeedbackIDImageNrRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_RegisterDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).RegisterDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/RegisterDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).RegisterDevice(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_VerifyKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).VerifyKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/VerifyKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).VerifyKey(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_DeviceUploadGcmToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).DeviceUploadGcmToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/DeviceUploadGcmToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).DeviceUploadGcmToken(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUploadStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetUploadStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetUploadStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetUploadStatus(ctx, req.(*GetUploadStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetNotification",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNotification(ctx, req.(*NotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNotificationConfirm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetNotificationConfirm",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNotificationConfirm(ctx, req.(*NotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetMembers(ctx, req.(*GetMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatRooms(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetChatRoomsRoomId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatRoomsRoomIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetChatRoomsRoomId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetChatRoomsRoomId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetChatRoomsRoomId(ctx, req.(*GetChatRoomsRoomIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatRoomsRoomIdLeave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostChatRoomsRoomIdLeaveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatRoomsRoomIdLeave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatRoomsRoomIdLeave",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatRoomsRoomIdLeave(ctx, req.(*PostChatRoomsRoomIdLeaveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatRoomsRoomIdAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostChatRoomsRoomIdAddRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatRoomsRoomIdAdd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatRoomsRoomIdAdd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatRoomsRoomIdAdd(ctx, req.(*PostChatRoomsRoomIdAddRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PutChatRoomsSendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutChatRoomsSendRoomIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PutChatRoomsSendMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PutChatRoomsSendMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PutChatRoomsSendMessage(ctx, req.(*PutChatRoomsSendRoomIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PutChatRoomsUpdateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutChatRoomsUpdateMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PutChatRoomsUpdateMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PutChatRoomsUpdateMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PutChatRoomsUpdateMessage(ctx, req.(*PutChatRoomsUpdateMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatRoomsGetMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostChatRoomsGetMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatRoomsGetMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatRoomsGetMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatRoomsGetMessages(ctx, req.(*PostChatRoomsGetMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatRoomsGetNewMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutChatRoomsSendRoomIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatRoomsGetNewMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatRoomsGetNewMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatRoomsGetNewMessages(ctx, req.(*PutChatRoomsSendRoomIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_PostChatCreateMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatMemberMsgElement)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).PostChatCreateMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/PostChatCreateMember",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).PostChatCreateMember(ctx, req.(*ChatMemberMsgElement))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetChatMemberByLrzId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetChatMemberByLrzId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetChatMemberByLrzId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetChatMemberByLrzId(ctx, req.(*GetChatMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_SearchMemberByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchMemberByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).SearchMemberByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/SearchMemberByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).SearchMemberByName(ctx, req.(*SearchMemberByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetMemberRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMemberRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetMemberRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetMemberRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetMemberRooms(ctx, req.(*GetMemberRoomsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -741,20 +1831,20 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetCafeteriaRatings_Handler,
 		},
 		{
-			MethodName: "GetMealRatings",
-			Handler:    _Campus_GetMealRatings_Handler,
+			MethodName: "GetDishRatings",
+			Handler:    _Campus_GetDishRatings_Handler,
 		},
 		{
 			MethodName: "NewCafeteriaRating",
 			Handler:    _Campus_NewCafeteriaRating_Handler,
 		},
 		{
-			MethodName: "NewMealRating",
-			Handler:    _Campus_NewMealRating_Handler,
+			MethodName: "NewDishRating",
+			Handler:    _Campus_NewDishRating_Handler,
 		},
 		{
-			MethodName: "GetAvailableMealTags",
-			Handler:    _Campus_GetAvailableMealTags_Handler,
+			MethodName: "GetAvailableDishTags",
+			Handler:    _Campus_GetAvailableDishTags_Handler,
 		},
 		{
 			MethodName: "GetAvailableCafeteriaTags",
@@ -765,28 +1855,164 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetCafeterias_Handler,
 		},
 		{
-			MethodName: "getResponsiblePerson",
+			MethodName: "GetDishes",
+			Handler:    _Campus_GetDishes_Handler,
+		},
+		{
+			MethodName: "GetResponsiblePerson",
 			Handler:    _Campus_GetResponsiblePerson_Handler,
 		},
 		{
-			MethodName: "getBuilding2Gps",
+			MethodName: "GetBuilding2Gps",
 			Handler:    _Campus_GetBuilding2Gps_Handler,
 		},
 		{
-			MethodName: "getAreaFacilitiesByBuildingNr",
+			MethodName: "GetAreaFacilitiesByBuildingNr",
 			Handler:    _Campus_GetAreaFacilitiesByBuildingNr_Handler,
 		},
 		{
-			MethodName: "getListOfToilets",
+			MethodName: "GetListOfToilets",
 			Handler:    _Campus_GetListOfToilets_Handler,
 		},
 		{
-			MethodName: "getListOfElevators",
+			MethodName: "GetListOfElevators",
 			Handler:    _Campus_GetListOfElevators_Handler,
 		},
 		{
-			MethodName: "getMoreInformation",
+			MethodName: "GetMoreInformation",
 			Handler:    _Campus_GetMoreInformation_Handler,
+		},
+		{
+			MethodName: "GetOpeningTimes",
+			Handler:    _Campus_GetOpeningTimes_Handler,
+		},
+		{
+			MethodName: "GetUpdateNote",
+			Handler:    _Campus_GetUpdateNote_Handler,
+		},
+		{
+			MethodName: "GetStudyRoomList",
+			Handler:    _Campus_GetStudyRoomList_Handler,
+		},
+		{
+			MethodName: "GetEventList",
+			Handler:    _Campus_GetEventList_Handler,
+		},
+		{
+			MethodName: "PostEventTicketMy",
+			Handler:    _Campus_PostEventTicketMy_Handler,
+		},
+		{
+			MethodName: "PostEventTicket",
+			Handler:    _Campus_PostEventTicket_Handler,
+		},
+		{
+			MethodName: "GetEventTicketType",
+			Handler:    _Campus_GetEventTicketType_Handler,
+		},
+		{
+			MethodName: "PostEventTicketReserveMultiple",
+			Handler:    _Campus_PostEventTicketReserveMultiple_Handler,
+		},
+		{
+			MethodName: "PurchaseTicketStripe",
+			Handler:    _Campus_PurchaseTicketStripe_Handler,
+		},
+		{
+			MethodName: "RetrieveEphemeralKey",
+			Handler:    _Campus_RetrieveEphemeralKey_Handler,
+		},
+		{
+			MethodName: "GetEventTicketStatus",
+			Handler:    _Campus_GetEventTicketStatus_Handler,
+		},
+		{
+			MethodName: "GetKino",
+			Handler:    _Campus_GetKino_Handler,
+		},
+		{
+			MethodName: "PostFeedback",
+			Handler:    _Campus_PostFeedback_Handler,
+		},
+		{
+			MethodName: "PostFeedbackIDImageNr",
+			Handler:    _Campus_PostFeedbackIDImageNr_Handler,
+		},
+		{
+			MethodName: "RegisterDevice",
+			Handler:    _Campus_RegisterDevice_Handler,
+		},
+		{
+			MethodName: "VerifyKey",
+			Handler:    _Campus_VerifyKey_Handler,
+		},
+		{
+			MethodName: "DeviceUploadGcmToken",
+			Handler:    _Campus_DeviceUploadGcmToken_Handler,
+		},
+		{
+			MethodName: "GetUploadStatus",
+			Handler:    _Campus_GetUploadStatus_Handler,
+		},
+		{
+			MethodName: "GetNotification",
+			Handler:    _Campus_GetNotification_Handler,
+		},
+		{
+			MethodName: "GetNotificationConfirm",
+			Handler:    _Campus_GetNotificationConfirm_Handler,
+		},
+		{
+			MethodName: "GetMembers",
+			Handler:    _Campus_GetMembers_Handler,
+		},
+		{
+			MethodName: "PostChatRooms",
+			Handler:    _Campus_PostChatRooms_Handler,
+		},
+		{
+			MethodName: "GetChatRoomsRoomId",
+			Handler:    _Campus_GetChatRoomsRoomId_Handler,
+		},
+		{
+			MethodName: "PostChatRoomsRoomIdLeave",
+			Handler:    _Campus_PostChatRoomsRoomIdLeave_Handler,
+		},
+		{
+			MethodName: "PostChatRoomsRoomIdAdd",
+			Handler:    _Campus_PostChatRoomsRoomIdAdd_Handler,
+		},
+		{
+			MethodName: "PutChatRoomsSendMessage",
+			Handler:    _Campus_PutChatRoomsSendMessage_Handler,
+		},
+		{
+			MethodName: "PutChatRoomsUpdateMessage",
+			Handler:    _Campus_PutChatRoomsUpdateMessage_Handler,
+		},
+		{
+			MethodName: "PostChatRoomsGetMessages",
+			Handler:    _Campus_PostChatRoomsGetMessages_Handler,
+		},
+		{
+			MethodName: "PostChatRoomsGetNewMessages",
+			Handler:    _Campus_PostChatRoomsGetNewMessages_Handler,
+		},
+		{
+			MethodName: "PostChatCreateMember",
+			Handler:    _Campus_PostChatCreateMember_Handler,
+		},
+		{
+			MethodName: "GetChatMemberByLrzId",
+			Handler:    _Campus_GetChatMemberByLrzId_Handler,
+		},
+		{
+			MethodName: "SearchMemberByName",
+			Handler:    _Campus_SearchMemberByName_Handler,
+		},
+		{
+			MethodName: "GetMemberRooms",
+			Handler:    _Campus_GetMemberRooms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
