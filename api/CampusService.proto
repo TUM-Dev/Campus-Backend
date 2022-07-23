@@ -69,7 +69,7 @@ service Campus {
   // This endpoint retrieves Cafeteria Ratings from the Backend.
   rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingResponse) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/cafeteria/get"
+      post: "/cafeteria/rating/get",
       body: "*",
     };
   }
@@ -77,7 +77,7 @@ service Campus {
 
   rpc GetDishRatings (DishRatingRequest) returns (DishRatingResponse) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/dish/get"
+      post: "/dish/rating/get",
       body: "*",
     };
   }
@@ -86,33 +86,48 @@ service Campus {
 
   rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/cafeteria/newCafeteriaRating"
+      post: "/cafeteria/rating/new",
       body: "*",
     };
   }
 
   rpc NewDishRating (NewDishRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/dish/newDishRating"
+      post: "/dish/rating/new",
       body: "*",
     };
   }
 
   rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/dish/allTags",
+      get: "/dish/rating/allTags",
+      body: "*",
+      response_body: "ratingTags"
     };
   }
 
   rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/cafeteria/allTags",
+      get: "/cafeteria/rating/allTags",
+      body: "*",
+      response_body: "ratingTags"
     };
   }
 
   rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaResponse) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/cafeteria/allCafeterias",
+      get: "/cafeteria/allCafeterias",
+      body: "*",
+      response_body: "cafeteria"
+    };
+  }
+
+
+  rpc GetDishes (GetDishesRequest) returns (GetDishesResponse) {
+    option (google.api.http) = {
+      get: "/dish/allDishes",
+      body: "*",
+      response_body: "dish"
     };
   }
 
@@ -240,6 +255,8 @@ service Campus {
       post: "/feedback/:id/:image_nr",
     };
   }
+
+
 }
 
 message GetRoomScheduleRequest {
@@ -463,6 +480,21 @@ message Cafeteria{
   double longitude = 3;
   double latitude = 4;
 }
+
+
+message GetDishesRequestRequest{
+  string cafeteriaId = 1;
+  int32 year = 2;
+  int32 month = 3;
+  int32 day = 4;
+}
+
+message GetDishesRequestResponse{
+  repeated string dish = 1;
+}
+
+
+
 
 
 
