@@ -75,7 +75,7 @@ service Campus {
   }
 
 
-  rpc GetMealRatings (MealRatingRequest) returns (MealRatingResponse) {
+  rpc GetDishRatings (DishRatingRequest) returns (DishRatingResponse) {
     option (google.api.http) = {
       post: "/cafeteriaRating/dish/get"
       body: "*",
@@ -91,16 +91,16 @@ service Campus {
     };
   }
 
-  rpc NewMealRating (NewMealRatingRequest) returns (google.protobuf.Empty) {
+  rpc NewDishRating (NewDishRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteriaRating/meal/newMealRating"
+      post: "/cafeteriaRating/dish/newDishRating"
       body: "*",
     };
   }
 
-  rpc GetAvailableMealTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+  rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteriaRating/meal/allTags",
+      get: "/cafeteriaRating/dish/allTags",
     };
   }
 
@@ -350,11 +350,11 @@ message CafeteriaRatingRequest {
   int32 limit = 4;
 }
 
-message MealRatingRequest {
+message DishRatingRequest {
   // Mandatory Name of the cafeteria (EAT-API naming scheme)
   string cafeteriaName = 1;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
-  string meal = 2;
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
+  string dish = 2;
   // Optional Parameter to define an interval for the ratings (Lower bound)
   google.protobuf.Timestamp from = 3;
   // Optional Parameter to define an interval for the ratings (Upper bound)
@@ -369,18 +369,18 @@ message CafeteriaRatingResponse {
   double standardDeviation = 3;
   int32 minPoints = 4;
   int32 maxPoints = 5;
-  repeated TagRatingsResult ratingTags = 6;
+  repeated RatingTagResult ratingTags = 6;
 }
 
 
-message MealRatingResponse {
-  repeated MealRating rating = 1;
+message DishRatingResponse {
+  repeated DishRating rating = 1;
   double averagePoints = 2;
   double standardDeviation = 3;
   int32 minPoints = 4;
   int32 maxPoints = 5;
-  repeated TagRatingsResult ratingTags = 6;
-  repeated TagRatingsResult nameTags = 7;
+  repeated RatingTagResult ratingTags = 6;
+  repeated RatingTagResult nameTags = 7;
 }
 
 
@@ -389,28 +389,28 @@ message MealRatingResponse {
 message CafeteriaRating{
   // number in the range 1-5
   int32 points = 1;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string cafeteriaName = 2;
   // Optional JPEG image in Base64
   bytes image = 3;
   // Optional comment (max 256 chars)
   string comment = 4;
-  repeated TagRatingResult tagRating = 5;
+  repeated RatingTagNewRequest ratingTags = 5;
   google.protobuf.Timestamp cafeteriaVisitedAt = 6;
 }
 
-message MealRating{
+message DishRating{
   // number in the range 1-5
   int32 points = 1;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string cafeteriaName = 2;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
-  string meal = 3;
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
+  string dish = 3;
   // Optional JPEG image in Base64
   bytes image = 4;
   // Optional comment (max 256 chars)
   string comment = 5;
-  repeated TagRatingResult tagRating = 6;
+  repeated RatingTagNewRequest ratingTags = 6;
   google.protobuf.Timestamp cafeteriaVisitedAt = 7;
 }
 
@@ -421,48 +421,48 @@ message NewCafeteriaRatingRequest{
   string cafeteriaName = 2;
   bytes image = 3;
   // Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags
-  repeated TagRating tags = 4;
+  repeated RatingTag ratingTags = 4;
   // Optional comment (max 256 chars)
   string comment = 6;
 }
 
-message NewMealRatingRequest{
+message NewDishRatingRequest{
   // number in the range 1-5
   int32 points = 1;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string cafeteriaName = 2;
-  // Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa
-  string meal = 3;
+  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
+  string dish = 3;
   // Optional JPEG image in Base64
   bytes image = 4;
-  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of mealRatingTags
-  repeated TagRating tags = 5;
+  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags
+  repeated RatingTag ratingTags = 5;
   // Optional comment (max 256 chars)
   string comment = 7;
 }
 
 message GetRatingTagsReply{
-  repeated TagRatingOverview tags = 1;
+  repeated RatingTagsOverview ratingTags = 1;
 }
 
 
-message TagRatingOverview {
+message RatingTagsOverview {
   string de = 1;
   string en = 2;
 }
 
-message TagRatingResult {
+message RatingTag {
+  string tag = 1;
+  double points = 2;
+}
+
+message RatingTagNewRequest {
   string de = 1;
   string en = 2;
   int32 points = 3;
 }
 
-message TagRating {
-  string tag = 1;
-  double points = 2;
-}
-
-message TagRatingsResult {
+message RatingTagResult {
   string de = 1;
   string en = 2;
   double averagePoints = 3;
