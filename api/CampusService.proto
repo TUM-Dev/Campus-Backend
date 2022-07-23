@@ -340,8 +340,8 @@ message GetTopNewsReply {
 
 
 message CafeteriaRatingRequest {
-  // cafeteriaName Mandatory Name of the cafeteria (EAT-API naming scheme)
-  string cafeteriaName = 1;
+  // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
+  string cafeteriaId = 1;
   // Optional Parameter to define an interval for the ratings (Lower bound)
   google.protobuf.Timestamp from = 2;
   // Optional Parameter to define an interval for the ratings (Upper bound)
@@ -351,8 +351,8 @@ message CafeteriaRatingRequest {
 }
 
 message DishRatingRequest {
-  // Mandatory Name of the cafeteria (EAT-API naming scheme)
-  string cafeteriaName = 1;
+  // Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
+  string cafeteriaId = 1;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 2;
   // Optional Parameter to define an interval for the ratings (Lower bound)
@@ -364,61 +364,42 @@ message DishRatingRequest {
 }
 
 message CafeteriaRatingResponse {
-  repeated CafeteriaRating rating = 1;
-  double averagePoints = 2;
-  double standardDeviation = 3;
-  int32 minPoints = 4;
-  int32 maxPoints = 5;
+  repeated SingleRatingResponse rating = 1;
+  double avg = 2;
+  double std = 3;
+  int32 min = 4;
+  int32 max = 5;
   repeated RatingTagResult ratingTags = 6;
 }
 
 
 message DishRatingResponse {
-  repeated DishRating rating = 1;
-  double averagePoints = 2;
-  double standardDeviation = 3;
-  int32 minPoints = 4;
-  int32 maxPoints = 5;
+  repeated SingleRatingResponse rating = 1;
+  double avg = 2;
+  double std = 3;
+  int32 min = 4;
+  int32 max = 5;
   repeated RatingTagResult ratingTags = 6;
   repeated RatingTagResult nameTags = 7;
 }
 
 
-
-
-message CafeteriaRating{
+message SingleRatingResponse{
   // number in the range 1-5
   int32 points = 1;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string cafeteriaName = 2;
   // Optional JPEG image in Base64
-  bytes image = 3;
+  bytes image = 2;
   // Optional comment (max 256 chars)
-  string comment = 4;
-  repeated RatingTagNewRequest ratingTags = 5;
-  google.protobuf.Timestamp cafeteriaVisitedAt = 6;
-}
-
-message DishRating{
-  // number in the range 1-5
-  int32 points = 1;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string cafeteriaName = 2;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string dish = 3;
-  // Optional JPEG image in Base64
-  bytes image = 4;
-  // Optional comment (max 256 chars)
-  string comment = 5;
-  repeated RatingTagNewRequest ratingTags = 6;
-  google.protobuf.Timestamp cafeteriaVisitedAt = 7;
+  string comment = 3;
+  repeated RatingTagNewRequest ratingTags = 4;
+  google.protobuf.Timestamp visited = 5;
 }
 
 
 message NewCafeteriaRatingRequest{
   // number in the range 1-5
   int32 points = 1;
-  string cafeteriaName = 2;
+  string cafeteriaId = 2;
   bytes image = 3;
   // Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags
   repeated RatingTag ratingTags = 4;
@@ -429,8 +410,8 @@ message NewCafeteriaRatingRequest{
 message NewDishRatingRequest{
   // number in the range 1-5
   int32 points = 1;
-  // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
-  string cafeteriaName = 2;
+  // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
+  string cafeteriaId = 2;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 3;
   // Optional JPEG image in Base64
@@ -447,28 +428,27 @@ message GetRatingTagsReply{
 
 
 message RatingTagsOverview {
-  string de = 1;
-  string en = 2;
+  int32 tagId= 1;
+  string de = 2;
+  string en = 3;
 }
 
 message RatingTag {
-  string tag = 1;
+  int32 tagId= 1;
   double points = 2;
 }
 
 message RatingTagNewRequest {
-  string de = 1;
-  string en = 2;
-  int32 points = 3;
+  int32 tagId= 1;
+  int32 points = 2;
 }
 
 message RatingTagResult {
-  string de = 1;
-  string en = 2;
-  double averagePoints = 3;
-  double standardDeviation = 4;
-  int32 minPoints = 5;
-  int32 maxPoints = 6;
+  int32 tagId= 1;
+  double avg = 2;
+  double std = 3;
+  int32 min = 4;
+  int32 max = 5;
 }
 
 
@@ -478,7 +458,7 @@ message GetCafeteriaResponse{
 }
 
 message Cafeteria{
-  string name = 1;
+  string id = 1;
   string address = 2;
   double longitude = 3;
   double latitude = 4;
