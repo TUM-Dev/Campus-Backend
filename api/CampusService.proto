@@ -251,7 +251,7 @@ service Campus {
     };
   }
 
-  rpc PostFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackIDImageNrReply) {
+  rpc PostFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackReply) {
     option (google.api.http) = {
       post: "/feedback/{id}/{image_nr}",
     };
@@ -301,26 +301,26 @@ service Campus {
     };
   }
 
-  rpc PostChatRooms(PostChatRoomsRequest) returns (PostChatRoomsReply) {
+  rpc PostChatRooms(google.protobuf.Empty) returns (PostChatRoomsReply) {
     option (google.api.http) = {
       post: "/chat/rooms/",
     };
   }
 
-  rpc GetChatRoomsRoomId(GetChatRoomsRoomIdRequest) returns (GetChatRoomsRoomIdReply) {
+  rpc GetChatRoomsRoomId(GetChatRoomsRoomIdRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
       get: "/chat/rooms/{room_id}",
     };
   }
 
-  rpc PostChatRoomsRoomIdLeave(PostChatRoomsRoomIdLeaveRequest) returns (PostChatRoomsRoomIdLeaveReply) {
+  rpc PostChatRoomsRoomIdLeave(PostChatRoomsRoomIdLeaveRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
       post: "/chat/rooms/{room_id}/leave",
     };
   }
-  rpc PostChatRoomsRoomIdAdd(PostChatRoomsRoomIdAddRequest) returns (PostChatRoomsRoomIdAddReply) {
+  rpc PostChatRoomsRoomIdAdd(PostChatRoomsRoomIdAddRequest) returns (ChatRoomsMsgElement) {
     option (google.api.http) = {
-      post: "/chat/rooms/{room_id}",
+      post: "/chat/rooms/{room_id}/add/{member}",
     };
   }
 
@@ -835,3 +835,67 @@ message KinoMsgElement{
   string trailer = 15;
   string link = 16;
 }
+
+message PostFeedbackRequest{
+  string topic = 1;
+  string email = 2;
+  string emailId = 3;
+  string message = 4;
+  int32 image_count = 5;
+  double latitude = 6;
+  double longitude = 7;
+  string osVersion = 8;
+  string appVersion = 9;
+
+
+}
+
+message PostFeedbackReply{
+  string status = 1;
+}
+
+message PostFeedbackIDImageNrRequest{
+  int32 id = 1;
+  int32 imageNr = 2;
+  //todo wo kommt das eigentliche file her?
+}
+
+
+message GetMembersRequest{
+  string lrzId = 1;
+}
+
+message GetMembersReply{
+  string lrzId = 1;
+  string name = 2;
+  int32 member = 3;
+}
+
+
+
+message PostChatRoomsReply{
+  repeated ChatRoomsMsgElement rooms = 1;
+}
+
+message ChatRoomsMsgElement{
+  int32 id = 1;
+  string name = 2;
+  string semester = 3;
+  string title = 4;
+  int32 members = 5;
+}
+
+message GetChatRoomsRoomIdRequest{
+  int32 roomId = 1;
+}
+
+
+message PostChatRoomsRoomIdLeaveRequest{
+  int32 roomId = 1;
+}
+
+message PostChatRoomsRoomIdAddRequest{
+  int32 room=1;
+  int32 member=2;
+}
+
