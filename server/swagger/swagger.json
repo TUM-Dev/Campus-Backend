@@ -128,12 +128,12 @@
     },
     "/cafeteriaRating/dish/get": {
       "post": {
-        "operationId": "Campus_GetMealRatings",
+        "operationId": "Campus_GetDishRatings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiMealRatingResponse"
+              "$ref": "#/definitions/apiDishRatingResponse"
             }
           },
           "default": {
@@ -149,7 +149,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiMealRatingRequest"
+              "$ref": "#/definitions/apiDishRatingRequest"
             }
           }
         ],
@@ -158,9 +158,9 @@
         ]
       }
     },
-    "/cafeteriaRating/meal/allTags": {
+    "/cafeteriaRating/dish/allTags": {
       "get": {
-        "operationId": "Campus_GetAvailableMealTags",
+        "operationId": "Campus_GetAvailableDishTags",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -180,9 +180,9 @@
         ]
       }
     },
-    "/cafeteriaRating/meal/newMealRating": {
+    "/cafeteriaRating/dish/newDishRating": {
       "post": {
-        "operationId": "Campus_NewMealRating",
+        "operationId": "Campus_NewDishRating",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -203,7 +203,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiNewMealRatingRequest"
+              "$ref": "#/definitions/apiNewDishRatingRequest"
             }
           }
         ],
@@ -395,7 +395,7 @@
         ]
       }
     },
-    "/roomfinder/room/search": {
+    "/roomfinder/room/dish": {
       "post": {
         "operationId": "Campus_SearchRooms",
         "responses": {
@@ -508,7 +508,7 @@
         },
         "cafeteriaName": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
@@ -735,7 +735,7 @@
         }
       }
     },
-    "apiMealRating": {
+    "apiDishRating": {
       "type": "object",
       "properties": {
         "points": {
@@ -745,11 +745,11 @@
         },
         "cafeteriaName": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
-        "meal": {
+        "dish": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
@@ -772,16 +772,16 @@
         }
       }
     },
-    "apiMealRatingRequest": {
+    "apiDishRatingRequest": {
       "type": "object",
       "properties": {
         "cafeteriaName": {
           "type": "string",
           "title": "Mandatory Name of the cafeteria (EAT-API naming scheme)"
         },
-        "meal": {
+        "dish": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
         "from": {
           "type": "string",
@@ -800,13 +800,13 @@
         }
       }
     },
-    "apiMealRatingResponse": {
+    "apiDishRatingResponse": {
       "type": "object",
       "properties": {
         "rating": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiMealRating"
+            "$ref": "#/definitions/apiDishRating"
           }
         },
         "averagePoints": {
@@ -867,7 +867,7 @@
         }
       }
     },
-    "apiNewMealRatingRequest": {
+    "apiNewDishRatingRequest": {
       "type": "object",
       "properties": {
         "points": {
@@ -877,11 +877,11 @@
         },
         "cafeteriaName": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
-        "meal": {
+        "dish": {
           "type": "string",
-          "title": "Mandatory Name of the meal (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
         },
         "image": {
           "type": "string",
@@ -893,7 +893,7 @@
           "items": {
             "$ref": "#/definitions/apiTagRating"
           },
-          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of mealRatingTags"
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
         },
         "comment": {
           "type": "string",

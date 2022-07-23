@@ -24,7 +24,7 @@ const (
 	TICKETSALE_TYPE            = "ticketsale"
 	ALARM_TYPE                 = "alarm"
 	FILE_DOWNLOAD_TYPE         = "fileDownload"
-	MEAL_NAME_DOWNLOAD         = "mealNameDownload"
+	MEAL_NAME_DOWNLOAD         = "dishNameDownload"
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
 	STORAGE_DIR                = "/Storage/" // target location of files
 )
@@ -42,7 +42,7 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'mealNamesDownload', 'averageRatingComputation','mealNameDownload')", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'dishNamesDownload', 'averageRatingComputation','dishNameDownload')", time.Now().Unix()).
 			Scan(&res)
 		g := new(errgroup.Group)
 
@@ -66,7 +66,7 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.fileDownloadCron() })
 				break
 			case MEAL_NAME_DOWNLOAD:
-				g.Go(func() error { return c.mealNameDownloadCron() })
+				g.Go(func() error { return c.dishNameDownloadCron() })
 				break
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
 				g.Go(func() error { return c.averageRatingComputation() })

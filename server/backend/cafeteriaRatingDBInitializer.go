@@ -37,11 +37,11 @@ Writes all available tags from the json file into tables in order to make them e
 Will be executed once while the server is started.
 */
 func initTagRatingOptions(db *gorm.DB) {
-	updateTagTable("backend/static_data/mealRatingTags.json", db, MEAL)
+	updateTagTable("backend/static_data/dishRatingTags.json", db, MEAL)
 	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
 	addEntriesForCronJob(db, "averageRatingComputation", 300)
-	addEntriesForCronJob(db, "mealNameDownload", 302400) //run twice every week
+	addEntriesForCronJob(db, "dishNameDownload", 302400) //run twice every week
 }
 
 func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
@@ -66,52 +66,52 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 }
 
 /*
-Updates the list of mealtags.
+Updates the list of dishtags.
 If a Tag with the exact german and english name does not exist yet, it will be created.
 Old tags won't be removed to prevent problems with foreign keys.
 */
 func updateNameTagOptions(db *gorm.DB) {
-	absPathMealNames, _ := filepath.Abs("backend/static_data/mealNameTags.json")
-	tagsNames := generateNameTagListFromFile(absPathMealNames)
+	absPathDishNames, _ := filepath.Abs("backend/static_data/dishNameTags.json")
+	tagsNames := generateNameTagListFromFile(absPathDishNames)
 	var elementID int32
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		var parentID int32
 
-		potentialTag := db.Model(&cafeteria_rating_models.MealNameTagOption{}).
+		potentialTag := db.Model(&cafeteria_rating_models.DishNameTagOption{}).
 			Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-			Select("MealNameTagOption").
+			Select("DishNameTagOption").
 			Scan(&parentID)
 
 		if potentialTag.RowsAffected == 0 {
-			parent := cafeteria_rating_models.MealRatingTagOption{
+			parent := cafeteria_rating_models.DishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish}
 
-			db.Model(&cafeteria_rating_models.MealNameTagOption{}).
+			db.Model(&cafeteria_rating_models.DishNameTagOption{}).
 				Create(&parent)
-			parentID = parent.MealRatingTagOption
+			parentID = parent.DishRatingTagOption
 		}
 
 		for _, u := range v.Canbeincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
+			resultIncluded := db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("MealNameTagOptionIncluded").
+				Select("DishNameTagOptionIncluded").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionIncluded{
+				db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
+					Create(&cafeteria_rating_models.DishNameTagOptionIncluded{
 						Expression: u,
 						NameTagID:  parentID})
 			}
 		}
 		for _, u := range v.Notincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
+			resultIncluded := db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
 				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("MealNameTagOptionExcluded").
+				Select("DishNameTagOptionExcluded").
 				Scan(&elementID)
 			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
-					Create(&cafeteria_rating_models.MealNameTagOptionExcluded{
+				db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
+					Create(&cafeteria_rating_models.DishNameTagOptionExcluded{
 						Expression: u,
 						NameTagID:  parentID})
 			}
@@ -125,10 +125,10 @@ If an entry with the same German and English name exists, the entry won't be add
 The TagType is used to identify the corresponding model
 */
 func updateTagTable(path string, db *gorm.DB, tagType int) {
-	absPathMeal, _ := filepath.Abs(path)
-	tagsMeal := generateRatingTagListFromFile(absPathMeal)
+	absPathDish, _ := filepath.Abs(path)
+	tagsDish := generateRatingTagListFromFile(absPathDish)
 	insertModel := getTagModel(tagType, db)
-	for _, v := range tagsMeal.MultiLanguageTags {
+	for _, v := range tagsDish.MultiLanguageTags {
 		var result int32
 		var affectedRows = 0
 		if tagType == CAFETERIA {
@@ -137,15 +137,15 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 				Select("cafeteriaRatingTagOption").
 				Scan(&result).RowsAffected)
 		} else {
-			affectedRows = int(db.Model(&cafeteria_rating_models.MealRatingTagOption{}).
+			affectedRows = int(db.Model(&cafeteria_rating_models.DishRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-				Select("mealRatingTagOption").
+				Select("dishRatingTagOption").
 				Scan(&result).RowsAffected)
 		}
 
 		if affectedRows == 0 {
 			println("New entry inserted to Rating Tag Options")
-			element := cafeteria_rating_models.MealRatingTagOption{
+			element := cafeteria_rating_models.DishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish}
 			insertModel.
@@ -156,7 +156,7 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 
 func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.MealRatingTagOption{})
+		return db.Model(&cafeteria_rating_models.DishRatingTagOption{})
 	} else {
 		return db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{})
 	}

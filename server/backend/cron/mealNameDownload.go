@@ -33,24 +33,24 @@ type Days struct {
 }
 
 type Date struct {
-	Dates []Meal `json:"dishes"`
+	Dates []Dish `json:"dishes"`
 }
 
-type Meal struct {
+type Dish struct {
 	Name     string `json:"name"`
 	DishType string `json:"dish_type"`
 }
 
 //fileDownloadCron Downloads all files that are not marked as finished in the database.
-func (c *CronService) mealNameDownloadCron() error {
+func (c *CronService) dishNameDownloadCron() error {
 
 	downloadCanteenNames(c)
-	downloadDailyMeals(c)
+	downloadDailyDishes(c)
 
 	return nil
 }
 
-func downloadDailyMeals(c *CronService) {
+func downloadDailyDishes(c *CronService) {
 	var result []CafeteriaWithID
 	c.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
 
@@ -68,36 +68,36 @@ func downloadDailyMeals(c *CronService) {
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if body[0] == '<' {
-			log.Println("Mealplan for", v, "does not exist error 404 returned.")
+			log.Println("Dishplan for", v, "does not exist error 404 returned.")
 		} else {
-			var meals Days
-			errjson := json.Unmarshal(body, &meals)
+			var dishes Days
+			errjson := json.Unmarshal(body, &dishes)
 			if errjson != nil {
 				log.Println("Error in Parsing")
 				log.Fatalln(errjson)
 			}
-			log.Println("Meals:")
-			for i := 0; i < len(meals.Days); i++ {
-				for u := 0; u < len(meals.Days[i].Dates); u++ {
+			log.Println("Dishes:")
+			for i := 0; i < len(dishes.Days); i++ {
+				for u := 0; u < len(dishes.Days[i].Dates); u++ {
 
-					meal := cafeteria_rating_models.Meal{
-						Name:        meals.Days[i].Dates[u].Name,
-						Type:        meals.Days[i].Dates[u].DishType,
+					dish := cafeteria_rating_models.Dish{
+						Name:        dishes.Days[i].Dates[u].Name,
+						Type:        dishes.Days[i].Dates[u].DishType,
 						CafeteriaID: v.Cafeteria,
 					}
 
-					res := c.db.Model(&cafeteria_rating_models.Meal{}).
-						Where("name = ? AND cafeteriaID = ?", meal.Name, meal.CafeteriaID)
+					res := c.db.Model(&cafeteria_rating_models.Dish{}).
+						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID)
 
 					if res.RowsAffected == 0 {
-						c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
-						addMealTagsToMapping(meal.Meal, meal.Name, c.db)
-					} /*else {		//todo potentially add update logic for the weekly meals
+						c.db.Model(&cafeteria_rating_models.Dish{}).Create(&dish)
+						addDishTagsToMapping(dish.Dish, dish.Name, c.db)
+					} /*else {		//todo potentially add update logic for the weekly dishes
 						c.db.Model(&cafeteria_rating_models.Cafeteria{}).
 							Where("name = ?", cafeteriaNames[i].Name).
 							Updates(&mensa)
 					}*/
-					//c.db.Model(&cafeteria_rating_models.Meal{}).Create(&meal)
+					//c.db.Model(&cafeteria_rating_models.Dish{}).Create(&dish)
 				}
 			}
 		}
@@ -144,20 +144,20 @@ func downloadCanteenNames(c *CronService) {
 }
 
 /*
-Checks whether the meal name includes one of the expressions for the excluded tas as well as the included tags.
-The corresponding tags for all identified MealNames will be saved in the table MealNameTags.
+Checks whether the dish name includes one of the expressions for the excluded tas as well as the included tags.
+The corresponding tags for all identified DishNames will be saved in the table DishNameTags.
 */
-func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
-	lowercaseMeal := strings.ToLower(mealName)
+func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
+	lowercaseDish := strings.ToLower(dishName)
 	var includedTags []int32
-	db.Model(&cafeteria_rating_models.MealNameTagOptionIncluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
+	db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&includedTags)
 
 	var excludedTags []int32
-	db.Model(&cafeteria_rating_models.MealNameTagOptionExcluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseMeal).
+	db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
+		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&excludedTags)
 
@@ -175,8 +175,8 @@ func addMealTagsToMapping(mealID int32, mealName string, db *gorm.DB) {
 
 	for _, a := range includedTags {
 		if a != -1 {
-			db.Model(&cafeteria_rating_models.MealToMealNameTag{}).Create(&cafeteria_rating_models.MealToMealNameTag{
-				MealID:    mealID,
+			db.Model(&cafeteria_rating_models.DishToDishNameTag{}).Create(&cafeteria_rating_models.DishToDishNameTag{
+				DishID:    dishID,
 				NameTagID: a,
 			})
 		}
