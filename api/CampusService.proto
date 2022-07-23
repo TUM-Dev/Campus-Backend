@@ -153,6 +153,93 @@ service Campus {
       get: "/barrierfree/moreInformation",
     };
   }
+
+
+  rpc getOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesResponse) {
+    option (google.api.http) = {
+      get: "/openingtimes/:language",
+    };
+  }
+
+
+  rpc getUpdateNote (GetUpdateNoteRequest) returns (GetUpdateNoteResponse) {
+    option (google.api.http) = {
+      get: "/updatenote/:version",
+    };
+  }
+
+
+  rpc getStudyRoomList (GetStudyRoomListRequest) returns (GetStudyRoomListResponse) {
+    option (google.api.http) = {
+      get: "/studyroom/list",
+    };
+  }
+
+  rpc getEventList(GetEventListRequest) returns (GetEventListResponse) {
+    option (google.api.http) = {
+      get: "/event/list",
+    };
+  }
+
+  rpc postEventTicketMy(PostEventTicketMyRequest) returns (PostEventTicketMyResponse) {
+    option (google.api.http) = {
+      post: "/event/ticket/my",
+    };
+  }
+
+  rpc postEventTicket(PostEventTicketRequest) returns (PostEventTicketResponse) {
+    option (google.api.http) = {
+      post: "/event/ticket/:ticket_id",
+    };
+  }
+
+  rpc getEventTicketType(GetEventTicketTypeRequest) returns (GetEventTicketTypeResponse) {
+    option (google.api.http) = {
+      get: "/event/ticket/type/:event_id",
+    };
+  }
+
+  rpc postEventTicketReserveMultiple(PostEventTicketReserveMultipleRequest) returns (PostEventTicketReserveMultipleResponse) {
+    option (google.api.http) = {
+      post: "/event/ticket/reserve/multiple",
+    };
+  }
+
+  rpc postEventTicketPaymentStripePurchaseMultiple(PostEventTicketPaymentStripePurchaseMultiple) returns (PostEventTicketPaymentStripePurchaseMultiple) {
+    option (google.api.http) = {
+      post: "/event/ticket/payment/stripe/purchase/multiple",
+    };
+  }
+
+  rpc postEventTicketPaymentStripeEphermalKeyTicket(PostEventTicketPaymentStripeEphermalKeyRequest) returns (PostEventTicketPaymentStripeEphermalKeyResponse) {
+    option (google.api.http) = {
+      post: "/event/ticket/payment/stripe/ephemeralkey",
+    };
+  }
+
+  rpc getEventTicketStatus(GetEventTicketStatusRequest) returns (GetEventTicketStatusResponse) {
+    option (google.api.http) = {
+      get: "/event/ticket/status/:event_id",
+    };
+  }
+
+  rpc getKino(GetKinoRequest) returns (GetKinoResponse) {
+    option (google.api.http) = {
+      get: "/kino/:last_id",
+    };
+  }
+
+  rpc postFeedback(PostFeedbackRequest) returns (PostFeedbackResponse) {
+    option (google.api.http) = {
+      post: "/feedback",
+    };
+  }
+
+  rpc postFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackIDImageNrResponse) {
+    option (google.api.http) = {
+      post: "/feedback/:id/:image_nr",
+    };
+  }
 }
 
 message GetRoomScheduleRequest {
