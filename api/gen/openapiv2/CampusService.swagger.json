@@ -1,4 +1,5 @@
 {
+"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "CampusService.proto",
@@ -264,416 +265,6 @@
             "schema": {
               "$ref": "#/definitions/apiNewCafeteriaRatingRequest"
             }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/members": {
-      "post": {
-        "operationId": "Campus_PostChatCreateMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMemberMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "lrzId",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "displayName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "signature",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/members/search/{query}": {
-      "get": {
-        "operationId": "Campus_SearchMemberByName",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMemberMsg"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "query",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/members/{lrzId}": {
-      "get": {
-        "operationId": "Campus_GetChatMemberByLrzId",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMemberMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lrzId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/members/{memberId}/rooms": {
-      "post": {
-        "operationId": "Campus_GetMemberRooms",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetMemberRoomsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms": {
-      "post": {
-        "operationId": "Campus_PostChatRooms",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiPostChatRoomsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "properties": {}
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}": {
-      "get": {
-        "operationId": "Campus_GetChatRoomsRoomId",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatRoomsMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/add/{memberId}": {
-      "post": {
-        "operationId": "Campus_PostChatRoomsRoomIdAdd",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatRoomsMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/leave": {
-      "post": {
-        "operationId": "Campus_PostChatRoomsRoomIdLeave",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatRoomsMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/message": {
-      "put": {
-        "operationId": "Campus_PutChatRoomsSendMessage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMessageModelMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/message/{messageId}": {
-      "put": {
-        "operationId": "Campus_PutChatRoomsUpdateMessage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMessageModelMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "messageId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/messages": {
-      "post": {
-        "operationId": "Campus_PostChatRoomsGetNewMessages",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMessageModelMsg"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/chat/rooms/{roomId}/messages/{pageId}": {
-      "post": {
-        "operationId": "Campus_PostChatRoomsGetMessages",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiChatMessageModelMsg"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pageId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
           }
         ],
         "tags": [
@@ -954,13 +545,12 @@
     },
     "/event/ticket/my": {
       "post": {
-        "summary": "todo check again",
-        "operationId": "Campus_PostEventTicketMy",
+        "operationId": "Campus_GetPurchasedTickets",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiPostEventTicketMyReply"
+              "$ref": "#/definitions/apiGetPurchasedTicketsReply"
             }
           },
           "default": {
@@ -977,12 +567,12 @@
     },
     "/event/ticket/payment/stripe/ephemeralkey": {
       "post": {
-        "operationId": "Campus_RetrieveEphemeralKey",
+        "operationId": "Campus_GetEphemeralKey",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiRetrieveEphemeralKeyReply"
+              "$ref": "#/definitions/apiGetEphemeralKeyReply"
             }
           },
           "default": {
@@ -1021,12 +611,12 @@
     },
     "/event/ticket/reserve/multiple": {
       "post": {
-        "operationId": "Campus_PostEventTicketReserveMultiple",
+        "operationId": "Campus_ReserveMultipleTickets",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiPostEventTicketReserveMultipleReply"
+              "$ref": "#/definitions/apiReserveMultipleTicketsReply"
             }
           },
           "default": {
@@ -1067,12 +657,12 @@
     },
     "/event/ticket/status/{eventId}": {
       "get": {
-        "operationId": "Campus_GetEventTicketStatus",
+        "operationId": "Campus_GetTicketStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetEventTicketStatusReply"
+              "$ref": "#/definitions/apiGetTicketStatusReply"
             }
           },
           "default": {
@@ -1098,7 +688,7 @@
     },
     "/event/ticket/type/{id}": {
       "get": {
-        "operationId": "Campus_GetEventTicketType",
+        "operationId": "Campus_GetTicketType",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1129,7 +719,7 @@
     },
     "/event/ticket/{id}": {
       "post": {
-        "operationId": "Campus_PostEventTicket",
+        "operationId": "Campus_GetMyTicket",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1160,12 +750,12 @@
     },
     "/feedback": {
       "post": {
-        "operationId": "Campus_PostFeedback",
+        "operationId": "Campus_SendFeedback",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiPostFeedbackReply"
+              "$ref": "#/definitions/apiSendFeedbackImageReply"
             }
           },
           "default": {
@@ -1241,12 +831,12 @@
     },
     "/feedback/{id}/{imageNr}": {
       "post": {
-        "operationId": "Campus_PostFeedbackIDImageNr",
+        "operationId": "Campus_SendFeedbackImage",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiPostFeedbackReply"
+              "$ref": "#/definitions/apiSendFeedbackImageReply"
             }
           },
           "default": {
@@ -1836,104 +1426,7 @@
         "limit": {
           "type": "integer",
           "format": "int32",
-          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
-        }
-      }
-    },
-    "apiChatMemberMsg": {
-      "type": "object",
-      "properties": {
-        "members": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiChatMemberMsgElement"
-          }
-        }
-      }
-    },
-    "apiChatMemberMsgElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "lrzId": {
-          "type": "string"
-        },
-        "displayName": {
-          "type": "string"
-        },
-        "signature": {
-          "type": "string"
-        }
-      }
-    },
-    "apiChatMessageModelMsg": {
-      "type": "object",
-      "properties": {
-        "messages": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiChatMessageModelMsgElement"
-          }
-        }
-      }
-    },
-    "apiChatMessageModelMsgElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "previous": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "room": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "text": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "signature": {
-          "type": "string"
-        },
-        "memberId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "sendingStatus": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiChatRoomsMsgElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "name": {
-          "type": "string"
-        },
-        "semester": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "members": {
-          "type": "integer",
-          "format": "int32"
+          "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
         }
       }
     },
@@ -2000,7 +1493,7 @@
         "limit": {
           "type": "integer",
           "format": "int32",
-          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
+          "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
         }
       }
     },
@@ -2186,6 +1679,9 @@
         }
       }
     },
+    "apiGetEphemeralKeyReply": {
+      "type": "object"
+    },
     "apiGetEventListReply": {
       "type": "object",
       "properties": {
@@ -2193,17 +1689,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiEventListMsgElement"
-          }
-        }
-      }
-    },
-    "apiGetEventTicketStatusReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTicketStatus"
           }
         }
       }
@@ -2283,17 +1768,6 @@
         }
       }
     },
-    "apiGetMemberRoomsReply": {
-      "type": "object",
-      "properties": {
-        "chatRooms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiChatRoomsMsgElement"
-          }
-        }
-      }
-    },
     "apiGetMembersReply": {
       "type": "object",
       "properties": {
@@ -2357,6 +1831,17 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiOpeningTimesMsgElement"
+          }
+        }
+      }
+    },
+    "apiGetPurchasedTicketsReply": {
+      "type": "object",
+      "properties": {
+        "myTickets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEventTicketMyMsgElement"
           }
         }
       }
@@ -2461,6 +1946,17 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiStudyRoomMsgElement"
+          }
+        }
+      }
+    },
+    "apiGetTicketStatusReply": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTicketStatus"
           }
         }
       }
@@ -2714,47 +2210,6 @@
         }
       }
     },
-    "apiPostChatRoomsReply": {
-      "type": "object",
-      "properties": {
-        "rooms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiChatRoomsMsgElement"
-          }
-        }
-      }
-    },
-    "apiPostEventTicketMyReply": {
-      "type": "object",
-      "properties": {
-        "myTickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiEventTicketMyMsgElement"
-          }
-        }
-      }
-    },
-    "apiPostEventTicketReserveMultipleReply": {
-      "type": "object",
-      "properties": {
-        "tickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiEventTicketReserveMultipleMsgElement"
-          }
-        }
-      }
-    },
-    "apiPostFeedbackReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        }
-      }
-    },
     "apiPurchaseTicketStripeReply": {
       "type": "object",
       "properties": {
@@ -2832,6 +2287,17 @@
         }
       }
     },
+    "apiReserveMultipleTicketsReply": {
+      "type": "object",
+      "properties": {
+        "tickets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiEventTicketReserveMultipleMsgElement"
+          }
+        }
+      }
+    },
     "apiResponsiblePersonElement": {
       "type": "object",
       "properties": {
@@ -2851,9 +2317,6 @@
           "type": "string"
         }
       }
-    },
-    "apiRetrieveEphemeralKeyReply": {
-      "type": "object"
     },
     "apiRoom": {
       "type": "object",
@@ -2936,6 +2399,14 @@
       "type": "object",
       "properties": {
         "query": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSendFeedbackImageReply": {
+      "type": "object",
+      "properties": {
+        "status": {
           "type": "string"
         }
       }
