@@ -136,25 +136,25 @@ service Campus {
 
   rpc GetBuilding2Gps (google.protobuf.Empty) returns (GetBuilding2GpsReply) {
     option (google.api.http) = {
-      get: "/barrierfree/getBuilding2Gps",
+      get: "/barrierfree/building2Gps",
     };
   }
 
   rpc GetAreaFacilitiesByBuildingNr (GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
     option (google.api.http) = {
-      get: "/barrierfree/nerby",
+      get: "/barrierfree/nearby",
     };
   }
 
   rpc GetListOfToilets (google.protobuf.Empty) returns (GetListOfToiletsReply) {
     option (google.api.http) = {
-      get: "/barrierfree/listOfToilets",
+      get: "/barrierfree/toilets",
     };
   }
 
   rpc GetListOfElevators (google.protobuf.Empty) returns (GetListOfElevatorsReply) {
     option (google.api.http) = {
-      get: "/barrierfree/listOfElevators",
+      get: "/barrierfree/elevators",
     };
   }
 
@@ -181,7 +181,7 @@ service Campus {
 
   rpc GetStudyRoomList (google.protobuf.Empty) returns (GetStudyRoomListReply) {
     option (google.api.http) = {
-      get: "/studyroom/list",
+      get: "/studyrooms",
     };
   }
 
@@ -191,47 +191,6 @@ service Campus {
     };
   }
 
-  rpc GetPurchasedTickets(google.protobuf.Empty) returns (GetPurchasedTicketsReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/my",
-    };
-  }
-
-  rpc GetMyTicket(GetTicketRequest) returns (EventListMsgElement) {
-    option (google.api.http) = {
-      post: "/event/ticket/{id}",
-    };
-  }
-
-  rpc GetTicketType(GetTicketRequest) returns (GetEventTicketTypeReply) {
-    option (google.api.http) = {
-      get: "/event/ticket/type/{id}",
-    };
-  }
-
-  rpc ReserveMultipleTickets(ReserveMultipleTicketsRequest) returns (ReserveMultipleTicketsReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/reserve/multiple",
-    };
-  }
-
-  rpc PurchaseTicketStripe(google.protobuf.Empty) returns (PurchaseTicketStripeReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/payment/stripe/purchase/multiple",
-    };
-  }
-
-  rpc GetEphemeralKey(google.protobuf.Empty) returns (GetEphemeralKeyReply) {
-    option (google.api.http) = {
-      post: "/event/ticket/payment/stripe/ephemeralkey",
-    };
-  }
-
-  rpc GetTicketStatus(GetTicketStatusRequest) returns (GetTicketStatusReply) {
-    option (google.api.http) = {
-      get: "/event/ticket/status/{eventId}",
-    };
-  }
 
   rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
     option (google.api.http) = {
@@ -279,7 +238,7 @@ service Campus {
 
   rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
     option (google.api.http) = {
-      get: "/notifications",
+      get: "/notifications/{notificationId}",
     };
   }
 
