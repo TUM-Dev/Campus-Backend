@@ -639,57 +639,6 @@ message EventListMsgElement{
 }
 
 
-message GetPurchasedTicketsReply{
-  repeated EventTicketMyMsgElement myTickets = 1;
-}
-
-message EventTicketMyMsgElement{
-  int32 ticket_history = 1;
-  int32 ticket_type = 2;
-  google.protobuf.Timestamp redemption = 3;
-  string code = 4;
-  int32 event = 5;
-}
-
-message GetTicketRequest {
-  int32 id = 1;
-}
-
-message GetEventTicketTypeReply{
-  repeated EventTicketTypeMsgElement eventTickets = 1;
-
-}
-message EventTicketTypeMsgElement{
-  int32 ticket_type = 1;
-  int32 event = 2;
-  int32 ticket_payment = 3;
-  int32 price = 4;
-  int32 contingent = 5;
-  string description = 6;
-  EventTicketPaymentMsg payment = 7;
-  int32 sold = 8;
-}
-
-message EventTicketPaymentMsg{
-  string stripe_publishable_key = 1;
-  string  terms = 2;
-  int32 minTickets = 3;
-  int32 maxTickets = 4;
-}
-
-message ReserveMultipleTicketsRequest{
-  repeated int32 ticketTypes = 1;
-  repeated int32 amounts = 2;
-}
-
-message ReserveMultipleTicketsReply{
-  repeated EventTicketReserveMultipleMsgElement tickets = 1;
-}
-
-message EventTicketReserveMultipleMsgElement{
-  int32 ticket_ids = 1;
-}
-
 message GetKinoRequest{
   int32 lastId = 1;
 }
@@ -748,42 +697,6 @@ message GetMembersReply{
   string lrzId = 1;
   string name = 2;
   int32 memberId = 3;
-}
-
-
-
-
-message PurchaseTicketStripeReply{
-  repeated TicketMessageElement tickets = 1;
-}
-
-message TicketMessageElement{
-  int32 id = 1;
-  int32 eventId = 2;
-  string code = 3;
-  int32 ticketTypeId = 4;
-  google.protobuf.Timestamp redemption = 5;
-}
-
-
-message GetEphemeralKeyReply{
-  //todo How does this look?
-}
-
-
-message GetTicketStatusRequest{
-  int32 eventId = 1;
-}
-
-
-message GetTicketStatusReply{
-  repeated TicketStatus status = 1;
-}
-
-message TicketStatus{
-  int32 ticketType = 1;
-  int32 contingent = 2;
-  int32 sold = 3;
 }
 
 message TUMCabeStatus{

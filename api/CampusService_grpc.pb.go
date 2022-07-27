@@ -50,13 +50,6 @@ type CampusClient interface {
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
 	GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error)
-	GetPurchasedTickets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPurchasedTicketsReply, error)
-	GetMyTicket(ctx context.Context, in *GetTicketRequest, opts ...grpc.CallOption) (*EventListMsgElement, error)
-	GetTicketType(ctx context.Context, in *GetTicketRequest, opts ...grpc.CallOption) (*GetEventTicketTypeReply, error)
-	ReserveMultipleTickets(ctx context.Context, in *ReserveMultipleTicketsRequest, opts ...grpc.CallOption) (*ReserveMultipleTicketsReply, error)
-	PurchaseTicketStripe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PurchaseTicketStripeReply, error)
-	GetEphemeralKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetEphemeralKeyReply, error)
-	GetTicketStatus(ctx context.Context, in *GetTicketStatusRequest, opts ...grpc.CallOption) (*GetTicketStatusReply, error)
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
 	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
@@ -302,69 +295,6 @@ func (c *campusClient) GetEventList(ctx context.Context, in *GetEventListRequest
 	return out, nil
 }
 
-func (c *campusClient) GetPurchasedTickets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPurchasedTicketsReply, error) {
-	out := new(GetPurchasedTicketsReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetPurchasedTickets", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetMyTicket(ctx context.Context, in *GetTicketRequest, opts ...grpc.CallOption) (*EventListMsgElement, error) {
-	out := new(EventListMsgElement)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetMyTicket", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetTicketType(ctx context.Context, in *GetTicketRequest, opts ...grpc.CallOption) (*GetEventTicketTypeReply, error) {
-	out := new(GetEventTicketTypeReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetTicketType", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ReserveMultipleTickets(ctx context.Context, in *ReserveMultipleTicketsRequest, opts ...grpc.CallOption) (*ReserveMultipleTicketsReply, error) {
-	out := new(ReserveMultipleTicketsReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/ReserveMultipleTickets", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) PurchaseTicketStripe(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PurchaseTicketStripeReply, error) {
-	out := new(PurchaseTicketStripeReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/PurchaseTicketStripe", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetEphemeralKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetEphemeralKeyReply, error) {
-	out := new(GetEphemeralKeyReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetEphemeralKey", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetTicketStatus(ctx context.Context, in *GetTicketStatusRequest, opts ...grpc.CallOption) (*GetTicketStatusReply, error) {
-	out := new(GetTicketStatusReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetTicketStatus", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error) {
 	out := new(GetKinoReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetKino", in, out, opts...)
@@ -486,13 +416,6 @@ type CampusServer interface {
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
 	GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error)
-	GetPurchasedTickets(context.Context, *emptypb.Empty) (*GetPurchasedTicketsReply, error)
-	GetMyTicket(context.Context, *GetTicketRequest) (*EventListMsgElement, error)
-	GetTicketType(context.Context, *GetTicketRequest) (*GetEventTicketTypeReply, error)
-	ReserveMultipleTickets(context.Context, *ReserveMultipleTicketsRequest) (*ReserveMultipleTicketsReply, error)
-	PurchaseTicketStripe(context.Context, *emptypb.Empty) (*PurchaseTicketStripeReply, error)
-	GetEphemeralKey(context.Context, *emptypb.Empty) (*GetEphemeralKeyReply, error)
-	GetTicketStatus(context.Context, *GetTicketStatusRequest) (*GetTicketStatusReply, error)
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
 	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error)
@@ -584,27 +507,6 @@ func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *emptypb.Empt
 }
 func (UnimplementedCampusServer) GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEventList not implemented")
-}
-func (UnimplementedCampusServer) GetPurchasedTickets(context.Context, *emptypb.Empty) (*GetPurchasedTicketsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPurchasedTickets not implemented")
-}
-func (UnimplementedCampusServer) GetMyTicket(context.Context, *GetTicketRequest) (*EventListMsgElement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMyTicket not implemented")
-}
-func (UnimplementedCampusServer) GetTicketType(context.Context, *GetTicketRequest) (*GetEventTicketTypeReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTicketType not implemented")
-}
-func (UnimplementedCampusServer) ReserveMultipleTickets(context.Context, *ReserveMultipleTicketsRequest) (*ReserveMultipleTicketsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReserveMultipleTickets not implemented")
-}
-func (UnimplementedCampusServer) PurchaseTicketStripe(context.Context, *emptypb.Empty) (*PurchaseTicketStripeReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PurchaseTicketStripe not implemented")
-}
-func (UnimplementedCampusServer) GetEphemeralKey(context.Context, *emptypb.Empty) (*GetEphemeralKeyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEphemeralKey not implemented")
-}
-func (UnimplementedCampusServer) GetTicketStatus(context.Context, *GetTicketStatusRequest) (*GetTicketStatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTicketStatus not implemented")
 }
 func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKino not implemented")
@@ -1099,132 +1001,6 @@ func _Campus_GetEventList_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetPurchasedTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetPurchasedTickets(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetPurchasedTickets",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetPurchasedTickets(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetMyTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTicketRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetMyTicket(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetMyTicket",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMyTicket(ctx, req.(*GetTicketRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetTicketType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTicketRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetTicketType(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetTicketType",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTicketType(ctx, req.(*GetTicketRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ReserveMultipleTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReserveMultipleTicketsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ReserveMultipleTickets(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/ReserveMultipleTickets",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ReserveMultipleTickets(ctx, req.(*ReserveMultipleTicketsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_PurchaseTicketStripe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).PurchaseTicketStripe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/PurchaseTicketStripe",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).PurchaseTicketStripe(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetEphemeralKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetEphemeralKey(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetEphemeralKey",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetEphemeralKey(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetTicketStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTicketStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetTicketStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetTicketStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTicketStatus(ctx, req.(*GetTicketStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetKino_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetKinoRequest)
 	if err := dec(in); err != nil {
@@ -1511,34 +1287,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEventList",
 			Handler:    _Campus_GetEventList_Handler,
-		},
-		{
-			MethodName: "GetPurchasedTickets",
-			Handler:    _Campus_GetPurchasedTickets_Handler,
-		},
-		{
-			MethodName: "GetMyTicket",
-			Handler:    _Campus_GetMyTicket_Handler,
-		},
-		{
-			MethodName: "GetTicketType",
-			Handler:    _Campus_GetTicketType_Handler,
-		},
-		{
-			MethodName: "ReserveMultipleTickets",
-			Handler:    _Campus_ReserveMultipleTickets_Handler,
-		},
-		{
-			MethodName: "PurchaseTicketStripe",
-			Handler:    _Campus_PurchaseTicketStripe_Handler,
-		},
-		{
-			MethodName: "GetEphemeralKey",
-			Handler:    _Campus_GetEphemeralKey_Handler,
-		},
-		{
-			MethodName: "GetTicketStatus",
-			Handler:    _Campus_GetTicketStatus_Handler,
 		},
 		{
 			MethodName: "GetKino",

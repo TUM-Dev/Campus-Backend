@@ -17,6 +17,28 @@
     "application/json"
   ],
   "paths": {
+    "/barrierfree/building2Gps": {
+      "get": {
+        "operationId": "Campus_GetBuilding2Gps",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetBuilding2GpsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/barrierfree/contacts": {
       "get": {
         "operationId": "Campus_GetResponsiblePerson",
@@ -39,29 +61,7 @@
         ]
       }
     },
-    "/barrierfree/getBuilding2Gps": {
-      "get": {
-        "operationId": "Campus_GetBuilding2Gps",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetBuilding2GpsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/listOfElevators": {
+    "/barrierfree/elevators": {
       "get": {
         "operationId": "Campus_GetListOfElevators",
         "responses": {
@@ -69,28 +69,6 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/apiGetListOfElevatorsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/listOfToilets": {
-      "get": {
-        "operationId": "Campus_GetListOfToilets",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetListOfToiletsReply"
             }
           },
           "default": {
@@ -127,7 +105,7 @@
         ]
       }
     },
-    "/barrierfree/nerby": {
+    "/barrierfree/nearby": {
       "get": {
         "operationId": "Campus_GetAreaFacilitiesByBuildingNr",
         "responses": {
@@ -152,6 +130,28 @@
             "type": "string"
           }
         ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/barrierfree/toilets": {
+      "get": {
+        "operationId": "Campus_GetListOfToilets",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetListOfToiletsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "Campus"
         ]
@@ -543,211 +543,6 @@
         ]
       }
     },
-    "/event/ticket/my": {
-      "post": {
-        "operationId": "Campus_GetPurchasedTickets",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetPurchasedTicketsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/payment/stripe/ephemeralkey": {
-      "post": {
-        "operationId": "Campus_GetEphemeralKey",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetEphemeralKeyReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/payment/stripe/purchase/multiple": {
-      "post": {
-        "operationId": "Campus_PurchaseTicketStripe",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiPurchaseTicketStripeReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/reserve/multiple": {
-      "post": {
-        "operationId": "Campus_ReserveMultipleTickets",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiReserveMultipleTicketsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "ticketTypes",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "amounts",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "collectionFormat": "multi"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/status/{eventId}": {
-      "get": {
-        "operationId": "Campus_GetTicketStatus",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetTicketStatusReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/type/{id}": {
-      "get": {
-        "operationId": "Campus_GetTicketType",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetEventTicketTypeReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/event/ticket/{id}": {
-      "post": {
-        "operationId": "Campus_GetMyTicket",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiEventListMsgElement"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/feedback": {
       "post": {
         "operationId": "Campus_SendFeedback",
@@ -1009,14 +804,14 @@
         ]
       }
     },
-    "/notifications": {
+    "/notifications/confirm/{notificationId}": {
       "get": {
-        "operationId": "Campus_GetNotification",
+        "operationId": "Campus_GetNotificationConfirm",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetNotificationsReply"
+              "$ref": "#/definitions/apiGetNotificationsConfirmReply"
             }
           },
           "default": {
@@ -1029,8 +824,8 @@
         "parameters": [
           {
             "name": "notificationId",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "integer",
             "format": "int32"
           }
@@ -1040,14 +835,14 @@
         ]
       }
     },
-    "/notifications/confirm/{notificationId}": {
+    "/notifications/{notificationId}": {
       "get": {
-        "operationId": "Campus_GetNotificationConfirm",
+        "operationId": "Campus_GetNotification",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetNotificationsConfirmReply"
+              "$ref": "#/definitions/apiGetNotificationsReply"
             }
           },
           "default": {
@@ -1238,7 +1033,7 @@
         ]
       }
     },
-    "/studyroom/list": {
+    "/studyrooms": {
       "get": {
         "operationId": "Campus_GetStudyRoomList",
         "responses": {
@@ -1548,93 +1343,6 @@
         }
       }
     },
-    "apiEventTicketMyMsgElement": {
-      "type": "object",
-      "properties": {
-        "ticketHistory": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "ticketType": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "redemption": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "code": {
-          "type": "string"
-        },
-        "event": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiEventTicketPaymentMsg": {
-      "type": "object",
-      "properties": {
-        "stripePublishableKey": {
-          "type": "string"
-        },
-        "terms": {
-          "type": "string"
-        },
-        "minTickets": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "maxTickets": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiEventTicketReserveMultipleMsgElement": {
-      "type": "object",
-      "properties": {
-        "ticketIds": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiEventTicketTypeMsgElement": {
-      "type": "object",
-      "properties": {
-        "ticketType": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "event": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "ticketPayment": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "price": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "contingent": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "description": {
-          "type": "string"
-        },
-        "payment": {
-          "$ref": "#/definitions/apiEventTicketPaymentMsg"
-        },
-        "sold": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
     "apiGetAreaFacilitiesByBuildingNrReply": {
       "type": "object",
       "properties": {
@@ -1679,9 +1387,6 @@
         }
       }
     },
-    "apiGetEphemeralKeyReply": {
-      "type": "object"
-    },
     "apiGetEventListReply": {
       "type": "object",
       "properties": {
@@ -1689,17 +1394,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiEventListMsgElement"
-          }
-        }
-      }
-    },
-    "apiGetEventTicketTypeReply": {
-      "type": "object",
-      "properties": {
-        "eventTickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiEventTicketTypeMsgElement"
           }
         }
       }
@@ -1835,17 +1529,6 @@
         }
       }
     },
-    "apiGetPurchasedTicketsReply": {
-      "type": "object",
-      "properties": {
-        "myTickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiEventTicketMyMsgElement"
-          }
-        }
-      }
-    },
     "apiGetRatingTagsReply": {
       "type": "object",
       "properties": {
@@ -1946,17 +1629,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiStudyRoomMsgElement"
-          }
-        }
-      }
-    },
-    "apiGetTicketStatusReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTicketStatus"
           }
         }
       }
@@ -2210,17 +1882,6 @@
         }
       }
     },
-    "apiPurchaseTicketStripeReply": {
-      "type": "object",
-      "properties": {
-        "tickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTicketMessageElement"
-          }
-        }
-      }
-    },
     "apiRatingTag": {
       "type": "object",
       "properties": {
@@ -2284,17 +1945,6 @@
         },
         "en": {
           "type": "string"
-        }
-      }
-    },
-    "apiReserveMultipleTicketsReply": {
-      "type": "object",
-      "properties": {
-        "tickets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiEventTicketReserveMultipleMsgElement"
-          }
         }
       }
     },
@@ -2488,47 +2138,6 @@
       "properties": {
         "status": {
           "type": "string"
-        }
-      }
-    },
-    "apiTicketMessageElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "eventId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "code": {
-          "type": "string"
-        },
-        "ticketTypeId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "redemption": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "apiTicketStatus": {
-      "type": "object",
-      "properties": {
-        "ticketType": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "contingent": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "sold": {
-          "type": "integer",
-          "format": "int32"
         }
       }
     },
