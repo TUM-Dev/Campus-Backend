@@ -191,26 +191,25 @@ service Campus {
     };
   }
 
-  // todo check again
-  rpc PostEventTicketMy(google.protobuf.Empty) returns (PostEventTicketMyReply) {
+  rpc GetPurchasedTickets(google.protobuf.Empty) returns (GetPurchasedTicketsReply) {
     option (google.api.http) = {
       post: "/event/ticket/my",
     };
   }
 
-  rpc PostEventTicket(PostEventTicketRequest) returns (EventListMsgElement) {
+  rpc GetMyTicket(GetTicketRequest) returns (EventListMsgElement) {
     option (google.api.http) = {
       post: "/event/ticket/{id}",
     };
   }
 
-  rpc GetEventTicketType(PostEventTicketRequest) returns (GetEventTicketTypeReply) {
+  rpc GetTicketType(GetTicketRequest) returns (GetEventTicketTypeReply) {
     option (google.api.http) = {
       get: "/event/ticket/type/{id}",
     };
   }
 
-  rpc PostEventTicketReserveMultiple(PostEventTicketReserveMultipleRequest) returns (PostEventTicketReserveMultipleReply) {
+  rpc ReserveMultipleTickets(ReserveMultipleTicketsRequest) returns (ReserveMultipleTicketsReply) {
     option (google.api.http) = {
       post: "/event/ticket/reserve/multiple",
     };
@@ -222,13 +221,13 @@ service Campus {
     };
   }
 
-  rpc RetrieveEphemeralKey(google.protobuf.Empty) returns (RetrieveEphemeralKeyReply) {
+  rpc GetEphemeralKey(google.protobuf.Empty) returns (GetEphemeralKeyReply) {
     option (google.api.http) = {
       post: "/event/ticket/payment/stripe/ephemeralkey",
     };
   }
 
-  rpc GetEventTicketStatus(GetEventTicketStatusRequest) returns (GetEventTicketStatusReply) {
+  rpc GetTicketStatus(GetTicketStatusRequest) returns (GetTicketStatusReply) {
     option (google.api.http) = {
       get: "/event/ticket/status/{eventId}",
     };
@@ -240,13 +239,13 @@ service Campus {
     };
   }
 
-  rpc PostFeedback(PostFeedbackRequest) returns (PostFeedbackReply) {
+  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackImageReply) {
     option (google.api.http) = {
       post: "/feedback",
     };
   }
 
-  rpc PostFeedbackIDImageNr(PostFeedbackIDImageNrRequest) returns (PostFeedbackReply) {
+  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
     option (google.api.http) = {
       post: "/feedback/{id}/{imageNr}",
     };
@@ -293,79 +292,6 @@ service Campus {
   rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
     option (google.api.http) = {
       get: "/members/{lrzId}",
-    };
-  }
-
-  rpc PostChatRooms(google.protobuf.Empty) returns (PostChatRoomsReply) {
-    option (google.api.http) = {
-      post: "/chat/rooms",
-      body: "*"
-    };
-  }
-
-  rpc GetChatRoomsRoomId(GetChatRoomsRoomIdRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      get: "/chat/rooms/{roomId}",
-    };
-  }
-
-  rpc PostChatRoomsRoomIdLeave(PostChatRoomsRoomIdLeaveRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/leave",
-    };
-  }
-  rpc PostChatRoomsRoomIdAdd(PostChatRoomsRoomIdAddRequest) returns (ChatRoomsMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/add/{memberId}",
-    };
-  }
-
-  rpc PutChatRoomsSendMessage(PutChatRoomsSendRoomIdRequest) returns (ChatMessageModelMsgElement) {
-    option (google.api.http) = {
-      put: "/chat/rooms/{roomId}/message",
-    };
-  }
-
-  rpc PutChatRoomsUpdateMessage(PutChatRoomsUpdateMessageRequest) returns (ChatMessageModelMsgElement) {
-    option (google.api.http) = {
-      put: "/chat/rooms/{roomId}/message/{messageId}",
-    };
-  }
-
-  rpc PostChatRoomsGetMessages(PostChatRoomsGetMessagesRequest) returns (ChatMessageModelMsg) {//get messageModel returnen
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/messages/{pageId}",
-    };
-  }
-
-  rpc PostChatRoomsGetNewMessages(PutChatRoomsSendRoomIdRequest) returns (ChatMessageModelMsg) {
-    option (google.api.http) = {
-      post: "/chat/rooms/{roomId}/messages",
-    };
-  }
-
-
-  rpc PostChatCreateMember(ChatMemberMsgElement) returns (ChatMemberMsgElement) {
-    option (google.api.http) = {
-      post: "/chat/members",
-    };
-  }
-
-  rpc GetChatMemberByLrzId(GetChatMemberRequest) returns (ChatMemberMsgElement) {
-    option (google.api.http) = {
-      get: "/chat/members/{lrzId}",
-    };
-  }
-
-  rpc SearchMemberByName(SearchMemberByNameRequest) returns (ChatMemberMsg) {
-    option (google.api.http) = {
-      get: "/chat/members/search/{query}",
-    };
-  }
-
-  rpc GetMemberRooms(GetMemberRoomsRequest) returns (GetMemberRoomsReply) {
-    option (google.api.http) = {
-      post: "/chat/members/{memberId}/rooms",
     };
   }
 }
@@ -474,7 +400,7 @@ message CafeteriaRatingRequest {
   google.protobuf.Timestamp from = 2;
   // Optional Parameter to define an interval for the ratings (Upper bound)
   google.protobuf.Timestamp to = 3;
-  // Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request
+  // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
 
@@ -487,7 +413,7 @@ message DishRatingRequest {
   google.protobuf.Timestamp from = 3;
   // Optional Parameter to define an interval for the ratings (Upper bound)
   google.protobuf.Timestamp to = 4;
-  // Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request
+  // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 5;
 }
 
@@ -754,7 +680,7 @@ message EventListMsgElement{
 }
 
 
-message PostEventTicketMyReply{
+message GetPurchasedTicketsReply{
   repeated EventTicketMyMsgElement myTickets = 1;
 }
 
@@ -766,7 +692,7 @@ message EventTicketMyMsgElement{
   int32 event = 5;
 }
 
-message PostEventTicketRequest {
+message GetTicketRequest {
   int32 id = 1;
 }
 
@@ -792,12 +718,12 @@ message EventTicketPaymentMsg{
   int32 maxTickets = 4;
 }
 
-message PostEventTicketReserveMultipleRequest{
+message ReserveMultipleTicketsRequest{
   repeated int32 ticketTypes = 1;
   repeated int32 amounts = 2;
 }
 
-message PostEventTicketReserveMultipleReply{
+message ReserveMultipleTicketsReply{
   repeated EventTicketReserveMultipleMsgElement tickets = 1;
 }
 
@@ -832,7 +758,7 @@ message KinoMsgElement{
   string link = 16;
 }
 
-message PostFeedbackRequest{
+message SendFeedbackRequest{
   string topic = 1;
   string email = 2;
   string emailId = 3;
@@ -844,14 +770,14 @@ message PostFeedbackRequest{
   string appVersion = 9;
 }
 
-message PostFeedbackReply{
+message SendFeedbackImageReply{
   string status = 1;
 }
 
-message PostFeedbackIDImageNrRequest{
+message SendFeedbackImageRequest{
   int32 id = 1;
   int32 imageNr = 2;
-  //todo wo kommt das eigentliche file her?
+  //todo where does the file come from?
 }
 
 
@@ -867,91 +793,6 @@ message GetMembersReply{
 
 
 
-message PostChatRoomsReply{
-  repeated ChatRoomsMsgElement rooms = 1;
-}
-
-message ChatRoomsMsgElement{
-  int32 id = 1;
-  string name = 2;
-  string semester = 3;
-  string title = 4;
-  int32 members = 5;
-}
-
-message GetChatRoomsRoomIdRequest{
-  int32 roomId = 1;
-}
-
-
-message PostChatRoomsRoomIdLeaveRequest{
-  int32 roomId = 1;
-}
-
-message PostChatRoomsRoomIdAddRequest{
-  int32 roomId = 1;
-  int32 memberId = 2;
-}
-
-message PutChatRoomsSendRoomIdRequest{
-  int32 roomId = 1;
-}
-
-message PutChatRoomsUpdateMessageRequest{
-  int32 roomId = 1;
-  int32 messageId = 2;
-}
-
-
-message ChatMessageModelMsg{
-  repeated ChatMessageModelMsgElement messages = 1;
-}
-
-message ChatMessageModelMsgElement{
-  int32 id = 1;
-  int32 previous = 2;
-  int32 room = 3;
-  string text = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  string signature = 6;
-  int32 memberId = 7;
-  int32 sendingStatus = 8;
-}
-
-message PostChatRoomsGetMessagesRequest{
-  int32 roomId = 1;
-  int32 pageId = 2;
-}
-
-message ChatMemberMsg{
-  repeated ChatMemberMsgElement members = 1;
-}
-
-message ChatMemberMsgElement{
-  int32 id = 1;
-  string lrzId = 2;
-  string displayName = 3;
-  string signature = 4;
-}
-
-
-message GetChatMemberRequest{
-  string lrzId = 1;
-}
-
-
-message SearchMemberByNameRequest{
-  string query = 1;
-}
-
-message GetMemberRoomsRequest{
-  int32 memberId = 1;
-}
-
-message GetMemberRoomsReply{
-  repeated ChatRoomsMsgElement chatRooms = 1;
-}
-
 
 message PurchaseTicketStripeReply{
   repeated TicketMessageElement tickets = 1;
@@ -966,17 +807,17 @@ message TicketMessageElement{
 }
 
 
-message RetrieveEphemeralKeyReply{
+message GetEphemeralKeyReply{
   //todo How does this look?
 }
 
 
-message GetEventTicketStatusRequest{
+message GetTicketStatusRequest{
   int32 eventId = 1;
 }
 
 
-message GetEventTicketStatusReply{
+message GetTicketStatusReply{
   repeated TicketStatus status = 1;
 }
 
