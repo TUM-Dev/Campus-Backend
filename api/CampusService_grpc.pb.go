@@ -400,6 +400,8 @@ type CampusServer interface {
 	// This endpoint retrieves Cafeteria Ratings from the Backend.
 	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingReply, error)
 	GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error)
+	GetCafeteriaRatings(context.Context, *CafeteriaRatingRequest) (*CafeteriaRatingResponse, error)
+	GetMealRatings(context.Context, *MealRatingRequest) (*MealRatingResponse, error)
 	NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error)
 	NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error)
 	GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
@@ -708,6 +710,7 @@ func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/api.Campus/GetDishRatings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+
 		return srv.(CampusServer).GetDishRatings(ctx, req.(*DishRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)

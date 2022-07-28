@@ -359,6 +359,7 @@ message CafeteriaRatingRequest {
   google.protobuf.Timestamp from = 2;
   // Optional Parameter to define an interval for the ratings (Upper bound)
   google.protobuf.Timestamp to = 3;
+
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
@@ -419,6 +420,7 @@ message NewCafeteriaRatingRequest{
   // Optional comment (max 256 chars)
   string comment = 6;
 }
+
 
 message NewDishRatingRequest{
   // number in the range 1-5

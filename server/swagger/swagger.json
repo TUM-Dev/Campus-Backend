@@ -108,6 +108,7 @@
     "/barrierfree/nearby": {
       "get": {
         "operationId": "Campus_GetAreaFacilitiesByBuildingNr",
+
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1406,6 +1407,10 @@
           "items": {
             "$ref": "#/definitions/apiKinoMsgElement"
           }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1839,6 +1844,10 @@
           "items": {
             "$ref": "#/definitions/apiNewsSource"
           }
+        },
+        "cafeteriaVisitedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1878,7 +1887,8 @@
         },
         "referenceId": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
         }
       }
     },
@@ -1913,7 +1923,8 @@
       "properties": {
         "tagId": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "avg": {
           "type": "number",
@@ -1938,7 +1949,8 @@
       "properties": {
         "tagId": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "number in the range 1-5"
         },
         "de": {
           "type": "string"
