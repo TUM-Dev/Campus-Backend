@@ -307,7 +307,6 @@ func request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-
 func local_request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq DishRatingRequest
 	var metadata runtime.ServerMetadata

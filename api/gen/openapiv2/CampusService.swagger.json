@@ -108,7 +108,6 @@
     "/barrierfree/nearby": {
       "get": {
         "operationId": "Campus_GetAreaFacilitiesByBuildingNr",
-
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -1399,7 +1398,6 @@
         }
       }
     },
-
     "apiGetKinoReply": {
       "type": "object",
       "properties": {
@@ -1408,10 +1406,6 @@
           "items": {
             "$ref": "#/definitions/apiKinoMsgElement"
           }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
         }
       }
     },
@@ -1845,10 +1839,6 @@
           "items": {
             "$ref": "#/definitions/apiNewsSource"
           }
-        },
-        "cafeteriaVisitedAt": {
-          "type": "string",
-          "format": "date-time"
         }
       }
     },
@@ -1888,12 +1878,10 @@
         },
         "referenceId": {
           "type": "integer",
-          "format": "int32",
-          "title": "Optional Parameter defines how many ratings are queried. Default is 3, Maximum is 100 ratings in one request"
+          "format": "int32"
         }
       }
     },
-
     "apiRatingTag": {
       "type": "object",
       "properties": {
@@ -1925,8 +1913,7 @@
       "properties": {
         "tagId": {
           "type": "integer",
-          "format": "int32",
-          "title": "number in the range 1-5"
+          "format": "int32"
         },
         "avg": {
           "type": "number",
@@ -1951,8 +1938,7 @@
       "properties": {
         "tagId": {
           "type": "integer",
-          "format": "int32",
-          "title": "number in the range 1-5"
+          "format": "int32"
         },
         "de": {
           "type": "string"
