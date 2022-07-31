@@ -263,12 +263,11 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 }
 
 func getImageToBytes(path string) []byte {
-
 	file, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.WithError(err).Error("Error while opening image ffile with path: {}.", path)
+		return nil
 	}
 
 	defer func(file *os.File) {
@@ -422,6 +421,7 @@ func storeImage(path string, i []byte) (string, error) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
 			log.WithError(err).Error("Directory with path {} could not be created successfully", path)
+			return "", nil
 		}
 	}
 	img, _, _ := image.Decode(bytes.NewReader(i))
@@ -554,6 +554,7 @@ func inputSanitizationForNewRatingElements(rating int32, image []byte, comment s
 // it will be saved with a reference to the rating
 func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType int) (*emptypb.Empty, error) {
 	var errorOccurred = ""
+	var warningOccurred = ""
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
 		insertModel := getModelStoreTag(tagType, s.db)
@@ -583,14 +584,19 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 
 					usedTagIds[currentTag] = 1
 				} else {
+					warningOccurred = warningOccurred + ", " + tag.Tag
 					log.Info("Each Rating tag must be used at most once in a rating. This tag rating was not stored.")
 				}
 			}
 		}
 	}
 
-	if len(errorOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag")
+	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag. The Tag(s) "+warningOccurred+" occurred more than once in this rating.")
+	} else if len(errorOccurred) > 0 {
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag.")
+	} else if len(warningOccurred) > 0 {
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+warningOccurred+" occurred more than once in this rating.")
 	} else {
 		return &emptypb.Empty{}, nil
 	}
@@ -648,7 +654,7 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*model.DishRatingTagOption
 	var requestStatus error = nil
-	err := s.db.Model(&model.DishRatingTagOption{}).Select("De, En").Scan(&result).Error
+	err := s.db.Model(&model.DishRatingTagOption{}).Select("De, En").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
@@ -669,7 +675,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*model.CafeteriaRatingTagOption
 	var requestStatus error = nil
-	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("De,En").Scan(&result).Error
+	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("De,En").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
@@ -699,7 +705,6 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 	ratingResults := make([]*pb.Cafeteria, len(result))
 
 	for i, v := range result {
-
 		ratingResults[i] = &pb.Cafeteria{
 			Name:      v.Name,
 			Address:   v.Address,

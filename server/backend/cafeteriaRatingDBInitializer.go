@@ -3,7 +3,6 @@ package backend
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
@@ -36,7 +35,7 @@ Writes all available tags from the json file into tables in order to make them e
 Will be executed once while the server is started.
 */
 func initTagRatingOptions(db *gorm.DB) {
-	updateTagTable("backend/static_data/dishRatingTags.json", db, MEAL)
+	updateTagTable("backend/static_data/dishRatingTags.json", db, DISH)
 	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
 	addEntriesForCronJob(db, "averageRatingComputation", 300)
@@ -44,23 +43,24 @@ func initTagRatingOptions(db *gorm.DB) {
 }
 
 func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
-	var exists bool
-	res := db.Model(&model.Crontab{}).
-		Select("count(*) > 0").
+	var count int64
+	err := db.Model(&model.Crontab{}).
 		Where("type LIKE ?", cronName).
-		Find(&exists).
+		Count(&count).
 		Error
 
-	if res != nil {
-		log.Error(res.Error)
-	} else if !exists {
-
-		db.Model(&model.Crontab{}).
+	if err != nil {
+		log.WithError(err).Error("Error while checking if cronjob with name {} already exists in database", cronName)
+	} else if count == 0 {
+		errCreate := db.Model(&model.Crontab{}).
 			Create(&model.Crontab{
 				Interval: interval,
 				Type:     null.String{NullString: sql.NullString{String: cronName, Valid: true}},
 				LastRun:  0,
-			})
+			}).Error
+		if errCreate != nil {
+			log.WithError(errCreate).Error("Error while creating cronjob with name {}.", cronName)
+		}
 	}
 }
 
@@ -87,8 +87,11 @@ func updateNameTagOptions(db *gorm.DB) {
 				EN: v.TagNameEnglish,
 			}
 
-			db.Model(&model.DishNameTagOption{}).
-				Create(&parent)
+			errCreate := db.Model(&model.DishNameTagOption{}).
+				Create(&parent).Error
+			if errCreate != nil {
+				log.WithError(errCreate).Error("Error while creating tag {}, {}.", v.TagNameGerman, v.TagNameEnglish)
+			}
 			parentId = parent.DishRatingTagOption
 		}
 
@@ -150,7 +153,7 @@ Reads the json file at the given path and checks whether the values have already
 If an entry with the same German and English name exists, the entry won't be added.
 The TagType is used to identify the corresponding model
 */
-func updateTagTable(path string, db *gorm.DB, tagType int) {
+func updateTagTable(path string, db *gorm.DB, tagType ModelType) {
 	absPathDish, _ := filepath.Abs(path)
 	tagsDish := generateRatingTagListFromFile(absPathDish)
 	insertModel := getTagModel(tagType, db)
@@ -222,7 +225,7 @@ func readFromFile(path string) []byte {
 	jsonFile, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println(err)
+		log.WithError(err).Error("Unable to open file with path: {}", path)
 	}
 
 	defer func(jsonFile *os.File) {

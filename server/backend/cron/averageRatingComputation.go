@@ -50,10 +50,9 @@ type averageDishNameTags struct {
 	Std         float32 `json:"std"`
 }
 
-/*
-This cronjob precomputes average ratings of all cafeteria ratings, dish ratings and all three types of tags.
-They are grouped (e.g. All Ratings for "Mensa_garching") and the computed values will then be stored in a table with the suffix "_result"
-*/
+// averageRatingComputation
+// This cronjob precomputes average ratings of all cafeteria ratings, dish ratings and all three types of tags.
+// They are grouped (e.g. All Ratings for "Mensa_garching") and the computed values will then be stored in a table with the suffix "_result"
 func (c *CronService) averageRatingComputation() error {
 	computeAverageForCafeteria(c)
 	computeAverageForDishesInCafeterias(c)
@@ -106,7 +105,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average dish tags.")
 	} else {
-		errDelete := c.db.Where("1=1").Delete(&model.DishRatingTagAverage{}).Error
+		errDelete := c.db.Where(true).Delete(&model.DishRatingTagAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
@@ -140,7 +139,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average cafeteria tags.")
 	} else {
-		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingTagsAverage{}).Error
+		errDelete := c.db.Where(true).Delete(&model.CafeteriaRatingTagsAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
@@ -171,7 +170,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average dish ratings.")
 	} else {
-		errDelete := c.db.Where("1=1").Delete(&model.DishRatingAverage{}).Error
+		errDelete := c.db.Where(true).Delete(&model.DishRatingAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
@@ -202,7 +201,7 @@ func computeAverageForCafeteria(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average cafeteria ratings.")
 	} else {
-		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingAverage{}).Error
+		errDelete := c.db.Where(true).Delete(&model.CafeteriaRatingAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}

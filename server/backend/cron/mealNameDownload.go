@@ -66,10 +66,10 @@ func downloadDailyDishes(c *CronService) {
 		if err != nil {
 			log.WithError(err).Error("Error fetching menu.")
 		}
-		body, err := ioutil.ReadAll(resp.Body)
-		if body[0] == '<' {
+		if resp.StatusCode != 200 {
 			log.WithError(err).Error("Menu for", v, "does not exist error 404 returned.")
 		} else {
+			body, err := ioutil.ReadAll(resp.Body)
 			var dishes Days
 			errjson := json.Unmarshal(body, &dishes)
 			if errjson != nil {
