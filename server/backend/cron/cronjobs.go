@@ -25,6 +25,7 @@ const (
 	ALARM_TYPE                 = "alarm"
 	FILE_DOWNLOAD_TYPE         = "fileDownload"
 	MEAL_NAME_DOWNLOAD         = "dishNameDownload"
+
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
 	STORAGE_DIR                = "/Storage/" // target location of files
 )

@@ -540,7 +540,7 @@ func inputSanitization(rating int32, image []byte, comment string, cafeteriaName
 	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
 		Where("name LIKE ?", cafeteriaName).
 		First(&result)
-	if testCanteen.Error != nil || testCanteen.RowsAffected == 0 {
+	if testCanteen.Error == gorm.ErrRecordNotFound || testCanteen.RowsAffected == 0 {
 		return -1, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
@@ -564,7 +564,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 				Select("id").
 				First(&currentTag)
 
-			if exists.Error != nil || exists.RowsAffected == 0 {
+			if exists.Error == gorm.ErrRecordNotFound || exists.RowsAffected == 0 {
 				log.Println("Tag with tagname ", tag.Tag, "does not exist")
 				errorOccured = errorOccured + ", " + tag.Tag
 			} else {

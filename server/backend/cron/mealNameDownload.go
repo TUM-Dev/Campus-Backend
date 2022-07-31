@@ -79,7 +79,6 @@ func downloadDailyDishes(c *CronService) {
 			log.Println("Dishes:")
 			for i := 0; i < len(dishes.Days); i++ {
 				for u := 0; u < len(dishes.Days[i].Dates); u++ {
-
 					dish := cafeteria_rating_models.Dish{
 						Name:        dishes.Days[i].Dates[u].Name,
 						Type:        dishes.Days[i].Dates[u].DishType,

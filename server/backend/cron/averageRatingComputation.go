@@ -66,7 +66,7 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageNameTags(c *CronService) {
 	var results []averageDishNameTags
-	err := c.db.Raw("SELECT  mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
+	err := c.db.Raw("SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
 		" FROM dish_rating mr" +
 		" JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating" +
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
