@@ -79,7 +79,7 @@ func updateNameTagOptions(db *gorm.DB) {
 			Select("DishNameTagOption").
 			Scan(&parentId)
 		if res.Error != nil {
-			log.WithError(res.Error).Error("Unable to load Tag with en {} and de {} ", v.TagNameEnglish, v.TagNameGerman)
+			log.WithError(res.Error).Error("Unable to load Tag with En {} and De {} ", v.TagNameEnglish, v.TagNameGerman)
 		}
 		if res.RowsAffected == 0 || res.Error != nil {
 			parent := model.DishRatingTagOption{
@@ -162,14 +162,14 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("cafeteriaRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Error("Unable to find cafeteria rating tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).Error("Unable to find cafeteria rating tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
 			}
 		} else {
 			countError := db.Model(&model.DishRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("dishRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Error("Unable to find dish rating tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).Error("Unable to find dish rating tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
 			}
 		}
 
@@ -180,9 +180,9 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 			}
 			createError := insertModel.Create(&element).Error
 			if createError != nil {
-				log.WithError(createError).Error("Unable to create new can be excluded Tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(createError).Error("Unable to create new can be excluded Tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
 			} else {
-				log.Info("New Entry with en {} and de {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
+				log.Info("New Entry with En {} and De {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
 			}
 		}
 	}
@@ -234,7 +234,7 @@ func readFromFile(path string) []byte {
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		log.WithError(err).Error("Error while reading teh file.")
+		log.WithError(err).Error("Error while reading the file.")
 	}
 	return byteValue
 }

@@ -2,7 +2,7 @@ package cron
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 type averageRatingForCafeteria struct {
@@ -72,9 +72,12 @@ func computeAverageNameTags(c *CronService) {
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
 
 	if err != nil {
-		log.Println(err)
+		log.WithError(err).Error("Error while precomputing average name tags.")
 	} else {
-		c.db.Where("1=1").Delete(&model.DishNameTagAverage{})
+		errDelete := c.db.Where("1=1").Delete(&model.DishNameTagAverage{}).Error
+		if errDelete != nil {
+			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
+		}
 		for _, v := range results {
 			cafeteria := model.DishNameTagAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -87,7 +90,7 @@ func computeAverageNameTags(c *CronService) {
 
 			errCreate := c.db.Model(&model.DishNameTagAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
-				log.Println(errCreate)
+				log.WithError(errCreate).Error("Error while creating a new average name tag rating in the database.")
 			}
 		}
 	}
@@ -101,9 +104,12 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 		" GROUP BY mr.cafeteriaID, mrt.tagID, mr.dishID").Scan(&results).Error
 
 	if err != nil {
-		log.Println(err)
+		log.WithError(err).Error("Error while precomputing average dish tags.")
 	} else {
-		c.db.Where("1=1").Delete(&model.DishRatingTagAverage{})
+		errDelete := c.db.Where("1=1").Delete(&model.DishRatingTagAverage{}).Error
+		if errDelete != nil {
+			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
+		}
 
 		for _, v := range results {
 			cafeteria := model.DishRatingTagAverage{
@@ -118,7 +124,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 
 			errCreate := c.db.Model(&model.DishRatingTagAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
-				log.Println(errCreate)
+				log.WithError(errCreate).Error("Error while creating a new average dish tag rating in the database.")
 			}
 		}
 	}
@@ -132,9 +138,12 @@ func computeAverageCafeteriaTags(c *CronService) {
 		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results).Error
 
 	if err != nil {
-		log.Println(err)
+		log.WithError(err).Error("Error while precomputing average cafeteria tags.")
 	} else {
-		c.db.Where("1=1").Delete(&model.CafeteriaRatingTagsAverage{})
+		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingTagsAverage{}).Error
+		if errDelete != nil {
+			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
+		}
 		for _, v := range results {
 			cafeteria := model.CafeteriaRatingTagsAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -147,24 +156,25 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 			errCreate := c.db.Model(&model.CafeteriaRatingTagsAverage{}).Create(&cafeteria).Error
 			if errCreate != nil {
-				log.Println(errCreate)
+				log.WithError(errCreate).Error("Error while creating a new average cafeteria tag rating in the database.")
 			}
-
 		}
 	}
 }
 
 func computeAverageForDishesInCafeterias(c *CronService) {
 	var results []averageRatingForDishInCafeteria
-	res := c.db.Model(&model.DishRating{}).
+	err := c.db.Model(&model.DishRating{}).
 		Select("cafeteriaID, dishID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
-		Group("cafeteriaID,dishID").Scan(&results)
+		Group("cafeteriaID,dishID").Scan(&results).Error
 
-	if res.Error != nil {
-		log.Println("Error in query")
-		log.Println(res.Error)
+	if err != nil {
+		log.WithError(err).Error("Error while precomputing average dish ratings.")
 	} else {
-		c.db.Where("1=1").Delete(&model.DishRatingAverage{})
+		errDelete := c.db.Where("1=1").Delete(&model.DishRatingAverage{}).Error
+		if errDelete != nil {
+			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
+		}
 		for _, v := range results {
 			cafeteria := model.DishRatingAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -175,9 +185,9 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 				Std:         v.Std,
 			}
 
-			errCreate := c.db.Model(&model.DishRatingAverage{}).Create(&cafeteria)
-			if errCreate.Error != nil {
-				log.Println(errCreate.Error)
+			errCreate := c.db.Model(&model.DishRatingAverage{}).Create(&cafeteria).Error
+			if errCreate != nil {
+				log.WithError(errCreate).Error("Error while creating a new average dish rating in the database.")
 			}
 		}
 	}
@@ -185,15 +195,17 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 
 func computeAverageForCafeteria(c *CronService) {
 	var results []averageRatingForCafeteria
-	res := c.db.Model(&model.CafeteriaRating{}).
+	err := c.db.Model(&model.CafeteriaRating{}).
 		Select("cafeteriaID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
-		Group("cafeteriaID").Find(&results)
+		Group("cafeteriaID").Find(&results).Error
 
-	if res.Error != nil {
-		log.Println("Error in query")
-		log.Println(res.Error)
+	if err != nil {
+		log.WithError(err).Error("Error while precomputing average cafeteria ratings.")
 	} else {
-		c.db.Where("1=1").Delete(&model.CafeteriaRatingAverage{})
+		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingAverage{}).Error
+		if errDelete != nil {
+			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
+		}
 		for _, v := range results {
 			cafeteria := model.CafeteriaRatingAverage{
 				CafeteriaID: v.CafeteriaID,
@@ -203,11 +215,10 @@ func computeAverageForCafeteria(c *CronService) {
 				Std:         v.Std,
 			}
 
-			errCreate := c.db.Create(&cafeteria)
-			if errCreate.Error != nil {
-				log.Println(errCreate.Error)
+			errCreate := c.db.Create(&cafeteria).Error
+			if errCreate != nil {
+				log.WithError(errCreate).Error("Error while creating a new average cafeteria rating in the database.")
 			}
-
 		}
 	}
 }
