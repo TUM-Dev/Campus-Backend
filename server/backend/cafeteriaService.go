@@ -538,11 +538,11 @@ func inputSanitizationForNewRatingElements(rating int32, image []byte, comment s
 	}
 
 	var result *model.Cafeteria
-	err := s.db.Model(&model.Cafeteria{}).
+	res := s.db.Model(&model.Cafeteria{}).
 		Where("name LIKE ?", cafeteriaName).
-		First(&result).Error
-	if err.Error != nil && result != nil {
-		log.WithError(err).Error("Error while querying the cafeteria id by name: {}", cafeteriaName)
+		First(&result)
+	if res.Error == gorm.ErrRecordNotFound || res.RowsAffected == 0 {
+		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: {}", cafeteriaName)
 		return -1, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
@@ -566,7 +566,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 				Select("id").
 				First(&currentTag)
 
-			if exists.Error != nil {
+			if exists.Error == gorm.ErrRecordNotFound {
 				log.WithError(exists.Error).Error("Error while querying the cafeteria name.")
 			} else if exists.RowsAffected == 0 {
 				log.Info("Tag with tag name ", tag.Tag, "does not exist")

@@ -77,7 +77,6 @@ func downloadDailyDishes(c *CronService) {
 			}
 			for i := 0; i < len(dishes.Days); i++ {
 				for u := 0; u < len(dishes.Days[i].Dates); u++ {
-
 					dish := model.Dish{
 						Name:        dishes.Days[i].Dates[u].Name,
 						Type:        dishes.Days[i].Dates[u].DishType,
