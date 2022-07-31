@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 // CafeteriaRatingAverage stores all precomputed values for the cafeteria ratings
 type CafeteriaRatingAverage struct {

@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 type DishNameTag struct {
 	DishNameTag         int32 `gorm:"primary_key;AUTO_INCREMENT;column:DishNameTag;type:int;" json:"DishNameTag"`

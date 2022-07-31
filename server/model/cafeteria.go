@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 import (
 	"database/sql"

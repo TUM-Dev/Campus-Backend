@@ -2,7 +2,7 @@ package cron
 
 import (
 	"encoding/json"
-	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
+	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -52,7 +52,7 @@ func (c *CronService) dishNameDownloadCron() error {
 
 func downloadDailyDishes(c *CronService) {
 	var result []CafeteriaWithID
-	c.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,id").Scan(&result)
+	c.db.Model(&model.Cafeteria{}).Select("name,id").Scan(&result)
 
 	for _, v := range result {
 
@@ -80,17 +80,17 @@ func downloadDailyDishes(c *CronService) {
 			for i := 0; i < len(dishes.Days); i++ {
 				for u := 0; u < len(dishes.Days[i].Dates); u++ {
 
-					dish := cafeteria_rating_models.Dish{
+					dish := model.Dish{
 						Name:        dishes.Days[i].Dates[u].Name,
 						Type:        dishes.Days[i].Dates[u].DishType,
 						CafeteriaID: v.Cafeteria,
 					}
 
-					res := c.db.Model(&cafeteria_rating_models.Dish{}).
+					res := c.db.Model(&model.Dish{}).
 						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID)
 
 					if res.RowsAffected == 0 {
-						c.db.Model(&cafeteria_rating_models.Dish{}).Create(&dish)
+						c.db.Model(&model.Dish{}).Create(&dish)
 						addDishTagsToMapping(dish.Dish, dish.Name, c.db)
 					} /*else {		//todo potentially add update logic for the weekly dishes
 						c.db.Model(&cafeteria_rating_models.Cafeteria{}).
@@ -123,20 +123,20 @@ func downloadCanteenNames(c *CronService) {
 
 	for i := 0; i < len(cafeteriaNames); i++ {
 
-		mensa := cafeteria_rating_models.Cafeteria{
+		mensa := model.Cafeteria{
 			Name:      cafeteriaNames[i].Name,
 			Address:   cafeteriaNames[i].Location.Address,
 			Latitude:  cafeteriaNames[i].Location.Latitude,
 			Longitude: cafeteriaNames[i].Location.Longitude,
 		}
-		var cafetriaResult cafeteria_rating_models.Cafeteria
-		res := c.db.Model(&cafeteria_rating_models.Cafeteria{}).
+		var cafetriaResult model.Cafeteria
+		res := c.db.Model(&model.Cafeteria{}).
 			Where("name = ?", cafeteriaNames[i].Name).
 			First(&cafetriaResult)
 		if res.RowsAffected == 0 {
-			c.db.Model(&cafeteria_rating_models.Cafeteria{}).Create(&mensa)
+			c.db.Model(&model.Cafeteria{}).Create(&mensa)
 		} else {
-			c.db.Model(&cafeteria_rating_models.Cafeteria{}).
+			c.db.Model(&model.Cafeteria{}).
 				Where("name = ?", cafeteriaNames[i].Name).
 				Updates(&mensa)
 		}
@@ -150,13 +150,13 @@ The corresponding tags for all identified DishNames will be saved in the table D
 func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 	lowercaseDish := strings.ToLower(dishName)
 	var includedTags []int32
-	db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
+	db.Model(&model.DishNameTagOptionIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&includedTags)
 
 	var excludedTags []int32
-	db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
+	db.Model(&model.DishNameTagOptionExcluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&excludedTags)
@@ -175,7 +175,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 
 	for _, a := range includedTags {
 		if a != -1 {
-			db.Model(&cafeteria_rating_models.DishToDishNameTag{}).Create(&cafeteria_rating_models.DishToDishNameTag{
+			db.Model(&model.DishToDishNameTag{}).Create(&model.DishToDishNameTag{
 				DishID:    dishID,
 				NameTagID: a,
 			})

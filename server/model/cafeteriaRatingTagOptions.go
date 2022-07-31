@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 // CafeteriaRatingTagOption stores all available options for tags which can be used to quickly rate cafeterias
 type CafeteriaRatingTagOption struct {

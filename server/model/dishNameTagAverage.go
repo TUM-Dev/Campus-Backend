@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 // DishNameTagAverage stores all precomputed values for the DishName ratings
 type DishNameTagAverage struct {

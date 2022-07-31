@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
+	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -54,9 +54,9 @@ The optional parameters from and to can define a interval in which the queried r
 If these aren't specified, the newest ratings will be returnes as the default
 */
 func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingResponse, error) {
-	var result cafeteria_rating_models.CafeteriaRatingAverage //get the average rating for this specific cafeteria
+	var result model.CafeteriaRatingAverage //get the average rating for this specific cafeteria
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
-	res := s.db.Model(&cafeteria_rating_models.CafeteriaRatingAverage{}).
+	res := s.db.Model(&model.CafeteriaRatingAverage{}).
 		Where("cafeteriaID = ?", cafeteriaID).
 		First(&result)
 
@@ -90,7 +90,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
 */
 func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.CafeteriaRating {
-	var ratings []cafeteria_rating_models.CafeteriaRating
+	var ratings []model.CafeteriaRating
 	var errRatings error
 
 	var limit = int(input.Limit)
@@ -113,13 +113,13 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 			} else {
 				to = input.To.AsTime()
 			}
-			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+			errRatings = s.db.Model(&model.CafeteriaRating{}).
 				Where("cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).
 				Order("timestamp desc, id desc").
 				Limit(limit).
 				Find(&ratings).Error
 		} else {
-			errRatings = s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).
+			errRatings = s.db.Model(&model.CafeteriaRating{}).
 				Where("cafeteriaID = ?", cafeteriaID).
 				Order("timestamp desc, id desc").
 				Limit(limit).
@@ -164,11 +164,11 @@ The optional parameters from and to can define a interval in which the queried r
 If these aren't specified, the newest ratings will be returnes as the default
 */
 func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingRequest) (*pb.DishRatingResponse, error) {
-	var result cafeteria_rating_models.DishRatingAverage //get the average rating for this specific dish
+	var result model.DishRatingAverage //get the average rating for this specific dish
 	cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
 	dishID := getIDForDishName(input.Dish, cafeteriaID, s.db)
 
-	res := s.db.Model(&cafeteria_rating_models.DishRatingAverage{}).
+	res := s.db.Model(&model.DishRatingAverage{}).
 		Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
 		First(&result)
 
@@ -205,7 +205,7 @@ func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingReq
 Queries the actual ratings for a dish in a cafeteria and attaches the tag ratings which belong to the ratings
 */
 func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int32, dishID int32, s *CampusServer) []*pb.DishRating {
-	var ratings []cafeteria_rating_models.DishRating
+	var ratings []model.DishRating
 	var errRatings error
 	var limit = int(input.Limit)
 	if limit > 100 {
@@ -227,13 +227,13 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 				to = input.To.AsTime()
 			}
 
-			errRatings = s.db.Model(&cafeteria_rating_models.DishRating{}).
+			errRatings = s.db.Model(&model.DishRating{}).
 				Where("cafeteriaID = ? AND dishID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, dishID, to, from).
 				Order("timestamp desc, id desc").
 				Limit(limit).
 				Find(&ratings).Error
 		} else {
-			errRatings = s.db.Model(&cafeteria_rating_models.DishRating{}).
+			errRatings = s.db.Model(&model.DishRating{}).
 				Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
 				Order("timestamp desc, id desc").
 				Limit(limit).
@@ -396,7 +396,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		println("storing an image did not succeed")
 	}
 
-	rating := cafeteria_rating_models.CafeteriaRating{
+	rating := model.CafeteriaRating{
 		Comment:     input.Comment,
 		Points:      input.Points,
 		CafeteriaID: cafeteriaID,
@@ -404,7 +404,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		Image:       respath,
 	}
 
-	s.db.Model(&cafeteria_rating_models.CafeteriaRating{}).Create(&rating)
+	s.db.Model(&model.CafeteriaRating{}).Create(&rating)
 
 	return storeRatingTags(s, rating.CafeteriaRating, input.Tags, CAFETERIA)
 }
@@ -464,11 +464,11 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 		return nil, errorRes
 	}
 
-	var dish *cafeteria_rating_models.Dish
+	var dish *model.Dish
 	//cafeteriaID := getIDForCafeteriaName(input.CafeteriaName, s.db)
-	dishExists := s.db.Model(&cafeteria_rating_models.Dish{}). //Dish must exist in the given mensa
-									Where("name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).
-									First(&dish).RowsAffected
+	dishExists := s.db.Model(&model.Dish{}). //Dish must exist in the given mensa
+							Where("name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).
+							First(&dish).RowsAffected
 
 	if dishExists == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
@@ -481,7 +481,7 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 		println("storing an image did not succeed")
 	}
 
-	rating := cafeteria_rating_models.DishRating{
+	rating := model.DishRating{
 		Comment:     input.Comment,
 		CafeteriaID: cafeteriaID,
 		DishID:      dish.Dish,
@@ -490,7 +490,7 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 		Image:       respath,
 	}
 
-	s.db.Model(&cafeteria_rating_models.DishRating{}).Create(&rating)
+	s.db.Model(&model.DishRating{}).Create(&rating)
 
 	assignDishNameTag(s, rating, dish.Dish)
 	return storeRatingTags(s, rating.DishRating, input.Tags, MEAL)
@@ -499,14 +499,14 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 /*
 Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
 */
-func assignDishNameTag(s *CampusServer, rating cafeteria_rating_models.DishRating, dishID int32) {
+func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 	var result []int
-	err := s.db.Model(&cafeteria_rating_models.DishToDishNameTag{}).Where("dishID = ? ", dishID).Select("nameTagID").Scan(&result).Error
+	err := s.db.Model(&model.DishToDishNameTag{}).Where("dishID = ? ", dishID).Select("nameTagID").Scan(&result).Error
 	if err != nil {
 		log.Error(err)
 	} else {
 		for _, tagID := range result {
-			s.db.Model(&cafeteria_rating_models.DishNameTag{}).Create(&cafeteria_rating_models.DishNameTag{
+			s.db.Model(&model.DishNameTag{}).Create(&model.DishNameTag{
 				CorrespondingRating: rating.DishRating,
 				Points:              rating.Points,
 				TagNameID:           tagID,
@@ -536,8 +536,8 @@ func inputSanitization(rating int32, image []byte, comment string, cafeteriaName
 		return -1, status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
-	var result *cafeteria_rating_models.Cafeteria
-	testCanteen := s.db.Model(&cafeteria_rating_models.Cafeteria{}).
+	var result *model.Cafeteria
+	testCanteen := s.db.Model(&model.Cafeteria{}).
 		Where("name LIKE ?", cafeteriaName).
 		First(&result)
 	if testCanteen.Error != nil || testCanteen.RowsAffected == 0 {
@@ -570,7 +570,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 			} else {
 				if usedTagIds[currentTag] == 0 {
 					insertModel.
-						Create(&cafeteria_rating_models.DishRatingTag{
+						Create(&model.DishRatingTag{
 							CorrespondingRating: parentRatingID,
 							Points:              int32(tag.Points),
 							TagID:               currentTag})
@@ -595,23 +595,23 @@ Returns the db model of the option toable to reduce code duplicates
 */
 func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.DishRatingTagOption{})
+		return db.Model(&model.DishRatingTagOption{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{})
+		return db.Model(&model.CafeteriaRatingTagOption{})
 	}
 }
 
 func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.DishRatingTag{})
+		return db.Model(&model.DishRatingTag{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingTag{})
+		return db.Model(&model.CafeteriaRatingTag{})
 	}
 }
 
 func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 	var result int32
-	db.Model(&cafeteria_rating_models.Cafeteria{}).
+	db.Model(&model.Cafeteria{}).
 		Where("name LIKE ?", name).
 		Select("cafeteria").
 		Scan(&result)
@@ -620,7 +620,7 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 
 func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	var result int32 = -1
-	db.Model(&cafeteria_rating_models.Dish{}).
+	db.Model(&model.Dish{}).
 		Where("name LIKE ? AND cafeteriaID = ?", name, cafeteriaID).
 		Select("dish").
 		Scan(&result)
@@ -634,8 +634,8 @@ RPC Endpoint
 Retunrs all valid Tags to quickly rate dishes in english and german
 */
 func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*cafeteria_rating_models.DishRatingTagOption
-	s.db.Model(&cafeteria_rating_models.DishRatingTagOption{}).Select("DE, EN").Scan(&result)
+	var result []*model.DishRatingTagOption
+	s.db.Model(&model.DishRatingTagOption{}).Select("DE, EN").Scan(&result)
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {
@@ -653,8 +653,8 @@ RPC Endpoint
 Retunrs all valid Tags to quickly rate dishes in english and german
 */
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*cafeteria_rating_models.CafeteriaRatingTagOption
-	s.db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{}).Select("DE,EN").Scan(&result)
+	var result []*model.CafeteriaRatingTagOption
+	s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE,EN").Scan(&result)
 
 	elements := make([]*pb.TagRatingOverview, len(result))
 	for i, a := range result {
@@ -668,7 +668,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 
 func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaResponse, error) {
 	var result []*pb.Cafeteria
-	s.db.Model(&cafeteria_rating_models.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result)
+	s.db.Model(&model.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result)
 
 	ratingResults := make([]*pb.Cafeteria, len(result))
 

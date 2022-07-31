@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 // TagRating struct is a row record of the either the dish_tag_rating-table or the cafeteria_rating_tags-table in the database
 type CafeteriaRatingTag struct {

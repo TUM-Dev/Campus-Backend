@@ -1,4 +1,4 @@
-package cafeteria_rating_models
+package model
 
 type DishNameTagOptionIncluded struct {
 	DishNameTagOptionIncluded int32  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;" json:"dishNameTagOptionIncluded"`

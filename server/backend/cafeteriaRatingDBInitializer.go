@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
-	"github.com/TUM-Dev/Campus-Backend/model/cafeteria_rating_models"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -28,8 +27,8 @@ type MultiLanguageNameTags struct {
 type NameTag struct {
 	TagNameEnglish string   `json:"tagNameEnglish"`
 	TagNameGerman  string   `json:"tagNameGerman"`
-	Notincluded    []string `json:"notincluded"`
-	Canbeincluded  []string `json:"canbeincluded"`
+	NotIncluded    []string `json:"notincluded"`
+	CanBeIncluded  []string `json:"canbeincluded"`
 }
 
 /*
@@ -73,47 +72,74 @@ Old tags won't be removed to prevent problems with foreign keys.
 func updateNameTagOptions(db *gorm.DB) {
 	absPathDishNames, _ := filepath.Abs("backend/static_data/dishNameTags.json")
 	tagsNames := generateNameTagListFromFile(absPathDishNames)
-	var elementID int32
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		var parentID int32
-
-		potentialTag := db.Model(&cafeteria_rating_models.DishNameTagOption{}).
+		var parentId int32
+		res := db.Model(&model.DishNameTagOption{}).
 			Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("DishNameTagOption").
-			Scan(&parentID)
-
-		if potentialTag.RowsAffected == 0 {
-			parent := cafeteria_rating_models.DishRatingTagOption{
+			Scan(&parentId)
+		if res.Error != nil {
+			log.WithError(res.Error).Error("Unable to load Tag with en {} and de {} ", v.TagNameEnglish, v.TagNameGerman)
+		}
+		if res.RowsAffected == 0 || res.Error != nil {
+			parent := model.DishRatingTagOption{
 				DE: v.TagNameGerman,
-				EN: v.TagNameEnglish}
+				EN: v.TagNameEnglish,
+			}
 
-			db.Model(&cafeteria_rating_models.DishNameTagOption{}).
+			db.Model(&model.DishNameTagOption{}).
 				Create(&parent)
-			parentID = parent.DishRatingTagOption
+			parentId = parent.DishRatingTagOption
 		}
 
-		for _, u := range v.Canbeincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("DishNameTagOptionIncluded").
-				Scan(&elementID)
-			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.DishNameTagOptionIncluded{}).
-					Create(&cafeteria_rating_models.DishNameTagOptionIncluded{
+		addCanBeIncluded(parentId, db, v)
+		addNotIncluded(parentId, db, v)
+
+	}
+}
+
+func addNotIncluded(parentId int32, db *gorm.DB, v NameTag) {
+	var count int64
+	for _, u := range v.NotIncluded {
+		errorLoadingIncluded := db.Model(&model.DishNameTagOptionExcluded{}).
+			Where("expression LIKE ? AND NameTagID = ?", u, parentId).
+			Select("DishNameTagOptionExcluded").
+			Count(&count).Error
+		if errorLoadingIncluded != nil {
+			log.WithError(errorLoadingIncluded).Error("Unable to load can be excluded Tag with expression {} and parentId {} ", u, parentId)
+		} else {
+			if count == 0 {
+				createError := db.Model(&model.DishNameTagOptionExcluded{}).
+					Create(&model.DishNameTagOptionExcluded{
 						Expression: u,
-						NameTagID:  parentID})
+						NameTagID:  parentId}).Error
+				if createError != nil {
+					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded Tag with expression {} and parentId {} ", u, parentId)
+				}
 			}
 		}
-		for _, u := range v.Notincluded {
-			resultIncluded := db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
-				Where("expression LIKE ? AND NameTagID = ?", u, parentID).
-				Select("DishNameTagOptionExcluded").
-				Scan(&elementID)
-			if resultIncluded.RowsAffected == 0 {
-				db.Model(&cafeteria_rating_models.DishNameTagOptionExcluded{}).
-					Create(&cafeteria_rating_models.DishNameTagOptionExcluded{
+	}
+}
+
+func addCanBeIncluded(parentId int32, db *gorm.DB, v NameTag) {
+	var count int64
+	for _, u := range v.CanBeIncluded {
+		errorLoadingIncluded := db.Model(&model.DishNameTagOptionIncluded{}).
+			Where("expression LIKE ? AND NameTagID = ?", u, parentId).
+			Select("DishNameTagOptionIncluded").
+			Count(&count).Error
+		if errorLoadingIncluded != nil {
+			log.WithError(errorLoadingIncluded).Error("Unable to load can be included Tag with expression {} and parentId {} ", u, parentId)
+		} else {
+			if count == 0 {
+				createError := db.Model(&model.DishNameTagOptionIncluded{}).
+					Create(&model.DishNameTagOptionIncluded{
 						Expression: u,
-						NameTagID:  parentID})
+						NameTagID:  parentId,
+					}).Error
+				if createError != nil {
+					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded Tag with expression {} and parentId {} ", u, parentId)
+				}
 			}
 		}
 	}
@@ -129,36 +155,44 @@ func updateTagTable(path string, db *gorm.DB, tagType int) {
 	tagsDish := generateRatingTagListFromFile(absPathDish)
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsDish.MultiLanguageTags {
-		var result int32
-		var affectedRows = 0
+		var count int64
+
 		if tagType == CAFETERIA {
-			affectedRows = int(db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{}).
+			countError := db.Model(&model.CafeteriaRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-				Select("cafeteriaRatingTagOption").
-				Scan(&result).RowsAffected)
+				Select("cafeteriaRatingTagOption").Count(&count).Error
+			if countError != nil {
+				log.WithError(countError).Error("Unable to find cafeteria rating tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+			}
 		} else {
-			affectedRows = int(db.Model(&cafeteria_rating_models.DishRatingTagOption{}).
+			countError := db.Model(&model.DishRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
-				Select("dishRatingTagOption").
-				Scan(&result).RowsAffected)
+				Select("dishRatingTagOption").Count(&count).Error
+			if countError != nil {
+				log.WithError(countError).Error("Unable to find dish rating tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+			}
 		}
 
-		if affectedRows == 0 {
-			println("New entry inserted to Rating Tag Options")
-			element := cafeteria_rating_models.DishRatingTagOption{
+		if count == 0 {
+			element := model.DishRatingTagOption{
 				DE: v.TagNameGerman,
-				EN: v.TagNameEnglish}
-			insertModel.
-				Create(&element)
+				EN: v.TagNameEnglish,
+			}
+			createError := insertModel.Create(&element).Error
+			if createError != nil {
+				log.WithError(createError).Error("Unable to create new can be excluded Tag with en {} and de {} ", v.TagNameGerman, v.TagNameEnglish)
+			} else {
+				log.Info("New Entry with en {} and de {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
+			}
 		}
 	}
 }
 
 func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
 	if tagType == MEAL {
-		return db.Model(&cafeteria_rating_models.DishRatingTagOption{})
+		return db.Model(&model.DishRatingTagOption{})
 	} else {
-		return db.Model(&cafeteria_rating_models.CafeteriaRatingTagOption{})
+		return db.Model(&model.CafeteriaRatingTagOption{})
 	}
 }
 
@@ -168,7 +202,7 @@ func generateNameTagListFromFile(path string) MultiLanguageNameTags {
 	var tags MultiLanguageNameTags
 	errorUnmarshal := json.Unmarshal(byteValue, &tags)
 	if errorUnmarshal != nil {
-		log.Error("Error in parsing json:", errorUnmarshal)
+		log.WithError(errorUnmarshal).Error("Error in parsing json.")
 	}
 	return tags
 }
@@ -179,7 +213,7 @@ func generateRatingTagListFromFile(path string) MultiLanguageTags {
 	var tags MultiLanguageTags
 	errorUnmarshal := json.Unmarshal(byteValue, &tags)
 	if errorUnmarshal != nil {
-		log.Error("Error in parsing json:", errorUnmarshal)
+		log.WithError(errorUnmarshal).Error("Error in parsing json.")
 	}
 	return tags
 }
@@ -194,13 +228,13 @@ func readFromFile(path string) []byte {
 	defer func(jsonFile *os.File) {
 		err := jsonFile.Close()
 		if err != nil {
-			log.Error("Error in parsing json:", err)
+			log.WithError(err).Error("Error in parsing json.")
 		}
 	}(jsonFile)
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		fmt.Println(err)
+		log.WithError(err).Error("Error while reading teh file.")
 	}
 	return byteValue
 }
