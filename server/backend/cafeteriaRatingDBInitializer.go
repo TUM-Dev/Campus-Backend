@@ -12,18 +12,18 @@ import (
 	"path/filepath"
 )
 
-type MultiLanguageTags struct {
-	MultiLanguageTags []Tag `json:"tags"`
+type multiLanguageTags struct {
+	MultiLanguageTags []tag `json:"tags"`
 }
-type Tag struct {
+type tag struct {
 	TagNameEnglish string `json:"tagNameEnglish"`
 	TagNameGerman  string `json:"tagNameGerman"`
 }
 
-type MultiLanguageNameTags struct {
-	MultiLanguageNameTags []NameTag `json:"tags"`
+type multiLanguageNameTags struct {
+	MultiLanguageNameTags []nameTag `json:"tags"`
 }
-type NameTag struct {
+type nameTag struct {
 	TagNameEnglish string   `json:"tagNameEnglish"`
 	TagNameGerman  string   `json:"tagNameGerman"`
 	NotIncluded    []string `json:"notincluded"`
@@ -66,7 +66,7 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 
 /*
 Updates the list of dishtags.
-If a Tag with the exact german and english name does not exist yet, it will be created.
+If a tag with the exact german and english name does not exist yet, it will be created.
 Old tags won't be removed to prevent problems with foreign keys.
 */
 func updateNameTagOptions(db *gorm.DB) {
@@ -79,7 +79,7 @@ func updateNameTagOptions(db *gorm.DB) {
 			Select("DishNameTagOption").
 			Scan(&parentId)
 		if res.Error != nil {
-			log.WithError(res.Error).Error("Unable to load Tag with En {} and De {} ", v.TagNameEnglish, v.TagNameGerman)
+			log.WithError(res.Error).Error("Unable to load tag with En {} and De {} ", v.TagNameEnglish, v.TagNameGerman)
 		}
 		if res.RowsAffected == 0 || res.Error != nil {
 			parent := model.DishRatingTagOption{
@@ -101,7 +101,7 @@ func updateNameTagOptions(db *gorm.DB) {
 	}
 }
 
-func addNotIncluded(parentId int32, db *gorm.DB, v NameTag) {
+func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 	var count int64
 	for _, u := range v.NotIncluded {
 		errorLoadingIncluded := db.Model(&model.DishNameTagOptionExcluded{}).
@@ -109,7 +109,7 @@ func addNotIncluded(parentId int32, db *gorm.DB, v NameTag) {
 			Select("DishNameTagOptionExcluded").
 			Count(&count).Error
 		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Error("Unable to load can be excluded Tag with expression {} and parentId {} ", u, parentId)
+			log.WithError(errorLoadingIncluded).Error("Unable to load can be excluded tag with expression {} and parentId {} ", u, parentId)
 		} else {
 			if count == 0 {
 				createError := db.Model(&model.DishNameTagOptionExcluded{}).
@@ -117,14 +117,14 @@ func addNotIncluded(parentId int32, db *gorm.DB, v NameTag) {
 						Expression: u,
 						NameTagID:  parentId}).Error
 				if createError != nil {
-					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded Tag with expression {} and parentId {} ", u, parentId)
+					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded tag with expression {} and parentId {} ", u, parentId)
 				}
 			}
 		}
 	}
 }
 
-func addCanBeIncluded(parentId int32, db *gorm.DB, v NameTag) {
+func addCanBeIncluded(parentId int32, db *gorm.DB, v nameTag) {
 	var count int64
 	for _, u := range v.CanBeIncluded {
 		errorLoadingIncluded := db.Model(&model.DishNameTagOptionIncluded{}).
@@ -132,7 +132,7 @@ func addCanBeIncluded(parentId int32, db *gorm.DB, v NameTag) {
 			Select("DishNameTagOptionIncluded").
 			Count(&count).Error
 		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Error("Unable to load can be included Tag with expression {} and parentId {} ", u, parentId)
+			log.WithError(errorLoadingIncluded).Error("Unable to load can be included tag with expression {} and parentId {} ", u, parentId)
 		} else {
 			if count == 0 {
 				createError := db.Model(&model.DishNameTagOptionIncluded{}).
@@ -141,7 +141,7 @@ func addCanBeIncluded(parentId int32, db *gorm.DB, v NameTag) {
 						NameTagID:  parentId,
 					}).Error
 				if createError != nil {
-					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded Tag with expression {} and parentId {} ", u, parentId)
+					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded tag with expression {} and parentId {} ", u, parentId)
 				}
 			}
 		}
@@ -153,7 +153,7 @@ Reads the json file at the given path and checks whether the values have already
 If an entry with the same German and English name exists, the entry won't be added.
 The TagType is used to identify the corresponding model
 */
-func updateTagTable(path string, db *gorm.DB, tagType ModelType) {
+func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 	absPathDish, _ := filepath.Abs(path)
 	tagsDish := generateRatingTagListFromFile(absPathDish)
 	insertModel := getTagModel(tagType, db)
@@ -183,7 +183,7 @@ func updateTagTable(path string, db *gorm.DB, tagType ModelType) {
 			}
 			createError := insertModel.Create(&element).Error
 			if createError != nil {
-				log.WithError(createError).Error("Unable to create new can be excluded Tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(createError).Error("Unable to create new can be excluded tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
 			} else {
 				log.Info("New Entry with En {} and De {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
 			}
@@ -191,18 +191,18 @@ func updateTagTable(path string, db *gorm.DB, tagType ModelType) {
 	}
 }
 
-func getTagModel(tagType int, db *gorm.DB) *gorm.DB {
-	if tagType == MEAL {
+func getTagModel(tagType modelType, db *gorm.DB) *gorm.DB {
+	if tagType == DISH {
 		return db.Model(&model.DishRatingTagOption{})
 	} else {
 		return db.Model(&model.CafeteriaRatingTagOption{})
 	}
 }
 
-func generateNameTagListFromFile(path string) MultiLanguageNameTags {
+func generateNameTagListFromFile(path string) multiLanguageNameTags {
 	byteValue := readFromFile(path)
 
-	var tags MultiLanguageNameTags
+	var tags multiLanguageNameTags
 	errorUnmarshal := json.Unmarshal(byteValue, &tags)
 	if errorUnmarshal != nil {
 		log.WithError(errorUnmarshal).Error("Error in parsing json.")
@@ -210,10 +210,10 @@ func generateNameTagListFromFile(path string) MultiLanguageNameTags {
 	return tags
 }
 
-func generateRatingTagListFromFile(path string) MultiLanguageTags {
+func generateRatingTagListFromFile(path string) multiLanguageTags {
 	byteValue := readFromFile(path)
 
-	var tags MultiLanguageTags
+	var tags multiLanguageTags
 	errorUnmarshal := json.Unmarshal(byteValue, &tags)
 	if errorUnmarshal != nil {
 		log.WithError(errorUnmarshal).Error("Error in parsing json.")

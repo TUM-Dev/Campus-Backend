@@ -22,16 +22,16 @@ import (
 	"time"
 )
 
-type ModelType int
+type modelType int
 
 // Used to differentiate between the type of the model for different queries to reduce duplicated code.
 const (
-	DISH      ModelType = 1
-	CAFETERIA ModelType = 2
-	NAME      ModelType = 3
+	DISH      modelType = 1
+	CAFETERIA modelType = 2
+	NAME      modelType = 3
 )
 
-type QueryRatingTag struct {
+type queryRatingTag struct {
 	En      string  `gorm:"column:en;type:text;" json:"en"`
 	De      string  `gorm:"column:De;type:text;" json:"De"`
 	Average float64 `json:"average"`
@@ -40,7 +40,7 @@ type QueryRatingTag struct {
 	Max     int32   `json:"max"`
 }
 
-type QueryOverviewRatingTag struct {
+type queryOverviewRatingTag struct {
 	En     string `gorm:"column:En;type:mediumtext;" json:"En"`
 	De     string `gorm:"column:De;type:mediumtext;" json:"De"`
 	Points int32  `gorm:"column:points;type:text;"  json:"rating"`
@@ -289,8 +289,8 @@ func getImageToBytes(path string) []byte {
 //queryTags
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
-func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType ModelType) []*pb.TagRatingsResult {
-	var results []QueryRatingTag
+func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelType) []*pb.TagRatingsResult {
+	var results []queryRatingTag
 	var err error
 	if ratingType == DISH {
 		err = db.Table("dish_rating_tag_option options").
@@ -339,7 +339,7 @@ func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType ModelTyp
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
 func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType int32) []*pb.TagRatingResult {
-	var results []QueryOverviewRatingTag
+	var results []queryOverviewRatingTag
 	var err error
 	if ratingType == DISH {
 		err = s.db.Table("dish_rating_tag_option options").
@@ -569,7 +569,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 			if exists.Error == gorm.ErrRecordNotFound {
 				log.WithError(exists.Error).Error("Error while querying the cafeteria name.")
 			} else if exists.RowsAffected == 0 {
-				log.Info("Tag with tag name ", tag.Tag, "does not exist")
+				log.Info("tag with tag name ", tag.Tag, "does not exist")
 				errorOccurred = errorOccurred + ", " + tag.Tag
 			} else {
 				if usedTagIds[currentTag] == 0 {
@@ -592,11 +592,11 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 	}
 
 	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag. The Tag(s) "+warningOccurred+" occurred more than once in this rating.")
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag. The tag(s) "+warningOccurred+" occurred more than once in this rating.")
 	} else if len(errorOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag.")
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag.")
 	} else if len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The Tag(s) "+warningOccurred+" occurred more than once in this rating.")
+		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+warningOccurred+" occurred more than once in this rating.")
 	} else {
 		return &emptypb.Empty{}, nil
 	}

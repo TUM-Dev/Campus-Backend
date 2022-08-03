@@ -12,31 +12,31 @@ import (
 	"time"
 )
 
-type CafeteriaName struct {
+type cafeteriaName struct {
 	Name     string   `json:"enum_name"`
-	Location Location `json:"location"`
+	Location location `json:"location"`
 }
 
-type CafeteriaWithID struct {
+type cafeteriaWithID struct {
 	Name      string `json:"name"`
 	Cafeteria int32  `json:"cafeteria"`
 }
 
-type Location struct {
+type location struct {
 	Longitude float32 `json:"longitude"`
 	Latitude  float32 `json:"latitude"`
 	Address   string  `json:"address"`
 }
 
-type Days struct {
-	Days []Date `json:"days"`
+type days struct {
+	Days []date `json:"days"`
 }
 
-type Date struct {
-	Dates []Dish `json:"dishes"`
+type date struct {
+	Dates []dish `json:"dishes"`
 }
 
-type Dish struct {
+type dish struct {
 	Name     string `json:"name"`
 	DishType string `json:"dish_type"`
 }
@@ -52,7 +52,7 @@ func (c *CronService) dishNameDownloadCron() error {
 }
 
 func downloadDailyDishes(c *CronService) {
-	var result []CafeteriaWithID
+	var result []cafeteriaWithID
 	c.db.Model(&model.Cafeteria{}).Select("name,id").Scan(&result)
 
 	for _, v := range result {
@@ -70,7 +70,7 @@ func downloadDailyDishes(c *CronService) {
 			log.WithError(err).Error("Menu for", v, "does not exist error 404 returned.")
 		} else {
 			body, err := ioutil.ReadAll(resp.Body)
-			var dishes Days
+			var dishes days
 			errjson := json.Unmarshal(body, &dishes)
 			if errjson != nil {
 				log.WithError(err).Error("Error in Parsing")
@@ -92,7 +92,7 @@ func downloadDailyDishes(c *CronService) {
 					if count == 0 {
 						errCreate := c.db.Model(&model.Dish{}).Create(&dish).Error
 						if errCreate != nil {
-							log.WithError(errCreate).Error("Error while creating new dish entry with name {}. Dish won't be saved", dish.Name)
+							log.WithError(errCreate).Error("Error while creating new dish entry with name {}. dish won't be saved", dish.Name)
 						}
 						addDishTagsToMapping(dish.Dish, dish.Name, c.db)
 					}
@@ -112,7 +112,7 @@ func downloadCanteenNames(c *CronService) {
 		log.WithError(err).Error("Error reading json data.")
 	}
 
-	var cafeteriaNames []CafeteriaName
+	var cafeteriaNames []cafeteriaName
 	errjson := json.Unmarshal(body, &cafeteriaNames)
 	if errjson != nil {
 		log.WithError(errjson).Error("Error while unmarshalling json data.")
