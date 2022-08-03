@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/disintegration/imaging"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -266,7 +268,7 @@ func getImageToBytes(path string) []byte {
 	file, err := os.Open(path)
 
 	if err != nil {
-		log.WithError(err).Error("Error while opening image ffile with path: {}.", path)
+		log.WithError(err).Error("Error while opening image file with path: {}.", path)
 		return nil
 	}
 
@@ -423,20 +425,19 @@ func storeImage(path string, i []byte) (string, error) {
 			return "", nil
 		}
 	}
+
 	img, _, _ := image.Decode(bytes.NewReader(i))
-	currentTime := time.Now().Unix()
-	var imgPath = fmt.Sprintf("%s%d%s", path, currentTime, ".jpeg")
-	var f, _ = os.Stat(imgPath)
-	var counter = 1
-	for {
-		if f == nil {
-			break
-		} else {
-			imgPath = fmt.Sprintf("%s%d%s%d%s", path, currentTime, "v", counter, ".jpeg")
-			counter++
-			f, _ = os.Stat(imgPath)
-		}
+	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
+
+	var opts jpeg.Options
+	maxImageSize := 524288 // 0.5MB
+	if len(i) > maxImageSize {
+		opts.Quality = len(i) / maxImageSize
+	} else {
+		opts.Quality = 100 // if image small enough use it directly
 	}
+
+	var imgPath = fmt.Sprintf("%s%d.jpeg", path, md5.Sum(i))
 
 	out, errFile := os.Create(imgPath)
 	defer func(out *os.File) {
@@ -445,9 +446,8 @@ func storeImage(path string, i []byte) (string, error) {
 			log.WithError(err).Error("Error while closing the file.")
 		}
 	}(out)
-	var opts jpeg.Options
-	opts.Quality = 100
-	errFile = jpeg.Encode(out, img, &opts)
+
+	errFile = jpeg.Encode(out, resizedImage, &opts)
 	return imgPath, errFile
 }
 
@@ -527,10 +527,6 @@ func inputSanitizationForNewRatingElements(rating int32, image []byte, comment s
 		return -1, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
 
-	if len(image) > 131100 {
-		return -1, status.Errorf(codes.InvalidArgument, "Image must not be larger than 1MB. Rating has not been saved.")
-	}
-
 	if len(comment) > 256 {
 		return -1, status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
@@ -554,7 +550,7 @@ func inputSanitizationForNewRatingElements(rating int32, image []byte, comment s
 // storeRatingTags
 // Checks whether the rating-tag name is a valid option and if so,
 // it will be saved with a reference to the rating
-func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType int) (*emptypb.Empty, error) {
+func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating, tagType modelType) (*emptypb.Empty, error) {
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
@@ -607,7 +603,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.TagRating
 
 // getModelStoreTagOption
 // Returns the db model of the option table to reduce code duplicates
-func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
+func getModelStoreTagOption(tagType modelType, db *gorm.DB) *gorm.DB {
 	if tagType == DISH {
 		return db.Model(&model.DishRatingTagOption{})
 	} else {
@@ -615,7 +611,7 @@ func getModelStoreTagOption(tagType int, db *gorm.DB) *gorm.DB {
 	}
 }
 
-func getModelStoreTag(tagType int, db *gorm.DB) *gorm.DB {
+func getModelStoreTag(tagType modelType, db *gorm.DB) *gorm.DB {
 	if tagType == DISH {
 		return db.Model(&model.DishRatingTag{})
 	} else {

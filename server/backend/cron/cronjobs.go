@@ -16,15 +16,15 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE                  = "news"
-	MENSA_TYPE                 = "mensa"
-	CHAT_TYPE                  = "chat"
-	KINO_TYPE                  = "kino"
-	ROOMFINDER_TYPE            = "roomfinder"
-	TICKETSALE_TYPE            = "ticketsale"
-	ALARM_TYPE                 = "alarm"
-	FILE_DOWNLOAD_TYPE         = "fileDownload"
-	MEAL_NAME_DOWNLOAD         = "dishNameDownload"
+	NEWS_TYPE          = "news"
+	MENSA_TYPE         = "mensa"
+	CHAT_TYPE          = "chat"
+	KINO_TYPE          = "kino"
+	ROOMFINDER_TYPE    = "roomfinder"
+	TICKETSALE_TYPE    = "ticketsale"
+	ALARM_TYPE         = "alarm"
+	FILE_DOWNLOAD_TYPE = "fileDownload"
+	MEAL_NAME_DOWNLOAD = "dishNameDownload"
 
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
 	STORAGE_DIR                = "/Storage/" // target location of files
@@ -39,13 +39,15 @@ func New(db *gorm.DB) *CronService {
 
 func (c *CronService) Run() error {
 	log.Printf("running cron service")
+	g := new(errgroup.Group)
+	g.Go(func() error { return c.dishNameDownloadCron() })
+	g.Go(func() error { return c.averageRatingComputation() })
 	for {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
 			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'dishNamesDownload', 'averageRatingComputation','dishNameDownload')", time.Now().Unix()).
 			Scan(&res)
-		g := new(errgroup.Group)
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
