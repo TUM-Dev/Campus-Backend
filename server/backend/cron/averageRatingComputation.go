@@ -77,20 +77,9 @@ func computeAverageNameTags(c *CronService) {
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
-		for _, v := range results {
-			cafeteria := model.DishNameTagAverage{
-				CafeteriaID: v.CafeteriaID,
-				Average:     v.Average,
-				TagID:       v.TagID,
-				Min:         v.Min,
-				Max:         v.Max,
-				Std:         v.Std,
-			}
-
-			errCreate := c.db.Model(&model.DishNameTagAverage{}).Create(&cafeteria).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating a new average name tag rating in the database.")
-			}
+		err := c.db.Model(&model.DishNameTagAverage{}).Create(&results).Error
+		if err != nil {
+			log.WithError(err).Error("Error while creating a new average name tag rating in the database.")
 		}
 	}
 }
@@ -110,22 +99,11 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
 
-		for _, v := range results {
-			cafeteria := model.DishRatingTagAverage{
-				CafeteriaID: v.CafeteriaID,
-				DishID:      v.DishID,
-				Average:     v.Average,
-				TagID:       v.TagID,
-				Min:         v.Min,
-				Max:         v.Max,
-				Std:         v.Std,
-			}
-
-			errCreate := c.db.Model(&model.DishRatingTagAverage{}).Create(&cafeteria).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating a new average dish tag rating in the database.")
-			}
+		err := c.db.Model(&model.DishRatingTagAverage{}).Create(&results).Error
+		if err != nil {
+			log.WithError(err).Error("Error while creating a new average dish tag rating in the database.")
 		}
+
 	}
 }
 
@@ -143,20 +121,10 @@ func computeAverageCafeteriaTags(c *CronService) {
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
-		for _, v := range results {
-			cafeteria := model.CafeteriaRatingTagsAverage{
-				CafeteriaID: v.CafeteriaID,
-				Average:     v.Average,
-				TagID:       v.TagID,
-				Min:         v.Min,
-				Max:         v.Max,
-				Std:         v.Std,
-			}
 
-			errCreate := c.db.Model(&model.CafeteriaRatingTagsAverage{}).Create(&cafeteria).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating a new average cafeteria tag rating in the database.")
-			}
+		err := c.db.Model(&model.CafeteriaRatingTagsAverage{}).Create(&results).Error
+		if err != nil {
+			log.WithError(err).Error("Error while creating a new average cafeteria tag rating in the database.")
 		}
 	}
 }
@@ -174,20 +142,9 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
-		for _, v := range results {
-			cafeteria := model.DishRatingAverage{
-				CafeteriaID: v.CafeteriaID,
-				Average:     v.Average,
-				DishID:      v.DishID,
-				Min:         v.Min,
-				Max:         v.Max,
-				Std:         v.Std,
-			}
-
-			errCreate := c.db.Model(&model.DishRatingAverage{}).Create(&cafeteria).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating a new average dish rating in the database.")
-			}
+		err := c.db.Model(&model.DishRatingAverage{}).Create(&results).Error
+		if err != nil {
+			log.WithError(err).Error("Error while creating a new average dish rating in the database.")
 		}
 	}
 }
@@ -205,19 +162,10 @@ func computeAverageForCafeteria(c *CronService) {
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
 		}
-		for _, v := range results {
-			cafeteria := model.CafeteriaRatingAverage{
-				CafeteriaID: v.CafeteriaID,
-				Average:     v.Average,
-				Min:         v.Min,
-				Max:         v.Max,
-				Std:         v.Std,
-			}
 
-			errCreate := c.db.Create(&cafeteria).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating a new average cafeteria rating in the database.")
-			}
+		err := c.db.Model(&model.CafeteriaRatingAverage{}).Create(&results).Error
+		if err != nil {
+			log.WithError(err).Error("Error while creating a new average cafeteria rating in the database.")
 		}
 	}
 }

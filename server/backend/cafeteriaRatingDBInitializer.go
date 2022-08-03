@@ -7,7 +7,6 @@ import (
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -200,28 +199,27 @@ func getTagModel(tagType modelType, db *gorm.DB) *gorm.DB {
 }
 
 func generateNameTagListFromFile(path string) multiLanguageNameTags {
-	byteValue := readFromFile(path)
+	file := readFromFile(path)
 
 	var tags multiLanguageNameTags
-	errorUnmarshal := json.Unmarshal(byteValue, &tags)
-	if errorUnmarshal != nil {
-		log.WithError(errorUnmarshal).Error("Error in parsing json.")
+	errjson := json.NewDecoder(file).Decode(&tags)
+	if errjson != nil {
+		log.WithError(errjson).Error("Error while reading the file.")
 	}
 	return tags
 }
 
 func generateRatingTagListFromFile(path string) multiLanguageTags {
-	byteValue := readFromFile(path)
-
+	file := readFromFile(path)
 	var tags multiLanguageTags
-	errorUnmarshal := json.Unmarshal(byteValue, &tags)
-	if errorUnmarshal != nil {
-		log.WithError(errorUnmarshal).Error("Error in parsing json.")
+	errjson := json.NewDecoder(file).Decode(&tags)
+	if errjson != nil {
+		log.WithError(errjson).Error("Error while reading or parsing the file.")
 	}
 	return tags
 }
 
-func readFromFile(path string) []byte {
+func readFromFile(path string) *os.File {
 	jsonFile, err := os.Open(path)
 
 	if err != nil {
@@ -235,9 +233,5 @@ func readFromFile(path string) []byte {
 		}
 	}(jsonFile)
 
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		log.WithError(err).Error("Error while reading the file.")
-	}
-	return byteValue
+	return jsonFile
 }

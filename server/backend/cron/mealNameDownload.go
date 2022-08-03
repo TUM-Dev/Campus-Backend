@@ -2,12 +2,11 @@ package cron
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -60,7 +59,7 @@ func downloadDailyDishes(c *CronService) {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 		y, w := time.Now().UTC().ISOWeek()
 
-		req := "https://tum-dev.github.io/eat-api/" + cafeteriaName + "/" + strconv.Itoa(y) + "/" + strconv.Itoa(w) + ".json"
+		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%i/%i.json", cafeteriaName, y, w)
 		log.Info("Fetching menu from: {}", req)
 		var resp, err = http.Get(req)
 		if err != nil {
@@ -69,9 +68,9 @@ func downloadDailyDishes(c *CronService) {
 		if resp.StatusCode != 200 {
 			log.WithError(err).Error("Menu for", v, "does not exist error 404 returned.")
 		} else {
-			body, err := ioutil.ReadAll(resp.Body)
+
 			var dishes days
-			errjson := json.Unmarshal(body, &dishes)
+			errjson := json.NewDecoder(resp.Body).Decode(&dishes)
 			if errjson != nil {
 				log.WithError(err).Error("Error in Parsing")
 			}
@@ -107,13 +106,9 @@ func downloadCanteenNames(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("Error fetching cafeteria list from eat-api.")
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.WithError(err).Error("Error reading json data.")
-	}
-
 	var cafeteriaNames []cafeteriaName
-	errjson := json.Unmarshal(body, &cafeteriaNames)
+	errjson := json.NewDecoder(resp.Body).Decode(&cafeteriaNames)
+
 	if errjson != nil {
 		log.WithError(errjson).Error("Error while unmarshalling json data.")
 	}
