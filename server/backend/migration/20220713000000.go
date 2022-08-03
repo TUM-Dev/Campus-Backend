@@ -37,5 +37,13 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 			}
 			return nil
 		},
+
+		Rollback: func(tx *gorm.DB) error {
+			res := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "fileDownload", 300).Error
+			if res != nil {
+				return res
+			}
+			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "fileDownload", 300).Error
+		},
 	}
 }

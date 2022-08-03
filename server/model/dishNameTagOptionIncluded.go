@@ -1,9 +1,9 @@
 package model
 
 type DishNameTagOptionIncluded struct {
-	DishNameTagOptionIncluded int32  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;" json:"dishNameTagOptionIncluded"`
-	NameTagID                 int32  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int" json:"nameTagID"`
-	Expression                string `gorm:"column:expression;type:text" json:"expression"`
+	DishNameTagOptionIncluded int32  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
+	NameTagID                 int32  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
+	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
 
 // TableName sets the insert table name for this struct type

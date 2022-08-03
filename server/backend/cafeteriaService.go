@@ -338,21 +338,20 @@ func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelTyp
 
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
-func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType int32) []*pb.TagRatingResult {
+func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType modelType) []*pb.TagRatingResult {
 	var results []queryOverviewRatingTag
 	var err error
 	if ratingType == DISH {
 		err = s.db.Table("dish_rating_tag_option options").
 			Joins("JOIN dish_rating_tag rating ON options.id = rating.tagID").
-			Where("rating.parentRating = ?", dishID).
-			Select("options.De as De, options.En as En, rating.rating as rating").
-			Scan(&results).Error
+			Find(&results, "rating.parentRating = ?", dishID).Error
+		//Where("rating.parentRating = ?", dishID).
+		//	Select("options.De as De, options.En as En, rating.rating as rating").
+		//	Scan(&results).Error
 	} else {
 		err = s.db.Table("cafeteria_rating_tag_option options").
 			Joins("JOIN cafeteria_rating_tag rating ON options.id = rating.tagID").
-			Where("rating.parentRating = ?", dishID).
-			Select("options.De as De, options.En as En, rating.rating as rating").
-			Scan(&results).Error
+			Find(&results, "rating.parentRating = ?", dishID).Error
 	}
 
 	if err != nil {
@@ -500,7 +499,10 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 // Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
 func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 	var result []int
-	err := s.db.Model(&model.DishToDishNameTag{}).Where("dishID = ? ", dishID).Select("nameTagID").Scan(&result).Error
+	err := s.db.Model(&model.DishToDishNameTag{}).
+		Where("dishID = ? ", dishID).
+		Select("nameTagID").
+		Scan(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading the dishID for the given name.")
 	} else {
