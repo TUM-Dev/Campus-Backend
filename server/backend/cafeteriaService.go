@@ -387,7 +387,7 @@ func imageWrapper(image []byte, path string, id int32) string {
 	var resPath = ""
 	if len(image) > 0 {
 		var resError error
-		path := fmt.Sprintf("%s%s%s%d%s", "../images/", path, "/", id, "/")
+		path := fmt.Sprintf("%s%s%s%d%s", "/Storage/rating/", path, "/", id, "/")
 		resPath, resError = storeImage(path, image)
 
 		if resError != nil {
@@ -413,14 +413,14 @@ func storeImage(path string, i []byte) (string, error) {
 	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
 
 	var opts jpeg.Options
-	maxImageSize := 524288 // 0.5MB
+	maxImageSize := 655400 // 5MB
 	if len(i) > maxImageSize {
-		opts.Quality = len(i) / maxImageSize
+		opts.Quality = maxImageSize / len(i)
 	} else {
 		opts.Quality = 100 // if image small enough use it directly
 	}
 
-	var imgPath = fmt.Sprintf("%s%d.jpeg", path, md5.Sum(i))
+	var imgPath = fmt.Sprintf("%s%x.jpeg", path, md5.Sum(i))
 
 	out, errFile := os.Create(imgPath)
 	if errFile != nil {

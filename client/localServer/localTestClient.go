@@ -18,6 +18,7 @@ import (
 
 const (
 	localAddress = "127.0.0.1:50051"
+	testImage    = "./localServer/images/sampleimage.jpeg"
 )
 
 func main() {
@@ -39,17 +40,17 @@ func main() {
 func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
-	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
-	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
+	//currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
+	//generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)
+	queryCafeteria(currentCafeteria, c, ctx, true)
+	/*queryDish(currentCafeteria, currentDish, c, ctx, false)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
 
 	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)
+	queryDish(currentCafeteria, currentDish, c, ctx, false)*/
 
 }
 
@@ -159,7 +160,7 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 		CafeteriaId: cafeteria,
 		Comment:     "Alles super, 2 Sterne",
 		RatingTags:  y,
-		Image:       getImageToBytes("./images/sampleimage.jpeg"),
+		Image:       getImageToBytes(testImage),
 	})
 
 	if err != nil {
@@ -190,7 +191,7 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string
 		Dish:        dish,
 		Comment:     "Alles Hähnchen",
 		RatingTags:  y,
-		Image:       getImageToBytes("./images/sampleimage.jpeg"),
+		Image:       getImageToBytes(testImage),
 	})
 
 	if err != nil {
