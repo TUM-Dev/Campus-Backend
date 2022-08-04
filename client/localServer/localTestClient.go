@@ -21,6 +21,8 @@ const (
 	testImage    = "./localServer/images/sampleimage.jpeg"
 )
 
+// main connects to a seperatly started local server and creates ratings for both, cafeterias and dishes.
+// Afterwards, they are queried and displayed on the console
 func main() {
 	// Set up a connection to the local server.
 	log.Info("Connecting...")
@@ -40,17 +42,17 @@ func main() {
 func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
-	//currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
-	//generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
+	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
+	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	queryCafeteria(currentCafeteria, c, ctx, true)
-	/*queryDish(currentCafeteria, currentDish, c, ctx, false)
+	queryDish(currentCafeteria, currentDish, c, ctx, false)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
 
 	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)*/
+	queryDish(currentCafeteria, currentDish, c, ctx, false)
 
 }
 
@@ -258,7 +260,7 @@ func storeImage(path string, i []byte) (string, error) {
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			log.Info("Fille was not closed successfully")
+			log.Info("File was not closed successfully")
 		}
 	}(out)
 	var opts jpeg.Options
