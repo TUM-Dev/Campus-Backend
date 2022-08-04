@@ -629,32 +629,48 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 
 //GetAvailableDishTags RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
-func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*pb.RatingTagsOverview
+func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
+	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, DishRatingTagOption as TagId").Find(&result).Error
+	err := s.db.Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, dishRatingTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
 
-	return &pb.GetRatingTagsReply{
+	return &pb.GetTagsReply{
+		RatingTags: result,
+	}, requestStatus
+}
+
+// GetAvailableDishTags RPC Endpoint
+// Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
+func (s *CampusServer) GetNameTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
+	var result []*pb.TagsOverview
+	var requestStatus error = nil
+	err := s.db.Model(&model.DishNameTagOption{}).Select("DE as de, EN as en, dishNameTagOption as TagId").Find(&result).Error
+	if err != nil {
+		log.WithError(err).Error("Error while loading available Name Tags from database.")
+		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
+	}
+
+	return &pb.GetTagsReply{
 		RatingTags: result,
 	}, requestStatus
 }
 
 //GetAvailableCafeteriaTags  RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german
-func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*pb.RatingTagsOverview
+func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
+	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, CafeteriaRatingsTagOption as TagId").Find(&result).Error
+	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
 	}
 
-	return &pb.GetRatingTagsReply{
+	return &pb.GetTagsReply{
 		RatingTags: result,
 	}, requestStatus
 }
@@ -679,8 +695,8 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 	if request.Year < 2022 {
 		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if request.Month < 1 || request.Month > 52 {
-		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Months are currently used as the weeks attribute. must be in the range 1 - 52")
+	if request.Week < 1 || request.Week > 53 {
+		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Weeks must be in the range 1 - 53")
 	}
 	if request.Day < 1 || request.Day > 4 {
 		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
@@ -689,7 +705,7 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 	var requestStatus error = nil
 	var results []string
 	err := s.db.Table("dishes_of_the_week weekly").
-		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Month, request.Year).
+		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Week, request.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Where("d.cafeteriaID = ?", request.CafeteriaId).
