@@ -410,6 +410,24 @@ func local_request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler 
 
 }
 
+func request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.GetNameTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.GetNameTags(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_Campus_GetAvailableCafeteriaTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
@@ -1465,7 +1483,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableDishTags", runtime.WithHTTPPathPattern("/dish/rating/allTags"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableDishTags", runtime.WithHTTPPathPattern("/dish/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1482,6 +1500,30 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
+	mux.Handle("GET", pattern_Campus_GetNameTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNameTags", runtime.WithHTTPPathPattern("/dish/rating/allDishTags"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Campus_GetNameTags_0(ctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetNameTags_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetNameTags_0{resp}, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_Campus_GetAvailableCafeteriaTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1489,7 +1531,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allTags"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2311,7 +2353,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableDishTags", runtime.WithHTTPPathPattern("/dish/rating/allTags"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableDishTags", runtime.WithHTTPPathPattern("/dish/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2327,12 +2369,33 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
+	mux.Handle("GET", pattern_Campus_GetNameTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNameTags", runtime.WithHTTPPathPattern("/dish/rating/allDishTags"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Campus_GetNameTags_0(ctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetNameTags_0(ctx, mux, outboundMarshaler, w, req, response_Campus_GetNameTags_0{resp}, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_Campus_GetAvailableCafeteriaTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allTags"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2863,7 +2926,16 @@ type response_Campus_GetAvailableDishTags_0 struct {
 }
 
 func (m response_Campus_GetAvailableDishTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetRatingTagsReply)
+	response := m.Message.(*GetTagsReply)
+	return response.RatingTags
+}
+
+type response_Campus_GetNameTags_0 struct {
+	proto.Message
+}
+
+func (m response_Campus_GetNameTags_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetTagsReply)
 	return response.RatingTags
 }
 
@@ -2872,7 +2944,7 @@ type response_Campus_GetAvailableCafeteriaTags_0 struct {
 }
 
 func (m response_Campus_GetAvailableCafeteriaTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetRatingTagsReply)
+	response := m.Message.(*GetTagsReply)
 	return response.RatingTags
 }
 
@@ -2917,9 +2989,11 @@ var (
 
 	pattern_Campus_NewDishRating_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "new"}, ""))
 
-	pattern_Campus_GetAvailableDishTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "allTags"}, ""))
+	pattern_Campus_GetAvailableDishTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "allRatingTags"}, ""))
 
-	pattern_Campus_GetAvailableCafeteriaTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteria", "rating", "allTags"}, ""))
+	pattern_Campus_GetNameTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "allDishTags"}, ""))
+
+	pattern_Campus_GetAvailableCafeteriaTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteria", "rating", "allRatingTags"}, ""))
 
 	pattern_Campus_GetCafeterias_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"cafeteria", "allCafeterias"}, ""))
 
@@ -2990,6 +3064,8 @@ var (
 	forward_Campus_NewDishRating_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetAvailableDishTags_0 = runtime.ForwardResponseMessage
+
+	forward_Campus_GetNameTags_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetAvailableCafeteriaTags_0 = runtime.ForwardResponseMessage
 

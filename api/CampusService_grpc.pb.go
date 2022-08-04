@@ -36,8 +36,9 @@ type CampusClient interface {
 	GetDishRatings(ctx context.Context, in *DishRatingRequest, opts ...grpc.CallOption) (*DishRatingReply, error)
 	NewCafeteriaRating(ctx context.Context, in *NewCafeteriaRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
-	GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error)
+	GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
+	GetNameTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
+	GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
 	GetCafeterias(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCafeteriaReply, error)
 	GetDishes(ctx context.Context, in *GetDishesRequest, opts ...grpc.CallOption) (*GetDishesReply, error)
 	GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error)
@@ -169,8 +170,8 @@ func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingReque
 	return out, nil
 }
 
-func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error) {
-	out := new(GetRatingTagsReply)
+func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
+	out := new(GetTagsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetAvailableDishTags", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -178,8 +179,17 @@ func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Emp
 	return out, nil
 }
 
-func (c *campusClient) GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetRatingTagsReply, error) {
-	out := new(GetRatingTagsReply)
+func (c *campusClient) GetNameTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
+	out := new(GetTagsReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetNameTags", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetAvailableCafeteriaTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
+	out := new(GetTagsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetAvailableCafeteriaTags", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -402,8 +412,9 @@ type CampusServer interface {
 	GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error)
 	NewCafeteriaRating(context.Context, *NewCafeteriaRatingRequest) (*emptypb.Empty, error)
 	NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error)
-	GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
-	GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error)
+	GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
+	GetNameTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
+	GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
 	GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaReply, error)
 	GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error)
 	GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonReply, error)
@@ -466,10 +477,13 @@ func (UnimplementedCampusServer) NewCafeteriaRating(context.Context, *NewCafeter
 func (UnimplementedCampusServer) NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewDishRating not implemented")
 }
-func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
+func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableDishTags not implemented")
 }
-func (UnimplementedCampusServer) GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetRatingTagsReply, error) {
+func (UnimplementedCampusServer) GetNameTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNameTags not implemented")
+}
+func (UnimplementedCampusServer) GetAvailableCafeteriaTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableCafeteriaTags not implemented")
 }
 func (UnimplementedCampusServer) GetCafeterias(context.Context, *emptypb.Empty) (*GetCafeteriaReply, error) {
@@ -763,6 +777,24 @@ func _Campus_GetAvailableDishTags_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetAvailableDishTags(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNameTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNameTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetNameTags",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNameTags(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1235,6 +1267,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAvailableDishTags",
 			Handler:    _Campus_GetAvailableDishTags_Handler,
+		},
+		{
+			MethodName: "GetNameTags",
+			Handler:    _Campus_GetNameTags_Handler,
 		},
 		{
 			MethodName: "GetAvailableCafeteriaTags",

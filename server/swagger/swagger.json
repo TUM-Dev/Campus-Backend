@@ -182,7 +182,7 @@
         ]
       }
     },
-    "/cafeteria/rating/allTags": {
+    "/cafeteria/rating/allRatingTags": {
       "get": {
         "operationId": "Campus_GetAvailableCafeteriaTags",
         "responses": {
@@ -191,7 +191,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/apiRatingTagsOverview"
+                "$ref": "#/definitions/apiTagsOverview"
               }
             }
           },
@@ -397,13 +397,15 @@
           },
           {
             "name": "year",
+            "description": "\u003e=2022 until the current year",
             "in": "query",
             "required": false,
             "type": "integer",
             "format": "int32"
           },
           {
-            "name": "month",
+            "name": "week",
+            "description": "range 1 - 53",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -411,6 +413,7 @@
           },
           {
             "name": "day",
+            "description": "range 0 (Monday) - 4 (Friday)",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -422,7 +425,32 @@
         ]
       }
     },
-    "/dish/rating/allTags": {
+    "/dish/rating/allDishTags": {
+      "get": {
+        "operationId": "Campus_GetNameTags",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/apiTagsOverview"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/dish/rating/allRatingTags": {
       "get": {
         "operationId": "Campus_GetAvailableDishTags",
         "responses": {
@@ -431,7 +459,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/apiRatingTagsOverview"
+                "$ref": "#/definitions/apiTagsOverview"
               }
             }
           },
@@ -1529,17 +1557,6 @@
         }
       }
     },
-    "apiGetRatingTagsReply": {
-      "type": "object",
-      "properties": {
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiRatingTagsOverview"
-          }
-        }
-      }
-    },
     "apiGetResponsiblePersonReply": {
       "type": "object",
       "properties": {
@@ -1629,6 +1646,17 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/apiStudyRoomMsgElement"
+          }
+        }
+      }
+    },
+    "apiGetTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTagsOverview"
           }
         }
       }
@@ -1933,21 +1961,6 @@
         }
       }
     },
-    "apiRatingTagsOverview": {
-      "type": "object",
-      "properties": {
-        "tagId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "de": {
-          "type": "string"
-        },
-        "en": {
-          "type": "string"
-        }
-      }
-    },
     "apiResponsiblePersonElement": {
       "type": "object",
       "properties": {
@@ -2137,6 +2150,21 @@
       "type": "object",
       "properties": {
         "status": {
+          "type": "string"
+        }
+      }
+    },
+    "apiTagsOverview": {
+      "type": "object",
+      "properties": {
+        "tagId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "de": {
+          "type": "string"
+        },
+        "en": {
           "type": "string"
         }
       }
