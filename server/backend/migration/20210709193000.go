@@ -20,7 +20,10 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 				URL        sql.NullString `gorm:"column:url;default:null;" json:"url"`                         // URL of the file source (if any)
 				Downloaded sql.NullBool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
 			}
-			if err := tx.AutoMigrate(&Files{}); err != nil {
+			if err := tx.AutoMigrate(
+				&Files{},
+				&model.Crontab{},
+			); err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{

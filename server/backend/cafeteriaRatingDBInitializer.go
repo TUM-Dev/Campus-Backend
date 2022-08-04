@@ -58,7 +58,7 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 				LastRun:  0,
 			}).Error
 		if errCreate != nil {
-			log.WithError(errCreate).Error("Error while creating cronjob with name {}.", cronName)
+			log.WithError(errCreate).Error("Error while creating cronjob with name: ", cronName)
 		}
 	}
 }
@@ -206,6 +206,12 @@ func generateNameTagListFromFile(path string) multiLanguageNameTags {
 	if errjson != nil {
 		log.WithError(errjson).Error("Error while reading the file.")
 	}
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.WithError(err).Error("Error in parsing json.")
+		}
+	}(file)
 	return tags
 }
 
@@ -216,6 +222,12 @@ func generateRatingTagListFromFile(path string) multiLanguageTags {
 	if errjson != nil {
 		log.WithError(errjson).Error("Error while reading or parsing the file.")
 	}
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.WithError(err).Error("Error in parsing json.")
+		}
+	}(file)
 	return tags
 }
 
@@ -225,13 +237,6 @@ func readFromFile(path string) *os.File {
 	if err != nil {
 		log.WithError(err).Error("Unable to open file with path: {}", path)
 	}
-
-	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
-			log.WithError(err).Error("Error in parsing json.")
-		}
-	}(jsonFile)
 
 	return jsonFile
 }

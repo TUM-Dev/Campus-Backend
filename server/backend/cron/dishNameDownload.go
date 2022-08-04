@@ -52,7 +52,7 @@ func (c *CronService) dishNameDownloadCron() error {
 
 func downloadDailyDishes(c *CronService) {
 	var result []cafeteriaWithID
-	c.db.Model(&model.Cafeteria{}).Select("name,id").Scan(&result)
+	c.db.Model(&model.Cafeteria{}).Select("name,cafeteria").Scan(&result)
 
 	for _, v := range result {
 
@@ -127,10 +127,6 @@ func downloadCanteenNames(c *CronService) {
 			First(&cafeteriaResult)
 
 		if resExists.Error != nil {
-			log.WithError(resExists.Error).Error("Error while unmarshalling json data.")
-		}
-
-		if resExists.RowsAffected == 0 {
 			errCreate := c.db.Model(&model.Cafeteria{}).Create(&mensa).Error
 			if errCreate != nil {
 				log.WithError(errCreate).Error("Error while creating the db entry for the cafeteria {}", cafeteriaNames[i].Name)

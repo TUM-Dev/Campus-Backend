@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"image"
 	"image/jpeg"
-	"log"
 	"os"
 	"time"
 )
@@ -22,11 +22,11 @@ const (
 
 func main() {
 	// Set up a connection to the local server.
-	log.Println("Connecting...")
+	log.Info("Connecting...")
 
 	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 	}
 	c := pb.NewCampusClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -58,39 +58,42 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 	})
 
 	if err != nil {
-		println(err)
+		log.Info(err)
 	} else {
-		println("Result: ")
-		println("avg: ", res.Avg)
-		println("min", res.Min)
-		println("max", res.Max)
-		println("Number of individual Ratings", len(res.Rating))
+		log.Info("Result: ")
+		log.Info("avg: ", res.Avg)
+		log.Info("min", res.Min)
+		log.Info("max", res.Max)
+		log.Info("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/dishes/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
-			println("\nRating: ", v.Points)
-			println("Comment ", v.Comment)
-			println("Number of Tag Ratings: ", len(v.RatingTags))
-			println("Timestamp: ", v.Visited)
-			println("ImageLength:", len(v.Image))
+			log.Info("\nRating: ", v.Points)
+			log.Info("Comment ", v.Comment)
+			log.Info("Number of Tag Ratings: ", len(v.RatingTags))
+			log.Info("Timestamp: ", v.Visited)
+			log.Info("ImageLength:", len(v.Image))
 			if imageShouldBeStored {
-				storeImage(path, v.Image)
+				_, err := storeImage(path, v.Image)
+				if err != nil {
+					log.Info("image was not saved successfully")
+				}
 			}
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nTagId: ", v.TagId)
-			println("avg: ", v.Avg)
-			println("min", v.Min)
-			println("max", v.Max)
-			println("std", v.Std)
+			log.Info("\nTagId: ", v.TagId)
+			log.Info("avg: ", v.Avg)
+			log.Info("min", v.Min)
+			log.Info("max", v.Max)
+			log.Info("std", v.Std)
 		}
-		log.Println("nameTags: ")
+		log.Info("nameTags: ")
 		for _, v := range res.NameTags {
-			println("\nTagId: ", v.TagId)
-			println("avg: ", v.Avg)
-			println("min", v.Min)
-			println("max", v.Max)
-			println("std", v.Std)
+			log.Info("\nTagId: ", v.TagId)
+			log.Info("avg: ", v.Avg)
+			log.Info("min", v.Min)
+			log.Info("max", v.Max)
+			log.Info("std", v.Std)
 		}
 	}
 }
@@ -104,31 +107,34 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 	})
 
 	if err != nil {
-		println(err)
+		log.Info(err)
 	} else {
-		println("Result: ")
-		println("avg: ", res.Avg)
-		println("min", res.Min)
-		println("max", res.Max)
-		println("Number of individual Ratings", len(res.Rating))
+		log.Info("Result: ")
+		log.Info("avg: ", res.Avg)
+		log.Info("min", res.Min)
+		log.Info("max", res.Max)
+		log.Info("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/cafeteria/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
-			println("\nRating: ", v.Points)
-			println("Comment ", v.Comment)
-			println("Number of Tag Ratings: ", len(v.RatingTags))
-			println("Timestamp: ", v.Visited)
-			println("ImageLength:", len(v.Image))
+			log.Info("\nRating: ", v.Points)
+			log.Info("Comment ", v.Comment)
+			log.Info("Number of Tag Ratings: ", len(v.RatingTags))
+			log.Info("Timestamp: ", v.Visited)
+			log.Info("ImageLength:", len(v.Image))
 			if imageShouldBeStored {
-				storeImage(path, v.Image)
+				_, err := storeImage(path, v.Image)
+				if err != nil {
+					log.Info("image was not saved successfully")
+				}
 			}
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nTagId: ", v.TagId)
-			println("avg: ", v.Avg)
-			println("min", v.Min)
-			println("max", v.Max)
-			println("std", v.Std)
+			log.Info("\nTagId: ", v.TagId)
+			log.Info("avg: ", v.Avg)
+			log.Info("min", v.Min)
+			log.Info("max", v.Max)
+			log.Info("std", v.Std)
 		}
 	}
 }
@@ -153,9 +159,9 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 	})
 
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 	} else {
-		log.Println("Request successfully: Cafeteria Rating should be stored")
+		log.Info("Request successfully: Cafeteria Rating should be stored")
 	}
 }
 
@@ -184,9 +190,9 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string
 	})
 
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 	} else {
-		log.Println("Request successfully: Dish Rating should be stored")
+		log.Info("Request successfully: Dish Rating should be stored")
 	}
 }
 
@@ -196,26 +202,31 @@ func getImageToBytes(path string) []byte {
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return make([]byte, 0)
 	}
 
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Info("Request successfully: Dish Rating should be stored")
+		}
+	}(file)
 
 	fileInfo, _ := file.Stat()
 	var size int64 = fileInfo.Size()
-	bytes := make([]byte, size)
+	byteArray := make([]byte, size)
 
 	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(bytes)
-	println("Length of the image as bytes: ", len(bytes))
-	return bytes
+	_, err = buffer.Read(byteArray)
+	log.Info("Length of the image as bytes: ", len(byteArray))
+	return byteArray
 }
 
 func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 		}
 	}
 	img, _, _ := image.Decode(bytes.NewReader(i))
@@ -233,7 +244,15 @@ func storeImage(path string, i []byte) (string, error) {
 	}
 
 	out, errFile := os.Create(imgPath)
-	defer out.Close()
+	if errFile != nil {
+		log.Info("Unable to create the new testfile")
+	}
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.Info("Fille was not closed successfully")
+		}
+	}(out)
 	var opts jpeg.Options
 	opts.Quality = 100
 	errFile = jpeg.Encode(out, img, &opts)
