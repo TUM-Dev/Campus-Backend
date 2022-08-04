@@ -39,7 +39,8 @@ func main() {
 func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
-	//	currentDish := "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen" //must be in the dish table
+	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
+	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	/*	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 		generateCafeteriaRating(c, ctx, currentCafeteria, 2)

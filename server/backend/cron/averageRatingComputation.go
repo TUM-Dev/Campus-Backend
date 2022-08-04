@@ -5,51 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-/*type averageRatingForCafeteria struct {
-	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	Average     float32 `json:"average"`
-	Min         int8    `json:"min"`
-	Max         int8    `json:"max"`
-	Std         float32 `json:"std"`
-}
-
-type averageRatingForDishInCafeteria struct {
-	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	DishID      int32   `gorm:"column:dishID;foreignKey:id;type:int;" json:"dishID"`
-	Average     float32 `json:"average"`
-	Min         int8    `json:"min"`
-	Max         int8    `json:"max"`
-	Std         float32 `json:"std"`
-}
-
-type averageCafeteriaTags struct {
-	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID       int32   `gorm:"foreignKey:tagRatingID;column:tagID;type:int" json:"tagID"`
-	Average     float32 `json:"average"`
-	Min         int8    `json:"min"`
-	Max         int8    `json:"max"`
-	Std         float32 `json:"std"`
-}
-
-type averageDishTags struct {
-	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID       int32   `gorm:"foreignKey:id;column:tagID;type:int" json:"tagID"`
-	DishID      int32   `gorm:"column:dishID;foreignKey:id;type:int;" json:"dishID"`
-	Average     float32 `json:"average"`
-	Min         int8    `json:"min"`
-	Max         int8    `json:"max"`
-	Std         float32 `json:"std"`
-}
-
-type averageDishNameTags struct {
-	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
-	TagID       int32   `gorm:"foreignKey:id;column:tagID;type:int" json:"tagID"`
-	Average     float32 `json:"average"`
-	Min         int8    `json:"min"`
-	Max         int8    `json:"max"`
-	Std         float32 `json:"std"`
-}*/
-
 // averageRatingComputation
 // This cronjob precomputes average ratings of all cafeteria ratings, dish ratings and all three types of tags.
 // They are grouped (e.g. All Ratings for "Mensa_garching") and the computed values will then be stored in a table with the suffix "_result"
@@ -85,7 +40,7 @@ func computeAverageNameTags(c *CronService) {
 }
 
 func computeAverageForDishesInCafeteriasTags(c *CronService) {
-	var results []model.DishRatingAverage
+	var results []model.DishRatingTagAverage //todo namen im select anpassen
 	err := c.db.Raw("SELECT mr.dishID as dishID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std" +
 		" FROM dish_rating mr" +
 		" JOIN dish_rating_tag mrt ON mr.dishRating = mrt.parentRating" +
