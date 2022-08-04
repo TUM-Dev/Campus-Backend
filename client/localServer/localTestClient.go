@@ -52,26 +52,25 @@ func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
 	res, err := c.GetDishRatings(ctx, &pb.DishRatingRequest{
-		Dish:          dish,
-		CafeteriaName: cafeteria,
-		Limit:         3,
+		Dish:        dish,
+		CafeteriaId: cafeteria,
+		Limit:       3,
 	})
 
 	if err != nil {
 		println(err)
 	} else {
 		println("Result: ")
-		println("averagerating: ", res.AveragePoints)
-		println("min", res.MinPoints)
-		println("max", res.MaxPoints)
+		println("avg: ", res.Avg)
+		println("min", res.Min)
+		println("max", res.Max)
 		println("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/dishes/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
 			println("\nRating: ", v.Points)
-			println("Cafeteria Name: ", v.CafeteriaName)
 			println("Comment ", v.Comment)
-			println("Number of Tag Ratings: ", len(v.TagRating))
-			println("Timestamp: ", v.CafeteriaVisitedAt)
+			println("Number of Tag Ratings: ", len(v.RatingTags))
+			println("Timestamp: ", v.Visited)
 			println("ImageLength:", len(v.Image))
 			if imageShouldBeStored {
 				storeImage(path, v.Image)
@@ -79,27 +78,27 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nNameDE: ", v.DE)
-			println("NameEN: ", v.EN)
-			println("averagerating: ", v.AveragePoints)
-			println("min", v.MinPoints)
-			println("max", v.MaxPoints)
+			println("\nTagId: ", v.TagId)
+			println("avg: ", v.Avg)
+			println("min", v.Min)
+			println("max", v.Max)
+			println("std", v.Std)
 		}
 		log.Println("nameTags: ")
 		for _, v := range res.NameTags {
-			println("\nNameDE: ", v.DE)
-			println("NameEN: ", v.EN)
-			println("averagerating: ", v.AveragePoints)
-			println("min", v.MinPoints)
-			println("max", v.MaxPoints)
+			println("\nTagId: ", v.TagId)
+			println("avg: ", v.Avg)
+			println("min", v.Min)
+			println("max", v.Max)
+			println("std", v.Std)
 		}
 	}
 }
 
 func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
 	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
-		CafeteriaName: s,
-		Limit:         3,
+		CafeteriaId: s,
+		Limit:       3,
 		//	From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),
 		//	To:            timestamppb.New(time.Date(2022, 7, 8, 17, 0, 0, 0, time.Local)),
 	})
@@ -108,17 +107,16 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 		println(err)
 	} else {
 		println("Result: ")
-		println("averagerating: ", res.AveragePoints)
-		println("min", res.MinPoints)
-		println("max", res.MaxPoints)
+		println("avg: ", res.Avg)
+		println("min", res.Min)
+		println("max", res.Max)
 		println("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/cafeteria/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
 			println("\nRating: ", v.Points)
-			println("Cafeteria Name: ", v.CafeteriaName)
 			println("Comment ", v.Comment)
-			println("Number of Tag Ratings: ", len(v.TagRating))
-			println("Timestamp: ", v.CafeteriaVisitedAt)
+			println("Number of Tag Ratings: ", len(v.RatingTags))
+			println("Timestamp: ", v.Visited)
 			println("ImageLength:", len(v.Image))
 			if imageShouldBeStored {
 				storeImage(path, v.Image)
@@ -126,32 +124,32 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 		}
 
 		for _, v := range res.RatingTags {
-			println("\nNameDE: ", v.DE)
-			println("NameEN: ", v.EN)
-			println("averagerating: ", v.AveragePoints)
-			println("min", v.MinPoints)
-			println("max", v.MaxPoints)
+			println("\nTagId: ", v.TagId)
+			println("avg: ", v.Avg)
+			println("min", v.Min)
+			println("max", v.Max)
+			println("std", v.Std)
 		}
 	}
 }
 
 func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
-	y := make([]*pb.TagRating, 2)
-	y[0] = &pb.TagRating{
+	y := make([]*pb.RatingTag, 2)
+	y[0] = &pb.RatingTag{
 		Points: float64(1 + rating),
-		Tag:    "Sauberkeit",
+		TagId:  1,
 	}
-	y[1] = &pb.TagRating{
+	y[1] = &pb.RatingTag{
 		Points: float64(2 + rating),
-		Tag:    "Enough Free Tables",
+		TagId:  2,
 	}
 
 	_, err := c.NewCafeteriaRating(ctx, &pb.NewCafeteriaRatingRequest{
-		Points:        rating,
-		CafeteriaName: cafeteria,
-		Comment:       "Alles super, 2 Sterne",
-		Tags:          y,
-		Image:         getImageToBytes("../images/sampleimage.jpeg"),
+		Points:      rating,
+		CafeteriaId: cafeteria,
+		Comment:     "Alles super, 2 Sterne",
+		RatingTags:  y,
+		Image:       getImageToBytes("../images/sampleimage.jpeg"),
 	})
 
 	if err != nil {
@@ -162,27 +160,27 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 }
 
 func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string, dish string, rating int32) {
-	y := make([]*pb.TagRating, 3)
-	y[0] = &pb.TagRating{
+	y := make([]*pb.RatingTag, 3)
+	y[0] = &pb.RatingTag{
 		Points: float64(1 + rating),
-		Tag:    "Spicy",
+		TagId:  1,
 	}
-	y[1] = &pb.TagRating{
+	y[1] = &pb.RatingTag{
 		Points: float64(2 + rating),
-		Tag:    "Salz",
+		TagId:  2,
 	}
-	y[2] = &pb.TagRating{
+	y[2] = &pb.RatingTag{
 		Points: float64(3 + rating),
-		Tag:    "Aussehen",
+		TagId:  3,
 	}
 
 	_, err := c.NewDishRating(ctx, &pb.NewDishRatingRequest{
-		Points:        rating,
-		CafeteriaName: cafeteria,
-		Dish:          dish,
-		Comment:       "Alles Hähnchen",
-		Tags:          y,
-		Image:         getImageToBytes("../images/sampleimage.jpeg"),
+		Points:      rating,
+		CafeteriaId: cafeteria,
+		Dish:        dish,
+		Comment:     "Alles Hähnchen",
+		RatingTags:  y,
+		Image:       getImageToBytes("../images/sampleimage.jpeg"),
 	})
 
 	if err != nil {
