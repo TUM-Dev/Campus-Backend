@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type averageRatingForCafeteria struct {
+/*type averageRatingForCafeteria struct {
 	CafeteriaID int32   `gorm:"column:cafeteriaID;foreignKey:cafeteriaID;type:int;" json:"cafeteriaID"`
 	Average     float32 `json:"average"`
 	Min         int8    `json:"min"`
@@ -48,7 +48,7 @@ type averageDishNameTags struct {
 	Min         int8    `json:"min"`
 	Max         int8    `json:"max"`
 	Std         float32 `json:"std"`
-}
+}*/
 
 // averageRatingComputation
 // This cronjob precomputes average ratings of all cafeteria ratings, dish ratings and all three types of tags.
@@ -64,7 +64,7 @@ func (c *CronService) averageRatingComputation() error {
 }
 
 func computeAverageNameTags(c *CronService) {
-	var results []averageDishNameTags
+	var results []model.DishNameTagAverage
 	err := c.db.Raw("SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
 		" FROM dish_rating mr" +
 		" JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating" +
@@ -85,7 +85,7 @@ func computeAverageNameTags(c *CronService) {
 }
 
 func computeAverageForDishesInCafeteriasTags(c *CronService) {
-	var results []averageDishTags
+	var results []model.DishRatingAverage
 	err := c.db.Raw("SELECT mr.dishID as dishID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std" +
 		" FROM dish_rating mr" +
 		" JOIN dish_rating_tag mrt ON mr.dishRating = mrt.parentRating" +
@@ -108,7 +108,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 }
 
 func computeAverageCafeteriaTags(c *CronService) {
-	var results []averageCafeteriaTags
+	var results []model.CafeteriaRatingTagsAverage
 	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.points) as average, MAX(crt.points) as max, MIN(crt.points) as min, STD(crt.points) as std" +
 		" FROM cafeteria_rating cr" +
 		" JOIN cafeteria_rating_tag crt ON cr.cafeteriaRating = crt.correspondingRating" +
@@ -130,7 +130,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 }
 
 func computeAverageForDishesInCafeterias(c *CronService) {
-	var results []averageRatingForDishInCafeteria
+	var results []model.DishRatingAverage
 	err := c.db.Model(&model.DishRating{}).
 		Select("cafeteriaID, dishID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
 		Group("cafeteriaID,dishID").Scan(&results).Error
@@ -150,7 +150,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 }
 
 func computeAverageForCafeteria(c *CronService) {
-	var results []averageRatingForCafeteria
+	var results []model.CafeteriaRatingAverage
 	err := c.db.Model(&model.CafeteriaRating{}).
 		Select("cafeteriaID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
 		Group("cafeteriaID").Find(&results).Error

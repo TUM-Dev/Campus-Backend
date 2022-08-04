@@ -39,14 +39,14 @@ func main() {
 func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
-	currentDish := "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen" //must be in the dish table
+	//	currentDish := "Levantinischer Bulgur mit roten Linsen, Spinat und Kichererbsen" //must be in the dish table
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
+	/*	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+		generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+		generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
 
-	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)
+		queryCafeteria(currentCafeteria, c, ctx, false)
+		queryDish(currentCafeteria, currentDish, c, ctx, false)*/
 
 }
 
@@ -155,7 +155,7 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 		CafeteriaId: cafeteria,
 		Comment:     "Alles super, 2 Sterne",
 		RatingTags:  y,
-		Image:       getImageToBytes("../images/sampleimage.jpeg"),
+		Image:       getImageToBytes("./images/sampleimage.jpeg"),
 	})
 
 	if err != nil {
@@ -186,7 +186,7 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string
 		Dish:        dish,
 		Comment:     "Alles Hähnchen",
 		RatingTags:  y,
-		Image:       getImageToBytes("../images/sampleimage.jpeg"),
+		Image:       getImageToBytes("./images/sampleimage.jpeg"),
 	})
 
 	if err != nil {

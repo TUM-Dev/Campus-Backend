@@ -551,36 +551,42 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 	if len(tags) > 0 {
 		usedTagIds := make(map[int]int)
 		insertModel := getModelStoreTag(tagType, s.db)
-		for _, tag := range tags {
-			var currentTag int
+		for _, currentTag := range tags {
+			var err error
+			var count int64
 
-			exists := getModelStoreTagOption(tagType, s.db).
-				Where("En LIKE ? OR De LIKE ?", tag.TagId). //todo simplyfy for tag id query
-				Select("id").
-				First(&currentTag)
-
-			if exists.Error == gorm.ErrRecordNotFound {
-				log.WithError(exists.Error).Error("Error while querying the cafeteria name.")
-			} else if exists.RowsAffected == 0 {
-				log.Info("tag with tagid ", tag.TagId, "does not exist")
-				errorOccurred = fmt.Sprintf("%s, %i", errorOccurred, tag.TagId)
+			if tagType == DISH {
+				err = s.db.Model(&model.DishRatingTagOption{}).
+					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
+					Count(&count).Error
 			} else {
-				if usedTagIds[currentTag] == 0 {
+				err = s.db.Model(&model.CafeteriaRatingTagOption{}).
+					Where("cafeteriaRatingTagOption LIKE ?", currentTag.TagId).
+					Count(&count).Error
+			}
+
+			if err == gorm.ErrRecordNotFound || count == 0 {
+				log.Info("tag with tagid ", currentTag.TagId, "does not exist")
+				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
+			} else {
+				if usedTagIds[int(currentTag.TagId)] == 0 {
 					err := insertModel.
 						Create(&model.DishRatingTag{
 							CorrespondingRating: parentRatingID,
-							Points:              int32(tag.Points),
-							TagID:               currentTag}).Error
+							Points:              int32(currentTag.Points),
+							TagID:               int(currentTag.TagId),
+						}).Error
 					if err != nil {
-						log.WithError(err).Error("Error while Creating a tag rating for a new rating.")
+						log.WithError(err).Error("Error while Creating a currentTag rating for a new rating.")
 					}
+					usedTagIds[int(currentTag.TagId)] = 1
 
-					usedTagIds[currentTag] = 1
 				} else {
-					warningOccurred = fmt.Sprintf("%s, %i", warningOccurred, tag.TagId)
-					log.Info("Each Rating tag must be used at most once in a rating. This tag rating was not stored.")
+					warningOccurred = fmt.Sprintf("%s, %i", warningOccurred, currentTag.TagId)
+					log.Info("Each Rating currentTag must be used at most once in a rating. This currentTag rating was not stored.")
 				}
 			}
+
 		}
 	}
 
@@ -594,16 +600,6 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 		return &emptypb.Empty{}, nil
 	}
 
-}
-
-// getModelStoreTagOption
-// Returns the db model of the option table to reduce code duplicates
-func getModelStoreTagOption(tagType modelType, db *gorm.DB) *gorm.DB {
-	if tagType == DISH {
-		return db.Model(&model.DishRatingTagOption{})
-	} else {
-		return db.Model(&model.CafeteriaRatingTagOption{})
-	}
 }
 
 func getModelStoreTag(tagType modelType, db *gorm.DB) *gorm.DB {
@@ -679,7 +675,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 // RPC endpoint
 // Returns all cafeterias with meta information which are available in the eat-api
 func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaReply, error) {
-	var result []*pb.Cafeteria //todo schleife unten wegsparen?
+	var result []*pb.Cafeteria
 	var requestStatus error = nil
 	err := s.db.Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
 	if err != nil {
