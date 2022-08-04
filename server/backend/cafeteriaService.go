@@ -358,7 +358,7 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	elements := make([]*pb.RatingTagNewRequest, len(results))
 	for i, a := range results {
 		elements[i] = &pb.RatingTagNewRequest{
-			TagId:  4, //todo simplify query
+			TagId:  4, //todo simplify query  -> without the loop if possible
 			Points: a.Points,
 		}
 	}
@@ -645,20 +645,16 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 // RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
 func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*model.DishRatingTagOption
+	var result []*pb.RatingTagsOverview
 	var requestStatus error = nil
-	err := s.db.Model(&model.DishRatingTagOption{}).Select("De, En").Find(&result).Error
+	err := s.db.Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, DishRatingTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
-	elements := make([]*pb.RatingTagsOverview, len(result))
-	for i, a := range result {
-		elements[i] = &pb.RatingTagsOverview{En: a.EN, De: a.DE, TagId: a.DishRatingTagOption}
-	}
 
 	return &pb.GetRatingTagsReply{
-		RatingTags: elements,
+		RatingTags: result,
 	}, requestStatus
 }
 
@@ -666,21 +662,16 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 // RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
-	var result []*model.CafeteriaRatingTagOption
+	var result []*pb.RatingTagsOverview
 	var requestStatus error = nil
-	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("De,En").Find(&result).Error //todo fix query for every (also ID)
+	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, CafeteriaRatingsTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
 	}
 
-	elements := make([]*pb.RatingTagsOverview, len(result))
-	for i, a := range result {
-		elements[i] = &pb.RatingTagsOverview{En: a.EN, De: a.DE, TagId: a.CafeteriaRatingsTagOption}
-	}
-
 	return &pb.GetRatingTagsReply{
-		RatingTags: elements,
+		RatingTags: result,
 	}, requestStatus
 }
 
@@ -688,24 +679,15 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 // RPC endpoint
 // Returns all cafeterias with meta information which are available in the eat-api
 func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaReply, error) {
-	var result []*pb.Cafeteria
+	var result []*pb.Cafeteria //todo schleife unten wegsparen?
 	var requestStatus error = nil
-	err := s.db.Model(&model.Cafeteria{}).Select("name,address,latitude,longitude").Scan(&result).Error
+	err := s.db.Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
 	if err != nil {
 		log.WithError(err).Error("Error while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
-	ratingResults := make([]*pb.Cafeteria, len(result))
 
-	for i, v := range result {
-		ratingResults[i] = &pb.Cafeteria{
-			Id:        v.Id,
-			Address:   v.Address,
-			Latitude:  v.Latitude,
-			Longitude: v.Longitude,
-		}
-	}
 	return &pb.GetCafeteriaReply{
-		Cafeteria: ratingResults,
+		Cafeteria: result,
 	}, requestStatus
 }

@@ -72,7 +72,7 @@ func computeAverageNameTags(c *CronService) {
 
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average name tags.")
-	} else {
+	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.DishNameTagAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
@@ -93,7 +93,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average dish tags.")
-	} else {
+	} else if len(results) > 0 {
 		errDelete := c.db.Where(true).Delete(&model.DishRatingTagAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
@@ -116,7 +116,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average cafeteria tags.")
-	} else {
+	} else if len(results) > 0 {
 		errDelete := c.db.Where(true).Delete(&model.CafeteriaRatingTagsAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
@@ -137,7 +137,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average dish ratings.")
-	} else {
+	} else if len(results) > 0 {
 		errDelete := c.db.Where(true).Delete(&model.DishRatingAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
@@ -157,7 +157,7 @@ func computeAverageForCafeteria(c *CronService) {
 
 	if err != nil {
 		log.WithError(err).Error("Error while precomputing average cafeteria ratings.")
-	} else {
+	} else if len(results) > 0 {
 		errDelete := c.db.Where(true).Delete(&model.CafeteriaRatingAverage{}).Error
 		if errDelete != nil {
 			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
