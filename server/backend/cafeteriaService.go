@@ -698,7 +698,7 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 	if request.Week < 1 || request.Week > 53 {
 		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Weeks must be in the range 1 - 53")
 	}
-	if request.Day < 1 || request.Day > 4 {
+	if request.Day < 0 || request.Day > 4 {
 		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
 	}
 
@@ -708,7 +708,8 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Week, request.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
-		Where("d.cafeteriaID = ?", request.CafeteriaId).
+		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
+		Where("c.name LIKE ?", request.CafeteriaId).
 		Select("d.name").
 		Find(&results).Error
 
