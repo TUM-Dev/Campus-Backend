@@ -572,7 +572,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 					usedTagIds[int(currentTag.TagId)] = 1
 
 				} else {
-					warningOccurred = fmt.Sprintf("%s, %i", warningOccurred, currentTag.TagId)
+					warningOccurred = fmt.Sprintf("%s, %d", warningOccurred, currentTag.TagId)
 					log.Info("Each Rating currentTag must be used at most once in a rating. This currentTag rating was not stored.")
 				}
 			}
@@ -672,5 +672,36 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 
 	return &pb.GetCafeteriaReply{
 		Cafeteria: result,
+	}, requestStatus
+}
+
+func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest) (*pb.GetDishesReply, error) {
+	if request.Year < 2022 {
+		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+	}
+	if request.Month < 1 || request.Month > 52 {
+		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Months are currently used as the weeks attribute. must be in the range 1 - 52")
+	}
+	if request.Day < 1 || request.Day > 4 {
+		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+	}
+
+	var requestStatus error = nil
+	var results []string
+	err := s.db.Table("dishes_of_the_week weekly").
+		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Month, request.Year).
+		Select("weekly.dishID").
+		Joins("JOIN dish d ON d.dish = weekly.dishID").
+		Where("d.cafeteriaID = ?", request.CafeteriaId).
+		Select("d.name").
+		Find(&results).Error
+
+	if err != nil {
+		log.WithError(err).Error("Error while loading Cafeterias from database.")
+		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
+	}
+
+	return &pb.GetDishesReply{
+		Dish: results,
 	}, requestStatus
 }

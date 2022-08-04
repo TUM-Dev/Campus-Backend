@@ -52,14 +52,24 @@ func (c *CronService) dishNameDownloadCron() error {
 
 func downloadDailyDishes(c *CronService) {
 	var result []cafeteriaWithID
-	c.db.Model(&model.Cafeteria{}).Select("name,cafeteria").Scan(&result)
+	errQueryCafeterias := c.db.Model(&model.Cafeteria{}).Select("name,cafeteria").Scan(&result).Error
+	if errQueryCafeterias != nil {
+		log.WithError(errQueryCafeterias).Error("Error while querying all cafeteria names from the database.")
+	}
+
+	year, week := time.Now().UTC().ISOWeek()
+	var weekliesWereAdded int64
+	errExistsQuery := c.db.Model(&model.DishesOfTheWeek{}).
+		Where("year = ? AND week = ?", year, week).
+		Count(&weekliesWereAdded).Error
+	if errExistsQuery != nil {
+		log.WithError(errExistsQuery).Error("Error while checking whether the meals of the current week have already been added to the weekly table.")
+	}
 
 	for _, v := range result {
-
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
-		y, w := time.Now().UTC().ISOWeek()
 
-		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%d.json", cafeteriaName, y, w)
+		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%d.json", cafeteriaName, year, week)
 		log.Info("Fetching menu from: {}", req)
 		var resp, err = http.Get(req)
 		if err != nil {
@@ -68,25 +78,28 @@ func downloadDailyDishes(c *CronService) {
 		if resp.StatusCode != 200 {
 			log.WithError(err).Error("Menu for", v, "does not exist error 404 returned.")
 		} else {
-
 			var dishes days
-			errjson := json.NewDecoder(resp.Body).Decode(&dishes)
-			if errjson != nil {
+			errJson := json.NewDecoder(resp.Body).Decode(&dishes)
+			if errJson != nil {
 				log.WithError(err).Error("Error in Parsing")
 			}
-			for i := 0; i < len(dishes.Days); i++ {
-				for u := 0; u < len(dishes.Days[i].Dates); u++ {
+
+			for weekDayIndex := 0; weekDayIndex < len(dishes.Days); weekDayIndex++ {
+				for u := 0; u < len(dishes.Days[weekDayIndex].Dates); u++ {
 					dish := model.Dish{
-						Name:        dishes.Days[i].Dates[u].Name,
-						Type:        dishes.Days[i].Dates[u].DishType,
+						Name:        dishes.Days[weekDayIndex].Dates[u].Name,
+						Type:        dishes.Days[weekDayIndex].Dates[u].DishType,
 						CafeteriaID: v.Cafeteria,
 					}
 
 					var count int64
+					var dishId int32
 					errCount := c.db.Model(&model.Dish{}).
-						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).Count(&count).Error
+						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).
+						Select("dish").First(&dishId).
+						Count(&count).Error
 					if errCount != nil {
-						log.WithError(errCount).Error("Error while checking whether dis is already in database")
+						log.WithError(errCount).Error("Error while checking whether this is already in database")
 					}
 					if count == 0 {
 						errCreate := c.db.Model(&model.Dish{}).Create(&dish).Error
@@ -94,6 +107,19 @@ func downloadDailyDishes(c *CronService) {
 							log.WithError(errCreate).Error("Error while creating new dish entry with name {}. dish won't be saved", dish.Name)
 						}
 						addDishTagsToMapping(dish.Dish, dish.Name, c.db)
+						dishId = dish.Dish
+					}
+					if 0 == weekliesWereAdded {
+						errCreate := c.db.Model(&model.DishesOfTheWeek{}).
+							Create(&model.DishesOfTheWeek{
+								DishID: dishId,
+								Year:   int32(year),
+								Week:   int32(week),
+								Day:    int32(weekDayIndex),
+							}).Error
+						if errCreate != nil {
+							log.WithError(errCreate).Error("Error while inserting dish for this weeks weekly dishes", dish.Name)
+						}
 					}
 				}
 			}

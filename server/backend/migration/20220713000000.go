@@ -21,6 +21,7 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&model.CafeteriaRatingTagsAverage{},
 				&model.CafeteriaRatingTagOption{},
 				&model.Dish{},
+				&model.DishesOfTheWeek{},
 				&model.DishNameTagOption{},
 				&model.DishNameTagOptionIncluded{},
 				&model.DishNameTagOptionExcluded{},

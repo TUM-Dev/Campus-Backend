@@ -39,7 +39,7 @@ func New(db *gorm.DB) *CronService {
 func (c *CronService) Run() error {
 	log.Printf("running cron service")
 	g := new(errgroup.Group)
-	// Todo add again	g.Go(func() error { return c.dishNameDownloadCron() })
+	g.Go(func() error { return c.dishNameDownloadCron() })
 	g.Go(func() error { return c.averageRatingComputation() })
 	for {
 		log.Info("Cron: checking for pending")
