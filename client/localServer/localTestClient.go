@@ -222,6 +222,9 @@ func getImageToBytes(path string) []byte {
 
 	buffer := bufio.NewReader(file)
 	_, err = buffer.Read(byteArray)
+	if err != nil {
+		log.Info("Unable to read the byteArray")
+	}
 	log.Info("Length of the image as bytes: ", len(byteArray))
 	return byteArray
 }
