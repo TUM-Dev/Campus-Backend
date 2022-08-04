@@ -1,18 +1,10 @@
 package model
 
 import (
-	"database/sql"
-	"github.com/guregu/null"
 	"time"
 )
 
-var (
-	_ = time.Second
-	_ = sql.LevelDefault
-	_ = null.Bool{}
-)
-
-// Cafeteria stores all Available cafeterias in the format of the eat-api
+// CafeteriaRating stores all Available cafeterias in the format of the eat-api
 type CafeteriaRating struct {
 	CafeteriaRating int32     `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRating;type:int;not null;" json:"cafeteriarating"`
 	Points          int32     `gorm:"column:points;type:int;not null;" json:"points"`

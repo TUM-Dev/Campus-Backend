@@ -33,8 +33,7 @@ const (
 	NAME      modelType = 3
 )
 
-// GetCafeteriaRatings
-// RPC Endpoint
+// GetCafeteriaRatings RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
 // all cafeteria rating tags which were used to rate this cafeteria.
@@ -137,8 +136,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 	}
 }
 
-// GetDishRatings
-// RPC Endpoint
+// GetDishRatings RPC Endpoint
 // Allows to query ratings for a specific dish in a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
 // all dish rating tags which were used to rate this dish in this cafeteria. Additionally, the average, max/min are
@@ -268,6 +266,10 @@ func getImageToBytes(path string) []byte {
 
 	buffer := bufio.NewReader(file)
 	_, err = buffer.Read(imageAsBytes)
+	if err != nil {
+		log.WithError(err).Error("Error while trying to read image as bytes")
+		return nil
+	}
 	return imageAsBytes
 }
 
@@ -352,14 +354,13 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	return results
 }
 
-//NewCafeteriaRating
-// RPC Endpoint
+//NewCafeteriaRating RPC Endpoint
 // Allows to store a new cafeteria Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
 func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
-	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Image, input.Comment, input.CafeteriaId, s)
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CafeteriaId, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -384,7 +385,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 
 func imageWrapper(image []byte, path string, id int32) string {
 	var resPath = ""
-	if image != nil && len(image) > 0 {
+	if len(image) > 0 {
 		var resError error
 		path := fmt.Sprintf("%s%s%s%d%s", "../images/", path, "/", id, "/")
 		resPath, resError = storeImage(path, image)
@@ -422,6 +423,10 @@ func storeImage(path string, i []byte) (string, error) {
 	var imgPath = fmt.Sprintf("%s%d.jpeg", path, md5.Sum(i))
 
 	out, errFile := os.Create(imgPath)
+	if errFile != nil {
+		log.WithError(errFile).Error("Error while creating a new file on the path: ", path)
+		return imgPath, errFile
+	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
@@ -433,8 +438,7 @@ func storeImage(path string, i []byte) (string, error) {
 	return imgPath, errFile
 }
 
-// NewDishRating
-// RPC Endpoint
+// NewDishRating RPC Endpoint
 // Allows to store a new dish Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // The ratingNumber will be saved for each corresponding DishNameTag.
@@ -442,7 +446,7 @@ func storeImage(path string, i []byte) (string, error) {
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
 func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingRequest) (*emptypb.Empty, error) {
 
-	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Image, input.Comment, input.CafeteriaId, s)
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CafeteriaId, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -501,10 +505,9 @@ func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 	}
 }
 
-// inputSanitizationForNewRatingElements
-// Checks parameters of the new rating for all cafeteria and dish ratings.
+// inputSanitizationForNewRatingElements Checks parameters of the new rating for all cafeteria and dish ratings.
 // Additionally, queries the cafeteria ID, since it checks whether the cafeteria actually exists.
-func inputSanitizationForNewRatingElements(rating int32, image []byte, comment string, cafeteriaName string, s *CampusServer) (int32, error) {
+func inputSanitizationForNewRatingElements(rating int32, comment string, cafeteriaName string, s *CampusServer) (int32, error) {
 	if rating > 5 || rating < 0 {
 		return -1, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
@@ -624,8 +627,7 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	return result
 }
 
-//GetAvailableDishTags
-// RPC Endpoint
+//GetAvailableDishTags RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
 func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*pb.RatingTagsOverview
@@ -641,8 +643,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 	}, requestStatus
 }
 
-//GetAvailableCafeteriaTags
-// RPC Endpoint
+//GetAvailableCafeteriaTags  RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetRatingTagsReply, error) {
 	var result []*pb.RatingTagsOverview
@@ -658,8 +659,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 	}, requestStatus
 }
 
-// GetCafeterias
-// RPC endpoint
+// GetCafeterias RPC endpoint
 // Returns all cafeterias with meta information which are available in the eat-api
 func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaReply, error) {
 	var result []*pb.Cafeteria

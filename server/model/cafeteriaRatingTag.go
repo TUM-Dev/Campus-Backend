@@ -1,6 +1,6 @@
 package model
 
-// TagRating struct is a row record of the either the dish_tag_rating-table or the cafeteria_rating_tags-table in the database
+// CafeteriaRatingTag struct is a row record of the either the dish_tag_rating-table or the cafeteria_rating_tags-table in the database
 type CafeteriaRatingTag struct {
 	CafeteriaRatingTag  int32 `gorm:"primary_key;AUTO_INCREMENT;column:CafeteriaRatingTag;type:int;not null;" json:"CafeteriaRatingTag" `
 	CorrespondingRating int32 `gorm:"foreignKey:cafeteriaRatingID;column:correspondingRating;type:int;not null;" json:"correspondingRating"`

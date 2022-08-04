@@ -40,16 +40,16 @@ func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
 	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
-	//generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
-	//generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	//queryCafeteria(currentCafeteria, c, ctx, false)
+	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
+	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	queryCafeteria(currentCafeteria, c, ctx, false)
 	queryDish(currentCafeteria, currentDish, c, ctx, false)
-	/*generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
 
 	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)*/
+	queryDish(currentCafeteria, currentDish, c, ctx, false)
 
 }
 
@@ -217,7 +217,7 @@ func getImageToBytes(path string) []byte {
 	}(file)
 
 	fileInfo, _ := file.Stat()
-	var size int64 = fileInfo.Size()
+	var size = fileInfo.Size()
 	byteArray := make([]byte, size)
 
 	buffer := bufio.NewReader(file)

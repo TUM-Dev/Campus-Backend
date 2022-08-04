@@ -1,18 +1,7 @@
 package model
 
 import (
-	"database/sql"
-	"time"
-
 	"github.com/guregu/null"
-	"github.com/satori/go.uuid"
-)
-
-var (
-	_ = time.Second
-	_ = sql.LevelDefault
-	_ = null.Bool{}
-	_ = uuid.UUID{}
 )
 
 // TableName overrides the table name used by Crontab to `crontab` (Would otherwise auto-migrate to crontabs)

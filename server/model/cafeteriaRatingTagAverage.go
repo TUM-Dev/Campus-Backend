@@ -1,15 +1,5 @@
 package model
 
-import (
-	"database/sql"
-	"github.com/guregu/null"
-)
-
-var (
-	_ = sql.LevelDefault
-	_ = null.Bool{}
-)
-
 // CafeteriaRatingTagsAverage stores all precomputed values for the cafeteria ratings
 type CafeteriaRatingTagsAverage struct {
 	CafeteriaRatingTagsAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagsAverage;type:int;not null;" json:"cafeteriaRatingTagsAverage" `

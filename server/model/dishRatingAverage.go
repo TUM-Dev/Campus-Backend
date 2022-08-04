@@ -1,6 +1,6 @@
 package model
 
-// DishRatingsAverage stores all precomputed values for the cafeteria ratings
+// DishRatingAverage stores all precomputed values for the cafeteria ratings
 type DishRatingAverage struct {
 	DishRatingAverage int32   `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingAverage;type:int;not null;" json:"dishRatingAverage" `
 	CafeteriaID       int32   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
