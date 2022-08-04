@@ -33,21 +33,6 @@ const (
 	NAME      modelType = 3
 )
 
-type queryRatingTag struct {
-	En      string  `gorm:"column:en;type:text;" json:"en"`
-	De      string  `gorm:"column:De;type:text;" json:"De"`
-	Average float64 `json:"average"`
-	Std     float64 `json:"std"`
-	Min     int32   `json:"min"`
-	Max     int32   `json:"max"`
-}
-
-type queryOverviewRatingTag struct {
-	En     string `gorm:"column:En;type:mediumtext;" json:"En"`
-	De     string `gorm:"column:De;type:mediumtext;" json:"De"`
-	Points int32  `gorm:"column:points;type:text;"  json:"rating"`
-}
-
 // GetCafeteriaRatings
 // RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
@@ -118,13 +103,13 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 			}
 			err = s.db.Model(&model.CafeteriaRating{}).
 				Where("cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).
-				Order("timestamp desc, id desc").
+				Order("timestamp desc, cafeteriaRating desc").
 				Limit(limit).
 				Find(&ratings).Error
 		} else {
 			err = s.db.Model(&model.CafeteriaRating{}).
 				Where("cafeteriaID = ?", cafeteriaID).
-				Order("timestamp desc, id desc").
+				Order("timestamp desc, cafeteriaRating desc").
 				Limit(limit).
 				Find(&ratings).Error
 		}
@@ -206,8 +191,8 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 	var ratings []model.DishRating
 	var err error
 	var limit = int(input.Limit)
-	if limit > 100 {
-		limit = 100
+	if limit == -1 {
+		limit = math.MaxInt32
 	}
 	if limit > 0 {
 		if input.From != nil || input.To != nil {
@@ -227,13 +212,13 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 
 			err = s.db.Model(&model.DishRating{}).
 				Where("cafeteriaID = ? AND dishID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, dishID, to, from).
-				Order("timestamp desc, id desc").
+				Order("timestamp desc, dishRating desc").
 				Limit(limit).
 				Find(&ratings).Error
 		} else {
 			err = s.db.Model(&model.DishRating{}).
 				Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
-				Order("timestamp desc, id desc").
+				Order("timestamp desc, dishRating desc").
 				Limit(limit).
 				Find(&ratings).Error
 		}
@@ -245,12 +230,10 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
 
 		for i, v := range ratings {
-
-			tagRatings := queryTagRatingsOverviewForRating(s, v.DishRating, DISH)
 			ratingResults[i] = &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
-				RatingTags: tagRatings,
+				RatingTags: queryTagRatingsOverviewForRating(s, v.DishRating, DISH),
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
 			}
@@ -262,10 +245,13 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 }
 
 func getImageToBytes(path string) []byte {
+	if len(path) == 0 {
+		return make([]byte, 0)
+	}
 	file, err := os.Open(path)
 
 	if err != nil {
-		log.WithError(err).Error("Error while opening image file with path: {}.", path)
+		log.WithError(err).Error("Error while opening image file with path: ", path)
 		return nil
 	}
 
@@ -289,80 +275,60 @@ func getImageToBytes(path string) []byte {
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
 func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelType) []*pb.RatingTagResult {
-	var results []queryRatingTag
+	var results []*pb.RatingTagResult
 	var err error
 	if ratingType == DISH {
 		err = db.Table("dish_rating_tag_option options").
-			Joins("JOIN dish_rating_tag_result results ON options.id = results.tagID").
-			Select("options.De as De, results.average as average, "+
-				"options.En as En, results.min as min, results.max as max, results.std as std").
+			Joins("JOIN dish_rating_tag_average results ON options.dishRatingTagOption = results.tagID").
+			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
+				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
 	} else if ratingType == CAFETERIA {
 		err = db.Table("cafeteria_rating_tag_option options").
-			Joins("JOIN cafeteria_rating_tag_result results ON options.id = results.tagID").
-			Select("options.De as De, results.average as average, "+
-				"options.En as En, results.min as min, results.max as max, results.std as std").
+			Joins("JOIN cafeteria_rating_tag_average results ON options.cafeteriaRatingTagOption = results.tagID").
+			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
+				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
 	} else { //Query for name tags
 		err = db.Table("dish_to_dish_name_tag mapping").
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
-			Joins("JOIN dish_name_tag_result results ON mapping.nameTagID = results.tagID").
+			Joins("JOIN dish_name_tag_average results ON mapping.nameTagID = results.tagID").
 			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.id").
-			Select("options.De as De, results.average as average, " +
-				"options.En as En, results.min as min, results.max as max, results.std as std").
+			Select("options.dishNameTagOption as tagId, results.average as avg, " +
+				"results.min as min, results.max as max, results.std as std").
 			Scan(&results).Error
 	}
 
 	if err != nil {
 		log.WithError(err).Error("Error while querying the tags for the request.")
 	}
-
-	elements := make([]*pb.RatingTagResult, len(results)) //needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
-	for i, v := range results {
-		elements[i] = &pb.RatingTagResult{
-			TagId: 5, // todo change to Id
-			Avg:   v.Average,
-			Std:   v.Std,
-			Min:   v.Min,
-			Max:   v.Max,
-		}
-	}
-
-	return elements
+	return results
 }
 
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
 func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType modelType) []*pb.RatingTagNewRequest {
-	var results []queryOverviewRatingTag
+	var results []*pb.RatingTagNewRequest
 	var err error
 	if ratingType == DISH {
 		err = s.db.Table("dish_rating_tag_option options").
-			Joins("JOIN dish_rating_tag rating ON options.id = rating.tagID").
-			Find(&results, "rating.parentRating = ?", dishID).Error
-		//Where("rating.parentRating = ?", dishID).
-		//	Select("options.De as De, options.En as En, rating.rating as rating").
-		//	Scan(&results).Error
+			Joins("JOIN dish_rating_tag rating ON options.dishRatingTag = rating.tagID").
+			Select("dishRatingTagOption as tagId, points, correspondingRating").
+			Find(&results, "rating.correspondingRating = ?", dishID).Error
 	} else {
 		err = s.db.Table("cafeteria_rating_tag_option options").
-			Joins("JOIN cafeteria_rating_tag rating ON options.id = rating.tagID").
-			Find(&results, "rating.parentRating = ?", dishID).Error
+			Joins("JOIN cafeteria_rating_tag rating ON options.cafeteriaRatingTagOption = rating.tagID").
+			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
+			Find(&results, "rating.correspondingRating = ?", dishID).Error
 	}
 
 	if err != nil {
-		log.WithError(err).Error("Error while querying th tag rating overview.")
+		log.WithError(err).Error("Error while querying the tag rating overview.")
 	}
-	elements := make([]*pb.RatingTagNewRequest, len(results))
-	for i, a := range results {
-		elements[i] = &pb.RatingTagNewRequest{
-			TagId:  4, //todo simplify query  -> without the loop if possible
-			Points: a.Points,
-		}
-	}
-	return elements
+	return results
 }
 
 //NewCafeteriaRating

@@ -40,14 +40,16 @@ func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCafeteria := "MENSA_GARCHING"
 	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
-	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
+	//generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
+	//generateCafeteriaRating(c, ctx, currentCafeteria, 2)
+	//queryCafeteria(currentCafeteria, c, ctx, false)
+	queryDish(currentCafeteria, currentDish, c, ctx, false)
+	/*generateCafeteriaRating(c, ctx, currentCafeteria, 2)
 	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	/*	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-		generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-		generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
+	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
 
-		queryCafeteria(currentCafeteria, c, ctx, false)
-		queryDish(currentCafeteria, currentDish, c, ctx, false)*/
+	queryCafeteria(currentCafeteria, c, ctx, false)
+	queryDish(currentCafeteria, currentDish, c, ctx, false)*/
 
 }
 
