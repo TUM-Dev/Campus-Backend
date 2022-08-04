@@ -98,16 +98,23 @@ service Campus {
     };
   }
 
-  rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+  rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
-      get: "/dish/rating/allTags",
+      get: "/dish/rating/allRatingTags",
       response_body: "ratingTags"
     };
   }
 
-  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetRatingTagsReply) {
+  rpc GetNameTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteria/rating/allTags",
+      get: "/dish/rating/allDishTags",
+      response_body: "ratingTags"
+    };
+  }
+
+  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetTagsReply) {
+    option (google.api.http) = {
+      get: "/cafeteria/rating/allRatingTags",
       response_body: "ratingTags"
     };
   }
@@ -118,7 +125,6 @@ service Campus {
       response_body: "cafeteria"
     };
   }
-
 
   rpc GetDishes (GetDishesRequest) returns (GetDishesReply) {
     option (google.api.http) = {
@@ -437,12 +443,12 @@ message NewDishRatingRequest{
   string comment = 7;
 }
 
-message GetRatingTagsReply{
-  repeated RatingTagsOverview ratingTags = 1;
+message GetTagsReply{
+  repeated TagsOverview ratingTags = 1;
 }
 
 
-message RatingTagsOverview {
+message TagsOverview {
   int32 tagId = 1;
   string de = 2;
   string en = 3;
@@ -482,19 +488,17 @@ message Cafeteria{
 
 message GetDishesRequest{
   string cafeteriaId = 1;
+  // >=2022 until the current year
   int32 year = 2;
-  int32 month = 3;
+  // range 1 - 53
+  int32 week = 3;
+  // range 0 (Monday) - 4 (Friday)
   int32 day = 4;
 }
 
 message GetDishesReply{
   repeated string dish = 1;
 }
-
-
-
-
-
 
 message GetResponsiblePersonReply {
   repeated ResponsiblePersonElement responsiblePerson = 1;
