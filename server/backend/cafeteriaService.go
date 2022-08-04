@@ -271,11 +271,19 @@ func getImageToBytes(path string) []byte {
 	return imageAsBytes
 }
 
+type queryRatingTag struct {
+	TagId   int32   `gorm:"column:tagId;type:int32;" json:"tagId"`
+	Average float64 `json:"avg"`
+	Std     float64 `json:"std"`
+	Min     int32   `json:"min"`
+	Max     int32   `json:"max"`
+}
+
 //queryTags
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
 func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelType) []*pb.RatingTagResult {
-	var results []*pb.RatingTagResult
+	var results []queryRatingTag
 	var err error
 	if ratingType == DISH {
 		err = db.Table("dish_rating_tag_option options").
@@ -296,8 +304,8 @@ func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelTyp
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
 			Joins("JOIN dish_name_tag_average results ON mapping.nameTagID = results.tagID").
-			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.id").
-			Select("options.dishNameTagOption as tagId, results.average as avg, " +
+			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.dishNameTagOption").
+			Select("mapping.nameTagID as tagId, results.average as avg, " +
 				"results.min as min, results.max as max, results.std as std").
 			Scan(&results).Error
 	}
@@ -305,7 +313,20 @@ func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelTyp
 	if err != nil {
 		log.WithError(err).Error("Error while querying the tags for the request.")
 	}
-	return results
+
+	//needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
+	elements := make([]*pb.RatingTagResult, len(results))
+	for i, v := range results {
+		elements[i] = &pb.RatingTagResult{
+			TagId: v.TagId,
+			Avg:   v.Average,
+			Std:   v.Std,
+			Min:   v.Min,
+			Max:   v.Max,
+		}
+	}
+
+	return elements
 }
 
 // queryTagRatingOverviewForRating
@@ -315,14 +336,14 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	var err error
 	if ratingType == DISH {
 		err = s.db.Table("dish_rating_tag_option options").
-			Joins("JOIN dish_rating_tag rating ON options.dishRatingTag = rating.tagID").
-			Select("dishRatingTagOption as tagId, points, correspondingRating").
-			Find(&results, "rating.correspondingRating = ?", dishID).Error
+			Joins("JOIN dish_rating_tag rating ON options.dishRatingTagOption = rating.tagID").
+			Select("dishRatingTagOption as tagId, points, parentRating").
+			Find(&results, "parentRating = ?", dishID).Error
 	} else {
 		err = s.db.Table("cafeteria_rating_tag_option options").
 			Joins("JOIN cafeteria_rating_tag rating ON options.cafeteriaRatingTagOption = rating.tagID").
 			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
-			Find(&results, "rating.correspondingRating = ?", dishID).Error
+			Find(&results, "correspondingRating = ?", dishID).Error
 	}
 
 	if err != nil {

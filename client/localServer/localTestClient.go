@@ -64,15 +64,16 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 		log.Info(err)
 	} else {
 		log.Info("Result: ")
-		log.Info("avg: ", res.Avg)
-		log.Info("min", res.Min)
-		log.Info("max", res.Max)
+		log.Info("\tavg : ", res.Avg)
+		log.Info("\tmin ", res.Min)
+		log.Info("\tmax ", res.Max)
+		log.Info("\tstd ", res.Std)
 		log.Info("Number of individual Ratings", len(res.Rating))
 		path := fmt.Sprintf("%s%d%s", "./testImages/dishes/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
 			log.Info("\nRating: ", v.Points)
 			log.Info("Comment ", v.Comment)
-			log.Info("Number of Tag Ratings: ", len(v.RatingTags))
+			log.Info("Number of Tag Ratings : ", len(v.RatingTags))
 			log.Info("Timestamp: ", v.Visited)
 			log.Info("ImageLength:", len(v.Image))
 			if imageShouldBeStored {
@@ -82,21 +83,21 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 				}
 			}
 		}
-
+		log.Info("Rating Tags: ")
 		for _, v := range res.RatingTags {
-			log.Info("\nTagId: ", v.TagId)
-			log.Info("avg: ", v.Avg)
-			log.Info("min", v.Min)
-			log.Info("max", v.Max)
-			log.Info("std", v.Std)
+			log.Info("TagId: ", v.TagId)
+			log.Info("\tavg: ", v.Avg)
+			log.Info("\tmin: ", v.Min)
+			log.Info("\tmax: ", v.Max)
+			log.Info("\tstd: ", v.Std)
 		}
 		log.Info("nameTags: ")
 		for _, v := range res.NameTags {
-			log.Info("\nTagId: ", v.TagId)
-			log.Info("avg: ", v.Avg)
-			log.Info("min", v.Min)
-			log.Info("max", v.Max)
-			log.Info("std", v.Std)
+			log.Info("TagId: ", v.TagId)
+			log.Info("\tavg: ", v.Avg)
+			log.Info("\tmin: ", v.Min)
+			log.Info("\tmax: ", v.Max)
+			log.Info("\tstd: ", v.Std)
 		}
 	}
 }
