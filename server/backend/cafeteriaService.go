@@ -413,9 +413,9 @@ func storeImage(path string, i []byte) (string, error) {
 	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
 
 	var opts jpeg.Options
-	maxImageSize := 655400 // 5MB
+	maxImageSize := 524288 // 0.55MB
 	if len(i) > maxImageSize {
-		opts.Quality = maxImageSize / len(i)
+		opts.Quality = (maxImageSize / len(i)) * 100
 	} else {
 		opts.Quality = 100 // if image small enough use it directly
 	}
