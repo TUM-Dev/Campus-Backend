@@ -101,6 +101,13 @@ func getDayAndHourFromTimestamp(timestamp string) (int, int) {
 	return day, hr
 }
 
+type location struct {
+	lat  string
+	long string
+}
+
+var locations map[string]location
+
 func (s *server) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessPointsServer) error {
 	ts := in.Timestamp
 	day, hr := getDayAndHourFromTimestamp(ts)
@@ -108,6 +115,12 @@ func (s *server) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessP
 	apList := dbservice.GetHistoryForAllAPs(day, hr)
 
 	log.Printf("Sending %d APs ...", len(apList))
+
+	locations = make(map[string]location)
+	accessPoints := dbservice.RetrieveAPsOfTUM(true)
+	for _, ap := range accessPoints {
+		locations[ap.Name] = location{ap.Lat, ap.Long}
+	}
 
 	for _, ap := range apList {
 		location := locations[ap.Name]
@@ -143,21 +156,6 @@ func (s *server) ListAllAPNames(in *emptypb.Empty, stream pb.Campus_ListAllAPNam
 		}
 	}
 	return nil
-}
-
-type location struct {
-	lat  string
-	long string
-}
-
-var locations map[string]location
-
-func main() {
-	locations = make(map[string]location)
-	apList := dbservice.RetrieveAPsOfTUM(true)
-	for _, ap := range apList {
-		locations[ap.Name] = location{ap.Lat, ap.Long}
-	}
 }
 
 func forecast() {
