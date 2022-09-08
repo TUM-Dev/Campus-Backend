@@ -16,6 +16,10 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"strconv"
+	"strings"
+	"github.com/TUM-Dev/Campus-Backend/model/heatmap/dbservice"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -34,7 +38,7 @@ type CampusServer struct {
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
-// var _ pb.CampusServer = (*CampusServer)(nil)
+var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	return &CampusServer{
@@ -47,13 +51,104 @@ func New(db *gorm.DB) *CampusServer {
 	}
 }
 
+const (
+	heatmapDB = "./data/sqlite/heatmap.db"
+)
+
 func (s *CampusServer) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*pb.AccessPoint, error) {
-	log.Printf("Received request for AP with name: %s and timestamp: %s", in.Name, in.Timestamp)
-	return &pb.AccessPoint{Name: "response"}, nil
+	name := in.Name
+	ts := in.Timestamp
+	log.Printf("Received request for AP with name: %s and timestamp: %s", name, in.Timestamp)
+
+	db := dbservice.InitDB(heatmapDB)
+
+	day, hr := getDayAndHourFromTimestamp(ts)
+	ap := dbservice.GetHistoryForSingleAP(name, day, hr)
+	db.Close()
+
+	load, _ := strconv.Atoi(ap.Load)
+
+	return &pb.AccessPoint{
+		Name:      ap.Name,
+		Lat:       ap.Lat,
+		Long:      ap.Long,
+		Intensity: int64(load),
+		Max:       int64(ap.Max),
+		Min:       int64(ap.Min),
+	}, nil
 }
 
+func getDayAndHourFromTimestamp(timestamp string) (int, int) {
+	ts := strings.Split(timestamp, " ")
+	date := ts[0]
+	yearMonthDay := strings.Split(date, "-")
+	day, err := strconv.Atoi(yearMonthDay[2])
+	if err != nil {
+		day = 0
+	}
+	hr, err := strconv.Atoi(ts[1])
+	if err != nil {
+		hr = 0
+	}
+	today := time.Now().Day()
+	day = day - today
+	return day, hr
+}
+
+type location struct {
+	lat  string
+	long string
+}
+
+var locations map[string]location
+
 func (s *CampusServer) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessPointsServer) error {
-	log.Println("Requesting list")
+	ts := in.Timestamp
+	day, hr := getDayAndHourFromTimestamp(ts)
+
+	apList := dbservice.GetHistoryForAllAPs(day, hr)
+
+	log.Printf("Sending %d APs ...", len(apList))
+
+	locations = make(map[string]location)
+	accessPoints := dbservice.RetrieveAPsOfTUM(true)
+	for _, ap := range accessPoints {
+		locations[ap.Name] = location{ap.Lat, ap.Long}
+	}
+
+	for _, ap := range apList {
+		location := locations[ap.Name]
+
+		load, _ := strconv.Atoi(ap.Load)
+
+		if err := stream.Send(
+			&pb.APResponse{
+				Accesspoint: &pb.AccessPoint{
+					Name:      ap.Name,
+					Lat:       location.lat,
+					Long:      location.long,
+					Intensity: int64(load),
+					Max:       int64(ap.Max),
+					Min:       int64(ap.Min),
+				},
+			}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *CampusServer) ListAllAPNames(in *emptypb.Empty, stream pb.Campus_ListAllAPNamesServer) error {
+	names := dbservice.GetAllNames()
+	for _, name := range names {
+		if err := stream.Send(
+			&pb.APName{
+				Name: name,
+			}); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
