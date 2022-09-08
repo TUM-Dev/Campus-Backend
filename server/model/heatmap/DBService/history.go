@@ -1,4 +1,4 @@
-package DBService
+package dbservice
 
 import (
 	"database/sql"
@@ -57,7 +57,8 @@ func UpdateHistory(day int, hour int, avg int, apName string) {
 	case 23:
 		query = "UPDATE history SET T23 = ? WHERE Day = ?"
 	default:
-		log.Panicf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		log.Printf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		return
 	}
 	runQuery(query, avg, apName, day)
 }
@@ -164,7 +165,8 @@ func GetHistoryForSingleAP(name string, day int, hour int) AccessPoint {
 	case 23:
 		query = "SELECT T23 FROM history WHERE Day = ?"
 	default:
-		log.Panicf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		log.Printf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		return AccessPoint{}
 	}
 
 	row := db.QueryRow(query, name, day)
@@ -236,12 +238,14 @@ func GetHistoryForAllAPs(day int, hour int) []AccessPoint {
 	case 23:
 		query = "SELECT DISTINCT AP_Name, T23, Max, Min FROM history WHERE Day = ?"
 	default:
-		log.Panicf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		log.Printf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		return []AccessPoint{}
 	}
 	
 	rows, err := db.Query(query, day)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return []AccessPoint{}
 	}
 	defer rows.Close()
 

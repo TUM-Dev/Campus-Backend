@@ -1,4 +1,4 @@
-package DBService
+package dbservice
 
 import (
 	"database/sql"
@@ -34,11 +34,11 @@ type AccessPoint struct {
 func InitDB(path string) *sql.DB {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		log.Panicf("Could not open the database! %v", err)
+		log.Printf("Could not open the database! %v", err)
 	}
 
 	if db == nil {
-		panic("DB pointer is nil!")
+		log.Println("DB pointer is nil!")
 	}
 	return db
 }
@@ -75,7 +75,8 @@ func RetrieveAPsFromTUM(query string) []AccessPoint {
 
 	rows, err := db.Query(query)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return []AccessPoint{}
 	}
 	defer rows.Close()
 
@@ -85,7 +86,8 @@ func RetrieveAPsFromTUM(query string) []AccessPoint {
 		err := rows.Scan(&item.ID, &item.Address, &item.Room, &item.Name, &item.Floor, &item.Load, &item.Lat, &item.Long)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			continue
 		}
 		result = append(result, item)
 	}
@@ -125,12 +127,14 @@ func runQuery(query string, params ...interface{}) {
 	stmt, err := DB.Prepare(query)
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(params...)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 }

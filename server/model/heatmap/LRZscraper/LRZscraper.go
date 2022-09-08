@@ -1,4 +1,4 @@
-package LRZscraper
+package lrzscraper
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package LRZscraper
+package lrzscraper
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model/heatmap/DBService"
+	"github.com/TUM-Dev/Campus-Backend/model/heatmap/dbservice"
 )
 
 type NetworkLoad struct {
@@ -136,7 +136,7 @@ func getCurrMaxMin(networkLoad string) (curr, max, min float64) {
 }
 
 func GetHistoriesFrom(from int) []History {
-	APs := DBService.RetrieveAPsOfTUM(true)
+	APs := dbservice.RetrieveAPsOfTUM(true)
 	var wg sync.WaitGroup
 	channel := make(chan History)
 
@@ -193,8 +193,8 @@ func storeMaxMins(histories []History) {
 		apName := apHistory.name
 		max := apHistory.max
 		min := apHistory.min
-		DBService.UpdateMinMax("Max", apName, max)
-		DBService.UpdateMinMax("Min", apName, min)
+		dbservice.UpdateMinMax("Max", apName, max)
+		dbservice.UpdateMinMax("Min", apName, min)
 	}
 }
 
@@ -215,7 +215,7 @@ func storeHistoryOfAP(apName string, history history) {
 	for day := 0; day < days; day++ {
 		for hour := 0; hour < hours; hour++ {
 			avg := history[day][hour]
-			DBService.UpdateHistory(day, hour, avg, apName)
+			dbservice.UpdateHistory(day, hour, avg, apName)
 		}
 	}
 }
@@ -310,7 +310,7 @@ func getTimeFromTimestamp(timestamp int) time.Time {
 	ts := fmt.Sprintf("%d", timestamp)
 	t, err := strconv.ParseInt(ts, 10, 64)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	tm := time.Unix(t, 0)
 	return tm

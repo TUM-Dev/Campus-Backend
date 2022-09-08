@@ -1,4 +1,4 @@
-package DBService
+package dbservice
 
 import (
 	"log"
@@ -56,7 +56,8 @@ func UpdateFuture(day int, hour int, avg int, apName string) {
 	case 23:
 		query = "UPDATE future SET T23 = ? WHERE AP_NAME = ? AND Day = ?"
 	default:
-		log.Panicf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		log.Printf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		return
 	}
 	runQuery(query, avg, apName, day)
 }
@@ -142,7 +143,7 @@ func GetPredictionForSingleAP(day int, hour int, name string) AccessPoint {
 	case 23:
 		query = "SELECT T23 FROM future WHERE AP_Name = ? AND Day = ?"
 	default:
-		log.Panicf("Hour should be  >= 0 and < 24, but was: %d", hour)
+		log.Printf("Hour should be  >= 0 and < 24, but was: %d", hour)
 	}
 
 	row := db.QueryRow(query, name, day)
@@ -164,7 +165,8 @@ func GetFutureForAllAPs(day int, hour int) []AccessPoint {
 
 	rows, err := db.Query(query, day, hour)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return []AccessPoint{}
 	}
 	defer rows.Close()
 

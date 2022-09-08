@@ -1,4 +1,4 @@
-package NavigaTUM
+package navigatum
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/TUM-Dev/Campus-Backend/model/heatmap/DBService"
+	"github.com/TUM-Dev/Campus-Backend/model/heatmap/dbservice"
 	"github.com/TUM-Dev/Campus-Backend/model/heatmap/RoomFinder"
 )
 
@@ -58,9 +58,9 @@ func ScrapeNavigaTUM(res RoomFinder.Result) (count int) {
 
 // stores the coordinates of the access point in the database
 func storeCoordinateOfAP(result RoomFinder.Failure, lat, long string) {
-	db := DBService.InitDB(heatmapDB)
-	DBService.UpdateLatLong("Lat", lat, result.ID)
-	DBService.UpdateLatLong("Long", long, result.ID)
+	db := dbservice.InitDB(heatmapDB)
+	dbservice.UpdateLatLong("Lat", lat, result.ID)
+	dbservice.UpdateLatLong("Long", long, result.ID)
 	db.Close()
 }
 

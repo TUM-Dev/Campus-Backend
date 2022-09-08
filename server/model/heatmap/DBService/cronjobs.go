@@ -1,4 +1,4 @@
-package DBService
+package dbservice
 
 func UpdateHistoryDaily() {
 	// TODO

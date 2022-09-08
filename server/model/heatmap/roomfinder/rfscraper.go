@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model/heatmap/DBService"
+	"github.com/TUM-Dev/Campus-Backend/model/heatmap/dbservice"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -51,7 +51,7 @@ type RF_Info struct {
 }
 
 func ScrapeRoomFinder() (Result, int) {
-	APs := DBService.RetrieveAPsOfTUM(false)
+	APs := dbservice.RetrieveAPsOfTUM(false)
 	roomInfos, totalLoad := PrepareDataToScrape(APs)
 	res := ScrapeURLs(roomInfos)
 
@@ -59,8 +59,8 @@ func ScrapeRoomFinder() (Result, int) {
 	log.Println("Number of retrieved URLs:", len(res.Successes))
 
 	for _, val := range res.Successes {
-		DBService.UpdateLatLong("Lat", val.Lat, val.ID)
-		DBService.UpdateLatLong("Long", val.Long, val.ID)
+		dbservice.UpdateLatLong("Lat", val.Lat, val.ID)
+		dbservice.UpdateLatLong("Long", val.Long, val.ID)
 	}
 
 	return res, totalLoad
@@ -68,7 +68,7 @@ func ScrapeRoomFinder() (Result, int) {
 
 // It receives as input an array of APs and generates a roomFinderID & URL for each element.
 // Returns a slice of RF_Infos, containing RoomFinder URLs.
-func PrepareDataToScrape(APs []DBService.AccessPoint) ([]RF_Info, int) {
+func PrepareDataToScrape(APs []dbservice.AccessPoint) ([]RF_Info, int) {
 	var data []RF_Info
 	var total int
 	for _, ap := range APs {

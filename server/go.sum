@@ -4,8 +4,6 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/PuerkitoBio/goquery v1.8.0 h1:PJTF7AmFCFKk1N6V6jmKfrNH9tV5pNE6lZMkG0gta/U=
 github.com/PuerkitoBio/goquery v1.8.0/go.mod h1:ypIiRMtY7COPGk+I/YbZLbxsxn9g5ejnI2HSMtkjZvI=
-github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220606093721-fc96ef507f0d h1:eXmdhhckSUxWpVkCEwARtYzdoOh/thypZ1Hhcsy/bg4=
-github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220606093721-fc96ef507f0d/go.mod h1:JZZ55exX5eEez3g9QfO++6iZr+/NFf5suMfuJXdW+rU=
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220706072527-47c0066cde1d h1:c8udvZlDh/WHwrQMyNPsankO67zKESv0sARD/QwPnHo=
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220706072527-47c0066cde1d/go.mod h1:L89agVWSUfXFCryvX5FrZxLVwbAcmK8eQn0u04ZPbF4=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=

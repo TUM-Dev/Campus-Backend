@@ -17,7 +17,7 @@ import (
 
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 
-	"github.com/TUM-Dev/Campus-Backend/model/heatmap/DBService"
+	"github.com/TUM-Dev/Campus-Backend/model/heatmap/dbservice"
 )
 
 type JsonEntry struct {
@@ -34,7 +34,7 @@ const (
 // Retrieves all access points from the database
 // and stores them in JSON format in `dst` e.g. "data/json/ap.json"
 func saveAPsToJSON(dst string, totalLoad int) {
-	APs := DBService.RetrieveAPsOfTUM(true)
+	APs := dbservice.RetrieveAPsOfTUM(true)
 	var jsonData []JsonEntry
 
 	for _, ap := range APs {
@@ -66,10 +66,10 @@ func (s *server) GetAccessPoint(ctx context.Context, in *pb.APRequest) (*pb.Acce
 	ts := in.Timestamp
 	log.Printf("Received request for AP with name: %s and timestamp: %s", name, in.Timestamp)
 
-	db := DBService.InitDB(heatmapDB)
+	db := dbservice.InitDB(heatmapDB)
 
 	day, hr := getDayAndHourFromTimestamp(ts)
-	ap := DBService.GetHistoryForSingleAP(name, day, hr)
+	ap := dbservice.GetHistoryForSingleAP(name, day, hr)
 	db.Close()
 
 	load, _ := strconv.Atoi(ap.Load)
@@ -105,7 +105,7 @@ func (s *server) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessP
 	ts := in.Timestamp
 	day, hr := getDayAndHourFromTimestamp(ts)
 
-	apList := DBService.GetHistoryForAllAPs(day, hr)
+	apList := dbservice.GetHistoryForAllAPs(day, hr)
 
 	log.Printf("Sending %d APs ...", len(apList))
 
@@ -133,7 +133,7 @@ func (s *server) ListAccessPoints(in *pb.APRequest, stream pb.Campus_ListAccessP
 }
 
 func (s *server) ListAllAPNames(in *emptypb.Empty, stream pb.Campus_ListAllAPNamesServer) error {
-	names := DBService.GetAllNames()
+	names := dbservice.GetAllNames()
 	for _, name := range names {
 		if err := stream.Send(
 			&pb.APName{
@@ -154,19 +154,19 @@ var locations map[string]location
 
 func main() {
 	locations = make(map[string]location)
-	apList := DBService.RetrieveAPsOfTUM(true)
+	apList := dbservice.RetrieveAPsOfTUM(true)
 	for _, ap := range apList {
 		locations[ap.Name] = location{ap.Lat, ap.Long}
 	}
 }
 
 func forecast() {
-	path := "./forecasting.py"
+	path := "./forecast.py"
 	cmd := exec.Command("python", "-u", path)
 	out, err := cmd.Output()
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	fmt.Println(string(out))

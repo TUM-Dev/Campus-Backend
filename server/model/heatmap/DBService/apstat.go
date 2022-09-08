@@ -1,4 +1,4 @@
-package DBService
+package dbservice
 
 import (
 	"log"
@@ -14,7 +14,8 @@ func GetAllNames() []string {
 	`
 	rows, err := DB.Query(query)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return []string{}
 	}
 	defer rows.Close()
 
@@ -24,7 +25,8 @@ func GetAllNames() []string {
 		err := rows.Scan(&name)
 
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			continue
 		}
 		names = append(names, name)
 	}
