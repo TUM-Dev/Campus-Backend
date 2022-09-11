@@ -63,16 +63,12 @@ func (c *CronService) Run() error {
 			switch cronjob.Type.String {
 			case NEWS_TYPE:
 				g.Go(func() error { return c.newsCron(&cronjob) })
-				break
 			case FILE_DOWNLOAD_TYPE:
 				g.Go(func() error { return c.fileDownloadCron() })
-				break
 			case DISH_NAME_DOWNLOAD:
 				g.Go(func() error { return c.dishNameDownloadCron() })
-				break
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
 				g.Go(func() error { return c.averageRatingComputation() })
-				break
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:

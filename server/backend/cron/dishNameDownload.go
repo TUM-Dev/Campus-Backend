@@ -109,7 +109,7 @@ func downloadDailyDishes(c *CronService) {
 						addDishTagsToMapping(dish.Dish, dish.Name, c.db)
 						dishId = dish.Dish
 					}
-					if 0 == weekliesWereAdded {
+					if weekliesWereAdded == 0 {
 						errCreate := c.db.Model(&model.DishesOfTheWeek{}).
 							Create(&model.DishesOfTheWeek{
 								DishID: dishId,

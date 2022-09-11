@@ -643,7 +643,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 	}, requestStatus
 }
 
-// GetAvailableDishTags RPC Endpoint
+// GetNameTags RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
 func (s *CampusServer) GetNameTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
 	var result []*pb.TagsOverview
