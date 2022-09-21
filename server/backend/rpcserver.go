@@ -37,6 +37,9 @@ type CampusServer struct {
 var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
+	log.Println("Server starting up")
+	initTagRatingOptions(db)
+
 	return &CampusServer{
 		db: db,
 		deviceBuf: &deviceBuffer{

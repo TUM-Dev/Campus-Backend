@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"time"
 )
@@ -37,7 +38,7 @@ func main() {
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Println("Trying to fetch top news")
-	r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{})
+	r, err := c.GetTopNews(ctx, &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

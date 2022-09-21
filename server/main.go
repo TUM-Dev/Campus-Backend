@@ -46,6 +46,7 @@ func main() {
 		log.Info("Connecting to dsn")
 		conn = mysql.Open(dbHost)
 	} else {
+		log.Info("Switching to test.db")
 		conn = sqlite.Open("test.db")
 		shouldAutoMigrate = true
 	}
