@@ -18,7 +18,7 @@ require (
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
-	gorm.io/driver/mysql v1.3.5
+	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
 )
