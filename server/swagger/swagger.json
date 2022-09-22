@@ -247,6 +247,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -272,28 +273,6 @@
         ]
       }
     },
-    "/device/addGcmToken": {
-      "post": {
-        "operationId": "Campus_DeviceUploadGcmToken",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/device/register": {
       "post": {
         "operationId": "Campus_RegisterDevice",
@@ -301,29 +280,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/device/uploaded/{lrzId}": {
-      "get": {
-        "operationId": "Campus_GetUploadStatus",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetUploadStatusReply"
+              "$ref": "#/definitions/apiRegisterDeviceReply"
             }
           },
           "default": {
@@ -335,34 +292,14 @@
         },
         "parameters": [
           {
-            "name": "lrzId",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/apiRegisterDeviceRequest"
+            }
           }
         ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/device/verifyKey": {
-      "get": {
-        "operationId": "Campus_VerifyKey",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "tags": [
           "Campus"
         ]
@@ -514,6 +451,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -1692,26 +1630,6 @@
         }
       }
     },
-    "apiGetUploadStatusReply": {
-      "type": "object",
-      "properties": {
-        "fcmToken": {
-          "type": "string"
-        },
-        "publicKey": {
-          "type": "string"
-        },
-        "studentId": {
-          "type": "boolean"
-        },
-        "employeeId": {
-          "type": "boolean"
-        },
-        "externalId": {
-          "type": "boolean"
-        }
-      }
-    },
     "apiKinoMsgElement": {
       "type": "object",
       "properties": {
@@ -1961,6 +1879,22 @@
         }
       }
     },
+    "apiRegisterDeviceReply": {
+      "type": "object",
+      "properties": {
+        "tcabeToken": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRegisterDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "lrzId": {
+          "type": "string"
+        }
+      }
+    },
     "apiResponsiblePersonElement": {
       "type": "object",
       "properties": {
@@ -2143,14 +2077,6 @@
           "items": {
             "$ref": "#/definitions/apiStudyRoom"
           }
-        }
-      }
-    },
-    "apiTUMCabeStatus": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
         }
       }
     },

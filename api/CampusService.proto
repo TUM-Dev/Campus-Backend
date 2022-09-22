@@ -13,6 +13,13 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service Campus {
+  rpc RegisterDevice (RegisterDeviceRequest) returns (RegisterDeviceReply) {
+    option (google.api.http) = {
+      post: "/device/register",
+      body: "*"
+    };
+  }
+
   rpc GetTopNews (google.protobuf.Empty) returns (GetTopNewsReply) {
     option (google.api.http) = {
       get: "/news/top"
@@ -65,7 +72,6 @@ service Campus {
     };
   }
 
-
   // This endpoint retrieves Cafeteria Ratings from the Backend.
   rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingReply) {
     option (google.api.http) = {
@@ -74,15 +80,12 @@ service Campus {
     };
   }
 
-
   rpc GetDishRatings (DishRatingRequest) returns (DishRatingReply) {
     option (google.api.http) = {
       post: "/dish/rating/get",
       body: "*",
     };
   }
-
-
 
   rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
@@ -133,7 +136,6 @@ service Campus {
     };
   }
 
-
   rpc GetResponsiblePerson (google.protobuf.Empty) returns (GetResponsiblePersonReply) {
     option (google.api.http) = {
       get: "/barrierfree/contacts",
@@ -170,20 +172,17 @@ service Campus {
     };
   }
 
-
   rpc GetOpeningTimes (GetOpeningTimesRequest) returns (GetOpeningTimesReply) {
     option (google.api.http) = {
       get: "/openingtimes/{language}",
     };
   }
 
-
   rpc GetUpdateNote (GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
     option (google.api.http) = {
       get: "/updatenote/{version}",
     };
   }
-
 
   rpc GetStudyRoomList (google.protobuf.Empty) returns (GetStudyRoomListReply) {
     option (google.api.http) = {
@@ -196,7 +195,6 @@ service Campus {
       get: "/event/list",
     };
   }
-
 
   rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
     option (google.api.http) = {
@@ -216,32 +214,6 @@ service Campus {
     };
   }
 
-
-  rpc RegisterDevice(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/register",
-    };
-  }
-
-  rpc VerifyKey(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      get: "/device/verifyKey",
-    };
-  }
-
-  rpc DeviceUploadGcmToken(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/addGcmToken",
-    };
-  }
-
-  rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
-    option (google.api.http) = {
-      get: "/device/uploaded/{lrzId}",
-    };
-  }
-
-
   rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
     option (google.api.http) = {
       get: "/notifications/{notificationId}",
@@ -259,6 +231,14 @@ service Campus {
       get: "/members/{lrzId}",
     };
   }
+}
+
+message RegisterDeviceRequest {
+  string lrzId = 1;
+}
+
+message RegisterDeviceReply {
+  string tcabeToken = 1;
 }
 
 message GetRoomScheduleRequest {
@@ -356,8 +336,6 @@ message GetTopNewsReply {
   google.protobuf.Timestamp to = 5;
 }
 
-
-
 message CafeteriaRatingRequest {
   // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
   string cafeteriaId = 1;
@@ -392,7 +370,6 @@ message CafeteriaRatingReply {
   repeated RatingTagResult ratingTags = 6;
 }
 
-
 message DishRatingReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
@@ -402,7 +379,6 @@ message DishRatingReply {
   repeated RatingTagResult ratingTags = 6;
   repeated RatingTagResult nameTags = 7;
 }
-
 
 message SingleRatingReply{
   // number in the range 1-5
@@ -415,7 +391,6 @@ message SingleRatingReply{
   google.protobuf.Timestamp visited = 5;
 }
 
-
 message NewCafeteriaRatingRequest{
   // number in the range 1-5
   int32 points = 1;
@@ -426,7 +401,6 @@ message NewCafeteriaRatingRequest{
   // Optional comment (max 256 chars)
   string comment = 6;
 }
-
 
 message NewDishRatingRequest{
   // number in the range 1-5
@@ -446,7 +420,6 @@ message NewDishRatingRequest{
 message GetTagsReply{
   repeated TagsOverview ratingTags = 1;
 }
-
 
 message TagsOverview {
   int32 tagId = 1;
@@ -472,8 +445,6 @@ message RatingTagResult {
   int32 max = 5;
 }
 
-
-
 message GetCafeteriaReply{
   repeated Cafeteria cafeteria = 1;
 }
@@ -484,7 +455,6 @@ message Cafeteria{
   double longitude = 3;
   double latitude = 4;
 }
-
 
 message GetDishesRequest{
   string cafeteriaId = 1;
@@ -528,8 +498,6 @@ message GetAreaFacilitiesByBuildingNrReply {
   repeated RoomInformationElement areaFacilitiesByBuildingNr = 1;
 }
 
-
-
 message GetAreaFacilitiesByBuildingNrRequest {
   string building_nr = 1;
 }
@@ -554,8 +522,6 @@ message GetListOfElevatorsReply {
   repeated RoomInformationElement listOfElevators = 1;
 }
 
-
-
 message GetMoreInformationReply {
   repeated MoreInformationElement information = 1;
 }
@@ -566,12 +532,9 @@ message MoreInformationElement{
   string url = 3;
 }
 
-
 message GetOpeningTimesRequest{
   string language = 1;
 }
-
-
 
 message GetOpeningTimesReply{
   repeated OpeningTimesMsgElement facilities = 1;
@@ -644,7 +607,6 @@ message EventListMsgElement{
   int32 ticket_group = 13;
 }
 
-
 message GetKinoRequest{
   int32 lastId = 1;
 }
@@ -694,7 +656,6 @@ message SendFeedbackImageRequest{
   //todo where does the file come from?
 }
 
-
 message GetMembersRequest{
   string lrzId = 1;
 }
@@ -705,22 +666,6 @@ message GetMembersReply{
   int32 memberId = 3;
 }
 
-message TUMCabeStatus{
-  string status = 1;
-}
-
-message GetUploadStatusRequest{
-  string lrzId = 1;
-}
-
-message GetUploadStatusReply{
-  string fcm_token = 1;
-  string public_key = 2;
-  bool student_id = 3;
-  bool employee_id = 4;
-  bool external_id = 5;
-}
-
 message GetNotificationsReply{
   int32 notificationId=1;
   int32 type=2;
@@ -728,7 +673,6 @@ message GetNotificationsReply{
   string description=4;
   string signature=5;
 }
-
 
 message NotificationsRequest{
   int32 notificationId=1;

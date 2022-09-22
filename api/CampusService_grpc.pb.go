@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
+	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceReply, error)
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
@@ -54,10 +55,6 @@ type CampusClient interface {
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
 	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
-	RegisterDevice(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
-	VerifyKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
-	DeviceUploadGcmToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error)
-	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
 	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
@@ -69,6 +66,15 @@ type campusClient struct {
 
 func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
+}
+
+func (c *campusClient) RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceReply, error) {
+	out := new(RegisterDeviceReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/RegisterDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
@@ -332,42 +338,6 @@ func (c *campusClient) SendFeedbackImage(ctx context.Context, in *SendFeedbackIm
 	return out, nil
 }
 
-func (c *campusClient) RegisterDevice(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
-	out := new(TUMCabeStatus)
-	err := c.cc.Invoke(ctx, "/api.Campus/RegisterDevice", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) VerifyKey(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
-	out := new(TUMCabeStatus)
-	err := c.cc.Invoke(ctx, "/api.Campus/VerifyKey", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) DeviceUploadGcmToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*TUMCabeStatus, error) {
-	out := new(TUMCabeStatus)
-	err := c.cc.Invoke(ctx, "/api.Campus/DeviceUploadGcmToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
-	out := new(GetUploadStatusReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/GetUploadStatus", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error) {
 	out := new(GetNotificationsReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/GetNotification", in, out, opts...)
@@ -399,6 +369,7 @@ func (c *campusClient) GetMembers(ctx context.Context, in *GetMembersRequest, op
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
+	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceReply, error)
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
@@ -430,10 +401,6 @@ type CampusServer interface {
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
 	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error)
-	RegisterDevice(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
-	VerifyKey(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
-	DeviceUploadGcmToken(context.Context, *emptypb.Empty) (*TUMCabeStatus, error)
-	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
 	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
@@ -444,6 +411,9 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
+func (UnimplementedCampusServer) RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterDevice not implemented")
+}
 func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
 }
@@ -531,18 +501,6 @@ func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequ
 func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFeedbackImage not implemented")
 }
-func (UnimplementedCampusServer) RegisterDevice(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterDevice not implemented")
-}
-func (UnimplementedCampusServer) VerifyKey(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyKey not implemented")
-}
-func (UnimplementedCampusServer) DeviceUploadGcmToken(context.Context, *emptypb.Empty) (*TUMCabeStatus, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeviceUploadGcmToken not implemented")
-}
-func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
-}
 func (UnimplementedCampusServer) GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNotification not implemented")
 }
@@ -563,6 +521,24 @@ type UnsafeCampusServer interface {
 
 func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 	s.RegisterService(&Campus_ServiceDesc, srv)
+}
+
+func _Campus_RegisterDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).RegisterDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/RegisterDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).RegisterDevice(ctx, req.(*RegisterDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1087,78 +1063,6 @@ func _Campus_SendFeedbackImage_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_RegisterDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).RegisterDevice(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/RegisterDevice",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).RegisterDevice(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_VerifyKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).VerifyKey(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/VerifyKey",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).VerifyKey(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_DeviceUploadGcmToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).DeviceUploadGcmToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/DeviceUploadGcmToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).DeviceUploadGcmToken(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUploadStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetUploadStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.Campus/GetUploadStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetUploadStatus(ctx, req.(*GetUploadStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NotificationsRequest)
 	if err := dec(in); err != nil {
@@ -1220,6 +1124,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.Campus",
 	HandlerType: (*CampusServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "RegisterDevice",
+			Handler:    _Campus_RegisterDevice_Handler,
+		},
 		{
 			MethodName: "GetTopNews",
 			Handler:    _Campus_GetTopNews_Handler,
@@ -1335,22 +1243,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendFeedbackImage",
 			Handler:    _Campus_SendFeedbackImage_Handler,
-		},
-		{
-			MethodName: "RegisterDevice",
-			Handler:    _Campus_RegisterDevice_Handler,
-		},
-		{
-			MethodName: "VerifyKey",
-			Handler:    _Campus_VerifyKey_Handler,
-		},
-		{
-			MethodName: "DeviceUploadGcmToken",
-			Handler:    _Campus_DeviceUploadGcmToken_Handler,
-		},
-		{
-			MethodName: "GetUploadStatus",
-			Handler:    _Campus_GetUploadStatus_Handler,
 		},
 		{
 			MethodName: "GetNotification",
