@@ -1,5 +1,4 @@
 {
-"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "CampusService.proto",
@@ -247,6 +246,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -514,6 +514,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -1078,6 +1079,36 @@
             }
           }
         },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/test/{name}": {
+      "get": {
+        "operationId": "Campus_HelloWorld",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiHelloWorldReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "tags": [
           "Campus"
         ]
@@ -1709,6 +1740,14 @@
         },
         "externalId": {
           "type": "boolean"
+        }
+      }
+    },
+    "apiHelloWorldReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
         }
       }
     },

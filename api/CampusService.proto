@@ -259,6 +259,20 @@ service Campus {
       get: "/members/{lrzId}",
     };
   }
+
+  rpc HelloWorld(HelloWorldRequest) returns (HelloWorldReply) {
+    option (google.api.http) = {
+      get: "/test/{name}"
+    };
+  }
+}
+
+message HelloWorldReply {
+  string message = 1;
+}
+
+message HelloWorldRequest {
+  string name = 1;
 }
 
 message GetRoomScheduleRequest {

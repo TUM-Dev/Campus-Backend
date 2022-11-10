@@ -61,6 +61,7 @@ type CampusClient interface {
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
 	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
+	HelloWorld(ctx context.Context, in *HelloWorldRequest, opts ...grpc.CallOption) (*HelloWorldReply, error)
 }
 
 type campusClient struct {
@@ -395,6 +396,15 @@ func (c *campusClient) GetMembers(ctx context.Context, in *GetMembersRequest, op
 	return out, nil
 }
 
+func (c *campusClient) HelloWorld(ctx context.Context, in *HelloWorldRequest, opts ...grpc.CallOption) (*HelloWorldReply, error) {
+	out := new(HelloWorldReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/HelloWorld", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
@@ -437,6 +447,7 @@ type CampusServer interface {
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
 	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
+	HelloWorld(context.Context, *HelloWorldRequest) (*HelloWorldReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -551,6 +562,9 @@ func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *Notifi
 }
 func (UnimplementedCampusServer) GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMembers not implemented")
+}
+func (UnimplementedCampusServer) HelloWorld(context.Context, *HelloWorldRequest) (*HelloWorldReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HelloWorld not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -1213,6 +1227,24 @@ func _Campus_GetMembers_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_HelloWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HelloWorldRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).HelloWorld(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/HelloWorld",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).HelloWorld(ctx, req.(*HelloWorldRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1363,6 +1395,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMembers",
 			Handler:    _Campus_GetMembers_Handler,
+		},
+		{
+			MethodName: "HelloWorld",
+			Handler:    _Campus_HelloWorld_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
