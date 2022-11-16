@@ -10,8 +10,9 @@ import (
 )
 
 type CronService struct {
-	db *gorm.DB
-	gf *gofeed.Parser
+	db       *gorm.DB
+	gf       *gofeed.Parser
+	useMensa bool
 }
 
 // names for cron jobs as specified in database
@@ -29,18 +30,16 @@ const (
 	STORAGE_DIR                = "/Storage/" // target location of files
 )
 
-var mensaActivated = true
-
 func New(db *gorm.DB, mensaCronActivated bool) *CronService {
-	mensaActivated = mensaCronActivated
 	return &CronService{
-		db: db,
-		gf: gofeed.NewParser(),
+		db:       db,
+		gf:       gofeed.NewParser(),
+		useMensa: mensaCronActivated,
 	}
 }
 
 func (c *CronService) Run() error {
-	log.Printf("running cron service. Mensa Crons Running: %t", mensaActivated)
+	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
 	g := new(errgroup.Group)
 	g.Go(func() error { return c.dishNameDownloadCron() })
 	g.Go(func() error { return c.averageRatingComputation() })
@@ -54,7 +53,7 @@ func (c *CronService) Run() error {
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			var offset int32 = 0
-			if mensaActivated {
+			if c.useMensa {
 				if cronjob.Type.String == AVERAGE_RATING_COMPUTATION {
 					if time.Now().Hour() == 16 {
 						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
@@ -72,11 +71,11 @@ func (c *CronService) Run() error {
 			case FILE_DOWNLOAD_TYPE:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DISH_NAME_DOWNLOAD:
-				if mensaActivated {
+				if c.useMensa {
 					g.Go(func() error { return c.dishNameDownloadCron() })
 				}
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
-				if mensaActivated {
+				if c.useMensa {
 					g.Go(func() error { return c.averageRatingComputation() })
 				}
 				/*
