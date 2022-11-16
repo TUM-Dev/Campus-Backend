@@ -9,4 +9,9 @@ This repository holds the following components:
 The API is publicly available for use by anyone, but most notably its the main backend system for the
 TUM Campus Apps (Android, iOS and Windows).
 
+### Running the Backend
+Optional Commandline Parameter: `-MensaCron 0` deactivates the Mensa Rating cronjobs if not needed in a local setup. The Cronjobs are activated if the parameter is not explicitly added.
+
+
+
 Please be respectful with its usage!
