@@ -79,8 +79,13 @@ func main() {
 		return
 	}
 
+	var mensaCronActivated = true
+	if len(os.Args) > 2 && os.Args[1] == "-MensaCron" && os.Args[2] == "0" {
+		mensaCronActivated = false
+		log.Println("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
+	}
 	// Create any other background services (these shouldn't do any long running work here)
-	cronService := cron.New(db)
+	cronService := cron.New(db, mensaCronActivated)
 	campusService := backend.New(db)
 
 	// Listen to our configured ports
