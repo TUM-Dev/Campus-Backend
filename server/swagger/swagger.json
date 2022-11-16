@@ -691,6 +691,101 @@
         ]
       }
     },
+    "/ios/device": {
+      "post": {
+        "summary": "register your ios device for push notifications",
+        "operationId": "Campus_RegisterIOSDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiRegisterIOSDeviceReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiRegisterIOSDeviceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/ios/device/{deviceId}": {
+      "delete": {
+        "summary": "remove your ios device from the db and unregister it from push notifications",
+        "operationId": "Campus_RemoveIOSDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiRemoveIOSDeviceReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/ios/device/{deviceId}/usage": {
+      "post": {
+        "summary": "add ios device usage log to calculate notification priority",
+        "operationId": "Campus_AddIOSDeviceUsage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiAddIOSDeviceUsageReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/kino/{lastId}": {
       "get": {
         "operationId": "Campus_GetKino",
@@ -1084,36 +1179,6 @@
         ]
       }
     },
-    "/test/{name}": {
-      "get": {
-        "operationId": "Campus_HelloWorld",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiHelloWorldReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/updatenote/{version}": {
       "get": {
         "operationId": "Campus_GetUpdateNote",
@@ -1190,6 +1255,21 @@
           "format": "int32"
         },
         "courseCode": {
+          "type": "string"
+        }
+      }
+    },
+    "apiAddIOSDeviceUsageReply": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "deviceId": {
+          "type": "string"
+        },
+        "createdAt": {
           "type": "string"
         }
       }
@@ -1743,14 +1823,6 @@
         }
       }
     },
-    "apiHelloWorldReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
     "apiKinoMsgElement": {
       "type": "object",
       "properties": {
@@ -1997,6 +2069,30 @@
         "max": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "apiRegisterIOSDeviceReply": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRegisterIOSDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRemoveIOSDeviceReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
         }
       }
     },

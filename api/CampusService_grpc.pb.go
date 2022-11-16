@@ -61,7 +61,12 @@ type CampusClient interface {
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
 	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
-	HelloWorld(ctx context.Context, in *HelloWorldRequest, opts ...grpc.CallOption) (*HelloWorldReply, error)
+	// register your ios device for push notifications
+	RegisterIOSDevice(ctx context.Context, in *RegisterIOSDeviceRequest, opts ...grpc.CallOption) (*RegisterIOSDeviceReply, error)
+	// remove your ios device from the db and unregister it from push notifications
+	RemoveIOSDevice(ctx context.Context, in *RemoveIOSDeviceRequest, opts ...grpc.CallOption) (*RemoveIOSDeviceReply, error)
+	// add ios device usage log to calculate notification priority
+	AddIOSDeviceUsage(ctx context.Context, in *AddIOSDeviceUsageRequest, opts ...grpc.CallOption) (*AddIOSDeviceUsageReply, error)
 }
 
 type campusClient struct {
@@ -396,9 +401,27 @@ func (c *campusClient) GetMembers(ctx context.Context, in *GetMembersRequest, op
 	return out, nil
 }
 
-func (c *campusClient) HelloWorld(ctx context.Context, in *HelloWorldRequest, opts ...grpc.CallOption) (*HelloWorldReply, error) {
-	out := new(HelloWorldReply)
-	err := c.cc.Invoke(ctx, "/api.Campus/HelloWorld", in, out, opts...)
+func (c *campusClient) RegisterIOSDevice(ctx context.Context, in *RegisterIOSDeviceRequest, opts ...grpc.CallOption) (*RegisterIOSDeviceReply, error) {
+	out := new(RegisterIOSDeviceReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/RegisterIOSDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) RemoveIOSDevice(ctx context.Context, in *RemoveIOSDeviceRequest, opts ...grpc.CallOption) (*RemoveIOSDeviceReply, error) {
+	out := new(RemoveIOSDeviceReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/RemoveIOSDevice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) AddIOSDeviceUsage(ctx context.Context, in *AddIOSDeviceUsageRequest, opts ...grpc.CallOption) (*AddIOSDeviceUsageReply, error) {
+	out := new(AddIOSDeviceUsageReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/AddIOSDeviceUsage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -447,7 +470,12 @@ type CampusServer interface {
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
 	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
-	HelloWorld(context.Context, *HelloWorldRequest) (*HelloWorldReply, error)
+	// register your ios device for push notifications
+	RegisterIOSDevice(context.Context, *RegisterIOSDeviceRequest) (*RegisterIOSDeviceReply, error)
+	// remove your ios device from the db and unregister it from push notifications
+	RemoveIOSDevice(context.Context, *RemoveIOSDeviceRequest) (*RemoveIOSDeviceReply, error)
+	// add ios device usage log to calculate notification priority
+	AddIOSDeviceUsage(context.Context, *AddIOSDeviceUsageRequest) (*AddIOSDeviceUsageReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -563,8 +591,14 @@ func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *Notifi
 func (UnimplementedCampusServer) GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMembers not implemented")
 }
-func (UnimplementedCampusServer) HelloWorld(context.Context, *HelloWorldRequest) (*HelloWorldReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HelloWorld not implemented")
+func (UnimplementedCampusServer) RegisterIOSDevice(context.Context, *RegisterIOSDeviceRequest) (*RegisterIOSDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterIOSDevice not implemented")
+}
+func (UnimplementedCampusServer) RemoveIOSDevice(context.Context, *RemoveIOSDeviceRequest) (*RemoveIOSDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveIOSDevice not implemented")
+}
+func (UnimplementedCampusServer) AddIOSDeviceUsage(context.Context, *AddIOSDeviceUsageRequest) (*AddIOSDeviceUsageReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddIOSDeviceUsage not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -1227,20 +1261,56 @@ func _Campus_GetMembers_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_HelloWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HelloWorldRequest)
+func _Campus_RegisterIOSDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterIOSDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).HelloWorld(ctx, in)
+		return srv.(CampusServer).RegisterIOSDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Campus/HelloWorld",
+		FullMethod: "/api.Campus/RegisterIOSDevice",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).HelloWorld(ctx, req.(*HelloWorldRequest))
+		return srv.(CampusServer).RegisterIOSDevice(ctx, req.(*RegisterIOSDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_RemoveIOSDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveIOSDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).RemoveIOSDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/RemoveIOSDevice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).RemoveIOSDevice(ctx, req.(*RemoveIOSDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_AddIOSDeviceUsage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddIOSDeviceUsageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).AddIOSDeviceUsage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/AddIOSDeviceUsage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).AddIOSDeviceUsage(ctx, req.(*AddIOSDeviceUsageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1397,8 +1467,16 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetMembers_Handler,
 		},
 		{
-			MethodName: "HelloWorld",
-			Handler:    _Campus_HelloWorld_Handler,
+			MethodName: "RegisterIOSDevice",
+			Handler:    _Campus_RegisterIOSDevice_Handler,
+		},
+		{
+			MethodName: "RemoveIOSDevice",
+			Handler:    _Campus_RemoveIOSDevice_Handler,
+		},
+		{
+			MethodName: "AddIOSDeviceUsage",
+			Handler:    _Campus_AddIOSDeviceUsage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

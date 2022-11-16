@@ -11,6 +11,7 @@ package api;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 service Campus {
   rpc GetTopNews (google.protobuf.Empty) returns (GetTopNewsReply) {
@@ -260,19 +261,53 @@ service Campus {
     };
   }
 
-  rpc HelloWorld(HelloWorldRequest) returns (HelloWorldReply) {
+  // register your ios device for push notifications
+  rpc RegisterIOSDevice(RegisterIOSDeviceRequest) returns (RegisterIOSDeviceReply) {
     option (google.api.http) = {
-      get: "/test/{name}"
+      post: "/ios/device",
+      body: "*",
+    };
+  }
+
+  // remove your ios device from the db and unregister it from push notifications
+  rpc RemoveIOSDevice(RemoveIOSDeviceRequest) returns (RemoveIOSDeviceReply) {
+    option (google.api.http) = {
+      delete: "/ios/device/{deviceId}",
+    };
+  }
+
+  // add ios device usage log to calculate notification priority
+  rpc AddIOSDeviceUsage(AddIOSDeviceUsageRequest) returns (AddIOSDeviceUsageReply) {
+    option (google.api.http) = {
+      post: "/ios/device/{deviceId}/usage",
     };
   }
 }
 
-message HelloWorldReply {
+message AddIOSDeviceUsageRequest {
+  string deviceId = 1;
+}
+
+message AddIOSDeviceUsageReply {
+  uint32 id = 1;
+  string deviceId = 2;
+  string createdAt = 3;
+}
+
+message RemoveIOSDeviceRequest {
+  string deviceId = 1;
+}
+
+message RemoveIOSDeviceReply {
   string message = 1;
 }
 
-message HelloWorldRequest {
-  string name = 1;
+message RegisterIOSDeviceRequest {
+  string deviceId = 1;
+}
+
+message RegisterIOSDeviceReply {
+  string deviceId = 1;
 }
 
 message GetRoomScheduleRequest {

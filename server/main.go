@@ -152,35 +152,51 @@ func addMethodNameInterceptor(ctx context.Context, method string, req interface{
 
 // errorHandler translates gRPC raised by the backend into HTTP errors.
 func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
-	httpStatus := http.StatusInternalServerError
-	httpResponse := "Internal Server Error"
+	errorResp := errorResponse{Error: "Internal Server Error", StatusCode: http.StatusInternalServerError}
+
 	if strings.HasPrefix(err.Error(), "no device id") {
-		httpStatus = http.StatusForbidden
-		httpResponse = "Not Authorized"
+		errorResp.Error = "Not Authorized"
+		errorResp.StatusCode = http.StatusForbidden
 	}
+
 	if s, ok := status.FromError(err); ok {
 		switch s.Code() {
 		case codes.NotFound:
-			httpStatus = http.StatusNotFound
-			httpResponse = "Not Found"
+			errorResp.Error = "Not Found"
+			errorResp.StatusCode = http.StatusNotFound
 		case codes.Unimplemented:
-			httpStatus = http.StatusNotImplemented
-			httpResponse = "Not Implemented"
+			errorResp.Error = "Not Implemented"
+			errorResp.StatusCode = http.StatusNotImplemented
+		case codes.InvalidArgument:
+			errorResp.Error = "Invalid Argument"
+			errorResp.StatusCode = http.StatusBadRequest
+		case codes.Internal:
+			errorResp.Error = "Internal Server Error"
+			errorResp.StatusCode = http.StatusInternalServerError
+		}
+
+		if s.Message() != "" {
+			errorResp.Error = s.Message()
+		}
+
+		if s.Details() != nil && len(s.Details()) > 0 {
+			errorResp.Details = s.Details()
 		}
 	}
 
-	w.WriteHeader(httpStatus)
-	resp, err := json.Marshal(errorResponse{Error: httpResponse})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(errorResp.StatusCode)
+
+	err = json.NewEncoder(w).Encode(errorResp)
+
 	if err != nil {
 		log.WithError(err).Error("Marshal error response failed")
 		return
 	}
-	_, err = w.Write(resp)
-	if err != nil {
-		log.WithError(err).Error("Error writing response")
-	}
 }
 
 type errorResponse struct {
-	Error string `json:"error"`
+	Error      string        `json:"error"`
+	Details    []interface{} `json:"details,omitempty"`
+	StatusCode int           `json:"-"`
 }

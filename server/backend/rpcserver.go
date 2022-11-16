@@ -137,7 +137,3 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	}
 	return &pb.GetTopNewsReply{}, nil
 }
-
-func (s *CampusServer) HelloWorld(ctx context.Context, req *pb.HelloWorldRequest) (*pb.HelloWorldReply, error) {
-	return &pb.HelloWorldReply{Message: fmt.Sprintf("Hello %s", req.GetName())}, nil
-}
