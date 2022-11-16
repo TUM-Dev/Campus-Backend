@@ -72,11 +72,11 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DISH_NAME_DOWNLOAD:
 				if c.useMensa {
-					g.Go(func() error { return c.dishNameDownloadCron() })
+					g.Go(c.dishNameDownloadCron)
 				}
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
 				if c.useMensa {
-					g.Go(func() error { return c.averageRatingComputation() })
+					g.Go(c.averageRatingComputation)
 				}
 				/*
 					TODO: Implement handlers for other cronjobs
