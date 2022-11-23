@@ -1,4 +1,4 @@
-package ios_notifications_service
+package ios_usage
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/api"
@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type IOSUsageService struct {
-	Repository *IOSUsageRepository
+type Service struct {
+	Repository *Repository
 }
 
-func (service *IOSUsageService) AddUsage(request *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
+func (service *Service) AddUsage(request *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
 	usageLog := model.IOSDeviceUsageLog{
 		DeviceID: request.GetDeviceId(),
 	}
@@ -27,4 +27,10 @@ func (service *IOSUsageService) AddUsage(request *pb.AddIOSDeviceUsageRequest) (
 		CreatedAt: usage.CreatedAt.String(),
 		Id:        usage.ID,
 	}, nil
+}
+
+func NewService(repository *Repository) *Service {
+	return &Service{
+		Repository: repository,
+	}
 }

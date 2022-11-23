@@ -1,4 +1,4 @@
-package ios_notifications_service
+package ios_notifications
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/api"
@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type IOSNotificationsService struct {
-	Repository *IOSNotificationsRepository
+type Service struct {
+	Repository *Repository
 }
 
-func (service *IOSNotificationsService) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
+func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
 
 	if err := ValidateRegisterDevice(request); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -32,7 +32,7 @@ func (service *IOSNotificationsService) RegisterDevice(request *pb.RegisterIOSDe
 	}, nil
 }
 
-func (service *IOSNotificationsService) RemoveDevice(request *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
+func (service *Service) RemoveDevice(request *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
 
 	if err := ValidateRemoveDevice(request); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -49,4 +49,8 @@ func (service *IOSNotificationsService) RemoveDevice(request *pb.RemoveIOSDevice
 	}, nil
 }
 
-// func (service *IOSNotificationsService) GetDevices() (pb.)
+func NewService(db *Repository) *Service {
+	return &Service{
+		Repository: db,
+	}
+}

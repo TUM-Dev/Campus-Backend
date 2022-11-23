@@ -1,4 +1,4 @@
-package ios_notifications_service
+package ios_notifications
 
 import (
 	"errors"

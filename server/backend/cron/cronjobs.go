@@ -27,6 +27,7 @@ const (
 	DISH_NAME_DOWNLOAD         = "dishNameDownload"
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
 	STORAGE_DIR                = "/Storage/" // target location of files
+	IOS_NOTIFICATIONS          = "iosNotifications"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -39,13 +40,23 @@ func New(db *gorm.DB) *CronService {
 func (c *CronService) Run() error {
 	log.Printf("running cron service")
 	g := new(errgroup.Group)
+
 	g.Go(func() error { return c.dishNameDownloadCron() })
 	g.Go(func() error { return c.averageRatingComputation() })
+
 	for {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
+
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'averageRatingComputation','dishNameDownload')", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?)",
+				time.Now().Unix(),
+				NEWS_TYPE,
+				FILE_DOWNLOAD_TYPE,
+				AVERAGE_RATING_COMPUTATION,
+				DISH_NAME_DOWNLOAD,
+				IOS_NOTIFICATIONS,
+			).
 			Scan(&res)
 
 		for _, cronjob := range res {
@@ -69,6 +80,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.dishNameDownloadCron() })
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
 				g.Go(func() error { return c.averageRatingComputation() })
+			case IOS_NOTIFICATIONS:
+				g.Go(func() error { return c.iosNotificationsCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:

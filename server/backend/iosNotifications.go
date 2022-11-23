@@ -3,23 +3,27 @@ package backend
 import (
 	"context"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
-	ios "github.com/TUM-Dev/Campus-Backend/backend/ios_notifications_service"
+	ios "github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduling"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_usage"
 )
 
-func (s *CampusServer) GetIOSNotificationsService() ios.IOSNotificationsService {
-	repository := ios.IOSNotificationsRepository{
-		DB: s.db,
-	}
+func (s *CampusServer) GetIOSNotificationsService() *ios.Service {
+	repository := ios.NewRepository(s.db)
 
-	return ios.IOSNotificationsService{Repository: &repository}
+	return ios.NewService(repository)
 }
 
-func (s *CampusServer) GetIOSUsageService() ios.IOSUsageService {
-	repository := ios.IOSUsageRepository{
-		DB: s.db,
-	}
+func (s *CampusServer) GetIOSUsageService() *ios_usage.Service {
+	repository := ios_usage.NewRepository(s.db)
 
-	return ios.IOSUsageService{Repository: &repository}
+	return ios_usage.NewService(repository)
+}
+
+func (s *CampusServer) GetIOSSchedulingService() *ios_scheduling.Service {
+	repository := ios_scheduling.NewRepository(s.db)
+
+	return ios_scheduling.NewService(repository)
 }
 
 func (s *CampusServer) RegisterIOSDevice(ctx context.Context, req *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {

@@ -11,9 +11,11 @@ require (
 )
 
 require (
+	github.com/adhocore/gronx v1.1.2 // indirect
 	github.com/gogo/protobuf v1.3.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mwitkow/go-proto-validators v0.3.2 // indirect
 	golang.org/x/net v0.0.0-20220921203646-d300de134e69 // indirect

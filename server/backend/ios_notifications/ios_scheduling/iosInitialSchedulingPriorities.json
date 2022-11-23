@@ -1,0 +1,23 @@
+[
+  {
+    "from_day": 152,
+    "to_day": 288,
+    "from_hour": 0,
+    "to_hour": 23,
+    "priority": 10
+  },
+  {
+    "from_day": 32,
+    "to_day": 106,
+    "from_hour": 0,
+    "to_hour": 23,
+    "priority": 10
+  },
+  {
+    "from_day": 1,
+    "to_day": 365,
+    "from_hour": 1,
+    "to_hour": 6,
+    "priority": 1
+  }
+]
