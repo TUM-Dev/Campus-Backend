@@ -786,6 +786,39 @@
         ]
       }
     },
+    "/ios/notifications/sendTest": {
+      "post": {
+        "summary": "send test notification to ios device",
+        "operationId": "Campus_SendIOSTestNotification",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiSendIOSTestNotificationReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiSendIOSTestNotificationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/kino/{lastId}": {
       "get": {
         "operationId": "Campus_GetKino",
@@ -2205,6 +2238,25 @@
       "type": "object",
       "properties": {
         "status": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSendIOSTestNotificationReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "apiSendIOSTestNotificationRequest": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "message": {
           "type": "string"
         }
       }

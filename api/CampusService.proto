@@ -281,6 +281,23 @@ service Campus {
       post: "/ios/device/{deviceId}/usage",
     };
   }
+
+  // send test notification to ios device
+  rpc SendIOSTestNotification(SendIOSTestNotificationRequest) returns (SendIOSTestNotificationReply) {
+    option (google.api.http) = {
+      post: "/ios/notifications/sendTest",
+      body: "*",
+    };
+  }
+}
+
+message SendIOSTestNotificationRequest {
+  string deviceId = 1;
+  string message = 2;
+}
+
+message SendIOSTestNotificationReply {
+  string message = 1;
 }
 
 message AddIOSDeviceUsageRequest {

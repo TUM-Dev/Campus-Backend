@@ -67,6 +67,8 @@ type CampusClient interface {
 	RemoveIOSDevice(ctx context.Context, in *RemoveIOSDeviceRequest, opts ...grpc.CallOption) (*RemoveIOSDeviceReply, error)
 	// add ios device usage log to calculate notification priority
 	AddIOSDeviceUsage(ctx context.Context, in *AddIOSDeviceUsageRequest, opts ...grpc.CallOption) (*AddIOSDeviceUsageReply, error)
+	// send test notification to ios device
+	SendIOSTestNotification(ctx context.Context, in *SendIOSTestNotificationRequest, opts ...grpc.CallOption) (*SendIOSTestNotificationReply, error)
 }
 
 type campusClient struct {
@@ -428,6 +430,15 @@ func (c *campusClient) AddIOSDeviceUsage(ctx context.Context, in *AddIOSDeviceUs
 	return out, nil
 }
 
+func (c *campusClient) SendIOSTestNotification(ctx context.Context, in *SendIOSTestNotificationRequest, opts ...grpc.CallOption) (*SendIOSTestNotificationReply, error) {
+	out := new(SendIOSTestNotificationReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/SendIOSTestNotification", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
@@ -476,6 +487,8 @@ type CampusServer interface {
 	RemoveIOSDevice(context.Context, *RemoveIOSDeviceRequest) (*RemoveIOSDeviceReply, error)
 	// add ios device usage log to calculate notification priority
 	AddIOSDeviceUsage(context.Context, *AddIOSDeviceUsageRequest) (*AddIOSDeviceUsageReply, error)
+	// send test notification to ios device
+	SendIOSTestNotification(context.Context, *SendIOSTestNotificationRequest) (*SendIOSTestNotificationReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -599,6 +612,9 @@ func (UnimplementedCampusServer) RemoveIOSDevice(context.Context, *RemoveIOSDevi
 }
 func (UnimplementedCampusServer) AddIOSDeviceUsage(context.Context, *AddIOSDeviceUsageRequest) (*AddIOSDeviceUsageReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddIOSDeviceUsage not implemented")
+}
+func (UnimplementedCampusServer) SendIOSTestNotification(context.Context, *SendIOSTestNotificationRequest) (*SendIOSTestNotificationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendIOSTestNotification not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -1315,6 +1331,24 @@ func _Campus_AddIOSDeviceUsage_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_SendIOSTestNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendIOSTestNotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).SendIOSTestNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/SendIOSTestNotification",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).SendIOSTestNotification(ctx, req.(*SendIOSTestNotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1477,6 +1511,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddIOSDeviceUsage",
 			Handler:    _Campus_AddIOSDeviceUsage_Handler,
+		},
+		{
+			MethodName: "SendIOSTestNotification",
+			Handler:    _Campus_SendIOSTestNotification_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

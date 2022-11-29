@@ -4,6 +4,7 @@ import (
 	"context"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	ios "github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduling"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_usage"
 )
@@ -18,6 +19,12 @@ func (s *CampusServer) GetIOSUsageService() *ios_usage.Service {
 	repository := ios_usage.NewRepository(s.db)
 
 	return ios_usage.NewService(repository)
+}
+
+func (s *CampusServer) GetIOSAPNsService() *ios_apns.Service {
+	repository := ios_apns.NewRepository()
+
+	return ios_apns.NewService(repository)
 }
 
 func (s *CampusServer) GetIOSSchedulingService() *ios_scheduling.Service {
@@ -39,4 +46,9 @@ func (s *CampusServer) RemoveIOSDevice(ctx context.Context, req *pb.RemoveIOSDev
 func (s *CampusServer) AddIOSDeviceUsage(ctx context.Context, req *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
 	service := s.GetIOSUsageService()
 	return service.AddUsage(req)
+}
+
+func (s *CampusServer) SendIOSTestNotification(ctx context.Context, req *pb.SendIOSTestNotificationRequest) (*pb.SendIOSTestNotificationReply, error) {
+	service := s.GetIOSAPNsService()
+	return service.SendTestNotification(req)
 }
