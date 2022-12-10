@@ -247,6 +247,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -265,6 +266,37 @@
             "schema": {
               "$ref": "#/definitions/apiNewCafeteriaRatingRequest"
             }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/canteen/homometer/{canteenId}": {
+      "get": {
+        "operationId": "Campus_GetCanteenHomometer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCanteenHomometerReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "canteenId",
+            "description": "The requested canteen ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -514,6 +546,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -1401,6 +1434,31 @@
           "items": {
             "$ref": "#/definitions/apiCafeteria"
           }
+        }
+      }
+    },
+    "apiGetCanteenHomometerReply": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The absolut count of humans in the canteen or 0 in case no data is available."
+        },
+        "maxCount": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The maximum nunmber of humans in the canteen for the percent to be 100.00 or 0 in case no data is available."
+        },
+        "percent": {
+          "type": "number",
+          "format": "float",
+          "description": "Current capacity utilization of the canteen or -1 in case no data is available."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "A time stamp indicating how up to date the response is or an unspecified value in case there is no data available (precent == -1)."
         }
       }
     },

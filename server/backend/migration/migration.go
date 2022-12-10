@@ -48,6 +48,7 @@ func (m TumDBMigrator) Migrate() error {
 			&model.DishRatingTagOption{},
 			&model.DishToDishNameTag{},
 			&model.DishesOfTheWeek{},
+			&model.CanteenHomometer{},
 		)
 		return err
 	}
