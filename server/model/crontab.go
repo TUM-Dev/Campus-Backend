@@ -18,7 +18,7 @@ type Crontab struct {
 	//[ 2] lastRun                                        int                  null: false  primary: false  isArray: false  auto: false  col: int             len: -1      default: [0]
 	LastRun int32 `gorm:"column:lastRun;type:int;default:0;" json:"last_run"`
 	//[ 3] type                                           char(10)             null: true   primary: false  isArray: false  auto: false  col: char            len: 10      default: []
-	Type null.String `gorm:"column:type;enum ('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation');" json:"type"`
+	Type null.String `gorm:"column:type;enum ('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation', 'canteenHomometer');" json:"type"`
 	//[ 4] id                                             int                  null: true   primary: false  isArray: false  auto: false  col: int             len: -1      default: []
 	ID null.Int `gorm:"column:id;type:int;" json:"id"`
 }
