@@ -3,12 +3,13 @@ package cron
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/model"
-	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/model"
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type cafeteriaName struct {
@@ -95,9 +96,8 @@ func downloadDailyDishes(c *CronService) {
 					var count int64
 					var dishId int32
 					errCount := c.db.Model(&model.Dish{}).
-						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).
-						Select("dish").First(&dishId).
-						Count(&count).Error
+						Count(&count).
+						Where(model.Dish{Name: dish.Name, CafeteriaID: dish.CafeteriaID}).Error
 					if errCount != nil {
 						log.WithError(errCount).Error("Error while checking whether this is already in database")
 					}
@@ -175,7 +175,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 	lowercaseDish := strings.ToLower(dishName)
 	var includedTags []int32
 	errIncluded := db.Model(&model.DishNameTagOptionIncluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
+		Where("? LIKE '%' || expression || '%'", lowercaseDish).
 		Select("nameTagID").
 		Scan(&includedTags).Error
 	if errIncluded != nil {
@@ -184,7 +184,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 
 	var excludedTags []int32
 	errExcluded := db.Model(&model.DishNameTagOptionExcluded{}).
-		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
+		Where("? LIKE '%' || expression || '%'", lowercaseDish).
 		Select("nameTagID").
 		Scan(&excludedTags).Error
 	if errExcluded != nil {

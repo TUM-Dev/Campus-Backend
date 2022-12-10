@@ -3,12 +3,13 @@ package backend
 import (
 	"database/sql"
 	"encoding/json"
+	"os"
+	"path/filepath"
+
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"os"
-	"path/filepath"
 )
 
 type multiLanguageTags struct {
@@ -184,7 +185,7 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 			if createError != nil {
 				log.WithError(createError).Error("Unable to create new can be excluded tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
 			} else {
-				log.Info("New Entry with En {} and De {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
+				log.Info("New Entry with En ", v.TagNameEnglish, " and De ", v.TagNameGerman, " successfully created.")
 			}
 		}
 	}
