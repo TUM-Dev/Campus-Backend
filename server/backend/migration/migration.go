@@ -30,6 +30,7 @@ func (m TumDBMigrator) Migrate() error {
 			&model.NewsSource{},
 			&model.NewsAlert{},
 			&model.News{},
+  &model.CanteenHomometer{},
 		)
 		return err
 	}
