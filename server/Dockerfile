@@ -7,15 +7,10 @@ RUN apk update && apk add --no-cache git ca-certificates tzdata alpine-sdk bash 
 
 # Create appuser
 RUN adduser -D -g '' appuser
-WORKDIR $GOPATH/server/
-
-# Using go mod.
-COPY ./server/go.mod $GOPATH/server/
-COPY ./server/go.sum $GOPATH/server/
-RUN GO111MODULE=on go mod download
+WORKDIR /app
 
 # Copy source code
-COPY ./server $GOPATH/server/
+COPY . .
 
 # bundle version into binary if specified in build-args, dev otherwise.
 ARG version=dev

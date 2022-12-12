@@ -3,7 +3,7 @@ package cron
 import (
 	"bytes"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/getsentry/sentry-go"
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-//fileDownloadCron Downloads all files that are not marked as finished in the database.
+// fileDownloadCron Downloads all files that are not marked as finished in the database.
 func (c *CronService) fileDownloadCron() error {
 	var files []model.Files
 	err := c.db.Find(&files, "downloaded = 0").Scan(&files).Error

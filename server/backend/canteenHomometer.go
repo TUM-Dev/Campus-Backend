@@ -3,8 +3,8 @@ package backend
 import (
 	"context"
 
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

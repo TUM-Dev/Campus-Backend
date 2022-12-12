@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )

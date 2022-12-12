@@ -7,8 +7,15 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"image"
+	"image/jpeg"
+	"math"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -16,12 +23,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
-	"image"
-	"image/jpeg"
-	"math"
-	"os"
-	"strings"
-	"time"
 )
 
 type modelType int
@@ -281,7 +282,7 @@ type queryRatingTag struct {
 	Max     int32   `json:"max"`
 }
 
-//queryTags
+// queryTags
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
 func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelType) []*pb.RatingTagResult {
@@ -354,7 +355,7 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	return results
 }
 
-//NewCafeteriaRating RPC Endpoint
+// NewCafeteriaRating RPC Endpoint
 // Allows to store a new cafeteria Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
@@ -627,7 +628,7 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 	return result
 }
 
-//GetAvailableDishTags RPC Endpoint
+// GetAvailableDishTags RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
 func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
 	var result []*pb.TagsOverview
@@ -659,7 +660,7 @@ func (s *CampusServer) GetNameTags(_ context.Context, _ *emptypb.Empty) (*pb.Get
 	}, requestStatus
 }
 
-//GetAvailableCafeteriaTags  RPC Endpoint
+// GetAvailableCafeteriaTags  RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german
 func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.Empty) (*pb.GetTagsReply, error) {
 	var result []*pb.TagsOverview

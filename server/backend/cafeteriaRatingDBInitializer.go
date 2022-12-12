@@ -3,6 +3,9 @@ package backend
 import (
 	"database/sql"
 	"encoding/json"
+	"os"
+	"path/filepath"
+
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"

@@ -3,7 +3,7 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"

@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
@@ -132,7 +132,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-//saveImage Saves an image to the database so it can be downloaded by another cronjob and returns it's id
+// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns it's id
 func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
@@ -167,7 +167,7 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
 }
 
-//skipNews returns true if link is in existingLinks or link is invalid
+// skipNews returns true if link is in existingLinks or link is invalid
 func skipNews(existingLinks []string, link string) bool {
 	if link == "" {
 		return true
@@ -192,7 +192,7 @@ func (c *CronService) cleanOldNewsForSource(source int32) error {
 	return nil
 }
 
-//newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
+// newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
 func (c *CronService) newspreadHook(item *gofeed.Item) {
 	re := regexp.MustCompile(`https://storage.googleapis.com/tum-newspread-de/assets/[a-z\-0-9]+\.jpeg`)
 	extractedImageSlice := re.FindAllString(item.Content, 1)
@@ -205,7 +205,7 @@ func (c *CronService) newspreadHook(item *gofeed.Item) {
 	item.Description = ""
 }
 
-//impulsivHook Converts the title of impulsiv news to a human friendly one
+// impulsivHook Converts the title of impulsiv news to a human friendly one
 func (c *CronService) impulsivHook(item *gofeed.Item) {
 	// Convert titles such as "123" to "Impulsiv - Ausgabe 123"
 	re := regexp.MustCompile("[0-9]+")

@@ -3,7 +3,11 @@ package cron
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
