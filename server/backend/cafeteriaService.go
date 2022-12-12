@@ -7,6 +7,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"image"
 	"image/jpeg"
 	"math"
@@ -14,8 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"

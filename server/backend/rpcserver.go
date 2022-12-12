@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/model"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

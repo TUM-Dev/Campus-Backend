@@ -11,10 +11,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TUM-Dev/Campus-Backend/backend"
-	"github.com/TUM-Dev/Campus-Backend/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/backend/migration"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"

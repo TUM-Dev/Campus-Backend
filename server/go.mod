@@ -1,4 +1,4 @@
-module github.com/TUM-Dev/Campus-Backend
+module github.com/TUM-Dev/Campus-Backend/server
 
 go 1.18
 
