@@ -121,7 +121,7 @@ BASE_URL is the base URL for the required format.
 Contains the 'XXX' placeholder that has to replaced with the Target property of the
 CanteenApInformation when performing a request.
 */
-const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-1hours&target=XXX&format=json"
+const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=XXX&format=json"
 
 func (c *CronService) canteenHomometerCron() error {
 	log.Info("Updating canteen homometer stats...")
