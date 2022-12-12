@@ -3,7 +3,6 @@ module github.com/TUM-Dev/Campus-Backend
 go 1.18
 
 require (
-	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220921171658-c0ee084ed389
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/getsentry/sentry-go v0.13.0

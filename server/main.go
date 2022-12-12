@@ -4,10 +4,17 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	"io/fs"
+	"net"
+	"net/http"
+	"net/textproto"
+	"os"
+	"strings"
+
 	"github.com/TUM-Dev/Campus-Backend/backend"
 	"github.com/TUM-Dev/Campus-Backend/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/backend/migration"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
@@ -21,12 +28,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"io/fs"
-	"net"
-	"net/http"
-	"net/textproto"
-	"os"
-	"strings"
 )
 
 const (
