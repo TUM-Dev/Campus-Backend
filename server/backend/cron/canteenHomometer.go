@@ -20,19 +20,117 @@ type AccessPoint struct {
 
 type CanteenApInformation struct {
 	CanteenId string
-	Url       string
+	Target    string
 	MaxCount  uint32
 }
 
 var (
-	CANTEENS = []CanteenApInformation{{CanteenId: "mensa_garching",
-		Url:      "http://graphite-kom.srv.lrz.de/render/?from=-1hours&target=ap.ap*-?mg*.ssid.*&format=json",
-		MaxCount: 1000}}
+	CANTEENS = []CanteenApInformation{
+		{CanteenId: "mensa-arcisstr",
+			Target:   "ap.ap*-?bn*.ssid.*",
+			MaxCount: 450},
+		{CanteenId: "mensa-garching",
+			Target:   "ap.apa{01,02,03,04,05,06,07,08,09,10,11,12,13}*-?mg*.ssid.*",
+			MaxCount: 1000},
+		{CanteenId: "mensa-leopoldstr",
+			Target:   "ap.ap*-?lm*.ssid.*",
+			MaxCount: 500},
+		{CanteenId: "mensa-lothstr",
+			Target:   "ap.{apa06-0rh,apa05-0rh,apa03-1rh,apa02-1rh}.ssid.*",
+			MaxCount: 110},
+		{CanteenId: "mensa-martinsried",
+			Target:   "ap.ap*-?ij*.ssid.*",
+			MaxCount: 100},
+		// Same as for the stucafe-parsing since I can not distinguish them
+		{CanteenId: "mensa-pasing",
+			Target:   "ap.apa{15,18}-?rl*.ssid.*",
+			MaxCount: 50},
+		{CanteenId: "mensa-weihenstephan",
+			Target:   "ap.ap*-?qz*.ssid.*",
+			MaxCount: 250},
+		// No data found. 'Kantine' has only a few users connected and has a wrong pattern of connected users: http://wlan.lrz.de/apstat/filter/Unterbezirk/fs/
+		{CanteenId: "stubistro-arcisstr",
+			Target:   "ap.apa01-kfs.ssid.*",
+			MaxCount: 25},
+		// No data found
+		{CanteenId: "stubistro-goethestr",
+			Target:   "",
+			MaxCount: 1000},
+		// No data found. 'Mensaria' has only a few users connected: http://wlan.lrz.de/apstat/filter/Unterbezirk/if/
+		{CanteenId: "stubistro-grosshadern",
+			Target:   "",
+			MaxCount: 1000},
+		// No data found
+		{CanteenId: "stubistro-rosenheim",
+			Target:   "",
+			MaxCount: 1000},
+		// No data found
+		{CanteenId: "stubistro-schellingstr",
+			Target:   "",
+			MaxCount: 1000},
+		// No data found
+		{CanteenId: "stubistro-adalbertstr",
+			Target:   "",
+			MaxCount: 1000},
+		{CanteenId: "stubistro-martinsried",
+			Target:   "ap.ap*-?iv*.ssid.*",
+			MaxCount: 125},
+		// No data found
+		{CanteenId: "stucafe-akademie-weihenstephan",
+			Target:   "",
+			MaxCount: 1000},
+		{CanteenId: "stucafe-boltzmannstr",
+			Target:   "ap.apa{14,15,16}-?mg*.ssid.*",
+			MaxCount: 1000},
+		// No APs for the stucafe found: http://wlan.lrz.de/apstat/filter/Unterbezirk/ef/
+		{CanteenId: "stucafe-connollystr",
+			Target:   "",
+			MaxCount: 1000},
+		{CanteenId: "stucafe-garching",
+			Target:   "ap.apa{14,15,16}*-?mg*.ssid.*",
+			MaxCount: 1000},
+		// No data found: http://wlan.lrz.de/apstat/filter/Unterbezirk/rf/
+		{CanteenId: "stucafe-karlstr",
+			Target:   "",
+			MaxCount: 1000},
+		// Same as for the mensa-parsing since I can not distinguish them
+		{CanteenId: "stucafe-pasing",
+			Target:   "ap.apa{15,18}-?rl*.ssid.*",
+			MaxCount: 50},
+		// No data found
+		{CanteenId: "ipp-bistro",
+			Target:   "",
+			MaxCount: 1000},
+		// No data available since the RBG does not provide stats
+		{CanteenId: "fmi-bistro",
+			Target:   "",
+			MaxCount: 1000},
+		// No data found
+		{CanteenId: "mediziner-mensa",
+			Target:   "",
+			MaxCount: 1000},
+		// Don't know which APs are for the canteen: http://wlan.lrz.de/apstat/filter/Unterbezirk/ua/
+		{CanteenId: "mensa-straubing",
+			Target:   "",
+			MaxCount: 1000},
+	}
 )
+
+/*
+BASE_URL is the base URL for the required format.
+Contains the 'XXX' placeholder that has to replaced with the Target property of the
+CanteenApInformation when performing a request.
+*/
+const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-1hours&target=XXX&format=json"
 
 func (c *CronService) canteenHomometerCron() error {
 	log.Info("Updating canteen homometer stats...")
 	for _, canteen := range CANTEENS {
+		if len(canteen.Target) <= 0 {
+			log.Debug("Skipping canteen homometer stats for '", canteen.CanteenId, "', since there is no target.")
+			continue
+		}
+
 		log.Debug("Updating canteen homometer stats for: ", canteen.CanteenId)
 		aps := requestApData(&canteen)
 		if len(aps) <= 0 {
@@ -42,7 +140,7 @@ func (c *CronService) canteenHomometerCron() error {
 
 		count := sumApCounts(aps)
 		updateDb(&canteen, count, c.db)
-		log.Debug("Canteen homometer stats updated for: ", canteen.CanteenId)
+		log.Debug("Canteen homometer stats (", count, ") updated for: ", canteen.CanteenId)
 	}
 	log.Info("Canteen homometer stats updated.")
 	return nil
@@ -83,7 +181,8 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 
 func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	// Perform web request
-	resp, err := http.Get(canteen.Url)
+	url := strings.Replace(BASE_URL, "XXX", canteen.Target, 1)
+	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).Error("Canteen homometer web request failed for: ", canteen.CanteenId)
 		return []AccessPoint{}
