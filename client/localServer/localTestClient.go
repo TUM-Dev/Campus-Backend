@@ -44,7 +44,7 @@ func main() {
 
 func canteenHomometer(c pb.CampusClient, ctx context.Context) {
 	res, err := c.GetCanteenHomometer(ctx, &pb.GetCanteenHomometerRequest{
-		CanteenId: "mensa_garching",
+		CanteenId: "mensa-garching",
 	})
 
 	if err != nil {
