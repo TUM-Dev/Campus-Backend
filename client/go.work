@@ -2,6 +2,6 @@ go 1.18
 
 use (
 	./..
-	./client
-	./server
+	../client
+	../server
 )
