@@ -79,15 +79,16 @@ var (
 		{CanteenId: "stucafe-akademie-weihenstephan",
 			Target:   "",
 			MaxCount: 1000},
+		// No data found: http://wlan.lrz.de/apstat/filter/Unterbezirk/w0/
 		{CanteenId: "stucafe-boltzmannstr",
-			Target:   "ap.apa{14,15,16}-?mg*.ssid.*",
+			Target:   "",
 			MaxCount: 1000},
 		// No APs for the stucafe found: http://wlan.lrz.de/apstat/filter/Unterbezirk/ef/
 		{CanteenId: "stucafe-connollystr",
 			Target:   "",
 			MaxCount: 1000},
 		{CanteenId: "stucafe-garching",
-			Target:   "ap.apa{14,15,16}*-?mg*.ssid.*",
+			Target:   "ap.apa{14,15,16}-?mg*.ssid.*",
 			MaxCount: 1000},
 		// No data found: http://wlan.lrz.de/apstat/filter/Unterbezirk/rf/
 		{CanteenId: "stucafe-karlstr",
