@@ -36,21 +36,21 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	canteenHomometer(c, ctx)
+	canteenHeadCount(c, ctx)
 
 	cafeteriaRatingTools(c, ctx)
 
 }
 
-func canteenHomometer(c pb.CampusClient, ctx context.Context) {
-	res, err := c.GetCanteenHomometer(ctx, &pb.GetCanteenHomometerRequest{
+func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
+	res, err := c.GetCanteenHeadCount(ctx, &pb.GetCanteenHeadCountRequest{
 		CanteenId: "mensa-garching",
 	})
 
 	if err != nil {
 		log.Error(err)
 	} else {
-		log.Info("Canteen homometer data request successful.")
+		log.Info("Canteen HeadCount data request successful.")
 		log.Info(res)
 	}
 }

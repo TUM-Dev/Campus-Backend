@@ -28,7 +28,7 @@ const (
 	FILE_DOWNLOAD_TYPE         = "fileDownload"
 	DISH_NAME_DOWNLOAD         = "dishNameDownload"
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
-	CANTEEN_HOMOMETER          = "canteenHomometer"
+	CANTEEN_HEADCOUNT          = "canteenHeadCount"
 	STORAGE_DIR                = "/Storage/" // target location of files
 )
 
@@ -49,7 +49,7 @@ func (c *CronService) Run() error {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'averageRatingComputation','dishNameDownload', 'canteenHomometer')", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'averageRatingComputation','dishNameDownload', 'canteenHeadCount')", time.Now().Unix()).
 			Scan(&res)
 
 		for _, cronjob := range res {
@@ -95,8 +95,8 @@ func (c *CronService) Run() error {
 					case ALARM_TYPE:
 						g.Go(func() error { return c.alarmCron() })
 				*/
-			case CANTEEN_HOMOMETER:
-				g.Go(func() error { return c.canteenHomometerCron() })
+			case CANTEEN_HEADCOUNT:
+				g.Go(func() error { return c.canteenHeadCountCron() })
 			}
 		}
 

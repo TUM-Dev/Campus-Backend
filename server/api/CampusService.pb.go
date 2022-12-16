@@ -4286,7 +4286,7 @@ func (x *GetNotificationsConfirmReply) GetStatus() string {
 	return ""
 }
 
-type GetCanteenHomometerRequest struct {
+type GetCanteenHeadCountRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4295,8 +4295,8 @@ type GetCanteenHomometerRequest struct {
 	CanteenId string `protobuf:"bytes,1,opt,name=canteenId,proto3" json:"canteenId,omitempty"`
 }
 
-func (x *GetCanteenHomometerRequest) Reset() {
-	*x = GetCanteenHomometerRequest{}
+func (x *GetCanteenHeadCountRequest) Reset() {
+	*x = GetCanteenHeadCountRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_CampusService_proto_msgTypes[66]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4304,13 +4304,13 @@ func (x *GetCanteenHomometerRequest) Reset() {
 	}
 }
 
-func (x *GetCanteenHomometerRequest) String() string {
+func (x *GetCanteenHeadCountRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteenHomometerRequest) ProtoMessage() {}
+func (*GetCanteenHeadCountRequest) ProtoMessage() {}
 
-func (x *GetCanteenHomometerRequest) ProtoReflect() protoreflect.Message {
+func (x *GetCanteenHeadCountRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_CampusService_proto_msgTypes[66]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4322,19 +4322,19 @@ func (x *GetCanteenHomometerRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteenHomometerRequest.ProtoReflect.Descriptor instead.
-func (*GetCanteenHomometerRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetCanteenHeadCountRequest.ProtoReflect.Descriptor instead.
+func (*GetCanteenHeadCountRequest) Descriptor() ([]byte, []int) {
 	return file_CampusService_proto_rawDescGZIP(), []int{66}
 }
 
-func (x *GetCanteenHomometerRequest) GetCanteenId() string {
+func (x *GetCanteenHeadCountRequest) GetCanteenId() string {
 	if x != nil {
 		return x.CanteenId
 	}
 	return ""
 }
 
-type GetCanteenHomometerReply struct {
+type GetCanteenHeadCountReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4349,8 +4349,8 @@ type GetCanteenHomometerReply struct {
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 }
 
-func (x *GetCanteenHomometerReply) Reset() {
-	*x = GetCanteenHomometerReply{}
+func (x *GetCanteenHeadCountReply) Reset() {
+	*x = GetCanteenHeadCountReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_CampusService_proto_msgTypes[67]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4358,13 +4358,13 @@ func (x *GetCanteenHomometerReply) Reset() {
 	}
 }
 
-func (x *GetCanteenHomometerReply) String() string {
+func (x *GetCanteenHeadCountReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteenHomometerReply) ProtoMessage() {}
+func (*GetCanteenHeadCountReply) ProtoMessage() {}
 
-func (x *GetCanteenHomometerReply) ProtoReflect() protoreflect.Message {
+func (x *GetCanteenHeadCountReply) ProtoReflect() protoreflect.Message {
 	mi := &file_CampusService_proto_msgTypes[67]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4376,33 +4376,33 @@ func (x *GetCanteenHomometerReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteenHomometerReply.ProtoReflect.Descriptor instead.
-func (*GetCanteenHomometerReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetCanteenHeadCountReply.ProtoReflect.Descriptor instead.
+func (*GetCanteenHeadCountReply) Descriptor() ([]byte, []int) {
 	return file_CampusService_proto_rawDescGZIP(), []int{67}
 }
 
-func (x *GetCanteenHomometerReply) GetCount() uint32 {
+func (x *GetCanteenHeadCountReply) GetCount() uint32 {
 	if x != nil {
 		return x.Count
 	}
 	return 0
 }
 
-func (x *GetCanteenHomometerReply) GetMaxCount() uint32 {
+func (x *GetCanteenHeadCountReply) GetMaxCount() uint32 {
 	if x != nil {
 		return x.MaxCount
 	}
 	return 0
 }
 
-func (x *GetCanteenHomometerReply) GetPercent() float32 {
+func (x *GetCanteenHeadCountReply) GetPercent() float32 {
 	if x != nil {
 		return x.Percent
 	}
 	return 0
 }
 
-func (x *GetCanteenHomometerReply) GetTimestamp() *timestamppb.Timestamp {
+func (x *GetCanteenHeadCountReply) GetTimestamp() *timestamppb.Timestamp {
 	if x != nil {
 		return x.Timestamp
 	}
@@ -5172,11 +5172,11 @@ var file_CampusService_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x73,
 	0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74, 0x61,
 	0x74, 0x75, 0x73, 0x22, 0x3a, 0x0a, 0x1a, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65,
-	0x6e, 0x48, 0x6f, 0x6d, 0x6f, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x6e, 0x48, 0x65, 0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x49, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x49, 0x64, 0x22,
-	0xa0, 0x01, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x6f,
-	0x6d, 0x6f, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x14, 0x0a, 0x05,
+	0xa0, 0x01, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x65,
+	0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x14, 0x0a, 0x05,
 	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05, 0x63, 0x6f, 0x75,
 	0x6e, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x61, 0x78, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x6d, 0x61, 0x78, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x18,
@@ -5422,13 +5422,13 @@ var file_CampusService_proto_rawDesc = []byte{
 	0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x18, 0x82, 0xd3, 0xe4, 0x93,
 	0x02, 0x12, 0x12, 0x10, 0x2f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x2f, 0x7b, 0x6c, 0x72,
 	0x7a, 0x49, 0x64, 0x7d, 0x12, 0x7d, 0x0a, 0x13, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65,
-	0x65, 0x6e, 0x48, 0x6f, 0x6d, 0x6f, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x12, 0x1f, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x6f, 0x6d, 0x6f,
-	0x6d, 0x65, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x6f, 0x6d,
-	0x6f, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x26, 0x82, 0xd3, 0xe4,
-	0x93, 0x02, 0x20, 0x12, 0x1e, 0x2f, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x2f, 0x68, 0x6f,
-	0x6d, 0x6f, 0x6d, 0x65, 0x74, 0x65, 0x72, 0x2f, 0x7b, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e,
+	0x65, 0x6e, 0x48, 0x65, 0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1f, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x65, 0x61, 0x64,
+	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x48, 0x65, 0x61,
+	0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x26, 0x82, 0xd3, 0xe4,
+	0x93, 0x02, 0x20, 0x12, 0x1e, 0x2f, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e, 0x2f, 0x68, 0x65,
+	0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x2f, 0x7b, 0x63, 0x61, 0x6e, 0x74, 0x65, 0x65, 0x6e,
 	0x49, 0x64, 0x7d, 0x42, 0x5e, 0x0a, 0x12, 0x61, 0x70, 0x70, 0x2e, 0x74, 0x75, 0x6d, 0x2e, 0x63,
 	0x61, 0x6d, 0x70, 0x75, 0x73, 0x2e, 0x61, 0x70, 0x69, 0x42, 0x0e, 0x43, 0x61, 0x6d, 0x70, 0x75,
 	0x73, 0x41, 0x70, 0x69, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x25, 0x67, 0x69, 0x74,
@@ -5518,8 +5518,8 @@ var file_CampusService_proto_goTypes = []interface{}{
 	(*GetNotificationsReply)(nil),                  // 63: api.GetNotificationsReply
 	(*NotificationsRequest)(nil),                   // 64: api.NotificationsRequest
 	(*GetNotificationsConfirmReply)(nil),           // 65: api.GetNotificationsConfirmReply
-	(*GetCanteenHomometerRequest)(nil),             // 66: api.GetCanteenHomometerRequest
-	(*GetCanteenHomometerReply)(nil),               // 67: api.GetCanteenHomometerReply
+	(*GetCanteenHeadCountRequest)(nil),             // 66: api.GetCanteenHeadCountRequest
+	(*GetCanteenHeadCountReply)(nil),               // 67: api.GetCanteenHeadCountReply
 	(*GetRoomScheduleReply_RoomScheduleEvent)(nil), // 68: api.GetRoomScheduleReply.RoomScheduleEvent
 	(*GetRoomMapsReply_Map)(nil),                   // 69: api.GetRoomMapsReply.Map
 	(*GetLocationsReply_Location)(nil),             // 70: api.GetLocationsReply.Location
@@ -5567,7 +5567,7 @@ var file_CampusService_proto_depIdxs = []int32{
 	54, // 37: api.GetKinoReply.kinos:type_name -> api.KinoMsgElement
 	71, // 38: api.KinoMsgElement.date:type_name -> google.protobuf.Timestamp
 	71, // 39: api.KinoMsgElement.created:type_name -> google.protobuf.Timestamp
-	71, // 40: api.GetCanteenHomometerReply.timestamp:type_name -> google.protobuf.Timestamp
+	71, // 40: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
 	71, // 41: api.GetRoomScheduleReply.RoomScheduleEvent.start:type_name -> google.protobuf.Timestamp
 	71, // 42: api.GetRoomScheduleReply.RoomScheduleEvent.end:type_name -> google.protobuf.Timestamp
 	72, // 43: api.Campus.GetTopNews:input_type -> google.protobuf.Empty
@@ -5606,7 +5606,7 @@ var file_CampusService_proto_depIdxs = []int32{
 	64, // 76: api.Campus.GetNotification:input_type -> api.NotificationsRequest
 	64, // 77: api.Campus.GetNotificationConfirm:input_type -> api.NotificationsRequest
 	58, // 78: api.Campus.GetMembers:input_type -> api.GetMembersRequest
-	66, // 79: api.Campus.GetCanteenHomometer:input_type -> api.GetCanteenHomometerRequest
+	66, // 79: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
 	13, // 80: api.Campus.GetTopNews:output_type -> api.GetTopNewsReply
 	11, // 81: api.Campus.GetNewsSources:output_type -> api.NewsSourceArray
 	9,  // 82: api.Campus.SearchRooms:output_type -> api.SearchRoomsReply
@@ -5643,7 +5643,7 @@ var file_CampusService_proto_depIdxs = []int32{
 	63, // 113: api.Campus.GetNotification:output_type -> api.GetNotificationsReply
 	65, // 114: api.Campus.GetNotificationConfirm:output_type -> api.GetNotificationsConfirmReply
 	59, // 115: api.Campus.GetMembers:output_type -> api.GetMembersReply
-	67, // 116: api.Campus.GetCanteenHomometer:output_type -> api.GetCanteenHomometerReply
+	67, // 116: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
 	80, // [80:117] is the sub-list for method output_type
 	43, // [43:80] is the sub-list for method input_type
 	43, // [43:43] is the sub-list for extension type_name
@@ -6450,7 +6450,7 @@ func file_CampusService_proto_init() {
 			}
 		}
 		file_CampusService_proto_msgTypes[66].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteenHomometerRequest); i {
+			switch v := v.(*GetCanteenHeadCountRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6462,7 +6462,7 @@ func file_CampusService_proto_init() {
 			}
 		}
 		file_CampusService_proto_msgTypes[67].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteenHomometerReply); i {
+			switch v := v.(*GetCanteenHeadCountReply); i {
 			case 0:
 				return &v.state
 			case 1:

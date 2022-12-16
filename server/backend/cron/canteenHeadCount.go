@@ -124,26 +124,26 @@ CanteenApInformation when performing a request.
 */
 const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=XXX&format=json"
 
-func (c *CronService) canteenHomometerCron() error {
-	log.Info("Updating canteen homometer stats...")
+func (c *CronService) canteenHeadCountCron() error {
+	log.Info("Updating canteen head count stats...")
 	for _, canteen := range CANTEENS {
 		if len(canteen.Target) <= 0 {
-			log.Debug("Skipping canteen homometer stats for '", canteen.CanteenId, "', since there is no target.")
+			log.Debug("Skipping canteen head count stats for '", canteen.CanteenId, "', since there is no target.")
 			continue
 		}
 
-		log.Debug("Updating canteen homometer stats for: ", canteen.CanteenId)
+		log.Debug("Updating canteen head count stats for: ", canteen.CanteenId)
 		aps := requestApData(&canteen)
 		if len(aps) <= 0 {
-			log.Debug("No canteen homometer data points found for: ", canteen.CanteenId)
+			log.Debug("No canteen head count data points found for: ", canteen.CanteenId)
 			continue
 		}
 
 		count := sumApCounts(aps)
 		updateDb(&canteen, count, c.db)
-		log.Debug("Canteen homometer stats (", count, ") updated for: ", canteen.CanteenId)
+		log.Debug("Canteen head count stats (", count, ") updated for: ", canteen.CanteenId)
 	}
-	log.Info("Canteen homometer stats updated.")
+	log.Info("Canteen head count stats updated.")
 	return nil
 }
 
@@ -152,7 +152,7 @@ func sumApCounts(aps []AccessPoint) uint32 {
 	for _, ap := range aps {
 		_, count, err := parseAp(&ap)
 		if err != nil {
-			log.WithError(err).Error("Canteen homometer getting the count failed for access point: ", ap.Target)
+			log.WithError(err).Error("Canteen HeadCount getting the count failed for access point: ", ap.Target)
 			continue
 		}
 		total += uint32(count)
@@ -161,7 +161,7 @@ func sumApCounts(aps []AccessPoint) uint32 {
 }
 
 func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
-	entry := model.CanteenHomometer{
+	entry := model.CanteenHeadCount{
 		CanteenId: canteen.CanteenId,
 		Count:     count,
 		MaxCount:  canteen.MaxCount,
@@ -169,7 +169,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 		Timestamp: time.Now(),
 	}
 
-	res := db.Model(&model.CanteenHomometer{}).Where(model.CanteenHomometer{CanteenId: canteen.CanteenId}).Updates(&entry)
+	res := db.Model(&model.CanteenHeadCount{}).Where(model.CanteenHeadCount{CanteenId: canteen.CanteenId}).Updates(&entry)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -185,7 +185,7 @@ func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	url := strings.Replace(BASE_URL, "XXX", canteen.Target, 1)
 	resp, err := http.Get(url)
 	if err != nil {
-		log.WithError(err).Error("Canteen homometer web request failed for: ", canteen.CanteenId)
+		log.WithError(err).Error("Canteen HeadCount web request failed for: ", canteen.CanteenId)
 		return []AccessPoint{}
 	}
 
@@ -197,7 +197,7 @@ func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	// Read the body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.WithError(err).Error("Canteen homometer reading body failed for: ", canteen.CanteenId)
+		log.WithError(err).Error("Canteen HeadCount reading body failed for: ", canteen.CanteenId)
 		return []AccessPoint{}
 	}
 
@@ -205,7 +205,7 @@ func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	aps := []AccessPoint{}
 	err = json.Unmarshal(body, &aps)
 	if err != nil {
-		log.WithError(err).Error("Canteen homometer parsing output as JSON failed for: ", canteen.CanteenId)
+		log.WithError(err).Error("Canteen HeadCount parsing output as JSON failed for: ", canteen.CanteenId)
 		log.Trace("Body for '", canteen.CanteenId, "': ", body)
 		return []AccessPoint{}
 	}

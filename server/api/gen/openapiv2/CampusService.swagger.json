@@ -273,14 +273,14 @@
         ]
       }
     },
-    "/canteen/homometer/{canteenId}": {
+    "/canteen/headCount/{canteenId}": {
       "get": {
-        "operationId": "Campus_GetCanteenHomometer",
+        "operationId": "Campus_GetCanteenHeadCount",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetCanteenHomometerReply"
+              "$ref": "#/definitions/apiGetCanteenHeadCountReply"
             }
           },
           "default": {
@@ -1437,7 +1437,7 @@
         }
       }
     },
-    "apiGetCanteenHomometerReply": {
+    "apiGetCanteenHeadCountReply": {
       "type": "object",
       "properties": {
         "count": {

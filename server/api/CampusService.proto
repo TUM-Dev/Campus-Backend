@@ -260,9 +260,9 @@ service Campus {
     };
   }
 
-  rpc GetCanteenHomometer(GetCanteenHomometerRequest) returns (GetCanteenHomometerReply) {
+  rpc GetCanteenHeadCount(GetCanteenHeadCountRequest) returns (GetCanteenHeadCountReply) {
     option (google.api.http) = {
-      get: "/canteen/homometer/{canteenId}",
+      get: "/canteen/headCount/{canteenId}",
     };
   }
 }
@@ -744,12 +744,12 @@ message GetNotificationsConfirmReply{
   string status=1;
 }
 
-message GetCanteenHomometerRequest {
+message GetCanteenHeadCountRequest {
   // The requested canteen ID
   string canteenId = 1;
 }
 
-message GetCanteenHomometerReply {
+message GetCanteenHeadCountReply {
   // The absolut count of humans in the canteen or 0 in case no data is available.
   uint32 count = 1;
   // The maximum nunmber of humans in the canteen for the percent to be 100.00 or 0 in case no data is available.
