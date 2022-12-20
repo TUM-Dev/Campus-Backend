@@ -45,6 +45,10 @@ func (c *customDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 	return nil
 }
 
+func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) bool {
+	return grade.LectureTitle == encryptedGrade.LectureTitle && grade.Grade == encryptedGrade.Grade
+}
+
 type IOSEncryptedGrade struct {
 	ID           uint `gorm:"primaryKey"`
 	Device       IOSDevice

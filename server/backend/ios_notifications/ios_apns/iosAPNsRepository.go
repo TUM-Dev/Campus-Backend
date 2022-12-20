@@ -87,8 +87,6 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 		return nil, errors.New("could not decode apns response")
 	}
 
-	log.Infof("APNS response: %v", response)
-
 	return &response, nil
 }
 

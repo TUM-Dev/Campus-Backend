@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repository struct {
@@ -11,7 +12,10 @@ type Repository struct {
 }
 
 func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
-	if err := repository.DB.Create(device).Error; err != nil {
+	if err := repository.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "device_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"public_key"}),
+	}).Create(device).Error; err != nil {
 		errors.Is(err, gorm.ErrEmptySlice)
 
 		return err

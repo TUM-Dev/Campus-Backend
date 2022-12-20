@@ -37,6 +37,14 @@ func (r *Repository) GetIOSEncryptedGrades(deviceId string) ([]model.IOSEncrypte
 	return grades, nil
 }
 
+func (r *Repository) DeleteEncryptedGrades(deviceId string) error {
+	if err := r.DB.Delete(&model.IOSEncryptedGrade{}, "device_id = ?", deviceId).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	return &Repository{
 		DB:    db,

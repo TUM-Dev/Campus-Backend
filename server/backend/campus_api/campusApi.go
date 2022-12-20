@@ -26,16 +26,12 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 
 	req.URL.RawQuery = q.Encode()
 
-	log.Infof("Request URL: %s", req.URL.String())
-
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		log.Errorf("Error while fetching grades: %s", err)
 		return nil, err
 	}
-
-	log.Infof("Response: %s", resp.Body)
 
 	defer resp.Body.Close()
 

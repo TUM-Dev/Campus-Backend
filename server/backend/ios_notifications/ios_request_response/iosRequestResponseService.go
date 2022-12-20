@@ -1,6 +1,7 @@
 package ios_request_response
 
 import (
+	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
@@ -26,26 +27,79 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 		return nil, status.Error(codes.Internal, "Could not get request, probably request is already outdated")
 	}
 
-	if requestLog.RequestType != model.IOSBackgroundCampusTokenRequest.String() {
-		return nil, status.Error(codes.Internal, "Request type is not implemented yet")
+	switch requestLog.RequestType {
+	case model.IOSBackgroundCampusTokenRequest.String():
+		campusToken := request.GetPayload()
+
+		if campusToken == "" {
+			return nil, status.Error(codes.InvalidArgument, "Payload is empty")
+		}
+
+		return service.handleDeviceCampusTokenRequest(requestLog, request.GetPayload())
+	default:
+		return nil, status.Error(codes.InvalidArgument, "Request type is not yet implemented")
 	}
+}
 
-	campusToken := request.GetPayload()
-
-	if campusToken == "" {
-		return nil, status.Error(codes.InvalidArgument, "Payload is empty")
-	}
-
-	grades, err := campus_api.FetchGrades(campusToken)
+func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
+	apiGrades, err := campus_api.FetchGrades(campusToken)
 
 	if err != nil {
 		log.Error("Could not fetch grades: ", err)
 		return nil, status.Error(codes.Internal, "Could not fetch grades")
 	}
 
-	log.Infof("Fetched grades: %s", grades)
+	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
 
-	for _, grade := range grades.Grades {
+	if err != nil {
+		log.Error("Could not get old grades: ", err)
+		return nil, status.Error(codes.Internal, "Could not get old grades")
+	}
+
+	// decrypt old grades from database to compare them with the new ones
+	oldGrades := make([]model.IOSEncryptedGrade, len(oldEncryptedGrades))
+	for i, encryptedGrade := range oldEncryptedGrades {
+		err := encryptedGrade.Decrypt(campusToken)
+
+		if err != nil {
+			log.Error("Could not decrypt grade: ", err)
+			return nil, status.Error(codes.Internal, "Could not decrypt grade")
+		}
+
+		oldGrades[i] = encryptedGrade
+	}
+
+	// compare old and new grades
+	var newGrades []model.IOSGrade
+	for _, grade := range apiGrades.Grades {
+		found := false
+		for _, oldGrade := range oldGrades {
+			if grade.CompareToEncrypted(&oldGrade) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			newGrades = append(newGrades, grade)
+		}
+	}
+
+	if len(newGrades) == 0 {
+		return &pb.IOSDeviceRequestResponseReply{
+			Message: "Successfully handled request",
+		}, nil
+	}
+
+	err = service.Repository.DeleteEncryptedGrades(requestLog.DeviceID)
+
+	if err != nil {
+		log.Error("Could not delete old grades: ", err)
+		return nil, status.Error(codes.Internal, "Could not delete old grades")
+	}
+
+	// encrypt new grades and save them to database
+	for _, grade := range apiGrades.Grades {
 		encryptedGrade := model.IOSEncryptedGrade{
 			Grade:        grade.Grade,
 			DeviceID:     requestLog.DeviceID,
@@ -56,50 +110,43 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 
 		if err != nil {
 			log.Error("Could not encrypt grade: ", err)
-			return nil, status.Error(codes.Internal, "Could not encrypt grade")
 		}
 
 		err = service.Repository.SaveEncryptedGrade(&encryptedGrade)
 
 		if err != nil {
 			log.Error("Could not save grade: ", err)
-			return nil, status.Error(codes.Internal, "Could not save grade")
 		}
 	}
 
-	encryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
-
-	if err != nil {
-		log.Error("Could not get encrypted grades: ", err)
-		return nil, status.Error(codes.Internal, "Could not get encrypted grades")
-	}
-
+	// send push notification to device
 	apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
 
-	alertTitle := "No New Grades Available"
-	alertSubtitle := "You have no new grades available"
+	if len(newGrades) > 0 {
+		alertTitle := fmt.Sprintf("%d New Grades Available", len(newGrades))
 
-	if len(encryptedGrades) > 0 {
-		grade := encryptedGrades[0]
-
-		err := grade.Decrypt(campusToken)
-
-		if err != nil {
-			log.Error("Could not decrypt grade: ", err)
-			return nil, status.Error(codes.Internal, "Could not decrypt grade")
+		if len(newGrades) == 1 {
+			alertTitle = "New Grade Available"
 		}
 
-		alertTitle = "New Grades Available"
-		alertSubtitle = grade.LectureTitle
-	}
+		var alertBody string
+		for i, grade := range newGrades {
+			if i == 0 {
+				alertBody = fmt.Sprintf("%s: %s", grade.LectureTitle, grade.Grade)
+			} else {
+				alertBody = fmt.Sprintf("%s\n %s: %s", alertBody, grade.LectureTitle, grade.Grade)
+			}
+		}
 
-	notificationPayload := model.NewIOSNotificationPayload(requestLog.DeviceID).Alert(alertTitle, "", alertSubtitle)
+		notificationPayload := model.NewIOSNotificationPayload(requestLog.DeviceID).Alert(alertTitle, "", alertBody)
 
-	apnsRepository.SendAlertNotification(notificationPayload)
+		notification, err := apnsRepository.SendAlertNotification(notificationPayload)
 
-	if err != nil {
-		log.Error("Could not get encrypted grades: ", err)
-		return nil, status.Error(codes.Internal, "Could not get encrypted grades")
+		log.Infof("Sent notification with reason %s", notification.Reason)
+
+		if err != nil {
+			log.Error("Could not send notification: ", err)
+		}
 	}
 
 	return &pb.IOSDeviceRequestResponseReply{
