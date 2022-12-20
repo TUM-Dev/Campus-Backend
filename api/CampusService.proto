@@ -289,6 +289,35 @@ service Campus {
       body: "*",
     };
   }
+
+  // send test remote notification to ios device
+  rpc SendIOSTestBackgroundNotification(google.protobuf.Empty) returns (SendIOSTestBackgroundNotificationReply) {
+    option (google.api.http) = {
+      post: "/ios/notifications/sendTestBackground",
+      body: "*",
+    };
+  }
+
+  // send test remote notification to ios device
+  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {
+    option (google.api.http) = {
+      post: "/ios/notifications/deviceRequestResponse",
+      body: "*",
+    };
+  }
+}
+
+message IOSDeviceRequestResponseRequest {
+  string requestId = 1;
+  string payload = 2;
+}
+
+message IOSDeviceRequestResponseReply {
+  string message = 1;
+}
+
+message SendIOSTestBackgroundNotificationReply {
+  string message = 1;
 }
 
 message SendIOSTestNotificationRequest {
@@ -320,6 +349,7 @@ message RemoveIOSDeviceReply {
 
 message RegisterIOSDeviceRequest {
   string deviceId = 1;
+  string publicKey = 2;
 }
 
 message RegisterIOSDeviceReply {

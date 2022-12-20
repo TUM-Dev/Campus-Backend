@@ -69,6 +69,10 @@ type CampusClient interface {
 	AddIOSDeviceUsage(ctx context.Context, in *AddIOSDeviceUsageRequest, opts ...grpc.CallOption) (*AddIOSDeviceUsageReply, error)
 	// send test notification to ios device
 	SendIOSTestNotification(ctx context.Context, in *SendIOSTestNotificationRequest, opts ...grpc.CallOption) (*SendIOSTestNotificationReply, error)
+	// send test remote notification to ios device
+	SendIOSTestBackgroundNotification(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SendIOSTestBackgroundNotificationReply, error)
+	// send test remote notification to ios device
+	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
 }
 
 type campusClient struct {
@@ -439,6 +443,24 @@ func (c *campusClient) SendIOSTestNotification(ctx context.Context, in *SendIOST
 	return out, nil
 }
 
+func (c *campusClient) SendIOSTestBackgroundNotification(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SendIOSTestBackgroundNotificationReply, error) {
+	out := new(SendIOSTestBackgroundNotificationReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/SendIOSTestBackgroundNotification", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error) {
+	out := new(IOSDeviceRequestResponseReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/IOSDeviceRequestResponse", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
@@ -489,6 +511,10 @@ type CampusServer interface {
 	AddIOSDeviceUsage(context.Context, *AddIOSDeviceUsageRequest) (*AddIOSDeviceUsageReply, error)
 	// send test notification to ios device
 	SendIOSTestNotification(context.Context, *SendIOSTestNotificationRequest) (*SendIOSTestNotificationReply, error)
+	// send test remote notification to ios device
+	SendIOSTestBackgroundNotification(context.Context, *emptypb.Empty) (*SendIOSTestBackgroundNotificationReply, error)
+	// send test remote notification to ios device
+	IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -615,6 +641,12 @@ func (UnimplementedCampusServer) AddIOSDeviceUsage(context.Context, *AddIOSDevic
 }
 func (UnimplementedCampusServer) SendIOSTestNotification(context.Context, *SendIOSTestNotificationRequest) (*SendIOSTestNotificationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendIOSTestNotification not implemented")
+}
+func (UnimplementedCampusServer) SendIOSTestBackgroundNotification(context.Context, *emptypb.Empty) (*SendIOSTestBackgroundNotificationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendIOSTestBackgroundNotification not implemented")
+}
+func (UnimplementedCampusServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IOSDeviceRequestResponse not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -1349,6 +1381,42 @@ func _Campus_SendIOSTestNotification_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_SendIOSTestBackgroundNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).SendIOSTestBackgroundNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/SendIOSTestBackgroundNotification",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).SendIOSTestBackgroundNotification(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IOSDeviceRequestResponseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/IOSDeviceRequestResponse",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, req.(*IOSDeviceRequestResponseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1515,6 +1583,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendIOSTestNotification",
 			Handler:    _Campus_SendIOSTestNotification_Handler,
+		},
+		{
+			MethodName: "SendIOSTestBackgroundNotification",
+			Handler:    _Campus_SendIOSTestBackgroundNotification_Handler,
+		},
+		{
+			MethodName: "IOSDeviceRequestResponse",
+			Handler:    _Campus_IOSDeviceRequestResponse_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

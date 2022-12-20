@@ -3,16 +3,25 @@ package backend
 import (
 	"context"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
-	ios "github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_request_response"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduling"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_usage"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"gorm.io/gorm"
 )
 
-func (s *CampusServer) GetIOSNotificationsService() *ios.Service {
-	repository := ios.NewRepository(s.db)
+type IOSNotificationsService struct {
+	DB        *gorm.DB
+	APNSToken *ios_apns_jwt.Token
+}
 
-	return ios.NewService(repository)
+func (s *CampusServer) GetIOSDeviceService() *ios_device.Service {
+	repository := ios_device.NewRepository(s.db)
+
+	return ios_device.NewService(repository)
 }
 
 func (s *CampusServer) GetIOSUsageService() *ios_usage.Service {
@@ -22,7 +31,7 @@ func (s *CampusServer) GetIOSUsageService() *ios_usage.Service {
 }
 
 func (s *CampusServer) GetIOSAPNsService() *ios_apns.Service {
-	repository := ios_apns.NewRepository()
+	repository := ios_apns.NewRepository(s.db, s.GetIOSNotificationsService().APNSToken)
 
 	return ios_apns.NewService(repository)
 }
@@ -33,13 +42,19 @@ func (s *CampusServer) GetIOSSchedulingService() *ios_scheduling.Service {
 	return ios_scheduling.NewService(repository)
 }
 
+func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Service {
+	repository := ios_request_response.NewRepository(s.db, s.GetIOSNotificationsService().APNSToken)
+
+	return ios_request_response.NewService(repository)
+}
+
 func (s *CampusServer) RegisterIOSDevice(ctx context.Context, req *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
-	service := s.GetIOSNotificationsService()
+	service := s.GetIOSDeviceService()
 	return service.RegisterDevice(req)
 }
 
 func (s *CampusServer) RemoveIOSDevice(ctx context.Context, req *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
-	service := s.GetIOSNotificationsService()
+	service := s.GetIOSDeviceService()
 	return service.RemoveDevice(req)
 }
 
@@ -51,4 +66,14 @@ func (s *CampusServer) AddIOSDeviceUsage(ctx context.Context, req *pb.AddIOSDevi
 func (s *CampusServer) SendIOSTestNotification(ctx context.Context, req *pb.SendIOSTestNotificationRequest) (*pb.SendIOSTestNotificationReply, error) {
 	service := s.GetIOSAPNsService()
 	return service.SendTestNotification(req)
+}
+
+func (s *CampusServer) SendIOSTestBackgroundNotification(ctx context.Context, req *emptypb.Empty) (*pb.SendIOSTestBackgroundNotificationReply, error) {
+	service := s.GetIOSAPNsService()
+	return service.SendTestBackgroundNotification()
+}
+
+func (s *CampusServer) IOSDeviceRequestResponse(ctx context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
+	service := s.GetIOSRequestResponseService()
+	return service.HandleDeviceRequestResponse(req)
 }

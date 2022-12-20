@@ -30,8 +30,6 @@ func (m TumDBMigrator) Migrate() error {
 			&model.NewsSource{},
 			&model.NewsAlert{},
 			&model.News{},
-			&model.IOSDevice{},
-			&model.IOSDeviceUsageLog{},
 		)
 		return err
 	}
@@ -44,5 +42,4 @@ func (m TumDBMigrator) Migrate() error {
 	})
 	err := mig.Migrate()
 	return err
-
 }

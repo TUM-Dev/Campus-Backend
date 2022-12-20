@@ -1,7 +1,8 @@
-package ios_notifications
+package ios_device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/api"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,13 +13,13 @@ type Service struct {
 }
 
 func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
-
-	if err := ValidateRegisterDevice(request); err != nil {
+	if err := ios_notifications.ValidateRegisterDevice(request); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	device := model.IOSDevice{
-		DeviceID: request.GetDeviceId(),
+		DeviceID:  request.GetDeviceId(),
+		PublicKey: request.GetPublicKey(),
 	}
 
 	err := service.Repository.RegisterDevice(&device)
@@ -34,7 +35,7 @@ func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*p
 
 func (service *Service) RemoveDevice(request *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
 
-	if err := ValidateRemoveDevice(request); err != nil {
+	if err := ios_notifications.ValidateRemoveDevice(request); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

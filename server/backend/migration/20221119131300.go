@@ -30,6 +30,8 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				&model.Crontab{},
 				&model.IOSSchedulingPriority{},
 				&model.IOSScheduledUpdateLog{},
+				&model.IOSDeviceRequestLog{},
+				&model.IOSEncryptedGrade{},
 			); err != nil {
 				return err
 			}
@@ -38,14 +40,14 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				types, _ := getCrontabEnumTypes(cTypes)
 
 				if !containsIOSNotifications(types) {
-					if err := tx.Exec(fmt.Sprintf("alter table test.crontab modify type enum (%s) null;", typesToString(types))).Error; err != nil {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", typesToString(types))).Error; err != nil {
 						log.Info(err.Error())
 						return err
 					}
 				}
 			}
 
-			if path, err := filepath.Abs("backend/ios_notifications/ios_scheduling/iosInitialSchedulingPriorities.json"); err == nil {
+			if path, err := filepath.Abs("/static_data/iosInitialSchedulingPriorities.json"); err == nil {
 				file, err := os.Open(path)
 				defer file.Close()
 
@@ -95,12 +97,18 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			if err := tx.Migrator().DropTable(&model.IOSScheduledUpdateLog{}); err != nil {
 				return err
 			}
+			if err := tx.Migrator().DropTable(&model.IOSDeviceRequestLog{}); err != nil {
+				return err
+			}
+			if err := tx.Migrator().DropTable(&model.IOSEncryptedGrade{}); err != nil {
+				return err
+			}
 
 			if cTypes, err := tx.Migrator().ColumnTypes(&model.Crontab{}); err == nil {
 				types, _ := getCrontabEnumTypes(cTypes)
 
 				if !containsIOSNotifications(types) {
-					if err := tx.Exec(fmt.Sprintf("alter table test.crontab modify type enum (%s) null;", rollbackTypesToString(types))).Error; err != nil {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", rollbackTypesToString(types))).Error; err != nil {
 						log.Info(err.Error())
 						return err
 					}

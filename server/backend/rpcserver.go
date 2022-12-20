@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/api"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -29,8 +30,9 @@ func (s *CampusServer) GRPCServe(l net.Listener) error {
 
 type CampusServer struct {
 	pb.UnimplementedCampusServer
-	db        *gorm.DB
-	deviceBuf *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
+	db                      *gorm.DB
+	deviceBuf               *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
+	iOSNotificationsService *IOSNotificationsService
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
@@ -47,6 +49,19 @@ func New(db *gorm.DB) *CampusServer {
 			devices:  make(map[string]*model.Devices),
 			interval: time.Minute,
 		},
+		iOSNotificationsService: NewIOSNotificationsService(),
+	}
+}
+
+func NewIOSNotificationsService() *IOSNotificationsService {
+	token, err := ios_apns_jwt.NewToken()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &IOSNotificationsService{
+		APNSToken: token,
 	}
 }
 
@@ -136,4 +151,8 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 		}, nil
 	}
 	return &pb.GetTopNewsReply{}, nil
+}
+
+func (s *CampusServer) GetIOSNotificationsService() *IOSNotificationsService {
+	return s.iOSNotificationsService
 }
