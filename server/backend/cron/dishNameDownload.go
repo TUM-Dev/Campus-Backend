@@ -10,9 +10,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type cafeteriaName struct {
