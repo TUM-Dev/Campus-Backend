@@ -3,6 +3,7 @@ package cron
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -118,10 +119,10 @@ var (
 
 /*
 BASE_URL is the base URL for the required format.
-Contains the 'XXX' placeholder that has to replaced with the Target property of the
+Contains the '%s' placeholder that has to replaced with the Target property of the
 CanteenApInformation when performing a request.
 */
-const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=XXX&format=json"
+const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
 
 func (c *CronService) canteenHeadCountCron() error {
 	log.Info("Updating canteen head count stats...")
@@ -181,7 +182,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 
 func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	// Perform web request
-	url := strings.Replace(BASE_URL, "XXX", canteen.Target, 1)
+	url := fmt.Sprintf(BASE_URL, canteen.Target)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).Error("Canteen HeadCount web request failed for: ", canteen.CanteenId)
