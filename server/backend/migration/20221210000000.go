@@ -16,9 +16,16 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 		ID: "20221210000000",
 		Migrate: func(tx *gorm.DB) error {
 
-			if err := tx.AutoMigrate(
+			err := tx.AutoMigrate(
 				&model.CanteenHeadCount{},
-			); err != nil {
+			)
+			if err != nil {
+				return err
+			}
+
+			// Add the 'canteenHeadCount' enum value
+			err = tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation', 'canteenHeadCount');").Error
+			if err != nil {
 				return err
 			}
 
@@ -29,7 +36,12 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 		},
 
 		Rollback: func(tx *gorm.DB) error {
-			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "canteenHeadCount", 60*5).Error
+			err := tx.Delete(&model.Crontab{}, "type = ?", "canteenHeadCount").Error
+			if err != nil {
+				return err
+			}
+			// Remove the 'canteenHeadCount' enum value
+			return tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation');").Error
 		},
 	}
 }
