@@ -1,4 +1,4 @@
-//Package migration contains functions related to database changes and executes them
+// Package migration contains functions related to database changes and executes them
 package migration
 
 import (
@@ -8,18 +8,18 @@ import (
 	"gorm.io/gorm"
 )
 
-//TumDBMigrator contains a reference to our database
+// TumDBMigrator contains a reference to our database
 type TumDBMigrator struct {
 	database          *gorm.DB
 	shouldAutoMigrate bool
 }
 
-//New creates a new TumDBMigrator with a database
+// New creates a new TumDBMigrator with a database
 func New(db *gorm.DB, shouldAutoMigrate bool) TumDBMigrator {
 	return TumDBMigrator{database: db, shouldAutoMigrate: shouldAutoMigrate}
 }
 
-//Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
+// Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
 func (m TumDBMigrator) Migrate() error {
 	if m.shouldAutoMigrate {
 		log.Info("Using automigration")
