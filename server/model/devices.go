@@ -13,7 +13,7 @@ type Devices struct {
 	//[ 1] member                                         int                  null: true   primary: false  isArray: false  auto: false  col: int             len: -1      default: []
 	Member null.Int `gorm:"column:member;type:int;" json:"member"`
 	//[ 2] uuid                                           varchar(50)          null: false  primary: false  isArray: false  auto: false  col: varchar         len: 50      default: []
-	UUID string `gorm:"column:uuid;type:varchar;size:50;" json:"uuid"`
+	UUID string `gorm:"column:uuid;type:varchar(50);" json:"uuid"`
 	//[ 3] created                                        timestamp            null: true   primary: false  isArray: false  auto: false  col: timestamp       len: -1      default: []
 	Created null.Time `gorm:"column:created;type:timestamp;" json:"created"`
 	//[ 4] lastAccess                                     timestamp            null: false  primary: false  isArray: false  auto: false  col: timestamp       len: -1      default: [0000-00-00 00:00:00]
@@ -35,9 +35,9 @@ type Devices struct {
 	//[12] gcmToken                                       text(65535)          null: true   primary: false  isArray: false  auto: false  col: text            len: 65535   default: []
 	GcmToken null.String `gorm:"column:gcmToken;type:text;size:65535;" json:"gcm_token"`
 	//[13] gcmStatus                                      varchar(200)         null: true   primary: false  isArray: false  auto: false  col: varchar         len: 200     default: []
-	GcmStatus null.String `gorm:"column:gcmStatus;type:varchar;size:200;" json:"gcm_status"`
+	GcmStatus null.String `gorm:"column:gcmStatus;type:varchar(200);" json:"gcm_status"`
 	//[14] confirmationKey                                varchar(35)          null: true   primary: false  isArray: false  auto: false  col: varchar         len: 35      default: []
-	ConfirmationKey null.String `gorm:"column:confirmationKey;type:varchar;size:35;" json:"confirmation_key"`
+	ConfirmationKey null.String `gorm:"column:confirmationKey;type:varchar(35);" json:"confirmation_key"`
 	//[15] keyCreated                                     datetime             null: true   primary: false  isArray: false  auto: false  col: datetime        len: -1      default: []
 	KeyCreated null.Time `gorm:"column:keyCreated;type:datetime;" json:"key_created"`
 	//[16] keyConfirmed                                   datetime             null: true   primary: false  isArray: false  auto: false  col: datetime        len: -1      default: []
