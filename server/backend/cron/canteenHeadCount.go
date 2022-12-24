@@ -19,9 +19,12 @@ type AccessPoint struct {
 }
 
 type CanteenApInformation struct {
+	// The canteen ID defined by the ea-api
 	CanteenId string
-	Target    string
-	MaxCount  uint32
+	// Graphite access point filter list
+	Target string
+	// An approximated amount of people that once present indicate the canteen is full/running out of capacity
+	MaxCount uint32
 }
 
 var (
