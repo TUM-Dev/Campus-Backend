@@ -136,7 +136,7 @@ func (c *CronService) canteenHeadCountCron() error {
 		}
 
 		log.Debug("Updating canteen head count stats for: ", canteen.CanteenId)
-		aps := requestApData(&canteen)
+		aps := canteen.requestApData()
 		if len(aps) <= 0 {
 			log.Debug("No canteen head count data points found for: ", canteen.CanteenId)
 			continue
@@ -183,7 +183,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 	return nil
 }
 
-func requestApData(canteen *CanteenApInformation) []AccessPoint {
+func (canteen CanteenApInformation) requestApData() []AccessPoint {
 	// Perform web request
 	url := fmt.Sprintf(BaseUrl, canteen.Target)
 	resp, err := http.Get(url)
