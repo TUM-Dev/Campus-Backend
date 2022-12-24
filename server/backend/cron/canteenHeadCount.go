@@ -3,7 +3,6 @@ package cron
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -194,22 +193,13 @@ func requestApData(canteen *CanteenApInformation) []AccessPoint {
 		defer resp.Body.Close()
 	}
 
-	// Read the body
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.WithError(err).Error("Canteen HeadCount reading body failed for: ", canteen.CanteenId)
-		return []AccessPoint{}
-	}
-
 	// Parse as JSON
 	aps := []AccessPoint{}
-	err = json.Unmarshal(body, &aps)
+	err = json.NewDecoder(resp.Body).Decode(&aps)
 	if err != nil {
 		log.WithError(err).Error("Canteen HeadCount parsing output as JSON failed for: ", canteen.CanteenId)
-		log.Trace("Body for '", canteen.CanteenId, "': ", body)
 		return []AccessPoint{}
 	}
-
 	return aps
 }
 
