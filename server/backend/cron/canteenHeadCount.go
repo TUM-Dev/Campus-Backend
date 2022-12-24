@@ -25,7 +25,7 @@ type CanteenApInformation struct {
 }
 
 var (
-	CANTEENS = []CanteenApInformation{
+	Canteens = []CanteenApInformation{
 		{CanteenId: "mensa-arcisstr",
 			Target:   "ap.ap*-?bn*.ssid.*",
 			MaxCount: 450},
@@ -118,15 +118,15 @@ var (
 )
 
 /*
-BASE_URL is the base URL for the required format.
+BaseUrl is the base URL for the required format.
 Contains the '%s' placeholder that has to replaced with the Target property of the
 CanteenApInformation when performing a request.
 */
-const BASE_URL = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
+const BaseUrl = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
 
 func (c *CronService) canteenHeadCountCron() error {
 	log.Info("Updating canteen head count stats...")
-	for _, canteen := range CANTEENS {
+	for _, canteen := range Canteens {
 		if len(canteen.Target) <= 0 {
 			log.Debug("Skipping canteen head count stats for '", canteen.CanteenId, "', since there is no target.")
 			continue
@@ -182,7 +182,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 
 func requestApData(canteen *CanteenApInformation) []AccessPoint {
 	// Perform web request
-	url := fmt.Sprintf(BASE_URL, canteen.Target)
+	url := fmt.Sprintf(BaseUrl, canteen.Target)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).Error("Canteen HeadCount web request failed for: ", canteen.CanteenId)
