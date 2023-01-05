@@ -20,7 +20,7 @@ type RoomfinderMaps struct {
 	//[ 0] map_id                                         int                  null: false  primary: true   isArray: false  auto: false  col: int             len: -1      default: []
 	MapID int32 `gorm:"primary_key;column:map_id;type:int;" json:"map_id"`
 	//[ 1] description                                    varchar(64)          null: false  primary: false  isArray: false  auto: false  col: varchar         len: 64      default: []
-	Description string `gorm:"column:description;type:varchar;size:64;" json:"description"`
+	Description string `gorm:"column:description;type:varchar(64);" json:"description"`
 	//[ 2] scale                                          int                  null: false  primary: false  isArray: false  auto: false  col: int             len: -1      default: []
 	Scale int32 `gorm:"column:scale;type:int;" json:"scale"`
 	//[ 3] width                                          int                  null: false  primary: false  isArray: false  auto: false  col: int             len: -1      default: []
