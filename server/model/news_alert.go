@@ -22,7 +22,7 @@ type NewsAlert struct {
 	//[ 1] file                                           int                  null: true   primary: false  isArray: false  auto: false  col: int             len: -1      default: []
 	File null.Int `gorm:"column:file;type:int;" json:"file"`
 	//[ 2] name                                           varchar(100)         null: true   primary: false  isArray: false  auto: false  col: varchar         len: 100     default: []
-	Name null.String `gorm:"column:name;type:varchar;size:100;" json:"name"`
+	Name null.String `gorm:"column:name;type:varchar(100);" json:"name"`
 	//[ 3] link                                           text(65535)          null: true   primary: false  isArray: false  auto: false  col: text            len: 65535   default: []
 	Link null.String `gorm:"column:link;type:text;size:65535;" json:"link"`
 	//[ 4] created                                        timestamp            null: false  primary: false  isArray: false  auto: false  col: timestamp       len: -1      default: [CURRENT_TIMESTAMP]
@@ -32,7 +32,6 @@ type NewsAlert struct {
 	//[ 6] to                                             datetime             null: false  primary: false  isArray: false  auto: false  col: datetime        len: -1      default: [CURRENT_TIMESTAMP]
 	To time.Time `gorm:"column:to;type:datetime;default:CURRENT_TIMESTAMP;" json:"to"`
 }
-
 
 // TableName sets the insert table name for this struct type
 func (n *NewsAlert) TableName() string {
