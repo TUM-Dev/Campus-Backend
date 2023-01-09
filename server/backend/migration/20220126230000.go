@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
