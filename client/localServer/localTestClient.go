@@ -6,14 +6,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"image"
 	"image/jpeg"
 	"os"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/api"
+	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -35,8 +36,23 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	canteenHeadCount(c, ctx)
+
 	cafeteriaRatingTools(c, ctx)
 
+}
+
+func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
+	res, err := c.GetCanteenHeadCount(ctx, &pb.GetCanteenHeadCountRequest{
+		CanteenId: "mensa-garching",
+	})
+
+	if err != nil {
+		log.Error(err)
+	} else {
+		log.Info("Canteen HeadCount data request successful.")
+		log.Info(res)
+	}
 }
 
 func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {

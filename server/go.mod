@@ -1,9 +1,8 @@
-module github.com/TUM-Dev/Campus-Backend
+module github.com/TUM-Dev/Campus-Backend/server
 
 go 1.18
 
 require (
-	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20220921171658-c0ee084ed389
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/getsentry/sentry-go v0.13.0
@@ -16,7 +15,9 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/soheilhy/cmux v0.1.5
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
+	google.golang.org/genproto v0.0.0-20220921223823-23cae91e6737
 	google.golang.org/grpc v1.49.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/sqlite v1.3.6
@@ -43,7 +44,5 @@ require (
 	golang.org/x/net v0.0.0-20220921203646-d300de134e69 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220921223823-23cae91e6737 // indirect
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -2,7 +2,7 @@
 package migration
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -30,6 +30,7 @@ func (m TumDBMigrator) Migrate() error {
 			&model.NewsSource{},
 			&model.NewsAlert{},
 			&model.News{},
+			&model.CanteenHeadCount{},
 		)
 		return err
 	}
@@ -38,6 +39,7 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20210709193000(),
 		m.migrate20220126230000(),
 		m.migrate20220713000000(),
+		m.migrate20221210000000(),
 	})
 	err := mig.Migrate()
 	return err

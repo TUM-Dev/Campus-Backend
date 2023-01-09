@@ -4,8 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"net"
+	"sync"
+	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -13,9 +17,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
-	"net"
-	"sync"
-	"time"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
