@@ -164,11 +164,16 @@ func sumApCounts(aps []AccessPoint) uint32 {
 }
 
 func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
+	percent := (float32(count) / float32(canteen.MaxCount)) * 100
+	// Ensure we do not see more than 100%
+	if percent > 100.0 {
+		percent = 100.0
+	}
 	entry := model.CanteenHeadCount{
 		CanteenId: canteen.CanteenId,
 		Count:     count,
 		MaxCount:  canteen.MaxCount,
-		Percent:   (float32(count) / float32(canteen.MaxCount)) * 100,
+		Percent:   percent,
 		Timestamp: time.Now(),
 	}
 
