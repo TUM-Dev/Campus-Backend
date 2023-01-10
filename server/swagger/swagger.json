@@ -1443,22 +1443,22 @@
         "count": {
           "type": "integer",
           "format": "int64",
-          "description": "The absolut count of humans in the canteen or 0 in case no data is available."
+          "description": "The absolut count of humans in the canteen. Only valid in case percent != -1."
         },
         "maxCount": {
           "type": "integer",
           "format": "int64",
-          "description": "The maximum nunmber of humans in the canteen for the percent to be 100.00 or 0 in case no data is available."
+          "description": "The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1."
         },
         "percent": {
           "type": "number",
           "format": "float",
-          "description": "Current capacity utilization of the canteen or -1 in case no data is available."
+          "description": "Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available."
         },
         "timestamp": {
           "type": "string",
           "format": "date-time",
-          "description": "A time stamp indicating how up to date the response is or an unspecified value in case there is no data available (precent == -1)."
+          "description": "A time stamp indicating how up to date the response is. Only valid in case percent != -1."
         }
       }
     },

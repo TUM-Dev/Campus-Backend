@@ -750,12 +750,12 @@ message GetCanteenHeadCountRequest {
 }
 
 message GetCanteenHeadCountReply {
-  // The absolut count of humans in the canteen or 0 in case no data is available.
+  // The absolut count of humans in the canteen. Only valid in case percent != -1.
   uint32 count = 1;
-  // The maximum nunmber of humans in the canteen for the percent to be 100.00 or 0 in case no data is available.
+  // The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1.
   uint32 maxCount = 2;
-  // Current capacity utilization of the canteen or -1 in case no data is available.
+  // Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available.
   float percent = 3;
-  // A time stamp indicating how up to date the response is or an unspecified value in case there is no data available (precent == -1).
+  // A time stamp indicating how up to date the response is. Only valid in case percent != -1.
   google.protobuf.Timestamp timestamp = 4;
 }
