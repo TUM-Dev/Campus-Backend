@@ -4339,13 +4339,13 @@ type GetCanteenHeadCountReply struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The absolut count of humans in the canteen or 0 in case no data is available.
+	// The absolut count of humans in the canteen. Only valid in case percent != -1.
 	Count uint32 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	// The maximum nunmber of humans in the canteen for the percent to be 100.00 or 0 in case no data is available.
+	// The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1.
 	MaxCount uint32 `protobuf:"varint,2,opt,name=maxCount,proto3" json:"maxCount,omitempty"`
-	// Current capacity utilization of the canteen or -1 in case no data is available.
+	// Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available.
 	Percent float32 `protobuf:"fixed32,3,opt,name=percent,proto3" json:"percent,omitempty"`
-	// A time stamp indicating how up to date the response is or an unspecified value in case there is no data available (precent == -1).
+	// A time stamp indicating how up to date the response is. Only valid in case percent != -1.
 	Timestamp *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 }
 
