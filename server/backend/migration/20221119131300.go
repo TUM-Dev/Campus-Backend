@@ -2,6 +2,7 @@ package migration
 
 import (
 	"database/sql"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,13 +12,13 @@ import (
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
 //migrate20221115000000
+
+//go:embed static_data/iosInitialSchedulingPriorities.json
+var iosInitialPrioritiesFile []byte
 
 func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 	return &gormigrate.Migration{
@@ -55,35 +56,18 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				}
 			}
 
-			if path, err := filepath.Abs("/static_data/iosInitialSchedulingPriorities.json"); err == nil {
-				file, err := os.Open(path)
-				defer file.Close()
+			var priorities []model.IOSSchedulingPriority
 
-				if err != nil {
-					log.Info(err.Error())
-					return err
-				}
+			unmarshalErr := json.Unmarshal(iosInitialPrioritiesFile, &priorities)
 
-				byteValue, err := io.ReadAll(file)
+			if unmarshalErr != nil {
+				log.Info(unmarshalErr.Error())
+				return unmarshalErr
+			}
 
-				if err != nil {
-					log.Info(err.Error())
-					return err
-				}
-
-				var priorities []model.IOSSchedulingPriority
-
-				unmarshalErr := json.Unmarshal(byteValue, &priorities)
-
-				if err != nil {
-					log.Info(unmarshalErr.Error())
-					return unmarshalErr
-				}
-
-				if err := tx.Create(&priorities).Error; err != nil {
-					log.Info(err.Error())
-					return err
-				}
+			if err := tx.Create(&priorities).Error; err != nil {
+				log.Info(err.Error())
+				return err
 			}
 
 			err := tx.Create(&model.Crontab{
