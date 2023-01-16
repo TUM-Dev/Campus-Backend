@@ -1,12 +1,27 @@
 package ios_scheduling
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_logging"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
+	"sync"
+)
+
+const (
+	DevicesToCheckPerCron = 100
+	MaxRoutineCount       = 10
 )
 
 type Service struct {
-	Repository *Repository
+	Repository             *Repository
+	DevicesRepository      *ios_device.Repository
+	SchedulerLogRepository *ios_scheduled_update_log.Repository
+	Priority               *model.IOSSchedulingPriority
+	APNs                   *ios_apns.Service
+	Logger                 *ios_logging.Service
 }
 
 func (service *Service) HandleScheduledCron() error {
@@ -20,7 +35,88 @@ func (service *Service) HandleScheduledCron() error {
 
 	log.Info("Current priority: ", currentPriority)
 
+	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
+
+	if err != nil {
+		log.Errorf("Error while getting devices: %s", err)
+		return err
+	}
+
+	if len(devices) == 0 {
+		log.Info("No devices to update")
+		return nil
+	}
+
+	log.Infof("Found %d devices to check!", len(devices))
+
+	devices = service.selectDevicesToUpdate(devices)
+
+	log.Infof("Selected %d of them", len(devices))
+
+	service.handleDevices(devices)
+
 	return nil
+}
+
+func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
+	routinesCount := routineCount(devices)
+
+	chunkSize := len(devices) / routinesCount
+
+	perfectChunkable := (len(devices) % routinesCount) == 0
+
+	chunksArrSize := routinesCount
+
+	if !perfectChunkable {
+		chunksArrSize = routinesCount + 1
+	}
+
+	chunks := make([][]model.IOSDeviceLastUpdated, chunksArrSize)
+
+	for i := 0; i < routinesCount; i++ {
+		chunks[i] = devices[i*chunkSize : (i+1)*chunkSize]
+	}
+
+	if !perfectChunkable {
+		chunks[routinesCount] = devices[routinesCount*chunkSize:]
+	}
+
+	var group sync.WaitGroup
+
+	for _, chunk := range chunks {
+		group.Add(1)
+		go func(chunk []model.IOSDeviceLastUpdated) {
+			defer group.Done()
+			service.handleDevices(chunk)
+		}(chunk)
+	}
+
+	group.Wait()
+}
+
+func routineCount(devices []model.IOSDeviceLastUpdated) int {
+	if len(devices) < MaxRoutineCount {
+		return len(devices)
+	}
+
+	return MaxRoutineCount
+}
+
+func (service *Service) LogScheduledUpdate(deviceID string) error {
+	log := model.IOSScheduledUpdateLog{
+		DeviceID: deviceID,
+		Type:     model.IOSUpdateTypeGrades,
+	}
+
+	return service.SchedulerLogRepository.LogScheduledUpdate(&log)
+}
+
+func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated) []model.IOSDeviceLastUpdated {
+	if len(devices) < DevicesToCheckPerCron {
+		return devices
+	}
+
+	return devices[:DevicesToCheckPerCron]
 }
 
 func findIOSSchedulingPriorityForNow(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {
@@ -56,8 +152,17 @@ func mergeIOSSchedulingPriorities(priorities []model.IOSSchedulingPriority) *mod
 	return mergedPriority
 }
 
-func NewService(repository *Repository) *Service {
+func NewService(repository *Repository,
+	devicesRepository *ios_device.Repository,
+	schedulerRepository *ios_scheduled_update_log.Repository,
+	apnsService *ios_apns.Service,
+) *Service {
 	return &Service{
-		Repository: repository,
+		Repository:             repository,
+		DevicesRepository:      devicesRepository,
+		SchedulerLogRepository: schedulerRepository,
+		Priority:               model.DefaultIOSSchedulingPriority(),
+		APNs:                   apnsService,
+		Logger:                 ios_logging.NewLogger(repository.DB),
 	}
 }

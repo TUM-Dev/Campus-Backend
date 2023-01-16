@@ -18,8 +18,9 @@ const (
 )
 
 type Repository struct {
-	DB    gorm.DB
-	Token *ios_apns_jwt.Token
+	DB         gorm.DB
+	Token      *ios_apns_jwt.Token
+	httpClient *http.Client
 }
 
 func (r *Repository) APNsURL() string {
@@ -55,7 +56,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 	body, _ := notification.MarshalJSON()
 
-	client := &http.Client{}
+	client := r.httpClient
 
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 
@@ -92,7 +93,18 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	return &Repository{
-		DB:    *db,
-		Token: token,
+		DB:         *db,
+		Token:      token,
+		httpClient: &http.Client{},
 	}
+}
+
+func NewCronRepository(db *gorm.DB) *Repository {
+	token, err := ios_apns_jwt.NewToken()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return NewRepository(db, token)
 }

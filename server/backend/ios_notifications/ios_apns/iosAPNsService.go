@@ -4,14 +4,17 @@ import (
 	pb "github.com/TUM-Dev/Campus-Backend/api"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_logging"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type Service struct {
 	Repository *Repository
+	Logger     *ios_logging.Service
 }
 
 func (s *Service) SendTestNotification(request *pb.SendIOSTestNotificationRequest) (*pb.SendIOSTestNotificationReply, error) {
@@ -54,20 +57,7 @@ func (s *Service) SendTestBackgroundNotification() (*pb.SendIOSTestBackgroundNot
 	}
 
 	for _, device := range devices {
-		campusRequestToken, err := s.Repository.CreateCampusTokenRequest(device.DeviceID)
-
-		if err != nil {
-			log.Errorf("Could not create campus token request: %s", err)
-			return nil, err
-		}
-
-		notification := model.NewIOSNotificationPayload(device.DeviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
-
-		_, err = s.Repository.SendBackgroundNotification(notification)
-
-		if err != nil {
-			return nil, err
-		}
+		s.RequestGradeUpdateForDevice(device.DeviceID)
 	}
 
 	return &pb.SendIOSTestBackgroundNotificationReply{
@@ -75,8 +65,47 @@ func (s *Service) SendTestBackgroundNotification() (*pb.SendIOSTestBackgroundNot
 	}, nil
 }
 
+func (s *Service) SendSuccessUpdateTestNotification(deviceID string) error {
+	notification := model.NewIOSNotificationPayload(deviceID).Alert("Campus App Test Notification", "", "Getting grades is now easier than ever!")
+
+	_, err := s.Repository.SendAlertNotification(notification)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
+	campusRequestToken, err := s.Repository.CreateCampusTokenRequest(deviceID)
+
+	if err != nil {
+		log.Errorf("Could not create campus token request: %s", err)
+		return err
+	}
+
+	notification := model.NewIOSNotificationPayload(deviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
+
+	_, err = s.Repository.SendBackgroundNotification(notification)
+
+	if err != nil {
+		log.Errorf("Could not send background notification: %s", err)
+		return err
+	}
+
+	s.Logger.LogTokenRequest("Token Requested: %s", campusRequestToken.RequestID)
+
+	return nil
+}
+
 func NewService(repository *Repository) *Service {
 	return &Service{
 		Repository: repository,
+		Logger:     ios_logging.NewLogger(&repository.DB),
 	}
+}
+
+func NewCronService(db *gorm.DB) *Service {
+	return NewService(NewCronRepository(db))
 }

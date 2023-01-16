@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
@@ -10,8 +11,9 @@ import (
 )
 
 type CronService struct {
-	db *gorm.DB
-	gf *gofeed.Parser
+	db   *gorm.DB
+	gf   *gofeed.Parser
+	APNs *ios_apns.Service
 }
 
 // names for cron jobs as specified in database
@@ -28,12 +30,14 @@ const (
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
 	STORAGE_DIR                = "/Storage/" // target location of files
 	IOS_NOTIFICATIONS          = "iosNotifications"
+	IOS_ACTIVITY_RESET         = "iosActivityReset"
 )
 
 func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db: db,
-		gf: gofeed.NewParser(),
+		db:   db,
+		gf:   gofeed.NewParser(),
+		APNs: ios_apns.NewCronService(db),
 	}
 }
 
@@ -49,13 +53,14 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NEWS_TYPE,
 				FILE_DOWNLOAD_TYPE,
 				AVERAGE_RATING_COMPUTATION,
 				DISH_NAME_DOWNLOAD,
 				IOS_NOTIFICATIONS,
+				IOS_ACTIVITY_RESET,
 			).
 			Scan(&res)
 
@@ -82,6 +87,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.averageRatingComputation() })
 			case IOS_NOTIFICATIONS:
 				g.Go(func() error { return c.iosNotificationsCron() })
+			case IOS_ACTIVITY_RESET:
+				g.Go(func() error { return nil })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:

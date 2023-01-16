@@ -45,6 +45,14 @@ func (r *Repository) DeleteEncryptedGrades(deviceId string) error {
 	return nil
 }
 
+func (r *Repository) DeleteRequestLog(requestId string) error {
+	if err := r.DB.Delete(&model.IOSDeviceRequestLog{}, "request_id = ?", requestId).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	return &Repository{
 		DB:    db,

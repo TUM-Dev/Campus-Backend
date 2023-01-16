@@ -32,6 +32,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				&model.IOSScheduledUpdateLog{},
 				&model.IOSDeviceRequestLog{},
 				&model.IOSEncryptedGrade{},
+				&model.IOSLog{},
 			); err != nil {
 				return err
 			}
@@ -39,8 +40,15 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			if cTypes, err := tx.Migrator().ColumnTypes(&model.Crontab{}); err == nil {
 				types, _ := getCrontabEnumTypes(cTypes)
 
-				if !containsIOSNotifications(types) {
-					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", typesToString(types))).Error; err != nil {
+				if !contains(types, "iosNotifications") {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", typesToString(types, "iosNotifications"))).Error; err != nil {
+						log.Info(err.Error())
+						return err
+					}
+				}
+
+				if !contains(types, "iosActivityReset") {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", typesToString(types, "iosActivityReset"))).Error; err != nil {
 						log.Info(err.Error())
 						return err
 					}
@@ -78,9 +86,24 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				}
 			}
 
-			return tx.Create(&model.Crontab{
+			err := tx.Create(&model.Crontab{
 				Interval: 60,
 				Type:     null.String{NullString: sql.NullString{String: cron.IOS_NOTIFICATIONS, Valid: true}},
+			}).Error
+
+			if err != nil {
+				log.Error(err.Error())
+				return err
+			}
+
+			return tx.Create(&model.Crontab{
+				Type: null.String{
+					NullString: sql.NullString{
+						String: cron.IOS_ACTIVITY_RESET,
+						Valid:  true,
+					},
+				},
+				Interval: 86400,
 			}).Error
 		},
 
@@ -103,47 +126,64 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			if err := tx.Migrator().DropTable(&model.IOSEncryptedGrade{}); err != nil {
 				return err
 			}
+			if err := tx.Migrator().DropTable(&model.IOSLog{}); err != nil {
+				return err
+			}
 
 			if cTypes, err := tx.Migrator().ColumnTypes(&model.Crontab{}); err == nil {
 				types, _ := getCrontabEnumTypes(cTypes)
 
-				if !containsIOSNotifications(types) {
-					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", rollbackTypesToString(types))).Error; err != nil {
+				if !contains(types, "iosNotifications") {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", rollback(types, "iosNotifications"))).Error; err != nil {
+						log.Info(err.Error())
+						return err
+					}
+				}
+
+				if !contains(types, "iosActivityReset") {
+					if err := tx.Exec(fmt.Sprintf("alter table campus_db.crontab modify type enum (%s) null;", rollback(types, "iosActivityReset"))).Error; err != nil {
 						log.Info(err.Error())
 						return err
 					}
 				}
 			}
 
-			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOS_NOTIFICATIONS, 60).Error
+			err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOS_NOTIFICATIONS, 60).Error
+			if err != nil {
+				log.Error(err.Error())
+			}
+
+			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOS_ACTIVITY_RESET, 86400).Error
 		},
 	}
 }
 
-func typesToString(types []string) string {
+func typesToString(types []string, plus string) string {
 	var str string
 	for _, t := range types {
 		str += fmt.Sprintf("%s,", t)
 	}
 
-	str += "'iosNotifications'"
+	str += fmt.Sprintf("'%s'", plus)
 
 	return str
 }
 
-func rollbackTypesToString(types []string) string {
+func rollback(types []string, search string) string {
 	var str string
 
-	for i := 0; i < len(types)-1; i++ {
-		str += fmt.Sprintf("%s,", types[i])
+	for _, eType := range types {
+		if eType != fmt.Sprintf("'%s'", search) {
+			str += fmt.Sprintf("%s,", eType)
+		}
 	}
 
 	return strings.TrimRight(str, ",")
 }
 
-func containsIOSNotifications(types []string) bool {
+func contains(types []string, search string) bool {
 	for _, t := range types {
-		if t == "'iosNotifications'" {
+		if t == fmt.Sprintf("'%s'", search) {
 			return true
 		}
 	}

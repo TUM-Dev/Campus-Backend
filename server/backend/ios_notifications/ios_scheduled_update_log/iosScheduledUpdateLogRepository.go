@@ -3,14 +3,22 @@ package ios_scheduled_update_log
 import (
 	"github.com/TUM-Dev/Campus-Backend/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repository struct {
 	DB *gorm.DB
 }
 
-func (service *Repository) AddScheduledUpdateLog(log *model.IOSScheduledUpdateLog) error {
-	if err := service.DB.Create(log).Error; err != nil {
+func (service *Repository) LogScheduledUpdate(log *model.IOSScheduledUpdateLog) error {
+	tx := service.DB.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "device_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"created_at",
+		}),
+	}).Create(log)
+
+	if err := tx.Error; err != nil {
 		return err
 	}
 
@@ -20,7 +28,7 @@ func (service *Repository) AddScheduledUpdateLog(log *model.IOSScheduledUpdateLo
 func (service *Repository) GetScheduledUpdateLogForDevice(deviceId string) ([]model.IOSScheduledUpdateLog, error) {
 	var logs []model.IOSScheduledUpdateLog
 
-	if err := service.DB.Where("device_id = ?", deviceId).Find(&logs).Error; err != nil {
+	if err := service.DB.Where("device_id = ?", deviceId).Order("created_at").Find(&logs).Error; err != nil {
 		return nil, err
 	}
 

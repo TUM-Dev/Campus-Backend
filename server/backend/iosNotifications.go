@@ -7,7 +7,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_request_response"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduling"
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_usage"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
@@ -34,12 +33,6 @@ func (s *CampusServer) GetIOSAPNsService() *ios_apns.Service {
 	repository := ios_apns.NewRepository(s.db, s.GetIOSNotificationsService().APNSToken)
 
 	return ios_apns.NewService(repository)
-}
-
-func (s *CampusServer) GetIOSSchedulingService() *ios_scheduling.Service {
-	repository := ios_scheduling.NewRepository(s.db)
-
-	return ios_scheduling.NewService(repository)
 }
 
 func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Service {
