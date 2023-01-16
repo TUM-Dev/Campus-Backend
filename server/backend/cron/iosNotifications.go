@@ -1,9 +1,9 @@
 package cron
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduled_update_log"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduling"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduling"
 )
 
 func (c *CronService) iosNotificationsCron() error {

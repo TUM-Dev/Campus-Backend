@@ -2,7 +2,7 @@ package ios_notifications
 
 import (
 	"errors"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 )
 
 func ValidateRegisterDevice(request *pb.RegisterIOSDeviceRequest) error {

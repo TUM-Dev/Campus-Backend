@@ -1,9 +1,9 @@
 package ios_device
 
 import (
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

@@ -61,6 +61,7 @@ type CampusClient interface {
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
 	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
+	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
 	// register your ios device for push notifications
 	RegisterIOSDevice(ctx context.Context, in *RegisterIOSDeviceRequest, opts ...grpc.CallOption) (*RegisterIOSDeviceReply, error)
 	// remove your ios device from the db and unregister it from push notifications
@@ -407,6 +408,15 @@ func (c *campusClient) GetMembers(ctx context.Context, in *GetMembersRequest, op
 	return out, nil
 }
 
+func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error) {
+	out := new(GetCanteenHeadCountReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetCanteenHeadCount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *campusClient) RegisterIOSDevice(ctx context.Context, in *RegisterIOSDeviceRequest, opts ...grpc.CallOption) (*RegisterIOSDeviceReply, error) {
 	out := new(RegisterIOSDeviceReply)
 	err := c.cc.Invoke(ctx, "/api.Campus/RegisterIOSDevice", in, out, opts...)
@@ -503,6 +513,7 @@ type CampusServer interface {
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
 	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
+	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// register your ios device for push notifications
 	RegisterIOSDevice(context.Context, *RegisterIOSDeviceRequest) (*RegisterIOSDeviceReply, error)
 	// remove your ios device from the db and unregister it from push notifications
@@ -629,6 +640,9 @@ func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *Notifi
 }
 func (UnimplementedCampusServer) GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMembers not implemented")
+}
+func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
 }
 func (UnimplementedCampusServer) RegisterIOSDevice(context.Context, *RegisterIOSDeviceRequest) (*RegisterIOSDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterIOSDevice not implemented")
@@ -1309,6 +1323,24 @@ func _Campus_GetMembers_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCanteenHeadCountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetCanteenHeadCount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetCanteenHeadCount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetCanteenHeadCount(ctx, req.(*GetCanteenHeadCountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Campus_RegisterIOSDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterIOSDeviceRequest)
 	if err := dec(in); err != nil {
@@ -1567,6 +1599,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMembers",
 			Handler:    _Campus_GetMembers_Handler,
+		},
+		{
+			MethodName: "GetCanteenHeadCount",
+			Handler:    _Campus_GetCanteenHeadCount_Handler,
 		},
 		{
 			MethodName: "RegisterIOSDevice",

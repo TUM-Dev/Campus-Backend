@@ -1,7 +1,7 @@
 package ios_scheduling
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
 

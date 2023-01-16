@@ -2,7 +2,7 @@ package model
 
 import (
 	"encoding/xml"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_crypto"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 	"time"
 )
 

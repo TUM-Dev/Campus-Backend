@@ -1,11 +1,11 @@
 package ios_scheduling
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_logging"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_scheduled_update_log"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_logging"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"sync"
 )

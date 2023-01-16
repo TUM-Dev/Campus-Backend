@@ -1,8 +1,8 @@
 package ios_request_response
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns/ios_apns_jwt"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
 

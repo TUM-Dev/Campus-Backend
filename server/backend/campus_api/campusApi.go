@@ -2,7 +2,7 @@ package campus_api
 
 import (
 	"encoding/xml"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"

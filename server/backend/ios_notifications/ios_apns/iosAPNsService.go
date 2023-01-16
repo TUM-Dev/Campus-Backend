@@ -1,11 +1,11 @@
 package ios_apns
 
 import (
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_logging"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_logging"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

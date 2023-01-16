@@ -2,12 +2,12 @@ package backend
 
 import (
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns/ios_apns_jwt"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_request_response"
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_usage"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_request_response"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_usage"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )

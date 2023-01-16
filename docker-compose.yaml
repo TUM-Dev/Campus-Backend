@@ -4,8 +4,7 @@ services:
     image: antonwy/tca-backend
     restart: always
     build:
-      context: .
-      dockerfile: Dockerfile.anton
+      context: server/
     ports:
       - 50051:50051
     environment:

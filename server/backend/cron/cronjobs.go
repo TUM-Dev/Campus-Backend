@@ -1,8 +1,7 @@
 package cron
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -13,10 +12,10 @@ import (
 )
 
 type CronService struct {
-	db   *gorm.DB
-	gf   *gofeed.Parser
+	db       *gorm.DB
+	gf       *gofeed.Parser
 	useMensa bool
-	APNs *ios_apns.Service
+	APNs     *ios_apns.Service
 }
 
 // names for cron jobs as specified in database
@@ -39,9 +38,9 @@ const (
 
 func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 	return &CronService{
-		db:   db,
-		gf:   gofeed.NewParser(),
-		APNs: ios_apns.NewCronService(db),
+		db:       db,
+		gf:       gofeed.NewParser(),
+		APNs:     ios_apns.NewCronService(db),
 		useMensa: mensaCronActivated,
 	}
 }
@@ -58,7 +57,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NEWS_TYPE,
 				FILE_DOWNLOAD_TYPE,
