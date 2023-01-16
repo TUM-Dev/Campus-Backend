@@ -11,7 +11,7 @@ jobs:
     name: "Run staticcheck"
     runs-on: ubuntu-latest
     strategy:
-      matrix: { dir: ['./api', './client', './server'] }
+      matrix: { dir: [ './server' ] }
     steps:
       - uses: actions/checkout@v3
         with:

@@ -3,16 +3,19 @@ package cron
 import (
 	"github.com/TUM-Dev/Campus-Backend/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/model"
+	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
-	"time"
 )
 
 type CronService struct {
 	db   *gorm.DB
 	gf   *gofeed.Parser
+	useMensa bool
 	APNs *ios_apns.Service
 }
 
@@ -28,21 +31,23 @@ const (
 	FILE_DOWNLOAD_TYPE         = "fileDownload"
 	DISH_NAME_DOWNLOAD         = "dishNameDownload"
 	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
+	CANTEEN_HEADCOUNT          = "canteenHeadCount"
 	STORAGE_DIR                = "/Storage/" // target location of files
 	IOS_NOTIFICATIONS          = "iosNotifications"
 	IOS_ACTIVITY_RESET         = "iosActivityReset"
 )
 
-func New(db *gorm.DB) *CronService {
+func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 	return &CronService{
 		db:   db,
 		gf:   gofeed.NewParser(),
 		APNs: ios_apns.NewCronService(db),
+		useMensa: mensaCronActivated,
 	}
 }
 
 func (c *CronService) Run() error {
-	log.Printf("running cron service")
+	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
 	g := new(errgroup.Group)
 
 	g.Go(func() error { return c.dishNameDownloadCron() })
@@ -59,6 +64,7 @@ func (c *CronService) Run() error {
 				FILE_DOWNLOAD_TYPE,
 				AVERAGE_RATING_COMPUTATION,
 				DISH_NAME_DOWNLOAD,
+				CANTEEN_HEADCOUNT,
 				IOS_NOTIFICATIONS,
 				IOS_ACTIVITY_RESET,
 			).
@@ -67,11 +73,14 @@ func (c *CronService) Run() error {
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			var offset int32 = 0
-			if cronjob.Type.String == AVERAGE_RATING_COMPUTATION {
-				if time.Now().Hour() == 16 {
-					offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
+			if c.useMensa {
+				if cronjob.Type.String == AVERAGE_RATING_COMPUTATION {
+					if time.Now().Hour() == 16 {
+						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
+					}
 				}
 			}
+
 			cronjob.LastRun = int32(time.Now().Unix()) + offset
 			c.db.Save(&cronjob)
 
@@ -82,13 +91,13 @@ func (c *CronService) Run() error {
 			case FILE_DOWNLOAD_TYPE:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DISH_NAME_DOWNLOAD:
-				g.Go(func() error { return c.dishNameDownloadCron() })
+				if c.useMensa {
+					g.Go(c.dishNameDownloadCron)
+				}
 			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
-				g.Go(func() error { return c.averageRatingComputation() })
-			case IOS_NOTIFICATIONS:
-				g.Go(func() error { return c.iosNotificationsCron() })
-			case IOS_ACTIVITY_RESET:
-				g.Go(func() error { return nil })
+				if c.useMensa {
+					g.Go(c.averageRatingComputation)
+				}
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MENSA_TYPE:
@@ -104,6 +113,12 @@ func (c *CronService) Run() error {
 					case ALARM_TYPE:
 						g.Go(func() error { return c.alarmCron() })
 				*/
+			case CANTEEN_HEADCOUNT:
+				g.Go(func() error { return c.canteenHeadCountCron() })
+			case IOS_NOTIFICATIONS:
+				g.Go(func() error { return c.iosNotificationsCron() })
+			case IOS_ACTIVITY_RESET:
+				g.Go(func() error { return nil })
 			}
 		}
 

@@ -28,7 +28,7 @@ type News struct {
 	//[ 5] src                                            int                  null: false  primary: false  isArray: false  auto: false  col: int             len: -1      default: []
 	Src int32 `gorm:"column:src;type:int;" json:"src"`
 	//[ 6] link                                           varchar(190)         null: false  primary: false  isArray: false  auto: false  col: varchar         len: 190     default: []
-	Link string `gorm:"column:link;type:varchar;size:190;" json:"link"`
+	Link string `gorm:"column:link;type:varchar(190);" json:"link"`
 	//[ 7] image                                          text(65535)          null: true   primary: false  isArray: false  auto: false  col: text            len: 65535   default: []
 	Image null.String `gorm:"column:image;type:text;size:65535;" json:"image"`
 	//[ 8] file                                           int                  null: true   primary: false  isArray: false  auto: false  col: int             len: -1      default: []
@@ -39,4 +39,3 @@ type News struct {
 func (n *News) TableName() string {
 	return "news"
 }
-

@@ -2,15 +2,16 @@ package backend
 
 import (
 	"context"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"sync"
+	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"sync"
-	"time"
 )
 
 // deviceBuffer stores all recent device calls in a buffer and flushes them to the database periodically
@@ -29,7 +30,7 @@ func (s *CampusServer) RunDeviceFlusher() error {
 	}
 }
 
-// 	s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
+// s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
 func (b *deviceBuffer) add(deviceID string, method string, osVersion string, appVersion string) {
 	b.lock.Lock()
 	defer b.lock.Unlock()

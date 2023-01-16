@@ -4,10 +4,17 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
-	"github.com/TUM-Dev/Campus-Backend/backend"
-	"github.com/TUM-Dev/Campus-Backend/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/backend/migration"
+	"io/fs"
+	"net"
+	"net/http"
+	"net/textproto"
+	"os"
+	"strings"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
@@ -21,12 +28,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"io/fs"
-	"net"
-	"net/http"
-	"net/textproto"
-	"os"
-	"strings"
 )
 
 const (
@@ -79,8 +80,13 @@ func main() {
 		return
 	}
 
+	var mensaCronActivated = true
+	if len(os.Args) > 2 && os.Args[1] == "-MensaCron" && os.Args[2] == "0" {
+		mensaCronActivated = false
+		log.Println("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
+	}
 	// Create any other background services (these shouldn't do any long running work here)
-	cronService := cron.New(db)
+	cronService := cron.New(db, mensaCronActivated)
 	campusService := backend.New(db)
 
 	// Listen to our configured ports

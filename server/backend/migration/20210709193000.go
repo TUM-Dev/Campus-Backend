@@ -2,16 +2,16 @@ package migration
 
 import (
 	"database/sql"
-	"github.com/TUM-Dev/Campus-Backend/model"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
-//migrate20210709193000
-//adds a "url" column to the database containing the url the file was downloaded from.
-//adds a "finished" column to the database that indicates, that a files download is finished.
-//adds a "fileDownload" cron job that runs every 5 minutes.
+// migrate20210709193000
+// adds a "url" column to the database containing the url the file was downloaded from.
+// adds a "finished" column to the database that indicates, that a files download is finished.
+// adds a "fileDownload" cron job that runs every 5 minutes.
 func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20210709193000",
