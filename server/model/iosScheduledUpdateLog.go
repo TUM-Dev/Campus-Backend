@@ -10,6 +10,7 @@ const (
 	IOSMinimumUpdateInterval = 30
 )
 
+// IOSScheduledUpdateLog logs the last time a device was updated.
 type IOSScheduledUpdateLog struct {
 	ID        uint32    `gorm:"primary_key;auto_increment;not_null" json:"id"`
 	DeviceID  string    `gorm:"index:idx_scheduled_update_log_device,unique" json:"deviceId"`

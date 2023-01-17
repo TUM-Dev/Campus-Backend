@@ -38,6 +38,9 @@ func (repository *Repository) GetDevices() ([]model.IOSDevice, error) {
 	return devices, nil
 }
 
+// GetDevicesThatShouldUpdateGrades returns a list of devices that should be updated
+// A device that needs to be updated is either a new device or a device that has not
+// been updated in the last model.IOSMinimumUpdateInterval minutes
 func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDeviceLastUpdated, error) {
 	var devices []model.IOSDeviceLastUpdated
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// IOSDeviceLastUpdated used as a result of a query that joins
+// IOSDevice and IOSDeviceRequestLog tables.
 type IOSDeviceLastUpdated struct {
 	DeviceID    string       `json:"deviceId"`
 	LastUpdated sql.NullTime `json:"lastUpdated"`

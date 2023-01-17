@@ -1,3 +1,5 @@
+// Package ios_logging contains functions to log data to the database
+// should be used for debugging and analytics purposes later on
 package ios_logging
 
 import (

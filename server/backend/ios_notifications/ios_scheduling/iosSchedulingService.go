@@ -1,3 +1,5 @@
+// Package ios_scheduling provides functionality for updating user information
+// and optionally sending notifications to iOS devices.
 package ios_scheduling
 
 import (
@@ -11,8 +13,8 @@ import (
 )
 
 const (
-	DevicesToCheckPerCron = 100
-	MaxRoutineCount       = 10
+	DevicesToCheckPerCronBase = 50
+	MaxRoutineCount           = 10
 )
 
 type Service struct {
@@ -49,7 +51,7 @@ func (service *Service) HandleScheduledCron() error {
 
 	log.Infof("Found %d devices to check!", len(devices))
 
-	devices = service.selectDevicesToUpdate(devices)
+	devices = service.selectDevicesToUpdate(devices, currentPriority.Priority)
 
 	service.handleDevices(devices)
 
@@ -109,12 +111,16 @@ func (service *Service) LogScheduledUpdate(deviceID string) error {
 	return service.SchedulerLogRepository.LogScheduledUpdate(&scheduleLog)
 }
 
-func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated) []model.IOSDeviceLastUpdated {
-	if len(devices) < DevicesToCheckPerCron {
+// selectDevicesToUpdate selects max DevicesToCheckPerCronBase devices to update
+// based on the priority.
+func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated, priority int) []model.IOSDeviceLastUpdated {
+	maxDevicesToCheck := DevicesToCheckPerCronBase * priority
+
+	if len(devices) < maxDevicesToCheck {
 		return devices
 	}
 
-	return devices[:DevicesToCheckPerCron]
+	return devices[:maxDevicesToCheck]
 }
 
 func findIOSSchedulingPriorityForNow(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {

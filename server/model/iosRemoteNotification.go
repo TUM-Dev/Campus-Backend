@@ -1,5 +1,7 @@
 package model
 
+// inspired by https://github.com/sideshow/apns2
+
 import (
 	"encoding/json"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"

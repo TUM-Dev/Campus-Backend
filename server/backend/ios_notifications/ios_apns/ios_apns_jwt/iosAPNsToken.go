@@ -1,3 +1,4 @@
+// Package ios_apns_jwt handles the generation and validation of the JWT token for the APNs service
 package ios_apns_jwt
 
 import (
@@ -14,6 +15,7 @@ import (
 )
 
 const (
+	// TokenTimeout for the token in seconds
 	TokenTimeout = 3000
 )
 
@@ -57,6 +59,9 @@ func NewToken() (*Token, error) {
 	return &token, nil
 }
 
+// APNsEncryptionKeyFromFile reads the APNs encryption key from the file system
+// and returns it as an ecdsa.PrivateKey
+// The file location is defined by the APNS_P8_FILE_PATH environment variable
 func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 	path, err := filepath.Abs(APNsP8FilePath)
 

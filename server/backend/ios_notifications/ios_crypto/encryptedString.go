@@ -1,3 +1,4 @@
+// Package ios_crypto provides functions for encrypting and decrypting strings using AES-256-GCM.
 package ios_crypto
 
 import (

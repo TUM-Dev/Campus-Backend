@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// IOSGrades is a wrapper for a list of grades => XML stuff
 type IOSGrades struct {
 	XMLName xml.Name   `xml:"rowset"`
 	Grades  []IOSGrade `xml:"row"`
@@ -49,12 +50,15 @@ func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) boo
 	return grade.LectureTitle == encryptedGrade.LectureTitle && grade.Grade == encryptedGrade.Grade
 }
 
+// IOSEncryptedGrade is a grade that can be encrypted.
+// Whether it is currently encrypted or not is indicated by the IsEncrypted field.
 type IOSEncryptedGrade struct {
 	ID           uint `gorm:"primaryKey"`
 	Device       IOSDevice
 	DeviceID     string `gorm:"index;not null"`
 	LectureTitle string "gorm:not null"
 	Grade        string "gorm:not null"
+	IsEncrypted  bool   "gorm:not null,default:true"
 }
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
@@ -72,6 +76,7 @@ func (e *IOSEncryptedGrade) Encrypt(key string) error {
 
 	e.LectureTitle = encryptedTitle.String()
 	e.Grade = encryptedGrade.String()
+	e.IsEncrypted = true
 
 	return nil
 }
@@ -91,6 +96,7 @@ func (e *IOSEncryptedGrade) Decrypt(key string) error {
 
 	e.LectureTitle = decryptedTitle
 	e.Grade = decryptedGrade
+	e.IsEncrypted = false
 
 	return nil
 }

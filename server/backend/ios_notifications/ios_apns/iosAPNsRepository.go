@@ -38,6 +38,8 @@ type Repository struct {
 	httpClient *http.Client
 }
 
+// APNsURL uses the environment variable ENVIRONMENT to determine whether
+// to use the production or development APNs URL.
 func (r *Repository) APNsURL() string {
 	if env.IsProd() {
 		return APNsProductionURL
@@ -46,6 +48,8 @@ func (r *Repository) APNsURL() string {
 	return APNsDevelopmentURL
 }
 
+// CreateCampusTokenRequest creates a request log in the database that can be referred to
+// when the app responds to the background notification.
 func (r *Repository) CreateCampusTokenRequest(deviceId string) (*model.IOSDeviceRequestLog, error) {
 	var request model.IOSDeviceRequestLog
 

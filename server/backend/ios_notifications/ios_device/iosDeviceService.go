@@ -1,3 +1,4 @@
+// Package ios_device provides functions to register and remove ios devices
 package ios_device
 
 import (

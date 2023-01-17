@@ -1,3 +1,5 @@
+// Package ios_apns contains the logic for sending push notifications to iOS devices.
+// and communicating with the Apple Push Notification Service (APNs).
 package ios_apns
 
 import (
@@ -17,6 +19,10 @@ type Service struct {
 	Logger     *ios_logging.Service
 }
 
+// RequestGradeUpdateForDevice stores a Request ID to the database and sends a background
+// notification to the device with the given deviceID.
+// The device will then send an update request to the server including the CampusToken
+// and the Request ID.
 func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	campusRequestToken, err := s.Repository.CreateCampusTokenRequest(deviceID)
 

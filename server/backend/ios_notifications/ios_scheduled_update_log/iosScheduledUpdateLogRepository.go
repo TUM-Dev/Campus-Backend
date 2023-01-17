@@ -1,3 +1,5 @@
+// Package ios_scheduled_update_log provides functionality for logging scheduler updates
+// E.g. when a device updated its grades, the scheduler will log the update
 package ios_scheduled_update_log
 
 import (

@@ -1,3 +1,6 @@
+// Package ios_request_response provides functionality to handle device requests.
+// Device Requests are requests that are sent from the device to the server when the
+// device received a background push notification from the backend.
 package ios_request_response
 
 import (
@@ -25,6 +28,7 @@ var (
 )
 
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
+	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
@@ -68,7 +72,6 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		return nil, ErrInternalHandleGrades
 	}
 
-	// compare old and new grades
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 
 	if len(newGrades) == 0 {

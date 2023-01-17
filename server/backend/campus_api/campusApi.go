@@ -1,3 +1,4 @@
+// Package campus_api handles all requests to the TUM Campus API and decodes the XML responses.
 package campus_api
 
 import (
