@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"io/fs"
 	"net"
 	"net/http"
@@ -34,8 +35,6 @@ const (
 	httpPort = ":50051"
 )
 
-var Version = "dev"
-
 //go:embed swagger
 var swagfs embed.FS
 
@@ -53,13 +52,13 @@ func main() {
 	}
 
 	environment := "development"
-	if Version != "dev" {
+	if env.IsDev() {
 		environment = "production"
 	}
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:         os.Getenv("SENTRY_DSN"),
-			Release:     Version,
+			Release:     env.GetEnvironment(),
 			Environment: environment,
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
