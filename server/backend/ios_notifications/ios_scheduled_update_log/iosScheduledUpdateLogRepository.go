@@ -25,16 +25,6 @@ func (service *Repository) LogScheduledUpdate(log *model.IOSScheduledUpdateLog) 
 	return nil
 }
 
-func (service *Repository) GetScheduledUpdateLogForDevice(deviceId string) ([]model.IOSScheduledUpdateLog, error) {
-	var logs []model.IOSScheduledUpdateLog
-
-	if err := service.DB.Where("device_id = ?", deviceId).Order("created_at").Find(&logs).Error; err != nil {
-		return nil, err
-	}
-
-	return logs, nil
-}
-
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		DB: db,

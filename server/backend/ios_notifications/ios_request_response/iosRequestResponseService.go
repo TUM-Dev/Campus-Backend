@@ -17,18 +17,20 @@ type Service struct {
 	Logger     *ios_logging.Service
 }
 
+var (
+	ErrOutdatedRequest      = status.Error(codes.Internal, "Could not get request, probably request is already outdated")
+	ErrEmptyPayload         = status.Error(codes.InvalidArgument, "Payload is empty")
+	ErrUnknownRequestType   = status.Error(codes.InvalidArgument, "Unknown request type")
+	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
+)
+
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
-
-	log.Infof("Received request with id %s with payload: %s", request.GetRequestId(), request.GetPayload())
-
 	requestId := request.GetRequestId()
-
-	service.Logger.LogTokenRequest("Received Token Request: %s", requestId)
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
 
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Could not get request, probably request is already outdated")
+		return nil, ErrOutdatedRequest
 	}
 
 	switch requestLog.RequestType {
@@ -36,12 +38,12 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 		campusToken := request.GetPayload()
 
 		if campusToken == "" {
-			return nil, status.Error(codes.InvalidArgument, "Payload is empty")
+			return nil, ErrEmptyPayload
 		}
 
 		return service.handleDeviceCampusTokenRequest(requestLog, request.GetPayload())
 	default:
-		return nil, status.Error(codes.InvalidArgument, "Request type is not yet implemented")
+		return nil, ErrUnknownRequestType
 	}
 }
 
@@ -50,24 +52,24 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	if err != nil {
 		log.Error("Could not fetch grades: ", err)
-		return nil, status.Error(codes.Internal, "Could not fetch grades")
+		return nil, ErrInternalHandleGrades
 	}
 
 	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
 
 	if err != nil {
 		log.Error("Could not get old grades: ", err)
-		return nil, status.Error(codes.Internal, "Could not get old grades")
+		return nil, ErrInternalHandleGrades
 	}
 
-	oldGrades, err := service.decryptGrades(oldEncryptedGrades, campusToken)
+	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
 
 	if err != nil {
-		return nil, err
+		return nil, ErrInternalHandleGrades
 	}
 
 	// compare old and new grades
-	newGrades := service.compareAndFindNewGrades(apiGrades.Grades, oldGrades)
+	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 
 	if len(newGrades) == 0 {
 		return &pb.IOSDeviceRequestResponseReply{
@@ -79,14 +81,14 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	if err != nil {
 		log.Error("Could not delete old grades: ", err)
-		return nil, status.Error(codes.Internal, "Could not delete old grades")
+		return nil, ErrInternalHandleGrades
 	}
 
 	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
 
 	if len(newGrades) > 0 {
 		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		service.sendGradesToDevice(requestLog.DeviceID, newGrades, apnsRepository)
+		sendGradesToDevice(requestLog.DeviceID, newGrades, apnsRepository)
 	}
 
 	err = service.Repository.DeleteRequestLog(requestLog.RequestID)
@@ -100,7 +102,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	}, nil
 }
 
-func (service *Service) decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {
+func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {
 	oldGrades := make([]model.IOSEncryptedGrade, len(grades))
 	for i, encryptedGrade := range grades {
 		err := encryptedGrade.Decrypt(campusToken)
@@ -116,7 +118,7 @@ func (service *Service) decryptGrades(grades []model.IOSEncryptedGrade, campusTo
 	return oldGrades, nil
 }
 
-func (service *Service) compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEncryptedGrade) []model.IOSGrade {
+func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEncryptedGrade) []model.IOSGrade {
 	var grades []model.IOSGrade
 	for _, grade := range newGrades {
 		found := false
@@ -157,7 +159,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 	}
 }
 
-func (service *Service) sendGradesToDevice(deviceId string, grades []model.IOSGrade, apns *ios_apns.Repository) {
+func sendGradesToDevice(deviceId string, grades []model.IOSGrade, apns *ios_apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
 
 	if len(grades) == 1 {

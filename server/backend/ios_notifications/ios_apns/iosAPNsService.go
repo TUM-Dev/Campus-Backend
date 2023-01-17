@@ -34,8 +34,6 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 		return ErrCouldNotSendNotification
 	}
 
-	s.Logger.LogTokenRequest("Token Requested: %s", campusRequestToken.RequestID)
-
 	return nil
 }
 

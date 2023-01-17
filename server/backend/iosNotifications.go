@@ -8,7 +8,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_request_response"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_usage"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 
@@ -41,32 +40,22 @@ func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Serv
 	return ios_request_response.NewService(repository)
 }
 
-func (s *CampusServer) RegisterIOSDevice(ctx context.Context, req *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
+func (s *CampusServer) RegisterIOSDevice(_ context.Context, req *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
 	service := s.GetIOSDeviceService()
 	return service.RegisterDevice(req)
 }
 
-func (s *CampusServer) RemoveIOSDevice(ctx context.Context, req *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
+func (s *CampusServer) RemoveIOSDevice(_ context.Context, req *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
 	service := s.GetIOSDeviceService()
 	return service.RemoveDevice(req)
 }
 
-func (s *CampusServer) AddIOSDeviceUsage(ctx context.Context, req *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
+func (s *CampusServer) AddIOSDeviceUsage(_ context.Context, req *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
 	service := s.GetIOSUsageService()
 	return service.AddUsage(req)
 }
 
-func (s *CampusServer) SendIOSTestNotification(ctx context.Context, req *pb.SendIOSTestNotificationRequest) (*pb.SendIOSTestNotificationReply, error) {
-	service := s.GetIOSAPNsService()
-	return service.SendTestNotification(req)
-}
-
-func (s *CampusServer) SendIOSTestBackgroundNotification(ctx context.Context, req *emptypb.Empty) (*pb.SendIOSTestBackgroundNotificationReply, error) {
-	service := s.GetIOSAPNsService()
-	return service.SendTestBackgroundNotification()
-}
-
-func (s *CampusServer) IOSDeviceRequestResponse(ctx context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
+func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
 	service := s.GetIOSRequestResponseService()
 	return service.HandleDeviceRequestResponse(req)
 }

@@ -51,8 +51,6 @@ func (service *Service) HandleScheduledCron() error {
 
 	devices = service.selectDevicesToUpdate(devices)
 
-	log.Infof("Selected %d of them", len(devices))
-
 	service.handleDevices(devices)
 
 	return nil
@@ -103,12 +101,12 @@ func routineCount(devices []model.IOSDeviceLastUpdated) int {
 }
 
 func (service *Service) LogScheduledUpdate(deviceID string) error {
-	log := model.IOSScheduledUpdateLog{
+	scheduleLog := model.IOSScheduledUpdateLog{
 		DeviceID: deviceID,
 		Type:     model.IOSUpdateTypeGrades,
 	}
 
-	return service.SchedulerLogRepository.LogScheduledUpdate(&log)
+	return service.SchedulerLogRepository.LogScheduledUpdate(&scheduleLog)
 }
 
 func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated) []model.IOSDeviceLastUpdated {

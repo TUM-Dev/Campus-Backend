@@ -12,6 +12,11 @@ type Service struct {
 	Repository *Repository
 }
 
+var (
+	ErrCouldNotRegisterDevice = status.Error(codes.Internal, "Could not register device")
+	ErrCouldNotRemoveDevice   = status.Error(codes.Internal, "Could not remove device")
+)
+
 func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
 	if err := ios_notifications.ValidateRegisterDevice(request); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -25,7 +30,7 @@ func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*p
 	err := service.Repository.RegisterDevice(&device)
 
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Could not register device")
+		return nil, ErrCouldNotRegisterDevice
 	}
 
 	return &pb.RegisterIOSDeviceReply{
@@ -42,7 +47,7 @@ func (service *Service) RemoveDevice(request *pb.RemoveIOSDeviceRequest) (*pb.Re
 	err := service.Repository.RemoveDevice(request.GetDeviceId())
 
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Could not remove device")
+		return nil, ErrCouldNotRemoveDevice
 	}
 
 	return &pb.RemoveIOSDeviceReply{

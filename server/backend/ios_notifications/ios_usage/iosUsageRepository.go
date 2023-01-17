@@ -3,7 +3,6 @@ package ios_usage
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Repository struct {
@@ -22,26 +21,6 @@ func (service *Repository) GetUsage(deviceID string) ([]model.IOSDeviceUsageLog,
 	var usage []model.IOSDeviceUsageLog
 
 	if err := service.DB.Where("device_id = ?", deviceID).Find(&usage).Error; err != nil {
-		return nil, err
-	}
-
-	return usage, nil
-}
-
-func (service *Repository) GetUsageForAllDevices() ([]model.IOSDeviceUsageLog, error) {
-	var usage []model.IOSDeviceUsageLog
-
-	if err := service.DB.Find(&usage).Error; err != nil {
-		return nil, err
-	}
-
-	return usage, nil
-}
-
-func (service *Repository) GetUsageForAllDevicesInLastMonths(months int) ([]model.IOSDeviceUsageLog, error) {
-	var usage []model.IOSDeviceUsageLog
-
-	if err := service.DB.Where("created_at >= ?", time.Now().AddDate(0, -months, 0)).Find(&usage).Error; err != nil {
 		return nil, err
 	}
 

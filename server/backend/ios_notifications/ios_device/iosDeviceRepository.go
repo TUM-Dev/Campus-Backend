@@ -41,7 +41,11 @@ func (repository *Repository) GetDevices() ([]model.IOSDevice, error) {
 func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDeviceLastUpdated, error) {
 	var devices []model.IOSDeviceLastUpdated
 
-	tx := repository.DB.Raw(repository.buildDevicesThatShouldUpdateGradesQuery(), model.IOSMinimumUpdateInterval).Scan(&devices)
+	tx := repository.DB.Raw(
+		buildDevicesThatShouldUpdateGradesQuery(),
+		model.IOSUpdateTypeGrades,
+		model.IOSMinimumUpdateInterval,
+	).Scan(&devices)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -50,13 +54,13 @@ func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDev
 	return devices, nil
 }
 
-func (repository *Repository) buildDevicesThatShouldUpdateGradesQuery() string {
+func buildDevicesThatShouldUpdateGradesQuery() string {
 	return `
 		select d.device_id, ul.created_at as last_updated, d.public_key
 		from ios_devices d
 				 left join ios_scheduled_update_logs ul on d.device_id = ul.device_id
 		where ul.created_at is null
-		   or (ul.type = 'grades'
+		   or (ul.type = ?
 			and ul.created_at < date_sub(now(), interval ? minute))
 		group by d.device_id, ul.created_at
 		order by ul.created_at;

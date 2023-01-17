@@ -24,15 +24,3 @@ func ValidateRemoveDevice(request *pb.RemoveIOSDeviceRequest) error {
 
 	return nil
 }
-
-func ValidateSendTestNotification(request *pb.SendIOSTestNotificationRequest) error {
-	if request.GetDeviceId() == "" {
-		return errors.New("deviceId is empty")
-	}
-
-	if request.GetMessage() == "" {
-		return errors.New("message is empty")
-	}
-
-	return nil
-}
