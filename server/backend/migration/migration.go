@@ -91,7 +91,10 @@ func alterEnumColumn(tx *gorm.DB, table interface{}, column string, types []stri
 	enum := buildEnum(types)
 
 	stmt := &gorm.Statement{DB: tx}
-	stmt.Parse(&table)
+	err := stmt.Parse(&table)
+	if err != nil {
+		return errors.New("could not parse table")
+	}
 	tableName := stmt.Schema.Table
 
 	rawQuery := fmt.Sprintf(
@@ -165,7 +168,7 @@ func getEnumTypes(columTypes []gorm.ColumnType, column string) ([]string, error)
 
 	for i, s := range splitted {
 		types[i] = strings.TrimSpace(s)
-		types[i] = strings.Trim(types[i], "''")
+		types[i] = strings.Trim(types[i], "'")
 	}
 
 	return types, nil

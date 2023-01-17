@@ -14,5 +14,10 @@ type IOSDeviceLastUpdated struct {
 }
 
 func (device *IOSDeviceLastUpdated) String() string {
-	return fmt.Sprintf("IOSDeviceLastUpdated{DeviceID: %s, LastUpdated: %d}", device.DeviceID, device.LastUpdated)
+	time := "null"
+
+	if device.LastUpdated.Valid {
+		time = device.LastUpdated.Time.String()
+	}
+	return fmt.Sprintf("IOSDeviceLastUpdated{DeviceID: %s, LastUpdated: %s}", device.DeviceID, time)
 }
