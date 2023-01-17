@@ -5,16 +5,26 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/http2"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const (
-	BundleId = "de.tum.tca"
+	BundleId          = "de.tum.tca"
+	ReadIdleTimeout   = 15 * time.Second
+	HTTPClientTimeout = 60 * time.Second
+)
+
+const (
+	APNsDevelopmentURL = "https://api.sandbox.push.apple.com:443"
+	APNsProductionURL  = "https://api.push.apple.com:443"
 )
 
 type Repository struct {
@@ -24,9 +34,11 @@ type Repository struct {
 }
 
 func (r *Repository) APNsURL() string {
-	// production
-	// return "https://api.push.apple.com:443"
-	return "https://api.sandbox.push.apple.com:443"
+	if env.IsProd() {
+		return APNsProductionURL
+	}
+
+	return APNsDevelopmentURL
 }
 
 func (r *Repository) CreateCampusTokenRequest(deviceId string) (*model.IOSDeviceRequestLog, error) {
@@ -92,10 +104,17 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 }
 
 func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
+	transport := &http2.Transport{
+		ReadIdleTimeout: ReadIdleTimeout,
+	}
+
 	return &Repository{
-		DB:         *db,
-		Token:      token,
-		httpClient: &http.Client{},
+		DB:    *db,
+		Token: token,
+		httpClient: &http.Client{
+			Transport: transport,
+			Timeout:   HTTPClientTimeout,
+		},
 	}
 }
 
