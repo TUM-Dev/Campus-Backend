@@ -47,7 +47,7 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			log.Errorf("Error while closing body: %s", err)
 		}
 	}(resp.Body)
 

@@ -27,6 +27,11 @@ const (
 	APNsProductionURL  = "https://api.push.apple.com:443"
 )
 
+var (
+	ErrCouldNotSendNotification   = errors.New("could not send notification")
+	ErrCouldNotDecodeAPNsResponse = errors.New("could not decode apns response")
+)
+
 type Repository struct {
 	DB         gorm.DB
 	Token      *ios_apns_jwt.Token
@@ -88,16 +93,21 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 	if err != nil {
 		log.Error(err)
-		return nil, errors.New("could not send notification")
+		return nil, ErrCouldNotSendNotification
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Errorf("Error while closing body: %s", err)
+		}
+	}(resp.Body)
 
 	var response model.IOSRemoteNotificationResponse
 
 	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
 		log.Error(err)
-		return nil, errors.New("could not decode apns response")
+		return nil, ErrCouldNotDecodeAPNsResponse
 	}
 
 	return &response, nil
