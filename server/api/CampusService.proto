@@ -281,30 +281,7 @@ service Campus {
     };
   }
 
-  // add ios device usage log to calculate notification priority
-  rpc AddIOSDeviceUsage(AddIOSDeviceUsageRequest) returns (AddIOSDeviceUsageReply) {
-    option (google.api.http) = {
-      post: "/ios/device/{deviceId}/usage",
-    };
-  }
-
-  // send test notification to ios device
-  rpc SendIOSTestNotification(SendIOSTestNotificationRequest) returns (SendIOSTestNotificationReply) {
-    option (google.api.http) = {
-      post: "/ios/notifications/sendTest",
-      body: "*",
-    };
-  }
-
-  // send test remote notification to ios device
-  rpc SendIOSTestBackgroundNotification(google.protobuf.Empty) returns (SendIOSTestBackgroundNotificationReply) {
-    option (google.api.http) = {
-      post: "/ios/notifications/sendTestBackground",
-      body: "*",
-    };
-  }
-
-  // send test remote notification to ios device
+  // Endpoint for the iOS app to respond to background notifications requests
   rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {
     option (google.api.http) = {
       post: "/ios/notifications/deviceRequestResponse",
@@ -320,29 +297,6 @@ message IOSDeviceRequestResponseRequest {
 
 message IOSDeviceRequestResponseReply {
   string message = 1;
-}
-
-message SendIOSTestBackgroundNotificationReply {
-  string message = 1;
-}
-
-message SendIOSTestNotificationRequest {
-  string deviceId = 1;
-  string message = 2;
-}
-
-message SendIOSTestNotificationReply {
-  string message = 1;
-}
-
-message AddIOSDeviceUsageRequest {
-  string deviceId = 1;
-}
-
-message AddIOSDeviceUsageReply {
-  uint32 id = 1;
-  string deviceId = 2;
-  string createdAt = 3;
 }
 
 message RemoveIOSDeviceRequest {
@@ -457,8 +411,6 @@ message GetTopNewsReply {
   google.protobuf.Timestamp to = 5;
 }
 
-
-
 message CafeteriaRatingRequest {
   // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
   string cafeteriaId = 1;
@@ -493,7 +445,6 @@ message CafeteriaRatingReply {
   repeated RatingTagResult ratingTags = 6;
 }
 
-
 message DishRatingReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
@@ -503,7 +454,6 @@ message DishRatingReply {
   repeated RatingTagResult ratingTags = 6;
   repeated RatingTagResult nameTags = 7;
 }
-
 
 message SingleRatingReply{
   // number in the range 1-5
@@ -516,7 +466,6 @@ message SingleRatingReply{
   google.protobuf.Timestamp visited = 5;
 }
 
-
 message NewCafeteriaRatingRequest{
   // number in the range 1-5
   int32 points = 1;
@@ -527,7 +476,6 @@ message NewCafeteriaRatingRequest{
   // Optional comment (max 256 chars)
   string comment = 6;
 }
-
 
 message NewDishRatingRequest{
   // number in the range 1-5
@@ -547,7 +495,6 @@ message NewDishRatingRequest{
 message GetTagsReply{
   repeated TagsOverview ratingTags = 1;
 }
-
 
 message TagsOverview {
   int32 tagId = 1;
@@ -572,8 +519,6 @@ message RatingTagResult {
   int32 min = 4;
   int32 max = 5;
 }
-
-
 
 message GetCafeteriaReply{
   repeated Cafeteria cafeteria = 1;

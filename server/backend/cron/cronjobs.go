@@ -20,20 +20,21 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE                  = "news"
-	MENSA_TYPE                 = "mensa"
-	CHAT_TYPE                  = "chat"
-	KINO_TYPE                  = "kino"
-	ROOMFINDER_TYPE            = "roomfinder"
-	TICKETSALE_TYPE            = "ticketsale"
-	ALARM_TYPE                 = "alarm"
-	FILE_DOWNLOAD_TYPE         = "fileDownload"
-	DISH_NAME_DOWNLOAD         = "dishNameDownload"
-	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
-	CANTEEN_HEADCOUNT          = "canteenHeadCount"
-	STORAGE_DIR                = "/Storage/" // target location of files
-	IOS_NOTIFICATIONS          = "iosNotifications"
-	IOS_ACTIVITY_RESET         = "iosActivityReset"
+	NewsType                 = "news"
+	FileDownloadType         = "fileDownload"
+	DishNameDownload         = "dishNameDownload"
+	AverageRatingComputation = "averageRatingComputation"
+	CanteenHeadcount         = "canteenHeadCount"
+	StorageDir               = "/Storage/" // target location of files
+	IOSNotifications         = "iosNotifications"
+	IOSActivityReset         = "iosActivityReset"
+
+	/* MensaType      = "mensa"
+	ChatType       = "chat"
+	KinoType       = "kino"
+	RoomfinderType = "roomfinder"
+	TicketSaleType = "ticketsale"
+	AlarmType      = "alarm" */
 )
 
 func New(db *gorm.DB, mensaCronActivated bool) *CronService {
@@ -59,13 +60,13 @@ func (c *CronService) Run() error {
 		c.db.Model(&model.Crontab{}).
 			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
-				NEWS_TYPE,
-				FILE_DOWNLOAD_TYPE,
-				AVERAGE_RATING_COMPUTATION,
-				DISH_NAME_DOWNLOAD,
-				CANTEEN_HEADCOUNT,
-				IOS_NOTIFICATIONS,
-				IOS_ACTIVITY_RESET,
+				NewsType,
+				FileDownloadType,
+				AverageRatingComputation,
+				DishNameDownload,
+				CanteenHeadcount,
+				IOSNotifications,
+				IOSActivityReset,
 			).
 			Scan(&res)
 
@@ -73,7 +74,7 @@ func (c *CronService) Run() error {
 			// Persist run to DB right away
 			var offset int32 = 0
 			if c.useMensa {
-				if cronjob.Type.String == AVERAGE_RATING_COMPUTATION {
+				if cronjob.Type.String == AverageRatingComputation {
 					if time.Now().Hour() == 16 {
 						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
 					}
@@ -85,15 +86,15 @@ func (c *CronService) Run() error {
 
 			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
-			case NEWS_TYPE:
+			case NewsType:
 				g.Go(func() error { return c.newsCron(&cronjob) })
-			case FILE_DOWNLOAD_TYPE:
+			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
-			case DISH_NAME_DOWNLOAD:
+			case DishNameDownload:
 				if c.useMensa {
 					g.Go(c.dishNameDownloadCron)
 				}
-			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
+			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
 				if c.useMensa {
 					g.Go(c.averageRatingComputation)
 				}
@@ -112,12 +113,12 @@ func (c *CronService) Run() error {
 					case ALARM_TYPE:
 						g.Go(func() error { return c.alarmCron() })
 				*/
-			case CANTEEN_HEADCOUNT:
+			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
-			case IOS_NOTIFICATIONS:
+			case IOSNotifications:
 				g.Go(func() error { return c.iosNotificationsCron() })
-			case IOS_ACTIVITY_RESET:
-				g.Go(func() error { return nil })
+			case IOSActivityReset:
+				g.Go(func() error { return c.iosActivityReset() })
 			}
 		}
 

@@ -786,40 +786,9 @@
         ]
       }
     },
-    "/ios/device/{deviceId}/usage": {
-      "post": {
-        "summary": "add ios device usage log to calculate notification priority",
-        "operationId": "Campus_AddIOSDeviceUsage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiAddIOSDeviceUsageReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/ios/notifications/deviceRequestResponse": {
       "post": {
-        "summary": "send test remote notification to ios device",
+        "summary": "Endpoint for the iOS app to respond to background notifications requests",
         "operationId": "Campus_IOSDeviceRequestResponse",
         "responses": {
           "200": {
@@ -842,73 +811,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/apiIOSDeviceRequestResponseRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/ios/notifications/sendTest": {
-      "post": {
-        "summary": "send test notification to ios device",
-        "operationId": "Campus_SendIOSTestNotification",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiSendIOSTestNotificationReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiSendIOSTestNotificationRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/ios/notifications/sendTestBackground": {
-      "post": {
-        "summary": "send test remote notification to ios device",
-        "operationId": "Campus_SendIOSTestBackgroundNotification",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiSendIOSTestBackgroundNotificationReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {}
             }
           }
         ],
@@ -1386,21 +1288,6 @@
           "format": "int32"
         },
         "courseCode": {
-          "type": "string"
-        }
-      }
-    },
-    "apiAddIOSDeviceUsageReply": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "deviceId": {
-          "type": "string"
-        },
-        "createdAt": {
           "type": "string"
         }
       }
@@ -2383,33 +2270,6 @@
       "type": "object",
       "properties": {
         "status": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSendIOSTestBackgroundNotificationReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSendIOSTestNotificationReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSendIOSTestNotificationRequest": {
-      "type": "object",
-      "properties": {
-        "deviceId": {
-          "type": "string"
-        },
-        "message": {
           "type": "string"
         }
       }

@@ -7,7 +7,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_request_response"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_usage"
 	"gorm.io/gorm"
 )
 
@@ -20,12 +19,6 @@ func (s *CampusServer) GetIOSDeviceService() *ios_device.Service {
 	repository := ios_device.NewRepository(s.db)
 
 	return ios_device.NewService(repository)
-}
-
-func (s *CampusServer) GetIOSUsageService() *ios_usage.Service {
-	repository := ios_usage.NewRepository(s.db)
-
-	return ios_usage.NewService(repository)
 }
 
 func (s *CampusServer) GetIOSAPNsService() *ios_apns.Service {
@@ -48,11 +41,6 @@ func (s *CampusServer) RegisterIOSDevice(_ context.Context, req *pb.RegisterIOSD
 func (s *CampusServer) RemoveIOSDevice(_ context.Context, req *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
 	service := s.GetIOSDeviceService()
 	return service.RemoveDevice(req)
-}
-
-func (s *CampusServer) AddIOSDeviceUsage(_ context.Context, req *pb.AddIOSDeviceUsageRequest) (*pb.AddIOSDeviceUsageReply, error) {
-	service := s.GetIOSUsageService()
-	return service.AddUsage(req)
 }
 
 func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {

@@ -3,7 +3,6 @@ package ios_device
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type Repository struct {
@@ -11,14 +10,32 @@ type Repository struct {
 }
 
 func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
-	if err := repository.DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "device_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"public_key"}),
-	}).Create(device).Error; err != nil {
-		return err
-	}
 
-	return nil
+	return repository.DB.Transaction(func(tx *gorm.DB) error {
+
+		var foundDevice model.IOSDevice
+
+		res := tx.First(&foundDevice, "device_id = ?", device.DeviceID)
+
+		if res.Error != nil && res.Error != gorm.ErrRecordNotFound {
+			return res.Error
+		}
+
+		if res.Error == gorm.ErrRecordNotFound {
+			return tx.Create(device).Error
+		}
+
+		newDevice := model.IOSDevice{
+			DeviceID:          device.DeviceID,
+			PublicKey:         device.PublicKey,
+			ActivityToday:     foundDevice.ActivityToday + 1,
+			ActivityThisWeek:  foundDevice.ActivityThisWeek + 1,
+			ActivityThisMonth: foundDevice.ActivityThisMonth + 1,
+			ActivityThisYear:  foundDevice.ActivityThisYear + 1,
+		}
+
+		return tx.Save(&newDevice).Error
+	})
 }
 
 func (repository *Repository) RemoveDevice(deviceId string) error {
@@ -68,6 +85,22 @@ func buildDevicesThatShouldUpdateGradesQuery() string {
 		group by d.device_id, ul.created_at
 		order by ul.created_at;
 	`
+}
+
+func (repository *Repository) ResetDevicesDailyActivity() error {
+	return repository.DB.Model(model.IOSDevice{}).Where("activity_today != ?", 0).Update("activity_today", 0).Error
+}
+
+func (repository *Repository) ResetDevicesWeeklyActivity() error {
+	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_week != ?", 0).Update("activity_this_week", 0).Error
+}
+
+func (repository *Repository) ResetDevicesMonthlyActivity() error {
+	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_month != ?", 0).Update("activity_this_month", 0).Error
+}
+
+func (repository *Repository) ResetDevicesYearlyActivity() error {
+	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_year != ?", 0).Update("activity_this_year", 0).Error
 }
 
 func NewRepository(db *gorm.DB) *Repository {

@@ -24,13 +24,13 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 
 			if err := tx.AutoMigrate(
 				&model.IOSDevice{},
-				&model.IOSDeviceUsageLog{},
 				&model.Crontab{},
 				&model.IOSSchedulingPriority{},
 				&model.IOSScheduledUpdateLog{},
 				&model.IOSDeviceRequestLog{},
 				&model.IOSEncryptedGrade{},
 				&model.IOSLog{},
+				&model.IOSDevicesActivityReset{},
 			); err != nil {
 				return err
 			}
@@ -57,7 +57,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 
 			err = tx.Create(&model.Crontab{
 				Interval: 60,
-				Type:     null.String{NullString: sql.NullString{String: cron.IOS_NOTIFICATIONS, Valid: true}},
+				Type:     null.String{NullString: sql.NullString{String: cron.IOSNotifications, Valid: true}},
 			}).Error
 
 			if err != nil {
@@ -68,7 +68,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			return tx.Create(&model.Crontab{
 				Type: null.String{
 					NullString: sql.NullString{
-						String: cron.IOS_ACTIVITY_RESET,
+						String: cron.IOSActivityReset,
 						Valid:  true,
 					},
 				},
@@ -78,9 +78,6 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 
 		Rollback: func(tx *gorm.DB) error {
 			if err := tx.Migrator().DropTable(&model.IOSDevice{}); err != nil {
-				return err
-			}
-			if err := tx.Migrator().DropTable(&model.IOSDeviceUsageLog{}); err != nil {
 				return err
 			}
 			if err := tx.Migrator().DropTable(&model.IOSSchedulingPriority{}); err != nil {
@@ -98,13 +95,16 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			if err := tx.Migrator().DropTable(&model.IOSLog{}); err != nil {
 				return err
 			}
+			if err := tx.Migrator().DropTable(&model.IOSDevicesActivityReset{}); err != nil {
+				return err
+			}
 
-			err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOS_NOTIFICATIONS, 60).Error
+			err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOSNotifications, 60).Error
 			if err != nil {
 				return err
 			}
 
-			err = tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOS_ACTIVITY_RESET, 86400).Error
+			err = tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOSActivityReset, 86400).Error
 
 			if err != nil {
 				return err
