@@ -50,7 +50,7 @@ func alterEnumColumn(tx *gorm.DB, table interface{}, column string, types []stri
 	stmt := &gorm.Statement{DB: tx}
 	err := stmt.Parse(&table)
 	if err != nil {
-		return errors.New("could not parse table")
+		return errors.New("could not parse enum table")
 	}
 	tableName := stmt.Schema.Table
 
@@ -64,7 +64,7 @@ func alterEnumColumn(tx *gorm.DB, table interface{}, column string, types []stri
 	tx = tx.Exec(rawQuery)
 
 	if tx.Error != nil {
-		return errors.New("could not alter table")
+		return errors.New("could not alter enum table")
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func getEnumTypesFromDB(tx *gorm.DB, table interface{}, column string) ([]string
 	columnType, err := tx.Migrator().ColumnTypes(&table)
 
 	if err != nil {
-		return nil, errors.New("could not get column types")
+		return nil, errors.New("could not get enum column types")
 	}
 
 	enumTypes, err := getEnumTypes(columnType, column)
