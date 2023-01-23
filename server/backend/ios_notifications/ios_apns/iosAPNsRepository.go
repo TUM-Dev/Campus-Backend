@@ -17,8 +17,11 @@ import (
 )
 
 const (
-	BundleId          = "de.tum.tca"
-	ReadIdleTimeout   = 15 * time.Second
+	// BundleId from the Apple Developer Portal
+	BundleId = "de.tum.tca"
+	// ReadIdleTimeout is the idle time after which the http2 transport will do a health check
+	ReadIdleTimeout = 15 * time.Second
+	// HTTPClientTimeout is the timeout for the http client used to send notifications
 	HTTPClientTimeout = 60 * time.Second
 )
 
