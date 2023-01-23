@@ -20,9 +20,11 @@ In the following, we provide instructions for installing [MariaDB](https://maria
 ```bash
 sudo dnf install mariadb-server
 
-# Enable and start the systemd service
-sudo systemctl enable mariadb
+# Start the MariaDB server
 sudo systemctl start mariadb
+
+# Optional: Enable autostart
+sudo systemctl enable mariadb
 ```
 
 More details are available here: https://docs.fedoraproject.org/en-US/quick-docs/installing-mysql-mariadb/
@@ -32,9 +34,11 @@ More details are available here: https://docs.fedoraproject.org/en-US/quick-docs
 ```bash
 sudo apt install mariadb-server
 
-# Enable and start the systemd service
-sudo systemctl enable mariadb
+# Start the MariaDB server
 sudo systemctl start mariadb
+
+# Optional: Enable autostart
+sudo systemctl enable mariadb
 ```
 
 ### Setting up the DB
