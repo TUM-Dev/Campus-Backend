@@ -51,6 +51,8 @@ CREATE DATABASE campus_backend; -- Create a new DB for the backend
 
 CREATE USER 'gorm'@'localhost' IDENTIFIED BY 'gorm'; -- Create a new user called `gorm`.
 GRANT ALL PRIVILEGES ON campus_backend.* TO 'gorm'@'localhost'; -- Garant our `gorm` user access to the `campus_backend` DB.
+ALTER USER 'gorm'@'localhost' IDENTIFIED BY 'GORM_USER_PASSWORD'; -- Set a password for the `gorm` user.
+FLUSH PRIVILEGES;
 ```
 
 ### Starting
@@ -59,7 +61,7 @@ To start the server there are environment variables, as well as command line opt
 
 ```bash
 cd  server
-export DB_DSN="Your gorm DB connection string for example: gorm@tcp(localhost:3306)/campus_backend"
+export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
 go run ./main.go [-MensaCron 0]
 ```
 
