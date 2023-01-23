@@ -1,5 +1,7 @@
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20221212204029-68b05b451617 h1:/o27aY5kfd4JnrqtbsMLIGwe+VBqS7j3ovCG/cXtAWk=
 github.com/TUM-Dev/Campus-Backend/api v0.0.0-20221212204029-68b05b451617/go.mod h1:hDLh5lxHD53m8/eDGsXJDqc9ONXqbJPa9b6uzpfl8Ow=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230111021245-cd17e382bda3 h1:b585GRp+ZPA9j2EM0KQSSFiknR2SVF18FcRHRHnIIA4=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230111021245-cd17e382bda3/go.mod h1:1gTg0lAImFNZiYKrJ/5OLM2UWoj7zeLzTX1WLJhF7LY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
