@@ -19,13 +19,11 @@ func SymmetricEncrypt(plaintext string, key string) (*EncryptedString, error) {
 	bytesPlaintext := []byte(plaintext)
 
 	c, err := aes.NewCipher(bytesKey)
-
 	if err != nil {
 		return nil, err
 	}
 
 	gcm, err := cipher.NewGCM(c)
-
 	if err != nil {
 		return nil, err
 	}
