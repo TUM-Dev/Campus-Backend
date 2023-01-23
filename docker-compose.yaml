@@ -28,7 +28,8 @@ services:
     volumes:
       - campus-db-data:/var/lib/mysql
       - ./source-schema.sql:/entrypoint/schema.sql
-      # - mysql --user=root --password=secret_root_password campus_db < /entrypoint/schema.sql
+      # Execute in container to init with schema:
+      # mysql --user=root --password=secret_root_password campus_db < /entrypoint/schema.sql
 
 volumes:
     campus-db-data:
