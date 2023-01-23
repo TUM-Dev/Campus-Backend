@@ -724,7 +724,7 @@
     },
     "/ios/device": {
       "post": {
-        "summary": "register your ios device for push notifications",
+        "summary": "Register your ios device for push notifications",
         "operationId": "Campus_RegisterIOSDevice",
         "responses": {
           "200": {
@@ -757,7 +757,7 @@
     },
     "/ios/device/{deviceId}": {
       "delete": {
-        "summary": "remove your ios device from the db and unregister it from push notifications",
+        "summary": "Remove your ios device from the db and unregister it from push notifications",
         "operationId": "Campus_RemoveIOSDevice",
         "responses": {
           "200": {
