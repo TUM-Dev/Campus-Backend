@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"sync"
 	"time"
 
@@ -80,8 +81,6 @@ func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	return nil
 }
 
-var ErrNoDeviceID = status.Errorf(codes.PermissionDenied, "no device id")
-
 // checkDevice checks if the device is approved (TODO: implement)
 func (s *CampusServer) checkDevice(ctx context.Context) error {
 	var deviceID, method string
@@ -113,4 +112,41 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	// log device to db
 	s.deviceBuf.add(deviceID, method, osVersion, appVersion)
 	return nil
+}
+
+func (s *CampusServer) RegisterDevice(_ context.Context, req *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
+
+	if err := ValidateRegisterDevice(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	switch req.GetDeviceType() {
+	case pb.DeviceType_ANDROID:
+		return nil, status.Error(codes.Unimplemented, "android device register not implemented")
+	case pb.DeviceType_IOS:
+		service := s.GetIOSDeviceService()
+		return service.RegisterDevice(req)
+	case pb.DeviceType_WINDOWS:
+		return nil, status.Error(codes.Unimplemented, "windows device register not implemented")
+	}
+
+	return nil, status.Error(codes.InvalidArgument, "invalid device type")
+}
+
+func (s *CampusServer) RemoveDevice(_ context.Context, req *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
+	if err := ValidateRemoveDevice(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	switch req.GetDeviceType() {
+	case pb.DeviceType_ANDROID:
+		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
+	case pb.DeviceType_IOS:
+		service := s.GetIOSDeviceService()
+		return service.RemoveDevice(req)
+	case pb.DeviceType_WINDOWS:
+		return nil, status.Error(codes.Unimplemented, "windows device remove not implemented")
+	}
+
+	return nil, status.Error(codes.InvalidArgument, "invalid device type")
 }

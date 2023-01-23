@@ -3,7 +3,6 @@ package ios_device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,11 +17,7 @@ var (
 	ErrCouldNotRemoveDevice   = status.Error(codes.Internal, "Could not remove device")
 )
 
-func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*pb.RegisterIOSDeviceReply, error) {
-	if err := ios_notifications.ValidateRegisterDevice(request); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
+func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
 	device := model.IOSDevice{
 		DeviceID:  request.GetDeviceId(),
 		PublicKey: request.GetPublicKey(),
@@ -34,25 +29,20 @@ func (service *Service) RegisterDevice(request *pb.RegisterIOSDeviceRequest) (*p
 		return nil, ErrCouldNotRegisterDevice
 	}
 
-	return &pb.RegisterIOSDeviceReply{
+	return &pb.RegisterDeviceReply{
 		DeviceId: device.DeviceID,
 	}, nil
 }
 
-func (service *Service) RemoveDevice(request *pb.RemoveIOSDeviceRequest) (*pb.RemoveIOSDeviceReply, error) {
-
-	if err := ios_notifications.ValidateRemoveDevice(request); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
+func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
 	err := service.Repository.RemoveDevice(request.GetDeviceId())
 
 	if err != nil {
 		return nil, ErrCouldNotRemoveDevice
 	}
 
-	return &pb.RemoveIOSDeviceReply{
-		Message: "Successfully removed device",
+	return &pb.RemoveDeviceReply{
+		DeviceId: request.GetDeviceId(),
 	}, nil
 }
 
