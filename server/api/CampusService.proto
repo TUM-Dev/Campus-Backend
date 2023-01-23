@@ -266,7 +266,7 @@ service Campus {
     };
   }
 
-  // register your ios device for push notifications
+  // Register your ios device for push notifications
   rpc RegisterIOSDevice(RegisterIOSDeviceRequest) returns (RegisterIOSDeviceReply) {
     option (google.api.http) = {
       post: "/ios/device",
@@ -274,7 +274,7 @@ service Campus {
     };
   }
 
-  // remove your ios device from the db and unregister it from push notifications
+  // Remove your ios device from the db and unregister it from push notifications
   rpc RemoveIOSDevice(RemoveIOSDeviceRequest) returns (RemoveIOSDeviceReply) {
     option (google.api.http) = {
       delete: "/ios/device/{deviceId}",

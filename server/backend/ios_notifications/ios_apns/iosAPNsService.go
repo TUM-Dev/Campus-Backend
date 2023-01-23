@@ -22,7 +22,7 @@ type Service struct {
 // RequestGradeUpdateForDevice stores a Request ID to the database and sends a background
 // notification to the device with the given deviceID.
 // The device will then send an update request to the server including the CampusToken
-// and the Request ID.
+// and the request ID.
 func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	campusRequestToken, err := s.Repository.CreateCampusTokenRequest(deviceID)
 

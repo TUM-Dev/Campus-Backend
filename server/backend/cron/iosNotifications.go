@@ -8,7 +8,7 @@ import (
 )
 
 // Starts the cron job for sending iOS notifications reuses
-// the apns client (ios_apns.Service) stored in CronService
+// the APNs client (ios_apns.Service) stored in CronService
 func (c *CronService) iosNotificationsCron() error {
 	repo := ios_scheduling.NewRepository(c.db)
 	devicesRepo := ios_device.NewRepository(c.db)
