@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DevicesToCheckPerCronBase = 50
+	DevicesToCheckPerCronBase = 10
 	MaxRoutineCount           = 10
 )
 
