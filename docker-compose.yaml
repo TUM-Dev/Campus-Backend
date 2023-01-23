@@ -13,7 +13,7 @@ services:
       - APNS_TEAM_ID=${APNS_TEAM_ID}
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
     volumes:
-      - ./AuthKey_JDTG2LZ9YP.p8:${APNS_P8_FILE_PATH}
+      - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     depends_on:
       - db
 
