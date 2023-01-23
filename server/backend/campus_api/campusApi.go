@@ -19,7 +19,6 @@ const (
 var (
 	ErrCannotCreateRequest  = errors.New("cannot create http request")
 	ErrWhileFetchingGrades  = errors.New("error while fetching grades")
-	ErrWhileReadingBody     = errors.New("error while reading response body")
 	ErrorWhileUnmarshalling = errors.New("error while unmarshalling")
 )
 
@@ -52,16 +51,10 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 		}
 	}(resp.Body)
 
-	body, err := io.ReadAll(resp.Body)
+	var grades model.IOSGrades
+	err = xml.NewDecoder(resp.Body).Decode(&grades)
 
 	if err != nil {
-		log.Errorf("Error while reading response body: %s", err)
-		return nil, ErrWhileReadingBody
-	}
-
-	var grades model.IOSGrades
-
-	if err := xml.Unmarshal(body, &grades); err != nil {
 		log.Errorf("Error while unmarshalling grades: %s", err)
 		return nil, ErrorWhileUnmarshalling
 	}
