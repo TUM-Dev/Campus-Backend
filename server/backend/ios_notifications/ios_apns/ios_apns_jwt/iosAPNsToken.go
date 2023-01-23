@@ -21,11 +21,11 @@ const (
 
 var (
 	ErrorAuthKeyNotPem   = errors.New("failed to parse token: AuthKey must be a valid .p8 PEM file")
-	ErrorAuthKeyNotECDSA = errors.New("failed to parse token: AuthKey must be of type ecdsa.PrivateKey")
+	ErrorAuthKeyNotEcdsa = errors.New("failed to parse token: AuthKey must be of type ecdsa.PrivateKey")
 	ErrorAuthKeyNil      = errors.New("failed to parse token: AuthKey was nil")
-	APNsKeyId            = os.Getenv("APNS_KEY_ID")
-	APNsTeamId           = os.Getenv("APNS_TEAM_ID")
-	APNsP8FilePath       = os.Getenv("APNS_P8_FILE_PATH")
+	ApnsKeyId            = os.Getenv("APNS_KEY_ID")
+	ApnsTeamId           = os.Getenv("APNS_TEAM_ID")
+	ApnsP8FilePath       = os.Getenv("APNS_P8_FILE_PATH")
 )
 
 type Token struct {
@@ -46,8 +46,8 @@ func NewToken() (*Token, error) {
 
 	token := Token{
 		EncryptionKey: encryptionKey,
-		KeyId:         APNsKeyId,
-		TeamId:        APNsTeamId,
+		KeyId:         ApnsKeyId,
+		TeamId:        ApnsTeamId,
 	}
 
 	_, err = token.Generate()
@@ -63,7 +63,7 @@ func NewToken() (*Token, error) {
 // and returns it as an ecdsa.PrivateKey
 // The file location is defined by the APNS_P8_FILE_PATH environment variable
 func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
-	path, err := filepath.Abs(APNsP8FilePath)
+	path, err := filepath.Abs(ApnsP8FilePath)
 
 	if err != nil {
 		log.Error("No valid path to AuthKey")
@@ -98,7 +98,7 @@ func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 		return ecdsaKey, nil
 	}
 
-	return nil, ErrorAuthKeyNotECDSA
+	return nil, ErrorAuthKeyNotEcdsa
 }
 
 func (t *Token) GenerateNewTokenIfExpired() (bearer string) {
@@ -106,14 +106,17 @@ func (t *Token) GenerateNewTokenIfExpired() (bearer string) {
 	defer t.Unlock()
 
 	if t.IsExpired() {
-		t.Generate()
+		_, err := t.Generate()
+		if err != nil {
+			return ""
+		}
 	}
 
 	return t.Bearer
 }
 
 func (t *Token) IsExpired() bool {
-	return time.Now().Unix() >= (t.IssuedAt + TokenTimeout)
+	return currentTimestamp() >= (t.IssuedAt + TokenTimeout)
 }
 
 func (t *Token) Generate() (bool, error) {
@@ -121,7 +124,7 @@ func (t *Token) Generate() (bool, error) {
 		return false, ErrorAuthKeyNil
 	}
 
-	issuedAt := time.Now().Unix()
+	issuedAt := currentTimestamp()
 
 	jwtToken := &jwt.Token{
 		Header: map[string]interface{}{
@@ -145,4 +148,8 @@ func (t *Token) Generate() (bool, error) {
 	t.Bearer = token
 
 	return true, nil
+}
+
+func currentTimestamp() int64 {
+	return time.Now().UTC().Unix()
 }

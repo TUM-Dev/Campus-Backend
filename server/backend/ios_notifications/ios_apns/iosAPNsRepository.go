@@ -26,8 +26,8 @@ const (
 )
 
 const (
-	APNsDevelopmentURL = "https://api.sandbox.push.apple.com:443"
-	APNsProductionURL  = "https://api.push.apple.com:443"
+	ApnsDevelopmentURL = "https://api.sandbox.push.apple.com:443"
+	ApnsProductionURL  = "https://api.push.apple.com:443"
 )
 
 var (
@@ -41,14 +41,14 @@ type Repository struct {
 	httpClient *http.Client
 }
 
-// APNsURL uses the environment variable ENVIRONMENT to determine whether
+// ApnsUrl uses the environment variable ENVIRONMENT to determine whether
 // to use the production or development APNs URL.
-func (r *Repository) APNsURL() string {
+func (r *Repository) ApnsUrl() string {
 	if env.IsProd() {
-		return APNsProductionURL
+		return ApnsProductionURL
 	}
 
-	return APNsDevelopmentURL
+	return ApnsDevelopmentURL
 }
 
 // CreateCampusTokenRequest creates a request log in the database that can be referred to
@@ -76,28 +76,22 @@ func (r *Repository) SendBackgroundNotification(payload *model.IOSNotificationPa
 
 func (r *Repository) SendNotification(notification *model.IOSNotificationPayload, apnsPushType model.IOSAPNSPushType, priority int) (*model.IOSRemoteNotificationResponse, error) {
 
-	url := r.APNsURL() + "/3/device/" + notification.DeviceId
-
+	url := r.ApnsUrl() + "/3/device/" + notification.DeviceId
 	body, _ := notification.MarshalJSON()
 
 	client := r.httpClient
-
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 
 	// can be e.g. alert or background
 	req.Header.Set("apns-push-type", apnsPushType.String())
-
 	req.Header.Set("apns-topic", BundleId)
-
 	// can be a value between 1 and 10
 	req.Header.Set("apns-priority", strconv.Itoa(priority))
 
 	bearer := r.Token.GenerateNewTokenIfExpired()
-
 	req.Header.Set("authorization", "bearer "+bearer)
 
 	resp, err := client.Do(req)
-
 	if err != nil {
 		log.Error(err)
 		return nil, ErrCouldNotSendNotification
@@ -111,7 +105,6 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	}(resp.Body)
 
 	var response model.IOSRemoteNotificationResponse
-
 	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
 		log.Error(err)
 		return nil, ErrCouldNotDecodeAPNsResponse
