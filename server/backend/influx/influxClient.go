@@ -1,6 +1,7 @@
 package influx
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"os"
@@ -31,8 +32,14 @@ func SetClient(client *influxdb2.Client) {
 
 	write.WritePoint(p)
 
-	write.Flush()
+	FlushIfDevelop()
 } */
+
+func FlushIfDevelop() {
+	if env.IsDev() {
+		writeAPI().Flush()
+	}
+}
 
 func writeAPI() api.WriteAPI {
 	return GetClient().WriteAPI(influxOrg, influxBucket)
