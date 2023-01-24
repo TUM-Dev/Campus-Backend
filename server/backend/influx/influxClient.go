@@ -32,12 +32,12 @@ func SetClient(client *influxdb2.Client) {
 
 	write.WritePoint(p)
 
-	FlushIfDevelop()
+	FlushIfDevelop(write)
 } */
 
-func FlushIfDevelop() {
+func FlushIfDevelop(write api.WriteAPI) {
 	if env.IsDev() {
-		writeAPI().Flush()
+		write.Flush()
 	}
 }
 
