@@ -66,6 +66,13 @@ func main() {
 	} else {
 		log.Println("continuing without sentry")
 	}
+
+	// initializing connection to InfluxDB
+	err := backend.ConnectToInfluxDB()
+	if err != nil {
+		log.WithError(err).Error("InfluxDB connection failed")
+	}
+
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
