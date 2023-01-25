@@ -90,7 +90,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
-		service.deleteRequestLog(requestLog.RequestID)
+		service.deleteRequestLog(requestLog)
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
 		}, nil
@@ -113,18 +113,18 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		influx.LogIOSNewGrades(requestLog.DeviceID, len(newGrades))
 	}
 
-	service.deleteRequestLog(requestLog.RequestID)
+	service.deleteRequestLog(requestLog)
 
 	return &pb.IOSDeviceRequestResponseReply{
 		Message: "Successfully handled request",
 	}, nil
 }
 
-func (service *Service) deleteRequestLog(requestId string) {
-	err := service.Repository.DeleteRequestLog(requestId)
+func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) {
+	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
 
 	if err != nil {
-		log.Error("Could not delete request log: ", err)
+		log.Error("Could not delete request logs: ", err)
 	}
 }
 

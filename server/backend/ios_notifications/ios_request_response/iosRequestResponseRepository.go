@@ -53,6 +53,23 @@ func (r *Repository) DeleteRequestLog(requestId string) error {
 	return nil
 }
 
+func (r *Repository) DeleteAllRequestLogsForThisDeviceWithType(requestLog *model.IOSDeviceRequestLog) error {
+
+	res := r.DB.
+		Delete(
+			&model.IOSDeviceRequestLog{},
+			"device_id = ? and request_type = ?",
+			requestLog.DeviceID,
+			requestLog.RequestType,
+		)
+
+	if err := res.Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	return &Repository{
 		DB:    db,
