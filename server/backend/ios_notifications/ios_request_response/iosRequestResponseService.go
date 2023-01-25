@@ -43,7 +43,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 			return nil, ErrEmptyPayload
 		}
 
-		return service.handleDeviceCampusTokenRequest(requestLog, request.GetPayload())
+		return service.handleDeviceCampusTokenRequest(requestLog, campusToken)
 	default:
 		return nil, ErrUnknownRequestType
 	}
@@ -51,28 +51,25 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	apiGrades, err := campus_api.FetchGrades(campusToken)
-
 	if err != nil {
 		log.Error("Could not fetch grades: ", err)
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
-
 	if err != nil {
 		log.Error("Could not get old grades: ", err)
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
-
 	if err != nil {
 		return nil, ErrInternalHandleGrades
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
-
 	if len(newGrades) == 0 {
+		service.deleteRequestLog(requestLog.RequestID)
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
 		}, nil
@@ -92,15 +89,21 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		sendGradesToDevice(requestLog.DeviceID, newGrades, apnsRepository)
 	}
 
-	err = service.Repository.DeleteRequestLog(requestLog.RequestID)
-
-	if err != nil {
-		log.Error("Could not delete request log: ", err)
-	}
+	service.deleteRequestLog(requestLog.RequestID)
 
 	return &pb.IOSDeviceRequestResponseReply{
 		Message: "Successfully handled request",
 	}, nil
+}
+
+func (service *Service) deleteRequestLog(requestId string) {
+	err := service.Repository.DeleteRequestLog(requestId)
+
+	log.Infof("Deleted request log")
+
+	if err != nil {
+		log.Error("Could not delete request log: ", err)
+	}
 }
 
 func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {
@@ -131,7 +134,7 @@ func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEn
 		}
 
 		if !found {
-			newGrades = append(newGrades, grade)
+			grades = append(grades, grade)
 		}
 	}
 
