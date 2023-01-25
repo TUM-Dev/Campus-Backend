@@ -5,7 +5,6 @@ package ios_scheduling
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_logging"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -23,7 +22,6 @@ type Service struct {
 	SchedulerLogRepository *ios_scheduled_update_log.Repository
 	Priority               *model.IOSSchedulingPriority
 	APNs                   *ios_apns.Service
-	Logger                 *ios_logging.Service
 }
 
 func (service *Service) HandleScheduledCron() error {
@@ -167,6 +165,5 @@ func NewService(repository *Repository,
 		SchedulerLogRepository: schedulerRepository,
 		Priority:               model.DefaultIOSSchedulingPriority(),
 		APNs:                   apnsService,
-		Logger:                 ios_logging.NewLogger(repository.DB),
 	}
 }

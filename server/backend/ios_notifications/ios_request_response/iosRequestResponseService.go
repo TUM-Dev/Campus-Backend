@@ -8,7 +8,6 @@ import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_logging"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -17,7 +16,6 @@ import (
 
 type Service struct {
 	Repository *Repository
-	Logger     *ios_logging.Service
 }
 
 var (
@@ -190,6 +188,5 @@ func sendGradesToDevice(deviceId string, grades []model.IOSGrade, apns *ios_apns
 func NewService(repo *Repository) *Service {
 	return &Service{
 		Repository: repo,
-		Logger:     ios_logging.NewLogger(repo.DB),
 	}
 }

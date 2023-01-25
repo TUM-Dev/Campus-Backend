@@ -16,7 +16,6 @@ var (
 
 type Service struct {
 	Repository *Repository
-	Logger     *ios_logging.Service
 }
 
 // RequestGradeUpdateForDevice stores a Request ID to the database and sends a background
@@ -46,7 +45,6 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 func NewService(repository *Repository) *Service {
 	return &Service{
 		Repository: repository,
-		Logger:     ios_logging.NewLogger(&repository.DB),
 	}
 }
 
