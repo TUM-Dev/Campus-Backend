@@ -15,6 +15,7 @@ services:
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
     depends_on:
       - db
+      - influxdb
 
   db:
     container_name: campus-db
