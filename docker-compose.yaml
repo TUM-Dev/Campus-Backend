@@ -20,6 +20,7 @@ services:
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     depends_on:
       - db
+      - influxdb
 
   db:
     container_name: campus-db
