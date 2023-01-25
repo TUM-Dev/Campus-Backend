@@ -115,13 +115,13 @@ func (aps *IOSRemoteNotificationAPS) alert() *IOSAlertAPSContent {
 	return aps.Alert.(*IOSAlertAPSContent)
 }
 
-func (np *IOSNotificationPayload) Encrypt(publicKey string) {
+func (np *IOSNotificationPayload) Encrypt(publicKey string) *IOSNotificationPayload {
 	alert := np.aps().alert()
 
 	np.aps().MutableContent = 1
 
 	if alert.Title != "" {
-		res, err := ios_crypto.SymmetricEncrypt(alert.Title, publicKey)
+		res, err := ios_crypto.AsymmetricEncrypt(alert.Title, publicKey)
 
 		if err != nil {
 			alert.Title = "You have a new notification"
@@ -131,7 +131,7 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) {
 	}
 
 	if alert.Body != "" {
-		res, err := ios_crypto.SymmetricEncrypt(alert.Body, publicKey)
+		res, err := ios_crypto.AsymmetricEncrypt(alert.Body, publicKey)
 
 		if err != nil {
 			alert.Body = ""
@@ -141,7 +141,7 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) {
 	}
 
 	if alert.Subtitle != "" {
-		res, err := ios_crypto.SymmetricEncrypt(alert.Subtitle, publicKey)
+		res, err := ios_crypto.AsymmetricEncrypt(alert.Subtitle, publicKey)
 
 		if err != nil {
 			alert.Subtitle = ""
@@ -149,6 +149,8 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) {
 			alert.Subtitle = res.String()
 		}
 	}
+
+	return np
 }
 
 func (np *IOSNotificationPayload) MarshalJSON() ([]byte, error) {

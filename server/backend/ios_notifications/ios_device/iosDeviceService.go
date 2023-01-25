@@ -3,6 +3,7 @@ package ios_device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,6 +30,8 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 		return nil, ErrCouldNotRegisterDevice
 	}
 
+	influx.LogRegisterDevice(request.GetDeviceId())
+
 	return &pb.RegisterDeviceReply{
 		DeviceId: device.DeviceID,
 	}, nil
@@ -40,6 +43,8 @@ func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.Remov
 	if err != nil {
 		return nil, ErrCouldNotRemoveDevice
 	}
+
+	influx.LogRemoveDevice(request.GetDeviceId())
 
 	return &pb.RemoveDeviceReply{
 		DeviceId: request.GetDeviceId(),

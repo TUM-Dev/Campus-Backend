@@ -3,6 +3,7 @@
 package ios_scheduling
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
@@ -33,8 +34,6 @@ func (service *Service) HandleScheduledCron() error {
 
 	currentPriority := findIOSSchedulingPriorityForNow(priorities)
 
-	log.Info("Current priority: ", currentPriority)
-
 	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
 
 	if err != nil {
@@ -42,14 +41,18 @@ func (service *Service) HandleScheduledCron() error {
 		return err
 	}
 
-	if len(devices) == 0 {
+	devicesLen := len(devices)
+
+	influx.LogIOSSchedulingDevicesToUpdate(devicesLen, currentPriority.Priority)
+
+	if devicesLen == 0 {
 		log.Info("No devices to update")
 		return nil
 	}
 
-	log.Infof("Found %d devices to check!", len(devices))
-
 	devices = service.selectDevicesToUpdate(devices, currentPriority.Priority)
+
+	log.Infof("Updating %d devices", len(devices))
 
 	service.handleDevices(devices)
 
@@ -94,7 +97,6 @@ func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
 
 func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated) {
 	for _, device := range devices {
-		log.Infof("Handling device %s", device.DeviceID)
 		err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
 
 		if err != nil {

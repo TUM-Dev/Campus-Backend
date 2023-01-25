@@ -1,6 +1,7 @@
 package ios_device
 
 import (
+	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
@@ -17,12 +18,12 @@ func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
 
 		res := tx.First(&foundDevice, "device_id = ?", device.DeviceID)
 
-		if res.Error != nil && res.Error != gorm.ErrRecordNotFound {
-			return res.Error
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return tx.Create(device).Error
 		}
 
-		if res.Error == gorm.ErrRecordNotFound {
-			return tx.Create(device).Error
+		if res.Error != nil {
+			return res.Error
 		}
 
 		newDevice := model.IOSDevice{
@@ -53,6 +54,15 @@ func (repository *Repository) GetDevices() ([]model.IOSDevice, error) {
 	}
 
 	return devices, nil
+}
+
+func (repository *Repository) GetDevice(id string) (*model.IOSDevice, error) {
+	var device *model.IOSDevice
+	if err := repository.DB.First(&device, "device_id = ?", id).Error; err != nil {
+		return nil, err
+	}
+
+	return device, nil
 }
 
 // GetDevicesThatShouldUpdateGrades returns a list of devices that should be updated

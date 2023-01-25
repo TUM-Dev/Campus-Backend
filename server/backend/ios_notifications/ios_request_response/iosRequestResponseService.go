@@ -9,6 +9,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -24,15 +25,19 @@ var (
 	ErrEmptyPayload         = status.Error(codes.InvalidArgument, "Payload is empty")
 	ErrUnknownRequestType   = status.Error(codes.InvalidArgument, "Unknown request type")
 	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
+	ErrCouldNotGetDevice    = status.Error(codes.Internal, "Could not get device")
 )
 
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
 	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
+	log.Infof("Handling request with id %s", requestId)
+
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
 
 	if err != nil {
+		log.WithError(err).Error("Could not get request")
 		return nil, ErrOutdatedRequest
 	}
 
@@ -53,6 +58,17 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 }
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
+	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
+
+	userRepo := ios_device.NewRepository(service.Repository.DB)
+
+	device, err := userRepo.GetDevice(requestLog.DeviceID)
+
+	if err != nil {
+		log.WithError(err).Error("Could not get device")
+		return nil, ErrCouldNotGetDevice
+	}
+
 	apiGrades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
 		log.Error("Could not fetch grades: ", err)
@@ -67,11 +83,13 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
 	if err != nil {
+		log.Error("Could not decrypt old grades: ", err)
 		return nil, ErrInternalHandleGrades
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 	if len(newGrades) == 0 {
+		log.Info("No new grades found")
 		service.deleteRequestLog(requestLog.RequestID)
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
@@ -87,9 +105,12 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
 
-	if len(newGrades) > 0 {
+	log.Infof("Found %d old grades and %d new grades", len(oldGrades), len(newGrades))
+
+	if len(newGrades) > 0 && len(oldGrades) > 0 {
 		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		sendGradesToDevice(requestLog.DeviceID, newGrades, apnsRepository)
+		sendGradesToDevice(device, newGrades, apnsRepository)
+		influx.LogIOSNewGrades(requestLog.DeviceID, len(newGrades))
 	}
 
 	service.deleteRequestLog(requestLog.RequestID)
@@ -101,8 +122,6 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 func (service *Service) deleteRequestLog(requestId string) {
 	err := service.Repository.DeleteRequestLog(requestId)
-
-	log.Infof("Deleted request log")
 
 	if err != nil {
 		log.Error("Could not delete request log: ", err)
@@ -166,7 +185,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 	}
 }
 
-func sendGradesToDevice(deviceId string, grades []model.IOSGrade, apns *ios_apns.Repository) {
+func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *ios_apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
 
 	if len(grades) == 1 {
@@ -182,7 +201,11 @@ func sendGradesToDevice(deviceId string, grades []model.IOSGrade, apns *ios_apns
 		}
 	}
 
-	notificationPayload := model.NewIOSNotificationPayload(deviceId).Alert(alertTitle, "", alertBody)
+	notificationPayload := model.NewIOSNotificationPayload(device.DeviceID).
+		Alert(alertTitle, "", alertBody).
+		Encrypt(device.PublicKey)
+
+	log.Infof("Sending push notification to device %s", device.DeviceID)
 
 	_, err := apns.SendAlertNotification(notificationPayload)
 
