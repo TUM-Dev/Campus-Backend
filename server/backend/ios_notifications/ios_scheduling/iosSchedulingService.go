@@ -85,11 +85,25 @@ func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
 		group.Add(1)
 		go func(chunk []model.IOSDeviceLastUpdated) {
 			defer group.Done()
-			service.handleDevices(chunk)
+			service.handleDevicesChunk(chunk)
 		}(chunk)
 	}
 
 	group.Wait()
+}
+
+func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated) {
+	for _, device := range devices {
+		log.Infof("Handling device %s", device.DeviceID)
+		err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
+
+		if err != nil {
+			log.Errorf("Error while handling device: %s", err)
+			continue
+		}
+
+		err = service.LogScheduledUpdate(device.DeviceID)
+	}
 }
 
 func routineCount(devices []model.IOSDeviceLastUpdated) int {
