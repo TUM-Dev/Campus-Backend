@@ -22,18 +22,30 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
-// Example of how to use the influx client
-/* func LogFileDownload() {
+func LogIOSBackgroundRequest(deviceId, requestType, reason string) {
 	write := writeAPI()
 
-	p := influxdb2.NewPointWithMeasurement("file_download").
-		AddTag("user", "test").
-		AddField("file", "test")
+	p := influxdb2.NewPointWithMeasurement("ios_campus_token_request").
+		AddTag("device_id", deviceId).
+		AddField("request_type", requestType).
+		AddField("notification_reason_response", reason)
 
 	write.WritePoint(p)
 
 	FlushIfDevelop(write)
-} */
+}
+
+func LogIOSBackgroundRequestResponse(deviceId, requestType string) {
+	write := writeAPI()
+
+	p := influxdb2.NewPointWithMeasurement("ios_campus_token_response").
+		AddTag("device_id", deviceId).
+		AddField("request_type", requestType)
+
+	write.WritePoint(p)
+
+	FlushIfDevelop(write)
+}
 
 func FlushIfDevelop(write api.WriteAPI) {
 	if env.IsDev() {

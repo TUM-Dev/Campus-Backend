@@ -4,7 +4,7 @@ package ios_apns
 
 import (
 	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_logging"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -32,12 +32,14 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 
 	notification := model.NewIOSNotificationPayload(deviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
 
-	_, err = s.Repository.SendBackgroundNotification(notification)
+	res, err := s.Repository.SendBackgroundNotification(notification)
 
 	if err != nil {
 		log.Errorf("Could not send background notification: %s", err)
 		return ErrCouldNotSendNotification
 	}
+
+	influx.LogIOSBackgroundRequest(deviceID, campusRequestToken.RequestType, res.Reason)
 
 	return nil
 }

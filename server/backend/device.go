@@ -115,7 +115,6 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 }
 
 func (s *CampusServer) RegisterDevice(_ context.Context, req *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
-
 	if err := ValidateRegisterDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

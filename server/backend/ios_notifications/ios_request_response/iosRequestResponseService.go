@@ -7,6 +7,7 @@ import (
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -34,6 +35,8 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 	if err != nil {
 		return nil, ErrOutdatedRequest
 	}
+
+	influx.LogIOSBackgroundRequestResponse(requestLog.DeviceID, requestLog.RequestType)
 
 	switch requestLog.RequestType {
 	case model.IOSBackgroundCampusTokenRequest.String():
