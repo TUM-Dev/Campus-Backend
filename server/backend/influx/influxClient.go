@@ -30,19 +30,6 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
-func LogPoint(p *write.Point) {
-	w, err := writeAPI()
-
-	if err != nil {
-		logClientNotConfigured()
-		return
-	}
-
-	w.WritePoint(p)
-
-	flushIfDevelop(w)
-}
-
 func hashSha256(s string) string {
 	h := sha256.New()
 
@@ -51,8 +38,17 @@ func hashSha256(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func logClientNotConfigured() {
-	log.Warn("could not log because influx client is not configured")
+func LogPoint(p *write.Point) {
+	w, err := writeAPI()
+
+	if err != nil {
+		log.Warn("could not log because influx client is not configured")
+		return
+	}
+
+	w.WritePoint(p)
+
+	flushIfDevelop(w)
 }
 
 func flushIfDevelop(write api.WriteAPI) {
