@@ -1,3 +1,4 @@
+// Package influx provides a handy wrapper around the influxdb client
 package influx
 
 import (
@@ -22,6 +23,10 @@ func GetClient() influxdb2.Client {
 
 func SetClient(client *influxdb2.Client) {
 	Client = client
+}
+
+func HasClient() bool {
+	return Client != nil
 }
 
 func LogRegisterDevice(deviceId string) {

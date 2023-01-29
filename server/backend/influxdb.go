@@ -11,21 +11,24 @@ import (
 const (
 	// InfluxBatchSize is the number of points that are sent to influxdb at once
 	// This is to reduce the number of requests to the database
-	InfluxBatchSize = 1_000
+	InfluxBatchSize = 500
 )
 
 var (
 	influxToken = os.Getenv("INFLUXDB_TOKEN")
 	influxURL   = os.Getenv("INFLUXDB_URL")
+
+	ErrInfluxTokenNotConfigured = errors.New("influxdb token not configured")
+	ErrInfluxURLNotConfigured   = errors.New("influxdb url not configured")
 )
 
 func ConnectToInfluxDB() error {
 	if influxToken == "" {
-		return errors.New("no influxdb token provided")
+		return ErrInfluxTokenNotConfigured
 	}
 
 	if influxURL == "" {
-		return errors.New("no influxdb url provided")
+		return ErrInfluxURLNotConfigured
 	}
 
 	client := influxdb2.NewClientWithOptions(influxURL, influxToken,
