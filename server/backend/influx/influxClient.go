@@ -6,6 +6,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	log "github.com/sirupsen/logrus"
 	"os"
 )
@@ -29,25 +30,25 @@ func SetClient(client *influxdb2.Client) {
 
 /* Example of how to use the influx client
 func LogFileDownload() {
-	write, err := writeAPI()
-
-	if err != nil {
-		logClientNotConfigured()
-		return
-	}
-
 	p := influxdb2.NewPointWithMeasurement("file_download").
 		AddTag("user", "test").
 		AddField("file", "test")
 
-	write.WritePoint(p)
-
-	flushIfDevelop(write)
+	LogPoint(p)
 }
 */
 
-func logClientNotConfigured() {
-	log.Warn("could not log because influx client is not configured")
+func LogPoint(p *write.Point) {
+	w, err := writeAPI()
+
+	if err != nil {
+		log.Warn("could not log because influx client is not configured")
+		return
+	}
+
+	w.WritePoint(p)
+
+	flushIfDevelop(w)
 }
 
 func flushIfDevelop(write api.WriteAPI) {
