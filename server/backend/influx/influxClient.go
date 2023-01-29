@@ -2,17 +2,21 @@
 package influx
 
 import (
+	"errors"
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 
 var (
 	influxOrg    = os.Getenv("INFLUXDB_ORG")
 	influxBucket = os.Getenv("INFLUXDB_BUCKET")
+
+	ErrInfluxClientNotConfigured = errors.New("influx client not configured")
 )
 
 var Client *influxdb2.Client
@@ -25,9 +29,6 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
-func HasClient() bool {
-	return Client != nil
-}
 
 func LogRegisterDevice(deviceId string) {
 	write := writeAPI()
@@ -54,7 +55,6 @@ func LogRemoveDevice(deviceId string) {
 
 	FlushIfDevelop(write)
 }
-
 func LogIOSNewGrades(deviceId string, gradesCount int) {
 	write := writeAPI()
 
@@ -63,12 +63,7 @@ func LogIOSNewGrades(deviceId string, gradesCount int) {
 	p := influxdb2.NewPointWithMeasurement("ios_new_grades").
 		AddTag("device_id", hashedDeviceId).
 		AddField("new_grades_count", gradesCount)
-
-	write.WritePoint(p)
-
-	FlushIfDevelop(write)
 }
-
 func LogIOSSchedulingDevicesToUpdate(devicesToUpdateCount int, priority int) {
 	write := writeAPI()
 
@@ -118,12 +113,20 @@ func hashSha256(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func FlushIfDevelop(write api.WriteAPI) {
+func logClientNotConfigured() {
+	log.Warn("could not log because influx client is not configured")
+}
+
+func flushIfDevelop(write api.WriteAPI) {
 	if env.IsDev() {
 		write.Flush()
 	}
 }
 
-func writeAPI() api.WriteAPI {
-	return GetClient().WriteAPI(influxOrg, influxBucket)
+func writeAPI() (api.WriteAPI, error) {
+	if Client != nil {
+		return GetClient().WriteAPI(influxOrg, influxBucket), nil
+	}
+
+	return nil, ErrInfluxClientNotConfigured
 }
