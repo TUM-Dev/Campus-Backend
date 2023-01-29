@@ -17,15 +17,18 @@ const (
 var (
 	influxToken = os.Getenv("INFLUXDB_TOKEN")
 	influxURL   = os.Getenv("INFLUXDB_URL")
+
+	ErrInfluxTokenNotConfigured = errors.New("influxdb token not configured")
+	ErrInfluxURLNotConfigured   = errors.New("influxdb url not configured")
 )
 
 func ConnectToInfluxDB() error {
 	if influxToken == "" {
-		return errors.New("no influxdb token provided")
+		return ErrInfluxTokenNotConfigured
 	}
 
 	if influxURL == "" {
-		return errors.New("no influxdb url provided")
+		return ErrInfluxURLNotConfigured
 	}
 
 	client := influxdb2.NewClientWithOptions(influxURL, influxToken,

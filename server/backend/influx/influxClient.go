@@ -1,3 +1,4 @@
+// Package influx provides a handy wrapper around the influxdb client
 package influx
 
 import (
@@ -22,8 +23,16 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
+func HasClient() bool {
+	return Client != nil
+}
+
 // Example of how to use the influx client
 /* func LogFileDownload() {
+	if !HasClient() {
+		return
+	}
+
 	write := writeAPI()
 
 	p := influxdb2.NewPointWithMeasurement("file_download").
@@ -33,7 +42,8 @@ func SetClient(client *influxdb2.Client) {
 	write.WritePoint(p)
 
 	FlushIfDevelop(write)
-} */
+}
+*/
 
 func FlushIfDevelop(write api.WriteAPI) {
 	if env.IsDev() {
