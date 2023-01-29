@@ -2,15 +2,19 @@
 package influx
 
 import (
+	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 
 var (
 	influxOrg    = os.Getenv("INFLUXDB_ORG")
 	influxBucket = os.Getenv("INFLUXDB_BUCKET")
+
+	ErrInfluxClientNotConfigured = errors.New("influx client not configured")
 )
 
 var Client *influxdb2.Client
@@ -23,17 +27,14 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
-func HasClient() bool {
-	return Client != nil
-}
+/* Example of how to use the influx client
+func LogFileDownload() {
+	write, err := writeAPI()
 
-// Example of how to use the influx client
-/* func LogFileDownload() {
-	if !HasClient() {
+	if err != nil {
+		logClientNotConfigured()
 		return
 	}
-
-	write := writeAPI()
 
 	p := influxdb2.NewPointWithMeasurement("file_download").
 		AddTag("user", "test").
@@ -41,16 +42,24 @@ func HasClient() bool {
 
 	write.WritePoint(p)
 
-	FlushIfDevelop(write)
+	flushIfDevelop(write)
 }
 */
 
-func FlushIfDevelop(write api.WriteAPI) {
+func logClientNotConfigured() {
+	log.Warn("could not log because influx client is not configured")
+}
+
+func flushIfDevelop(write api.WriteAPI) {
 	if env.IsDev() {
 		write.Flush()
 	}
 }
 
-func writeAPI() api.WriteAPI {
-	return GetClient().WriteAPI(influxOrg, influxBucket)
+func writeAPI() (api.WriteAPI, error) {
+	if Client != nil {
+		return GetClient().WriteAPI(influxOrg, influxBucket), nil
+	}
+
+	return nil, ErrInfluxClientNotConfigured
 }
