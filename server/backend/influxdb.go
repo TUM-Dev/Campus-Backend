@@ -11,7 +11,7 @@ import (
 const (
 	// InfluxBatchSize is the number of points that are sent to influxdb at once
 	// This is to reduce the number of requests to the database
-	InfluxBatchSize = 1_000
+	InfluxBatchSize = 500
 )
 
 var (
