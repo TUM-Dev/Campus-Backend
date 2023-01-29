@@ -30,7 +30,7 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 		return nil, ErrCouldNotRegisterDevice
 	}
 
-	influx.LogRegisterDevice(request.GetDeviceId())
+	influx.LogIOSRegisterDevice(request.GetDeviceId())
 
 	return &pb.RegisterDeviceReply{
 		DeviceId: device.DeviceID,
@@ -44,7 +44,7 @@ func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.Remov
 		return nil, ErrCouldNotRemoveDevice
 	}
 
-	influx.LogRemoveDevice(request.GetDeviceId())
+	influx.LogIOSRemoveDevice(request.GetDeviceId())
 
 	return &pb.RemoveDeviceReply{
 		DeviceId: request.GetDeviceId(),
