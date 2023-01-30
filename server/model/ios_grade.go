@@ -33,15 +33,18 @@ type customDate struct {
 
 func (c *customDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
-	d.DecodeElement(&v, &start)
+	err := d.DecodeElement(&v, &start)
+	if err != nil {
+		return err
+	}
 
-	time, err := time.Parse("2006-01-02", v)
+	t, err := time.Parse("2006-01-02", v)
 
 	if err != nil {
 		return err
 	}
 
-	c.Time = time
+	c.Time = t
 
 	return nil
 }
@@ -53,12 +56,12 @@ func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) boo
 // IOSEncryptedGrade is a grade that can be encrypted.
 // Whether it is currently encrypted or not is indicated by the IsEncrypted field.
 type IOSEncryptedGrade struct {
-	ID           uint `gorm:"primaryKey"`
-	Device       IOSDevice
-	DeviceID     string `gorm:"index;not null"`
-	LectureTitle string "gorm:not null"
-	Grade        string "gorm:not null"
-	IsEncrypted  bool   "gorm:not null,default:true"
+	ID           uint      `gorm:"primaryKey"`
+	Device       IOSDevice `gorm:"constraint:OnDelete:CASCADE"`
+	DeviceID     string    `gorm:"index;not null"`
+	LectureTitle string    `gorm:"not null"`
+	Grade        string    `gorm:"not null"`
+	IsEncrypted  bool      `gorm:"not null,default:true"`
 }
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
