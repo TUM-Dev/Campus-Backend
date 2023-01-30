@@ -721,6 +721,7 @@
           },
           {
             "name": "imageNr",
+            "description": "todo where does the file come from?",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -2108,6 +2109,9 @@
         },
         "deviceType": {
           "$ref": "#/definitions/apiDeviceType"
+        },
+        "campusApiToken": {
+          "type": "string"
         }
       }
     },

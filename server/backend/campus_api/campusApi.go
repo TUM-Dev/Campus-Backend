@@ -11,25 +11,45 @@ import (
 )
 
 const (
-	CampusApiUrl     = "https://campus.tum.de/tumonline"
-	CampusQueryToken = "pToken"
-	CampusGradesPath = "/wbservicesbasic.noten"
+	CampusApiUrl               = "https://campus.tum.de/tumonline"
+	CampusQueryToken           = "pToken"
+	CampusGradesPath           = "/wbservicesbasic.noten"
+	CampusPersonalLecturesPath = "/wbservicesbasic.veranstaltungenEigene"
 )
 
 var (
 	ErrCannotCreateRequest  = errors.New("cannot create http request")
-	ErrWhileFetchingGrades  = errors.New("error while fetching grades")
 	ErrorWhileUnmarshalling = errors.New("error while unmarshalling")
 )
 
-func FetchGrades(token string) (*model.IOSGrades, error) {
+func FetchGrades(token string) (*model.Grades, error) {
+	var grades model.Grades
+	err := RequestCampusApi(CampusGradesPath, token, &grades)
+	if err != nil {
+		return nil, err
+	}
 
-	requestUrl := CampusApiUrl + CampusGradesPath
+	return &grades, nil
+}
+
+func FetchPersonalLectures(token string) (*model.Lectures, error) {
+	var lectures model.Lectures
+	err := RequestCampusApi(CampusPersonalLecturesPath, token, &lectures)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &lectures, nil
+}
+
+func RequestCampusApi(path string, token string, response any) error {
+	requestUrl := CampusApiUrl + path
 	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
 
 	if err != nil {
 		log.Errorf("Error while creating request: %s", err)
-		return nil, ErrCannotCreateRequest
+		return ErrCannotCreateRequest
 	}
 
 	q := req.URL.Query()
@@ -40,8 +60,8 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Errorf("Error while fetching grades: %s", err)
-		return nil, ErrWhileFetchingGrades
+		log.Errorf("Error while fetching %s: %s", path, err)
+		return errors.New("error while fetching " + path)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -51,13 +71,12 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 		}
 	}(resp.Body)
 
-	var grades model.IOSGrades
-	err = xml.NewDecoder(resp.Body).Decode(&grades)
+	err = xml.NewDecoder(resp.Body).Decode(&response)
 
 	if err != nil {
-		log.Errorf("Error while unmarshalling grades: %s", err)
-		return nil, ErrorWhileUnmarshalling
+		log.Errorf("Error while unmarshalling %s: %s", path, err)
+		return ErrorWhileUnmarshalling
 	}
 
-	return &grades, nil
+	return nil
 }

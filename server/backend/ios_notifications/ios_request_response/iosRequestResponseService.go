@@ -10,6 +10,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_grades"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -61,6 +62,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
 
 	userRepo := ios_device.NewRepository(service.Repository.DB)
+	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
 
 	device, err := userRepo.GetDevice(requestLog.DeviceID)
 
@@ -75,7 +77,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		return nil, ErrInternalHandleGrades
 	}
 
-	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
+	oldEncryptedGrades, err := gradesRepo.GetIOSEncryptedGrades(requestLog.DeviceID)
 	if err != nil {
 		log.Error("Could not get old grades: ", err)
 		return nil, ErrInternalHandleGrades
@@ -96,7 +98,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		}, nil
 	}
 
-	err = service.Repository.DeleteEncryptedGrades(requestLog.DeviceID)
+	err = gradesRepo.DeleteEncryptedGrades(requestLog.DeviceID)
 
 	if err != nil {
 		log.Error("Could not delete old grades: ", err)
@@ -144,8 +146,8 @@ func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]mode
 	return oldGrades, nil
 }
 
-func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEncryptedGrade) []model.IOSGrade {
-	var grades []model.IOSGrade
+func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.IOSEncryptedGrade) []model.Grade {
+	var grades []model.Grade
 	for _, grade := range newGrades {
 		found := false
 		for _, oldGrade := range oldGrades {
@@ -163,7 +165,9 @@ func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEn
 	return grades
 }
 
-func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade, deviceID string, campusToken string) {
+func (service *Service) encryptGradesAndStoreInDatabase(grades []model.Grade, deviceID string, campusToken string) {
+	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
+
 	for _, grade := range grades {
 		encryptedGrade := model.IOSEncryptedGrade{
 			Grade:        grade.Grade,
@@ -177,7 +181,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 			log.Error("Could not encrypt grade: ", err)
 		}
 
-		err = service.Repository.SaveEncryptedGrade(&encryptedGrade)
+		err = gradesRepo.SaveEncryptedGrade(&encryptedGrade)
 
 		if err != nil {
 			log.Error("Could not save grade: ", err)
@@ -185,7 +189,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 	}
 }
 
-func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *ios_apns.Repository) {
+func sendGradesToDevice(device *model.IOSDevice, grades []model.Grade, apns *ios_apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
 
 	if len(grades) == 1 {

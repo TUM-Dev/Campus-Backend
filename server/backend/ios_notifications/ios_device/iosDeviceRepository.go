@@ -1,7 +1,6 @@
 package ios_device
 
 import (
-	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
@@ -10,33 +9,48 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
+func (repository *Repository) RegisterDevice(device *model.IOSDevice) (bool, error) {
+	exists, err := repository.CheckIfDeviceExists(device.DeviceID)
 
-	return repository.DB.Transaction(func(tx *gorm.DB) error {
+	if err != nil {
+		return false, err
+	}
 
-		var foundDevice model.IOSDevice
+	err = repository.DB.Transaction(func(tx *gorm.DB) error {
+		err := tx.
+			Where("device_id = ?", device.DeviceID).
+			FirstOrCreate(&device).Error
 
-		res := tx.First(&foundDevice, "device_id = ?", device.DeviceID)
-
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return tx.Create(device).Error
-		}
-
-		if res.Error != nil {
-			return res.Error
+		if err != nil {
+			return err
 		}
 
 		newDevice := model.IOSDevice{
 			DeviceID:          device.DeviceID,
 			PublicKey:         device.PublicKey,
-			ActivityToday:     foundDevice.ActivityToday + 1,
-			ActivityThisWeek:  foundDevice.ActivityThisWeek + 1,
-			ActivityThisMonth: foundDevice.ActivityThisMonth + 1,
-			ActivityThisYear:  foundDevice.ActivityThisYear + 1,
+			ActivityToday:     device.ActivityToday + 1,
+			ActivityThisWeek:  device.ActivityThisWeek + 1,
+			ActivityThisMonth: device.ActivityThisMonth + 1,
+			ActivityThisYear:  device.ActivityThisYear + 1,
 		}
 
 		return tx.Save(&newDevice).Error
 	})
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func (repository *Repository) CheckIfDeviceExists(deviceId string) (bool, error) {
+	var devices []model.IOSDevice
+	if err := repository.DB.Limit(1).Find(&devices, "device_id = ?", deviceId).Error; err != nil {
+		return false, err
+	}
+
+	return len(devices) > 0, nil
 }
 
 func (repository *Repository) RemoveDevice(deviceId string) error {

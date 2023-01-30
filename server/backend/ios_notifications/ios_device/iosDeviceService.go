@@ -3,8 +3,10 @@ package ios_device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,13 +26,18 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 		PublicKey: request.GetPublicKey(),
 	}
 
-	err := service.Repository.RegisterDevice(&device)
+	deviceAlreadyExisted, err := service.Repository.RegisterDevice(&device)
 
 	if err != nil {
 		return nil, ErrCouldNotRegisterDevice
 	}
 
-	influx.LogIOSRegisterDevice(request.GetDeviceId())
+	if !deviceAlreadyExisted {
+		err := handleFirstDeviceRegistration(request)
+		if err != nil {
+			return nil, ErrCouldNotRegisterDevice
+		}
+	}
 
 	return &pb.RegisterDeviceReply{
 		DeviceId: device.DeviceID,
@@ -49,6 +56,33 @@ func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.Remov
 	return &pb.RemoveDeviceReply{
 		DeviceId: request.GetDeviceId(),
 	}, nil
+}
+
+func handleFirstDeviceRegistration(request *pb.RegisterDeviceRequest) error {
+	influx.LogIOSRegisterDevice(request.GetDeviceId())
+
+	campusToken := request.GetCampusApiToken()
+
+	lectures, err := campus_api.FetchPersonalLectures(campusToken)
+	if err != nil {
+		return err
+	}
+
+	for _, lecture := range lectures.Lectures {
+		log.Infof(lecture.LectureTitle)
+	}
+
+	grades, err := campus_api.FetchGrades(campusToken)
+	if err != nil {
+		return err
+	}
+
+	for _, grade := range grades.Grades {
+		log.Infof(grade.LectureTitle)
+
+	}
+
+	return nil
 }
 
 func NewService(db *Repository) *Service {

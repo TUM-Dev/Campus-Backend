@@ -12,7 +12,7 @@ type Lecture struct {
 	Id                string   `xml:"stp_sp_nr"`
 	LectureNumber     string   `xml:"stp_lv_nr"`
 	LectureTitle      string   `xml:"stp_lv_titel"`
-	Duration          int      `xml:"dauer_info"`
+	Duration          string   `xml:"dauer_info"`
 	LectureType       string   `xml:"stp_lv_art_name"`
 	LectureTypeShort  string   `xml:"stp_lv_art_kurz"`
 	SemesterYear      string   `xml:"sj_name"`
