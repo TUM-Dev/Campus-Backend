@@ -54,12 +54,19 @@ func (r *Repository) ApnsUrl() string {
 // CreateCampusTokenRequest creates a request log in the database that can be referred to
 // when the app responds to the background notification.
 func (r *Repository) CreateCampusTokenRequest(deviceId string) (*model.IOSDeviceRequestLog, error) {
+	return r.CreateRequest(deviceId, model.IOSBackgroundCampusTokenRequest)
+}
+
+func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgroundNotificationType) (*model.IOSDeviceRequestLog, error) {
 	var request model.IOSDeviceRequestLog
 
-	if err := r.DB.Create(&model.IOSDeviceRequestLog{
-		DeviceID:    deviceId,
-		RequestType: model.IOSBackgroundCampusTokenRequest.String(),
-	}).Scan(&request).Error; err != nil {
+	tx := r.DB.Raw(`
+		insert into ios_device_request_logs (device_id, request_type)
+		values (?, ?)
+		returning device_id, request_id, request_type;
+	`, deviceId, requestType.String()).Scan(&request)
+
+	if err := tx.Error; err != nil {
 		return nil, err
 	}
 
