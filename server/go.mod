@@ -9,7 +9,7 @@ require (
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/microcosm-cc/bluemonday v1.0.21
+	github.com/microcosm-cc/bluemonday v1.0.22
 	github.com/mmcdole/gofeed v1.1.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.0
