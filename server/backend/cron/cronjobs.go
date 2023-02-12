@@ -18,18 +18,19 @@ type CronService struct {
 
 // names for cron jobs as specified in database
 const (
-	NEWS_TYPE                  = "news"
-	MENSA_TYPE                 = "mensa"
-	CHAT_TYPE                  = "chat"
-	KINO_TYPE                  = "kino"
-	ROOMFINDER_TYPE            = "roomfinder"
-	TICKETSALE_TYPE            = "ticketsale"
-	ALARM_TYPE                 = "alarm"
-	FILE_DOWNLOAD_TYPE         = "fileDownload"
-	DISH_NAME_DOWNLOAD         = "dishNameDownload"
-	AVERAGE_RATING_COMPUTATION = "averageRatingComputation"
-	CANTEEN_HEADCOUNT          = "canteenHeadCount"
-	STORAGE_DIR                = "/Storage/" // target location of files
+	NewsType                 = "news"
+	FileDownloadType         = "fileDownload"
+	DishNameDownload         = "dishNameDownload"
+	AverageRatingComputation = "averageRatingComputation"
+	CanteenHeadcount         = "canteenHeadCount"
+	StorageDir               = "/Storage/" // target location of files
+
+	/* MensaType      = "mensa"
+	ChatType       = "chat"
+	KinoType       = "kino"
+	RoomfinderType = "roomfinder"
+	TicketSaleType = "ticketsale"
+	AlarmType      = "alarm" */
 )
 
 func New(db *gorm.DB, mensaCronActivated bool) *CronService {
@@ -43,20 +44,30 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 func (c *CronService) Run() error {
 	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
 	g := new(errgroup.Group)
+
 	g.Go(func() error { return c.dishNameDownloadCron() })
 	g.Go(func() error { return c.averageRatingComputation() })
+
 	for {
 		log.Info("Cron: checking for pending")
 		var res []model.Crontab
+
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN ('news', 'fileDownload', 'averageRatingComputation','dishNameDownload', 'canteenHeadCount')", time.Now().Unix()).
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?)",
+				time.Now().Unix(),
+				NewsType,
+				FileDownloadType,
+				AverageRatingComputation,
+				DishNameDownload,
+				CanteenHeadcount,
+			).
 			Scan(&res)
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			var offset int32 = 0
 			if c.useMensa {
-				if cronjob.Type.String == AVERAGE_RATING_COMPUTATION {
+				if cronjob.Type.String == AverageRatingComputation {
 					if time.Now().Hour() == 16 {
 						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
 					}
@@ -68,34 +79,34 @@ func (c *CronService) Run() error {
 
 			// Run each job in a separate goroutine so we can parallelize them
 			switch cronjob.Type.String {
-			case NEWS_TYPE:
+			case NewsType:
 				g.Go(func() error { return c.newsCron(&cronjob) })
-			case FILE_DOWNLOAD_TYPE:
+			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
-			case DISH_NAME_DOWNLOAD:
+			case DishNameDownload:
 				if c.useMensa {
 					g.Go(c.dishNameDownloadCron)
 				}
-			case AVERAGE_RATING_COMPUTATION: //call every five minutes between 11AM and 4 PM on weekdays
+			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
 				if c.useMensa {
 					g.Go(c.averageRatingComputation)
 				}
 				/*
 					TODO: Implement handlers for other cronjobs
-					case MENSA_TYPE:
+					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
-					case CHAT_TYPE:
+					case ChatType:
 						g.Go(func() error { return c.chatCron() })
-					case KINO_TYPE:
+					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
-					case ROOMFINDER_TYPE:
+					case RoomfinderType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case TICKETSALE_TYPE:
+					case TicketSaleType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case ALARM_TYPE:
+					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
 				*/
-			case CANTEEN_HEADCOUNT:
+			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
 			}
 		}
