@@ -5,6 +5,7 @@ package ios_apns
 import (
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ var (
 
 type Service struct {
 	Repository *Repository
+	IsActive   bool
 }
 
 // RequestGradeUpdateForDevice stores a Request ID to the database and sends a background
@@ -44,12 +46,37 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	return nil
 }
 
+func ValidateRequirementsForIOSNotificationsService() error {
+	if ios_apns_jwt.ApnsKeyId == "" {
+		return errors.New("APNS_KEY_ID env variable is not set")
+	}
+
+	if ios_apns_jwt.ApnsTeamId == "" {
+		return errors.New("APNS_TEAM_ID env variable is not set")
+	}
+
+	if ios_apns_jwt.ApnsP8FilePath == "" {
+		return errors.New("APNS_P8_FILE_PATH env variable is not set")
+	}
+
+	if _, err := ios_apns_jwt.APNsEncryptionKeyFromFile(); err != nil {
+		return errors.New("APNS P8 token is not valid or not set")
+	}
+
+	return nil
+}
+
 func NewService(repository *Repository) *Service {
 	return &Service{
 		Repository: repository,
+		IsActive:   true,
 	}
 }
 
 func NewCronService(db *gorm.DB) *Service {
-	return NewService(NewCronRepository(db))
+	if repo, err := NewCronRepository(db); err != nil {
+		return &Service{IsActive: false}
+	} else {
+		return NewService(repo)
+	}
 }

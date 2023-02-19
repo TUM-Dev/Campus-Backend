@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -54,6 +55,15 @@ func New(db *gorm.DB) *CampusServer {
 }
 
 func NewIOSNotificationsService() *IOSNotificationsService {
+	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
+		log.Warn(err)
+
+		return &IOSNotificationsService{
+			APNSToken: nil,
+			IsActive:  false,
+		}
+	}
+
 	token, err := ios_apns_jwt.NewToken()
 
 	if err != nil {
@@ -62,6 +72,7 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 
 	return &IOSNotificationsService{
 		APNSToken: token,
+		IsActive:  true,
 	}
 }
 

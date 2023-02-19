@@ -26,9 +26,10 @@ var (
 	ErrUnknownRequestType   = status.Error(codes.InvalidArgument, "Unknown request type")
 	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
 	ErrCouldNotGetDevice    = status.Error(codes.Internal, "Could not get device")
+	ErrAPNSNotActive        = status.Error(codes.Internal, "APNS is not active")
 )
 
-func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
+func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
 	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
@@ -49,6 +50,10 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 
 		if campusToken == "" {
 			return nil, ErrEmptyPayload
+		}
+
+		if !apnsIsActive {
+			return nil, ErrAPNSNotActive
 		}
 
 		return service.handleDeviceCampusTokenRequest(requestLog, campusToken)

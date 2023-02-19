@@ -135,12 +135,18 @@ func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	}
 }
 
-func NewCronRepository(db *gorm.DB) *Repository {
+func NewCronRepository(db *gorm.DB) (*Repository, error) {
+	if err := ValidateRequirementsForIOSNotificationsService(); err != nil {
+		log.Warn(err)
+
+		return nil, err
+	}
+
 	token, err := ios_apns_jwt.NewToken()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return NewRepository(db, token)
+	return NewRepository(db, token), nil
 }
