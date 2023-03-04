@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.1
-	github.com/getsentry/sentry-go v0.17.0
+	github.com/getsentry/sentry-go v0.18.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/guregu/null v4.0.0+incompatible
