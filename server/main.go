@@ -28,7 +28,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -43,13 +42,13 @@ func main() {
 	// Connect to DB
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
-	if dbHost := os.Getenv("DB_DSN"); dbHost != "" {
+	dbHost := os.Getenv("DB_DSN")
+	if dbHost != "" {
 		log.Info("Connecting to dsn")
 		conn = mysql.Open(dbHost)
 	} else {
-		log.Info("Switching to test.db")
-		conn = sqlite.Open("test.db")
-		shouldAutoMigrate = true
+		log.Error("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
+		os.Exit(-1)
 	}
 
 	environment := "development"

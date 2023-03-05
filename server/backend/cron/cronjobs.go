@@ -1,7 +1,6 @@
 package cron
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -15,7 +14,6 @@ type CronService struct {
 	db       *gorm.DB
 	gf       *gofeed.Parser
 	useMensa bool
-	APNs     *ios_apns.Service
 }
 
 // names for cron jobs as specified in database
@@ -41,7 +39,6 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 	return &CronService{
 		db:       db,
 		gf:       gofeed.NewParser(),
-		APNs:     ios_apns.NewCronService(db),
 		useMensa: mensaCronActivated,
 	}
 }
@@ -100,17 +97,17 @@ func (c *CronService) Run() error {
 				}
 				/*
 					TODO: Implement handlers for other cronjobs
-					case MENSA_TYPE:
+					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
-					case CHAT_TYPE:
+					case ChatType:
 						g.Go(func() error { return c.chatCron() })
-					case KINO_TYPE:
+					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
-					case ROOMFINDER_TYPE:
+					case RoomfinderType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case TICKETSALE_TYPE:
+					case TicketSaleType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case ALARM_TYPE:
+					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
 				*/
 			case CanteenHeadcount:
