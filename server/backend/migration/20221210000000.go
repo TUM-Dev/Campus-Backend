@@ -24,7 +24,7 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 			}
 
 			// Add the 'canteenHeadCount' enum value
-			err = tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation', 'canteenHeadCount');").Error
+			// err = tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation', 'canteenHeadCount');").Error
 			if err != nil {
 				return err
 			}
