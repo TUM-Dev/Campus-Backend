@@ -10,8 +10,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"image"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -46,7 +47,7 @@ func (c *CronService) downloadFile(file model.Files) {
 		return
 	}
 	// read body here because we can't exhaust the io.reader twice
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.WithError(err).Warn("Unable to read http body")
 		return
@@ -65,7 +66,7 @@ func (c *CronService) downloadFile(file model.Files) {
 		// in our case resolves to /Storage/news/newspread/1234abc.jpg
 		dstFileName := fmt.Sprintf("%s%s", file.Path, file.Name)
 		dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-		err = imaging.Save(dstImage, STORAGE_DIR+dstFileName, imaging.JPEGQuality(75))
+		err = imaging.Save(dstImage, StorageDir+dstFileName, imaging.JPEGQuality(75))
 		if err != nil {
 			log.WithError(err).WithField("url", url).Warn("Could not save image file")
 			sentry.CaptureException(err)
@@ -73,7 +74,7 @@ func (c *CronService) downloadFile(file model.Files) {
 		}
 	} else {
 		// save without resizing image
-		err = ioutil.WriteFile(fmt.Sprintf("%s%s", file.Path, file.Name), body, 0644)
+		err = os.WriteFile(fmt.Sprintf("%s%s", file.Path, file.Name), body, 0644)
 		if err != nil {
 			sentry.CaptureException(err)
 			log.WithError(err).Error("Can't save file to disk")
