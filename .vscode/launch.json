@@ -10,10 +10,9 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/server/main.go",
-            "args": [
-                "-MensaCron",
-                "0"
-            ]
+            "env": {
+                "DB_DSN": "gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
+            }
         },
         {
             "name": "Launch Local Server Client",
