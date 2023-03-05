@@ -8,7 +8,7 @@ This repository holds the following components:
 
 The API is publicly available for anyone, but most notably, it's the main backend system for the TUM Campus Apps (Android, iOS, and Windows).
 
-## Running the Server
+## Running the Server (without Docker)
 
 ### Installing Requirements
 
@@ -71,18 +71,33 @@ There are a few environment variables available:
 
 * [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_backend`
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
-* **[InfluxDB [OPTIONAL]](#influxdb)**:
-  * [OPTIONAL] `INFLUXDB_USER`: The InfluxDB username to set for the systems initial superuser. 
-  * [OPTIONAL] `INFLUXDB_PASSWORD`: The InfluxDB password to set for the systems initial superuser.
-  * [OPTIONAL] `INFLUXDB_ORG`: The InfluxDB organization to set for the systems initial organization.
-  * [OPTIONAL] `INFLUXDB_BUCKET`: The InfluxDB bucket to set for the systems initial bucket.
-  * [REQUIRED] `INFLUXDB_URL`: The InfluxDB URL to use for writing metrics.
-  * [REQUIRED] `INFLUXDB_ADMIN_TOKEN`: The InfluxDB admin token to use for authenticating with the InfluxDB server. If set initially the system will associate the token with the initial superuser.
 
 #### Command Line Arguments
 
 * [OPTIONAL] `-MensaCron 0`: Providing this argument deactivates the Mensa Rating cronjobs if not needed in a local setup. Be aware, this option will change in a future version ([#117](https://github.com/TUM-Dev/Campus-Backend/issues/117) and [#115](https://github.com/TUM-Dev/Campus-Backend/issues/115)).
 
+## Running the Server (Docker)
+```bash
+docker compose up -d
+```
+The docker compose will start the server and a mariadb instance. 
+The server will be available at `localhost:50051` and the mariadb instance at `localhost:3306`.
+Additionally, docker creates the volume `campus-db-data` and mounts it to the mariadb instance.
+
+### Setting up the Database
+The mariadb schema can be installed by executing the following command inside the mariadb container:
+```bash
+mysql --user=root --password=secret_root_password campus_db < /entrypoint/schema.sql
+```
+
+### Environment Variables
+The following environment variables need to be set for the server to work properly:
+* [REQUIRED] `DB_NAME`: The name of the database to use.
+* [REQUIRED] `DB_ROOT_PASSWORD`: The password of the root user.
+* [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
+* [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
+
+## Visual Studio Code
 ### InfluxDB
 InfluxDB can be used to store metrics.
 
