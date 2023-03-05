@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -14,6 +15,7 @@ type CronService struct {
 	db       *gorm.DB
 	gf       *gofeed.Parser
 	useMensa bool
+	APNs     *ios_apns.Service
 }
 
 // names for cron jobs as specified in database
@@ -39,6 +41,7 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 	return &CronService{
 		db:       db,
 		gf:       gofeed.NewParser(),
+		APNs:     ios_apns.NewCronService(db),
 		useMensa: mensaCronActivated,
 	}
 }
