@@ -104,6 +104,10 @@ The following environment variables need to be set for the server to work proper
    * [OPTIONAL] `INFLUXDB_BUCKET`: The InfluxDB bucket to set for the systems initial bucket.
    * [REQUIRED] `INFLUXDB_URL`: The InfluxDB URL to use for writing metrics.
    * [REQUIRED] `INFLUXDB_ADMIN_TOKEN`: The InfluxDB admin token to use for authenticating with the InfluxDB server. If set initially the system will associate the token with the initial superuser.
+* **[iOS Push Notification Service [OPTIONAL]](#ios-push-notifications-service)**:
+  * [REQUIRED] `APNS_KEY_ID`: The key ID of the APNs key => APNs Key needs to be downloaded from the Apple Developer Portal the name of the file also contains the key ID.
+  * [REQUIRED] `APNS_TEAM_ID`: The team ID of the iOS app can be found in AppStoreConnect.
+  * [REQUIRED] `APNS_P8_FILE_PATH`: The path to the APNs key file (e.g. `/secrets/AuthKey_XXXX.p8`) in the docker container. The file itself needs to exist in the same directory as the `docker-compose.yml` file and called `apns_auth_key.p8`.
 
 ## InfluxDB
 InfluxDB can be used to store metrics.
@@ -112,6 +116,9 @@ If an InfluxDB instance is already set up, just the `INFLUXDB_URL` and the `INFL
 to enable the metrics endpoint.
 All the other environment variables are optional and only needed if the InfluxDB instance needs to be set up.
 If `INFLUXDB_URL` or `INFLUXDB_ADMIN_TOKEN` are not set, the metrics endpoint will be disabled.
+
+## iOS Push Notifications Service
+The iOS Push Notifications Service can be used to send push notifications to iOS devices.
 
 ## Visual Studio Code
 There are already predefined Visual Studio Code launch tasks for debugging the client and server.
