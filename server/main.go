@@ -4,6 +4,8 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"errors"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"io/fs"
 	"net"
 	"net/http"
@@ -33,8 +35,6 @@ const (
 	httpPort = ":50051"
 )
 
-var Version = "dev"
-
 //go:embed swagger
 var swagfs embed.FS
 
@@ -52,13 +52,13 @@ func main() {
 	}
 
 	environment := "development"
-	if Version != "dev" {
+	if env.IsDev() {
 		environment = "production"
 	}
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:         os.Getenv("SENTRY_DSN"),
-			Release:     Version,
+			Release:     env.GetEnvironment(),
 			Environment: environment,
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
@@ -66,6 +66,17 @@ func main() {
 	} else {
 		log.Println("continuing without sentry")
 	}
+
+	// initializing connection to InfluxDB
+	err := backend.ConnectToInfluxDB()
+	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
+		log.Warn("InfluxDB token not configured - continuing without InfluxDB")
+	} else if errors.Is(err, backend.ErrInfluxURLNotConfigured) {
+		log.Warn("InfluxDB url not configured - continuing without InfluxDB")
+	} else if err != nil {
+		log.WithError(err).Error("InfluxDB connection failed - health check failed")
+	}
+
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
