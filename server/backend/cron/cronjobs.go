@@ -41,6 +41,7 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 	return &CronService{
 		db:       db,
 		gf:       gofeed.NewParser(),
+		APNs:     ios_apns.NewCronService(db),
 		useMensa: mensaCronActivated,
 	}
 }
