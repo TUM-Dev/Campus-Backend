@@ -71,10 +71,25 @@ There are a few environment variables available:
 
 * [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_backend`
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
+* **[InfluxDB [OPTIONAL]](#influxdb)**:
+  * [OPTIONAL] `INFLUXDB_USER`: The InfluxDB username to set for the systems initial superuser. 
+  * [OPTIONAL] `INFLUXDB_PASSWORD`: The InfluxDB password to set for the systems initial superuser.
+  * [OPTIONAL] `INFLUXDB_ORG`: The InfluxDB organization to set for the systems initial organization.
+  * [OPTIONAL] `INFLUXDB_BUCKET`: The InfluxDB bucket to set for the systems initial bucket.
+  * [REQUIRED] `INFLUXDB_URL`: The InfluxDB URL to use for writing metrics.
+  * [REQUIRED] `INFLUXDB_ADMIN_TOKEN`: The InfluxDB admin token to use for authenticating with the InfluxDB server. If set initially the system will associate the token with the initial superuser.
 
 #### Command Line Arguments
 
 * [OPTIONAL] `-MensaCron 0`: Providing this argument deactivates the Mensa Rating cronjobs if not needed in a local setup. Be aware, this option will change in a future version ([#117](https://github.com/TUM-Dev/Campus-Backend/issues/117) and [#115](https://github.com/TUM-Dev/Campus-Backend/issues/115)).
+
+### InfluxDB
+InfluxDB can be used to store metrics.
+
+If an InfluxDB instance is already set up, just the `INFLUXDB_URL` and the `INFLUXDB_ADMIN_TOKEN` environment variable needs to be set
+to enable the metrics endpoint.
+All the other environment variables are optional and only needed if the InfluxDB instance needs to be set up.
+If `INFLUXDB_URL` or `INFLUXDB_ADMIN_TOKEN` are not set, the metrics endpoint will be disabled.
 
 ### Visual Studio Code
 
