@@ -10,7 +10,7 @@ import (
 // The DeviceID can be used to send push notifications via APNs
 type IOSDevice struct {
 	DeviceID          string    `gorm:"primary_key" json:"deviceId"`
-	CreatedAt         time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	CreatedAt         time.Time `gorm:"default:now()" json:"createdAt"`
 	PublicKey         string    `gorm:"not null" json:"publicKey"`
 	ActivityToday     int32     `gorm:"default:0" json:"activityToday"`
 	ActivityThisWeek  int32     `gorm:"default:0" json:"activityThisWeek"`

@@ -65,12 +65,15 @@ type IOSBackgroundNotificationType int64
 
 const (
 	IOSBackgroundCampusTokenRequest IOSBackgroundNotificationType = iota
+	IOSBackgroundLectureUpdateRequest
 )
 
 func (requestType IOSBackgroundNotificationType) String() string {
 	switch requestType {
 	case IOSBackgroundCampusTokenRequest:
 		return "CAMPUS_TOKEN_REQUEST"
+	case IOSBackgroundLectureUpdateRequest:
+		return "LECTURE_UPDATE_REQUEST"
 	}
 
 	return "unknown"

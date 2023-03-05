@@ -2,6 +2,7 @@ package ios_grades
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -32,6 +33,51 @@ func (r *Repository) DeleteEncryptedGrades(deviceId string) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) EncryptAndSaveGrades(grades []model.Grade, deviceId string, encryptionKey string) error {
+	var encryptedGrades []model.IOSEncryptedGrade
+
+	for _, grade := range grades {
+		encryptedGrade := grade.ToEncryptedGrade(deviceId)
+		err := encryptedGrade.Encrypt(encryptionKey)
+
+		if err != nil {
+			log.WithError(err).Error("Could not encrypt grade")
+			continue
+		}
+
+		encryptedGrades = append(encryptedGrades, *encryptedGrade)
+	}
+
+	if err := r.DB.Create(&encryptedGrades).Error; err != nil {
+		log.WithError(err).Error("Could not save grades")
+		return err
+	}
+
+	return nil
+}
+
+func (r *Repository) GetAndDecryptGrades(deviceId string, encryptionKey string) ([]model.IOSEncryptedGrade, error) {
+	var encryptedGrades []model.IOSEncryptedGrade
+	if err := r.DB.Find(&encryptedGrades, "device_id = ?", deviceId).Error; err != nil {
+		return nil, err
+	}
+
+	var grades []model.IOSEncryptedGrade
+
+	for _, encryptedGrade := range encryptedGrades {
+		err := encryptedGrade.Decrypt(encryptionKey)
+
+		if err != nil {
+			log.WithError(err).Error("Could not decrypt grade")
+			continue
+		}
+
+		grades = append(grades, encryptedGrade)
+	}
+
+	return grades, nil
 }
 
 func NewRepository(db *gorm.DB) *Repository {

@@ -1,6 +1,9 @@
 package model
 
-import "github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
+import (
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
+	log "github.com/sirupsen/logrus"
+)
 
 // IOSEncryptedGrade is a grade that can be encrypted.
 // Whether it is currently encrypted or not is indicated by the IsEncrypted field.
@@ -15,14 +18,14 @@ type IOSEncryptedGrade struct {
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
 	encryptedTitle, err := ios_crypto.SymmetricEncrypt(e.LectureTitle, key)
-
 	if err != nil {
+		log.WithError(err).Error("Failed to encrypt lecture title")
 		return err
 	}
 
 	encryptedGrade, err := ios_crypto.SymmetricEncrypt(e.Grade, key)
-
 	if err != nil {
+		log.WithError(err).Error("Failed to encrypt grade")
 		return err
 	}
 

@@ -51,3 +51,11 @@ func (c *customDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 func (grade *Grade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) bool {
 	return grade.LectureTitle == encryptedGrade.LectureTitle && grade.Grade == encryptedGrade.Grade
 }
+
+func (grade *Grade) ToEncryptedGrade(deviceId string) *IOSEncryptedGrade {
+	return &IOSEncryptedGrade{
+		Grade:        grade.Grade,
+		DeviceID:     deviceId,
+		LectureTitle: grade.LectureTitle,
+	}
+}

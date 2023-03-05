@@ -1,9 +1,11 @@
 package ios_request_response
 
 import (
+	"database/sql"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Repository struct {
@@ -29,7 +31,6 @@ func (r *Repository) DeleteRequestLog(requestId string) error {
 }
 
 func (r *Repository) DeleteAllRequestLogsForThisDeviceWithType(requestLog *model.IOSDeviceRequestLog) error {
-
 	res := r.DB.
 		Delete(
 			&model.IOSDeviceRequestLog{},
@@ -39,6 +40,19 @@ func (r *Repository) DeleteAllRequestLogsForThisDeviceWithType(requestLog *model
 		)
 
 	if err := res.Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Repository) SetRequestLogAsHandled(requestLog *model.IOSDeviceRequestLog) error {
+	requestLog.HandledAt = sql.NullTime{
+		Valid: true,
+		Time:  time.Now(),
+	}
+
+	if err := r.DB.Save(&requestLog).Error; err != nil {
 		return err
 	}
 

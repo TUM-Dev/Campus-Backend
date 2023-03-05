@@ -44,6 +44,8 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 
 	influx.LogIOSBackgroundRequestResponse(requestLog.DeviceID, requestLog.RequestType)
 
+	service.setRequestLogAsHandled(requestLog)
+
 	switch requestLog.RequestType {
 	case model.IOSBackgroundCampusTokenRequest.String():
 		campusToken := request.GetPayload()
@@ -53,9 +55,25 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 		}
 
 		return service.handleDeviceCampusTokenRequest(requestLog, campusToken)
+	case model.IOSBackgroundLectureUpdateRequest.String():
+		campusToken := request.GetPayload()
+
+		if campusToken == "" {
+			return nil, ErrEmptyPayload
+		}
+
+		return service.handleUpdateLecturesRequest(requestLog, campusToken)
 	default:
 		return nil, ErrUnknownRequestType
 	}
+}
+
+func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
+	log.Infof("Handling update lectures request for device %s", requestLog.DeviceID)
+
+	return &pb.IOSDeviceRequestResponseReply{
+		Message: "Successfully handled request",
+	}, nil
 }
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
@@ -77,22 +95,14 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		return nil, ErrInternalHandleGrades
 	}
 
-	oldEncryptedGrades, err := gradesRepo.GetIOSEncryptedGrades(requestLog.DeviceID)
+	oldGrades, err := gradesRepo.GetAndDecryptGrades(requestLog.DeviceID, campusToken)
 	if err != nil {
-		log.Error("Could not get old grades: ", err)
-		return nil, ErrInternalHandleGrades
-	}
-
-	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
-	if err != nil {
-		log.Error("Could not decrypt old grades: ", err)
-		return nil, ErrInternalHandleGrades
+		return nil, status.Error(codes.Internal, "Could not decrypt grade")
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
-		service.deleteRequestLog(requestLog)
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
 		}, nil
@@ -105,7 +115,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		return nil, ErrInternalHandleGrades
 	}
 
-	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
+	gradesRepo.EncryptAndSaveGrades(apiGrades.Grades, requestLog.DeviceID, campusToken)
 
 	log.Infof("Found %d old grades and %d new grades", len(oldGrades), len(newGrades))
 
@@ -115,35 +125,17 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		influx.LogIOSNewGrades(requestLog.DeviceID, len(newGrades))
 	}
 
-	service.deleteRequestLog(requestLog)
-
 	return &pb.IOSDeviceRequestResponseReply{
 		Message: "Successfully handled request",
 	}, nil
 }
 
-func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) {
-	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
+func (service *Service) setRequestLogAsHandled(requestLog *model.IOSDeviceRequestLog) {
+	err := service.Repository.SetRequestLogAsHandled(requestLog)
 
 	if err != nil {
 		log.Error("Could not delete request logs: ", err)
 	}
-}
-
-func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {
-	oldGrades := make([]model.IOSEncryptedGrade, len(grades))
-	for i, encryptedGrade := range grades {
-		err := encryptedGrade.Decrypt(campusToken)
-
-		if err != nil {
-			log.Error("Could not decrypt grade: ", err)
-			return nil, status.Error(codes.Internal, "Could not decrypt grade")
-		}
-
-		oldGrades[i] = encryptedGrade
-	}
-
-	return oldGrades, nil
 }
 
 func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.IOSEncryptedGrade) []model.Grade {
@@ -163,30 +155,6 @@ func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.IOSEncry
 	}
 
 	return grades
-}
-
-func (service *Service) encryptGradesAndStoreInDatabase(grades []model.Grade, deviceID string, campusToken string) {
-	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
-
-	for _, grade := range grades {
-		encryptedGrade := model.IOSEncryptedGrade{
-			Grade:        grade.Grade,
-			DeviceID:     deviceID,
-			LectureTitle: grade.LectureTitle,
-		}
-
-		err := encryptedGrade.Encrypt(campusToken)
-
-		if err != nil {
-			log.Error("Could not encrypt grade: ", err)
-		}
-
-		err = gradesRepo.SaveEncryptedGrade(&encryptedGrade)
-
-		if err != nil {
-			log.Error("Could not save grade: ", err)
-		}
-	}
 }
 
 func sendGradesToDevice(device *model.IOSDevice, grades []model.Grade, apns *ios_apns.Repository) {

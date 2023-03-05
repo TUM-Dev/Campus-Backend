@@ -11,5 +11,5 @@ const (
 
 type IOSDevicesActivityReset struct {
 	Type      string    `gorm:"primary_key;type:enum('day', 'week', 'month', 'year')"`
-	LastReset time.Time `gorm:"autoCreateTime"`
+	LastReset time.Time `gorm:"default:now()"`
 }

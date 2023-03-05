@@ -44,6 +44,32 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	return nil
 }
 
+func (s *Service) RequestLectureUpdateForDevice(deviceID string) error {
+	lectureUpdateRequest, err := s.Repository.CreateLectureUpdateRequest(deviceID)
+
+	log.Infof("Created lecture update request: %v", lectureUpdateRequest)
+
+	log.Infof("Created lecture update request: %s", (*lectureUpdateRequest).RequestID)
+
+	if err != nil {
+		log.Errorf("Could not create campus token request: %s", err)
+		return ErrCouldNotCreateTokenRequest
+	}
+
+	notification := model.NewIOSNotificationPayload(deviceID).Background(lectureUpdateRequest.RequestID, model.IOSBackgroundLectureUpdateRequest)
+
+	res, err := s.Repository.SendBackgroundNotification(notification)
+
+	if err != nil {
+		log.Errorf("Could not send background notification: %s", err)
+		return ErrCouldNotSendNotification
+	}
+
+	influx.LogIOSBackgroundRequest(deviceID, lectureUpdateRequest.RequestType, res.Reason)
+
+	return nil
+}
+
 func NewService(repository *Repository) *Service {
 	return &Service{
 		Repository: repository,

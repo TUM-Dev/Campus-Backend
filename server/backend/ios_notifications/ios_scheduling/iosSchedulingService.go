@@ -6,6 +6,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_lectures"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -23,6 +24,79 @@ type Service struct {
 	SchedulerLogRepository *ios_scheduled_update_log.Repository
 	Priority               *model.IOSSchedulingPriority
 	APNs                   *ios_apns.Service
+}
+
+func (service *Service) NewHandleScheduledCron() error {
+	priorities, err := service.Repository.FindSchedulingPriorities()
+	if err != nil {
+		log.WithError(err).Error("Error while getting priorities")
+		return err
+	}
+
+	currentPriority := findIOSSchedulingPriorityForNow(priorities)
+
+	log.Infof("New HandleScheduledCron: %d", currentPriority.Priority)
+
+	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
+
+	lecturesToCheck, err := lecturesRepo.GetLecturesToUpdate()
+	if err != nil {
+		log.WithError(err).Error("Error while getting lectures to check")
+		return err
+	}
+
+	err = service.checkLectures(lecturesToCheck)
+	if err != nil {
+		log.WithError(err).Error("Error while checking lectures")
+		return err
+	}
+
+	return nil
+}
+
+func (service *Service) checkLectures(lectures []model.IOSLecture) error {
+	log.Infof("Checking %d lectures", len(lectures))
+
+	for _, lecture := range lectures {
+		if err := service.updateLecture(lecture); err != nil {
+			log.WithError(err).Error("Error while updating lecture")
+			continue
+		}
+	}
+
+	return nil
+}
+
+func (service *Service) updateLecture(lecture model.IOSLecture) error {
+	log.Infof("Updating lecture %s", lecture.Id)
+
+	devices, err := service.selectDevicesToUpdateLecture(&lecture)
+	if err != nil {
+		log.WithError(err).Error("Error while selecting devices")
+		return err
+	}
+
+	log.Infof("Found %d devices to update lecture %s", len(devices), lecture.Id)
+
+	for _, device := range devices {
+		err := service.APNs.RequestLectureUpdateForDevice(device.DeviceID)
+		if err != nil {
+			log.WithError(err).Error("Error while requesting lecture update")
+			continue
+		}
+	}
+
+	return nil
+}
+
+func (service *Service) selectDevicesToUpdateLecture(lecture *model.IOSLecture) ([]model.IOSDevice, error) {
+	devices, err := service.DevicesRepository.GetDevicesThatCouldUpdateLecture(lecture)
+	if err != nil {
+		log.WithError(err).Error("Error while getting devices")
+		return nil, err
+	}
+
+	return devices, nil
 }
 
 func (service *Service) HandleScheduledCron() error {

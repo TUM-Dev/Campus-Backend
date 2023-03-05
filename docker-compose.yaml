@@ -16,6 +16,7 @@ services:
       - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN}
       - INFLUXDB_ORG=${INFLUXDB_ORG}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - ENVIRONMENT=${ENVIRONMENT}
     volumes:
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     depends_on:

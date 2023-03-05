@@ -16,7 +16,7 @@ func (c *CronService) iosNotificationsCron() error {
 
 	service := ios_scheduling.NewService(repo, devicesRepo, schedulerRepo, c.APNs)
 
-	return service.HandleScheduledCron()
+	return service.NewHandleScheduledCron()
 }
 
 // Resets the activity of all devices to 0 every day, week, month or year

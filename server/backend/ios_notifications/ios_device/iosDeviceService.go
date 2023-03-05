@@ -5,10 +5,13 @@ import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_grades"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_lectures"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type Service struct {
@@ -24,6 +27,7 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 	device := model.IOSDevice{
 		DeviceID:  request.GetDeviceId(),
 		PublicKey: request.GetPublicKey(),
+		CreatedAt: time.Now(),
 	}
 
 	deviceAlreadyExisted, err := service.Repository.RegisterDevice(&device)
@@ -33,10 +37,7 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 	}
 
 	if !deviceAlreadyExisted {
-		err := handleFirstDeviceRegistration(request)
-		if err != nil {
-			return nil, ErrCouldNotRegisterDevice
-		}
+		service.handleFirstDeviceRegistration(request)
 	}
 
 	return &pb.RegisterDeviceReply{
@@ -58,28 +59,49 @@ func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.Remov
 	}, nil
 }
 
-func handleFirstDeviceRegistration(request *pb.RegisterDeviceRequest) error {
-	influx.LogIOSRegisterDevice(request.GetDeviceId())
-
+func (service *Service) handleFirstDeviceRegistration(request *pb.RegisterDeviceRequest) {
 	campusToken := request.GetCampusApiToken()
+	deviceId := request.GetDeviceId()
 
-	lectures, err := campus_api.FetchPersonalLectures(campusToken)
+	influx.LogIOSRegisterDevice(deviceId)
+
+	err := service.fetchDeviceLectures(deviceId, campusToken)
 	if err != nil {
-		return err
+		log.WithError(err).Error("Could not fetch lectures of device")
 	}
 
-	for _, lecture := range lectures.Lectures {
-		log.Infof(lecture.LectureTitle)
+	err = service.fetchDeviceGrades(deviceId, campusToken)
+	if err != nil {
+		log.WithError(err).Error("Could not fetch grades of device")
 	}
+}
 
+func (service *Service) fetchDeviceGrades(deviceId, campusToken string) error {
 	grades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
 		return err
 	}
 
-	for _, grade := range grades.Grades {
-		log.Infof(grade.LectureTitle)
+	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
 
+	err = gradesRepo.EncryptAndSaveGrades(grades.Grades, deviceId, campusToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (service *Service) fetchDeviceLectures(deviceId, campusToken string) error {
+	lectures, err := campus_api.FetchPersonalLectures(campusToken)
+	if err != nil {
+		return err
+	}
+
+	lecturesService := ios_lectures.NewService(service.Repository.DB)
+	err = lecturesService.SaveRelevantLecturesForDevice(lectures.Lectures, deviceId)
+	if err != nil {
+		return err
 	}
 
 	return nil

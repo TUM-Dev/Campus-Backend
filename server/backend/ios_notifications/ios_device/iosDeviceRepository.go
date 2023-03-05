@@ -5,6 +5,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	DevicesThatCouldUpdateLectureCount = 10
+)
+
 type Repository struct {
 	DB *gorm.DB
 }
@@ -109,6 +113,57 @@ func buildDevicesThatShouldUpdateGradesQuery() string {
 		group by d.device_id, ul.created_at
 		order by ul.created_at;
 	`
+}
+
+func (repository *Repository) GetDevicesThatCouldUpdateLecture(lecture *model.IOSLecture) ([]model.IOSDevice, error) {
+	var devices []model.IOSDevice
+
+	tx := repository.DB.Raw(
+		buildGetDevicesThatCouldUpdateLectureQuery(),
+		lecture.Id,
+		DevicesThatCouldUpdateLectureCount,
+	).Scan(&devices)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return devices, nil
+}
+
+func buildGetDevicesThatCouldUpdateLectureQuery() string {
+	return `
+	with ios_devices_with_lecture as (select d.*
+                                  from ios_devices d,
+                                       ios_device_lectures dl
+                                  where d.device_id = dl.device_id
+                                    and dl.lecture_id = ?),
+     ios_devices_response_time
+         as (select avg(timestampdiff(SECOND, drl.created_at, drl.handled_at)) as avg_response_time, drl.device_id
+             from ios_device_request_logs drl,
+                  ios_devices_with_lecture dl
+             where dl.device_id = drl.device_id
+               and drl.handled_at is not null),
+     ios_devices_lecture_count as (select count(device_id) as lecture_count, device_id
+                                   from ios_device_lectures
+                                   group by device_id)
+	select d.*
+	from ios_devices d
+			 left join ios_devices_response_time drt on d.device_id = drt.device_id
+				left join ios_devices_lecture_count dlc on d.device_id = dlc.device_id,
+		 ios_device_lectures dl
+	where d.device_id = dl.device_id
+	  and not exists(select d.device_id
+					 from ios_device_request_logs drl
+					 where drl.device_id = d.device_id
+					   and drl.created_at
+						 > subdate(now()
+							   , interval 30 minute)
+					 limit 1)
+	group by d.device_id
+	order by dlc.lecture_count desc, drt.avg_response_time asc
+	limit ?;
+`
 }
 
 func (repository *Repository) ResetDevicesDailyActivity() error {

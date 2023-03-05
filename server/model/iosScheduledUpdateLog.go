@@ -16,7 +16,7 @@ type IOSScheduledUpdateLog struct {
 	DeviceID  string    `gorm:"index:idx_scheduled_update_log_device,unique" json:"deviceId"`
 	Device    IOSDevice `gorm:"constraint:OnDelete:CASCADE;" json:"device"`
 	Type      string    `gorm:"type:enum ('grades');" json:"type"`
-	CreatedAt time.Time `gorm:"index:idx_scheduled_update_log_created,unique;autoCreateTime" json:"createdAt"`
+	CreatedAt time.Time `gorm:"index:idx_scheduled_update_log_created,unique;default:now()" json:"createdAt"`
 }
 
 func (log *IOSScheduledUpdateLog) IsGrades() bool {

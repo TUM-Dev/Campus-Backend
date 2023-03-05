@@ -57,6 +57,10 @@ func (r *Repository) CreateCampusTokenRequest(deviceId string) (*model.IOSDevice
 	return r.CreateRequest(deviceId, model.IOSBackgroundCampusTokenRequest)
 }
 
+func (r *Repository) CreateLectureUpdateRequest(deviceId string) (*model.IOSDeviceRequestLog, error) {
+	return r.CreateRequest(deviceId, model.IOSBackgroundLectureUpdateRequest)
+}
+
 func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgroundNotificationType) (*model.IOSDeviceRequestLog, error) {
 	var request model.IOSDeviceRequestLog
 
@@ -65,7 +69,6 @@ func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgro
 		values (?, ?)
 		returning device_id, request_id, request_type;
 	`, deviceId, requestType.String()).Scan(&request)
-
 	if err := tx.Error; err != nil {
 		return nil, err
 	}
