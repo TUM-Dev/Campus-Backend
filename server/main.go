@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"io/fs"
 	"net"
@@ -65,6 +66,17 @@ func main() {
 	} else {
 		log.Println("continuing without sentry")
 	}
+
+	// initializing connection to InfluxDB
+	err := backend.ConnectToInfluxDB()
+	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
+		log.Warn("InfluxDB token not configured - continuing without InfluxDB")
+	} else if errors.Is(err, backend.ErrInfluxURLNotConfigured) {
+		log.Warn("InfluxDB url not configured - continuing without InfluxDB")
+	} else if err != nil {
+		log.WithError(err).Error("InfluxDB connection failed - health check failed")
+	}
+
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")

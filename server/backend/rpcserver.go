@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
-	"sync"
-	"time"
-
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -17,6 +15,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
+	"net"
+	"sync"
+	"time"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -30,8 +31,9 @@ func (s *CampusServer) GRPCServe(l net.Listener) error {
 
 type CampusServer struct {
 	pb.UnimplementedCampusServer
-	db        *gorm.DB
-	deviceBuf *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
+	db                      *gorm.DB
+	deviceBuf               *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
+	iOSNotificationsService *IOSNotificationsService
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
@@ -48,6 +50,29 @@ func New(db *gorm.DB) *CampusServer {
 			devices:  make(map[string]*model.Devices),
 			interval: time.Minute,
 		},
+		iOSNotificationsService: NewIOSNotificationsService(),
+	}
+}
+
+func NewIOSNotificationsService() *IOSNotificationsService {
+	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
+		log.Warn(err)
+
+		return &IOSNotificationsService{
+			APNSToken: nil,
+			IsActive:  false,
+		}
+	}
+
+	token, err := ios_apns_jwt.NewToken()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &IOSNotificationsService{
+		APNSToken: token,
+		IsActive:  true,
 	}
 }
 
@@ -137,4 +162,8 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 		}, nil
 	}
 	return &pb.GetTopNewsReply{}, nil
+}
+
+func (s *CampusServer) GetIOSNotificationsService() *IOSNotificationsService {
+	return s.iOSNotificationsService
 }
