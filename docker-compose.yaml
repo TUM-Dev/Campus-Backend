@@ -8,7 +8,8 @@ services:
     ports:
       - 50051:50051
     environment:
-      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - db
 
@@ -16,7 +17,7 @@ services:
     container_name: campus-db
     image: mariadb:latest
     ports:
-      - 3306:3306
+      - ${DB_PORT:-3306}:3306
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
