@@ -178,7 +178,7 @@ func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated)
 			continue
 		}
 
-		err = service.LogScheduledUpdate(device.DeviceID)
+		service.LogScheduledUpdate(device.DeviceID)
 	}
 }
 

@@ -100,17 +100,17 @@ func (c *CronService) Run() error {
 				}
 				/*
 					TODO: Implement handlers for other cronjobs
-					case MENSA_TYPE:
+					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
-					case CHAT_TYPE:
+					case ChatType:
 						g.Go(func() error { return c.chatCron() })
-					case KINO_TYPE:
+					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
-					case ROOMFINDER_TYPE:
+					case RoomfinderType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case TICKETSALE_TYPE:
+					case TicketSaleType:
 						g.Go(func() error { return c.roomFinderCron() })
-					case ALARM_TYPE:
+					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
 				*/
 			case CanteenHeadcount:

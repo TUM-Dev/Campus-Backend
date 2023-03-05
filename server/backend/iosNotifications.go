@@ -13,6 +13,7 @@ import (
 type IOSNotificationsService struct {
 	DB        *gorm.DB
 	APNSToken *ios_apns_jwt.Token
+	IsActive  bool
 }
 
 func (s *CampusServer) GetIOSDeviceService() *ios_device.Service {
@@ -35,5 +36,5 @@ func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Serv
 
 func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
 	service := s.GetIOSRequestResponseService()
-	return service.HandleDeviceRequestResponse(req)
+	return service.HandleDeviceRequestResponse(req, s.iOSNotificationsService.IsActive)
 }

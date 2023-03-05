@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
@@ -10,24 +7,23 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/server/main.go",
-            "args": [
-                "-MensaCron",
-                "0"
-            ]
+            "env": {
+                "DB_DSN": "gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
+            }
         },
         {
             "name": "Launch Local Server Client",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/client/localServer/localTestClient.go",
+            "program": "${workspaceFolder}/client/localServer/localTestClient.go"
         },
         {
             "name": "Launch Public Server Client",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/client/publicServer/client.go",
+            "program": "${workspaceFolder}/client/publicServer/client.go"
         }
     ]
 }

@@ -69,6 +69,7 @@ func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgro
 		values (?, ?)
 		returning device_id, request_id, request_type;
 	`, deviceId, requestType.String()).Scan(&request)
+
 	if err := tx.Error; err != nil {
 		return nil, err
 	}
@@ -138,12 +139,18 @@ func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 	}
 }
 
-func NewCronRepository(db *gorm.DB) *Repository {
+func NewCronRepository(db *gorm.DB) (*Repository, error) {
+	if err := ValidateRequirementsForIOSNotificationsService(); err != nil {
+		log.Warn(err)
+
+		return nil, err
+	}
+
 	token, err := ios_apns_jwt.NewToken()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return NewRepository(db, token)
+	return NewRepository(db, token), nil
 }

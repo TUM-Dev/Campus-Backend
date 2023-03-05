@@ -10,6 +10,10 @@ import (
 // Starts the cron job for sending iOS notifications reuses
 // the APNs client (ios_apns.Service) stored in CronService
 func (c *CronService) iosNotificationsCron() error {
+	if !c.APNs.IsActive {
+		return nil
+	}
+
 	repo := ios_scheduling.NewRepository(c.db)
 	devicesRepo := ios_device.NewRepository(c.db)
 	schedulerRepo := ios_scheduled_update_log.NewRepository(c.db)

@@ -401,6 +401,8 @@ message GetTopNewsReply {
   google.protobuf.Timestamp to = 5;
 }
 
+
+
 message CafeteriaRatingRequest {
   // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
   string cafeteriaId = 1;
@@ -435,6 +437,7 @@ message CafeteriaRatingReply {
   repeated RatingTagResult ratingTags = 6;
 }
 
+
 message DishRatingReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
@@ -444,6 +447,7 @@ message DishRatingReply {
   repeated RatingTagResult ratingTags = 6;
   repeated RatingTagResult nameTags = 7;
 }
+
 
 message SingleRatingReply{
   // number in the range 1-5
@@ -456,6 +460,7 @@ message SingleRatingReply{
   google.protobuf.Timestamp visited = 5;
 }
 
+
 message NewCafeteriaRatingRequest{
   // number in the range 1-5
   int32 points = 1;
@@ -466,6 +471,7 @@ message NewCafeteriaRatingRequest{
   // Optional comment (max 256 chars)
   string comment = 6;
 }
+
 
 message NewDishRatingRequest{
   // number in the range 1-5
@@ -485,6 +491,7 @@ message NewDishRatingRequest{
 message GetTagsReply{
   repeated TagsOverview ratingTags = 1;
 }
+
 
 message TagsOverview {
   int32 tagId = 1;
@@ -509,6 +516,8 @@ message RatingTagResult {
   int32 min = 4;
   int32 max = 5;
 }
+
+
 
 message GetCafeteriaReply{
   repeated Cafeteria cafeteria = 1;
@@ -739,6 +748,10 @@ message GetMembersReply{
   string lrzId = 1;
   string name = 2;
   int32 memberId = 3;
+}
+
+message TUMCabeStatus{
+  string status = 1;
 }
 
 message GetUploadStatusRequest{
