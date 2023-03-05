@@ -49,7 +49,6 @@ func LogPoint(p *write.Point) {
 	w.WritePoint(p)
 
 	flushIfDevelop(w)
-
 }
 
 func flushIfDevelop(write api.WriteAPI) {
