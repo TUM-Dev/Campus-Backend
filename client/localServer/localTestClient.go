@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

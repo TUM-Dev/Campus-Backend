@@ -216,25 +216,6 @@ service Campus {
     };
   }
 
-
-  rpc RegisterDevice(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/register",
-    };
-  }
-
-  rpc VerifyKey(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      get: "/device/verifyKey",
-    };
-  }
-
-  rpc DeviceUploadGcmToken(google.protobuf.Empty) returns (TUMCabeStatus) {
-    option (google.api.http) = {
-      post: "/device/addGcmToken",
-    };
-  }
-
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
     option (google.api.http) = {
       get: "/device/uploaded/{lrzId}",
@@ -265,6 +246,63 @@ service Campus {
       get: "/canteen/headCount/{canteenId}",
     };
   }
+
+  // Endpoint for the iOS app to respond to background notifications requests
+  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {
+    option (google.api.http) = {
+      post: "/ios/notifications/deviceRequestResponse",
+      body: "*",
+    };
+  }
+
+  // Register an Android, iOS or Windows device for push notifications
+  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceReply) {
+    option (google.api.http) = {
+      post: "/device",
+      body: "*",
+    };
+  }
+
+  // Unregister it from push notifications
+  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceReply) {
+    option (google.api.http) = {
+      delete: "/device/{deviceId}",
+    };
+  }
+}
+
+enum DeviceType {
+  IOS = 0;
+  ANDROID = 1;
+  WINDOWS = 2;
+}
+
+message RegisterDeviceRequest {
+  string deviceId = 1;
+  optional string publicKey = 2;
+  DeviceType deviceType = 3;
+}
+
+message RegisterDeviceReply {
+  string deviceId = 1;
+}
+
+message RemoveDeviceRequest {
+  string deviceId = 1;
+  DeviceType deviceType = 2;
+}
+
+message RemoveDeviceReply {
+  string deviceId = 1;
+}
+
+message IOSDeviceRequestResponseRequest {
+  string requestId = 1;
+  string payload = 2;
+}
+
+message IOSDeviceRequestResponseReply {
+  string message = 1;
 }
 
 message GetRoomScheduleRequest {
@@ -362,8 +400,6 @@ message GetTopNewsReply {
   google.protobuf.Timestamp to = 5;
 }
 
-
-
 message CafeteriaRatingRequest {
   // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
   string cafeteriaId = 1;
@@ -398,7 +434,6 @@ message CafeteriaRatingReply {
   repeated RatingTagResult ratingTags = 6;
 }
 
-
 message DishRatingReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
@@ -408,7 +443,6 @@ message DishRatingReply {
   repeated RatingTagResult ratingTags = 6;
   repeated RatingTagResult nameTags = 7;
 }
-
 
 message SingleRatingReply{
   // number in the range 1-5
@@ -421,7 +455,6 @@ message SingleRatingReply{
   google.protobuf.Timestamp visited = 5;
 }
 
-
 message NewCafeteriaRatingRequest{
   // number in the range 1-5
   int32 points = 1;
@@ -432,7 +465,6 @@ message NewCafeteriaRatingRequest{
   // Optional comment (max 256 chars)
   string comment = 6;
 }
-
 
 message NewDishRatingRequest{
   // number in the range 1-5
@@ -452,7 +484,6 @@ message NewDishRatingRequest{
 message GetTagsReply{
   repeated TagsOverview ratingTags = 1;
 }
-
 
 message TagsOverview {
   int32 tagId = 1;
@@ -477,8 +508,6 @@ message RatingTagResult {
   int32 min = 4;
   int32 max = 5;
 }
-
-
 
 message GetCafeteriaReply{
   repeated Cafeteria cafeteria = 1;
@@ -709,10 +738,6 @@ message GetMembersReply{
   string lrzId = 1;
   string name = 2;
   int32 memberId = 3;
-}
-
-message TUMCabeStatus{
-  string status = 1;
 }
 
 message GetUploadStatusRequest{

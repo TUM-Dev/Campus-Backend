@@ -1,5 +1,4 @@
 {
-"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "CampusService.proto",
@@ -304,36 +303,15 @@
         ]
       }
     },
-    "/device/addGcmToken": {
+    "/device": {
       "post": {
-        "operationId": "Campus_DeviceUploadGcmToken",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/device/register": {
-      "post": {
+        "summary": "Register an Android, iOS or Windows device for push notifications",
         "operationId": "Campus_RegisterDevice",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
+              "$ref": "#/definitions/apiRegisterDeviceReply"
             }
           },
           "default": {
@@ -343,6 +321,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiRegisterDeviceRequest"
+            }
+          }
+        ],
         "tags": [
           "Campus"
         ]
@@ -378,14 +366,15 @@
         ]
       }
     },
-    "/device/verifyKey": {
-      "get": {
-        "operationId": "Campus_VerifyKey",
+    "/device/{deviceId}": {
+      "delete": {
+        "summary": "Unregister it from push notifications",
+        "operationId": "Campus_RemoveDevice",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiTUMCabeStatus"
+              "$ref": "#/definitions/apiRemoveDeviceReply"
             }
           },
           "default": {
@@ -395,6 +384,26 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "deviceType",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "IOS",
+              "ANDROID",
+              "WINDOWS"
+            ],
+            "default": "IOS"
+          }
+        ],
         "tags": [
           "Campus"
         ]
@@ -716,6 +725,39 @@
             "required": true,
             "type": "integer",
             "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/ios/notifications/deviceRequestResponse": {
+      "post": {
+        "summary": "Endpoint for the iOS app to respond to background notifications requests",
+        "operationId": "Campus_IOSDeviceRequestResponse",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiIOSDeviceRequestResponseReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiIOSDeviceRequestResponseRequest"
+            }
           }
         ],
         "tags": [
@@ -1286,6 +1328,15 @@
         }
       }
     },
+    "apiDeviceType": {
+      "type": "string",
+      "enum": [
+        "IOS",
+        "ANDROID",
+        "WINDOWS"
+      ],
+      "default": "IOS"
+    },
     "apiDishRatingReply": {
       "type": "object",
       "properties": {
@@ -1770,6 +1821,25 @@
         }
       }
     },
+    "apiIOSDeviceRequestResponseReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "apiIOSDeviceRequestResponseRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "string"
+        }
+      }
+    },
     "apiKinoMsgElement": {
       "type": "object",
       "properties": {
@@ -2019,6 +2089,36 @@
         }
       }
     },
+    "apiRegisterDeviceReply": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiRegisterDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "deviceType": {
+          "$ref": "#/definitions/apiDeviceType"
+        }
+      }
+    },
+    "apiRemoveDeviceReply": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      }
+    },
     "apiResponsiblePersonElement": {
       "type": "object",
       "properties": {
@@ -2201,14 +2301,6 @@
           "items": {
             "$ref": "#/definitions/apiStudyRoom"
           }
-        }
-      }
-    },
-    "apiTUMCabeStatus": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
         }
       }
     },

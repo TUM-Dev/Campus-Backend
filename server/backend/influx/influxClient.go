@@ -2,6 +2,8 @@
 package influx
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -28,15 +30,13 @@ func SetClient(client *influxdb2.Client) {
 	Client = client
 }
 
-/* Example of how to use the influx client
-func LogFileDownload() {
-	p := influxdb2.NewPointWithMeasurement("file_download").
-		AddTag("user", "test").
-		AddField("file", "test")
+func hashSha256(s string) string {
+	h := sha256.New()
 
-	LogPoint(p)
+	h.Write([]byte(s))
+
+	return hex.EncodeToString(h.Sum(nil))
 }
-*/
 
 func LogPoint(p *write.Point) {
 	w, err := writeAPI()
