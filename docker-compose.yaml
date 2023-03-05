@@ -10,7 +10,6 @@ services:
     environment:
       - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - SENTRY_DSN=${SENTRY_DSN}
-      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
