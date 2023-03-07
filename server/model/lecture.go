@@ -15,7 +15,7 @@ type Lecture struct {
 	XMLName       xml.Name `xml:"row"`
 	Id            string   `xml:"stp_sp_nr"`
 	LectureNumber string   `xml:"stp_lv_nr"`
-	LectureTitle  string   `xml:"stp_lv_titel"`
+	LectureTitle  string   `xml:"stp_sp_titel"`
 	Duration      string   `xml:"dauer_info"`
 	LectureType   string   `xml:"stp_lv_art_name"`
 	// possible values: "VO", "TT", "UE", "PR", "SE"
@@ -52,9 +52,12 @@ func (lecture *Lecture) ToIOSLecture() (*IOSLecture, error) {
 		return nil, err
 	}
 
+	log.Infof("Saving lecture %s in year %d and semester %d", lecture.LectureTitle, year, semester)
+
 	return &IOSLecture{
 		Id:       lecture.Id,
 		Year:     int16(year),
 		Semester: semester,
+		Title:    lecture.LectureTitle,
 	}, nil
 }

@@ -3,14 +3,13 @@
 package ios_scheduling
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_lectures"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/utils"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
-	"sync"
 )
 
 const (
@@ -27,25 +26,53 @@ type Service struct {
 }
 
 func (service *Service) NewHandleScheduledCron() error {
-	priorities, err := service.Repository.FindSchedulingPriorities()
+	/* priorities, err := service.Repository.FindSchedulingPriorities()
 	if err != nil {
 		log.WithError(err).Error("Error while getting priorities")
 		return err
 	}
 
-	currentPriority := findIOSSchedulingPriorityForNow(priorities)
-
-	log.Infof("New HandleScheduledCron: %d", currentPriority.Priority)
+	currentPriority := findIOSSchedulingPriorityForNow(priorities) */
 
 	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
 
-	lecturesToCheck, err := lecturesRepo.GetLecturesToUpdate()
+	lectures, err := lecturesRepo.GetLectures()
 	if err != nil {
 		log.WithError(err).Error("Error while getting lectures to check")
 		return err
 	}
 
-	err = service.checkLectures(lecturesToCheck)
+	devicesRepo := ios_device.NewRepository(service.Repository.DB)
+
+	maxAttendedLecturesCount, err := devicesRepo.GetMaxAttendedLecturesCount()
+	if err != nil {
+		log.WithError(err).Error("Error while getting max attended lectures count")
+		return err
+	}
+
+	deviceLectures, err := lecturesRepo.GetDeviceLectures()
+	if err != nil {
+		log.WithError(err).Error("Error while getting device lectures")
+		return err
+	}
+
+	devices, err := devicesRepo.GetReadyDevices()
+	if err != nil {
+		log.WithError(err).Error("Error while getting devices")
+		return err
+	}
+
+	if len(*devices) == 0 {
+		log.Info("No devices to check")
+		return nil
+	}
+
+	devicesMatch := FindPerfectDevicesMatch(lectures, devices, deviceLectures, maxAttendedLecturesCount)
+
+	log.Infof("Found %d perfect matches", len(*devicesMatch))
+
+	service.requestUpdateForDevices(devicesMatch)
+
 	if err != nil {
 		log.WithError(err).Error("Error while checking lectures")
 		return err
@@ -54,137 +81,20 @@ func (service *Service) NewHandleScheduledCron() error {
 	return nil
 }
 
-func (service *Service) checkLectures(lectures []model.IOSLecture) error {
-	log.Infof("Checking %d lectures", len(lectures))
+func (service *Service) requestUpdateForDevices(devices *[]model.IOSDeviceWithAvgResponseTime) {
+	routineCount := routineCount(devices)
 
-	for _, lecture := range lectures {
-		if err := service.updateLecture(lecture); err != nil {
-			log.WithError(err).Error("Error while updating lecture")
-			continue
-		}
-	}
-
-	return nil
-}
-
-func (service *Service) updateLecture(lecture model.IOSLecture) error {
-	log.Infof("Updating lecture %s", lecture.Id)
-
-	devices, err := service.selectDevicesToUpdateLecture(&lecture)
-	if err != nil {
-		log.WithError(err).Error("Error while selecting devices")
-		return err
-	}
-
-	log.Infof("Found %d devices to update lecture %s", len(devices), lecture.Id)
-
-	for _, device := range devices {
+	utils.RunTasksInRoutines(devices, func(device model.IOSDeviceWithAvgResponseTime) {
 		err := service.APNs.RequestLectureUpdateForDevice(device.DeviceID)
 		if err != nil {
-			log.WithError(err).Error("Error while requesting lecture update")
-			continue
+			log.WithError(err).Error("Error while requesting grades update")
 		}
-	}
-
-	return nil
+	}, routineCount)
 }
 
-func (service *Service) selectDevicesToUpdateLecture(lecture *model.IOSLecture) ([]model.IOSDevice, error) {
-	devices, err := service.DevicesRepository.GetDevicesThatCouldUpdateLecture(lecture)
-	if err != nil {
-		log.WithError(err).Error("Error while getting devices")
-		return nil, err
-	}
-
-	return devices, nil
-}
-
-func (service *Service) HandleScheduledCron() error {
-	priorities, err := service.Repository.FindSchedulingPriorities()
-
-	if err != nil {
-		return err
-	}
-
-	currentPriority := findIOSSchedulingPriorityForNow(priorities)
-
-	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
-
-	if err != nil {
-		log.Errorf("Error while getting devices: %s", err)
-		return err
-	}
-
-	devicesLen := len(devices)
-
-	influx.LogIOSSchedulingDevicesToUpdate(devicesLen, currentPriority.Priority)
-
-	if devicesLen == 0 {
-		log.Info("No devices to update")
-		return nil
-	}
-
-	devices = service.selectDevicesToUpdate(devices, currentPriority.Priority)
-
-	log.Infof("Updating %d devices", len(devices))
-
-	service.handleDevices(devices)
-
-	return nil
-}
-
-func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
-	routinesCount := routineCount(devices)
-
-	chunkSize := len(devices) / routinesCount
-
-	perfectChunkable := (len(devices) % routinesCount) == 0
-
-	chunksArrSize := routinesCount
-
-	if !perfectChunkable {
-		chunksArrSize = routinesCount + 1
-	}
-
-	chunks := make([][]model.IOSDeviceLastUpdated, chunksArrSize)
-
-	for i := 0; i < routinesCount; i++ {
-		chunks[i] = devices[i*chunkSize : (i+1)*chunkSize]
-	}
-
-	if !perfectChunkable {
-		chunks[routinesCount] = devices[routinesCount*chunkSize:]
-	}
-
-	var group sync.WaitGroup
-
-	for _, chunk := range chunks {
-		group.Add(1)
-		go func(chunk []model.IOSDeviceLastUpdated) {
-			defer group.Done()
-			service.handleDevicesChunk(chunk)
-		}(chunk)
-	}
-
-	group.Wait()
-}
-
-func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated) {
-	for _, device := range devices {
-		err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
-
-		if err != nil {
-			log.Errorf("Error while handling device: %s", err)
-			continue
-		}
-
-		service.LogScheduledUpdate(device.DeviceID)
-	}
-}
-
-func routineCount(devices []model.IOSDeviceLastUpdated) int {
-	if len(devices) < MaxRoutineCount {
-		return len(devices)
+func routineCount(devices *[]model.IOSDeviceWithAvgResponseTime) int {
+	if len(*devices) < MaxRoutineCount {
+		return 1
 	}
 
 	return MaxRoutineCount
@@ -197,18 +107,6 @@ func (service *Service) LogScheduledUpdate(deviceID string) error {
 	}
 
 	return service.SchedulerLogRepository.LogScheduledUpdate(&scheduleLog)
-}
-
-// selectDevicesToUpdate selects max DevicesToCheckPerCronBase devices to update
-// based on the priority.
-func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated, priority int) []model.IOSDeviceLastUpdated {
-	maxDevicesToCheck := DevicesToCheckPerCronBase * priority
-
-	if len(devices) < maxDevicesToCheck {
-		return devices
-	}
-
-	return devices[:maxDevicesToCheck]
 }
 
 func findIOSSchedulingPriorityForNow(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {

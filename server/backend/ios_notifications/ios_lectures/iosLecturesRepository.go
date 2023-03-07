@@ -2,6 +2,7 @@ package ios_lectures
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -33,6 +34,11 @@ func (repo *Repository) SaveLecturesAsIOSLectures(lectures []model.Lecture) erro
 		}
 
 		iosLectures = append(iosLectures, *iosLecture)
+	}
+
+	if len(iosLectures) == 0 {
+		log.Info("No lectures to save")
+		return nil
 	}
 
 	tx := repo.DB.Clauses(clause.OnConflict{
@@ -70,6 +76,53 @@ func (repo *Repository) SaveLecturesOfDevice(lectures []model.Lecture, deviceId 
 	return nil
 }
 
+func (repo *Repository) GetLectures() (*[]model.IOSLecture, error) {
+	var lectures []model.IOSLecture
+
+	if err := repo.DB.Find(&lectures).Error; err != nil {
+		return nil, err
+	}
+
+	return &lectures, nil
+}
+
+func (repo *Repository) GetDeviceLectures() (*[]model.IOSDeviceLecture, error) {
+	var deviceLectures []model.IOSDeviceLecture
+
+	if err := repo.DB.Model(&model.IOSDeviceLecture{}).Find(&deviceLectures).Error; err != nil {
+		return nil, err
+	}
+
+	return &deviceLectures, nil
+}
+
+func (repo *Repository) SetLecturesLastUpdatedBy(requestId string, grades *[]model.Grade) {
+	for _, grade := range *grades {
+		tx := repo.DB.Model(&model.IOSLecture{}).
+			Where("title = ?", grade.LectureTitle).
+			Update("last_request_id", requestId)
+
+		if err := tx.Error; err != nil {
+			log.WithError(err).Error("Failed to update last_request_id for lecture")
+		}
+	}
+}
+
+func (repo *Repository) FindOtherDevicesThatAttendLecture(lectureTitle string) (*[]model.IOSDevice, error) {
+	var devices []model.IOSDevice
+
+	tx := repo.DB.Raw(
+		buildFindOtherDevicesThatAttendLectureQuery(),
+		"%"+lectureTitle+"%",
+	).Scan(&devices)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &devices, nil
+}
+
 func (repo *Repository) GetLecturesToUpdate() ([]model.IOSLecture, error) {
 	var lectures []model.IOSLecture
 
@@ -94,6 +147,18 @@ func buildGetLecturesToUpdateQuery() string {
 			log.handled_at < subdate(now(), interval 1 minute)
 			)
 		order by log.handled_at asc;
+	`
+}
+
+func buildFindOtherDevicesThatAttendLectureQuery() string {
+	return `
+	select d.*
+	from ios_lectures l,
+		 ios_device_lectures dl,
+		 ios_devices d
+	where l.id = dl.lecture_id
+	  and d.device_id = dl.device_id
+	  and l.title like ?;
 	`
 }
 

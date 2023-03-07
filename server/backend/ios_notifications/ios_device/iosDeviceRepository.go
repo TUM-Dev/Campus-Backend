@@ -166,6 +166,51 @@ func buildGetDevicesThatCouldUpdateLectureQuery() string {
 `
 }
 
+func (repository *Repository) GetMaxAttendedLecturesCount() (int, error) {
+	var maxCount int
+
+	tx := repository.DB.Raw("select coalesce(max(lecture_count), 0) from (select count(*) as lecture_count from ios_device_lectures group by device_id) as t;").Scan(&maxCount)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+
+	return maxCount, nil
+}
+
+func (repository *Repository) GetReadyDevices() (*[]model.IOSDeviceWithAvgResponseTime, error) {
+	var devices []model.IOSDeviceWithAvgResponseTime
+
+	tx := repository.DB.Raw(buildDevicesWithAvgResponseTimeQuery()).Scan(&devices)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &devices, nil
+}
+
+func buildDevicesWithAvgResponseTimeQuery() string {
+	return `
+	with ios_devices_response_time
+			 as (select avg(timestampdiff(SECOND, drl.created_at, drl.handled_at)) as avg_response_time, d.device_id
+				 from ios_devices d
+						  left join ios_device_request_logs drl on d.device_id = drl.device_id
+				 where drl.handled_at is not null
+				 group by d.device_id)
+	select d.*, drt.avg_response_time as avg_response_time
+	from ios_devices d
+			 left join ios_devices_response_time drt on d.device_id = drt.device_id
+	where not exists(select drl.device_id
+					 from ios_device_request_logs drl
+					 where drl.device_id = d.device_id
+					   and drl.created_at
+						 > subdate(now()
+							   , interval 30 minute)
+					 limit 1)
+	group by d.device_id
+	order by avg_response_time asc;
+`
+}
+
 func (repository *Repository) ResetDevicesDailyActivity() error {
 	return repository.DB.Model(model.IOSDevice{}).Where("activity_today != ?", 0).Update("activity_today", 0).Error
 }
