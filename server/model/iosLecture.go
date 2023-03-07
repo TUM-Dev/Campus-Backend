@@ -16,4 +16,5 @@ type IOSLecture struct {
 	LastUpdate    time.Time            `gorm:"default:now()"`
 	LastRequestId *string              `gorm:"default:NULL;"`
 	LastRequest   *IOSDeviceRequestLog `gorm:"constraint:OnDelete:SET NULL;"`
+	Title         string               `gorm:"not null"`
 }
