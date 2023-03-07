@@ -11,6 +11,7 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+// SaveLectureAsIOSLecture saves a lecture as an IOSLecture => filtering out unnecessary fields
 func (repo *Repository) SaveLectureAsIOSLecture(lecture *model.Lecture) error {
 	iosLecture, err := lecture.ToIOSLecture()
 	if err != nil {
@@ -24,6 +25,7 @@ func (repo *Repository) SaveLectureAsIOSLecture(lecture *model.Lecture) error {
 	return nil
 }
 
+// SaveLecturesAsIOSLectures saves a list of lectures as IOSLectures => batching the insertions
 func (repo *Repository) SaveLecturesAsIOSLectures(lectures []model.Lecture) error {
 	var iosLectures []model.IOSLecture
 
@@ -96,10 +98,13 @@ func (repo *Repository) GetDeviceLectures() (*[]model.IOSDeviceLecture, error) {
 	return &deviceLectures, nil
 }
 
+// SetLecturesLastUpdatedBy sets the last_request_id of all lectures that are in the given grades
+// IMPORTANT: the title needs to be filtered with `like` because the title of the lecture in the grades
+// is not exactly the same as the title of the lecture in the ios_lectures table.
 func (repo *Repository) SetLecturesLastUpdatedBy(requestId string, grades *[]model.Grade) {
 	for _, grade := range *grades {
 		tx := repo.DB.Model(&model.IOSLecture{}).
-			Where("title = ?", grade.LectureTitle).
+			Where("title like ?", "%"+grade.LectureTitle+"%").
 			Update("last_request_id", requestId)
 
 		if err := tx.Error; err != nil {
@@ -108,6 +113,9 @@ func (repo *Repository) SetLecturesLastUpdatedBy(requestId string, grades *[]mod
 	}
 }
 
+// FindOtherDevicesThatAttendLecture finds all devices that attend a lecture with the given title which
+// then can be notified about e.g. a new grade.
+// IMPORTANT: the title needs to be filtered with `like` => see SetLecturesLastUpdatedBy
 func (repo *Repository) FindOtherDevicesThatAttendLecture(lectureTitle string) (*[]model.IOSDevice, error) {
 	var devices []model.IOSDevice
 
@@ -121,33 +129,6 @@ func (repo *Repository) FindOtherDevicesThatAttendLecture(lectureTitle string) (
 	}
 
 	return &devices, nil
-}
-
-func (repo *Repository) GetLecturesToUpdate() ([]model.IOSLecture, error) {
-	var lectures []model.IOSLecture
-
-	tx := repo.DB.Raw(
-		buildGetLecturesToUpdateQuery(),
-	).Scan(&lectures)
-
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return lectures, nil
-}
-
-func buildGetLecturesToUpdateQuery() string {
-	return `
-		select lec.id, lec.year, lec.semester, lec.last_request_id
-		from ios_lectures lec
-				 left join ios_device_request_logs log on lec.last_request_id = log.request_id
-		where lec.last_request_id is null
-		   or (
-			log.handled_at < subdate(now(), interval 1 minute)
-			)
-		order by log.handled_at asc;
-	`
 }
 
 func buildFindOtherDevicesThatAttendLectureQuery() string {

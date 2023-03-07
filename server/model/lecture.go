@@ -52,7 +52,7 @@ func (lecture *Lecture) ToIOSLecture() (*IOSLecture, error) {
 		return nil, err
 	}
 
-	log.Infof("Saving lecture %s in year %d and semester %d", lecture.LectureTitle, year, semester)
+	log.Infof("Saving lecture %s in year %d and semester %s", lecture.LectureTitle, year, semester)
 
 	return &IOSLecture{
 		Id:       lecture.Id,

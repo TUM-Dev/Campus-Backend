@@ -46,6 +46,8 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	return nil
 }
 
+// ValidateRequirementsForIOSNotificationsService checks whether all required environment variables
+// are set and valid. If not the service will not be started.
 func ValidateRequirementsForIOSNotificationsService() error {
 	if ios_apns_jwt.ApnsKeyId == "" {
 		return errors.New("APNS_KEY_ID env variable is not set")
@@ -66,6 +68,7 @@ func ValidateRequirementsForIOSNotificationsService() error {
 	return nil
 }
 
+// RequestLectureUpdateForDevice is similar to RequestGradeUpdateForDevice but for lectures.
 func (s *Service) RequestLectureUpdateForDevice(deviceID string) error {
 	lectureUpdateRequest, err := s.Repository.CreateLectureUpdateRequest(deviceID)
 

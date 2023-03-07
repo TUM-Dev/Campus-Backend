@@ -6,7 +6,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_lectures"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/utils"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -17,21 +16,25 @@ const (
 )
 
 type Service struct {
-	Repository             *Repository
-	DevicesRepository      *ios_device.Repository
-	SchedulerLogRepository *ios_scheduled_update_log.Repository
-	Priority               *model.IOSSchedulingPriority
-	APNs                   *ios_apns.Service
+	Repository        *Repository
+	DevicesRepository *ios_device.Repository
+	Priority          *model.IOSSchedulingPriority
+	APNs              *ios_apns.Service
 }
 
-func (service *Service) NewHandleScheduledCron() error {
-	/* priorities, err := service.Repository.FindSchedulingPriorities()
+// HandleScheduledCron will be called by the cron job every minute. It will calculate a perfect set
+// of devices that together attend all lectures. Next, it will request a lecture update for these devices.
+func (service *Service) HandleScheduledCron() error {
+	priorities, err := service.Repository.FindSchedulingPriorities()
 	if err != nil {
 		log.WithError(err).Error("Error while getting priorities")
 		return err
 	}
 
-	currentPriority := findIOSSchedulingPriorityForNow(priorities) */
+	currentPriority := findIOSSchedulingPriorityForNow(priorities)
+
+	// TODO: implement currentPriority
+	log.Infof("Current priority: %s", currentPriority)
 
 	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
 
@@ -72,11 +75,6 @@ func (service *Service) NewHandleScheduledCron() error {
 
 	service.requestUpdateForDevices(devicesMatch)
 
-	if err != nil {
-		log.WithError(err).Error("Error while checking lectures")
-		return err
-	}
-
 	return nil
 }
 
@@ -97,15 +95,6 @@ func routineCount(devices *[]model.IOSDevice) int {
 	}
 
 	return MaxRoutineCount
-}
-
-func (service *Service) LogScheduledUpdate(deviceID string) error {
-	scheduleLog := model.IOSScheduledUpdateLog{
-		DeviceID: deviceID,
-		Type:     model.IOSUpdateTypeGrades,
-	}
-
-	return service.SchedulerLogRepository.LogScheduledUpdate(&scheduleLog)
 }
 
 func findIOSSchedulingPriorityForNow(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {
@@ -143,14 +132,12 @@ func mergeIOSSchedulingPriorities(priorities []model.IOSSchedulingPriority) *mod
 
 func NewService(repository *Repository,
 	devicesRepository *ios_device.Repository,
-	schedulerRepository *ios_scheduled_update_log.Repository,
 	apnsService *ios_apns.Service,
 ) *Service {
 	return &Service{
-		Repository:             repository,
-		DevicesRepository:      devicesRepository,
-		SchedulerLogRepository: schedulerRepository,
-		Priority:               model.DefaultIOSSchedulingPriority(),
-		APNs:                   apnsService,
+		Repository:        repository,
+		DevicesRepository: devicesRepository,
+		Priority:          model.DefaultIOSSchedulingPriority(),
+		APNs:              apnsService,
 	}
 }

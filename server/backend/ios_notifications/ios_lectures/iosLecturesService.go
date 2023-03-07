@@ -1,3 +1,4 @@
+// Package ios_lectures provides functionality for saving and finding lectures.
 package ios_lectures
 
 import (
@@ -23,6 +24,8 @@ type Service struct {
 	Repository *Repository
 }
 
+// SaveRelevantLecturesForDevice filters the lectures for relevant ones and saves them in the database.
+// For information about what is relevant see isSchedulingRelevantLecture.
 func (service *Service) SaveRelevantLecturesForDevice(lectures []model.Lecture, deviceId string) error {
 	lecturesRepo := service.Repository
 
@@ -55,6 +58,10 @@ func FilterRelevantLectures(lectures []model.Lecture) []model.Lecture {
 	return relevantLectures
 }
 
+// A Lecture isSchedulingRelevantLecture if the following conditions are met:
+// - LectureType is in schedulingRelevantLectureTypes e.g. a lecture (VO), practical (PR) or seminar (SE)
+// - Organisation is not in notSchedulingRelevantLectureOrganisations e.g. TUVBSBV => Fachschaft
+// - SemesterId is the current semester
 func isSchedulingRelevantLecture(lecture model.Lecture) bool {
 	correctLectureType := false
 

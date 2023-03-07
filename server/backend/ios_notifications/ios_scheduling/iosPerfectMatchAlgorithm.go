@@ -13,6 +13,7 @@ type LectureToOverlapped map[string]*LectureOverlapped
 type DeviceToOverlappedLectures map[string][]*LectureOverlapped
 type CompareFunc[T comparable] func(T) bool
 
+// FindPerfectDevicesMatch returns the minimum set of devices that are able to attend all lectures
 func FindPerfectDevicesMatch(lectures *[]model.IOSLecture, devices *[]model.IOSDevice, devicesLectures *[]model.IOSDeviceLecture, maxAttendedLecturesCount int) *[]model.IOSDevice {
 	lecturesToOverlapping := lectureToOverlappedLectureMap(lectures)
 	devicesLecturesMap := devicesLecturesToMap(devicesLectures, lecturesToOverlapping)
@@ -32,6 +33,7 @@ func FindPerfectDevicesMatch(lectures *[]model.IOSLecture, devices *[]model.IOSD
 	return &overlappingDevices
 }
 
+// getOverlappingDevices returns the minimum set of devices that are able to attend all lectures
 func getOverlappingDevices(
 	devicesLectures *DeviceToOverlappedLectures,
 	lectures *[]model.IOSLecture,
@@ -74,6 +76,7 @@ func getOverlappingDevices(
 	return &overlappingStudents
 }
 
+// findBestNextMatch returns the device with the most lectures that are not overlapped
 func findBestNextMatch(
 	devicesLectures *DeviceToOverlappedLectures,
 	currentMaxAttended int,

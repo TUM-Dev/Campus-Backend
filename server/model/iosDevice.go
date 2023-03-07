@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const IOSMinimumDeviceUpdateInterval = 30
+
 // IOSDevice stores relevant device information.
 // E.g. the PublicKey which is used to encrypt push notifications
 // The DeviceID can be used to send push notifications via APNs

@@ -71,9 +71,9 @@ const (
 func (requestType IOSBackgroundNotificationType) String() string {
 	switch requestType {
 	case IOSBackgroundCampusTokenRequest:
-		return "CAMPUS_TOKEN_REQUEST"
+		return IOSTokenRequestType
 	case IOSBackgroundLectureUpdateRequest:
-		return "LECTURE_UPDATE_REQUEST"
+		return IOSLectureUpdateRequestType
 	}
 
 	return "unknown"

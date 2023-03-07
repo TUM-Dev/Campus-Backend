@@ -5,14 +5,13 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	DevicesThatCouldUpdateLectureCount = 10
-)
-
 type Repository struct {
 	DB *gorm.DB
 }
 
+// RegisterDevice registers a new ios device or updates an existing one.
+// Returns true if the device already existed, false otherwise.
+// If the device already existed, the activity counters are updated.
 func (repository *Repository) RegisterDevice(device *model.IOSDevice) (bool, error) {
 	exists, err := repository.CheckIfDeviceExists(device.DeviceID)
 
@@ -83,89 +82,6 @@ func (repository *Repository) GetDevice(id string) (*model.IOSDevice, error) {
 	return device, nil
 }
 
-// GetDevicesThatShouldUpdateGrades returns a list of devices that should be updated
-// A device that needs to be updated is either a new device or a device that has not
-// been updated in the last model.IOSMinimumUpdateInterval minutes
-func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDeviceLastUpdated, error) {
-	var devices []model.IOSDeviceLastUpdated
-
-	tx := repository.DB.Raw(
-		buildDevicesThatShouldUpdateGradesQuery(),
-		model.IOSUpdateTypeGrades,
-		model.IOSMinimumUpdateInterval,
-	).Scan(&devices)
-
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return devices, nil
-}
-
-func buildDevicesThatShouldUpdateGradesQuery() string {
-	return `
-		select d.device_id, ul.created_at as last_updated, d.public_key
-		from ios_devices d
-				 left join ios_scheduled_update_logs ul on d.device_id = ul.device_id
-		where ul.created_at is null
-		   or (ul.type = ?
-			and ul.created_at < date_sub(now(), interval ? minute))
-		group by d.device_id, ul.created_at
-		order by ul.created_at;
-	`
-}
-
-func (repository *Repository) GetDevicesThatCouldUpdateLecture(lecture *model.IOSLecture) ([]model.IOSDevice, error) {
-	var devices []model.IOSDevice
-
-	tx := repository.DB.Raw(
-		buildGetDevicesThatCouldUpdateLectureQuery(),
-		lecture.Id,
-		DevicesThatCouldUpdateLectureCount,
-	).Scan(&devices)
-
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return devices, nil
-}
-
-func buildGetDevicesThatCouldUpdateLectureQuery() string {
-	return `
-	with ios_devices_with_lecture as (select d.*
-                                  from ios_devices d,
-                                       ios_device_lectures dl
-                                  where d.device_id = dl.device_id
-                                    and dl.lecture_id = ?),
-     ios_devices_response_time
-         as (select avg(timestampdiff(SECOND, drl.created_at, drl.handled_at)) as avg_response_time, drl.device_id
-             from ios_device_request_logs drl,
-                  ios_devices_with_lecture dl
-             where dl.device_id = drl.device_id
-               and drl.handled_at is not null),
-     ios_devices_lecture_count as (select count(device_id) as lecture_count, device_id
-                                   from ios_device_lectures
-                                   group by device_id)
-	select d.*
-	from ios_devices d
-			 left join ios_devices_response_time drt on d.device_id = drt.device_id
-				left join ios_devices_lecture_count dlc on d.device_id = dlc.device_id,
-		 ios_device_lectures dl
-	where d.device_id = dl.device_id
-	  and not exists(select d.device_id
-					 from ios_device_request_logs drl
-					 where drl.device_id = d.device_id
-					   and drl.created_at
-						 > subdate(now()
-							   , interval 30 minute)
-					 limit 1)
-	group by d.device_id
-	order by dlc.lecture_count desc, drt.avg_response_time asc
-	limit ?;
-`
-}
-
 func (repository *Repository) GetMaxAttendedLecturesCount() (int, error) {
 	var maxCount int
 
@@ -177,10 +93,13 @@ func (repository *Repository) GetMaxAttendedLecturesCount() (int, error) {
 	return maxCount, nil
 }
 
+// GetReadyDevices returns a list of devices that can be used to update their grades.
+// A device that can be updated is either a new device or a device that has not
+// been updated in the last model.IOSMinimumUpdateInterval minutes
 func (repository *Repository) GetReadyDevices() (*[]model.IOSDevice, error) {
 	var devices []model.IOSDevice
 
-	tx := repository.DB.Raw(buildDevicesWithAvgResponseTimeQuery()).Scan(&devices)
+	tx := repository.DB.Raw(buildReadyDevicesQuery(), model.IOSMinimumDeviceUpdateInterval).Scan(&devices)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -188,18 +107,18 @@ func (repository *Repository) GetReadyDevices() (*[]model.IOSDevice, error) {
 	return &devices, nil
 }
 
-func buildDevicesWithAvgResponseTimeQuery() string {
+func buildReadyDevicesQuery() string {
 	return `
-select d.*
-from ios_devices d
-where not exists(select drl.device_id
-                 from ios_device_request_logs drl
-                 where drl.device_id = d.device_id
-                   and drl.created_at
-                     > subdate(now()
-                           , interval 30 minute)
-                 limit 1)
-group by d.device_id;
+	select d.*
+	from ios_devices d
+	where not exists(select drl.device_id
+					 from ios_device_request_logs drl
+					 where drl.device_id = d.device_id
+					   and drl.created_at
+						 > subdate(now()
+							   , interval ? minute)
+					 limit 1)
+	group by d.device_id;
 `
 }
 

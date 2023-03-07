@@ -85,6 +85,8 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 	}
 }
 
+// handleUpdateLecturesRequest handles the request to update the grades for a device. It is different from the
+// handleDeviceCampusTokenRequest method because it also notifies other devices about new grades.
 func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	log.Infof("Handling update lectures request for device %s", requestLog.DeviceID)
 
@@ -102,8 +104,7 @@ func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceR
 	}
 
 	if len(*newGrades) > 0 {
-		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		sendGradesToDevice(device, newGrades, apnsRepository)
+		service.sendGradesToDevice(device, newGrades)
 
 		influx.LogIOSNewGrades(requestLog.DeviceID, len(*newGrades))
 
@@ -115,6 +116,9 @@ func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceR
 	}, nil
 }
 
+// handleDeviceCampusTokenRequest handles the request to update the grades for a device.
+// It requests the grades from the campus api compares them to the grades that are already stored in the database
+// and sends a notification to the device if there are new grades.
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
 
@@ -132,8 +136,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	}
 
 	if len(*newGrades) > 0 {
-		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		sendGradesToDevice(device, newGrades, apnsRepository)
+		service.sendGradesToDevice(device, newGrades)
 
 		influx.LogIOSNewGrades(requestLog.DeviceID, len(*newGrades))
 	}
@@ -143,6 +146,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	}, nil
 }
 
+// notifyOtherDevicesAboutNewGrades finds all devices that also attend the lecture of the new grades and sends them a notification.
 func (service *Service) notifyOtherDevicesAboutNewGrades(deviceId string, newGrades *[]model.Grade) {
 	log.Infof("Notifying other devices about new grades")
 	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
@@ -156,15 +160,22 @@ func (service *Service) notifyOtherDevicesAboutNewGrades(deviceId string, newGra
 		}
 
 		utils.RunTasksInRoutines(devicesThatAttendLecture, func(device model.IOSDevice) {
-			/* if device.DeviceID == deviceId {
+			if device.DeviceID == deviceId {
 				return
-			}*/
+			}
+
 			log.Infof("Notifying device %s about new grades", device.DeviceID)
-			service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
+			err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
+			if err != nil {
+				log.WithError(err).Error("Could not send grade update request to device")
+				return
+			}
 		}, 10)
 	}
 }
 
+// findGetAndUpdateNewGrades fetches the grades from the campus api and compares them to the old grades.
+// It returns the new grades if there were already old grades and the grades were updated.
 func (service *Service) findGetAndUpdateNewGrades(deviceId, campusToken, requestId string, updateLectures bool) (*[]model.Grade, error) {
 	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
 	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
@@ -181,7 +192,7 @@ func (service *Service) findGetAndUpdateNewGrades(deviceId, campusToken, request
 
 	oldGrades, err := gradesRepo.GetAndDecryptGrades(deviceId, campusToken)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Could not decrypt grade")
+		return nil, ErrCouldNotDecryptGrades
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
@@ -235,7 +246,8 @@ func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.IOSEncry
 	return grades
 }
 
-func sendGradesToDevice(device *model.IOSDevice, grades *[]model.Grade, apns *ios_apns.Repository) {
+// sendGradesToDevice builds a readable message of a grades array and sends a push notification to the device.
+func (service *Service) sendGradesToDevice(device *model.IOSDevice, grades *[]model.Grade) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(*grades))
 
 	if len(*grades) == 1 {
@@ -257,7 +269,7 @@ func sendGradesToDevice(device *model.IOSDevice, grades *[]model.Grade, apns *io
 
 	log.Infof("Sending push notification to device %s", device.DeviceID)
 
-	_, err := apns.SendAlertNotification(notificationPayload)
+	_, err := service.APNs.Repository.SendAlertNotification(notificationPayload)
 
 	if err != nil {
 		log.Error("Could not send notification: ", err)

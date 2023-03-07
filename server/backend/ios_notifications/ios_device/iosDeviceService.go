@@ -23,6 +23,10 @@ var (
 	ErrCouldNotRemoveDevice   = status.Error(codes.Internal, "Could not remove device")
 )
 
+// RegisterDevice registers a new device or updates an existing one.
+// if the device already exists it just updates the device activity,
+// otherwise it creates a new device and fetches the lectures and grades
+// of the device.
 func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
 	device := model.IOSDevice{
 		DeviceID:  request.GetDeviceId(),
@@ -65,25 +69,24 @@ func (service *Service) handleFirstDeviceRegistration(request *pb.RegisterDevice
 
 	influx.LogIOSRegisterDevice(deviceId)
 
-	err := service.fetchDeviceLectures(deviceId, campusToken)
+	err := service.fetchAndStoreDeviceLectures(deviceId, campusToken)
 	if err != nil {
 		log.WithError(err).Error("Could not fetch lectures of device")
 	}
 
-	err = service.fetchDeviceGrades(deviceId, campusToken)
+	err = service.fetchAndStoreDeviceGrades(deviceId, campusToken)
 	if err != nil {
 		log.WithError(err).Error("Could not fetch grades of device")
 	}
 }
 
-func (service *Service) fetchDeviceGrades(deviceId, campusToken string) error {
+func (service *Service) fetchAndStoreDeviceGrades(deviceId, campusToken string) error {
 	grades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
 		return err
 	}
 
 	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
-
 	err = gradesRepo.EncryptAndSaveGrades(grades.Grades, deviceId, campusToken)
 	if err != nil {
 		return err
@@ -92,7 +95,7 @@ func (service *Service) fetchDeviceGrades(deviceId, campusToken string) error {
 	return nil
 }
 
-func (service *Service) fetchDeviceLectures(deviceId, campusToken string) error {
+func (service *Service) fetchAndStoreDeviceLectures(deviceId, campusToken string) error {
 	lectures, err := campus_api.FetchPersonalLectures(campusToken)
 	if err != nil {
 		return err
