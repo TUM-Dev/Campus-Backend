@@ -104,7 +104,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error(err)
+		log.WithError(err).Error("Error while sending notification")
 		return nil, ErrCouldNotSendNotification
 	}
 
