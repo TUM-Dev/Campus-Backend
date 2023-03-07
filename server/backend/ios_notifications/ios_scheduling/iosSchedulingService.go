@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	DevicesToCheckPerCronBase = 10
-	MaxRoutineCount           = 10
+	MaxRoutineCount = 10
 )
 
 type Service struct {
@@ -81,10 +80,10 @@ func (service *Service) NewHandleScheduledCron() error {
 	return nil
 }
 
-func (service *Service) requestUpdateForDevices(devices *[]model.IOSDeviceWithAvgResponseTime) {
+func (service *Service) requestUpdateForDevices(devices *[]model.IOSDevice) {
 	routineCount := routineCount(devices)
 
-	utils.RunTasksInRoutines(devices, func(device model.IOSDeviceWithAvgResponseTime) {
+	utils.RunTasksInRoutines(devices, func(device model.IOSDevice) {
 		err := service.APNs.RequestLectureUpdateForDevice(device.DeviceID)
 		if err != nil {
 			log.WithError(err).Error("Error while requesting grades update")
@@ -92,7 +91,7 @@ func (service *Service) requestUpdateForDevices(devices *[]model.IOSDeviceWithAv
 	}, routineCount)
 }
 
-func routineCount(devices *[]model.IOSDeviceWithAvgResponseTime) int {
+func routineCount(devices *[]model.IOSDevice) int {
 	if len(*devices) < MaxRoutineCount {
 		return 1
 	}
