@@ -31,7 +31,7 @@ func (s *CampusServer) GetIOSAPNsService() *ios_apns.Service {
 func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Service {
 	repository := ios_request_response.NewRepository(s.db, s.GetIOSNotificationsService().APNSToken)
 
-	return ios_request_response.NewService(repository)
+	return ios_request_response.NewService(repository, s.GetIOSAPNsService())
 }
 
 func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {
