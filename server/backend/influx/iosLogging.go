@@ -30,14 +30,6 @@ func LogIOSNewGrades(deviceId string, gradesCount int) {
 	LogPoint(p)
 }
 
-func LogIOSSchedulingDevicesToUpdate(devicesToUpdateCount int, priority int) {
-	p := influxdb2.NewPointWithMeasurement("ios_scheduling_devices_to_update").
-		AddTag("priority", string(rune(priority))).
-		AddField("devices_to_update", devicesToUpdateCount)
-
-	LogPoint(p)
-}
-
 func LogIOSBackgroundRequest(deviceId, requestType, reason string) {
 	hashedDeviceId := hashSha256(deviceId)
 
