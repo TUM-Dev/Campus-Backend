@@ -69,8 +69,6 @@ func ValidateRequirementsForIOSNotificationsService() error {
 func (s *Service) RequestLectureUpdateForDevice(deviceID string) error {
 	lectureUpdateRequest, err := s.Repository.CreateLectureUpdateRequest(deviceID)
 
-	log.Infof("Created lecture update request: %v", lectureUpdateRequest)
-
 	log.Infof("Created lecture update request: %s", (*lectureUpdateRequest).RequestID)
 
 	if err != nil {
