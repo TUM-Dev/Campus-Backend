@@ -21,3 +21,8 @@ type IOSDevice struct {
 func (device *IOSDevice) String() string {
 	return fmt.Sprintf("IOSDevice{DeviceID: %s}", device.DeviceID)
 }
+
+type IOSDeviceWithAvgResponseTime struct {
+	IOSDevice
+	AvgResponseTime float64 `json:"avgResponseTime"`
+}
