@@ -19,6 +19,7 @@ import (
 
 type Service struct {
 	Repository *Repository
+	APNs       *ios_apns.Service
 }
 
 var (
@@ -195,8 +196,9 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.Grade, apns *ios
 	}
 }
 
-func NewService(repo *Repository) *Service {
+func NewService(repo *Repository, apns *ios_apns.Service) *Service {
 	return &Service{
 		Repository: repo,
+		APNs:       apns,
 	}
 }
