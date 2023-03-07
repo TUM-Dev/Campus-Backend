@@ -11,6 +11,8 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_grades"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_lectures"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/utils"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -23,12 +25,13 @@ type Service struct {
 }
 
 var (
-	ErrOutdatedRequest      = status.Error(codes.Internal, "Could not get request, probably request is already outdated")
-	ErrEmptyPayload         = status.Error(codes.InvalidArgument, "Payload is empty")
-	ErrUnknownRequestType   = status.Error(codes.InvalidArgument, "Unknown request type")
-	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
-	ErrCouldNotGetDevice    = status.Error(codes.Internal, "Could not get device")
-	ErrAPNSNotActive        = status.Error(codes.Internal, "APNS is not active")
+	ErrOutdatedRequest       = status.Error(codes.Internal, "Could not get request, probably request is already outdated")
+	ErrEmptyPayload          = status.Error(codes.InvalidArgument, "Payload is empty")
+	ErrUnknownRequestType    = status.Error(codes.InvalidArgument, "Unknown request type")
+	ErrInternalHandleGrades  = status.Error(codes.Internal, "Could not handle grades request")
+	ErrCouldNotGetDevice     = status.Error(codes.Internal, "Could not get device")
+	ErrAPNSNotActive         = status.Error(codes.Internal, "APNS is not active")
+	ErrCouldNotDecryptGrades = status.Error(codes.Internal, "Could not decrypt grades")
 )
 
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
@@ -38,9 +41,13 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 	log.Infof("Handling request with id %s", requestId)
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
-
 	if err != nil {
 		log.WithError(err).Error("Could not get request")
+		return nil, ErrOutdatedRequest
+	}
+
+	if requestLog.HandledAt.Valid {
+		log.Warnf("Request with id %s is already handled", requestId)
 		return nil, ErrOutdatedRequest
 	}
 
@@ -81,6 +88,28 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	log.Infof("Handling update lectures request for device %s", requestLog.DeviceID)
 
+	devicesRepo := ios_device.NewRepository(service.Repository.DB)
+	device, err := devicesRepo.GetDevice(requestLog.DeviceID)
+	if err != nil {
+		log.WithError(err).Error("Could not get device")
+		return nil, ErrCouldNotGetDevice
+	}
+
+	newGrades, err := service.findGetAndUpdateNewGrades(requestLog.DeviceID, campusToken, requestLog.RequestID, true)
+	if err != nil {
+		log.WithError(err).Error("Could not get new grades")
+		return nil, err
+	}
+
+	if len(*newGrades) > 0 {
+		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
+		sendGradesToDevice(device, newGrades, apnsRepository)
+
+		influx.LogIOSNewGrades(requestLog.DeviceID, len(*newGrades))
+
+		service.notifyOtherDevicesAboutNewGrades(device.DeviceID, newGrades)
+	}
+
 	return &pb.IOSDeviceRequestResponseReply{
 		Message: "Successfully handled request",
 	}, nil
@@ -89,15 +118,56 @@ func (service *Service) handleUpdateLecturesRequest(requestLog *model.IOSDeviceR
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
 
-	userRepo := ios_device.NewRepository(service.Repository.DB)
-	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
-
-	device, err := userRepo.GetDevice(requestLog.DeviceID)
-
+	devicesRepo := ios_device.NewRepository(service.Repository.DB)
+	device, err := devicesRepo.GetDevice(requestLog.DeviceID)
 	if err != nil {
 		log.WithError(err).Error("Could not get device")
 		return nil, ErrCouldNotGetDevice
 	}
+
+	newGrades, err := service.findGetAndUpdateNewGrades(requestLog.DeviceID, campusToken, requestLog.RequestID, false)
+	if err != nil {
+		log.WithError(err).Error("Could not get new grades")
+		return nil, err
+	}
+
+	if len(*newGrades) > 0 {
+		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
+		sendGradesToDevice(device, newGrades, apnsRepository)
+
+		influx.LogIOSNewGrades(requestLog.DeviceID, len(*newGrades))
+	}
+
+	return &pb.IOSDeviceRequestResponseReply{
+		Message: "Successfully handled request",
+	}, nil
+}
+
+func (service *Service) notifyOtherDevicesAboutNewGrades(deviceId string, newGrades *[]model.Grade) {
+	log.Infof("Notifying other devices about new grades")
+	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
+
+	for _, grade := range *newGrades {
+		devicesThatAttendLecture, err := lecturesRepo.FindOtherDevicesThatAttendLecture(grade.LectureTitle)
+		log.Infof("Found %d devices that attend lecture %s", len(*devicesThatAttendLecture), grade.LectureTitle)
+		if err != nil {
+			log.WithError(err).Error("Could not find other devices that attend lecture")
+			continue
+		}
+
+		utils.RunTasksInRoutines(devicesThatAttendLecture, func(device model.IOSDevice) {
+			/* if device.DeviceID == deviceId {
+				return
+			}*/
+			log.Infof("Notifying device %s about new grades", device.DeviceID)
+			service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
+		}, 10)
+	}
+}
+
+func (service *Service) findGetAndUpdateNewGrades(deviceId, campusToken, requestId string, updateLectures bool) (*[]model.Grade, error) {
+	lecturesRepo := ios_lectures.NewRepository(service.Repository.DB)
+	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
 
 	apiGrades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
@@ -105,7 +175,11 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		return nil, ErrInternalHandleGrades
 	}
 
-	oldGrades, err := gradesRepo.GetAndDecryptGrades(requestLog.DeviceID, campusToken)
+	if updateLectures {
+		lecturesRepo.SetLecturesLastUpdatedBy(requestId, &apiGrades.Grades)
+	}
+
+	oldGrades, err := gradesRepo.GetAndDecryptGrades(deviceId, campusToken)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Could not decrypt grade")
 	}
@@ -113,31 +187,25 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
-		return &pb.IOSDeviceRequestResponseReply{
-			Message: "Successfully handled request",
-		}, nil
+		return &newGrades, nil
 	}
 
-	err = gradesRepo.DeleteEncryptedGrades(requestLog.DeviceID)
-
+	err = gradesRepo.DeleteEncryptedGrades(deviceId)
 	if err != nil {
 		log.Error("Could not delete old grades: ", err)
 		return nil, ErrInternalHandleGrades
 	}
 
-	gradesRepo.EncryptAndSaveGrades(apiGrades.Grades, requestLog.DeviceID, campusToken)
+	gradesRepo.EncryptAndSaveGrades(apiGrades.Grades, deviceId, campusToken)
 
 	log.Infof("Found %d old grades and %d new grades", len(oldGrades), len(newGrades))
 
-	if len(newGrades) > 0 && len(oldGrades) > 0 {
-		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		sendGradesToDevice(device, newGrades, apnsRepository)
-		influx.LogIOSNewGrades(requestLog.DeviceID, len(newGrades))
+	// check if this is the first time the user has grades => no need to send notification
+	if len(newGrades) > 0 && len(oldGrades) == 0 {
+		return &([]model.Grade{}), nil
 	}
 
-	return &pb.IOSDeviceRequestResponseReply{
-		Message: "Successfully handled request",
-	}, nil
+	return &newGrades, nil
 }
 
 func (service *Service) setRequestLogAsHandled(requestLog *model.IOSDeviceRequestLog) {
@@ -167,15 +235,15 @@ func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.IOSEncry
 	return grades
 }
 
-func sendGradesToDevice(device *model.IOSDevice, grades []model.Grade, apns *ios_apns.Repository) {
-	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
+func sendGradesToDevice(device *model.IOSDevice, grades *[]model.Grade, apns *ios_apns.Repository) {
+	alertTitle := fmt.Sprintf("%d New Grades Available", len(*grades))
 
-	if len(grades) == 1 {
+	if len(*grades) == 1 {
 		alertTitle = "New Grade Available"
 	}
 
 	var alertBody string
-	for i, grade := range grades {
+	for i, grade := range *grades {
 		if i == 0 {
 			alertBody = fmt.Sprintf("%s: %s", grade.LectureTitle, grade.Grade)
 		} else {
