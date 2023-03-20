@@ -269,6 +269,31 @@ service Campus {
       delete: "/device/{deviceId}",
     };
   }
+
+  // Get the approximated average grade of a user
+  rpc GetApproximatedAverageGrade(GetApproximatedAverageGradeRequest) returns (GetApproximatedAverageGradeReply) {
+    option (google.api.http) = {
+      post: "/approximatedAverageGrade",
+      body: "*",
+    };
+  }
+}
+
+message GetApproximatedAverageGradeRequest {
+  string campusToken = 1;
+}
+
+message GetApproximatedAverageGradeReply {
+  double averageGrade = 1;
+  repeated ApproximatedAverageGradeCalculationStep calculationSteps = 2;
+}
+
+message ApproximatedAverageGradeCalculationStep {
+  string lectureTitle = 1;
+  double grade = 2;
+  double weight = 3;
+  int32 ects = 4;
+  optional string errorMessage = 5;
 }
 
 enum DeviceType {

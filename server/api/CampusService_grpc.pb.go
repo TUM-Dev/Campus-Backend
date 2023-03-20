@@ -65,6 +65,8 @@ type CampusClient interface {
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceReply, error)
 	// Unregister it from push notifications
 	RemoveDevice(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceReply, error)
+	// Get the approximated average grade of a user
+	GetApproximatedAverageGrade(ctx context.Context, in *GetApproximatedAverageGradeRequest, opts ...grpc.CallOption) (*GetApproximatedAverageGradeReply, error)
 }
 
 type campusClient struct {
@@ -408,6 +410,15 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 	return out, nil
 }
 
+func (c *campusClient) GetApproximatedAverageGrade(ctx context.Context, in *GetApproximatedAverageGradeRequest, opts ...grpc.CallOption) (*GetApproximatedAverageGradeReply, error) {
+	out := new(GetApproximatedAverageGradeReply)
+	err := c.cc.Invoke(ctx, "/api.Campus/GetApproximatedAverageGrade", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
@@ -454,6 +465,8 @@ type CampusServer interface {
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceReply, error)
 	// Unregister it from push notifications
 	RemoveDevice(context.Context, *RemoveDeviceRequest) (*RemoveDeviceReply, error)
+	// Get the approximated average grade of a user
+	GetApproximatedAverageGrade(context.Context, *GetApproximatedAverageGradeRequest) (*GetApproximatedAverageGradeReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -571,6 +584,9 @@ func (UnimplementedCampusServer) RegisterDevice(context.Context, *RegisterDevice
 }
 func (UnimplementedCampusServer) RemoveDevice(context.Context, *RemoveDeviceRequest) (*RemoveDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveDevice not implemented")
+}
+func (UnimplementedCampusServer) GetApproximatedAverageGrade(context.Context, *GetApproximatedAverageGradeRequest) (*GetApproximatedAverageGradeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetApproximatedAverageGrade not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -1251,6 +1267,24 @@ func _Campus_RemoveDevice_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetApproximatedAverageGrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetApproximatedAverageGradeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetApproximatedAverageGrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Campus/GetApproximatedAverageGrade",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetApproximatedAverageGrade(ctx, req.(*GetApproximatedAverageGradeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1405,6 +1439,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveDevice",
 			Handler:    _Campus_RemoveDevice_Handler,
+		},
+		{
+			MethodName: "GetApproximatedAverageGrade",
+			Handler:    _Campus_GetApproximatedAverageGrade_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -7,6 +7,10 @@ func RunTasksInRoutines[T any](tasks *[]T, routine func(T), maxRoutines int) {
 	partSize := taskLen / maxRoutines
 	var wg sync.WaitGroup
 
+	if taskLen < maxRoutines {
+		maxRoutines = taskLen
+	}
+
 	for i := 0; i < maxRoutines; i++ {
 		wg.Add(1)
 		go func(i int) {
@@ -31,6 +35,10 @@ func RunTasksInRoutines[T any](tasks *[]T, routine func(T), maxRoutines int) {
 func RunXTasksInRoutines(count int, routine func(int), maxRoutines int) {
 	partSize := count / maxRoutines
 	var wg sync.WaitGroup
+
+	if count < maxRoutines {
+		maxRoutines = count
+	}
 
 	for i := 0; i < maxRoutines; i++ {
 		wg.Add(1)

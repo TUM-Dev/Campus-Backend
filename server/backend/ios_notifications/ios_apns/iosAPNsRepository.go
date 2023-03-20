@@ -90,6 +90,8 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	url := r.ApnsUrl() + "/3/device/" + notification.DeviceId
 	body, _ := notification.MarshalJSON()
 
+	log.Infof("Sending notification to %s", string(body))
+
 	client := r.httpClient
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 

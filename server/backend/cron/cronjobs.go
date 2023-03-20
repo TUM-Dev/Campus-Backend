@@ -28,6 +28,7 @@ const (
 	StorageDir               = "/Storage/" // target location of files
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
+	LectureCrawler           = "lectureCrawler"
 
 	/* MensaType      = "mensa"
 	ChatType       = "chat"
@@ -58,7 +59,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -67,6 +68,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				IOSNotifications,
 				IOSActivityReset,
+				LectureCrawler,
 			).
 			Scan(&res)
 
@@ -119,6 +121,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.iosNotificationsCron() })
 			case IOSActivityReset:
 				g.Go(func() error { return c.iosActivityReset() })
+			case LectureCrawler:
+				g.Go(func() error { return c.lectureCrawlerCron() })
 			}
 		}
 

@@ -4,6 +4,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_devices_activity_reset"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduling"
+	log "github.com/sirupsen/logrus"
 )
 
 // Starts the cron job for sending iOS notifications reuses
@@ -17,6 +18,8 @@ func (c *CronService) iosNotificationsCron() error {
 	devicesRepo := ios_device.NewRepository(c.db)
 
 	service := ios_scheduling.NewService(repo, devicesRepo, c.APNs)
+
+	log.Infof("Starting iOS notifications cron job")
 
 	return service.HandleScheduledCron()
 }

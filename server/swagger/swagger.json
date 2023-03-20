@@ -16,6 +16,39 @@
     "application/json"
   ],
   "paths": {
+    "/approximatedAverageGrade": {
+      "post": {
+        "summary": "Get the approximated average grade of a user",
+        "operationId": "Campus_GetApproximatedAverageGrade",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetApproximatedAverageGradeReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetApproximatedAverageGradeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/barrierfree/building2Gps": {
       "get": {
         "operationId": "Campus_GetBuilding2Gps",
@@ -1239,6 +1272,29 @@
         }
       }
     },
+    "apiApproximatedAverageGradeCalculationStep": {
+      "type": "object",
+      "properties": {
+        "lectureTitle": {
+          "type": "string"
+        },
+        "grade": {
+          "type": "number",
+          "format": "double"
+        },
+        "weight": {
+          "type": "number",
+          "format": "double"
+        },
+        "ects": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    },
     "apiBuilding2GpsElement": {
       "type": "object",
       "properties": {
@@ -1453,6 +1509,29 @@
         "ticketGroup": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "apiGetApproximatedAverageGradeReply": {
+      "type": "object",
+      "properties": {
+        "averageGrade": {
+          "type": "number",
+          "format": "double"
+        },
+        "calculationSteps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiApproximatedAverageGradeCalculationStep"
+          }
+        }
+      }
+    },
+    "apiGetApproximatedAverageGradeRequest": {
+      "type": "object",
+      "properties": {
+        "campusToken": {
+          "type": "string"
         }
       }
     },

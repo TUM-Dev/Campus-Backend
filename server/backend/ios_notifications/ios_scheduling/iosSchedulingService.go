@@ -79,6 +79,10 @@ func (service *Service) HandleScheduledCron() error {
 }
 
 func (service *Service) requestUpdateForDevices(devices *[]model.IOSDevice) {
+	if len(*devices) == 0 {
+		return
+	}
+
 	routineCount := routineCount(devices)
 
 	utils.RunTasksInRoutines(devices, func(device model.IOSDevice) {
