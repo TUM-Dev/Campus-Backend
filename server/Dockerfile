@@ -18,7 +18,7 @@ ARG version=dev
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
 RUN chmod +x /backend
 
-FROM scratch
+FROM alpine:latest
 COPY --from=builder /backend /backend
 
 # Import from builder - needed for running
