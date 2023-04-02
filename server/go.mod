@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/influxdata/influxdb-client-go/v2 v2.12.2
+	github.com/influxdata/influxdb-client-go/v2 v2.12.3
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/mmcdole/gofeed v1.2.0
 	github.com/satori/go.uuid v1.2.0
@@ -22,7 +22,7 @@ require (
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923
 	google.golang.org/grpc v1.53.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
-	google.golang.org/protobuf v1.29.1
+	google.golang.org/protobuf v1.30.0
 	gorm.io/driver/mysql v1.4.7
 	gorm.io/gorm v1.24.5
 )
