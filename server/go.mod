@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/guregu/null v4.0.0+incompatible
-	github.com/influxdata/influxdb-client-go/v2 v2.12.2
+	github.com/influxdata/influxdb-client-go/v2 v2.12.3
 	github.com/microcosm-cc/bluemonday v1.0.22
 	github.com/mmcdole/gofeed v1.2.0
 	github.com/satori/go.uuid v1.2.0
