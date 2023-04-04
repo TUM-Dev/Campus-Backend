@@ -1292,6 +1292,27 @@
         },
         "errorMessage": {
           "type": "string"
+        },
+        "infoMessage": {
+          "type": "string"
+        }
+      }
+    },
+    "apiApproximatedAverageGradePerStudy": {
+      "type": "object",
+      "properties": {
+        "averageGrade": {
+          "type": "number",
+          "format": "double"
+        },
+        "studyId": {
+          "type": "string"
+        },
+        "calculationSteps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiApproximatedAverageGradeCalculationStep"
+          }
         }
       }
     },
@@ -1515,14 +1536,10 @@
     "apiGetApproximatedAverageGradeReply": {
       "type": "object",
       "properties": {
-        "averageGrade": {
-          "type": "number",
-          "format": "double"
-        },
-        "calculationSteps": {
+        "studies": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiApproximatedAverageGradeCalculationStep"
+            "$ref": "#/definitions/apiApproximatedAverageGradePerStudy"
           }
         }
       }

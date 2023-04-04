@@ -284,8 +284,13 @@ message GetApproximatedAverageGradeRequest {
 }
 
 message GetApproximatedAverageGradeReply {
+  repeated ApproximatedAverageGradePerStudy studies = 1;
+}
+
+message ApproximatedAverageGradePerStudy {
   double averageGrade = 1;
-  repeated ApproximatedAverageGradeCalculationStep calculationSteps = 2;
+  string study_id = 2;
+  repeated ApproximatedAverageGradeCalculationStep calculationSteps = 3;
 }
 
 message ApproximatedAverageGradeCalculationStep {
@@ -294,6 +299,7 @@ message ApproximatedAverageGradeCalculationStep {
   double weight = 3;
   int32 ects = 4;
   optional string errorMessage = 5;
+  optional string infoMessage = 6;
 }
 
 enum DeviceType {
