@@ -18,7 +18,7 @@ var customContainsCourses = map[string]int32{
 	"Seminar":   5,
 }
 
-const FallbackEcts = 6
+const FallbackEcts = 5
 
 func (repo *Repository) GetCalculationSteps(grades []model.Grade) []*pb.ApproximatedAverageGradeCalculationStep {
 	var calculationSteps []*pb.ApproximatedAverageGradeCalculationStep
