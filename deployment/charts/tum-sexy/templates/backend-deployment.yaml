@@ -33,21 +33,23 @@ spec:
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
           imagePullPolicy: Always
           env:
-            - key: APNS_P8_FILE_PATH
+            - name: ENVIRONMENT
+              value: prod
+            - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
             - key: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
                   name: backend-api-keys
                   key: SENTRY_DSN
-            - key: DB_DSN
+            - name: DB_DSN
               value: "{{ $db.username }}:{{ $db.password }}@tcp(mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
             - key: APNS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: backend-api-keys
                   key: APNS_KEY_ID
-            - key: APNS_TEAM_ID
+            - name: APNS_TEAM_ID
               valueFrom:
                 secretKeyRef:
                   name: backend-api-keys
