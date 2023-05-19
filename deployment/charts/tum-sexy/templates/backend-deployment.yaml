@@ -1,0 +1,48 @@
+serverVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: tum-campus-app
+      app.kubernetes.io/name: server
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: tum-campus-app
+        app.kubernetes.io/name: server
+    spec:
+      containers:
+        - name: tca-backend
+          image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: tca-backend-db
+            - secretRef:
+                name: tca-backend-sentry
+          env:
+            - APNS_P8_FILE_PATH:
+                value: /etc/apns_auth_key.p8
+          volumeMount:
+            - name: apns-auth-key
+              mountPath: /etc/apns_auth_key.p8
+              subPath: apns_auth_key.p8
+              readOnly: true
+          ports:
+            - containerPort: 50051
+              name: https
+          securityContext:
+            readOnlyRootFilesystem: true
