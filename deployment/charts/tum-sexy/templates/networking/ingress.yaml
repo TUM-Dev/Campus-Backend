@@ -4,6 +4,7 @@ metadata:
   name: ingress
   labels:
     app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   entryPoints:
@@ -23,6 +24,7 @@ metadata:
   name: ingress-http
   labels:
     app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   entryPoints:

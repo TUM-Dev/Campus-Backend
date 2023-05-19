@@ -4,6 +4,7 @@ metadata:
   name: {{ $.Values.url }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   commonName: {{ $.Values.url }}

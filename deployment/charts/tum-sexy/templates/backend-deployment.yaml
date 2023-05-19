@@ -1,7 +1,7 @@
 serverVersion: apps/v1
 kind: Deployment
 metadata:
-  name: server
+  name: backend
   labels:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend
@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/part-of: tum-campus-app
-      app.kubernetes.io/name: server
+      app.kubernetes.io/name: backend
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/part-of: tum-campus-app
-        app.kubernetes.io/name: server
+        app.kubernetes.io/name: backend
     spec:
       containers:
         - name: tca-backend
