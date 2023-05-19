@@ -3,12 +3,18 @@ description: Backend for the TUM campus apps
 version: 1.0.0
 apiVersion: v1
 deprecated: false
-icon: https://tum.sexy/favicon.png
-
-
-
+icon: https://tum.app/assets/img/fav.png
+keywords:
+  - backend
+  - campus
+  - tum
+  - sexy
 dependencies:
-  - condition: mariadbEnabled
+  - condition: mariadb-galera.enabled
     name: mariadb-galera
+    repository: https://charts.bitnami.com/bitnami
+    version: 10.x.x
+  - condition: mariadb.enabled
+    name: mariadb
     repository: https://charts.bitnami.com/bitnami
     version: 10.x.x

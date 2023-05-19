@@ -1,4 +1,8 @@
-serverVersion: apps/v1
+{{- $db := $.Values.mariadb.auth -}}
+{{- if $.Values.mariadb-galera.enabled -}}
+  {{- $db = $.Values.mariadb-galera.db -}}
+{{ end}}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
@@ -28,21 +32,48 @@ spec:
         - name: tca-backend
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
           imagePullPolicy: Always
-          envFrom:
-            - secretRef:
-                name: tca-backend-db
-            - secretRef:
-                name: tca-backend-sentry
           env:
-            - APNS_P8_FILE_PATH:
-                value: /etc/apns_auth_key.p8
+            - key: APNS_P8_FILE_PATH
+              value: /etc/apns_auth_key.p8
+            - key: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: SENTRY_DSN
+            - key: DB_DSN
+              value: "{{ $db.username }}:{{ $db.password }}@tcp(mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
+            - key: APNS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: APNS_KEY_ID
+            - key: APNS_TEAM_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: APNS_TEAM_ID
           volumeMount:
-            - name: apns-auth-key
+            - name: backend-api-keys
               mountPath: /etc/apns_auth_key.p8
-              subPath: apns_auth_key.p8
+              subPath: apns_auth_key
               readOnly: true
           ports:
             - containerPort: 50051
               name: https
           securityContext:
             readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: backend-api-keys
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
+data:
+  SENTRY_DSN: {{ $.Values.backend.SENTRY_DSN | b64enc | quote }}
+  APNS_AUTH_KEY: {{ $.Values.backend.apns.auth_key | b64enc | quote }}
+  APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc | quote }}
+  APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc | quote }}
