@@ -23,6 +23,7 @@ mariadb:
     size: 1Gi
     storageClass: local-path
 #    storageClass: longhorn
+  initdbScriptsConfigMap: sql-init
 
 
 backend:
