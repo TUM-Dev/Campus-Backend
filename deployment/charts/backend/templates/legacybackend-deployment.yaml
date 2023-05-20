@@ -46,7 +46,7 @@ spec:
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: config.ini
-              subPath: config.ini
+              subPath: /app/Config
               name: legacybackend-config
               readOnly: true
             - mountPath: /app/Storage/
