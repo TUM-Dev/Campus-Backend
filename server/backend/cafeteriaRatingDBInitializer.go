@@ -50,7 +50,7 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 		Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while checking if cronjob with name {} already exists in database", cronName)
+		log.WithError(err).Errorf("Error while checking if cronjob with name %s already exists in database", cronName)
 	} else if count == 0 {
 		errCreate := db.Model(&model.Crontab{}).
 			Create(&model.Crontab{
@@ -79,7 +79,7 @@ func updateNameTagOptions(db *gorm.DB) {
 			Select("DishNameTagOption").
 			Scan(&parentId)
 		if res.Error != nil {
-			log.WithError(res.Error).Error("Unable to load tag with En {} and De {} ", v.TagNameEnglish, v.TagNameGerman)
+			log.WithError(res.Error).Errorf("Unable to load tag with En %s and De %s", v.TagNameEnglish, v.TagNameGerman)
 		}
 		if res.RowsAffected == 0 || res.Error != nil {
 			parent := model.DishRatingTagOption{
@@ -109,7 +109,7 @@ func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 			Select("DishNameTagOptionExcluded").
 			Count(&count).Error
 		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Error("Unable to load can be excluded tag with expression {} and parentId {} ", u, parentId)
+			log.WithError(errorLoadingIncluded).Errorf("Unable to load can be excluded tag with expression %s and parentId %s", u, parentId)
 		} else {
 			if count == 0 {
 				createError := db.Model(&model.DishNameTagOptionExcluded{}).
@@ -132,7 +132,7 @@ func addCanBeIncluded(parentId int32, db *gorm.DB, v nameTag) {
 			Select("DishNameTagOptionIncluded").
 			Count(&count).Error
 		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Error("Unable to load can be included tag with expression {} and parentId {} ", u, parentId)
+			log.WithError(errorLoadingIncluded).Errorf("Unable to load can be included tag with expression %s and parentId %s", u, parentId)
 		} else {
 			if count == 0 {
 				createError := db.Model(&model.DishNameTagOptionIncluded{}).
@@ -141,7 +141,7 @@ func addCanBeIncluded(parentId int32, db *gorm.DB, v nameTag) {
 						NameTagID:  parentId,
 					}).Error
 				if createError != nil {
-					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded tag with expression {} and parentId {} ", u, parentId)
+					log.WithError(errorLoadingIncluded).Errorf("Unable to create new can be excluded tag with expression %s and parentId %s", u, parentId)
 				}
 			}
 		}
@@ -165,14 +165,14 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("cafeteriaRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Error("Unable to find cafeteria rating tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).Errorf("Unable to find cafeteria rating tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
 			}
 		} else {
 			countError := db.Model(&model.DishRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("dishRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Error("Unable to find dish rating tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).Errorf("Unable to find dish rating tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
 			}
 		}
 
@@ -183,9 +183,9 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 			}
 			createError := insertModel.Create(&element).Error
 			if createError != nil {
-				log.WithError(createError).Error("Unable to create new can be excluded tag with En {} and De {} ", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(createError).Errorf("Unable to create new can be excluded tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
 			} else {
-				log.Info("New Entry with En {} and De {} successfully created.", v.TagNameGerman, v.TagNameEnglish)
+				log.Infof("New Entry with En %s and De %s successfully created.", v.TagNameGerman, v.TagNameEnglish)
 			}
 		}
 	}
@@ -236,7 +236,7 @@ func readFromFile(path string) *os.File {
 	jsonFile, err := os.Open(path)
 
 	if err != nil {
-		log.WithError(err).Error("Unable to open file with path: {}", path)
+		log.WithError(err).Error("Unable to open file with path: ", path)
 	}
 
 	return jsonFile

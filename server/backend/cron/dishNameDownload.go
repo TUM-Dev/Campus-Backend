@@ -71,7 +71,7 @@ func downloadDailyDishes(c *CronService) {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 
 		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%d.json", cafeteriaName, year, week)
-		log.Info("Fetching menu from: {}", req)
+		log.Info("Fetching menu from: ", req)
 		var resp, err = http.Get(req)
 		if err != nil {
 			log.WithError(err).Error("Error fetching menu.")
@@ -156,7 +156,7 @@ func downloadCanteenNames(c *CronService) {
 		if resExists.Error != nil {
 			errCreate := c.db.Model(&model.Cafeteria{}).Create(&mensa).Error
 			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating the db entry for the cafeteria {}", cafeteriaNames[i].Name)
+				log.WithError(errCreate).Error("Error while creating the db entry for the cafeteria ", cafeteriaNames[i].Name)
 			}
 		} else {
 			errUpdate := c.db.Model(&model.Cafeteria{}).
@@ -180,7 +180,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 		Select("nameTagID").
 		Scan(&includedTags).Error
 	if errIncluded != nil {
-		log.WithError(errIncluded).Error("Error while querying all included expressions for the dish: {}", lowercaseDish)
+		log.WithError(errIncluded).Error("Error while querying all included expressions for the dish: ", lowercaseDish)
 	}
 
 	var excludedTags []int32
@@ -189,7 +189,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 		Select("nameTagID").
 		Scan(&excludedTags).Error
 	if errExcluded != nil {
-		log.WithError(errExcluded).Error("Error while querying all excluded expressions for the dish: {}", lowercaseDish)
+		log.WithError(errExcluded).Error("Error while querying all excluded expressions for the dish: ", lowercaseDish)
 	}
 
 	//set all entries in included to -1 if the excluded tag was recognised for this tag rating.
@@ -209,7 +209,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 				NameTagID: a,
 			}).Error
 			if err != nil {
-				log.WithError(err).Error("Error while creating a new entry with dish {} and nametag {}", dishID, a)
+				log.WithError(err).Errorf("Error while creating a new entry with dish %s and nametag %s", dishID, a)
 			}
 		}
 	}
