@@ -64,7 +64,7 @@ spec:
               name: storage-vol
               readOnly: false
             - mountPath: /etc/apns_auth_key.p8
-              subPath: APNS_AUTH_KEY
+              subPath: apns_auth_key.p8
               name: backend-api-keys
               readOnly: true
           ports:
@@ -102,6 +102,6 @@ metadata:
     app.kubernetes.io/name: backend
 data:
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
-  APNS_AUTH_KEY: {{ $.Values.backend.apns.auth_key }}
+  apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}
   APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc }}
   APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc }}
