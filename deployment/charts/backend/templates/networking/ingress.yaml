@@ -36,7 +36,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ $.Values.url }}`) || Host(`{{ $.Values.url-grpc }}`)
+      match: Host(`{{ $.Values.url }}`) || Host(`{{ $.Values.urlGrpc }}`)
       services:
         - name: noop@internal
           kind: TraefikService
