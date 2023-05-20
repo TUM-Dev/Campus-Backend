@@ -1,5 +1,5 @@
-namespace: latest
-tag: main
+namespace: tca-backend
+tag: latest
 url: "api.tum.app"
 urlGrpc: "api-grpc.tum.app"
 
