@@ -49,13 +49,10 @@ spec:
               subPath: config.ini
               name: configuration-vol
               readOnly: true
-              create: true
             - mountPath: /app/Storage/
               name: storage-vol
-              readOnly: false
             - mountPath: /app/Tmp/
               name: tmp-vol
-              readOnly: false
             - mountPath: /var/www/html/tmp/
               name: tmp-html
             - mountPath: /var/run/apache2/
