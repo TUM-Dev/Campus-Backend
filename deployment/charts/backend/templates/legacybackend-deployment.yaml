@@ -45,8 +45,8 @@ spec:
           image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: config.ini
-              subPath: /app/Config
+            - mountPath: /app/Config/config.ini
+              subPath: config.ini
               name: legacybackend-config
               readOnly: true
             - mountPath: /app/Storage/
