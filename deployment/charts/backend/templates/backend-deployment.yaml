@@ -78,18 +78,18 @@ spec:
               memory: 50Mi
             limits:
               memory: 200Mi
-          #livenessProbe:
-          #  httpGet:
-          #    path: /health
-          #    port: https
-          #  failureThreshold: 1
-          #  periodSeconds: 1
-          #startupProbe:
-          #  httpGet:
-          #    path: /health
-          #    port: https
-          #  failureThreshold: 20
-          #  periodSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: https
+            failureThreshold: 1
+            periodSeconds: 1
+          startupProbe:
+            httpGet:
+              path: /health
+              port: https
+            failureThreshold: 20
+            periodSeconds: 1
 ---
 apiVersion: v1
 kind: Secret
