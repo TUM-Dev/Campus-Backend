@@ -16,7 +16,7 @@ spec:
         - name: campus-backend-svc
           port: 50051
     - kind: Rule
-      match: Host(`{{ $.Values.url-grpc }}`)
+      match: Host(`{{ $.Values.urlGrpc }}`)
       services:
         - name: campus-backend-svc
           port: 50051
