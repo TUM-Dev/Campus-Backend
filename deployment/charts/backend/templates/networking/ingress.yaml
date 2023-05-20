@@ -4,24 +4,23 @@ metadata:
   name: ingress
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`{{ $.Values.url }}`)
+      match: {{ join " || " $.Values.url.v2 }}}
       services:
-        - name: campus-backend-svc
+        - name: backend-v2-svc
           port: 50051
     - kind: Rule
-      match: Host(`{{ $.Values.urlGrpc }}`)
+      match: {{ join " || " $.Values.url.v1 }}}
       services:
-        - name: campus-backend-svc
-          port: 50051
+        - name: backend-v1-svc
+          port: 80
   tls:
-    secretName: {{ $.Values.url }}
+    secretName: app.tum.de
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -29,14 +28,13 @@ metadata:
   name: ingress-http
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ $.Values.url }}`) || Host(`{{ $.Values.urlGrpc }}`)
+      match: {{ join " || " $.Values.url.v1 }} || {{ join " || " $.Values.url.v2 }}
       services:
         - name: noop@internal
           kind: TraefikService

@@ -4,7 +4,6 @@ metadata:
   name: https
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   redirectScheme:

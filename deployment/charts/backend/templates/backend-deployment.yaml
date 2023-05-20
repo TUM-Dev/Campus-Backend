@@ -5,15 +5,15 @@ metadata:
   name: backend
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
+    app.kubernetes.io/name: backend-v2
   namespace: {{ $.Values.namespace }}
 spec:
   replicas: 1
   revisionHistoryLimit: 1
   selector:
     matchLabels:
-      app.kubernetes.io/part-of: tum-campus-app
-      app.kubernetes.io/name: backend
+      app.kubernetes.io/part-of: tum-campus-apppus-app
+      app.kubernetes.io/name: backend-v2
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -22,8 +22,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/part-of: tum-campus-app
-        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: tum-campus-apppus-app
+        app.kubernetes.io/name: backend-v2
     spec:
       volumes:
         - name: storage-vol
@@ -69,7 +69,7 @@ spec:
               readOnly: true
           ports:
             - containerPort: 50051
-              name: https
+              name: http
           securityContext:
             readOnlyRootFilesystem: true
           resources:
@@ -81,13 +81,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: https
+              port: http
             failureThreshold: 1
             periodSeconds: 1
           startupProbe:
             httpGet:
               path: /health
-              port: https
+              port: http
             failureThreshold: 20
             periodSeconds: 1
 ---
@@ -99,7 +99,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
+    app.kubernetes.io/name: backend-v2
 data:
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
   apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}

@@ -1,7 +1,15 @@
 namespace: tca-backend
 tag: latest
-url: "api.tum.app"
-urlGrpc: "api-grpc.tum.app"
+urls:
+  v1:
+  - app.tum.app
+  - app.tum.de
+  - www.app.tum.de
+  - tumcabe.in.tum.de
+  - tuinf01-tcabe.srv.mwn.de
+  v2:
+  - api.tum.app
+  - api-grpc.tum.app
 
 # see https://github.com/bitnami/charts/tree/main/bitnami/mariadb for more options, the se are just the most important ones
 mariadb:

@@ -75,7 +75,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
+    app.kubernetes.io/name: backend-v1
 data:
   cfg.ini: {{ $.Values.legacy.config }}
 ---
@@ -86,7 +86,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend
+    app.kubernetes.io/name: backend-v1
 data:
   .dockerconfigjson: {{ $.Values.legacy.imagepullsecret }}
 type: kubernetes.io/dockerconfigjson
