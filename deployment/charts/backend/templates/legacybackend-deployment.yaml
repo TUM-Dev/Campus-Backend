@@ -74,5 +74,5 @@ metadata:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend
 data:
-  .dockerconfigjson: {{ $.Values.legacy.imagepullsecret | b64enc }}
+  .dockerconfigjson: {{ $.Values.legacy.imagepullsecret }}
 type: kubernetes.io/dockerconfigjson
