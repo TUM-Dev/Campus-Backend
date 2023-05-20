@@ -49,6 +49,7 @@ spec:
               subPath: config.ini
               name: configuration-vol
               readOnly: true
+              create: true
             - mountPath: /app/Storage/
               name: storage-vol
               readOnly: false
