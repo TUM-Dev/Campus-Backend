@@ -25,6 +25,11 @@ spec:
         app.kubernetes.io/part-of: tum-campus-app
         app.kubernetes.io/name: backend
     spec:
+      volumes:
+        - name: backend-api-keys
+          secret:
+            name: backend-api-keys
+            readOnly: true
       containers:
         - name: tca-backend
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
@@ -52,10 +57,9 @@ spec:
                   name: backend-api-keys
                   key: APNS_TEAM_ID
           volumeMount:
-            - name: backend-api-keys
-              mountPath: /etc/apns_auth_key.p8
+            - mountPath: /etc/apns_auth_key.p8
               subPath: apns_auth_key
-              readOnly: true
+              name: backend-api-keys
           ports:
             - containerPort: 50051
               name: https
