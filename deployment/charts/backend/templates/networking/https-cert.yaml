@@ -12,7 +12,7 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-{{- range $host := $.Values.urls.v1 -}}
+{{ range $host := $.Values.urls.v1 -}}
     - {{ $host }}
 {{- end -}}
 {{- range $host := $.Values.urls.v2 -}}
