@@ -12,5 +12,5 @@ keywords:
 dependencies:
   - condition: mariadb.enabled
     name: mariadb
-    repository: oci://registry-1.docker.io/bitnamicharts/mariadb
+    repository: https://marketplace.azurecr.io/helm/v1/repo
     version: 10.11.3
