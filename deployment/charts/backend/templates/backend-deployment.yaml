@@ -34,7 +34,7 @@ spec:
               value: prod
             - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
-            - key: SENTRY_DSN
+            - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
                   name: backend-api-keys
