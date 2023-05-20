@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legacybackend
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: legacybackend
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: tum-campus-app
+      app.kubernetes.io/name: legacybackend
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: tum-campus-app
+        app.kubernetes.io/name: legacybackend
+    spec:
+      volumes:
+        - name: configuration-vol
+          secret:
+            secretName: legacybackend-config
+        - name: storage-vol
+          persistentVolumeClaim:
+            readOnly: false
+            claimName: legacybackend-pvc
+        - name: tmp-vol
+          emptyDir: {}
+      containers:
+        - name: tca-legacybackend
+          image: docker.pkg.github.com/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/Storage/
+              name: storage-vol
+              readOnly: false
+            - mountPath: /app/Tmp/
+              name: tmp-vol
+              readOnly: false
+          ports:
+            - containerPort: 80
+              name: https
+          securityContext:
+            readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: legacybackend-config
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
+data:
+  config.ini: {{ $.Values.legacy.config }}
