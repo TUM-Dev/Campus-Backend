@@ -17,12 +17,19 @@ mariadb:
   primary:
     pdb:
       create: true
+    persistence:
+      size: 1Gi
+      storageClass: local-path
+      # storageClass: longhorn
+  secondary:
+    pdb:
+      create: true
+    persistence:
+      size: 1Gi
+      storageClass: local-path
+      # storageClass: longhorn
   volumePermissions:
     enabled: true
-  persistence:
-    size: 1Gi
-    storageClass: local-path
-#    storageClass: longhorn
   initdbScriptsConfigMap: sql-init
 
 
