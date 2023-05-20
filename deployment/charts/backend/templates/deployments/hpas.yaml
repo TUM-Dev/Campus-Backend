@@ -1,4 +1,4 @@
-{{ range $name := (list backend-v1 backend-v2) }}
+{{ range $name := (list "backend-v1" "backend-v2") }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
