@@ -29,7 +29,6 @@ spec:
         - name: backend-api-keys
           secret:
             secretName: backend-api-keys
-            readOnly: true
       containers:
         - name: tca-backend
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
@@ -60,6 +59,7 @@ spec:
             - mountPath: /etc/apns_auth_key.p8
               subPath: apns_auth_key
               name: backend-api-keys
+              readOnly: true
           ports:
             - containerPort: 50051
               name: https
@@ -67,7 +67,7 @@ spec:
             readOnlyRootFilesystem: true
           resources:
             requests:
-              cpu: 1
+              cpu: 1000m
               memory: 50Mi
             limits:
               memory: 200Mi
