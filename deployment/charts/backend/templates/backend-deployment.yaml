@@ -26,6 +26,10 @@ spec:
         app.kubernetes.io/name: backend
     spec:
       volumes:
+        - name: storage-vol
+          persistentVolumeClaim:
+            readOnly: false
+            claimName: backend-pvc
         - name: backend-api-keys
           secret:
             secretName: backend-api-keys
@@ -56,6 +60,9 @@ spec:
                   name: backend-api-keys
                   key: APNS_TEAM_ID
           volumeMounts:
+            - mountPath: /app/Storage/
+              name: storage-vol
+              readOnly: false
             - mountPath: /etc/apns_auth_key.p8
               subPath: apns_auth_key
               name: backend-api-keys
