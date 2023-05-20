@@ -25,7 +25,7 @@ spec:
         app.kubernetes.io/name: legacybackend
     spec:
       volumes:
-        - name: configuration-vol
+        - name: legacybackend-config
           secret:
             secretName: legacybackend-config
         - name: storage-vol
@@ -45,9 +45,9 @@ spec:
           image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /app/Config/
+            - mountPath: config.ini
               subPath: config.ini
-              name: configuration-vol
+              name: legacybackend-config
               readOnly: true
             - mountPath: /app/Storage/
               name: storage-vol
