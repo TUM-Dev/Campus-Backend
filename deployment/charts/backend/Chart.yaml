@@ -10,10 +10,6 @@ keywords:
   - tum
   - sexy
 dependencies:
-  - condition: mariadb-galera.enabled
-    name: mariadb-galera
-    repository: https://charts.bitnami.com/bitnami
-    version: 10.x.x
   - condition: mariadb.enabled
     name: mariadb
     repository: https://charts.bitnami.com/bitnami

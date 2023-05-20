@@ -15,6 +15,11 @@ spec:
       services:
         - name: campus-backend-svc
           port: 50051
+    - kind: Rule
+      match: Host(`{{ $.Values.url-grpc }}`)
+      services:
+        - name: campus-backend-svc
+          port: 50051
   tls:
     secretName: {{ $.Values.url }}
 ---
@@ -31,7 +36,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ $.Values.url }}`)
+      match: Host(`{{ $.Values.url }}`) || Host(`{{ $.Values.url-grpc }}`)
       services:
         - name: noop@internal
           kind: TraefikService
