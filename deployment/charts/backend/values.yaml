@@ -42,3 +42,4 @@ backend:
     team_id: changeme-changeme-changeme
 legacy:
   config: changeme-changeme-changeme
+  imagepullsecret: changeme-changeme-changeme

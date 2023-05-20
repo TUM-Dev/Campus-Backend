@@ -50,6 +50,8 @@ spec:
               name: https
           securityContext:
             readOnlyRootFilesystem: true
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Secret
@@ -62,3 +64,15 @@ metadata:
     app.kubernetes.io/name: backend
 data:
   config.ini: {{ $.Values.legacy.config }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend
+data:
+  .dockerconfigjson: {{ $.Values.legacy.imagepullsecret | b64enc | quote }}
+type: kubernetes.io/dockerconfigjson
