@@ -34,6 +34,12 @@ spec:
             claimName: backend-pvc
         - name: tmp-vol
           emptyDir: {}
+        - name: tmp-apache2
+          emptyDir: { }
+        - name: tmp-html
+          emptyDir: { }
+        - name: logs
+          emptyDir: { }
       containers:
         - name: tca-legacybackend
           image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
@@ -45,6 +51,12 @@ spec:
             - mountPath: /app/Tmp/
               name: tmp-vol
               readOnly: false
+            - mountPath: /var/www/html/tmp/
+              name: tmp-html
+            - mountPath: /var/run/apache2/
+              name: tmp-apache2
+            - mountPath: /var/log/
+              name: logs
           ports:
             - containerPort: 80
               name: https
