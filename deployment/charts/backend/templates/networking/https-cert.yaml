@@ -7,6 +7,10 @@ metadata:
   namespace: {{ $.Values.namespace }}
 spec:
   commonName: app.tum.de
+  secretName: app.tum.de
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
   dnsNames:
 {{- range $host := $.Values.urls.v1 -}}
     - {{ $host }}
@@ -14,7 +18,3 @@ spec:
 {{- range $host := $.Values.urls.v2 -}}
     - {{ $host }}
 {{- end -}}
-  secretName: app.tum.de
-  issuerRef:
-    name: letsencrypt-production
-    kind: ClusterIssuer
