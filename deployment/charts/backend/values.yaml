@@ -5,7 +5,6 @@ urlGrpc: "api-grpc.tum.app"
 
 # see https://github.com/bitnami/charts/tree/main/bitnami/mariadb for more options, the se are just the most important ones
 mariadb:
-  fullNameOverride: mariadb
   enabled: true
   architecture: standalone
   auth:

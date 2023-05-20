@@ -40,7 +40,7 @@ spec:
                   name: backend-api-keys
                   key: SENTRY_DSN
             - name: DB_DSN
-              value: "{{ $db.username }}:{{ $db.password }}@tcp(mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
+              value: "{{ $db.username }}:{{ $db.password }}@tcp(tca-backend-mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
             - name: APNS_KEY_ID
               valueFrom:
                 secretKeyRef:
