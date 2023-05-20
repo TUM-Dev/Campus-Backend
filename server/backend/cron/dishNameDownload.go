@@ -77,7 +77,7 @@ func downloadDailyDishes(c *CronService) {
 			log.WithError(err).Error("Error fetching menu.")
 		}
 		if resp.StatusCode != 200 {
-			log.WithError(err).Error("Menu for", v, "does not exist error 404 returned.")
+			log.WithError(err).Errorf("Menu for %s does not exist error 404 returned.", v.Name)
 		} else {
 			var dishes days
 			errJson := json.NewDecoder(resp.Body).Decode(&dishes)
