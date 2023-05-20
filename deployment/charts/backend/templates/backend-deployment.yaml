@@ -64,7 +64,7 @@ spec:
               name: storage-vol
               readOnly: false
             - mountPath: /etc/apns_auth_key.p8
-              subPath: apns_auth_key
+              subPath: APNS_AUTH_KEY
               name: backend-api-keys
               readOnly: true
           ports:
