@@ -10,10 +10,10 @@ spec:
   dnsNames:
 {{- range $host := $.Values.urls.v1 -}}
     - {{ $host }}
-{{-end-}}
+{{- end -}}
 {{- range $host := $.Values.urls.v2 -}}
     - {{ $host }}
-{{-end-}}
+{{- end -}}
   secretName: app.tum.de
   issuerRef:
     name: letsencrypt-production
