@@ -28,7 +28,7 @@ spec:
       volumes:
         - name: backend-api-keys
           secret:
-            name: backend-api-keys
+            secretName: backend-api-keys
             readOnly: true
       containers:
         - name: tca-backend
@@ -56,7 +56,7 @@ spec:
                 secretKeyRef:
                   name: backend-api-keys
                   key: APNS_TEAM_ID
-          volumeMount:
+          volumeMounts:
             - mountPath: /etc/apns_auth_key.p8
               subPath: apns_auth_key
               name: backend-api-keys
