@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: legacybackend
+  name: backend-v1
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: legacybackend
+    app.kubernetes.io/name: backend-v1
   namespace: {{ $.Values.namespace }}
 spec:
   replicas: 1
@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/part-of: tum-campus-app
-      app.kubernetes.io/name: legacybackend
+      app.kubernetes.io/name: backend-v1
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/part-of: tum-campus-app
-        app.kubernetes.io/name: legacybackend
+        app.kubernetes.io/name: backend-v1
     spec:
       volumes:
         - name: legacybackend-config

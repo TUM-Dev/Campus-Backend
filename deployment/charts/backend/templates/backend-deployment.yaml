@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: backend-v2
   labels:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend-v2
