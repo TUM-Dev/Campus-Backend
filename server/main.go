@@ -17,7 +17,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
-	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
@@ -114,6 +113,12 @@ func main() {
 	mux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("Hello, world!"))
 	})
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+	})
+
 	static, _ := fs.Sub(swagfs, "swagger")
 	mux.Handle("/", http.FileServer(http.FS(static)))
 
