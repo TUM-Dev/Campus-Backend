@@ -36,7 +36,7 @@ spec:
           emptyDir: {}
       containers:
         - name: tca-legacybackend
-          image: docker.pkg.github.com/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
+          image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /app/Storage/
