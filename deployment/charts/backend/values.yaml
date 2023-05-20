@@ -6,7 +6,6 @@ urls:
   - app.tum.de
   - www.app.tum.de
   - tumcabe.in.tum.de
-  - tuinf01-tcabe.srv.mwn.de
   v2:
   - api.tum.app
   - api-grpc.tum.app
