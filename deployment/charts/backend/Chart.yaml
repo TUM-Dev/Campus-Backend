@@ -12,5 +12,5 @@ keywords:
 dependencies:
   - condition: mariadb.enabled
     name: mariadb
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://marketplace.azurecr.io/helm/v1/repo
     version: 12.x.x
