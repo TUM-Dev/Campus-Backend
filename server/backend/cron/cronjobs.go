@@ -54,7 +54,7 @@ func (c *CronService) Run() error {
 	g.Go(func() error { return c.averageRatingComputation() })
 
 	for {
-		log.Info("Cron: checking for pending")
+		log.Trace("Cron: checking for pending")
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
@@ -126,7 +126,7 @@ func (c *CronService) Run() error {
 		if err != nil {
 			log.Println("Couldn't run all cron jobs: %v", err)
 		}
-		log.Info("Cron: sleeping for 60 seconds")
+		log.Trace("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
 	}
 }
