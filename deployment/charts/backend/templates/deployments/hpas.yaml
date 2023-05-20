@@ -12,10 +12,6 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ $name }}
-    labels:
-      app.kubernetes.io/part-of: tum-campus-app
-      app.kubernetes.io/name: {{ $name }}
-    namespace: {{ $.Values.namespace }}
   minReplicas: 1
   maxReplicas: 3
   metrics:
