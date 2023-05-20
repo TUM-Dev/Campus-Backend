@@ -72,7 +72,7 @@ metadata:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend
 data:
-  SENTRY_DSN: {{ $.Values.backend.SENTRY_DSN | b64enc }}
+  SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
   APNS_AUTH_KEY: {{ $.Values.backend.apns.auth_key | b64enc }}
   APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc }}
   APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc }}
