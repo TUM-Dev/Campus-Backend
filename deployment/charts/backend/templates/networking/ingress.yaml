@@ -10,12 +10,12 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: HostRegexp({{- join "|" $.Values.urls.v1 }})
+      match: {{- join "|" $.Values.urls.v1 }}
       services:
         - name: backend-v1-svc
           port: 80
     - kind: Rule
-      match: HostRegexp({{- join "|" $.Values.urls.v2 }})
+      match: {{- join "|" $.Values.urls.v2 }}
       services:
         - name: backend-v2-svc
           port: 50051
@@ -34,7 +34,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: '{{ join "' || '" (concat $.Values.urls.v1 $.Values.urls.v2) }}'
+      match: {{ join " || " (concat $.Values.urls.v1 $.Values.urls.v2) }}
       services:
         - name: noop@internal
           kind: TraefikService
