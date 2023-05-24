@@ -34,7 +34,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ join "` || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2) }}`)
+      match: Host(`{{ join "`) || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2) }}`)
       services:
         - name: noop@internal
           kind: TraefikService
