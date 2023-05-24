@@ -10,7 +10,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host({{ join "|" $.Values.urls.v1 }})
+      match: Host(`{{ join "|" $.Values.urls.v1 }}`)
       services:
         - name: backend-v1-svc
           port: 80
