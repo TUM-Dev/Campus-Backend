@@ -11,7 +11,7 @@ spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      app.kubernetes.io/part-of: tum-campus-apppus-app
+      app.kubernetes.io/part-of: tum-campus-app
       app.kubernetes.io/name: backend-v2
   strategy:
     rollingUpdate:
@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/part-of: tum-campus-apppus-app
+        app.kubernetes.io/part-of: tum-campus-app
         app.kubernetes.io/name: backend-v2
     spec:
       volumes:
