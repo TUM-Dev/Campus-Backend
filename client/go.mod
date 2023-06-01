@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20221212204029-68b05b451617
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230111021245-cd17e382bda3
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.2
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
 )
