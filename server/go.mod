@@ -14,7 +14,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/mmcdole/gofeed v1.2.0
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.2
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/net v0.8.0
