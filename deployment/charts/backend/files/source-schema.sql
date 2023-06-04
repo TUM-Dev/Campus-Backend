@@ -86,7 +86,7 @@ create table if not exists crontab
     cron       int auto_increment,
     `interval` int default 7200                                                                            not null,
     lastRun    int default 0                                                                               not null,
-    type       enum ('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload') null,
+    type       enum ('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload', 'canteenHeadCount') null,
     id         int                                                                                         null,
     constraint cron
         unique (cron)
