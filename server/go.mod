@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.2
-	github.com/getsentry/sentry-go v0.18.0
+	github.com/getsentry/sentry-go v0.20.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
@@ -19,12 +19,12 @@ require (
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/net v0.8.0
 	golang.org/x/sync v0.1.0
-	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923
-	google.golang.org/grpc v1.53.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
+	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
 	google.golang.org/protobuf v1.30.0
 	gorm.io/driver/mysql v1.4.7
-	gorm.io/gorm v1.24.5
+	gorm.io/gorm v1.25.0
 )
 
 require (
@@ -34,8 +34,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
-	github.com/golang/glog v1.0.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/glog v1.1.0 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

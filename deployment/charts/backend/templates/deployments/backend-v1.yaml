@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v1
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v1
+  namespace: {{ $.Values.namespace }}
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: tum-campus-app
+      app.kubernetes.io/name: backend-v1
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: tum-campus-app
+        app.kubernetes.io/name: backend-v1
+    spec:
+      volumes:
+        - name: legacybackend-config
+          secret:
+            secretName: legacybackend-config
+        - name: storage-vol
+          persistentVolumeClaim:
+            readOnly: false
+            claimName: backend-pvc
+        - name: tmp-vol
+          emptyDir: {}
+        - name: tmp-apache2
+          emptyDir: { }
+        - name: tmp-html
+          emptyDir: { }
+        - name: logs
+          emptyDir: { }
+      containers:
+        - name: tca-legacybackend
+          image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/Config/cfg.ini
+              subPath: cfg.ini
+              name: legacybackend-config
+              readOnly: true
+            - mountPath: /app/Storage/
+              name: storage-vol
+            - mountPath: /app/Tmp/
+              name: tmp-vol
+            - mountPath: /var/www/html/tmp/
+              name: tmp-html
+            - mountPath: /var/run/apache2/
+              name: tmp-apache2
+            - mountPath: /var/log/
+              name: logs
+          ports:
+            - containerPort: 80
+              name: https
+          securityContext:
+            readOnlyRootFilesystem: true
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: legacybackend-config
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v1
+data:
+  cfg.ini: {{ $.Values.legacy.config }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v1
+data:
+  .dockerconfigjson: {{ $.Values.legacy.imagepullsecret }}
+type: kubernetes.io/dockerconfigjson

@@ -49,7 +49,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 		First(&result)
 
 	if res.Error != nil {
-		log.WithError(res.Error).Error("Error while querying the cafeteria with Id {}", cafeteriaId)
+		log.WithError(res.Error).Error("Error while querying the cafeteria with Id ", cafeteriaId)
 		return nil, status.Errorf(codes.Internal, "This cafeteria has not yet been rated.")
 	}
 
@@ -155,7 +155,7 @@ func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingReq
 		First(&result)
 
 	if err.Error != nil {
-		log.WithError(err.Error).Error("Error while querying the average ratings for the dish {} in the cafeteria {}.", dishID, cafeteriaID)
+		log.WithError(err.Error).Errorf("Error while querying the average ratings for the dish %s in the cafeteria %s.", dishID, cafeteriaID)
 		return nil, status.Errorf(codes.Internal, "This dish has not yet been rated.")
 	}
 
@@ -405,7 +405,7 @@ func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
-			log.WithError(err).Error("Directory with path {} could not be created successfully", path)
+			log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
 			return "", nil
 		}
 	}
@@ -526,7 +526,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 		Where("name LIKE ?", cafeteriaName).
 		First(&result)
 	if res.Error == gorm.ErrRecordNotFound || res.RowsAffected == 0 {
-		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: {}", cafeteriaName)
+		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: ", cafeteriaName)
 		return -1, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 

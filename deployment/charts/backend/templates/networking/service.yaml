@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v2-svc
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v2
+  namespace: {{ $.Values.namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v2
+  ports:
+    - name: http
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-v1-svc
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v1
+  namespace: {{ $.Values.namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v1
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

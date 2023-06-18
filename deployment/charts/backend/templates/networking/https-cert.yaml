@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app.tum.de
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+  namespace: {{ $.Values.namespace }}
+spec:
+  commonName: api-test-v1.tum.app
+  secretName: app.tum.de
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+{{- range $host := concat $.Values.urls.v1 $.Values.urls.v2 }}
+    - {{ $host }}
+{{ end }}

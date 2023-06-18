@@ -1,0 +1,46 @@
+namespace: tca-backend
+tag: latest
+urls:
+  v1:
+  - api-test-v1.tum.app
+  v2:
+  - api-test-v2.tum.app
+
+# see https://github.com/bitnami/charts/tree/main/bitnami/mariadb for more options, the se are just the most important ones
+mariadb:
+  enabled: true
+  architecture: standalone
+  auth:
+    rootPassword: changeme-changeme-changeme
+    username: backend
+    password: changeme-changeme-changeme
+    replicationPassword: changeme-changeme-changeme
+    forcePassword: true
+    database: tca
+  primary:
+    pdb:
+      create: true
+    persistence:
+      size: 1Gi
+      storageClass: local-path
+  secondary:
+    pdb:
+      create: true
+    persistence:
+      size: 1Gi
+      storageClass: local-path
+  volumePermissions:
+    enabled: true
+  initdbScriptsConfigMap: sql-init
+
+
+backend:
+  sentry:
+    dsn: changeme-changeme-changeme
+  apns:
+    auth_key: changeme-changeme-changeme
+    key_id: changeme-changeme-changeme
+    team_id: changeme-changeme-changeme
+legacy:
+  config: changeme-changeme-changeme
+  imagepullsecret: changeme-changeme-changeme

@@ -114,6 +114,12 @@ func main() {
 	mux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("Hello, world!"))
 	})
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+	})
+
 	static, _ := fs.Sub(swagfs, "swagger")
 	mux.Handle("/", http.FileServer(http.FS(static)))
 
