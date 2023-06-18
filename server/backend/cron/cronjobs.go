@@ -28,6 +28,7 @@ const (
 	StorageDir               = "/Storage/" // target location of files
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
+	NewExamResultsHook       = "newExamResultsHook"
 
 	/* MensaType      = "mensa"
 	ChatType       = "chat"
@@ -58,7 +59,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -67,6 +68,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				IOSNotifications,
 				IOSActivityReset,
+				NewExamResultsHook,
 			).
 			Scan(&res)
 
@@ -98,6 +100,8 @@ func (c *CronService) Run() error {
 				if c.useMensa {
 					g.Go(c.averageRatingComputation)
 				}
+			case NewExamResultsHook:
+				g.Go(func() error { return c.newExamResultsHookCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
