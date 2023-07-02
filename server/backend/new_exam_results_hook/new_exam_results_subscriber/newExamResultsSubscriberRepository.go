@@ -30,9 +30,7 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 
 	var newExams model.NewExamsPublishedHookPayload
 
-	for _, grade := range *newGrades {
-		newExams.PublishedExams = append(newExams.PublishedExams, grade)
-	}
+	newExams.PublishedExams = append(newExams.PublishedExams, *newGrades...)
 
 	body, err := json.Marshal(newExams)
 	if err != nil {

@@ -48,6 +48,9 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 			}
 
 			err = SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			if err != nil {
+				log.WithError(err).Info("Could not create new exam results subscriber")
+			}
 
 			return nil
 		},

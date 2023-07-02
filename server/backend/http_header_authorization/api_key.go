@@ -8,17 +8,17 @@ import (
 )
 
 var (
-	UnauthorizedErr = errors.New("unauthorized! API Key is missing or invalid")
+	ErrUnauthorized = errors.New("unauthorized! API Key is missing or invalid")
 )
 
 func CheckApiKeyAuthorization(ctx context.Context) error {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return UnauthorizedErr
+		return ErrUnauthorized
 	}
 
 	if len(md["authorization"]) == 0 {
-		return UnauthorizedErr
+		return ErrUnauthorized
 	}
 
 	envApiKey := env.ApiKey()
@@ -29,5 +29,5 @@ func CheckApiKeyAuthorization(ctx context.Context) error {
 		}
 	}
 
-	return UnauthorizedErr
+	return ErrUnauthorized
 }
