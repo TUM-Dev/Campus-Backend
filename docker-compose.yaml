@@ -20,15 +20,17 @@ services:
 
   db:
     container_name: campus-db
-    image: bitnami/mariadb:10
+    image: mariadb:latest
     ports:
       - ${DB_PORT:-3306}:3306
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
     volumes:
-      - campus-db-data:/bitnami/mariadb
-      - ./deployment/charts/backend/files/source-schema.sql:/docker-entrypoint-startdb.d/schema.sql
+      - campus-db-data:/var/lib/mysql
+      - ./source-schema.sql:/entrypoint/schema.sql
+      # Execute in container to init with schema:
+      # mysql --user=root --password=secret_root_password campus_db < /entrypoint/schema.sql
 
 volumes:
     campus-db-data:

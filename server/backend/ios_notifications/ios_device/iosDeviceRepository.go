@@ -1,7 +1,6 @@
 package ios_device
 
 import (
-	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
@@ -10,33 +9,26 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
+func (repository *Repository) RegisterDevice(device *model.IOSDevice) (bool, error) {
+	exists, err := repository.CheckIfDeviceExists(device.DeviceID)
+	if err != nil {
+		return false, err
+	}
 
-	return repository.DB.Transaction(func(tx *gorm.DB) error {
+	if exists {
+		return true, nil
+	}
 
-		var foundDevice model.IOSDevice
+	return false, repository.DB.Create(device).Error
+}
 
-		res := tx.First(&foundDevice, "device_id = ?", device.DeviceID)
+func (repository *Repository) CheckIfDeviceExists(deviceId string) (bool, error) {
+	var devices []model.IOSDevice
+	if err := repository.DB.Limit(1).Find(&devices, "device_id = ?", deviceId).Error; err != nil {
+		return false, err
+	}
 
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return tx.Create(device).Error
-		}
-
-		if res.Error != nil {
-			return res.Error
-		}
-
-		newDevice := model.IOSDevice{
-			DeviceID:          device.DeviceID,
-			PublicKey:         device.PublicKey,
-			ActivityToday:     foundDevice.ActivityToday + 1,
-			ActivityThisWeek:  foundDevice.ActivityThisWeek + 1,
-			ActivityThisMonth: foundDevice.ActivityThisMonth + 1,
-			ActivityThisYear:  foundDevice.ActivityThisYear + 1,
-		}
-
-		return tx.Save(&newDevice).Error
-	})
+	return len(devices) > 0, nil
 }
 
 func (repository *Repository) RemoveDevice(deviceId string) error {
@@ -63,38 +55,6 @@ func (repository *Repository) GetDevice(id string) (*model.IOSDevice, error) {
 	}
 
 	return device, nil
-}
-
-// GetDevicesThatShouldUpdateGrades returns a list of devices that should be updated
-// A device that needs to be updated is either a new device or a device that has not
-// been updated in the last model.IOSMinimumUpdateInterval minutes
-func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDeviceLastUpdated, error) {
-	var devices []model.IOSDeviceLastUpdated
-
-	tx := repository.DB.Raw(
-		buildDevicesThatShouldUpdateGradesQuery(),
-		model.IOSUpdateTypeGrades,
-		model.IOSMinimumUpdateInterval,
-	).Scan(&devices)
-
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return devices, nil
-}
-
-func buildDevicesThatShouldUpdateGradesQuery() string {
-	return `
-		select d.device_id, ul.created_at as last_updated, d.public_key
-		from ios_devices d
-				 left join ios_scheduled_update_logs ul on d.device_id = ul.device_id
-		where ul.created_at is null
-		   or (ul.type = ?
-			and ul.created_at < date_sub(now(), interval ? minute))
-		group by d.device_id, ul.created_at
-		order by ul.created_at;
-	`
 }
 
 func (repository *Repository) ResetDevicesDailyActivity() error {

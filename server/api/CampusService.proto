@@ -269,6 +269,26 @@ service Campus {
       delete: "/device/{deviceId}",
     };
   }
+
+  // iOS new grade hook callback
+  rpc IOSNewExamsHookCallback(NewExamsHookRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/ios/exams/new",
+      body: "*",
+    };
+  }
+}
+
+message NewExamPublished {
+  string date = 1;
+  string examId = 2;
+  string lectureTitle = 3;
+  string lectureType = 4;
+  string lectureSem = 5;
+}
+
+message NewExamsHookRequest {
+  repeated NewExamPublished publishedExams = 1;
 }
 
 enum DeviceType {
@@ -281,6 +301,7 @@ message RegisterDeviceRequest {
   string deviceId = 1;
   optional string publicKey = 2;
   DeviceType deviceType = 3;
+  optional string campusApiToken = 4;
 }
 
 message RegisterDeviceReply {

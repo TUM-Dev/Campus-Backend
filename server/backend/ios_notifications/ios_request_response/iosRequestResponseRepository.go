@@ -11,7 +11,7 @@ type Repository struct {
 	Token *ios_apns_jwt.Token
 }
 
-func (r *Repository) SaveEncryptedGrade(grade *model.IOSEncryptedGrade) error {
+func (r *Repository) SaveEncryptedGrade(grade *model.EncryptedGrade) error {
 	if err := r.DB.Create(grade).Error; err != nil {
 		return err
 	}
@@ -28,8 +28,8 @@ func (r *Repository) GetIOSDeviceRequest(requestId string) (*model.IOSDeviceRequ
 	return &request, nil
 }
 
-func (r *Repository) GetIOSEncryptedGrades(deviceId string) ([]model.IOSEncryptedGrade, error) {
-	var grades []model.IOSEncryptedGrade
+func (r *Repository) GetIOSEncryptedGrades(deviceId string) ([]model.EncryptedGrade, error) {
+	var grades []model.EncryptedGrade
 	if err := r.DB.Find(&grades, "device_id = ?", deviceId).Error; err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (r *Repository) GetIOSEncryptedGrades(deviceId string) ([]model.IOSEncrypte
 }
 
 func (r *Repository) DeleteEncryptedGrades(deviceId string) error {
-	if err := r.DB.Delete(&model.IOSEncryptedGrade{}, "device_id = ?", deviceId).Error; err != nil {
+	if err := r.DB.Delete(&model.EncryptedGrade{}, "device_id = ?", deviceId).Error; err != nil {
 		return err
 	}
 

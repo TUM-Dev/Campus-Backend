@@ -8,13 +8,22 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"net/url"
+)
+
+var (
+	CampusApiUrl = url.URL{
+		Scheme: "https",
+		Host:   "campus.tum.de",
+		Path:   "/tumonline",
+	}
 )
 
 const (
-	CampusApiUrl               = "https://campus.tum.de/tumonline"
 	CampusQueryToken           = "pToken"
 	CampusGradesPath           = "/wbservicesbasic.noten"
 	CampusExamResultsPublished = "/wbservicesbasic.pruefungenErgebnisse"
+	CampusPersonalExamsPath    = "/wbservicesbasic.pruefungenEigene"
 )
 
 var (
@@ -24,6 +33,7 @@ var (
 
 func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished, error) {
 	var examResultsPublished model.TUMAPIExamResultsPublished
+
 	err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished)
 	if err != nil {
 		return nil, err
@@ -32,8 +42,8 @@ func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished,
 	return &examResultsPublished, nil
 }
 
-func FetchGrades(token string) (*model.IOSGrades, error) {
-	var grades model.IOSGrades
+func FetchGrades(token string) (*model.Grades, error) {
+	var grades model.Grades
 	err := RequestCampusApi(CampusGradesPath, token, &grades)
 	if err != nil {
 		return nil, err
@@ -42,9 +52,30 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	return &grades, nil
 }
 
+func FetchPersonalExams(token string) (*model.Exams, error) {
+	var exams model.Exams
+	err := RequestCampusApi(CampusPersonalExamsPath, token, &exams)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &exams, nil
+}
+
 func RequestCampusApi(path string, token string, response any) error {
-	requestUrl := "https://exams.free.beeceptor.com/"
-	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
+	return RequestCampusApiWithBaseUrl(&CampusApiUrl, path, token, response)
+}
+
+func RequestCampusApiWithBaseUrl(baseUrl *url.URL, path string, token string, response any) error {
+	requestUrl := baseUrl.JoinPath(path)
+
+	query := requestUrl.Query()
+	query.Add(CampusQueryToken, token)
+
+	requestUrl.RawQuery = query.Encode()
+
+	req, err := http.NewRequest(http.MethodGet, requestUrl.String(), nil)
 
 	if err != nil {
 		log.Errorf("Error while creating request: %s", err)

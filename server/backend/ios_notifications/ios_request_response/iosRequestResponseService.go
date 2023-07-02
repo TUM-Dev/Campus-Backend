@@ -96,6 +96,12 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
 		service.deleteRequestLog(requestLog)
+
+		if err != nil {
+			log.Error("Could not send push notification: ", err)
+			return nil, ErrInternalHandleGrades
+		}
+
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
 		}, nil
@@ -133,8 +139,8 @@ func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) 
 	}
 }
 
-func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {
-	oldGrades := make([]model.IOSEncryptedGrade, len(grades))
+func decryptGrades(grades []model.EncryptedGrade, campusToken string) ([]model.EncryptedGrade, error) {
+	oldGrades := make([]model.EncryptedGrade, len(grades))
 	for i, encryptedGrade := range grades {
 		err := encryptedGrade.Decrypt(campusToken)
 
@@ -149,8 +155,8 @@ func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]mode
 	return oldGrades, nil
 }
 
-func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEncryptedGrade) []model.IOSGrade {
-	var grades []model.IOSGrade
+func compareAndFindNewGrades(newGrades []model.Grade, oldGrades []model.EncryptedGrade) []model.Grade {
+	var grades []model.Grade
 	for _, grade := range newGrades {
 		found := false
 		for _, oldGrade := range oldGrades {
@@ -168,9 +174,9 @@ func compareAndFindNewGrades(newGrades []model.IOSGrade, oldGrades []model.IOSEn
 	return grades
 }
 
-func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade, deviceID string, campusToken string) {
+func (service *Service) encryptGradesAndStoreInDatabase(grades []model.Grade, deviceID string, campusToken string) {
 	for _, grade := range grades {
-		encryptedGrade := model.IOSEncryptedGrade{
+		encryptedGrade := model.EncryptedGrade{
 			Grade:        grade.Grade,
 			DeviceID:     deviceID,
 			LectureTitle: grade.LectureTitle,
@@ -190,7 +196,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 	}
 }
 
-func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *ios_apns.Repository) {
+func sendGradesToDevice(device *model.IOSDevice, grades []model.Grade, apns *ios_apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
 
 	if len(grades) == 1 {

@@ -13,14 +13,8 @@ type TUMAPIExamResultsPublished struct {
 }
 
 type TUMAPIExamResultPublished struct {
-	XMLName       xml.Name      `xml:"pruefung"`
-	Date          customDate    `xml:"datum"`
-	ExamID        string        `xml:"pv_term_nr"`
-	LectureTitle  string        `xml:"lv_titel"`
-	LectureNumber string        `xml:"lv_nummer"`
-	LectureSem    string        `xml:"lv_semester"`
-	LectureType   string        `xml:"lv_typ"`
-	Published     campusApiBool `xml:"note_veroeffentlicht"`
+	Exam
+	Published campusApiBool `xml:"note_veroeffentlicht"`
 }
 
 func (examResult *TUMAPIExamResultPublished) ToDBExamResult() *ExamResultPublished {
@@ -59,4 +53,8 @@ func (p *campusApiBool) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		*p = false
 	}
 	return nil
+}
+
+type NewExamsPublishedHookPayload struct {
+	PublishedExams []ExamResultPublished `json:"publishedExams"`
 }

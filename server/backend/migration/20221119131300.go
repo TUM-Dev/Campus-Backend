@@ -28,7 +28,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				&model.IOSSchedulingPriority{},
 				&model.IOSScheduledUpdateLog{},
 				&model.IOSDeviceRequestLog{},
-				&model.IOSEncryptedGrade{},
+				&model.EncryptedGrade{},
 				&model.IOSDevicesActivityReset{},
 			); err != nil {
 				return err
@@ -88,7 +88,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			if err := tx.Migrator().DropTable(&model.IOSDeviceRequestLog{}); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable(&model.IOSEncryptedGrade{}); err != nil {
+			if err := tx.Migrator().DropTable(&model.EncryptedGrade{}); err != nil {
 				return err
 			}
 			if err := tx.Migrator().DropTable(&model.IOSDevicesActivityReset{}); err != nil {

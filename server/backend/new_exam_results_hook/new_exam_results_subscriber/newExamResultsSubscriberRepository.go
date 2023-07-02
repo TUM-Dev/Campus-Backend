@@ -2,11 +2,13 @@ package new_exam_results_subscriber
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 type Repository struct {
@@ -26,7 +28,13 @@ func (repository *Repository) FindAllSubscribers() (*[]model.NewExamResultsSubsc
 func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsSubscriber, newGrades *[]model.ExamResultPublished) error {
 	url := subscriber.CallbackUrl
 
-	body, err := json.Marshal(newGrades)
+	var newExams model.NewExamsPublishedHookPayload
+
+	for _, grade := range *newGrades {
+		newExams.PublishedExams = append(newExams.PublishedExams, grade)
+	}
+
+	body, err := json.Marshal(newExams)
 	if err != nil {
 		log.WithError(err).Errorf("Error while marshalling newGrades")
 		return err
@@ -44,6 +52,14 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		log.WithError(err).Errorf("Error while fetching %s", url)
+		return err
+	}
+
+	subscriber.LastNotifiedAt = sql.NullTime{Time: time.Now(), Valid: true}
+
+	err = repository.DB.Save(subscriber).Error
+	if err != nil {
+		log.WithError(err).Errorf("Error while saving subscriber")
 		return err
 	}
 

@@ -721,10 +721,45 @@
           },
           {
             "name": "imageNr",
+            "description": "todo where does the file come from?",
             "in": "path",
             "required": true,
             "type": "integer",
             "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/ios/exams/new": {
+      "post": {
+        "summary": "iOS new grade hook callback",
+        "operationId": "Campus_IOSNewExamsHookCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiNewExamsHookRequest"
+            }
           }
         ],
         "tags": [
@@ -1973,6 +2008,37 @@
         }
       }
     },
+    "apiNewExamPublished": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "examId": {
+          "type": "string"
+        },
+        "lectureTitle": {
+          "type": "string"
+        },
+        "lectureType": {
+          "type": "string"
+        },
+        "lectureSem": {
+          "type": "string"
+        }
+      }
+    },
+    "apiNewExamsHookRequest": {
+      "type": "object",
+      "properties": {
+        "publishedExams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiNewExamPublished"
+          }
+        }
+      }
+    },
     "apiNewsSource": {
       "type": "object",
       "properties": {
@@ -2108,6 +2174,9 @@
         },
         "deviceType": {
           "$ref": "#/definitions/apiDeviceType"
+        },
+        "campusApiToken": {
+          "type": "string"
         }
       }
     },
