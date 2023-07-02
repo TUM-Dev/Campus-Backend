@@ -36,6 +36,10 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 
 	req.Header.Set("Content-Type", "application/json")
 
+	if subscriber.ApiKey.Valid {
+		req.Header.Set("Authorization", subscriber.ApiKey.String)
+	}
+
 	if err != nil {
 		log.WithError(err).Errorf("Error while creating request")
 		return err
