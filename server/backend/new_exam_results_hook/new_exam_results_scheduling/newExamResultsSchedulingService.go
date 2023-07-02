@@ -71,8 +71,6 @@ func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamRe
 }
 
 func (service *Service) notifySubscribers(newPublishedExamResults *[]model.ExamResultPublished) {
-	log.Infof("Notifying subscribers about %d published exam results", len(*newPublishedExamResults))
-
 	subscribersRepo := new_exam_results_subscriber.NewRepository(service.Repository.DB)
 	subscribersService := new_exam_results_subscriber.NewService(subscribersRepo)
 

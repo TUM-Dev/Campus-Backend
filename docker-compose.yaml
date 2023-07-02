@@ -13,6 +13,8 @@ services:
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
+      - API_KEY=${API_KEY}
+      - IOS_EXAMS_HOOK_CALLBACK_URL=${IOS_EXAMS_HOOK_CALLBACK_URL}
     volumes:
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     depends_on:

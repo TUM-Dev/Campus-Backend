@@ -3,11 +3,13 @@ package migration
 import (
 	"database/sql"
 	_ "embed"
+	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"os"
 )
 
 func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
@@ -24,28 +26,17 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 			}
 
 			err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_today")
-			if err != nil {
-				log.WithError(err).Info("Could not drop column activity_today")
-				return err
-			}
 			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_week")
-			if err != nil {
-				log.WithError(err).Info("Could not drop column activity_this_week")
-				return err
-			}
 			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_month")
-			if err != nil {
-				log.WithError(err).Info("Could not drop column activity_this_month")
-				return err
-			}
 			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_year")
-			if err != nil {
-				log.WithError(err).Info("Could not drop column activity_this_year")
-				return err
+
+			callbackUrl, ok := os.LookupEnv("IOS_EXAMS_HOOK_CALLBACK_URL")
+			if !ok {
+				return errors.New("IOS_EXAMS_HOOK_CALLBACK_URL not set")
 			}
 
 			err = tx.Create(&model.NewExamResultsSubscriber{
-				CallbackUrl: env.ApiUrl(),
+				CallbackUrl: callbackUrl,
 				ApiKey: sql.NullString{
 					String: env.ApiKey(),
 					Valid:  true,
@@ -58,7 +49,7 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 
 			err = SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 
-			return err
+			return nil
 		},
 		Rollback: func(tx *gorm.DB) error {
 			if err := tx.Migrator().DropTable(&model.DbExam{}); err != nil {
@@ -90,7 +81,12 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 				return err
 			}
 
-			err = tx.Delete(&model.NewExamResultsSubscriber{}, "callback_url = ?", env.ApiUrl()).Error
+			callbackUrl, ok := os.LookupEnv("IOS_EXAMS_HOOK_CALLBACK_URL")
+			if !ok {
+				return errors.New("IOS_EXAMS_HOOK_CALLBACK_URL not set")
+			}
+
+			err = tx.Delete(&model.NewExamResultsSubscriber{}, "callback_url = ?", callbackUrl).Error
 			if err != nil {
 				log.WithError(err).Info("Could not delete new exam results subscriber")
 				return err

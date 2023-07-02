@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/http_header_authorization"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
@@ -45,9 +46,14 @@ func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDe
 	return service.HandleDeviceRequestResponse(req, s.iOSNotificationsService.IsActive)
 }
 
-func (s *CampusServer) IOSNewExamsHookCallback(_ context.Context, req *pb.NewExamsHookRequest) (*emptypb.Empty, error) {
+func (s *CampusServer) IOSNewExamsHookCallback(ctx context.Context, req *pb.NewExamsHookRequest) (*emptypb.Empty, error) {
+	err := http_header_authorization.CheckApiKeyAuthorization(ctx)
+	if err != nil {
+		return &emptypb.Empty{}, err
+	}
+
 	service := s.GetIOSNewExamsCallbackService()
-	err := service.HandleNewExamsCallback(req)
+	err = service.HandleNewExamsCallback(req)
 
 	return &emptypb.Empty{}, err
 }

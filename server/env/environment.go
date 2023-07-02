@@ -27,13 +27,3 @@ func ApiKey() string {
 
 	return value
 }
-
-func ApiUrl() string {
-	value, ok := os.LookupEnv("API_URL")
-
-	if !ok {
-		return "http://localhost:50051"
-	}
-
-	return value
-}
