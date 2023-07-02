@@ -57,22 +57,6 @@ func (repository *Repository) GetDevice(id string) (*model.IOSDevice, error) {
 	return device, nil
 }
 
-func (repository *Repository) ResetDevicesDailyActivity() error {
-	return repository.DB.Model(model.IOSDevice{}).Where("activity_today != ?", 0).Update("activity_today", 0).Error
-}
-
-func (repository *Repository) ResetDevicesWeeklyActivity() error {
-	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_week != ?", 0).Update("activity_this_week", 0).Error
-}
-
-func (repository *Repository) ResetDevicesMonthlyActivity() error {
-	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_month != ?", 0).Update("activity_this_month", 0).Error
-}
-
-func (repository *Repository) ResetDevicesYearlyActivity() error {
-	return repository.DB.Model(model.IOSDevice{}).Where("activity_this_year != ?", 0).Update("activity_this_year", 0).Error
-}
-
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		DB: db,

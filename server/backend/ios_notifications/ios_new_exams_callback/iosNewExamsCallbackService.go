@@ -5,12 +5,13 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_exams"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type Service struct {
-	Repository *Repository
-	APNs       *ios_apns.Service
-	isActive   bool
+	APNs     *ios_apns.Service
+	isActive bool
+	DB       *gorm.DB
 }
 
 func (service *Service) HandleNewExamsCallback(req *pb.NewExamsHookRequest) error {
@@ -32,7 +33,7 @@ func (service *Service) HandleNewExamsCallback(req *pb.NewExamsHookRequest) erro
 		examIds = append(examIds, exam.ExamId)
 	}
 
-	examRepository := ios_exams.NewRepository(service.Repository.DB)
+	examRepository := ios_exams.NewRepository(service.DB)
 
 	devices, err := examRepository.GetDevicesThatHaveExams(&examIds)
 	if err != nil {
@@ -53,10 +54,10 @@ func (service *Service) HandleNewExamsCallback(req *pb.NewExamsHookRequest) erro
 	return nil
 }
 
-func NewService(repo *Repository, apns *ios_apns.Service, isActive bool) *Service {
+func NewService(apns *ios_apns.Service, db *gorm.DB, isActive bool) *Service {
 	return &Service{
-		Repository: repo,
-		APNs:       apns,
-		isActive:   isActive,
+		APNs:     apns,
+		isActive: isActive,
+		DB:       db,
 	}
 }

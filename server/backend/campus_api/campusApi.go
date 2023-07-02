@@ -34,7 +34,9 @@ var (
 func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished, error) {
 	var examResultsPublished model.TUMAPIExamResultsPublished
 
-	err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished)
+	url, _ := url.Parse("https://exams2.free.beeceptor.com")
+
+	err := RequestCampusApiWithBaseUrl(url, "", token, &examResultsPublished)
 	if err != nil {
 		return nil, err
 	}

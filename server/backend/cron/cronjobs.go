@@ -26,8 +26,6 @@ const (
 	AverageRatingComputation = "averageRatingComputation"
 	CanteenHeadcount         = "canteenHeadCount"
 	StorageDir               = "/Storage/" // target location of files
-	IOSNotifications         = "iosNotifications"
-	IOSActivityReset         = "iosActivityReset"
 	NewExamResultsHook       = "newExamResultsHook"
 
 	/* MensaType      = "mensa"
@@ -59,15 +57,13 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
 				AverageRatingComputation,
 				DishNameDownload,
 				CanteenHeadcount,
-				IOSNotifications,
-				IOSActivityReset,
 				NewExamResultsHook,
 			).
 			Scan(&res)
@@ -119,10 +115,6 @@ func (c *CronService) Run() error {
 				*/
 			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
-			case IOSNotifications:
-				g.Go(func() error { return c.iosNotificationsCron() })
-			case IOSActivityReset:
-				g.Go(func() error { return c.iosActivityReset() })
 			}
 		}
 

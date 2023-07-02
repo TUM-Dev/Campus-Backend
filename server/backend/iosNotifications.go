@@ -37,9 +37,7 @@ func (s *CampusServer) GetIOSRequestResponseService() *ios_request_response.Serv
 }
 
 func (s *CampusServer) GetIOSNewExamsCallbackService() *ios_new_exams_callback.Service {
-	repository := ios_new_exams_callback.NewRepository(s.db)
-
-	return ios_new_exams_callback.NewService(repository, s.GetIOSAPNsService(), s.GetIOSNotificationsService().IsActive)
+	return ios_new_exams_callback.NewService(s.GetIOSAPNsService(), s.db, s.GetIOSNotificationsService().IsActive)
 }
 
 func (s *CampusServer) IOSDeviceRequestResponse(_ context.Context, req *pb.IOSDeviceRequestResponseRequest) (*pb.IOSDeviceRequestResponseReply, error) {

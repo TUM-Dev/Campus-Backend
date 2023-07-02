@@ -28,14 +28,10 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 		PublicKey: request.GetPublicKey(),
 	}
 
-	log.Info("Registering device with id ", device.DeviceID)
-
 	deviceAlreadyExisted, err := service.Repository.RegisterDevice(&device)
 	if err != nil {
 		return nil, ErrCouldNotRegisterDevice
 	}
-
-	log.Info("Device already existed: ", deviceAlreadyExisted)
 
 	if !deviceAlreadyExisted {
 		service.handleFirstDeviceRegistration(request)
@@ -85,8 +81,6 @@ func (service *Service) fetchAndStoreDeviceGrades(deviceId, campusToken string) 
 		return err
 	}
 
-	log.Info("Fetched grades: ", len(grades.Grades))
-
 	gradesRepo := ios_grades.NewRepository(service.Repository.DB)
 	err = gradesRepo.EncryptAndSaveGrades(grades.Grades, deviceId, campusToken)
 	if err != nil {
@@ -101,8 +95,6 @@ func (service *Service) fetchAndStoreDeviceExams(deviceId, campusToken string) e
 	if err != nil {
 		return err
 	}
-
-	log.Info("Fetched exams: ", len(exams.Exams))
 
 	examsService := ios_exams.NewService(service.Repository.DB)
 	err = examsService.SaveRelevantExamsForDevice(exams.Exams, deviceId)

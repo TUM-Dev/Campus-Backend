@@ -10,14 +10,12 @@ import (
 )
 
 const (
-	MaxRoutineCount = 10
-	MockAPIToken    = "DDF9A212B2F80A01C6D0307B8455EEAA"
+	MockAPIToken = "DDF9A212B2F80A01C6D0307B8455EEAA"
 )
 
 type Service struct {
 	Repository        *Repository
 	DevicesRepository *ios_device.Repository
-	Priority          *model.IOSSchedulingPriority
 	APNs              *ios_apns.Service
 }
 
@@ -47,9 +45,7 @@ func (service *Service) HandleScheduledCron() error {
 		log.Info("No new published exam results")
 	}
 
-	service.Repository.StoreExamResultsPublished(apiExamResults)
-
-	return nil
+	return service.Repository.StoreExamResultsPublished(apiExamResults)
 }
 
 func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.ExamResultPublished) *[]model.ExamResultPublished {
@@ -94,7 +90,6 @@ func NewService(repository *Repository,
 	return &Service{
 		Repository:        repository,
 		DevicesRepository: devicesRepository,
-		Priority:          model.DefaultIOSSchedulingPriority(),
 		APNs:              apnsService,
 	}
 }
