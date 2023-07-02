@@ -16,19 +16,26 @@ services:
     volumes:
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     container_name: campus-db
-    image: bitnami/mariadb:10
+    image: bitnami/mariadb:latest
     ports:
       - ${DB_PORT:-3306}:3306
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
     volumes:
-      - campus-db-data:/bitnami/mariadb
+      - mariadb_data:/bitnami/mariadb
       - ./deployment/charts/backend/files/source-schema.sql:/docker-entrypoint-startdb.d/schema.sql
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
 
 volumes:
-    campus-db-data:
+  mariadb_data:
+    driver: local
