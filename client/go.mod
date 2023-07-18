@@ -7,7 +7,7 @@ require (
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230111021245-cd17e382bda3
 	github.com/sirupsen/logrus v1.9.0
 	google.golang.org/grpc v1.56.2
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
