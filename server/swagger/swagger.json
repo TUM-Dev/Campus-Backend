@@ -1,4 +1,5 @@
 {
+"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "CampusService.proto",
@@ -246,7 +247,6 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
               "properties": {}
             }
           },
@@ -438,7 +438,7 @@
           },
           {
             "name": "year",
-            "description": "\u003e=2022 until the current year",
+            "description": "\u003e=2022 until the current year.",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -446,7 +446,7 @@
           },
           {
             "name": "week",
-            "description": "range 1 - 53",
+            "description": "range 1 - 53.",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -454,7 +454,7 @@
           },
           {
             "name": "day",
-            "description": "range 0 (Monday) - 4 (Friday)",
+            "description": "range 0 (Monday) - 4 (Friday).",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -555,7 +555,6 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
               "properties": {}
             }
           },
@@ -601,7 +600,7 @@
         "parameters": [
           {
             "name": "eventId",
-            "description": "optional parameter, will return all events if no id is specified",
+            "description": "optional parameter, will return all events if no id is specified.",
             "in": "query",
             "required": false,
             "type": "integer",
