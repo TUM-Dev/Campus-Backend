@@ -59,7 +59,7 @@ spec:
                   name: backend-api-keys
                   key: APNS_TEAM_ID
           volumeMounts:
-            - mountPath: /app/Storage/
+            - mountPath: /Storage/
               name: storage-vol
               readOnly: false
             - mountPath: /etc/apns_auth_key.p8
