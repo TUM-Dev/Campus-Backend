@@ -25,9 +25,8 @@ spec:
         app.kubernetes.io/name: backend-v2
     spec:
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 3000
-        fsGroup: users
+        runAsUser: appuser
+        runAsGroup: users
       volumes:
         - name: storage-vol
           persistentVolumeClaim:
