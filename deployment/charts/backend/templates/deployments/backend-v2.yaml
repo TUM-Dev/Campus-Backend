@@ -24,6 +24,10 @@ spec:
         app.kubernetes.io/part-of: tum-campus-app
         app.kubernetes.io/name: backend-v2
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 3000
+        fsGroup: users
       volumes:
         - name: storage-vol
           persistentVolumeClaim:
@@ -70,6 +74,7 @@ spec:
             - containerPort: 50051
               name: http
           securityContext:
+            runAsNonRoot: true
             readOnlyRootFilesystem: true
           resources:
             requests:
