@@ -71,8 +71,8 @@ spec:
               name: http
           securityContext:
             runAsNonRoot: true
-            runAsUser: appuser
-            runAsGroup: users
+            runAsUser: 1000
+            runAsGroup: 3000
             readOnlyRootFilesystem: true
           resources:
             requests:
