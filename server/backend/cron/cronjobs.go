@@ -31,7 +31,6 @@ const (
 	IOSActivityReset         = "iosActivityReset"
 
 	/* MensaType      = "mensa"
-	ChatType       = "chat"
 	KinoType       = "kino"
 	RoomfinderType = "roomfinder"
 	AlarmType      = "alarm" */
@@ -107,8 +106,6 @@ func (c *CronService) Run() error {
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
-					case ChatType:
-						g.Go(func() error { return c.chatCron() })
 					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
 					case RoomfinderType:
