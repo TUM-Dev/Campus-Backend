@@ -23,9 +23,8 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 				return err
 			}
 
-			// Add the 'canteenHeadCount' enum value
-			// err = tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation', 'canteenHeadCount');").Error
-			if err != nil {
+			// allow "canteenHeadCount" in the enum
+			if err := SafeEnumMigrate(tx, model.Crontab{}, "type", "canteenHeadCount"); err != nil {
 				return err
 			}
 
@@ -40,8 +39,8 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 			if err != nil {
 				return err
 			}
-			// Remove the 'canteenHeadCount' enum value
-			return tx.Exec("ALTER TABLE crontab MODIFY COLUMN type enum('news', 'mensa', 'chat', 'kino', 'roomfinder', 'ticketsale', 'alarm', 'fileDownload','dishNameDownload','averageRatingComputation');").Error
+			// Remove the 'canteenHeadCount' from the enum
+			return SafeEnumRollback(tx, model.Crontab{}, "type", "canteenHeadCount")
 		},
 	}
 }
