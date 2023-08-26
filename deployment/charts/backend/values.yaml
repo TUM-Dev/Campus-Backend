@@ -5,6 +5,7 @@ urls:
   - api-test-v1.tum.app
   - app.tum.app
   - app.tum.de
+  - www.app.tum.de
   - tumcabe.in.tum.de
   v2:
   - api-test-v2.tum.app

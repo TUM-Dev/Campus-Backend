@@ -70,6 +70,9 @@ spec:
             - containerPort: 50051
               name: http
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 3000
             readOnlyRootFilesystem: true
           resources:
             requests:
