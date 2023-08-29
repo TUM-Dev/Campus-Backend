@@ -15,6 +15,7 @@ type Feedback struct {
 	Longitude  sql.NullFloat64 `gorm:"column:longitude;type:float;null;"`
 	OsVersion  sql.NullString  `gorm:"column:os_version;type:text;null;"`
 	AppVersion sql.NullString  `gorm:"column:app_version;type:text;null;"`
+	Processed  bool            `gorm:"column:processed;type:boolean;default:false;not null;"`
 	Timestamp  sql.NullTime    `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;null;"`
 }
 

@@ -28,7 +28,7 @@ const (
 	StorageDir               = "/Storage/" // target location of files
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
-
+	FeedbackEmail            = "feedbackEmail"
 	/* MensaType      = "mensa"
 	ChatType       = "chat"
 	KinoType       = "kino"
@@ -58,7 +58,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -67,6 +67,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				IOSNotifications,
 				IOSActivityReset,
+				FeedbackEmail,
 			).
 			Scan(&res)
 
@@ -119,6 +120,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.iosNotificationsCron() })
 			case IOSActivityReset:
 				g.Go(func() error { return c.iosActivityReset() })
+			case FeedbackEmail:
+				g.Go(func() error { return c.feedbackEmailCron() })
 			}
 		}
 

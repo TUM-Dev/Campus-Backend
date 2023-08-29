@@ -1,0 +1,20 @@
+Feedback via TumCampusApp:
+
+{{- if .Feedback.Valid }}
+{{ .Feedback.String }}
+{{- end }}
+
+{{- if .Latitude.Valid }}
+- Nutzer-Standort:
+    latitude: {{ .Latitude.Float64 }}, longitude: {{ .Longitude.Float64 }}
+    https://www.google.com/maps/search/?api=1&query={{ .Latitude.Float64 }},{{ .Longitude.Float64 }}
+{{- end }}
+- OS-Version: {{ if .OsVersion.Valid }}{{.OsVersion.String }}{{else}}unknown{{end}}
+- App-Version: {{ if .AppVersion.Valid }}{{.APPVersion.String }}{{else}}unknown{{end}}
+
+{{ if .ImageCount }}
+Fotos:
+  {{- range $val := Iterate .ImageCount }}
+- Foto {{ $val }}: https://app.tum.de/File/feedback/{{ $.Id }}/{{ $val }}.png
+  {{- end -}}
+{{- end -}}

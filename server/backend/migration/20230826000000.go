@@ -2,11 +2,14 @@ package migration
 
 import (
 	"database/sql"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
 type Feedback struct {
+	Processed  bool           `gorm:"column:processed;type:boolean;default:false;not null;"`
 	OsVersion  sql.NullString `gorm:"column:os_version;type:text;null;"`
 	AppVersion sql.NullString `gorm:"column:app_version;type:text;null;"`
 }
@@ -22,17 +25,41 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230826000000",
 		Migrate: func(tx *gorm.DB) error {
+			if err := tx.Migrator().AddColumn(&Feedback{}, "Processed"); err != nil {
+				return err
+			}
 			if err := tx.Migrator().AddColumn(&Feedback{}, "OsVersion"); err != nil {
 				return err
 			}
-			return tx.Migrator().AddColumn(&Feedback{}, "AppVersion")
+			if err := tx.Migrator().AddColumn(&Feedback{}, "AppVersion"); err != nil {
+				return err
+			}
+			if err := tx.Exec("UPDATE feedback SET processed = true WHERE processed != true;").Error; err != nil {
+				return err
+			}
+			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail"); err != nil {
+				return err
+			}
+			return tx.Create(&model.Crontab{
+				Interval: 60 * 30, // Every 30 minutes
+				Type:     null.String{NullString: sql.NullString{String: "feedbackEmail", Valid: true}},
+			}).Error
 		},
 
 		Rollback: func(tx *gorm.DB) error {
+			if err := tx.Migrator().DropColumn(&Feedback{}, "Processed"); err != nil {
+				return err
+			}
 			if err := tx.Migrator().DropColumn(&Feedback{}, "OsVersion"); err != nil {
 				return err
 			}
-			return tx.Migrator().DropColumn(&Feedback{}, "AppVersion")
+			if err := tx.Migrator().DropColumn(&Feedback{}, "AppVersion"); err != nil {
+				return err
+			}
+			if err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "fileDownload", 30*60).Error; err != nil {
+				return err
+			}
+			return SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail")
 		},
 	}
 }
