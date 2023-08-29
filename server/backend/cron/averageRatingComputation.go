@@ -26,7 +26,7 @@ func computeAverageNameTags(c *CronService) {
 		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while precomputing average name tags.")
+		log.WithError(err).Error("while precomputing average name tags.")
 	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.DishNameTagAverage{}).Error // Does not work with "true"
 		if errDelete != nil {
@@ -34,7 +34,7 @@ func computeAverageNameTags(c *CronService) {
 		}
 		err := c.db.Model(&model.DishNameTagAverage{}).Create(&results).Error
 		if err != nil {
-			log.WithError(err).Error("Error while creating a new average name tag rating in the database.")
+			log.WithError(err).Error("while creating a new average name tag rating in the database.")
 		}
 	}
 }
@@ -47,7 +47,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 		" GROUP BY mr.cafeteriaID, mrt.tagID, mr.dishID").Scan(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while precomputing average dish tags.")
+		log.WithError(err).Error("while precomputing average dish tags.")
 	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.DishRatingTagAverage{}).Error
 		if errDelete != nil {
@@ -56,7 +56,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 
 		err := c.db.Model(&model.DishRatingTagAverage{}).Create(&results).Error
 		if err != nil {
-			log.WithError(err).Error("Error while creating a new average dish tag rating in the database.")
+			log.WithError(err).Error("while creating a new average dish tag rating in the database.")
 		}
 
 	}
@@ -70,7 +70,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 		" GROUP BY cr.cafeteriaID, crt.tagID").Scan(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while precomputing average cafeteria tags.")
+		log.WithError(err).Error("while precomputing average cafeteria tags.")
 	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingTagsAverage{}).Error
 		if errDelete != nil {
@@ -79,7 +79,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 
 		err := c.db.Model(&model.CafeteriaRatingTagsAverage{}).Create(&results).Error
 		if err != nil {
-			log.WithError(err).Error("Error while creating a new average cafeteria tag rating in the database.")
+			log.WithError(err).Error("while creating a new average cafeteria tag rating in the database.")
 		}
 	}
 }
@@ -91,7 +91,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 		Group("cafeteriaID,dishID").Scan(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while precomputing average dish ratings.")
+		log.WithError(err).Error("while precomputing average dish ratings.")
 	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.DishRatingAverage{}).Error
 		if errDelete != nil {
@@ -99,7 +99,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 		}
 		err := c.db.Model(&model.DishRatingAverage{}).Create(&results).Error
 		if err != nil {
-			log.WithError(err).Error("Error while creating a new average dish rating in the database.")
+			log.WithError(err).Error("while creating a new average dish rating in the database.")
 		}
 	}
 }
@@ -111,7 +111,7 @@ func computeAverageForCafeteria(c *CronService) {
 		Group("cafeteriaID").Find(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while precomputing average cafeteria ratings.")
+		log.WithError(err).Error("while precomputing average cafeteria ratings.")
 	} else if len(results) > 0 {
 		errDelete := c.db.Where("1=1").Delete(&model.CafeteriaRatingAverage{}).Error
 		if errDelete != nil {
@@ -120,7 +120,7 @@ func computeAverageForCafeteria(c *CronService) {
 
 		err := c.db.Model(&model.CafeteriaRatingAverage{}).Create(&results).Error
 		if err != nil {
-			log.WithError(err).Error("Error while creating a new average cafeteria rating in the database.")
+			log.WithError(err).Error("while creating a new average cafeteria rating in the database.")
 		}
 	}
 }

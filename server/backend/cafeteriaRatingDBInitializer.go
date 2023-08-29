@@ -50,7 +50,7 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 		Error
 
 	if err != nil {
-		log.WithError(err).Errorf("Error while checking if cronjob with name %s already exists in database", cronName)
+		log.WithError(err).WithField("cronName", cronName).Error("Error while checking if cronjob already exists in database")
 	} else if count == 0 {
 		errCreate := db.Model(&model.Crontab{}).
 			Create(&model.Crontab{
@@ -78,8 +78,9 @@ func updateNameTagOptions(db *gorm.DB) {
 			Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("DishNameTagOption").
 			Scan(&parentId)
+		fields := log.Fields{"en": v.TagNameEnglish, "de": v.TagNameGerman}
 		if res.Error != nil {
-			log.WithError(res.Error).Errorf("Unable to load tag with En %s and De %s", v.TagNameEnglish, v.TagNameGerman)
+			log.WithError(res.Error).WithFields(fields).Error("Unable to load tag")
 		}
 		if res.RowsAffected == 0 || res.Error != nil {
 			parent := model.DishRatingTagOption{
@@ -87,17 +88,14 @@ func updateNameTagOptions(db *gorm.DB) {
 				EN: v.TagNameEnglish,
 			}
 
-			errCreate := db.Model(&model.DishNameTagOption{}).
-				Create(&parent).Error
-			if errCreate != nil {
-				log.WithError(errCreate).Error("Error while creating tag {}, {}.", v.TagNameGerman, v.TagNameEnglish)
+			if err := db.Model(&model.DishNameTagOption{}).Create(&parent).Error; err != nil {
+				log.WithError(err).WithFields(fields).Error("Error while creating tag")
 			}
 			parentId = parent.DishRatingTagOption
 		}
 
 		addCanBeIncluded(parentId, db, v)
 		addNotIncluded(parentId, db, v)
-
 	}
 }
 
@@ -161,20 +159,20 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsDish.MultiLanguageTags {
 		var count int64
-
+		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		if tagType == CAFETERIA {
 			countError := db.Model(&model.CafeteriaRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("cafeteriaRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Errorf("Unable to find cafeteria rating tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).WithFields(fields).Error("Unable to find cafeteria rating tag")
 			}
 		} else {
 			countError := db.Model(&model.DishRatingTagOption{}).
 				Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 				Select("dishRatingTagOption").Count(&count).Error
 			if countError != nil {
-				log.WithError(countError).Errorf("Unable to find dish rating tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(countError).WithFields(fields).Error("Unable to find dish rating tag")
 			}
 		}
 
@@ -185,9 +183,9 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 			}
 			createError := insertModel.Create(&element).Error
 			if createError != nil {
-				log.WithError(createError).Errorf("Unable to create new can be excluded tag with En %s and De %s", v.TagNameGerman, v.TagNameEnglish)
+				log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
 			} else {
-				log.Infof("New Entry with En %s and De %s successfully created.", v.TagNameGerman, v.TagNameEnglish)
+				log.WithFields(fields).Info("New Entry successfully created")
 			}
 		}
 	}

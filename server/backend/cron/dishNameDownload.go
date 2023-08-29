@@ -71,13 +71,17 @@ func downloadDailyDishes(c *CronService) {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 
 		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%d.json", cafeteriaName, year, week)
-		log.Info("Fetching menu from: ", req)
+		log.WithField("req", req).Debug("Fetching menu")
 		var resp, err = http.Get(req)
 		if err != nil {
 			log.WithError(err).Error("Error fetching menu.")
 		}
 		if resp.StatusCode != 200 {
-			log.WithError(err).Errorf("Menu for %s does not exist error 404 returned.", v.Name)
+			fields := log.Fields{
+				"Name":       v.Name,
+				"StatusCode": resp.StatusCode,
+			}
+			log.WithError(err).WithFields(fields).Error("Menu does not exist")
 		} else {
 			var dishes days
 			errJson := json.NewDecoder(resp.Body).Decode(&dishes)
