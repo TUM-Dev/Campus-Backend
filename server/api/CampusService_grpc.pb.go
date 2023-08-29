@@ -91,7 +91,7 @@ type CampusClient interface {
 	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
 	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SendFeedbackImage(ctx context.Context, opts ...grpc.CallOption) (Campus_SendFeedbackImageClient, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
@@ -356,13 +356,38 @@ func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest
 	return out, nil
 }
 
-func (c *campusClient) SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, Campus_SendFeedbackImage_FullMethodName, in, out, opts...)
+func (c *campusClient) SendFeedbackImage(ctx context.Context, opts ...grpc.CallOption) (Campus_SendFeedbackImageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], Campus_SendFeedbackImage_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &campusSendFeedbackImageClient{stream}
+	return x, nil
+}
+
+type Campus_SendFeedbackImageClient interface {
+	Send(*SendFeedbackImageRequest) error
+	CloseAndRecv() (*emptypb.Empty, error)
+	grpc.ClientStream
+}
+
+type campusSendFeedbackImageClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusSendFeedbackImageClient) Send(m *SendFeedbackImageRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *campusSendFeedbackImageClient) CloseAndRecv() (*emptypb.Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(emptypb.Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
@@ -470,7 +495,7 @@ type CampusServer interface {
 	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
 	SendFeedback(context.Context, *SendFeedbackRequest) (*emptypb.Empty, error)
-	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*emptypb.Empty, error)
+	SendFeedbackImage(Campus_SendFeedbackImageServer) error
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
@@ -570,8 +595,8 @@ func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*Get
 func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFeedback not implemented")
 }
-func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendFeedbackImage not implemented")
+func (UnimplementedCampusServer) SendFeedbackImage(Campus_SendFeedbackImageServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendFeedbackImage not implemented")
 }
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
@@ -1096,22 +1121,30 @@ func _Campus_SendFeedback_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_SendFeedbackImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendFeedbackImageRequest)
-	if err := dec(in); err != nil {
+func _Campus_SendFeedbackImage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CampusServer).SendFeedbackImage(&campusSendFeedbackImageServer{stream})
+}
+
+type Campus_SendFeedbackImageServer interface {
+	SendAndClose(*emptypb.Empty) error
+	Recv() (*SendFeedbackImageRequest, error)
+	grpc.ServerStream
+}
+
+type campusSendFeedbackImageServer struct {
+	grpc.ServerStream
+}
+
+func (x *campusSendFeedbackImageServer) SendAndClose(m *emptypb.Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *campusSendFeedbackImageServer) Recv() (*SendFeedbackImageRequest, error) {
+	m := new(SendFeedbackImageRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).SendFeedbackImage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_SendFeedbackImage_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).SendFeedbackImage(ctx, req.(*SendFeedbackImageRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1374,10 +1407,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_SendFeedback_Handler,
 		},
 		{
-			MethodName: "SendFeedbackImage",
-			Handler:    _Campus_SendFeedbackImage_Handler,
-		},
-		{
 			MethodName: "GetUploadStatus",
 			Handler:    _Campus_GetUploadStatus_Handler,
 		},
@@ -1410,6 +1439,12 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_RemoveDevice_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SendFeedbackImage",
+			Handler:       _Campus_SendFeedbackImage_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "CampusService.proto",
 }

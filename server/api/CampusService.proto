@@ -204,9 +204,10 @@ service Campus {
     };
   }
 
-  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (google.protobuf.Empty) {
+  rpc SendFeedbackImage(stream SendFeedbackImageRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/feedback/{id}/{imageNr}",
+      post: "/feedback/images",
+      body: "*",
     };
   }
 
@@ -690,7 +691,7 @@ message SendFeedbackRequest{
 message SendFeedbackImageRequest{
   int32 id = 1;
   int32 imageNr = 2;
-  //todo where does the file come from?
+  bytes content = 3;
 }
 
 
