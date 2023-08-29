@@ -5,6 +5,8 @@ services:
     restart: always
     build:
       context: server/
+      args:
+        version: dev # compiled with the git sha in prod
     ports:
       - 50051:50051
     environment:

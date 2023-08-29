@@ -13,6 +13,7 @@ import (
 	"net/textproto"
 	"os"
 	"strings"
+	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
@@ -32,15 +33,18 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	httpPort = ":50051"
-)
+const httpPort = ":50051"
+
+// Version is injected at build time by the compiler with the correct git-commit-sha or "dev" in development
+var Version = "dev"
 
 //go:embed swagger
 var swagfs embed.FS
 
 func main() {
 	setupTelemetry()
+	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
+
 	// Connect to DB
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
@@ -156,33 +160,23 @@ func main() {
 // - sentry to be connected with log
 // - logrus to
 func setupTelemetry() {
-	environment := "unknown"
+	environment := "development"
 	if env.IsProd() {
 		environment = "production"
-	}
-	if env.IsDev() {
-		environment = "development"
-	}
-
-	if environment == "production" {
-		log.SetFormatter(&log.JSONFormatter{})
-	} else {
-		log.SetFormatter(&log.TextFormatter{})
+		log.SetFormatter(&log.JSONFormatter{}) // simpler to query but harder to parse in the console
 	}
 
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:         os.Getenv("SENTRY_DSN"),
-			Release:     env.GetEnvironment(),
-			Environment: environment,
+			Dsn:              sentryDSN,
+			AttachStacktrace: true,
+			Release:          Version,
+			Dist:             Version, // see https://github.com/getsentry/sentry-react-native/issues/516 why this is equal
+			Environment:      environment,
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}
-		log.AddHook(sentryhook.New([]log.Level{
-			log.PanicLevel,
-			log.FatalLevel,
-			log.ErrorLevel,
-		}))
+		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel}))
 	} else {
 		log.Info("continuing without sentry")
 	}
