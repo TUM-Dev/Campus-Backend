@@ -204,13 +204,13 @@ service Campus {
     };
   }
 
-  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackImageReply) {
+  rpc SendFeedback(SendFeedbackRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/feedback",
     };
   }
 
-  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
+  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/feedback/{id}/{imageNr}",
     };
@@ -717,10 +717,6 @@ message SendFeedbackRequest{
   double longitude = 7;
   string osVersion = 8;
   string appVersion = 9;
-}
-
-message SendFeedbackImageReply{
-  string status = 1;
 }
 
 message SendFeedbackImageRequest{

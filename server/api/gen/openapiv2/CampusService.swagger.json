@@ -625,7 +625,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackImageReply"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -706,7 +707,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackImageReply"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -2255,14 +2257,6 @@
       "type": "object",
       "properties": {
         "query": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSendFeedbackImageReply": {
-      "type": "object",
-      "properties": {
-        "status": {
           "type": "string"
         }
       }

@@ -92,8 +92,8 @@ type CampusClient interface {
 	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
 	GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error)
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
-	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
-	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
+	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
 	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
@@ -358,8 +358,8 @@ func (c *campusClient) GetKino(ctx context.Context, in *GetKinoRequest, opts ...
 	return out, nil
 }
 
-func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error) {
-	out := new(SendFeedbackImageReply)
+func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Campus_SendFeedback_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -367,8 +367,8 @@ func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest
 	return out, nil
 }
 
-func (c *campusClient) SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error) {
-	out := new(SendFeedbackImageReply)
+func (c *campusClient) SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Campus_SendFeedbackImage_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -481,8 +481,8 @@ type CampusServer interface {
 	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
 	GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error)
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
-	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error)
-	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error)
+	SendFeedback(context.Context, *SendFeedbackRequest) (*emptypb.Empty, error)
+	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*emptypb.Empty, error)
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
 	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
@@ -582,10 +582,10 @@ func (UnimplementedCampusServer) GetEventList(context.Context, *GetEventListRequ
 func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKino not implemented")
 }
-func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error) {
+func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFeedback not implemented")
 }
-func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error) {
+func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFeedbackImage not implemented")
 }
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
