@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"github.com/evalphobia/logrus_sentry"
+	"github.com/makasim/sentryhook"
 	"io/fs"
 	"net"
 	"net/http"
@@ -171,15 +171,6 @@ func setupTelemetry() {
 	}
 
 	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
-		hook, err := logrus_sentry.NewSentryHook(sentryDSN, []log.Level{
-			log.PanicLevel,
-			log.FatalLevel,
-			log.ErrorLevel,
-		})
-
-		if err == nil {
-			log.AddHook(hook)
-		}
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:         os.Getenv("SENTRY_DSN"),
 			Release:     env.GetEnvironment(),
@@ -187,6 +178,11 @@ func setupTelemetry() {
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}
+		log.AddHook(sentryhook.New([]log.Level{
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
+		}))
 	} else {
 		log.Info("continuing without sentry")
 	}

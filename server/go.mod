@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/disintegration/imaging v1.6.2
-	github.com/evalphobia/logrus_sentry v0.8.2
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.0
@@ -12,6 +11,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/influxdata/influxdb-client-go/v2 v2.12.3
+	github.com/makasim/sentryhook v0.4.2
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/mmcdole/gofeed v1.2.0
 	github.com/satori/go.uuid v1.2.0
@@ -32,10 +32,8 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect
-	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/glog v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
