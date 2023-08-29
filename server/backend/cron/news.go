@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
@@ -39,8 +38,7 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	var source model.NewsSource
 	err := c.db.Find(&source, cronjob.ID.Int64).Error
 	if err != nil {
-		log.Printf("error getting news source from database: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("getting news source from database")
 		return err
 	}
 	// skip sources with null url
@@ -63,15 +61,13 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	log.Printf("processing source %s", source.URL.String)
 	feed, err := c.gf.ParseURL(source.URL.String)
 	if err != nil {
-		log.Printf("error parsing rss: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("parsing rss")
 		return err
 	}
 	// get all news for this source so we only process new ones, using map for performance reasons
 	existingNewsLinksForSource := make([]string, 0)
 	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Printf("failed to fetch existing news: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("failed to fetch existing news")
 		return err
 	}
 	var newNews []model.News
@@ -103,8 +99,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			if pickedEnclosure != nil {
 				fileId, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
-					log.WithError(err).Error("error saving image")
-					sentry.CaptureException(err)
+					log.WithError(err).Error("can't save news image")
 				}
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
@@ -186,7 +181,6 @@ func (c *CronService) cleanOldNewsForSource(source int32) error {
 		log.Infof("cleaned up %v old news", res.RowsAffected)
 	} else {
 		log.WithError(res.Error).Error("failed to clean up old news")
-		sentry.CaptureException(res.Error)
 		return res.Error
 	}
 	return nil

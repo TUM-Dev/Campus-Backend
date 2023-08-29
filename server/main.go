@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
+	"github.com/evalphobia/logrus_sentry"
 	"io/fs"
 	"net"
 	"net/http"
@@ -39,6 +40,7 @@ const (
 var swagfs embed.FS
 
 func main() {
+	setupTelemetry()
 	// Connect to DB
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
@@ -49,22 +51,6 @@ func main() {
 	} else {
 		log.Error("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
 		os.Exit(-1)
-	}
-
-	environment := "development"
-	if env.IsDev() {
-		environment = "production"
-	}
-	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
-		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:         os.Getenv("SENTRY_DSN"),
-			Release:     env.GetEnvironment(),
-			Environment: environment,
-		}); err != nil {
-			log.WithError(err).Error("Sentry initialization failed")
-		}
-	} else {
-		log.Println("continuing without sentry")
 	}
 
 	// initializing connection to InfluxDB
@@ -93,7 +79,7 @@ func main() {
 	var mensaCronActivated = true
 	if len(os.Args) > 2 && os.Args[1] == "-MensaCron" && os.Args[2] == "0" {
 		mensaCronActivated = false
-		log.Println("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
+		log.Info("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
 	}
 	// Create any other background services (these shouldn't do any long running work here)
 	cronService := cron.New(db, mensaCronActivated)
@@ -159,10 +145,50 @@ func main() {
 	g.Go(func() error { return cronService.Run() })                // Setup cron jobs
 	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
-	log.Println("running server")
+	log.Info("running server")
 	err = g.Wait()
 	if err != nil {
 		log.Error(err)
+	}
+}
+
+// setupTelemetry initializes our telemetry stack
+// - sentry to be connected with log
+// - logrus to
+func setupTelemetry() {
+	environment := "unknown"
+	if env.IsProd() {
+		environment = "production"
+	}
+	if env.IsDev() {
+		environment = "development"
+	}
+
+	if environment == "production" {
+		log.SetFormatter(&log.JSONFormatter{})
+	} else {
+		log.SetFormatter(&log.TextFormatter{})
+	}
+
+	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
+		hook, err := logrus_sentry.NewSentryHook(sentryDSN, []log.Level{
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
+		})
+
+		if err == nil {
+			log.AddHook(hook)
+		}
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn:         os.Getenv("SENTRY_DSN"),
+			Release:     env.GetEnvironment(),
+			Environment: environment,
+		}); err != nil {
+			log.WithError(err).Error("Sentry initialization failed")
+		}
+	} else {
+		log.Info("continuing without sentry")
 	}
 }
 
