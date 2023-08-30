@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
-	"embed"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -17,6 +16,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
+	"github.com/flowchartsman/swaggerui"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	log "github.com/sirupsen/logrus"
@@ -35,8 +35,8 @@ const (
 	httpPort = ":50051"
 )
 
-//go:embed swagger
-var swagfs embed.FS
+//go:embed api/gen/openapiv2/CampusService.swagger.json
+var spec []byte
 
 func main() {
 	// Connect to DB
@@ -120,8 +120,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
 	})
 
-	static, _ := fs.Sub(swagfs, "swagger")
-	mux.Handle("/", http.FileServer(http.FS(static)))
+	mux.Handle("/", swaggerui.Handler(spec))
 
 	// Main GRPC Server
 	grpcS := grpc.NewServer()
