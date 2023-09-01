@@ -202,14 +202,15 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 		}
 	}
 
-	for _, a := range includedTags {
-		if a != -1 {
+	for _, nametagID := range includedTags {
+		if nametagID != -1 {
 			err := db.Model(&model.DishToDishNameTag{}).Create(&model.DishToDishNameTag{
 				DishID:    dishID,
-				NameTagID: a,
+				NameTagID: nametagID,
 			}).Error
 			if err != nil {
-				log.WithError(err).Errorf("Error while creating a new entry with dish %s and nametag %s", dishID, a)
+				fields := log.Fields{"dishID": dishID, "nametagID": nametagID}
+				log.WithError(err).WithFields(fields).Error("creating a new entry")
 			}
 		}
 	}

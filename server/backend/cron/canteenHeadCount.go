@@ -143,8 +143,12 @@ func (c *CronService) canteenHeadCountCron() error {
 		}
 
 		count := sumApCounts(aps)
-		updateDb(&canteen, count, c.db)
-		log.Debug("Canteen head count stats (", count, ") updated for: ", canteen.CanteenId)
+		fields := log.Fields{"count": count, "CanteenId": canteen.CanteenId}
+		if err := updateDb(&canteen, count, c.db); err != nil {
+			log.WithFields(fields).WithError(err).Error("Failed to update Canteen head count stats")
+		} else {
+			log.WithFields(fields).Debug("Canteen head count stats updated")
+		}
 	}
 	log.Info("Canteen head count stats updated.")
 	return nil
