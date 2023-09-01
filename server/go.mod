@@ -1,6 +1,6 @@
 module github.com/TUM-Dev/Campus-Backend/server
 
-go 1.18
+go 1.21
 
 require (
 	github.com/disintegration/imaging v1.6.2
