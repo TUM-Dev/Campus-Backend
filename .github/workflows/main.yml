@@ -1,7 +1,9 @@
 name: CI
 on:
   push:
-    branches: main
+    branches: [main]
+  pull_request:
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +37,9 @@ jobs:
       with:
         context: server
         pull: true
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         build-args: version=${{ github.sha }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
