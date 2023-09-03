@@ -209,7 +209,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 				NameTagID: a,
 			}).Error
 			if err != nil {
-				log.WithError(err).Errorf("Error while creating a new entry with dish %s and nametag %s", dishID, a)
+				log.WithError(err).Errorf("Error while creating a new entry with dish %d and nametag %d", dishID, a)
 			}
 		}
 	}

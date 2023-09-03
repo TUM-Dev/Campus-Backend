@@ -32,7 +32,7 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	//check if source id provided for news job is not null
 	if !cronjob.ID.Valid {
 		cronjobJson, _ := json.Marshal(cronjob)
-		log.Println("skipping news job, id of source is null, cronjob: %s", string(cronjobJson))
+		log.Println("skipping news job, id of source is null, cronjob: ", string(cronjobJson))
 		return nil
 	}
 	// get news source for cronjob

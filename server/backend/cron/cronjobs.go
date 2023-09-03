@@ -127,7 +127,7 @@ func (c *CronService) Run() error {
 
 		err := g.Wait()
 		if err != nil {
-			log.Println("Couldn't run all cron jobs: %v", err)
+			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
 		log.Trace("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)

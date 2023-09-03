@@ -153,7 +153,7 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Errorf("Failed to fetch top news: %w", err)
+		log.WithError(err).Error("Failed to fetch top news")
 	} else if res != nil {
 		return &pb.GetTopNewsReply{
 			//ImageUrl: res.Name,

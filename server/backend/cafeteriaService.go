@@ -155,7 +155,7 @@ func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingReq
 		First(&result)
 
 	if err.Error != nil {
-		log.WithError(err.Error).Errorf("Error while querying the average ratings for the dish %s in the cafeteria %s.", dishID, cafeteriaID)
+		log.WithError(err.Error).Errorf("Error while querying the average ratings for the dish %d in the cafeteria %d", dishID, cafeteriaID)
 		return nil, status.Errorf(codes.Internal, "This dish has not yet been rated.")
 	}
 
