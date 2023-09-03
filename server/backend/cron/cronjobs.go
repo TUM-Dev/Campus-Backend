@@ -2,6 +2,7 @@ package cron
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -12,10 +13,9 @@ import (
 )
 
 type CronService struct {
-	db       *gorm.DB
-	gf       *gofeed.Parser
-	useMensa bool
-	APNs     *ios_apns.Service
+	db   *gorm.DB
+	gf   *gofeed.Parser
+	APNs *ios_apns.Service
 }
 
 // names for cron jobs as specified in database
@@ -37,21 +37,22 @@ const (
 	AlarmType      = "alarm" */
 )
 
-func New(db *gorm.DB, mensaCronActivated bool) *CronService {
+func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db:       db,
-		gf:       gofeed.NewParser(),
-		APNs:     ios_apns.NewCronService(db),
-		useMensa: mensaCronActivated,
+		db:   db,
+		gf:   gofeed.NewParser(),
+		APNs: ios_apns.NewCronService(db),
 	}
 }
 
 func (c *CronService) Run() error {
-	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
+	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
 	g := new(errgroup.Group)
 
-	g.Go(func() error { return c.dishNameDownloadCron() })
-	g.Go(func() error { return c.averageRatingComputation() })
+	if env.IsMensaCronActive() {
+		g.Go(func() error { return c.dishNameDownloadCron() })
+		g.Go(func() error { return c.averageRatingComputation() })
+	}
 
 	for {
 		log.Trace("Cron: checking for pending")
@@ -73,7 +74,7 @@ func (c *CronService) Run() error {
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			var offset int32 = 0
-			if c.useMensa {
+			if env.IsMensaCronActive() {
 				if cronjob.Type.String == AverageRatingComputation {
 					if time.Now().Hour() == 16 {
 						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
@@ -91,11 +92,11 @@ func (c *CronService) Run() error {
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
-				if c.useMensa {
+				if env.IsMensaCronActive() {
 					g.Go(c.dishNameDownloadCron)
 				}
 			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
-				if c.useMensa {
+				if env.IsMensaCronActive() {
 					g.Go(c.averageRatingComputation)
 				}
 				/*
