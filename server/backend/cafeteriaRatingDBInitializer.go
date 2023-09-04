@@ -111,15 +111,15 @@ func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 			Count(&count).Error
 		if err != nil {
 			log.WithError(err).WithFields(fields).Error("Unable to load can be excluded tag")
-			return
-		}
-		if count == 0 {
-			err := db.Model(&model.DishNameTagOptionExcluded{}).
-				Create(&model.DishNameTagOptionExcluded{
-					Expression: expression,
-					NameTagID:  parentId}).Error
-			if err != nil {
-				log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
+		} else {
+			if count == 0 {
+				err := db.Model(&model.DishNameTagOptionExcluded{}).
+					Create(&model.DishNameTagOptionExcluded{
+						Expression: expression,
+						NameTagID:  parentId}).Error
+				if err != nil {
+					log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
+				}
 			}
 		}
 	}

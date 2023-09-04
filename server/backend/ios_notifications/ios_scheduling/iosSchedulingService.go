@@ -102,7 +102,7 @@ func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated)
 			continue
 		}
 		if err := service.LogScheduledUpdate(device.DeviceID); err != nil {
-			log.WithError(err).WithField("deviceID", device.DeviceID).Error("could not log scheduled update for ")
+			log.WithError(err).WithField("deviceID", device.DeviceID).Error("could not log scheduled update")
 		}
 	}
 }
