@@ -84,10 +84,13 @@ func (c *CronService) Run() error {
 			cronjob.LastRun = int32(time.Now().Unix()) + offset
 			c.db.Save(&cronjob)
 
-			// Run each job in a separate goroutine so we can parallelize them
+			// Run each job in a separate goroutine, so we can parallelize them
 			switch cronjob.Type.String {
 			case NewsType:
-				g.Go(func() error { return c.newsCron(&cronjob) })
+				// if this is not copied here, this may not be threads save due to go's guarantees
+				// loop variable cronjob captured by func literal (govet)
+				copyCronjob := cronjob
+				g.Go(func() error { return c.newsCron(&copyCronjob) })
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
@@ -122,9 +125,8 @@ func (c *CronService) Run() error {
 			}
 		}
 
-		err := g.Wait()
-		if err != nil {
-			log.Println("Couldn't run all cron jobs: %v", err)
+		if err := g.Wait(); err != nil {
+			log.WithError(err).Println("Couldn't run all cron jobs")
 		}
 		log.Trace("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)

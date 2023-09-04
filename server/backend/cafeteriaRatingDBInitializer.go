@@ -103,21 +103,22 @@ func updateNameTagOptions(db *gorm.DB) {
 
 func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 	var count int64
-	for _, u := range v.NotIncluded {
-		errorLoadingIncluded := db.Model(&model.DishNameTagOptionExcluded{}).
-			Where("expression LIKE ? AND NameTagID = ?", u, parentId).
+	for _, expression := range v.NotIncluded {
+		fields := log.Fields{"expression": expression, "parentId": parentId}
+		err := db.Model(&model.DishNameTagOptionExcluded{}).
+			Where("expression LIKE ? AND NameTagID = ?", expression, parentId).
 			Select("DishNameTagOptionExcluded").
 			Count(&count).Error
-		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Errorf("Unable to load can be excluded tag with expression %s and parentId %s", u, parentId)
+		if err != nil {
+			log.WithError(err).WithFields(fields).Error("Unable to load can be excluded tag")
 		} else {
 			if count == 0 {
-				createError := db.Model(&model.DishNameTagOptionExcluded{}).
+				err := db.Model(&model.DishNameTagOptionExcluded{}).
 					Create(&model.DishNameTagOptionExcluded{
-						Expression: u,
+						Expression: expression,
 						NameTagID:  parentId}).Error
-				if createError != nil {
-					log.WithError(errorLoadingIncluded).Error("Unable to create new can be excluded tag with expression {} and parentId {} ", u, parentId)
+				if err != nil {
+					log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
 				}
 			}
 		}
@@ -126,22 +127,23 @@ func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 
 func addCanBeIncluded(parentId int32, db *gorm.DB, v nameTag) {
 	var count int64
-	for _, u := range v.CanBeIncluded {
-		errorLoadingIncluded := db.Model(&model.DishNameTagOptionIncluded{}).
-			Where("expression LIKE ? AND NameTagID = ?", u, parentId).
+	for _, expression := range v.CanBeIncluded {
+		fields := log.Fields{"expression": expression, "parentId": parentId}
+		err := db.Model(&model.DishNameTagOptionIncluded{}).
+			Where("expression LIKE ? AND NameTagID = ?", expression, parentId).
 			Select("DishNameTagOptionIncluded").
 			Count(&count).Error
-		if errorLoadingIncluded != nil {
-			log.WithError(errorLoadingIncluded).Errorf("Unable to load can be included tag with expression %s and parentId %s", u, parentId)
+		if err != nil {
+			log.WithError(err).WithFields(fields).Error("Unable to load can be included tag")
 		} else {
 			if count == 0 {
-				createError := db.Model(&model.DishNameTagOptionIncluded{}).
+				err := db.Model(&model.DishNameTagOptionIncluded{}).
 					Create(&model.DishNameTagOptionIncluded{
-						Expression: u,
+						Expression: expression,
 						NameTagID:  parentId,
 					}).Error
-				if createError != nil {
-					log.WithError(errorLoadingIncluded).Errorf("Unable to create new can be excluded tag with expression %s and parentId %s", u, parentId)
+				if err != nil {
+					log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
 				}
 			}
 		}
