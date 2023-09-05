@@ -192,9 +192,9 @@ service Campus {
   }
 
 
-  rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
+  rpc GetMovies(GetMoviesRequest) returns (GetMoviesReply) {
     option (google.api.http) = {
-      get: "/kino/{lastId}",
+      get: "/movies/{lastId}",
     };
   }
 
@@ -648,30 +648,35 @@ message StudyRoom{
   string building_name = 5;
 }
 
-message GetKinoRequest{
+message GetMoviesRequest{
+  // the last Id you have requested. Use -1 to get all movies
   int32 lastId = 1;
 }
 
-message GetKinoReply{
-  repeated KinoMsgElement kinos = 1;
+message GetMoviesReply{
+  repeated MovieMsgElement movies = 1;
 }
 
-message KinoMsgElement{
-  string name = 1;
-  string path = 2;
-  int32 kino = 3;
+message MovieMsgElement{
+  string coverName = 1;
+  string coverPath = 2;
+  int32 id = 3;
   google.protobuf.Timestamp date = 4;
   google.protobuf.Timestamp created = 5;
   string title = 6;
+  // release year of the movie
   string year = 7;
   string runtime = 8;
   string genre = 9;
   string director = 10;
   string actors = 11;
-  string rating = 12;
+  // imdb rating
+  string imdbRating = 12;
   string description = 13;
-  int32 cover = 14;
-  string trailer = 15;
+  int32 coverID = 14;
+  // was previously the trailer
+  reserved 15;
+  // Where to find additional information about this movie
   string link = 16;
 }
 
