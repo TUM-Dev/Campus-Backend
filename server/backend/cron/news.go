@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	ImageDirectory = "news/newspread/"
-	NewspreadHook  = "newspread"
-	ImpulsivHook   = "impulsivHook"
+	NewsImageDirectory = "news/newspread/"
+	NewspreadHook      = "newspread"
+	ImpulsivHook       = "impulsivHook"
 	//MAX_IMAGE_RETRYS = 3
 )
 
@@ -136,7 +136,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
+// saveImage saves an image to the database, so it can be downloaded by another cronjob and returns its id
 func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
@@ -153,7 +153,7 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 	// otherwise store in database:
 	file := model.Files{
 		Name:       targetFileName,
-		Path:       ImageDirectory,
+		Path:       NewsImageDirectory,
 		URL:        sql.NullString{String: url, Valid: true},
 		Downloaded: sql.NullBool{Bool: false, Valid: true},
 	}
