@@ -41,6 +41,7 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20220713000000(),
 		m.migrate20221119131300(),
 		m.migrate20221210000000(),
+		m.migrate2023090510000000(),
 		m.migrate20230904000000(),
 		m.migrate20230825000000(),
 	})
