@@ -104,7 +104,7 @@ func (c *CronService) movieCron(cronjob *model.Crontab) error {
 				Genre:       imdbMovie.Genre,
 				Director:    imdbMovie.Director,
 				Actors:      imdbMovie.Actors,
-				ImdbRating:  imdbMovie.imdbRating,
+				ImdbRating:  imdbMovie.ImdbRating,
 				Description: imdbMovie.Plot, // we get this from imdb as tu-fim does truncate their plot
 				FilesID:     file.File,
 				Files:       file,
@@ -128,7 +128,7 @@ type imdbResults struct {
 	Director   string
 	Actors     string
 	Plot       string
-	imdbRating string
+	ImdbRating string `json:"imdbRating"`
 }
 
 func getIMDB(id string) (*imdbResults, error) {
