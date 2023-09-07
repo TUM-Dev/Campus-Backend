@@ -161,7 +161,9 @@ func main() {
 // - logrus to
 func setupTelemetry() {
 	environment := "development"
+	log.SetLevel(log.TraceLevel)
 	if env.IsProd() {
+		log.SetLevel(log.InfoLevel)
 		environment = "production"
 		log.SetFormatter(&log.JSONFormatter{}) // simpler to query but harder to parse in the console
 	}
