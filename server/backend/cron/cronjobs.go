@@ -18,6 +18,8 @@ type CronService struct {
 	APNs     *ios_apns.Service
 }
 
+const StorageDir = "/Storage/" // target location of files
+
 // names for cron jobs as specified in database
 const (
 	NewsType                 = "news"
@@ -25,7 +27,6 @@ const (
 	DishNameDownload         = "dishNameDownload"
 	AverageRatingComputation = "averageRatingComputation"
 	CanteenHeadcount         = "canteenHeadCount"
-	StorageDir               = "/Storage/" // target location of files
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
 
