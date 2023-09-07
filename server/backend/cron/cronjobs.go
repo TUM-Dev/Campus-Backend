@@ -48,7 +48,7 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 }
 
 func (c *CronService) Run() error {
-	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
+	log.WithField("useMensa", c.useMensa).Trace("running cron service")
 	g := new(errgroup.Group)
 
 	g.Go(func() error { return c.dishNameDownloadCron() })
@@ -81,6 +81,8 @@ func (c *CronService) Run() error {
 					}
 				}
 			}
+			cronFields := log.Fields{"Cron (id)": cronjob.Cron, "type": cronjob.Type.String, "offset": offset, "LastRun": cronjob.LastRun, "interval": cronjob.Interval, "id (not real id)": cronjob.ID.Int64}
+			log.WithFields(cronFields).Trace("Running cronjob")
 
 			cronjob.LastRun = int32(time.Now().Unix()) + offset
 			c.db.Save(&cronjob)
@@ -127,7 +129,7 @@ func (c *CronService) Run() error {
 		}
 
 		if err := g.Wait(); err != nil {
-			log.WithError(err).Println("Couldn't run all cron jobs")
+			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
 		log.Trace("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)
