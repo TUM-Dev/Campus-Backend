@@ -9,6 +9,10 @@ RUN apk update && apk add --no-cache git ca-certificates tzdata alpine-sdk bash 
 RUN adduser -D -g '' appuser
 WORKDIR /app
 
+# Copy go mod and sum files and download dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
 # Copy source code
 COPY . .
 
