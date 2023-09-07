@@ -22,8 +22,10 @@ jobs:
         with:
           version: v1.54
           working-directory: server
+          args: --timeout=30m
       - name: golangci-lint-client
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.54
           working-directory: client
+          args: --timeout=30m
