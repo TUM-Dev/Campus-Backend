@@ -45,7 +45,7 @@ func (s *NewsSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-func file(id int32) *model.Files {
+func newsFile(id int32) *model.Files {
 	return &model.Files{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
@@ -61,8 +61,8 @@ func source1() *model.NewsSource {
 		Source:  1,
 		Title:   "Amazing News 1",
 		URL:     null.String{NullString: sql.NullString{String: "https://example.com/amazing1", Valid: true}},
-		FilesID: file(2).File,
-		Files:   *file(2),
+		FilesID: newsFile(1).File,
+		Files:   *newsFile(1),
 		Hook:    null.String{NullString: sql.NullString{String: "", Valid: true}},
 	}
 }
@@ -72,8 +72,8 @@ func source2() *model.NewsSource {
 		Source:  2,
 		Title:   "Amazing News 2",
 		URL:     null.String{NullString: sql.NullString{String: "https://example.com/amazing2", Valid: true}},
-		FilesID: file(2).File,
-		Files:   *file(2),
+		FilesID: newsFile(2).File,
+		Files:   *newsFile(2),
 		Hook:    null.String{NullString: sql.NullString{String: "hook", Valid: true}},
 	}
 }

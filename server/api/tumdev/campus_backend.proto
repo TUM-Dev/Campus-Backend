@@ -13,9 +13,22 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service Campus {
-  rpc GetTopNews (google.protobuf.Empty) returns (GetTopNewsReply) {
+  rpc GetTopNewsAlert (google.protobuf.Empty) returns (GetTopNewsAlertReply) {
     option (google.api.http) = {
-      get: "/news/top"
+      get: "/news/alerts/top"
+      response_body: "alert"
+    };
+  }
+  rpc GetNewsAlert (GetNewsAlertRequest) returns (GetNewsAlertReply) {
+    option (google.api.http) = {
+      get: "/news/alerts/{id}"
+      response_body: "alert"
+    };
+  }
+  rpc GetNewsAlerts (google.protobuf.Empty) returns (GetNewsAlertsReply) {
+    option (google.api.http) = {
+      get: "/news/alerts"
+      response_body: "alerts"
     };
   }
 
@@ -386,7 +399,22 @@ message NewsSource {
   string icon = 3;
 }
 
-message GetTopNewsReply {
+message GetNewsAlertRequest {
+  int32 id = 1;
+}
+
+message GetNewsAlertReply {
+  NewsAlert alert = 1;
+}
+
+message GetNewsAlertsReply {
+  repeated NewsAlert alerts = 1;
+}
+message GetTopNewsAlertReply {
+  NewsAlert alert = 1;
+}
+
+message NewsAlert {
   string image_url = 1;
   string link = 2;
   google.protobuf.Timestamp created = 3;

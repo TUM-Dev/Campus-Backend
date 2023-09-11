@@ -3,6 +3,7 @@
 # needs buf: https://docs.buf.build/installation#github-releases
 
 echo updating the generated files
+export PATH="$PATH:$(go env GOPATH)/bin"
 buf mod update
 buf generate
 

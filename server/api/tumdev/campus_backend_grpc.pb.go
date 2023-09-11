@@ -20,7 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Campus_GetTopNews_FullMethodName                    = "/api.Campus/GetTopNews"
+	Campus_GetTopNewsAlert_FullMethodName               = "/api.Campus/GetTopNewsAlert"
+	Campus_GetNewsAlert_FullMethodName                  = "/api.Campus/GetNewsAlert"
+	Campus_GetNewsAlerts_FullMethodName                 = "/api.Campus/GetNewsAlerts"
 	Campus_GetNewsSources_FullMethodName                = "/api.Campus/GetNewsSources"
 	Campus_SearchRooms_FullMethodName                   = "/api.Campus/SearchRooms"
 	Campus_GetLocations_FullMethodName                  = "/api.Campus/GetLocations"
@@ -62,7 +64,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
-	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetTopNewsAlert(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsAlertReply, error)
+	GetNewsAlert(ctx context.Context, in *GetNewsAlertRequest, opts ...grpc.CallOption) (*GetNewsAlertReply, error)
+	GetNewsAlerts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetNewsAlertsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
@@ -113,9 +117,27 @@ func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
 }
 
-func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
-	out := new(GetTopNewsReply)
-	err := c.cc.Invoke(ctx, Campus_GetTopNews_FullMethodName, in, out, opts...)
+func (c *campusClient) GetTopNewsAlert(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsAlertReply, error) {
+	out := new(GetTopNewsAlertReply)
+	err := c.cc.Invoke(ctx, Campus_GetTopNewsAlert_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNewsAlert(ctx context.Context, in *GetNewsAlertRequest, opts ...grpc.CallOption) (*GetNewsAlertReply, error) {
+	out := new(GetNewsAlertReply)
+	err := c.cc.Invoke(ctx, Campus_GetNewsAlert_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNewsAlerts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetNewsAlertsReply, error) {
+	out := new(GetNewsAlertsReply)
+	err := c.cc.Invoke(ctx, Campus_GetNewsAlerts_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -441,7 +463,9 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
-	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
+	GetTopNewsAlert(context.Context, *emptypb.Empty) (*GetTopNewsAlertReply, error)
+	GetNewsAlert(context.Context, *GetNewsAlertRequest) (*GetNewsAlertReply, error)
+	GetNewsAlerts(context.Context, *emptypb.Empty) (*GetNewsAlertsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
@@ -489,8 +513,14 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
-func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
+func (UnimplementedCampusServer) GetTopNewsAlert(context.Context, *emptypb.Empty) (*GetTopNewsAlertReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTopNewsAlert not implemented")
+}
+func (UnimplementedCampusServer) GetNewsAlert(context.Context, *GetNewsAlertRequest) (*GetNewsAlertReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewsAlert not implemented")
+}
+func (UnimplementedCampusServer) GetNewsAlerts(context.Context, *emptypb.Empty) (*GetNewsAlertsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewsAlerts not implemented")
 }
 func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
@@ -610,20 +640,56 @@ func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 	s.RegisterService(&Campus_ServiceDesc, srv)
 }
 
-func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Campus_GetTopNewsAlert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetTopNews(ctx, in)
+		return srv.(CampusServer).GetTopNewsAlert(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_GetTopNews_FullMethodName,
+		FullMethod: Campus_GetTopNewsAlert_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTopNews(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetTopNewsAlert(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNewsAlert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNewsAlertRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNewsAlert(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetNewsAlert_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNewsAlert(ctx, req.(*GetNewsAlertRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNewsAlerts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNewsAlerts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetNewsAlerts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNewsAlerts(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1266,8 +1332,16 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CampusServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetTopNews",
-			Handler:    _Campus_GetTopNews_Handler,
+			MethodName: "GetTopNewsAlert",
+			Handler:    _Campus_GetTopNewsAlert_Handler,
+		},
+		{
+			MethodName: "GetNewsAlert",
+			Handler:    _Campus_GetNewsAlert_Handler,
+		},
+		{
+			MethodName: "GetNewsAlerts",
+			Handler:    _Campus_GetNewsAlerts_Handler,
 		},
 		{
 			MethodName: "GetNewsSources",
