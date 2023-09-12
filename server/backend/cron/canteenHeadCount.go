@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -128,25 +129,29 @@ CanteenApInformation when performing a request.
 const BaseUrl = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
 
 func (c *CronService) canteenHeadCountCron() error {
-	log.Info("Updating canteen head count stats...")
+	log.Debug("Updating canteen head count stats...")
 	for _, canteen := range Canteens {
 		if len(canteen.Target) <= 0 {
-			log.Debug("Skipping canteen head count stats for '", canteen.CanteenId, "', since there is no target.")
+			log.WithField("CanteenId", canteen.CanteenId).Debug("Skipping canteen head count stats, since there is no target.")
 			continue
 		}
 
-		log.Debug("Updating canteen head count stats for: ", canteen.CanteenId)
+		log.WithField("CanteenId", canteen.CanteenId).Debug("Updating canteen head count stats")
 		aps := canteen.requestApData()
 		if len(aps) <= 0 {
-			log.Debug("No canteen head count data points found for: ", canteen.CanteenId)
+			log.WithField("CanteenId", canteen.CanteenId).Debug("No canteen head count data points found")
 			continue
 		}
 
 		count := sumApCounts(aps)
-		updateDb(&canteen, count, c.db)
-		log.Debug("Canteen head count stats (", count, ") updated for: ", canteen.CanteenId)
+		fields := log.Fields{"count": count, "CanteenId": canteen.CanteenId}
+		if err := updateDb(&canteen, count, c.db); err != nil {
+			log.WithFields(fields).WithError(err).Error("Failed to update Canteen head count stats")
+		} else {
+			log.WithFields(fields).Debug("Canteen head count stats updated")
+		}
 	}
-	log.Info("Canteen head count stats updated.")
+	log.Debug("Canteen head count stats updated.")
 	return nil
 }
 
@@ -179,11 +184,22 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 
 	res := db.Model(&model.CanteenHeadCount{}).Where(model.CanteenHeadCount{CanteenId: canteen.CanteenId}).Updates(&entry)
 	if res.Error != nil {
+		log.WithError(res.Error).WithField("CanteenId", canteen.CanteenId).Error("could not update all instances of headcount")
 		return res.Error
 	}
 
 	if res.RowsAffected == 0 {
-		return db.Create(&entry).Error
+		err := db.Create(&entry).Error
+		if err != nil {
+			fields := log.Fields{
+				"CanteenId": entry.CanteenId,
+				"Count":     entry.Count,
+				"MaxCount":  entry.MaxCount,
+				"Percent":   entry.Percent,
+				"Timestamp": entry.Timestamp}
+			log.WithError(res.Error).WithFields(fields).Error("could not create headcount entry")
+		}
+		return err
 	}
 	return nil
 }
@@ -193,13 +209,18 @@ func (canteen CanteenApInformation) requestApData() []AccessPoint {
 	url := fmt.Sprintf(BaseUrl, canteen.Target)
 	resp, err := http.Get(url)
 	if err != nil {
-		log.WithError(err).Error("Canteen HeadCount web request failed for: ", canteen.CanteenId)
+		log.WithError(err).WithField("CanteenId", canteen.CanteenId).Error("Canteen HeadCount web request failed")
 		return []AccessPoint{}
 	}
 
 	// Ensure we close the body once we leave this function
 	if resp.Body != nil {
-		defer resp.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.WithError(err).Error("Could not close body")
+			}
+		}(resp.Body)
 	}
 
 	// Parse as JSON

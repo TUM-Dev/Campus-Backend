@@ -50,7 +50,7 @@ func isValidEnum(enum string) bool {
 	match, err := regexp.MatchString("enum\\s*\\('\\w+'(,\\s*'\\w+')*\\);?", enum)
 
 	if err != nil {
-		log.Errorf("error matching regex: %s", err)
+		log.WithError(err).Error("error matching regex")
 		return false
 	}
 

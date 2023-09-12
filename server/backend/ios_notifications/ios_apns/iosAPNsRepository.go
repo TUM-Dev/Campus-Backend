@@ -107,7 +107,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Errorf("Error while closing body: %s", err)
+			log.WithError(err).Error("Could not close body")
 		}
 	}(resp.Body)
 

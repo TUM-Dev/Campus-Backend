@@ -28,7 +28,7 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
 
 	if err != nil {
-		log.Errorf("Error while creating request: %s", err)
+		log.WithError(err).Error("Failed to create api-request")
 		return nil, ErrCannotCreateRequest
 	}
 
@@ -40,14 +40,14 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Errorf("Error while fetching grades: %s", err)
+		log.WithError(err).Error("failed to fetch grades")
 		return nil, ErrWhileFetchingGrades
 	}
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Errorf("Error while closing body: %s", err)
+			log.WithError(err).Error("Could not close body")
 		}
 	}(resp.Body)
 
@@ -55,7 +55,7 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	err = xml.NewDecoder(resp.Body).Decode(&grades)
 
 	if err != nil {
-		log.Errorf("Error while unmarshalling grades: %s", err)
+		log.WithError(err).Error("could not unmarshall grades")
 		return nil, ErrorWhileUnmarshalling
 	}
 

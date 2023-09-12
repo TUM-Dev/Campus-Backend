@@ -22,7 +22,7 @@ func main() {
 
 	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Error("could not dial localAddress")
 	}
 	c := pb.NewCampusClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
