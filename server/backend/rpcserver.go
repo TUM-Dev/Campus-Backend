@@ -13,8 +13,6 @@ import (
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"net"
-	"sync"
-	"time"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
@@ -41,12 +39,8 @@ func New(db *gorm.DB) *CampusServer {
 	initTagRatingOptions(db)
 
 	return &CampusServer{
-		db: db,
-		deviceBuf: &deviceBuffer{
-			lock:     sync.Mutex{},
-			devices:  make(map[string]*model.Devices),
-			interval: time.Minute,
-		},
+		db:                      db,
+		deviceBuf:               newDeviceBuffer(),
 		iOSNotificationsService: NewIOSNotificationsService(),
 	}
 }

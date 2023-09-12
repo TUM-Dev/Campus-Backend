@@ -22,6 +22,15 @@ type deviceBuffer struct {
 	interval time.Duration             // flush interval
 }
 
+func newDeviceBuffer() *deviceBuffer {
+	return &deviceBuffer{
+		lock:     sync.Mutex{},
+		devices:  make(map[string]*model.Devices),
+		interval: time.Minute,
+	}
+
+}
+
 func (s *CampusServer) RunDeviceFlusher() error {
 	for {
 		time.Sleep(s.deviceBuf.interval)
