@@ -40,7 +40,7 @@ type CampusServer struct {
 var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
-	log.Println("Server starting up")
+	log.Trace("Server starting up")
 	initTagRatingOptions(db)
 
 	return &CampusServer{
@@ -92,7 +92,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (ne
 		if err := s.db.Where("file = ?", source.Icon).First(&icon).Error; err != nil {
 			icon = model.Files{File: 0}
 		}
-		log.Info("sending news source", source.Title)
+		log.WithField("Title", source.Title).Info("sending news source")
 		resp = append(resp, &pb.NewsSource{
 			Source: fmt.Sprintf("%d", source.Source),
 			Title:  source.Title,
@@ -149,11 +149,11 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.Ge
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
-	log.Printf("Received: get top news")
+
 	var res *model.NewsAlert
 	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Errorf("Failed to fetch top news: %w", err)
+		log.WithError(err).Errorf("Failed to fetch top news")
 	} else if res != nil {
 		return &pb.GetTopNewsReply{
 			//ImageUrl: res.Name,

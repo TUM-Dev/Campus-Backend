@@ -19,6 +19,12 @@ spec:
       services:
         - name: backend-v2-svc
           port: 50051
+    - kind: Rule
+      match: (Host(`{{ join "`) || Host(`" $.Values.urls.v2 }}`)) && Headers(`Content-Type`, `application/grpc`)
+      services:
+        - name: backend-v2-svc
+          port: 50051
+          scheme: h2c
   tls:
     secretName: app.tum.de
 ---

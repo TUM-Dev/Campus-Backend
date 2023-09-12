@@ -1,4 +1,4 @@
-FROM golang:1.19.3-alpine3.15 as builder
+FROM golang:1.21-alpine3.18 as builder
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -8,6 +8,10 @@ RUN apk update && apk add --no-cache git ca-certificates tzdata alpine-sdk bash 
 # Create appuser
 RUN adduser -D -g '' appuser
 WORKDIR /app
+
+# Copy go mod and sum files and download dependencies
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy source code
 COPY . .
@@ -33,8 +37,10 @@ VOLUME /Storage
 # Use an unprivileged user
 USER appuser
 
-# documentation for docker-compose
+# metadata
 EXPOSE 50051
+HEALTHCHECK  --interval=5m --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health && exit 0 || exit 1
 
 # Run the main binary
 CMD ["/backend"]

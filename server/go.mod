@@ -1,18 +1,19 @@
 module github.com/TUM-Dev/Campus-Backend/server
 
-go 1.18
+go 1.21
 
 require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.2
-	github.com/getsentry/sentry-go v0.20.0
+	github.com/getsentry/sentry-go v0.23.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/influxdata/influxdb-client-go/v2 v2.12.3
-	github.com/microcosm-cc/bluemonday v1.0.23
-	github.com/mmcdole/gofeed v1.2.0
+	github.com/makasim/sentryhook v0.4.2
+	github.com/microcosm-cc/bluemonday v1.0.25
+	github.com/mmcdole/gofeed v1.2.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/soheilhy/cmux v0.1.5
@@ -41,8 +42,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kr/text v0.2.0 // indirect
-	github.com/mmcdole/goxpp v0.0.0-20200921145534-2f3784f67354 // indirect
+	github.com/mmcdole/goxpp v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

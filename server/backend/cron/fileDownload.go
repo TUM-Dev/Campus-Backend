@@ -6,7 +6,6 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/getsentry/sentry-go"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"image"
@@ -43,7 +42,6 @@ func (c *CronService) downloadFile(file model.Files) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).WithField("url", url).Warn("Could not download image")
-		sentry.CaptureException(err)
 		return
 	}
 	// read body here because we can't exhaust the io.reader twice
@@ -59,7 +57,6 @@ func (c *CronService) downloadFile(file model.Files) {
 		downloadedImg, _, err := image.Decode(bytes.NewReader(body))
 		if err != nil {
 			log.WithError(err).WithField("url", url).Warn("Couldn't decode source image")
-			sentry.CaptureException(err)
 			return
 		}
 
@@ -69,21 +66,18 @@ func (c *CronService) downloadFile(file model.Files) {
 		err = imaging.Save(dstImage, StorageDir+dstFileName, imaging.JPEGQuality(75))
 		if err != nil {
 			log.WithError(err).WithField("url", url).Warn("Could not save image file")
-			sentry.CaptureException(err)
 			return
 		}
 	} else {
 		// save without resizing image
 		err = os.WriteFile(fmt.Sprintf("%s%s", file.Path, file.Name), body, 0644)
 		if err != nil {
-			sentry.CaptureException(err)
 			log.WithError(err).Error("Can't save file to disk")
 			return
 		}
 	}
 	err = c.db.Model(&model.Files{}).Where("url = ?", url).Update("downloaded", true).Error
 	if err != nil {
-		sentry.CaptureException(err)
 		log.WithError(err).Error("Could not set image to downloaded.")
 	}
 }
