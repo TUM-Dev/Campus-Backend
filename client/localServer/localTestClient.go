@@ -30,7 +30,7 @@ func main() {
 
 	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Error("could not dial localAddress")
 	}
 	c := pb.NewCampusClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -50,8 +50,7 @@ func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
 	if err != nil {
 		log.Error(err)
 	} else {
-		log.Info("Canteen HeadCount data request successful.")
-		log.Info(res)
+		log.WithField("res", res).Info("Canteen HeadCount data request successful.")
 	}
 }
 
@@ -80,43 +79,52 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 	})
 
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Info("failed to query dish")
 	} else {
-		log.Info("Result: ")
-		log.Info("\tavg : ", res.Avg)
-		log.Info("\tmin ", res.Min)
-		log.Info("\tmax ", res.Max)
-		log.Info("\tstd ", res.Std)
-		log.Info("Number of individual Ratings", len(res.Rating))
+		fields := log.Fields{
+			"avg":               res.Avg,
+			"min":               res.Min,
+			"max":               res.Max,
+			"std":               res.Std,
+			"individualRatings": len(res.Rating),
+		}
+		log.WithFields(fields).Info("succeeded to query dish")
 		path := fmt.Sprintf("%s%d%s", "./testImages/dishes/", time.Now().Unix(), "/")
 		for _, v := range res.Rating {
-			log.Info("\nRating: ", v.Points)
-			log.Info("Comment ", v.Comment)
-			log.Info("Number of Tag Ratings : ", len(v.RatingTags))
-			log.Info("Timestamp: ", v.Visited)
-			log.Info("ImageLength:", len(v.Image))
+			fields := log.Fields{
+				"Rating":                v.Points,
+				"Comment":               v.Comment,
+				"Number of Tag Ratings": len(v.RatingTags),
+				"Timestamp":             v.Visited,
+				"ImageLength":           len(v.Image),
+			}
+			log.WithFields(fields).Info("storing image")
 			if imageShouldBeStored {
 				_, err := storeImage(path, v.Image)
 				if err != nil {
-					log.Info("image was not saved successfully")
+					log.WithError(err).Error("image was not saved successfully")
 				}
 			}
 		}
 		log.Info("Rating Tags: ")
 		for _, v := range res.RatingTags {
-			log.Info("TagId: ", v.TagId)
-			log.Info("\tavg: ", v.Avg)
-			log.Info("\tmin: ", v.Min)
-			log.Info("\tmax: ", v.Max)
-			log.Info("\tstd: ", v.Std)
+			fields := log.Fields{
+				"avg": v.Avg,
+				"min": v.Min,
+				"max": v.Max,
+				"std": v.Std,
+			}
+			log.WithFields(fields).Info(v.TagId)
 		}
 		log.Info("nameTags: ")
 		for _, v := range res.NameTags {
-			log.Info("TagId: ", v.TagId)
-			log.Info("\tavg: ", v.Avg)
-			log.Info("\tmin: ", v.Min)
-			log.Info("\tmax: ", v.Max)
-			log.Info("\tstd: ", v.Std)
+			fields := log.Fields{
+				"avg": v.Avg,
+				"min": v.Min,
+				"max": v.Max,
+				"std": v.Std,
+			}
+			log.WithFields(fields).Info(v.TagId)
 		}
 	}
 }
@@ -130,34 +138,42 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 	})
 
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Error("failed to query cafeteria")
 	} else {
-		log.Info("Result: ")
-		log.Info("avg: ", res.Avg)
-		log.Info("min", res.Min)
-		log.Info("max", res.Max)
-		log.Info("Number of individual Ratings", len(res.Rating))
+		fields := log.Fields{
+			"avg":                          res.Avg,
+			"min":                          res.Min,
+			"max":                          res.Max,
+			"std":                          res.Std,
+			"Number of individual Ratings": len(res.Rating),
+		}
+		log.WithFields(fields).Info("succeeded to query cafeteria")
 		path := fmt.Sprintf("%s%d%s", "./testImages/cafeteria/", time.Now().Unix(), "/")
-		for _, v := range res.Rating {
-			log.Info("\nRating: ", v.Points)
-			log.Info("Comment ", v.Comment)
-			log.Info("Number of Tag Ratings: ", len(v.RatingTags))
-			log.Info("Timestamp: ", v.Visited)
-			log.Info("ImageLength:", len(v.Image))
+		for i, v := range res.Rating {
+			fields := log.Fields{
+				"Rating":                v.Points,
+				"Comment":               v.Comment,
+				"Number of Tag Ratings": len(v.RatingTags),
+				"Timestamp":             v.Visited,
+				"ImageLength":           len(v.Image),
+			}
+			log.WithFields(fields).Infof("Rating %d", i)
 			if imageShouldBeStored {
 				_, err := storeImage(path, v.Image)
 				if err != nil {
-					log.Info("image was not saved successfully")
+					log.WithError(err).Error("image was not saved successfully")
 				}
 			}
 		}
 
 		for _, v := range res.RatingTags {
-			log.Info("\nTagId: ", v.TagId)
-			log.Info("avg: ", v.Avg)
-			log.Info("min", v.Min)
-			log.Info("max", v.Max)
-			log.Info("std", v.Std)
+			fields := log.Fields{
+				"avg": v.Avg,
+				"min": v.Min,
+				"max": v.Max,
+				"std": v.Std,
+			}
+			log.WithFields(fields).Info(v.TagId)
 		}
 	}
 }
@@ -182,9 +198,9 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 	})
 
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Error("could not store new Cafeteria Rating")
 	} else {
-		log.Info("Request successfully: Cafeteria Rating should be stored")
+		log.Info("Cafeteria Rating successfully be stored")
 	}
 }
 
@@ -213,9 +229,9 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string
 	})
 
 	if err != nil {
-		log.Info(err)
+		log.WithError(err).Error("failed to store dish rating")
 	} else {
-		log.Info("Request successfully: Dish Rating should be stored")
+		log.Info("Dish Rating successfully stored")
 	}
 }
 
@@ -231,7 +247,7 @@ func getImageToBytes(path string) []byte {
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Info("Request successfully: Dish Rating should be stored")
+			log.WithError(err).Error("could not close file")
 		}
 	}(file)
 
@@ -239,12 +255,13 @@ func getImageToBytes(path string) []byte {
 	var size = fileInfo.Size()
 	byteArray := make([]byte, size)
 
-	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(byteArray)
+	n, err := bufio.NewReader(file).Read(byteArray)
+	fields := log.Fields{"readBytes": n, "len(byteArray)": len(byteArray)}
 	if err != nil {
-		log.Info("Unable to read the byteArray")
+		log.WithError(err).Error("Unable to read the byteArray")
+	} else {
+		log.WithFields(fields).Info("read image to byteArray")
 	}
-	log.Info("Length of the image as bytes: ", len(byteArray))
 	return byteArray
 }
 
@@ -252,7 +269,7 @@ func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
-			log.Info(err)
+			log.WithError(err).Error("could not make dir")
 		}
 	}
 	img, _, _ := image.Decode(bytes.NewReader(i))
@@ -271,12 +288,12 @@ func storeImage(path string, i []byte) (string, error) {
 
 	out, errFile := os.Create(imgPath)
 	if errFile != nil {
-		log.Info("Unable to create the new testfile")
+		log.WithError(errFile).Error("Unable to create the new testfile")
 	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			log.Info("File was not closed successfully")
+			log.WithError(err).Error("File was not closed successfully")
 		}
 	}(out)
 	var opts jpeg.Options

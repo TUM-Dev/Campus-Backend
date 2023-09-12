@@ -37,7 +37,7 @@ func (service *Service) HandleScheduledCron() error {
 	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
 
 	if err != nil {
-		log.Errorf("Error while getting devices: %s", err)
+		log.WithError(err).Error("can't get devices")
 		return err
 	}
 

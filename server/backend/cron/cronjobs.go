@@ -48,7 +48,7 @@ func New(db *gorm.DB, mensaCronActivated bool) *CronService {
 }
 
 func (c *CronService) Run() error {
-	log.WithField("useMensa", c.useMensa).Trace("running cron service")
+	log.WithField("MensaCronsRunning", c.useMensa).Trace("running cron service")
 	g := new(errgroup.Group)
 
 	g.Go(func() error { return c.dishNameDownloadCron() })

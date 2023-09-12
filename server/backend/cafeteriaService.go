@@ -115,7 +115,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 		}
 
 		if err != nil {
-			log.WithError(err).Error("Error while querying last cafeteria ratings.")
+			log.WithError(err).Error("while querying last cafeteria ratings.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
 		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
@@ -224,7 +224,7 @@ func queryLastDishRatingsWithLimit(input *pb.DishRatingRequest, cafeteriaID int3
 		}
 
 		if err != nil {
-			log.WithError(err).Error("Error while querying last dish ratings from Database.")
+			log.WithError(err).Error("while querying last dish ratings from Database.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
 		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
@@ -251,7 +251,7 @@ func getImageToBytes(path string) []byte {
 	file, err := os.Open(path)
 
 	if err != nil {
-		log.WithError(err).Error("Error while opening image file with path: ", path)
+		log.WithError(err).Error("while opening image file with path: ", path)
 		return nil
 	}
 
@@ -269,7 +269,7 @@ func getImageToBytes(path string) []byte {
 	buffer := bufio.NewReader(file)
 	_, err = buffer.Read(imageAsBytes)
 	if err != nil {
-		log.WithError(err).Error("Error while trying to read image as bytes")
+		log.WithError(err).Error("while trying to read image as bytes")
 		return nil
 	}
 	return imageAsBytes
@@ -315,7 +315,7 @@ func queryTags(db *gorm.DB, cafeteriaID int32, dishID int32, ratingType modelTyp
 	}
 
 	if err != nil {
-		log.WithError(err).Error("Error while querying the tags for the request.")
+		log.WithError(err).Error("while querying the tags for the request.")
 	}
 
 	//needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
@@ -351,7 +351,7 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	}
 
 	if err != nil {
-		log.WithError(err).Error("Error while querying the tag rating overview.")
+		log.WithError(err).Error("while querying the tag rating overview.")
 	}
 	return results
 }
@@ -406,7 +406,7 @@ func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
-			log.WithError(err).Errorf("Directory with path %s could not be created successfully", path)
+			log.WithError(err).WithField("path", path).Error("Directory could not be created successfully")
 			return "", nil
 		}
 	}
@@ -432,7 +432,7 @@ func storeImage(path string, i []byte) (string, error) {
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			log.WithError(err).Error("Error while closing the file.")
+			log.WithError(err).Error("while closing the file.")
 		}
 	}(out)
 
@@ -475,7 +475,7 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 
 	err := s.db.Model(&model.DishRating{}).Create(&rating).Error
 	if err != nil {
-		log.WithError(err).Error("Error while creating a new dish rating.")
+		log.WithError(err).Error("while creating a new dish rating.")
 		return nil, status.Errorf(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
@@ -492,7 +492,7 @@ func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 		Select("nameTagID").
 		Scan(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while loading the dishID for the given name.")
+		log.WithError(err).Error("while loading the dishID for the given name.")
 	} else {
 		for _, tagID := range result {
 			err := s.db.Model(&model.DishNameTag{}).Create(&model.DishNameTag{
@@ -501,7 +501,7 @@ func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 				TagNameID:           tagID,
 			}).Error
 			if err != nil {
-				log.WithError(err).Error("Error while creating a new dish name rating.")
+				log.WithError(err).Error("while creating a new dish name rating.")
 			}
 		}
 	}
@@ -558,7 +558,11 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 			}
 
 			if err == gorm.ErrRecordNotFound || count == 0 {
-				log.Info("tag with tagid ", currentTag.TagId, "does not exist")
+				fields := log.Fields{
+					"tagid": currentTag.TagId,
+					"count": count,
+				}
+				log.WithFields(fields).Info("tag does not exist")
 				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
 			} else {
 				if usedTagIds[int(currentTag.TagId)] == 0 {
@@ -569,7 +573,7 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 							TagID:               int(currentTag.TagId),
 						}).Error
 					if err != nil {
-						log.WithError(err).Error("Error while Creating a currentTag rating for a new rating.")
+						log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
 					}
 					usedTagIds[int(currentTag.TagId)] = 1
 
@@ -609,7 +613,7 @@ func getIDForCafeteriaName(name string, db *gorm.DB) int32 {
 		Select("cafeteria").
 		Scan(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while querying the cafeteria name.")
+		log.WithError(err).Error("while querying the cafeteria name.")
 		result = -1
 	}
 	return result
@@ -622,7 +626,7 @@ func getIDForDishName(name string, cafeteriaID int32, db *gorm.DB) int32 {
 		Select("dish").
 		Scan(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while querying the dish name.")
+		log.WithError(err).Error("while querying the dish name.")
 		result = -1
 	}
 
@@ -636,7 +640,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 	var requestStatus error = nil
 	err := s.db.Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, dishRatingTagOption as TagId").Find(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while loading Cafeterias from database.")
+		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
 
@@ -652,7 +656,7 @@ func (s *CampusServer) GetNameTags(_ context.Context, _ *emptypb.Empty) (*pb.Get
 	var requestStatus error = nil
 	err := s.db.Model(&model.DishNameTagOption{}).Select("DE as de, EN as en, dishNameTagOption as TagId").Find(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while loading available Name Tags from database.")
+		log.WithError(err).Error("while loading available Name Tags from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
 
@@ -668,7 +672,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 	var requestStatus error = nil
 	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while loading Cafeterias from database.")
+		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
 	}
 
@@ -684,7 +688,7 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 	var requestStatus error = nil
 	err := s.db.Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
 	if err != nil {
-		log.WithError(err).Error("Error while loading Cafeterias from database.")
+		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
@@ -716,7 +720,7 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 		Find(&results).Error
 
 	if err != nil {
-		log.WithError(err).Error("Error while loading Cafeterias from database.")
+		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 

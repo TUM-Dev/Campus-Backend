@@ -33,7 +33,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
-	log.Infof("Handling request with id %s", requestId)
+	log.WithField("requestId", requestId).Info("Handling request")
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
 
@@ -63,7 +63,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 }
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
-	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
+	log.WithField("DeviceID", requestLog.DeviceID).Info("Handling campus token request")
 
 	userRepo := ios_device.NewRepository(service.Repository.DB)
 
@@ -110,7 +110,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
 
-	log.Infof("Found %d old grades and %d new grades", len(oldGrades), len(newGrades))
+	log.WithFields(log.Fields{"old": len(oldGrades), "new": len(newGrades)}).Info("Found grades")
 
 	if len(newGrades) > 0 && len(oldGrades) > 0 {
 		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
@@ -210,7 +210,7 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *
 		Alert(alertTitle, "", alertBody).
 		Encrypt(device.PublicKey)
 
-	log.Infof("Sending push notification to device %s", device.DeviceID)
+	log.WithField("DeviceID", device.DeviceID).Infof("Sending push notification")
 
 	_, err := apns.SendAlertNotification(notificationPayload)
 
