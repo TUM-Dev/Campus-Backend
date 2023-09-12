@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
+	"github.com/makasim/sentryhook"
 	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
 	"os"
 	"strings"
+	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
@@ -31,14 +33,18 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	httpPort = ":50051"
-)
+const httpPort = ":50051"
+
+// Version is injected at build time by the compiler with the correct git-commit-sha or "dev" in development
+var Version = "dev"
 
 //go:embed swagger
 var swagfs embed.FS
 
 func main() {
+	setupTelemetry()
+	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
+
 	// Connect to DB
 	var conn gorm.Dialector
 	shouldAutoMigrate := false
@@ -49,22 +55,6 @@ func main() {
 	} else {
 		log.Error("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
 		os.Exit(-1)
-	}
-
-	environment := "development"
-	if env.IsDev() {
-		environment = "production"
-	}
-	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
-		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:         os.Getenv("SENTRY_DSN"),
-			Release:     env.GetEnvironment(),
-			Environment: environment,
-		}); err != nil {
-			log.WithError(err).Error("Sentry initialization failed")
-		}
-	} else {
-		log.Println("continuing without sentry")
 	}
 
 	// initializing connection to InfluxDB
@@ -93,7 +83,7 @@ func main() {
 	var mensaCronActivated = true
 	if len(os.Args) > 2 && os.Args[1] == "-MensaCron" && os.Args[2] == "0" {
 		mensaCronActivated = false
-		log.Println("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
+		log.Info("Cronjobs for the cafeteria rating are deactivated. Remove commandline argument <-MensaCron 0> or set it to 1.", len(os.Args))
 	}
 	// Create any other background services (these shouldn't do any long running work here)
 	cronService := cron.New(db, mensaCronActivated)
@@ -158,10 +148,38 @@ func main() {
 	g.Go(func() error { return cronService.Run() })                // Setup cron jobs
 	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
-	log.Println("running server")
+	log.Info("running server")
 	err = g.Wait()
 	if err != nil {
 		log.Error(err)
+	}
+}
+
+// setupTelemetry initializes our telemetry stack
+// - sentry to be connected with log
+// - logrus to
+func setupTelemetry() {
+	environment := "development"
+	log.SetLevel(log.TraceLevel)
+	if env.IsProd() {
+		log.SetLevel(log.InfoLevel)
+		environment = "production"
+		log.SetFormatter(&log.JSONFormatter{}) // simpler to query but harder to parse in the console
+	}
+
+	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn:              sentryDSN,
+			AttachStacktrace: true,
+			Release:          Version,
+			Dist:             Version, // see https://github.com/getsentry/sentry-react-native/issues/516 why this is equal
+			Environment:      environment,
+		}); err != nil {
+			log.WithError(err).Error("Sentry initialization failed")
+		}
+		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel}))
+	} else {
+		log.Info("continuing without sentry")
 	}
 }
 

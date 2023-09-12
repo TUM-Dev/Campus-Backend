@@ -5,10 +5,13 @@ services:
     restart: always
     build:
       context: server/
+      args:
+        version: dev # compiled with the git sha in prod
     ports:
       - 50051:50051
     environment:
       - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - ENVIRONMENT=dev
       - SENTRY_DSN=${SENTRY_DSN}
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
