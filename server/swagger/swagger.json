@@ -586,38 +586,6 @@
         ]
       }
     },
-    "/event/list": {
-      "get": {
-        "operationId": "Campus_GetEventList",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetEventListReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "eventId",
-            "description": "optional parameter, will return all events if no id is specified",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/feedback": {
       "post": {
         "operationId": "Campus_SendFeedback",
@@ -1420,57 +1388,6 @@
         }
       }
     },
-    "apiEventListMsgElement": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "event": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "news": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "kino": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "file": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "locality": {
-          "type": "string"
-        },
-        "link": {
-          "type": "string"
-        },
-        "start": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "end": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "ticketGroup": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
     "apiGetAreaFacilitiesByBuildingNrReply": {
       "type": "object",
       "properties": {
@@ -1539,18 +1456,6 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
-        }
-      }
-    },
-    "apiGetEventListReply": {
-      "type": "object",
-      "properties": {
-        "events": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiEventListMsgElement"
           }
         }
       }

@@ -191,12 +191,6 @@ service Campus {
     };
   }
 
-  rpc GetEventList(GetEventListRequest) returns (GetEventListReply) {
-    option (google.api.http) = {
-      get: "/event/list",
-    };
-  }
-
 
   rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
     option (google.api.http) = {
@@ -653,32 +647,6 @@ message StudyRoom{
   string room_name = 4;
   string building_name = 5;
 }
-
-message GetEventListRequest{
-  // optional parameter, will return all events if no id is specified
-  int32 eventId = 1;
-}
-
-message GetEventListReply{
-  repeated EventListMsgElement events = 1;
-}
-
-message EventListMsgElement{
-  string name = 1;
-  string path = 2;
-  int32 event = 3;
-  int32 news = 4;
-  int32 kino = 5;
-  int32 file = 6;
-  string title = 7;
-  string description = 8;
-  string locality = 9;
-  string  link = 10;
-  google.protobuf.Timestamp start = 11;
-  google.protobuf.Timestamp end = 12;
-  int32 ticket_group = 13;
-}
-
 
 message GetKinoRequest{
   int32 lastId = 1;
