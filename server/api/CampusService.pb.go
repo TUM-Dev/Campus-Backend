@@ -999,7 +999,7 @@ func (x *Room) GetName() string {
 	return ""
 }
 
-type NewsSourceArray struct {
+type NewsSourceReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1007,8 +1007,8 @@ type NewsSourceArray struct {
 	Sources []*NewsSource `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
 }
 
-func (x *NewsSourceArray) Reset() {
-	*x = NewsSourceArray{}
+func (x *NewsSourceReply) Reset() {
+	*x = NewsSourceReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_CampusService_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1016,13 +1016,13 @@ func (x *NewsSourceArray) Reset() {
 	}
 }
 
-func (x *NewsSourceArray) String() string {
+func (x *NewsSourceReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*NewsSourceArray) ProtoMessage() {}
+func (*NewsSourceReply) ProtoMessage() {}
 
-func (x *NewsSourceArray) ProtoReflect() protoreflect.Message {
+func (x *NewsSourceReply) ProtoReflect() protoreflect.Message {
 	mi := &file_CampusService_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1034,12 +1034,12 @@ func (x *NewsSourceArray) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NewsSourceArray.ProtoReflect.Descriptor instead.
-func (*NewsSourceArray) Descriptor() ([]byte, []int) {
+// Deprecated: Use NewsSourceReply.ProtoReflect.Descriptor instead.
+func (*NewsSourceReply) Descriptor() ([]byte, []int) {
 	return file_CampusService_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *NewsSourceArray) GetSources() []*NewsSource {
+func (x *NewsSourceReply) GetSources() []*NewsSource {
 	if x != nil {
 		return x.Sources
 	}
@@ -4857,7 +4857,7 @@ var file_CampusService_proto_rawDesc = []byte{
 	0x6d, 0x70, 0x75, 0x73, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x63, 0x61, 0x6d, 0x70,
 	0x75, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x3c, 0x0a, 0x0f, 0x4e, 0x65, 0x77, 0x73, 0x53, 0x6f,
-	0x75, 0x72, 0x63, 0x65, 0x41, 0x72, 0x72, 0x61, 0x79, 0x12, 0x29, 0x0a, 0x07, 0x73, 0x6f, 0x75,
+	0x75, 0x72, 0x63, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x29, 0x0a, 0x07, 0x73, 0x6f, 0x75,
 	0x72, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x61, 0x70, 0x69,
 	0x2e, 0x4e, 0x65, 0x77, 0x73, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x07, 0x73, 0x6f, 0x75,
 	0x72, 0x63, 0x65, 0x73, 0x22, 0x4e, 0x0a, 0x0a, 0x4e, 0x65, 0x77, 0x73, 0x53, 0x6f, 0x75, 0x72,
@@ -5273,7 +5273,7 @@ var file_CampusService_proto_rawDesc = []byte{
 	0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a,
 	0x14, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x4e, 0x65, 0x77, 0x73, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65,
-	0x41, 0x72, 0x72, 0x61, 0x79, 0x22, 0x1e, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x18, 0x62, 0x07, 0x73,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x1e, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x18, 0x62, 0x07, 0x73,
 	0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x0d, 0x2f, 0x6e, 0x65, 0x77, 0x73, 0x2f, 0x73, 0x6f,
 	0x75, 0x72, 0x63, 0x65, 0x73, 0x12, 0x68, 0x0a, 0x0b, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x52,
 	0x6f, 0x6f, 0x6d, 0x73, 0x12, 0x17, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x61, 0x72, 0x63,
@@ -5549,7 +5549,7 @@ var file_CampusService_proto_goTypes = []interface{}{
 	(*SearchRoomsRequest)(nil),                     // 15: api.SearchRoomsRequest
 	(*SearchRoomsReply)(nil),                       // 16: api.SearchRoomsReply
 	(*Room)(nil),                                   // 17: api.Room
-	(*NewsSourceArray)(nil),                        // 18: api.NewsSourceArray
+	(*NewsSourceReply)(nil),                        // 18: api.NewsSourceReply
 	(*NewsSource)(nil),                             // 19: api.NewsSource
 	(*GetTopNewsReply)(nil),                        // 20: api.GetTopNewsReply
 	(*CafeteriaRatingRequest)(nil),                 // 21: api.CafeteriaRatingRequest
@@ -5617,7 +5617,7 @@ var file_CampusService_proto_depIdxs = []int32{
 	72, // 5: api.GetRoomMapsReply.maps:type_name -> api.GetRoomMapsReply.Map
 	73, // 6: api.GetLocationsReply.locations:type_name -> api.GetLocationsReply.Location
 	17, // 7: api.SearchRoomsReply.rooms:type_name -> api.Room
-	19, // 8: api.NewsSourceArray.sources:type_name -> api.NewsSource
+	19, // 8: api.NewsSourceReply.sources:type_name -> api.NewsSource
 	74, // 9: api.GetTopNewsReply.created:type_name -> google.protobuf.Timestamp
 	74, // 10: api.GetTopNewsReply.from:type_name -> google.protobuf.Timestamp
 	74, // 11: api.GetTopNewsReply.to:type_name -> google.protobuf.Timestamp
@@ -5688,7 +5688,7 @@ var file_CampusService_proto_depIdxs = []int32{
 	1,  // 76: api.Campus.RegisterDevice:input_type -> api.RegisterDeviceRequest
 	3,  // 77: api.Campus.RemoveDevice:input_type -> api.RemoveDeviceRequest
 	20, // 78: api.Campus.GetTopNews:output_type -> api.GetTopNewsReply
-	18, // 79: api.Campus.GetNewsSources:output_type -> api.NewsSourceArray
+	18, // 79: api.Campus.GetNewsSources:output_type -> api.NewsSourceReply
 	16, // 80: api.Campus.SearchRooms:output_type -> api.SearchRoomsReply
 	14, // 81: api.Campus.GetLocations:output_type -> api.GetLocationsReply
 	12, // 82: api.Campus.GetRoomMaps:output_type -> api.GetRoomMapsReply
@@ -5941,7 +5941,7 @@ func file_CampusService_proto_init() {
 			}
 		}
 		file_CampusService_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NewsSourceArray); i {
+			switch v := v.(*NewsSourceReply); i {
 			case 0:
 				return &v.state
 			case 1:

@@ -63,7 +63,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
-	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error)
+	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(ctx context.Context, in *GetLocationsRequest, opts ...grpc.CallOption) (*GetLocationsReply, error)
@@ -122,8 +122,8 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts .
 	return out, nil
 }
 
-func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceArray, error) {
-	out := new(NewsSourceArray)
+func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error) {
+	out := new(NewsSourceReply)
 	err := c.cc.Invoke(ctx, Campus_GetNewsSources_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -442,7 +442,7 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 // for forward compatibility
 type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
-	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error)
+	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(context.Context, *GetLocationsRequest) (*GetLocationsReply, error)
@@ -492,7 +492,7 @@ type UnimplementedCampusServer struct {
 func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
 }
-func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceArray, error) {
+func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
 }
 func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
