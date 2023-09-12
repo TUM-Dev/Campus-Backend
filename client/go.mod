@@ -1,6 +1,6 @@
 module github.com/TUM-Dev/Campus-Backend/client
 
-go 1.18
+go 1.21
 
 require (
 	github.com/TUM-Dev/Campus-Backend/api v0.0.0-20221212204029-68b05b451617
