@@ -32,5 +32,10 @@ COPY --from=builder /etc/passwd /etc/passwd
 # Use an unprivileged user
 USER appuser
 
+# metadata
+EXPOSE 50051
+HEALTHCHECK  --interval=5m --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health && exit 0 || exit 1
+
 # Run the main binary
 CMD ["/backend"]
