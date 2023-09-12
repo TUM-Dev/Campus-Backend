@@ -34,33 +34,29 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
-
-			if err != nil {
+			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
 				return err
 			}
 
 			var priorities []model.IOSSchedulingPriority
 
-			unmarshalErr := json.Unmarshal(iosInitialPrioritiesFile, &priorities)
-
-			if unmarshalErr != nil {
-				log.Info(unmarshalErr.Error())
-				return unmarshalErr
-			}
-
-			if err := tx.Create(&priorities).Error; err != nil {
-				log.Info(err.Error())
+			if err := json.Unmarshal(iosInitialPrioritiesFile, &priorities); err != nil {
+				log.WithError(err).Error("could not unmarshal json")
 				return err
 			}
 
-			err = tx.Create(&model.Crontab{
+			if err := tx.Create(&priorities).Error; err != nil {
+				log.WithError(err).Error("could not save priority's")
+				return err
+			}
+
+			err := tx.Create(&model.Crontab{
 				Interval: 60,
 				Type:     null.String{NullString: sql.NullString{String: cron.IOSNotifications, Valid: true}},
 			}).Error
 
 			if err != nil {
-				log.Error(err.Error())
+				log.WithError(err).Error("could not create crontab")
 				return err
 			}
 
