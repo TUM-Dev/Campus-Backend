@@ -34,7 +34,6 @@ const (
 	ChatType       = "chat"
 	KinoType       = "kino"
 	RoomfinderType = "roomfinder"
-	TicketSaleType = "ticketsale"
 	AlarmType      = "alarm" */
 )
 
@@ -113,8 +112,6 @@ func (c *CronService) Run() error {
 					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
 					case RoomfinderType:
-						g.Go(func() error { return c.roomFinderCron() })
-					case TicketSaleType:
 						g.Go(func() error { return c.roomFinderCron() })
 					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })

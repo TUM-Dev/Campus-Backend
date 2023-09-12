@@ -45,7 +45,6 @@ const (
 	Campus_GetOpeningTimes_FullMethodName               = "/api.Campus/GetOpeningTimes"
 	Campus_GetUpdateNote_FullMethodName                 = "/api.Campus/GetUpdateNote"
 	Campus_GetStudyRoomList_FullMethodName              = "/api.Campus/GetStudyRoomList"
-	Campus_GetEventList_FullMethodName                  = "/api.Campus/GetEventList"
 	Campus_GetKino_FullMethodName                       = "/api.Campus/GetKino"
 	Campus_SendFeedback_FullMethodName                  = "/api.Campus/SendFeedback"
 	Campus_SendFeedbackImage_FullMethodName             = "/api.Campus/SendFeedbackImage"
@@ -90,7 +89,6 @@ type CampusClient interface {
 	GetOpeningTimes(ctx context.Context, in *GetOpeningTimesRequest, opts ...grpc.CallOption) (*GetOpeningTimesReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
-	GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error)
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
 	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
@@ -340,15 +338,6 @@ func (c *campusClient) GetStudyRoomList(ctx context.Context, in *emptypb.Empty, 
 	return out, nil
 }
 
-func (c *campusClient) GetEventList(ctx context.Context, in *GetEventListRequest, opts ...grpc.CallOption) (*GetEventListReply, error) {
-	out := new(GetEventListReply)
-	err := c.cc.Invoke(ctx, Campus_GetEventList_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error) {
 	out := new(GetKinoReply)
 	err := c.cc.Invoke(ctx, Campus_GetKino_FullMethodName, in, out, opts...)
@@ -479,7 +468,6 @@ type CampusServer interface {
 	GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
-	GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error)
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
 	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error)
 	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error)
@@ -575,9 +563,6 @@ func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRe
 }
 func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStudyRoomList not implemented")
-}
-func (UnimplementedCampusServer) GetEventList(context.Context, *GetEventListRequest) (*GetEventListReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEventList not implemented")
 }
 func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKino not implemented")
@@ -1075,24 +1060,6 @@ func _Campus_GetStudyRoomList_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetEventList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetEventListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetEventList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetEventList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetEventList(ctx, req.(*GetEventListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetKino_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetKinoRequest)
 	if err := dec(in); err != nil {
@@ -1397,10 +1364,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStudyRoomList",
 			Handler:    _Campus_GetStudyRoomList_Handler,
-		},
-		{
-			MethodName: "GetEventList",
-			Handler:    _Campus_GetEventList_Handler,
 		},
 		{
 			MethodName: "GetKino",
