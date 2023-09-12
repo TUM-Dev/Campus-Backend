@@ -7,7 +7,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"image"
 	"image/jpeg"
 	"math"

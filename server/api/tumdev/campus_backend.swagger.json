@@ -2,7 +2,7 @@
 "basePath": "/v1",
   "swagger": "2.0",
   "info": {
-    "title": "CampusService.proto",
+    "title": "tumdev/campus_backend.proto",
     "version": "version not set"
   },
   "tags": [

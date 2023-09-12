@@ -14,6 +14,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code
+COPY api/tumdev/campus_backend.swagger.json ./swagger/swagger.json
 COPY . .
 
 # bundle version into binary if specified in build-args, dev otherwise.

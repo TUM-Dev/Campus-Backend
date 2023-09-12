@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: CampusService.proto
+// source: tumdev/campus_backend.proto
 
 package api
 
@@ -1411,5 +1411,5 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "CampusService.proto",
+	Metadata: "tumdev/campus_backend.proto",
 }
