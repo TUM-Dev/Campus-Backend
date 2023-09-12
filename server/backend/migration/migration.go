@@ -42,6 +42,7 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20221119131300(),
 		m.migrate20221210000000(),
 		m.migrate20230904000000(),
+		m.migrate20230825000000(),
 	})
 	err := mig.Migrate()
 	return err
