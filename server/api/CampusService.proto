@@ -19,7 +19,7 @@ service Campus {
     };
   }
 
-  rpc GetNewsSources (google.protobuf.Empty) returns (NewsSourceArray) {
+  rpc GetNewsSources (google.protobuf.Empty) returns (NewsSourceReply) {
     option (google.api.http) = {
       get: "/news/sources",
       response_body: "sources"
@@ -376,7 +376,7 @@ message Room {
   string name = 9;
 }
 
-message NewsSourceArray {
+message NewsSourceReply {
   repeated NewsSource sources = 1;
 }
 

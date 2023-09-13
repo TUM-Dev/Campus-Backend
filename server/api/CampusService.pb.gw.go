@@ -3053,7 +3053,7 @@ type response_Campus_GetNewsSources_0 struct {
 }
 
 func (m response_Campus_GetNewsSources_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*NewsSourceArray)
+	response := m.Message.(*NewsSourceReply)
 	return response.Sources
 }
 
