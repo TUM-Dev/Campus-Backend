@@ -10,12 +10,12 @@ func (c *CronService) alarmCron() error {
 	return notifyAllUsers(c.db, sendGCMNotification)
 }
 
-func sendGCMNotification(*[]model.Device) error {
+func sendGCMNotification(*[]model.Devices) error {
 	log.Trace("sendGCMNotification")
 	return nil
 }
 
-func notifyAllUsers(db *gorm.DB, callbacks ...func(*[]model.Device) error) error {
+func notifyAllUsers(db *gorm.DB, callbacks ...func(*[]model.Devices) error) error {
 	var pendingNotifications []model.Notification
 	if err := db.
 		Joins("notification_confirmation").
@@ -27,7 +27,7 @@ func notifyAllUsers(db *gorm.DB, callbacks ...func(*[]model.Device) error) error
 	}
 	for _, pending := range pendingNotifications {
 		// Get a few targets
-		var targets []model.Device
+		var targets []model.Devices
 		if err := db.
 			Distinct("device").
 			Where("notification = ?", pending.Notification).
