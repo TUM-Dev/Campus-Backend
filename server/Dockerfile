@@ -30,6 +30,11 @@ COPY --from=builder /backend /backend
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 
+# make sure that /Storage is mounted with the correct access permissions even in docker-compose
+RUN mkdir /Storage
+RUN chown appuser /Storage
+VOLUME /Storage
+
 # Use an unprivileged user
 USER appuser
 
