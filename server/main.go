@@ -84,27 +84,27 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("failed to listen")
 	}
-	m := cmux.New(listener)
-	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
-	httpListener := m.Match(cmux.HTTP1Fast())
+	mux := cmux.New(listener)
+	grpcListener := mux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := mux.Match(cmux.HTTP1Fast())
 
 	// HTTP Stuff
-	mux := http.NewServeMux()
-	httpServer := &http.Server{Handler: mux}
-	mux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
+	httpMux := http.NewServeMux()
+	httpServer := &http.Server{Handler: httpMux}
+	httpMux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("Hello, world!"))
 	})
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	httpMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("healthy"))
 	})
 
 	static, _ := fs.Sub(swagfs, "swagger")
-	mux.Handle("/", http.FileServer(http.FS(static)))
+	httpMux.Handle("/", http.FileServer(http.FS(static)))
 
 	// Main GRPC Server
-	grpcS := grpc.NewServer()
-	pb.RegisterCampusServer(grpcS, campusService)
+	grpcServer := grpc.NewServer()
+	pb.RegisterCampusServer(grpcServer, campusService)
 
 	// GRPC Gateway for HTTP REST -> GRPC
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
@@ -118,23 +118,21 @@ func main() {
 		}),
 		runtime.WithErrorHandler(errorHandler),
 	)
-	ctx := context.Background()
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUserAgent("internal"),
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
-	if err := pb.RegisterCampusHandlerFromEndpoint(ctx, grpcGatewayMux, httpPort, opts); err != nil {
+	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
 		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
 	}
-	restPrefix := "/v1"
-	mux.Handle("/v1/", http.StripPrefix(restPrefix, grpcGatewayMux))
+	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
 	// Start each server in its own go routine and logs any errors
 	g := errgroup.Group{}
-	g.Go(func() error { return grpcS.Serve(grpcListener) })
+	g.Go(func() error { return grpcServer.Serve(grpcListener) })
 	g.Go(func() error { return httpServer.Serve(httpListener) })
-	g.Go(func() error { return m.Serve() })
+	g.Go(func() error { return mux.Serve() })
 	g.Go(func() error { return cronService.Run() })                // Setup cron jobs
 	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
