@@ -2,7 +2,7 @@ package backend
 
 import (
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"sync"
 	"time"
 

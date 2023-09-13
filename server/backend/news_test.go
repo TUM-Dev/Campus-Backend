@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/stretchr/testify/require"

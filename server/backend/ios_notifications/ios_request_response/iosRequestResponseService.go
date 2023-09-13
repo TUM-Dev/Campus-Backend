@@ -5,7 +5,7 @@ package ios_request_response
 
 import (
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"

@@ -2,7 +2,7 @@ package backend
 
 import (
 	"errors"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 )
 
 func ValidateRegisterDevice(request *pb.RegisterDeviceRequest) error {

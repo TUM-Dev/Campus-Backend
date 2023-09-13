@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"crypto/x509"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
