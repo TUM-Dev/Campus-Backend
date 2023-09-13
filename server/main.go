@@ -45,17 +45,6 @@ func main() {
 	setupTelemetry()
 	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
 
-	// Connect to DB
-	var conn gorm.Dialector
-	shouldAutoMigrate := false
-	dbHost := os.Getenv("DB_DSN")
-	if dbHost != "" {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
-	} else {
-		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	}
-
 	// initializing connection to InfluxDB
 	err := backend.ConnectToInfluxDB()
 	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
@@ -66,15 +55,23 @@ func main() {
 		log.WithError(err).Error("InfluxDB connection failed - health check failed")
 	}
 
+	// Connect to DB
+	var conn gorm.Dialector
+	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
+	} else {
+		log.Info("Connecting to dsn")
+		conn = mysql.Open(dbHost)
+	}
+
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
 		log.WithError(err).Panic("failed to connect database")
 	}
 
 	// Migrate the schema
-	tumMigrator := migration.New(db, shouldAutoMigrate)
-	err = tumMigrator.Migrate()
-	if err != nil {
+	// currently not activated as
+	if err := migration.New(db, false).Migrate(); err != nil {
 		log.WithError(err).Fatal("Failed to migrate database")
 	}
 
