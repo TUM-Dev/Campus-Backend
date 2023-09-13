@@ -245,8 +245,7 @@ func getImageToBytes(path string) []byte {
 	}
 
 	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
+		if err := file.Close(); err != nil {
 			log.WithError(err).Error("could not close file")
 		}
 	}(file)
@@ -291,8 +290,7 @@ func storeImage(path string, i []byte) (string, error) {
 		log.WithError(errFile).Error("Unable to create the new testfile")
 	}
 	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
+		if err := out.Close(); err != nil {
 			log.WithError(err).Error("File was not closed successfully")
 		}
 	}(out)

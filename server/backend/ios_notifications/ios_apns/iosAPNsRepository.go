@@ -100,13 +100,11 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error(err)
+		log.WithError(err).Error("Could not send notification")
 		return nil, ErrCouldNotSendNotification
 	}
-
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+		if err := Body.Close(); err != nil {
 			log.WithError(err).Error("Could not close body")
 		}
 	}(resp.Body)

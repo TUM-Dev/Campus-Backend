@@ -28,8 +28,7 @@ func main() {
 		log.WithError(err).Fatal("did not connect")
 	}
 	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
+		if err := conn.Close(); err != nil {
 			log.WithError(err).Error("did not close connection")
 		}
 	}(conn)

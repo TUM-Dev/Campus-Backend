@@ -249,15 +249,12 @@ func getImageToBytes(path string) []byte {
 		return make([]byte, 0)
 	}
 	file, err := os.Open(path)
-
 	if err != nil {
 		log.WithError(err).Error("while opening image file with path: ", path)
 		return nil
 	}
-
 	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
+		if err := file.Close(); err != nil {
 			log.WithError(err).Error("Unable to close the file for storing the image.")
 		}
 	}(file)
@@ -267,8 +264,7 @@ func getImageToBytes(path string) []byte {
 	imageAsBytes := make([]byte, size)
 
 	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(imageAsBytes)
-	if err != nil {
+	if _, err = buffer.Read(imageAsBytes); err != nil {
 		log.WithError(err).Error("while trying to read image as bytes")
 		return nil
 	}
@@ -376,8 +372,7 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		Image:       resPath,
 	}
 
-	err := s.db.Model(&model.CafeteriaRating{}).Create(&rating).Error
-	if err != nil {
+	if err := s.db.Model(&model.CafeteriaRating{}).Create(&rating).Error; err != nil {
 		log.WithError(err).Error("Error occurred while creating the new cafeteria rating.")
 		return nil, status.Errorf(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
 
@@ -400,12 +395,11 @@ func imageWrapper(image []byte, path string, id int32) string {
 }
 
 // storeImage
-// stores an image and returns teh path to this image.
+// stores an image and returns the path to this image.
 // if needed, a new directory will be created and the path is extended until it is unique
 func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			log.WithError(err).WithField("path", path).Error("Directory could not be created successfully")
 			return "", nil
 		}
@@ -430,8 +424,7 @@ func storeImage(path string, i []byte) (string, error) {
 		return imgPath, errFile
 	}
 	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
+		if err := out.Close(); err != nil {
 			log.WithError(err).Error("while closing the file.")
 		}
 	}(out)
@@ -473,8 +466,7 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 		Image:       resPath,
 	}
 
-	err := s.db.Model(&model.DishRating{}).Create(&rating).Error
-	if err != nil {
+	if err := s.db.Model(&model.DishRating{}).Create(&rating).Error; err != nil {
 		log.WithError(err).Error("while creating a new dish rating.")
 		return nil, status.Errorf(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}

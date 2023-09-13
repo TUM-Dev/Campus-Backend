@@ -219,9 +219,7 @@ func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(errorResp.StatusCode)
 
-	err = json.NewEncoder(w).Encode(errorResp)
-
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(errorResp); err != nil {
 		log.WithError(err).Error("Marshal error response failed")
 		return
 	}
