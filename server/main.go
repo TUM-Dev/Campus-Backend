@@ -53,8 +53,7 @@ func main() {
 		log.Info("Connecting to dsn")
 		conn = mysql.Open(dbHost)
 	} else {
-		log.Error("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-		os.Exit(-1)
+		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
 	}
 
 	// initializing connection to InfluxDB
@@ -69,7 +68,7 @@ func main() {
 
 	db, err := gorm.Open(conn, &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.WithError(err).Panic("failed to connect database")
 	}
 
 	// Migrate the schema
@@ -77,7 +76,6 @@ func main() {
 	err = tumMigrator.Migrate()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to migrate database")
-		return
 	}
 
 	// Create any other background services (these shouldn't do any long-running work here)
@@ -87,7 +85,7 @@ func main() {
 	// Listen to our configured ports
 	listener, err := net.Listen("tcp", httpPort)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.WithError(err).Fatal("failed to listen")
 	}
 	m := cmux.New(listener)
 	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
@@ -130,7 +128,7 @@ func main() {
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(ctx, grpcGatewayMux, httpPort, opts); err != nil {
-		panic(err)
+		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
 	}
 	restPrefix := "/v1"
 	mux.Handle("/v1/", http.StripPrefix(restPrefix, grpcGatewayMux))
@@ -144,9 +142,8 @@ func main() {
 	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
 	log.Info("running server")
-	err = g.Wait()
-	if err != nil {
-		log.Error(err)
+	if err := g.Wait(); err != nil {
+		log.WithError(err).Error("encountered issue while running the server")
 	}
 }
 
@@ -172,7 +169,7 @@ func setupTelemetry() {
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}
-		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel}))
+		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel, log.WarnLevel}))
 	} else {
 		log.Info("continuing without sentry")
 	}

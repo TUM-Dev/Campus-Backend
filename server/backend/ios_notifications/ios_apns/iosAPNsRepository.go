@@ -113,7 +113,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 	var response model.IOSRemoteNotificationResponse
 	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
-		log.Error(err)
+		log.WithError(err).Error("Could not decode APNs response")
 		return nil, ErrCouldNotDecodeAPNsResponse
 	}
 
@@ -137,15 +137,13 @@ func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
 
 func NewCronRepository(db *gorm.DB) (*Repository, error) {
 	if err := ValidateRequirementsForIOSNotificationsService(); err != nil {
-		log.Warn(err)
-
+		log.WithError(err).Warn("Failed to validate requirements for ios notifications service")
 		return nil, err
 	}
 
 	token, err := ios_apns_jwt.NewToken()
-
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("Could not create APNs token")
 	}
 
 	return NewRepository(db, token), nil

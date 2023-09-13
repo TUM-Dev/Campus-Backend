@@ -76,19 +76,19 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	apiGrades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
-		log.Error("Could not fetch grades: ", err)
+		log.WithError(err).Error("Could not fetch grades")
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
 	if err != nil {
-		log.Error("Could not get old grades: ", err)
+		log.WithError(err).Error("Could not get old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
 	if err != nil {
-		log.Error("Could not decrypt old grades: ", err)
+		log.WithError(err).Error("Could not decrypt old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
@@ -104,7 +104,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	err = service.Repository.DeleteEncryptedGrades(requestLog.DeviceID)
 
 	if err != nil {
-		log.Error("Could not delete old grades: ", err)
+		log.WithError(err).Error("Could not delete old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
@@ -129,7 +129,7 @@ func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) 
 	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
 
 	if err != nil {
-		log.Error("Could not delete request logs: ", err)
+		log.WithError(err).Error("Could not delete request logs")
 	}
 }
 
@@ -139,7 +139,7 @@ func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]mode
 		err := encryptedGrade.Decrypt(campusToken)
 
 		if err != nil {
-			log.Error("Could not decrypt grade: ", err)
+			log.WithError(err).Error("Could not decrypt grade")
 			return nil, status.Error(codes.Internal, "Could not decrypt grade")
 		}
 
@@ -179,13 +179,13 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 		err := encryptedGrade.Encrypt(campusToken)
 
 		if err != nil {
-			log.Error("Could not encrypt grade: ", err)
+			log.WithError(err).Error("Could not encrypt grade")
 		}
 
 		err = service.Repository.SaveEncryptedGrade(&encryptedGrade)
 
 		if err != nil {
-			log.Error("Could not save grade: ", err)
+			log.WithError(err).Error("Could not save grade")
 		}
 	}
 }
@@ -210,12 +210,12 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *
 		Alert(alertTitle, "", alertBody).
 		Encrypt(device.PublicKey)
 
-	log.WithField("DeviceID", device.DeviceID).Infof("Sending push notification")
+	log.WithField("DeviceID", device.DeviceID).Info("Sending push notification")
 
 	_, err := apns.SendAlertNotification(notificationPayload)
 
 	if err != nil {
-		log.Error("Could not send notification: ", err)
+		log.WithField("DeviceID", device.DeviceID).WithError(err).Error("Could not send notification")
 	}
 }
 

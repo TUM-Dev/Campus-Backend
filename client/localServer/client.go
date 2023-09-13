@@ -48,7 +48,7 @@ func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
 	})
 
 	if err != nil {
-		log.Error(err)
+		log.WithError(err).Error("Canteen HeadCount data request failed.")
 	} else {
 		log.WithField("res", res).Info("Canteen HeadCount data request successful.")
 	}
