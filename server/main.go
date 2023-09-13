@@ -55,25 +55,7 @@ func main() {
 		log.WithError(err).Error("InfluxDB connection failed - health check failed")
 	}
 
-	// Connect to DB
-	var conn gorm.Dialector
-	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
-		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	} else {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
-	}
-
-	db, err := gorm.Open(conn, &gorm.Config{})
-	if err != nil {
-		log.WithError(err).Panic("failed to connect database")
-	}
-
-	// Migrate the schema
-	// currently not activated as
-	if err := migration.New(db, false).Migrate(); err != nil {
-		log.WithError(err).Fatal("Failed to migrate database")
-	}
+	db := setupDB()
 
 	// Create any other background services (these shouldn't do any long-running work here)
 	cronService := cron.New(db)
@@ -140,6 +122,30 @@ func main() {
 	if err := g.Wait(); err != nil {
 		log.WithError(err).Error("encountered issue while running the server")
 	}
+}
+
+// setupDB connects to the database and migrates it if necessary
+func setupDB() *gorm.DB {
+	// Connect to DB
+	var conn gorm.Dialector
+	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
+	} else {
+		log.Info("Connecting to dsn")
+		conn = mysql.Open(dbHost)
+	}
+
+	db, err := gorm.Open(conn, &gorm.Config{})
+	if err != nil {
+		log.WithError(err).Panic("failed to connect database")
+	}
+
+	// Migrate the schema
+	// currently not activated as
+	if err := migration.New(db, false).Migrate(); err != nil {
+		log.WithError(err).Fatal("Failed to migrate database")
+	}
+	return db
 }
 
 // setupTelemetry initializes our telemetry stack
