@@ -14,6 +14,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code
+COPY api/tumdev/campus_backend.swagger.json ./swagger/swagger.json
 COPY . .
 
 # bundle version into binary if specified in build-args, dev otherwise.
@@ -28,6 +29,11 @@ COPY --from=builder /backend /backend
 # Import from builder - needed for running
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
+
+# make sure that /Storage is mounted with the correct access permissions even in docker-compose
+RUN mkdir /Storage
+RUN chown appuser /Storage
+VOLUME /Storage
 
 # Use an unprivileged user
 USER appuser
