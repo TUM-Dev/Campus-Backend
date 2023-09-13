@@ -56,7 +56,6 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 	}
 
 	token, err := ios_apns_jwt.NewToken()
-
 	if err != nil {
 		log.WithError(err).Fatal("failed to create new token")
 	}

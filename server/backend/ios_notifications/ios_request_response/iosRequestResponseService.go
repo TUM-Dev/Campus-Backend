@@ -177,13 +177,11 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 		}
 
 		err := encryptedGrade.Encrypt(campusToken)
-
 		if err != nil {
 			log.WithError(err).Error("Could not encrypt grade")
 		}
 
 		err = service.Repository.SaveEncryptedGrade(&encryptedGrade)
-
 		if err != nil {
 			log.WithError(err).Error("Could not save grade")
 		}
@@ -213,7 +211,6 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *
 	log.WithField("DeviceID", device.DeviceID).Info("Sending push notification")
 
 	_, err := apns.SendAlertNotification(notificationPayload)
-
 	if err != nil {
 		log.WithField("DeviceID", device.DeviceID).WithError(err).Error("Could not send notification")
 	}
