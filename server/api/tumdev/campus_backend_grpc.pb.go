@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Campus_GetTopNews_FullMethodName                    = "/api.Campus/GetTopNews"
 	Campus_GetNewsSources_FullMethodName                = "/api.Campus/GetNewsSources"
+	Campus_GetNews_FullMethodName                       = "/api.Campus/GetNews"
 	Campus_SearchRooms_FullMethodName                   = "/api.Campus/SearchRooms"
 	Campus_GetLocations_FullMethodName                  = "/api.Campus/GetLocations"
 	Campus_GetRoomMaps_FullMethodName                   = "/api.Campus/GetRoomMaps"
@@ -65,6 +66,7 @@ const (
 type CampusClient interface {
 	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
 	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error)
+	GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(ctx context.Context, in *GetLocationsRequest, opts ...grpc.CallOption) (*GetLocationsReply, error)
@@ -126,6 +128,15 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts .
 func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error) {
 	out := new(NewsSourceReply)
 	err := c.cc.Invoke(ctx, Campus_GetNewsSources_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error) {
+	out := new(GetNewsReply)
+	err := c.cc.Invoke(ctx, Campus_GetNews_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -444,6 +455,7 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 type CampusServer interface {
 	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
 	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error)
+	GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// a location is a campus location/building, e.g. "Garching Forschungszentrum"
 	GetLocations(context.Context, *GetLocationsRequest) (*GetLocationsReply, error)
@@ -495,6 +507,9 @@ func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*G
 }
 func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
+}
+func (UnimplementedCampusServer) GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNews not implemented")
 }
 func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
@@ -643,6 +658,24 @@ func _Campus_GetNewsSources_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).GetNewsSources(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetNews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetNews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetNews(ctx, req.(*GetNewsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1273,6 +1306,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetNewsSources",
 			Handler:    _Campus_GetNewsSources_Handler,
+		},
+		{
+			MethodName: "GetNews",
+			Handler:    _Campus_GetNews_Handler,
 		},
 		{
 			MethodName: "SearchRooms",

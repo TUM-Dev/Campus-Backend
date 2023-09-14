@@ -34,3 +34,30 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (ne
 	}
 	return &pb.NewsSourceReply{Sources: resp}, nil
 }
+
+func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (newsSources *pb.GetNewsReply, err error) {
+	if err = s.checkDevice(ctx); err != nil {
+		return
+	}
+
+	var sources []model.News
+	if err := s.db.Joins("Files").Find(&sources).Error; err != nil {
+		log.WithError(err).Error("could not find news item")
+		return nil, status.Error(codes.Internal, "could not GetNews")
+	}
+
+	resp := make([]*pb.NewsItem, len(sources))
+	for i, item := range sources {
+		log.WithField("title", item.Title).Trace("sending news")
+		resp[i] = &pb.NewsItem{
+			Id:       item.News,
+			Title:    item.Title,
+			Text:     item.Description,
+			Link:     item.Link,
+			ImageUrl: item.Image,
+			Source:   "",
+			Created:  nil,
+		}
+	}
+	return &pb.GetNewsReply{News: resp}, nil
+}
