@@ -5,6 +5,17 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
+      - name: run tests
+        run: go test -v ./...
+        working-directory: ./server
   build:
     runs-on: ubuntu-latest
     steps:
