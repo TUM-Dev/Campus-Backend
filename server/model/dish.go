@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+
 	"github.com/guregu/null"
 )
 

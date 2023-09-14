@@ -2,11 +2,12 @@ package model
 
 import (
 	"database/sql"
-	"gorm.io/gorm"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/guregu/null"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
