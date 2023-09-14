@@ -45,18 +45,6 @@ func main() {
 	setupTelemetry()
 	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
 
-	// Connect to DB
-	var conn gorm.Dialector
-	shouldAutoMigrate := false
-	dbHost := os.Getenv("DB_DSN")
-	if dbHost != "" {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
-	} else {
-		log.Error("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-		os.Exit(-1)
-	}
-
 	// initializing connection to InfluxDB
 	err := backend.ConnectToInfluxDB()
 	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
@@ -67,18 +55,7 @@ func main() {
 		log.WithError(err).Error("InfluxDB connection failed - health check failed")
 	}
 
-	db, err := gorm.Open(conn, &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	// Migrate the schema
-	tumMigrator := migration.New(db, shouldAutoMigrate)
-	err = tumMigrator.Migrate()
-	if err != nil {
-		log.WithError(err).Fatal("Failed to migrate database")
-		return
-	}
+	db := setupDB()
 
 	// Create any other background services (these shouldn't do any long-running work here)
 	cronService := cron.New(db)
@@ -87,29 +64,29 @@ func main() {
 	// Listen to our configured ports
 	listener, err := net.Listen("tcp", httpPort)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.WithError(err).Fatal("failed to listen")
 	}
-	m := cmux.New(listener)
-	grpcListener := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
-	httpListener := m.Match(cmux.HTTP1Fast())
+	mux := cmux.New(listener)
+	grpcListener := mux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := mux.Match(cmux.HTTP1Fast())
 
 	// HTTP Stuff
-	mux := http.NewServeMux()
-	httpServer := &http.Server{Handler: mux}
-	mux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
+	httpMux := http.NewServeMux()
+	httpServer := &http.Server{Handler: httpMux}
+	httpMux.HandleFunc("/imprint", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("Hello, world!"))
 	})
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	httpMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("healthy"))
 	})
 
 	static, _ := fs.Sub(swagfs, "swagger")
-	mux.Handle("/", http.FileServer(http.FS(static)))
+	httpMux.Handle("/", http.FileServer(http.FS(static)))
 
 	// Main GRPC Server
-	grpcS := grpc.NewServer()
-	pb.RegisterCampusServer(grpcS, campusService)
+	grpcServer := grpc.NewServer()
+	pb.RegisterCampusServer(grpcServer, campusService)
 
 	// GRPC Gateway for HTTP REST -> GRPC
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
@@ -123,31 +100,52 @@ func main() {
 		}),
 		runtime.WithErrorHandler(errorHandler),
 	)
-	ctx := context.Background()
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUserAgent("internal"),
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
-	if err := pb.RegisterCampusHandlerFromEndpoint(ctx, grpcGatewayMux, httpPort, opts); err != nil {
-		panic(err)
+	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
 	}
-	restPrefix := "/v1"
-	mux.Handle("/v1/", http.StripPrefix(restPrefix, grpcGatewayMux))
+	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
 	// Start each server in its own go routine and logs any errors
 	g := errgroup.Group{}
-	g.Go(func() error { return grpcS.Serve(grpcListener) })
+	g.Go(func() error { return grpcServer.Serve(grpcListener) })
 	g.Go(func() error { return httpServer.Serve(httpListener) })
-	g.Go(func() error { return m.Serve() })
+	g.Go(func() error { return mux.Serve() })
 	g.Go(func() error { return cronService.Run() })                // Setup cron jobs
 	g.Go(func() error { return campusService.RunDeviceFlusher() }) // Setup campus service
 
 	log.Info("running server")
-	err = g.Wait()
-	if err != nil {
-		log.Error(err)
+	if err := g.Wait(); err != nil {
+		log.WithError(err).Error("encountered issue while running the server")
 	}
+}
+
+// setupDB connects to the database and migrates it if necessary
+func setupDB() *gorm.DB {
+	// Connect to DB
+	var conn gorm.Dialector
+	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
+	} else {
+		log.Info("Connecting to dsn")
+		conn = mysql.Open(dbHost)
+	}
+
+	db, err := gorm.Open(conn, &gorm.Config{})
+	if err != nil {
+		log.WithError(err).Panic("failed to connect database")
+	}
+
+	// Migrate the schema
+	// currently not activated as
+	if err := migration.New(db, false).Migrate(); err != nil {
+		log.WithError(err).Fatal("Failed to migrate database")
+	}
+	return db
 }
 
 // setupTelemetry initializes our telemetry stack
@@ -172,7 +170,7 @@ func setupTelemetry() {
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}
-		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel}))
+		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel, log.WarnLevel}))
 	} else {
 		log.Info("continuing without sentry")
 	}
@@ -221,9 +219,7 @@ func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(errorResp.StatusCode)
 
-	err = json.NewEncoder(w).Encode(errorResp)
-
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(errorResp); err != nil {
 		log.WithError(err).Error("Marshal error response failed")
 		return
 	}

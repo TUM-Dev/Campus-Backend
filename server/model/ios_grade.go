@@ -33,13 +33,11 @@ type customDate struct {
 
 func (c *customDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
-	err := d.DecodeElement(&v, &start)
-	if err != nil {
+	if err := d.DecodeElement(&v, &start); err != nil {
 		return err
 	}
 
 	t, err := time.Parse("2006-01-02", v)
-
 	if err != nil {
 		return err
 	}
@@ -66,13 +64,11 @@ type IOSEncryptedGrade struct {
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
 	encryptedTitle, err := ios_crypto.SymmetricEncrypt(e.LectureTitle, key)
-
 	if err != nil {
 		return err
 	}
 
 	encryptedGrade, err := ios_crypto.SymmetricEncrypt(e.Grade, key)
-
 	if err != nil {
 		return err
 	}
@@ -86,13 +82,11 @@ func (e *IOSEncryptedGrade) Encrypt(key string) error {
 
 func (e *IOSEncryptedGrade) Decrypt(key string) error {
 	decryptedTitle, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.LectureTitle), key)
-
 	if err != nil {
 		return err
 	}
 
 	decryptedGrade, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.Grade), key)
-
 	if err != nil {
 		return err
 	}
