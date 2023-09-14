@@ -40,7 +40,7 @@ func (m TumDBMigrator) Migrate() error {
 		IDColumnName:              gormigrate.DefaultOptions.TableName,
 		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
 		UseTransaction:            true,
-		ValidateUnknownMigrations: true,
+		ValidateUnknownMigrations: false,
 	}
 	mig := gormigrate.New(m.database, gormigrateOptions, []*gormigrate.Migration{
 		m.migrate20210709193000(),
@@ -48,8 +48,8 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20220713000000(),
 		m.migrate20221119131300(),
 		m.migrate20221210000000(),
-		m.migrate20230904000000(),
 		m.migrate20230825000000(),
+		m.migrate20230904000000(),
 	})
 	err := mig.Migrate()
 	return err
