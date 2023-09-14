@@ -8,6 +8,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/getsentry/sentry-go v0.24.1
 	github.com/go-gormigrate/gormigrate/v2 v2.1.1
+	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/guregu/null v4.0.0+incompatible
@@ -16,7 +17,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/mmcdole/gofeed v1.2.1
 	github.com/onrik/gorm-logrus v0.5.0
-	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.4

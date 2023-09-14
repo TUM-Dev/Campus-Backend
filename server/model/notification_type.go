@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/guregu/null"
-	uuid "github.com/satori/go.uuid"
 )
 
 var (
