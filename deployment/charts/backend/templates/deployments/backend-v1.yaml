@@ -40,6 +40,18 @@ spec:
         - name: logs
           emptyDir: { }
       containers:
+        - name: access-legacybackend
+          image: busybox:1.28
+          args: [/bin/sh, -c, 'tail -n+1 -F /var/log/access.log']
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
+        - name: error-legacybackend
+          image: busybox:1.28
+          args: [/bin/sh, -c, 'tail -n+1 -F /var/log/error.log']
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
         - name: tca-legacybackend
           image: ghcr.io/kordianbruck/tca-backend/tca-server:{{ $.Values.tag }}
           imagePullPolicy: Always
