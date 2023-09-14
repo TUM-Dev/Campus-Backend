@@ -27,3 +27,5 @@ jobs:
           version: v1.54
           working-directory: client
           args: --timeout=30m
+      - name: pre-commit
+        uses: pre-commit/action@v3.0.0
