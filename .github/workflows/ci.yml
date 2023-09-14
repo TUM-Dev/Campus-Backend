@@ -1,14 +1,12 @@
-name: CI
+name: lint
 on:
-  push:
-    branches: [ main ]
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  ci:
+  lint:
     name: lint
     runs-on: ubuntu-latest
     steps:
