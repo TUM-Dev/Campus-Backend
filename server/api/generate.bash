@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # needs buf: https://docs.buf.build/installation#github-releases
 BASEDIR=$(dirname "$0")

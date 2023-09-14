@@ -51,12 +51,12 @@ Follow the installation instructions detailed here: https://docs.buf.build/insta
 Alternatively, we have prepared this installation script:
 
 ```shell
-sh installBuf.sh
+sh installBuf.bash
 ```
 
 ## Generating
 
-Once you have installed all dependencies, run `./generate.sh` to update the client and server `Protocol Buffers` definitions.
+Once you have installed all dependencies, run `./generate.bash` to update the client and server `Protocol Buffers` definitions.
 
 # Common Issues
 
