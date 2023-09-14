@@ -3,6 +3,9 @@ package backend
 import (
 	"context"
 	"database/sql"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/stretchr/testify/require"
@@ -10,8 +13,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"testing"
-	"time"
 )
 
 type MovieSuite struct {

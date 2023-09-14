@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 )
 
 type MovieItems struct {
