@@ -37,10 +37,10 @@ func (m TumDBMigrator) Migrate() error {
 	log.Info("Using manual migration")
 	gormigrateOptions := &gormigrate.Options{
 		TableName:                 gormigrate.DefaultOptions.TableName,
-		IDColumnName:              gormigrate.DefaultOptions.TableName,
+		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
 		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
 		UseTransaction:            true,
-		ValidateUnknownMigrations: false,
+		ValidateUnknownMigrations: true,
 	}
 	mig := gormigrate.New(m.database, gormigrateOptions, []*gormigrate.Migration{
 		m.migrate20210709193000(),
