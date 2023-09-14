@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/guregu/null"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -25,7 +25,7 @@ type Files struct {
 	Path string `gorm:"column:path;type:text;size:16777215;" json:"path"`
 	//[ 3] downloads                                      int                  null: false  primary: false  isArray: false  auto: false  col: int             len: -1      default: [0]
 	Downloads  int32          `gorm:"column:downloads;type:int;default:0;" json:"downloads"`
-	URL        sql.NullString `gorm:"column:url;default:null;" json:"url"`                       // URL of the files source (if any)
+	URL        sql.NullString `gorm:"column:url;default:null;" json:"url"`                         // URL of the files source (if any)
 	Downloaded sql.NullBool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
 }
 

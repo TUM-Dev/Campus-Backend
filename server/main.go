@@ -5,8 +5,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"github.com/makasim/sentryhook"
 	"io/fs"
 	"net"
 	"net/http"
@@ -14,6 +12,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/env"
+	"github.com/makasim/sentryhook"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"

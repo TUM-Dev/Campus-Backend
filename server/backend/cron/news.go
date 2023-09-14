@@ -5,15 +5,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"regexp"
-	"strings"
-	"time"
 )
 
 const (

@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -13,8 +16,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"regexp"
-	"testing"
 )
 
 type NewsSuite struct {

@@ -2,8 +2,9 @@ package model
 
 import (
 	"encoding/xml"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 )
 
 // IOSGrades is a wrapper for a list of grades => XML stuff

@@ -5,12 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"os"
+
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 var (

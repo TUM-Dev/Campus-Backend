@@ -7,13 +7,14 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"image"
 	"image/jpeg"
 	"math"
 	"os"
 	"strings"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"

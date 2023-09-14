@@ -3,6 +3,8 @@ package backend
 import (
 	"context"
 	"errors"
+	"net"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
@@ -12,7 +14,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-	"net"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
