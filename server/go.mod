@@ -15,6 +15,7 @@ require (
 	github.com/makasim/sentryhook v0.4.2
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/mmcdole/gofeed v1.2.1
+	github.com/onrik/gorm-logrus v0.5.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/soheilhy/cmux v0.1.5
