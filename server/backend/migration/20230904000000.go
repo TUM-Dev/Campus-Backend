@@ -16,7 +16,7 @@ func (m TumDBMigrator) migrate20230904000000() *gormigrate.Migration {
 		ID: "20230904000000",
 		Migrate: func(tx *gorm.DB) error {
 			// remove "canteenHeadCount" in the enum
-			if err := tx.Where("type = ?", "ticketsales").Delete(&model.Crontab{}).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'ticketsales'").Error; err != nil {
 				return err
 			}
 			if err := SafeEnumRollback(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
