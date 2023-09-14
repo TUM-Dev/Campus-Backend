@@ -122,3 +122,18 @@ Take a look at the [`lauch.json`](.vscode/launch.json) file for more details.
 
 
 Please be respectful with its usage!
+
+## pre-commit
+
+To ensure that that common pitfalls which can be automated are not done, we recommend you to install `pre-commit`.
+You can do so via
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install pre-commit
+pre-commit install
+```
+
+Certain `pre-commit` hooks will now be run on every commit where you change specific files.
+If you want to run all files instead, run `pre-commit run -a`
