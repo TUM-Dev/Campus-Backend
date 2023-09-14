@@ -62,7 +62,7 @@ To start the server there are environment variables, as well as command line opt
 ```bash
 cd  server
 export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
-go run ./main.go [-MensaCron 0]
+go run ./main.go
 ```
 
 #### Environment Variables
@@ -71,10 +71,6 @@ There are a few environment variables available:
 
 * [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_backend`
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
-
-#### Command Line Arguments
-
-* [OPTIONAL] `-MensaCron 0`: Providing this argument deactivates the Mensa Rating cronjobs if not needed in a local setup. Be aware, this option will change in a future version ([#117](https://github.com/TUM-Dev/Campus-Backend/issues/117) and [#115](https://github.com/TUM-Dev/Campus-Backend/issues/115)).
 
 ## Running the Server (Docker)
 ```bash
