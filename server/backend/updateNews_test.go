@@ -3,11 +3,11 @@ package backend
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"regexp"
 	"testing"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
@@ -50,44 +50,38 @@ const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_note` WHERE `update_no
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url"}).
-			AddRow(source1().Source, source1().Title, source1().URL, source1().FilesID, source1().Hook, source1().Files.File, source1().Files.Name, source1().Files.Path, source1().Files.Downloads, source1().Files.URL, source1().Files.Downloaded).
-			AddRow(source2().Source, source2().Title, source2().URL, source2().FilesID, source2().Hook, source2().Files.File, source2().Files.Name, source2().Files.Path, source2().Files.Downloads, source2().Files.URL, source2().Files.Downloaded))
+		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}).
+			AddRow(1, "1.0.0", "Test Message"))
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetUpdateNote(metadata.NewIncomingContext(context.Background(), meta), &pb.GetUpdateNoteRequest{Version: 1})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.NewsSourceReply{
-		Sources: []*pb.NewsSource{
-			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, Icon: source1().Files.URL.String},
-			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, Icon: source2().Files.URL.String},
-		},
+	expectedResp := &pb.GetUpdateNoteReply{
+		Message:     "Test Message",
+		VersionName: "1.0.0",
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url"}))
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}))
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetUpdateNote(metadata.NewIncomingContext(context.Background(), meta), &pb.GetUpdateNoteRequest{Version: 1})
-	require.NoError(s.T(), err)
-	expectedResp := &pb.NewsSourceReply{
-		Sources: []*pb.NewsSource(nil),
-	}
-	require.Equal(s.T(), expectedResp, response)
+	require.Equal(s.T(), status.Error(codes.NotFound, "No update note found"), err)
+	require.Nil(s.T(), response)
 }
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteError() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetTopNewsQuery)).WillReturnError(gorm.ErrInvalidDB)
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).WillReturnError(gorm.ErrInvalidDB)
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetUpdateNote(metadata.NewIncomingContext(context.Background(), meta), &pb.GetUpdateNoteRequest{Version: 1})
-	require.Equal(s.T(), status.Error(codes.Internal, "could not GetTopNews"), err)
+	require.Equal(s.T(), status.Error(codes.Internal, "Internal server error"), err)
 	require.Nil(s.T(), response)
 }
 

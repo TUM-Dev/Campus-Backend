@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"google.golang.org/grpc/codes"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -18,10 +20,10 @@ func (s *CampusServer) GetUpdateNote(ctx context.Context, req *pb.GetUpdateNoteR
 
 	res := model.UpdateNote{VersionCode: req.Version}
 	if err := s.db.First(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, status.Error(404, "No update note found")
+		return nil, status.Error(codes.NotFound, "No update note found")
 	} else if err != nil {
 		log.WithField("VersionCode", req.Version).WithError(err).Error("Failed to get update note")
-		return nil, status.Error(500, "Internal server error")
+		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
 	return &pb.GetUpdateNoteReply{Message: res.Message, VersionName: res.VersionName}, nil
