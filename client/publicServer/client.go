@@ -25,11 +25,10 @@ func main() {
 
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.WithError(err).Fatalf("did not connect")
+		log.WithError(err).Fatal("did not connect")
 	}
 	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
+		if err := conn.Close(); err != nil {
 			log.WithError(err).Error("did not close connection")
 		}
 	}(conn)

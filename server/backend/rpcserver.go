@@ -19,7 +19,7 @@ func (s *CampusServer) GRPCServe(l net.Listener) error {
 	grpcServer := grpc.NewServer()
 	pb.RegisterCampusServer(grpcServer, s)
 	if err := grpcServer.Serve(l); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.WithError(err).Fatal("failed to serve")
 	}
 	return grpcServer.Serve(l)
 }
@@ -47,7 +47,7 @@ func New(db *gorm.DB) *CampusServer {
 
 func NewIOSNotificationsService() *IOSNotificationsService {
 	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
-		log.Warn(err)
+		log.WithError(err).Warn("failed to validate requirements for ios notifications service")
 
 		return &IOSNotificationsService{
 			APNSToken: nil,
@@ -56,9 +56,8 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 	}
 
 	token, err := ios_apns_jwt.NewToken()
-
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Fatal("failed to create new token")
 	}
 
 	return &IOSNotificationsService{
