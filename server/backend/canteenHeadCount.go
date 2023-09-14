@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"

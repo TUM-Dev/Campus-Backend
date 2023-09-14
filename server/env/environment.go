@@ -13,3 +13,7 @@ func IsDev() bool {
 func IsProd() bool {
 	return GetEnvironment() == "prod"
 }
+
+func IsMensaCronActive() bool {
+	return os.Getenv("MensaCronDisabled") != "true"
+}

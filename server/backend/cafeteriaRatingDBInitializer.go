@@ -208,8 +208,7 @@ func generateNameTagListFromFile(path string) multiLanguageNameTags {
 		log.WithError(errjson).Error("Error while reading the file.")
 	}
 	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
+		if err := jsonFile.Close(); err != nil {
 			log.WithError(err).Error("Error in parsing json.")
 		}
 	}(file)
@@ -224,8 +223,7 @@ func generateRatingTagListFromFile(path string) multiLanguageTags {
 		log.WithError(errjson).Error("Error while reading or parsing the file.")
 	}
 	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
+		if err := jsonFile.Close(); err != nil {
 			log.WithError(err).Error("Error in parsing json.")
 		}
 	}(file)
