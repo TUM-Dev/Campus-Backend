@@ -19,7 +19,7 @@ repos:
       - id: regen-protobuf
         name: Regenerate protobuf files
         files: server/api/
-        entry: bash generate.bash
+        entry: bash server/api/generate.bash
         language: system
         pass_filenames: false
         stages: [commit]
