@@ -17,8 +17,8 @@ rm -f google/api/*.go
 rm -f google/api/*.swagger.json
 
 echo maing sure that the generated files are formatted
-go fmt ./...
-goimports -w ./...
+go fmt tumdev/*.go
+goimports -w tumdev/*.go
 
 # clean up the stack
 popd > /dev/null
