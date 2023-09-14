@@ -1,6 +1,9 @@
 #!/bin/sh
 
 # needs buf: https://docs.buf.build/installation#github-releases
+BASEDIR=$(dirname "$0")
+echo making sure that this script is run from $BASEDIR
+pushd $BASEDIR > /dev/null
 
 echo updating the generated files
 buf mod update
@@ -13,3 +16,9 @@ echo making sure that all artifacts we don\'t need are cleaned up
 rm -f google/api/*.go
 rm -f google/api/*.swagger.json
 
+echo maing sure that the generated files are formatted
+go fmt ./...
+goimports -w ./...
+
+# clean up the stack
+popd > /dev/null
