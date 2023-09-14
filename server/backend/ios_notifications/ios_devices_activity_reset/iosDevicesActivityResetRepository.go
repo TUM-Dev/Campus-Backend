@@ -1,11 +1,12 @@
 package ios_devices_activity_reset
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 )
 
 type Repository struct {

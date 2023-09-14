@@ -7,13 +7,14 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"image"
 	"image/jpeg"
 	"math"
 	"os"
 	"strings"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
@@ -50,7 +51,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 
 	if res.Error != nil {
 		log.WithError(res.Error).Error("Error while querying the cafeteria with Id ", cafeteriaId)
-		return nil, status.Errorf(codes.Internal, "This cafeteria has not yet been rated.")
+		return nil, status.Error(codes.Internal, "This cafeteria has not yet been rated.")
 	}
 
 	if res.RowsAffected > 0 {
@@ -157,7 +158,7 @@ func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingReq
 	if err.Error != nil {
 		fields := log.Fields{"dishID": dishID, "cafeteriaID": cafeteriaID}
 		log.WithError(err.Error).WithFields(fields).Error("Error while querying the average ratings")
-		return nil, status.Errorf(codes.Internal, "This dish has not yet been rated.")
+		return nil, status.Error(codes.Internal, "This dish has not yet been rated.")
 	}
 
 	if err.RowsAffected > 0 {
@@ -249,15 +250,12 @@ func getImageToBytes(path string) []byte {
 		return make([]byte, 0)
 	}
 	file, err := os.Open(path)
-
 	if err != nil {
 		log.WithError(err).Error("while opening image file with path: ", path)
 		return nil
 	}
-
 	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
+		if err := file.Close(); err != nil {
 			log.WithError(err).Error("Unable to close the file for storing the image.")
 		}
 	}(file)
@@ -267,8 +265,7 @@ func getImageToBytes(path string) []byte {
 	imageAsBytes := make([]byte, size)
 
 	buffer := bufio.NewReader(file)
-	_, err = buffer.Read(imageAsBytes)
-	if err != nil {
+	if _, err = buffer.Read(imageAsBytes); err != nil {
 		log.WithError(err).Error("while trying to read image as bytes")
 		return nil
 	}
@@ -376,10 +373,9 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafete
 		Image:       resPath,
 	}
 
-	err := s.db.Model(&model.CafeteriaRating{}).Create(&rating).Error
-	if err != nil {
+	if err := s.db.Model(&model.CafeteriaRating{}).Create(&rating).Error; err != nil {
 		log.WithError(err).Error("Error occurred while creating the new cafeteria rating.")
-		return nil, status.Errorf(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
+		return nil, status.Error(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
 
 	}
 	return storeRatingTags(s, rating.CafeteriaRating, input.RatingTags, CAFETERIA)
@@ -400,12 +396,11 @@ func imageWrapper(image []byte, path string, id int32) string {
 }
 
 // storeImage
-// stores an image and returns teh path to this image.
+// stores an image and returns the path to this image.
 // if needed, a new directory will be created and the path is extended until it is unique
 func storeImage(path string, i []byte) (string, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			log.WithError(err).WithField("path", path).Error("Directory could not be created successfully")
 			return "", nil
 		}
@@ -430,8 +425,7 @@ func storeImage(path string, i []byte) (string, error) {
 		return imgPath, errFile
 	}
 	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
+		if err := out.Close(); err != nil {
 			log.WithError(err).Error("while closing the file.")
 		}
 	}(out)
@@ -459,7 +453,7 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 						First(&dish).Error
 	if errDish != nil || dish == nil {
 		log.WithError(errDish).Error("Error while creating a new dish rating.")
-		return nil, status.Errorf(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+		return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
 	resPath := imageWrapper(input.Image, "dishes", dish.Dish)
@@ -473,10 +467,9 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 		Image:       resPath,
 	}
 
-	err := s.db.Model(&model.DishRating{}).Create(&rating).Error
-	if err != nil {
+	if err := s.db.Model(&model.DishRating{}).Create(&rating).Error; err != nil {
 		log.WithError(err).Error("while creating a new dish rating.")
-		return nil, status.Errorf(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
+		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
 	assignDishNameTag(s, rating, dish.Dish)
@@ -511,24 +504,24 @@ func assignDishNameTag(s *CampusServer, rating model.DishRating, dishID int32) {
 // Additionally, queries the cafeteria ID, since it checks whether the cafeteria actually exists.
 func inputSanitizationForNewRatingElements(rating int32, comment string, cafeteriaName string, s *CampusServer) (int32, error) {
 	if rating > 5 || rating < 0 {
-		return -1, status.Errorf(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
 
 	if len(comment) > 256 {
-		return -1, status.Errorf(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
 
 	if strings.Contains(comment, "@") {
-		return -1, status.Errorf(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
 	var result *model.Cafeteria
 	res := s.db.Model(&model.Cafeteria{}).
 		Where("name LIKE ?", cafeteriaName).
 		First(&result)
-	if res.Error == gorm.ErrRecordNotFound || res.RowsAffected == 0 {
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
 		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: ", cafeteriaName)
-		return -1, status.Errorf(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
 	}
 
 	return result.Cafeteria, nil
@@ -587,11 +580,11 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 	}
 
 	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag. The tag(s) "+warningOccurred+" occurred more than once in this rating.")
+		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag. The tag(s) %s occurred more than once in this rating.", errorOccurred, warningOccurred))
 	} else if len(errorOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+errorOccurred+" does not exist. Remaining rating was saved without this rating tag.")
+		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag.", errorOccurred))
 	} else if len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Errorf(codes.InvalidArgument, "The tag(s) "+warningOccurred+" occurred more than once in this rating.")
+		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
 	} else {
 		return &emptypb.Empty{}, nil
 	}
@@ -641,7 +634,7 @@ func (s *CampusServer) GetAvailableDishTags(_ context.Context, _ *emptypb.Empty)
 	err := s.db.Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, dishRatingTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
-		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
+		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
 
 	return &pb.GetTagsReply{
@@ -657,7 +650,7 @@ func (s *CampusServer) GetNameTags(_ context.Context, _ *emptypb.Empty) (*pb.Get
 	err := s.db.Model(&model.DishNameTagOption{}).Select("DE as de, EN as en, dishNameTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading available Name Tags from database.")
-		requestStatus = status.Errorf(codes.Internal, "Available dish tags could not be loaded from the database.")
+		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
 	}
 
 	return &pb.GetTagsReply{
@@ -673,7 +666,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 	err := s.db.Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
-		requestStatus = status.Errorf(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
+		requestStatus = status.Error(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
 	}
 
 	return &pb.GetTagsReply{
@@ -689,7 +682,7 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 	err := s.db.Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
-		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
+		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
 	return &pb.GetCafeteriaReply{
@@ -699,13 +692,13 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 
 func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest) (*pb.GetDishesReply, error) {
 	if request.Year < 2022 {
-		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.GetDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
 	if request.Week < 1 || request.Week > 53 {
-		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Weeks must be in the range 1 - 53")
+		return &pb.GetDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
 	}
 	if request.Day < 0 || request.Day > 4 {
-		return &pb.GetDishesReply{}, status.Errorf(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+		return &pb.GetDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
@@ -721,7 +714,7 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
-		requestStatus = status.Errorf(codes.Internal, "Cafeterias could not be loaded from the database.")
+		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
 	return &pb.GetDishesReply{

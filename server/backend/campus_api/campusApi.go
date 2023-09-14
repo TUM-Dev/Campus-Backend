@@ -4,10 +4,11 @@ package campus_api
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -38,23 +39,18 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		log.WithError(err).Error("failed to fetch grades")
 		return nil, ErrWhileFetchingGrades
 	}
-
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+		if err := Body.Close(); err != nil {
 			log.WithError(err).Error("Could not close body")
 		}
 	}(resp.Body)
 
 	var grades model.IOSGrades
-	err = xml.NewDecoder(resp.Body).Decode(&grades)
-
-	if err != nil {
+	if err = xml.NewDecoder(resp.Body).Decode(&grades); err != nil {
 		log.WithError(err).Error("could not unmarshall grades")
 		return nil, ErrorWhileUnmarshalling
 	}
