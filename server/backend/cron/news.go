@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm/clause"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
@@ -91,7 +93,6 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		if !skipNews(existingNewsLinksForSource, item.Link) {
 			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
-			var enclosureUrl = null.String{NullString: sql.NullString{Valid: true, String: ""}}
 			for _, enclosure := range item.Enclosures {
 				if strings.HasSuffix(enclosure.URL, "jpg") ||
 					strings.HasSuffix(enclosure.URL, "jpeg") ||
@@ -101,9 +102,10 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			var enclosureUrl null.String
+			var file *model.Files
 			if pickedEnclosure != nil {
-				fileId, err = c.saveImage(pickedEnclosure.URL)
+				file, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
 					log.WithError(err).Error("can't save news image")
 				}
@@ -120,7 +122,8 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				File:        fileId,
+				FilesID:     null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}},
+				Files:       *file,
 			}
 			newNews = append(newNews, newsItem)
 		}
@@ -137,39 +140,23 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
-func (c *CronService) saveImage(url string) (null.Int, error) {
+// saveImage Saves an image to the database, so it can be downloaded by another cronjob
+func (c *CronService) saveImage(url string) (*model.Files, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
-	var fileId null.Int
-	if err := c.db.Model(model.Files{}).
-		Where("name = ?", targetFileName).
-		Select("file").Scan(&fileId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
-		return null.Int{}, err
-	}
-	if fileId.Valid { // file already in database -> return for current news.
-		return fileId, nil
-	}
-
-	// otherwise store in database:
 	file := model.Files{
 		Name:       targetFileName,
 		Path:       ImageDirectory,
 		URL:        sql.NullString{String: url, Valid: true},
 		Downloaded: sql.NullBool{Bool: false, Valid: true},
 	}
-	err := c.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&file).Error; err != nil {
-			log.WithError(err).Error("Could not store new file to database")
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return null.Int{}, err
+	if err := c.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "path"}},
+		DoNothing: true,
+	}).Create(&file).Error; err != nil {
+		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
+		return nil, err
 	}
-	// creating this int is annoying but i'm too afraid to use real ORM in the model
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
+	return &file, nil
 }
 
 // skipNews returns true if link is in existingLinks or link is invalid
