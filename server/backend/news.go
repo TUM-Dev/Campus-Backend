@@ -41,7 +41,14 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (new
 	}
 
 	var sources []model.News
-	if err := s.db.Joins("Files").Find(&sources).Error; err != nil {
+	tx := s.db.Joins("Files")
+	if req.NewsSource != 0 {
+		tx = tx.Where("src = ?", req.NewsSource)
+	}
+	if req.LastNewsId != 0 {
+		tx = tx.Where("news > ?", req.LastNewsId)
+	}
+	if err := tx.Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find news item")
 		return nil, status.Error(codes.Internal, "could not GetNews")
 	}
@@ -54,8 +61,8 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (new
 			Title:    item.Title,
 			Text:     item.Description,
 			Link:     item.Link,
-			ImageUrl: item.Image,
-			Source:   "",
+			ImageUrl: item.Image.String,
+			Source:   fmt.Sprintf("%d", item.Src),
 			Created:  nil,
 		}
 	}

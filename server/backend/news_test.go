@@ -100,6 +100,26 @@ func (s *NewsSuite) Test_GetNewsSourcesMultiple() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
+func news1() *model.News {
+	return &model.News{
+		News:    1,
+		Title:   "Amazing News 1",
+		Link:    "https://example.com/amazing2",
+		FilesID: null.Int{NullInt64: sql.NullInt64{Int64: int64(file(1).File), Valid: true}},
+		Files:   file(1),
+	}
+}
+
+func news2() *model.News {
+	return &model.News{
+		News:    2,
+		Title:   "Amazing News 2",
+		Link:    "https://example.com/amazing2",
+		FilesID: null.Int{},
+		Files:   nil,
+	}
+}
+
 func (s *NewsSuite) Test_GetNewsSourcesNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}))
@@ -110,6 +130,35 @@ func (s *NewsSuite) Test_GetNewsSourcesNone() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.NewsSourceReply{
 		Sources: []*pb.NewsSource(nil),
+	}
+	require.Equal(s.T(), expectedResp, response)
+}
+
+const ExpectedGetNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`Files`.`file` AS `Files__file`,`Files`.`name` AS `Files__name`,`Files`.`path` AS `Files__path`,`Files`.`downloads` AS `Files__downloads`,`Files`.`url` AS `Files__url`,`Files`.`downloaded` AS `Files__downloaded` FROM `news` LEFT JOIN `files` `Files` ON `news`.`file` = `Files`.`file`"
+
+func (s *NewsSuite) Test_GetNewsNone_withFilters() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery + " WHERE src = ? AND news > ?")).
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}))
+
+	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNews(meta, &pb.GetNewsRequest{NewsSource: 1, LastNewsId: 2})
+	require.NoError(s.T(), err)
+	expectedResp := &pb.GetNewsReply{
+		News: []*pb.NewsItem{},
+	}
+	require.Equal(s.T(), expectedResp, response)
+}
+func (s *NewsSuite) Test_GetNewsNone() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}))
+
+	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
+	require.NoError(s.T(), err)
+	expectedResp := &pb.GetNewsReply{
+		News: []*pb.NewsItem{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
