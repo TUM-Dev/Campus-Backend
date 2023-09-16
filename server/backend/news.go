@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -41,7 +43,9 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (new
 	}
 
 	var sources []model.News
-	tx := s.db.Joins("Files")
+	// preloading files as the news images can be null
+	// I could not get outer joins to work => we are currently doing unnecessary db calls
+	tx := s.db.Preload("Files")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
@@ -63,7 +67,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (new
 			Link:     item.Link,
 			ImageUrl: item.Image.String,
 			Source:   fmt.Sprintf("%d", item.Src),
-			Created:  nil,
+			Created:  timestamppb.New(item.Created),
 		}
 	}
 	return &pb.GetNewsReply{News: resp}, nil
