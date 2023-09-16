@@ -126,12 +126,11 @@ service Campus {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
-  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackReply) {
-    option (google.api.http) = {post: "/feedback"};
-  }
-
-  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
-    option (google.api.http) = {post: "/feedback/{id}/{image_nr}"};
+  rpc SendFeedback(stream SendFeedbackRequest) returns (SendFeedbackReply) {
+    option (google.api.http) = {
+      post: "/feedback",
+      body: "attachment",
+    };
   }
 
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
@@ -538,28 +537,34 @@ message Movie {
   string link = 16;
 }
 
-message SendFeedbackReply {}
 message SendFeedbackRequest {
-  string topic = 1;
-  string email = 2;
-  string email_id = 3;
-  string message = 4;
-  int32 image_count = 5;
-  double latitude = 6;
-  double longitude = 7;
-  string os_version = 8;
-  string app_version = 9;
+  message Metadata {
+    double latitude = 1;
+    double longitude = 2;
+    string osVersion = 3;
+    string appVersion = 4;
+  }
+
+  enum Recipient {
+    // Feedback for the TUM Dev Team
+    TUM_DEV = 0;
+    // Feedback for the general TUM Contact Form
+    TUM_CONTACT = 1;
+  }
+
+  // who is the feedback for
+  Recipient recipient = 1;
+  // the email address of the user
+  string from_email = 2;
+  // The actual message
+  string message = 3;
+  // Optional metadata which the user can choose to attach or not
+  Metadata metadata = 4;
+  // Optional file in Base64
+  bytes attachment = 5;
 }
 
-message SendFeedbackImageReply {
-  string status = 1;
-}
-
-message SendFeedbackImageRequest {
-  int32 id = 1;
-  int32 image_nr = 2;
-  //todo where does the file come from?
-}
+message SendFeedbackReply {}
 
 message GetMembersRequest {
   string lrz_id = 1;
