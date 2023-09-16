@@ -19,6 +19,10 @@ services:
       - MensaCronDisabled=true
       - OMDB_API_KEY=${OMDB_API_KEY}
       - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_URL=${SMTP_URL:-postout.lrz.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-tca-support.os.in@tum.de}
+      - SMTP_PORT=${SMTP_PORT:-587}
     volumes:
       - backend-storage:/Storage
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}

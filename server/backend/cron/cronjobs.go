@@ -32,6 +32,7 @@ const (
 	IOSActivityReset         = "iosActivityReset"
 	NewExamResultsHook       = "newExamResultsHook"
 	MovieType                = "movie"
+	FeedbackEmail            = "feedbackEmail"
 
 	/* MensaType      = "mensa"
 	AlarmType      = "alarm" */
@@ -59,7 +60,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -70,6 +71,7 @@ func (c *CronService) Run() error {
 				IOSActivityReset,
 				NewExamResultsHook,
 				MovieType,
+				FeedbackEmail,
 			).
 			Scan(&res)
 
@@ -125,6 +127,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.iosNotificationsCron() })
 			case IOSActivityReset:
 				g.Go(func() error { return c.iosActivityReset() })
+			case FeedbackEmail:
+				g.Go(func() error { return c.feedbackEmailCron() })
 			}
 		}
 
