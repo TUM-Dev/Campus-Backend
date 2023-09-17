@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"

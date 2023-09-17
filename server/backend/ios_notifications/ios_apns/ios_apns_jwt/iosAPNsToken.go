@@ -6,12 +6,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"github.com/golang-jwt/jwt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -39,7 +40,6 @@ type Token struct {
 
 func NewToken() (*Token, error) {
 	encryptionKey, err := APNsEncryptionKeyFromFile()
-
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +50,7 @@ func NewToken() (*Token, error) {
 		TeamId:        ApnsTeamId,
 	}
 
-	_, err = token.Generate()
-
-	if err != nil {
+	if err = token.Generate(); err != nil {
 		return nil, err
 	}
 
@@ -106,7 +104,7 @@ func (t *Token) GenerateNewTokenIfExpired() (bearer string) {
 	defer t.Unlock()
 
 	if t.IsExpired() {
-		_, err := t.Generate()
+		err := t.Generate()
 		if err != nil {
 			return ""
 		}
@@ -119,9 +117,9 @@ func (t *Token) IsExpired() bool {
 	return currentTimestamp() >= (t.IssuedAt + TokenTimeout)
 }
 
-func (t *Token) Generate() (bool, error) {
+func (t *Token) Generate() error {
 	if t.EncryptionKey == nil {
-		return false, ErrorAuthKeyNil
+		return ErrorAuthKeyNil
 	}
 
 	issuedAt := currentTimestamp()
@@ -141,13 +139,13 @@ func (t *Token) Generate() (bool, error) {
 	token, err := jwtToken.SignedString(t.EncryptionKey)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	t.IssuedAt = issuedAt
 	t.Bearer = token
 
-	return true, nil
+	return nil
 }
 
 func currentTimestamp() int64 {

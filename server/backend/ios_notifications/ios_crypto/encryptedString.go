@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -97,19 +98,16 @@ func SymmetricEncrypt(plaintext string, key string) (*EncryptedString, error) {
 func SymmetricDecrypt(encryptedString EncryptedString, key string) (string, error) {
 	bytesKey := []byte(key)
 	bytesEncryptedString, err := base64.StdEncoding.DecodeString(string(encryptedString))
-
 	if err != nil {
 		return "", err
 	}
 
 	c, err := aes.NewCipher(bytesKey)
-
 	if err != nil {
 		return "", err
 	}
 
 	gcm, err := cipher.NewGCM(c)
-
 	if err != nil {
 		return "", err
 	}
@@ -118,7 +116,6 @@ func SymmetricDecrypt(encryptedString EncryptedString, key string) (string, erro
 	nonce, ciphertext := bytesEncryptedString[:nonceSize], bytesEncryptedString[nonceSize:]
 
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-
 	if err != nil {
 		return "", err
 	}

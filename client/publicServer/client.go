@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"crypto/x509"
-	pb "github.com/TUM-Dev/Campus-Backend/api"
+	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"time"
 )
 
 const (
@@ -25,11 +26,10 @@ func main() {
 
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.WithError(err).Fatalf("did not connect")
+		log.WithError(err).Fatal("did not connect")
 	}
 	defer func(conn *grpc.ClientConn) {
-		err := conn.Close()
-		if err != nil {
+		if err := conn.Close(); err != nil {
 			log.WithError(err).Error("did not close connection")
 		}
 	}(conn)

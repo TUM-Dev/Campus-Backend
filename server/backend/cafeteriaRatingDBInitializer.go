@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"embed"
 	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"

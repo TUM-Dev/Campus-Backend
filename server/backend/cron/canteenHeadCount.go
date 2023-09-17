@@ -189,8 +189,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 	}
 
 	if res.RowsAffected == 0 {
-		err := db.Create(&entry).Error
-		if err != nil {
+		if err := db.Create(&entry).Error; err != nil {
 			fields := log.Fields{
 				"CanteenId": entry.CanteenId,
 				"Count":     entry.Count,
@@ -198,8 +197,8 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 				"Percent":   entry.Percent,
 				"Timestamp": entry.Timestamp}
 			log.WithError(res.Error).WithFields(fields).Error("could not create headcount entry")
+			return err
 		}
-		return err
 	}
 	return nil
 }
@@ -216,17 +215,15 @@ func (canteen CanteenApInformation) requestApData() []AccessPoint {
 	// Ensure we close the body once we leave this function
 	if resp.Body != nil {
 		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
+			if err := Body.Close(); err != nil {
 				log.WithError(err).Error("Could not close body")
 			}
 		}(resp.Body)
 	}
 
 	// Parse as JSON
-	aps := []AccessPoint{}
-	err = json.NewDecoder(resp.Body).Decode(&aps)
-	if err != nil {
+	var aps []AccessPoint
+	if err = json.NewDecoder(resp.Body).Decode(&aps); err != nil {
 		log.WithError(err).Error("Canteen HeadCount parsing output as JSON failed for: ", canteen.CanteenId)
 		return []AccessPoint{}
 	}
