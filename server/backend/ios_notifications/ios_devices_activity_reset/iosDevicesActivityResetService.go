@@ -1,10 +1,11 @@
 package ios_devices_activity_reset
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Service struct {
@@ -44,41 +45,41 @@ func (service *Service) HandleScheduledActivityReset() error {
 
 	if now.Sub(daily.LastReset).Hours() > 24 {
 		if err := service.Repository.ResettedDevicesDaily(); err != nil {
-			log.Errorf("Error while resetting devices daily: %s", err)
+			log.WithError(err).Error("while resetting devices daily")
 		}
 
 		if err := devicesRepo.ResetDevicesDailyActivity(); err != nil {
-			log.Errorf("Error while resetting devices daily activity: %s", err)
+			log.WithError(err).Error("while resetting devices daily activity")
 		}
 	}
 
 	if now.Sub(weekly.LastReset).Hours() > 168 {
 		if err := service.Repository.ResettedDevicesWeekly(); err != nil {
-			log.Errorf("Error while resetting devices weekly: %s", err)
+			log.WithError(err).Error("while resetting devices weekly")
 		}
 
 		if err := devicesRepo.ResetDevicesWeeklyActivity(); err != nil {
-			log.Errorf("Error while resetting devices weekly activity: %s", err)
+			log.WithError(err).Error("while resetting devices weekly activity")
 		}
 	}
 
 	if now.Sub(monthly.LastReset).Hours() > 730 {
 		if err := service.Repository.ResettedDevicesMonthly(); err != nil {
-			log.Errorf("Error while resetting devices monthly: %s", err)
+			log.WithError(err).Error("while resetting devices monthly")
 		}
 
 		if err := devicesRepo.ResetDevicesMonthlyActivity(); err != nil {
-			log.Errorf("Error while resetting devices monthly activity: %s", err)
+			log.WithError(err).Error("while resetting devices monthly activity")
 		}
 	}
 
 	if now.Sub(yearly.LastReset).Hours() > 8760 {
 		if err := service.Repository.ResettedDevicesYearly(); err != nil {
-			log.Errorf("Error while resetting devices yearly: %s", err)
+			log.WithError(err).Error("while resetting devices yearly")
 		}
 
 		if err := devicesRepo.ResetDevicesYearlyActivity(); err != nil {
-			log.Errorf("Error while resetting devices yearly activity: %s", err)
+			log.WithError(err).Error("while resetting devices yearly activity")
 		}
 	}
 

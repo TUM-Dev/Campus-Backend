@@ -2,6 +2,7 @@ package migration
 
 import (
 	"database/sql"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"

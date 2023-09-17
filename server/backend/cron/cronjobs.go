@@ -1,8 +1,10 @@
 package cron
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
@@ -12,11 +14,12 @@ import (
 )
 
 type CronService struct {
-	db       *gorm.DB
-	gf       *gofeed.Parser
-	useMensa bool
-	APNs     *ios_apns.Service
+	db   *gorm.DB
+	gf   *gofeed.Parser
+	APNs *ios_apns.Service
 }
+
+const StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
@@ -25,34 +28,32 @@ const (
 	DishNameDownload         = "dishNameDownload"
 	AverageRatingComputation = "averageRatingComputation"
 	CanteenHeadcount         = "canteenHeadCount"
-	StorageDir               = "/Storage/" // target location of files
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
 	NewExamResultsHook       = "newExamResultsHook"
 
 	/* MensaType      = "mensa"
-	ChatType       = "chat"
 	KinoType       = "kino"
 	RoomfinderType = "roomfinder"
-	TicketSaleType = "ticketsale"
 	AlarmType      = "alarm" */
 )
 
-func New(db *gorm.DB, mensaCronActivated bool) *CronService {
+func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db:       db,
-		gf:       gofeed.NewParser(),
-		APNs:     ios_apns.NewCronService(db),
-		useMensa: mensaCronActivated,
+		db:   db,
+		gf:   gofeed.NewParser(),
+		APNs: ios_apns.NewCronService(db),
 	}
 }
 
 func (c *CronService) Run() error {
-	log.Printf("running cron service. Mensa Crons Running: %t", c.useMensa)
+	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
 	g := new(errgroup.Group)
 
-	g.Go(func() error { return c.dishNameDownloadCron() })
-	g.Go(func() error { return c.averageRatingComputation() })
+	if env.IsMensaCronActive() {
+		g.Go(func() error { return c.dishNameDownloadCron() })
+		g.Go(func() error { return c.averageRatingComputation() })
+	}
 
 	for {
 		log.Trace("Cron: checking for pending")
@@ -75,29 +76,34 @@ func (c *CronService) Run() error {
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			var offset int32 = 0
-			if c.useMensa {
+			if env.IsMensaCronActive() {
 				if cronjob.Type.String == AverageRatingComputation {
 					if time.Now().Hour() == 16 {
 						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
 					}
 				}
 			}
+			cronFields := log.Fields{"Cron (id)": cronjob.Cron, "type": cronjob.Type.String, "offset": offset, "LastRun": cronjob.LastRun, "interval": cronjob.Interval, "id (not real id)": cronjob.ID.Int64}
+			log.WithFields(cronFields).Trace("Running cronjob")
 
 			cronjob.LastRun = int32(time.Now().Unix()) + offset
 			c.db.Save(&cronjob)
 
-			// Run each job in a separate goroutine so we can parallelize them
+			// Run each job in a separate goroutine, so we can parallelize them
 			switch cronjob.Type.String {
 			case NewsType:
-				g.Go(func() error { return c.newsCron(&cronjob) })
+				// if this is not copied here, this may not be threads save due to go's guarantees
+				// loop variable cronjob captured by func literal (govet)
+				copyCronjob := cronjob
+				g.Go(func() error { return c.newsCron(&copyCronjob) })
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
-				if c.useMensa {
+				if env.IsMensaCronActive() {
 					g.Go(c.dishNameDownloadCron)
 				}
 			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
-				if c.useMensa {
+				if env.IsMensaCronActive() {
 					g.Go(c.averageRatingComputation)
 				}
 			case NewExamResultsHook:
@@ -106,13 +112,9 @@ func (c *CronService) Run() error {
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
-					case ChatType:
-						g.Go(func() error { return c.chatCron() })
 					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
 					case RoomfinderType:
-						g.Go(func() error { return c.roomFinderCron() })
-					case TicketSaleType:
 						g.Go(func() error { return c.roomFinderCron() })
 					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
@@ -126,9 +128,8 @@ func (c *CronService) Run() error {
 			}
 		}
 
-		err := g.Wait()
-		if err != nil {
-			log.Println("Couldn't run all cron jobs: %v", err)
+		if err := g.Wait(); err != nil {
+			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
 		log.Trace("Cron: sleeping for 60 seconds")
 		time.Sleep(60 * time.Second)

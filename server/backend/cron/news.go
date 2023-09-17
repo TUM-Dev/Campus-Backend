@@ -3,19 +3,18 @@ package cron
 import (
 	"crypto/md5"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/getsentry/sentry-go"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"regexp"
-	"strings"
-	"time"
 )
 
 const (
@@ -31,16 +30,21 @@ var ImageContentTypeRegex, _ = regexp.Compile("image/[a-z.]+")
 func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	//check if source id provided for news job is not null
 	if !cronjob.ID.Valid {
-		cronjobJson, _ := json.Marshal(cronjob)
-		log.Println("skipping news job, id of source is null, cronjob: %s", string(cronjobJson))
+		fields := log.Fields{
+			"Cron":     cronjob.Cron,
+			"Interval": cronjob.Interval,
+			"LastRun":  cronjob.LastRun,
+			"Type":     cronjob.Type,
+			"ID":       cronjob.ID,
+		}
+		log.WithFields(fields).Warn("skipping news job, id of source is null")
 		return nil
 	}
 	// get news source for cronjob
 	var source model.NewsSource
 	err := c.db.Find(&source, cronjob.ID.Int64).Error
 	if err != nil {
-		log.Printf("error getting news source from database: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("getting news source from database")
 		return err
 	}
 	// skip sources with null url
@@ -60,18 +64,16 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 
 // parseNewsFeed processes a single news feed, extracts titles, content etc and saves it to the database
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
-	log.Printf("processing source %s", source.URL.String)
+	log.WithField("url", source.URL.String).Trace("processing newsfeed")
 	feed, err := c.gf.ParseURL(source.URL.String)
 	if err != nil {
-		log.Printf("error parsing rss: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("parsing rss")
 		return err
 	}
 	// get all news for this source so we only process new ones, using map for performance reasons
 	existingNewsLinksForSource := make([]string, 0)
 	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Printf("failed to fetch existing news: %v", err)
-		sentry.CaptureException(err)
+		log.WithError(err).Error("failed to fetch existing news")
 		return err
 	}
 	var newNews []model.News
@@ -103,8 +105,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			if pickedEnclosure != nil {
 				fileId, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
-					log.WithError(err).Error("error saving image")
-					sentry.CaptureException(err)
+					log.WithError(err).Error("can't save news image")
 				}
 				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
 			}
@@ -124,22 +125,26 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			newNews = append(newNews, newsItem)
 		}
 	}
-	if len(newNews) != 0 {
-		log.Printf("Inserting %v new news", len(newNews))
+	if ammountOfNewNews := len(newNews); ammountOfNewNews != 0 {
 		err = c.db.Save(&newNews).Error
+		if err != nil {
+			log.WithField("ammountOfNewNews", ammountOfNewNews).Error("Inserting new news failed")
+		} else {
+			log.WithField("ammountOfNewNews", ammountOfNewNews).Trace("Inserting new news")
+		}
 		return err
 	}
 	return nil
 }
 
-// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns it's id
+// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
 func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	var fileId null.Int
 	if err := c.db.Model(model.Files{}).
 		Where("name = ?", targetFileName).
-		Select("file").Scan(&fileId).Error; err != nil && err != gorm.ErrRecordNotFound {
-		log.Printf("Couldn't query database for file: %v", err)
+		Select("file").Scan(&fileId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
 		return null.Int{}, err
 	}
 	if fileId.Valid { // file already in database -> return for current news.
@@ -181,12 +186,11 @@ func skipNews(existingLinks []string, link string) bool {
 }
 
 func (c *CronService) cleanOldNewsForSource(source int32) error {
-	log.Printf("Truncating old entries for source %d\n", source)
+	log.WithField("source", source).Trace("Truncating old entries")
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
-		log.Infof("cleaned up %v old news", res.RowsAffected)
+		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")
 	} else {
 		log.WithError(res.Error).Error("failed to clean up old news")
-		sentry.CaptureException(res.Error)
 		return res.Error
 	}
 	return nil

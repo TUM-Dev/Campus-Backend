@@ -1,11 +1,12 @@
 package ios_devices_activity_reset
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 )
 
 type Repository struct {
@@ -104,8 +105,8 @@ func (repo *Repository) CreateInitialRecords() {
 			LastReset: now,
 		}
 
-		if err := repo.DB.Create(&reset); err != nil {
-			log.Errorf("Failed to create initial %s type: %v", resetType, err)
+		if err := repo.DB.Create(&reset).Error; err != nil {
+			log.WithError(err).WithField("resetType", resetType).Error("Failed to create IOSDevicesActivityReset")
 			continue
 		}
 	}

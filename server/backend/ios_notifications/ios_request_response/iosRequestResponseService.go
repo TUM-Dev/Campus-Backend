@@ -5,7 +5,8 @@ package ios_request_response
 
 import (
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
@@ -33,7 +34,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
-	log.Infof("Handling request with id %s", requestId)
+	log.WithField("requestId", requestId).Info("Handling request")
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
 
@@ -63,7 +64,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 }
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
-	log.Infof("Handling campus token request for device %s", requestLog.DeviceID)
+	log.WithField("DeviceID", requestLog.DeviceID).Info("Handling campus token request")
 
 	userRepo := ios_device.NewRepository(service.Repository.DB)
 
@@ -76,19 +77,19 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	apiGrades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
-		log.Error("Could not fetch grades: ", err)
+		log.WithError(err).Error("Could not fetch grades")
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
 	if err != nil {
-		log.Error("Could not get old grades: ", err)
+		log.WithError(err).Error("Could not get old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
 	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
 	if err != nil {
-		log.Error("Could not decrypt old grades: ", err)
+		log.WithError(err).Error("Could not decrypt old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
@@ -104,13 +105,13 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	err = service.Repository.DeleteEncryptedGrades(requestLog.DeviceID)
 
 	if err != nil {
-		log.Error("Could not delete old grades: ", err)
+		log.WithError(err).Error("Could not delete old grades")
 		return nil, ErrInternalHandleGrades
 	}
 
 	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
 
-	log.Infof("Found %d old grades and %d new grades", len(oldGrades), len(newGrades))
+	log.WithFields(log.Fields{"old": len(oldGrades), "new": len(newGrades)}).Info("Found grades")
 
 	if len(newGrades) > 0 && len(oldGrades) > 0 {
 		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
@@ -129,7 +130,7 @@ func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) 
 	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
 
 	if err != nil {
-		log.Error("Could not delete request logs: ", err)
+		log.WithError(err).Error("Could not delete request logs")
 	}
 }
 
@@ -139,7 +140,7 @@ func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]mode
 		err := encryptedGrade.Decrypt(campusToken)
 
 		if err != nil {
-			log.Error("Could not decrypt grade: ", err)
+			log.WithError(err).Error("Could not decrypt grade")
 			return nil, status.Error(codes.Internal, "Could not decrypt grade")
 		}
 
@@ -177,15 +178,13 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 		}
 
 		err := encryptedGrade.Encrypt(campusToken)
-
 		if err != nil {
-			log.Error("Could not encrypt grade: ", err)
+			log.WithError(err).Error("Could not encrypt grade")
 		}
 
 		err = service.Repository.SaveEncryptedGrade(&encryptedGrade)
-
 		if err != nil {
-			log.Error("Could not save grade: ", err)
+			log.WithError(err).Error("Could not save grade")
 		}
 	}
 }
@@ -210,12 +209,11 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *
 		Alert(alertTitle, "", alertBody).
 		Encrypt(device.PublicKey)
 
-	log.Infof("Sending push notification to device %s", device.DeviceID)
+	log.WithField("DeviceID", device.DeviceID).Info("Sending push notification")
 
 	_, err := apns.SendAlertNotification(notificationPayload)
-
 	if err != nil {
-		log.Error("Could not send notification: ", err)
+		log.WithField("DeviceID", device.DeviceID).WithError(err).Error("Could not send notification")
 	}
 }
 

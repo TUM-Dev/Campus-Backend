@@ -1,10 +1,25 @@
 name: CI
 on:
   push:
-    branches: main
+    branches: [main]
+  pull_request:
+    branches: [ main ]
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: |
+            server/go.sum
+      - name: run tests
+        run: go test -v ./...
+        working-directory: ./server
   build:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -35,7 +50,9 @@ jobs:
       with:
         context: server
         pull: true
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         build-args: version=${{ github.sha }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

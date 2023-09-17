@@ -2,13 +2,14 @@ package migration_test
 
 import (
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
-	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -50,7 +51,7 @@ func isValidEnum(enum string) bool {
 	match, err := regexp.MatchString("enum\\s*\\('\\w+'(,\\s*'\\w+')*\\);?", enum)
 
 	if err != nil {
-		log.Errorf("error matching regex: %s", err)
+		log.WithError(err).Error("error matching regex")
 		return false
 	}
 

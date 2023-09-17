@@ -2,9 +2,10 @@ package backend
 
 import (
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
 	"sync"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -20,6 +21,15 @@ type deviceBuffer struct {
 	lock     sync.Mutex
 	devices  map[string]*model.Devices // key is uuid
 	interval time.Duration             // flush interval
+}
+
+func newDeviceBuffer() *deviceBuffer {
+	return &deviceBuffer{
+		lock:     sync.Mutex{},
+		devices:  make(map[string]*model.Devices),
+		interval: time.Minute,
+	}
+
 }
 
 func (s *CampusServer) RunDeviceFlusher() error {

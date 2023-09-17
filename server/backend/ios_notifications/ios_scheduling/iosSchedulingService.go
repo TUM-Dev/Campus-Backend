@@ -3,13 +3,14 @@
 package ios_scheduling
 
 import (
+	"sync"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
-	"sync"
 )
 
 const (
@@ -37,7 +38,7 @@ func (service *Service) HandleScheduledCron() error {
 	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
 
 	if err != nil {
-		log.Errorf("Error while getting devices: %s", err)
+		log.WithError(err).Error("can't get devices")
 		return err
 	}
 
@@ -97,14 +98,13 @@ func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
 
 func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated) {
 	for _, device := range devices {
-		err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID)
-
-		if err != nil {
-			log.Errorf("Error while handling device: %s", err)
+		if err := service.APNs.RequestGradeUpdateForDevice(device.DeviceID); err != nil {
+			log.WithError(err).Error("could not RequestGradeUpdateForDevice")
 			continue
 		}
-
-		service.LogScheduledUpdate(device.DeviceID)
+		if err := service.LogScheduledUpdate(device.DeviceID); err != nil {
+			log.WithError(err).WithField("deviceID", device.DeviceID).Error("could not log scheduled update")
+		}
 	}
 }
 

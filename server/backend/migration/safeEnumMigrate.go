@@ -3,8 +3,9 @@ package migration
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 func SafeEnumMigrate(tx *gorm.DB, table interface{}, column string, additionalTypes ...string) error {

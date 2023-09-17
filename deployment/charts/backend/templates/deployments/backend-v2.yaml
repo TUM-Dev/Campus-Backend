@@ -39,6 +39,8 @@ spec:
           env:
             - name: ENVIRONMENT
               value: prod
+            - name: MensaCronDisabled
+              value: "false"
             - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
             - name: SENTRY_DSN
@@ -59,7 +61,7 @@ spec:
                   name: backend-api-keys
                   key: APNS_TEAM_ID
           volumeMounts:
-            - mountPath: /app/Storage/
+            - mountPath: /Storage/
               name: storage-vol
               readOnly: false
             - mountPath: /etc/apns_auth_key.p8
@@ -70,6 +72,9 @@ spec:
             - containerPort: 50051
               name: http
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 3000
             readOnlyRootFilesystem: true
           resources:
             requests:

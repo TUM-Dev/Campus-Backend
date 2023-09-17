@@ -3,9 +3,10 @@ package backend
 import (
 	"context"
 	"errors"
+	"os"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"os"
 )
 
 const (
