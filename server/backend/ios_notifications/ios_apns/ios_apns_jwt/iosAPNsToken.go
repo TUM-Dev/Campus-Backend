@@ -6,12 +6,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"github.com/golang-jwt/jwt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

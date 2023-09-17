@@ -4,6 +4,7 @@ package model
 
 import (
 	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 )
 

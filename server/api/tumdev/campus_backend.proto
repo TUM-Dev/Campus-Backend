@@ -655,6 +655,7 @@ message GetUpdateNoteRequest{
 
 message GetUpdateNoteReply{
   string message = 1;
+  string version_name = 2;
 }
 
 message GetStudyRoomListReply{

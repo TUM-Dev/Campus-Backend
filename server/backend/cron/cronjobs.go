@@ -1,9 +1,10 @@
 package cron
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"

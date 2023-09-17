@@ -2,13 +2,14 @@ package migration_test
 
 import (
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
-	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 var (

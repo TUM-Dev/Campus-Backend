@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"crypto/x509"
+	"time"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"time"
 )
 
 const (
