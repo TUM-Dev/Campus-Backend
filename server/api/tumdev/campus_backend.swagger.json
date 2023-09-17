@@ -915,7 +915,7 @@
           },
           {
             "name": "newsSource",
-            "description": "filter by news source id. 0 or empty to get all news items",
+            "description": "filter by news source id. 0 to get all news items",
             "in": "query",
             "required": false,
             "type": "integer",

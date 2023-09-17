@@ -1149,7 +1149,7 @@ type GetNewsRequest struct {
 
 	// the last id of the news item received. 0 to get all news items
 	LastNewsId int32 `protobuf:"varint,1,opt,name=last_news_id,json=lastNewsId,proto3" json:"last_news_id,omitempty"`
-	// filter by news source id. 0 or empty to get all news items
+	// filter by news source id. 0 to get all news items
 	NewsSource int32 `protobuf:"varint,2,opt,name=news_source,json=newsSource,proto3" json:"news_source,omitempty"`
 }
 
