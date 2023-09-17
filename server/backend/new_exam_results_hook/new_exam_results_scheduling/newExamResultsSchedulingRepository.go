@@ -13,19 +13,23 @@ type Repository struct {
 func (repository *Repository) StoreExamResultsPublished(examResultsPublished []model.ExamResultPublished) error {
 	db := repository.DB
 
-	db.Where("1 = 1").Delete(&model.ExamResultPublished{})
+	return db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Where("1 = 1").Delete(&model.ExamResultPublished{}).Error
 
-	return db.
-		Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
-		Create(examResultsPublished).Error
+		if err != nil {
+			return err
+		}
+
+		// disabled logging because this query always prints a warning because it takes longer then normal
+		// to execute because we bulk insert a lot of data
+		return tx.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
+			Create(examResultsPublished).Error
+	})
 }
 
 func (repository *Repository) FindAllExamResultsPublished() (*[]model.ExamResultPublished, error) {
-	db := repository.DB
-
 	var results []model.ExamResultPublished
-
-	err := db.Find(&results).Error
+	err := repository.DB.Find(&results).Error
 
 	return &results, err
 }

@@ -7,11 +7,11 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/new_exam_results_hook/new_exam_results_subscriber"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
-const (
-	MaxRoutineCount = 10
-	MockAPIToken    = "DDF9A212B2F80A01C6D0307B8455EEAA"
+var (
+	CampusApiToken = os.Getenv("CAMPUS_API_TOKEN")
 )
 
 type Service struct {
@@ -24,7 +24,7 @@ type Service struct {
 func (service *Service) HandleScheduledCron() error {
 	log.Info("Fetching published exam results")
 
-	apiResult, err := campus_api.FetchExamResultsPublished(MockAPIToken)
+	apiResult, err := campus_api.FetchExamResultsPublished(CampusApiToken)
 	if err != nil {
 		return err
 	}
@@ -47,9 +47,7 @@ func (service *Service) HandleScheduledCron() error {
 		log.Info("No new published exam results")
 	}
 
-	service.Repository.StoreExamResultsPublished(apiExamResults)
-
-	return nil
+	return service.Repository.StoreExamResultsPublished(apiExamResults)
 }
 
 func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.ExamResultPublished) *[]model.ExamResultPublished {
