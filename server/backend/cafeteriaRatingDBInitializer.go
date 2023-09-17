@@ -2,9 +2,8 @@ package backend
 
 import (
 	"database/sql"
+	"embed"
 	"encoding/json"
-	"os"
-	"path/filepath"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
@@ -30,13 +29,16 @@ type nameTag struct {
 	CanBeIncluded  []string `json:"canbeincluded"`
 }
 
+//go:embed static_data
+var staticData embed.FS
+
 /*
 Writes all available tags from the json file into tables in order to make them easier to use.
 Will be executed once while the server is started.
 */
 func initTagRatingOptions(db *gorm.DB) {
-	updateTagTable("backend/static_data/dishRatingTags.json", db, DISH)
-	updateTagTable("backend/static_data/cafeteriaRatingTags.json", db, CAFETERIA)
+	updateTagTable("static_data/dishRatingTags.json", db, DISH)
+	updateTagTable("static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
 	addEntriesForCronJob(db, "averageRatingComputation", 300)
 	addEntriesForCronJob(db, "dishNameDownload", 302400) //run twice every week
@@ -70,8 +72,7 @@ If a tag with the exact german and english name does not exist yet, it will be c
 Old tags won't be removed to prevent problems with foreign keys.
 */
 func updateNameTagOptions(db *gorm.DB) {
-	absPathDishNames, _ := filepath.Abs("backend/static_data/dishNameTags.json")
-	tagsNames := generateNameTagListFromFile(absPathDishNames)
+	tagsNames := generateNameTagListFromFile("static_data/dishNameTags.json")
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		var parentId int32
 		res := db.Model(&model.DishNameTagOption{}).
@@ -154,8 +155,7 @@ If an entry with the same German and English name exists, the entry won't be add
 The TagType is used to identify the corresponding model
 */
 func updateTagTable(path string, db *gorm.DB, tagType modelType) {
-	absPathDish, _ := filepath.Abs(path)
-	tagsDish := generateRatingTagListFromFile(absPathDish)
+	tagsDish := generateRatingTagListFromFile(path)
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsDish.MultiLanguageTags {
 		var count int64
@@ -200,42 +200,29 @@ func getTagModel(tagType modelType, db *gorm.DB) *gorm.DB {
 }
 
 func generateNameTagListFromFile(path string) multiLanguageNameTags {
-	file := readFromFile(path)
+	file, err := staticData.ReadFile(path)
+	if err != nil {
+		log.WithError(err).Error("Error including json.")
+	}
 
 	var tags multiLanguageNameTags
-	errjson := json.NewDecoder(file).Decode(&tags)
+	errjson := json.Unmarshal(file, &tags)
 	if errjson != nil {
-		log.WithError(errjson).Error("Error while reading the file.")
+		log.WithError(errjson).Error("Error parsing nameTagList to json.")
 	}
-	defer func(jsonFile *os.File) {
-		if err := jsonFile.Close(); err != nil {
-			log.WithError(err).Error("Error in parsing json.")
-		}
-	}(file)
 	return tags
 }
 
 func generateRatingTagListFromFile(path string) multiLanguageTags {
-	file := readFromFile(path)
-	var tags multiLanguageTags
-	errjson := json.NewDecoder(file).Decode(&tags)
-	if errjson != nil {
-		log.WithError(errjson).Error("Error while reading or parsing the file.")
-	}
-	defer func(jsonFile *os.File) {
-		if err := jsonFile.Close(); err != nil {
-			log.WithError(err).Error("Error in parsing json.")
-		}
-	}(file)
-	return tags
-}
-
-func readFromFile(path string) *os.File {
-	jsonFile, err := os.Open(path)
-
+	file, err := staticData.ReadFile(path)
 	if err != nil {
-		log.WithError(err).Error("Unable to open file with path: ", path)
+		log.WithError(err).Error("Error including json.")
 	}
 
-	return jsonFile
+	var tags multiLanguageTags
+	errjson := json.Unmarshal(file, &tags)
+	if errjson != nil {
+		log.WithError(errjson).Error("Error parsing ratingTagList to json.")
+	}
+	return tags
 }
