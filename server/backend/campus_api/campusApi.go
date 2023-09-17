@@ -4,6 +4,7 @@ package campus_api
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -43,32 +44,32 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 }
 
 func RequestCampusApi(path string, token string, response any) error {
-	requestUrl := "https://exams.free.beeceptor.com/"
+	requestUrl := fmt.Sprintf("%s%s?%s=%s", CampusApiUrl, path, CampusQueryToken, token)
 	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
 
 	if err != nil {
-		log.Errorf("Error while creating request: %s", err)
+		log.WithError(err).Error("Error while creating request")
 		return ErrCannotCreateRequest
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		log.Errorf("Error while fetching %s: %s", path, err)
+		log.WithError(err).WithField("path", path).Error("Error while fetching url")
 		return errors.New("error while fetching " + path)
 	}
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Errorf("Error while closing body: %s", err)
+			log.WithError(err).Error("Error while closing body")
 		}
 	}(resp.Body)
 
 	err = xml.NewDecoder(resp.Body).Decode(&response)
 
 	if err != nil {
-		log.Errorf("Error while unmarshalling %s: %s", path, err)
+		log.WithError(err).WithField("path", path).Error("Error while unmarshalling")
 		return ErrorWhileUnmarshalling
 	}
 
