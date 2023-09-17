@@ -400,7 +400,7 @@ message GetNewsReply {
 message GetNewsRequest {
   // the last id of the news item received. 0 to get all news items
   int32 last_news_id = 1;
-  // filter by news source id. 0 or empty to get all news items
+  // filter by news source id. 0 to get all news items
   int32 news_source = 2;
 }
 
