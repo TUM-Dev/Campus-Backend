@@ -1551,7 +1551,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiMovieMsgElement"
+            "$ref": "#/definitions/apiMovie"
           }
         }
       }
@@ -1794,7 +1794,7 @@
         }
       }
     },
-    "apiMovieMsgElement": {
+    "apiMovie": {
       "type": "object",
       "properties": {
         "coverName": {
@@ -1803,7 +1803,7 @@
         "coverPath": {
           "type": "string"
         },
-        "id": {
+        "movieId": {
           "type": "integer",
           "format": "int32"
         },
@@ -1841,7 +1841,7 @@
         "description": {
           "type": "string"
         },
-        "coverID": {
+        "coverId": {
           "type": "integer",
           "format": "int32"
         },

@@ -17,9 +17,9 @@ func (s *CampusServer) GetMovies(_ context.Context, req *pb.GetMoviesRequest) (*
 		log.WithError(err).Error("Error while fetching movies from database")
 		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
 	}
-	var movieResponse []*pb.MovieMsgElement
+	var movieResponse []*pb.Movie
 	for _, movie := range movies {
-		movieResponse = append(movieResponse, &pb.MovieMsgElement{
+		movieResponse = append(movieResponse, &pb.Movie{
 			Id:          movie.Id,
 			Date:        timestamppb.New(movie.Date),
 			Created:     timestamppb.New(movie.Created),

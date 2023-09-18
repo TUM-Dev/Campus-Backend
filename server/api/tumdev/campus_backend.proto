@@ -655,13 +655,13 @@ message GetMoviesRequest{
 }
 
 message GetMoviesReply{
-  repeated MovieMsgElement movies = 1;
+  repeated Movie movies = 1;
 }
 
-message MovieMsgElement{
+message Movie{
   string coverName = 1;
-  string coverPath = 2;
-  int32 id = 3;
+  string cover_path = 2;
+  int32 movie_id = 3;
   google.protobuf.Timestamp date = 4;
   google.protobuf.Timestamp created = 5;
   string title = 6;
@@ -672,9 +672,9 @@ message MovieMsgElement{
   string director = 10;
   string actors = 11;
   // imdb rating
-  string imdbRating = 12;
+  string imdb_rating = 12;
   string description = 13;
-  int32 coverID = 14;
+  int32 cover_id = 14;
   // was previously the trailer
   reserved 15;
   // Where to find additional information about this movie
