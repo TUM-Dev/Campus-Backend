@@ -141,7 +141,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 func (c *CronService) saveImage(url string) (*model.Files, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
 	file := model.Files{
-		Name: targetFileName,
+		Name: targetFileName, // path intentionally omitted
 	}
 	if err := c.db.First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
