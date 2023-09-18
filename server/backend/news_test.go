@@ -52,8 +52,8 @@ func newsFile(id int32) *model.Files {
 		Name:       fmt.Sprintf("src_%d.png", id),
 		Path:       "news/sources",
 		Downloads:  1,
-		URL:        sql.NullString{Valid: false},
-		Downloaded: sql.NullBool{Bool: true, Valid: true},
+		URL:        null.String{},
+		Downloaded: null.BoolFrom(true),
 	}
 }
 
@@ -61,10 +61,10 @@ func source1() *model.NewsSource {
 	return &model.NewsSource{
 		Source:  1,
 		Title:   "Amazing News 1",
-		URL:     null.String{NullString: sql.NullString{String: "https://example.com/amazing1", Valid: true}},
+		URL:     null.StringFrom("https://example.com/amazing1"),
 		FilesID: newsFile(1).File,
 		Files:   *newsFile(1),
-		Hook:    null.String{NullString: sql.NullString{String: "", Valid: true}},
+		Hook:    null.StringFrom(""),
 	}
 }
 
@@ -72,10 +72,10 @@ func source2() *model.NewsSource {
 	return &model.NewsSource{
 		Source:  2,
 		Title:   "Amazing News 2",
-		URL:     null.String{NullString: sql.NullString{String: "https://example.com/amazing2", Valid: true}},
+		URL:     null.StringFrom("https://example.com/amazing2"),
 		FilesID: newsFile(2).File,
 		Files:   *newsFile(2),
-		Hook:    null.String{NullString: sql.NullString{String: "hook", Valid: true}},
+		Hook:    null.StringFrom("hook"),
 	}
 }
 

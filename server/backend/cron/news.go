@@ -2,7 +2,6 @@ package cron
 
 import (
 	"crypto/md5"
-	"database/sql"
 	"errors"
 	"fmt"
 	"regexp"
@@ -91,7 +90,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		if !skipNews(existingNewsLinksForSource, item.Link) {
 			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
-			var enclosureUrl = null.String{NullString: sql.NullString{Valid: true, String: ""}}
+			var enclosureUrl = null.StringFrom("")
 			for _, enclosure := range item.Enclosures {
 				if strings.HasSuffix(enclosure.URL, "jpg") ||
 					strings.HasSuffix(enclosure.URL, "jpeg") ||
@@ -101,13 +100,13 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			var fileId = null.Int{}
 			if pickedEnclosure != nil {
 				fileId, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
 					log.WithError(err).Error("can't save news image")
 				}
-				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
+				enclosureUrl = null.StringFrom(pickedEnclosure.URL)
 			}
 			bm := bluemonday.StrictPolicy()
 			sanitizedDesc := bm.Sanitize(item.Description)
@@ -155,8 +154,8 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 	file := model.Files{
 		Name:       targetFileName,
 		Path:       ImageDirectory,
-		URL:        sql.NullString{String: url, Valid: true},
-		Downloaded: sql.NullBool{Bool: false, Valid: true},
+		URL:        null.StringFrom(url),
+		Downloaded: null.BoolFrom(false),
 	}
 	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&file).Error; err != nil {
@@ -169,7 +168,7 @@ func (c *CronService) saveImage(url string) (null.Int, error) {
 		return null.Int{}, err
 	}
 	// creating this int is annoying but i'm too afraid to use real ORM in the model
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
+	return null.IntFrom(int64(file.File)), nil
 }
 
 // skipNews returns true if link is in existingLinks or link is invalid
