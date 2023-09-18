@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"testing"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -14,7 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -135,10 +136,12 @@ func (s *NewsSuite) Test_GetNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
+const ExpectedGetNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`Files`.`file` AS `Files__file`,`Files`.`name` AS `Files__name`,`Files`.`path` AS `Files__path`,`Files`.`downloads` AS `Files__downloads`,`Files`.`url` AS `Files__url`,`Files`.`downloaded` AS `Files__downloaded` FROM `news` LEFT JOIN `files` `Files` ON `news`.`file` = `Files`.`file`"
+
 func (s *NewsSuite) Test_GetNewsNone_withFilters() {
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `news` WHERE src = ? AND news > ?")).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file"}))
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -150,8 +153,8 @@ func (s *NewsSuite) Test_GetNewsNone_withFilters() {
 	require.Equal(s.T(), expectedResp, response)
 }
 func (s *NewsSuite) Test_GetNewsNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `news`")).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file"}))
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -165,14 +168,10 @@ func (s *NewsSuite) Test_GetNewsNone() {
 func (s *NewsSuite) Test_GetNewsMultiple() {
 	n1 := news1()
 	n2 := news2()
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `news`")).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file"}).
-			AddRow(n1.News, n1.Date, n1.Created, n1.Title, n1.Description, n1.Src, n1.Link, n1.Image, n1.FilesID).
-			AddRow(n2.News, n2.Date, n2.Created, n2.Title, n2.Description, n2.Src, n2.Link, n2.Image, n2.FilesID))
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `files` WHERE `files`.`file` = ?")).
-		WithArgs(1).
-		WillReturnRows(sqlmock.NewRows([]string{"file", "name", "path", "downloads", "url", "downloaded"}).
-			AddRow(n1.Files.File, n1.Files.Name, n1.Files.Path, n1.Files.Downloads, n1.Files.URL, n1.Files.Downloaded))
+	s.mock.ExpectQuery(regexp.QuoteMeta(" ")).
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}).
+			AddRow(n1.News, n1.Date, n1.Created, n1.Title, n1.Description, n1.Src, n1.Link, n1.Image, n1.FilesID, n1.Files.File, n1.Files.Name, n1.Files.Path, n1.Files.Downloads, n1.Files.URL, n1.Files.Downloaded).
+			AddRow(n2.News, n2.Date, n2.Created, n2.Title, n2.Description, n2.Src, n2.Link, n2.Image, nil, nil, nil, nil, nil, nil, nil))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}

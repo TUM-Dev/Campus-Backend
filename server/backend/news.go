@@ -43,9 +43,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 	}
 
 	var newsEntries []model.News
-	// preloading files as the news images can be null
-	// I could not get outer joins to work => we are currently doing unnecessary db calls
-	tx := s.db.Preload("Files")
+	tx := s.db.Joins("Files")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}

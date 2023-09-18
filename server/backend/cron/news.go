@@ -121,7 +121,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				FilesID:     null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}},
+				FilesID:     null.IntFrom(int64(file.File)),
 				Files:       file,
 			}
 			newNews = append(newNews, newsItem)
