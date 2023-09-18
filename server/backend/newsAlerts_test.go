@@ -107,8 +107,8 @@ func newsAlertFile(id int32) *model.Files {
 		Name:       fmt.Sprintf("src_%d.png", id),
 		Path:       "news/sources",
 		Downloads:  1,
-		URL:        sql.NullString{Valid: false},
-		Downloaded: sql.NullBool{Bool: true, Valid: true},
+		URL:        null.String{},
+		Downloaded: null.BoolFrom(true),
 	}
 }
 func alert1() *model.NewsAlert {
