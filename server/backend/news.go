@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -12,9 +14,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (newsSources *pb.NewsSourceReply, err error) {
-	if err = s.checkDevice(ctx); err != nil {
-		return
+func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (*pb.NewsSourceReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
 	}
 
 	var sources []model.NewsSource
@@ -33,4 +35,38 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (ne
 		})
 	}
 	return &pb.NewsSourceReply{Sources: resp}, nil
+}
+
+func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb.GetNewsReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
+
+	var newsEntries []model.News
+	tx := s.db.Joins("Files")
+	if req.NewsSource != 0 {
+		tx = tx.Where("src = ?", req.NewsSource)
+	}
+	if req.LastNewsId != 0 {
+		tx = tx.Where("news > ?", req.LastNewsId)
+	}
+	if err := tx.Find(&newsEntries).Error; err != nil {
+		log.WithError(err).Error("could not find news item")
+		return nil, status.Error(codes.Internal, "could not GetNews")
+	}
+
+	resp := make([]*pb.NewsItem, len(newsEntries))
+	for i, item := range newsEntries {
+		log.WithField("title", item.Title).Trace("sending news")
+		resp[i] = &pb.NewsItem{
+			Id:       item.News,
+			Title:    item.Title,
+			Text:     item.Description,
+			Link:     item.Link,
+			ImageUrl: item.Image.String,
+			Source:   fmt.Sprintf("%d", item.Src),
+			Created:  timestamppb.New(item.Created),
+		}
+	}
+	return &pb.GetNewsReply{News: resp}, nil
 }
