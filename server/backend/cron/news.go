@@ -143,7 +143,7 @@ func (c *CronService) saveImage(url string) (*model.Files, error) {
 	file := model.Files{
 		Name: targetFileName,
 	}
-	if err := c.db.Model(model.Files{}).First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := c.db.First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
 		return nil, err
 	} else if err == nil {
