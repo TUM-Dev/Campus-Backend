@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/gorm/clause"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
@@ -139,23 +137,39 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// saveImage Saves an image to the database, so it can be downloaded by another cronjob
-func (c *CronService) saveImage(url string) (*model.Files, error) {
+// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
+func (c *CronService) saveImage(url string) (null.Int, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
+	var fileId null.Int
+	if err := c.db.Model(model.Files{}).
+		Where("name = ?", targetFileName).
+		Select("file").Scan(&fileId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
+		return null.Int{}, err
+	}
+	if fileId.Valid { // file already in database -> return for current news.
+		return fileId, nil
+	}
+
+	// otherwise store in database:
 	file := model.Files{
 		Name:       targetFileName,
 		Path:       ImageDirectory,
 		URL:        null.StringFrom(url),
 		Downloaded: null.BoolFrom(false),
 	}
-	if err := c.db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "path"}},
-		DoNothing: true,
-	}).Create(&file).Error; err != nil {
-		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
-		return nil, err
+	err := c.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&file).Error; err != nil {
+			log.WithError(err).Error("Could not store new file to database")
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return null.Int{}, err
 	}
-	return &file, nil
+	// creating this int is annoying but i'm too afraid to use real ORM in the model
+	return null.IntFrom(int64(file.File)), nil
 }
 
 // skipNews returns true if link is in existingLinks or link is invalid
