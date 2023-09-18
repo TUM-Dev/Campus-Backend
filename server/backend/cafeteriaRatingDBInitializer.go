@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"database/sql"
 	"embed"
 	"encoding/json"
 
@@ -57,7 +56,7 @@ func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
 		errCreate := db.Model(&model.Crontab{}).
 			Create(&model.Crontab{
 				Interval: interval,
-				Type:     null.String{NullString: sql.NullString{String: cronName, Valid: true}},
+				Type:     null.StringFrom(cronName),
 				LastRun:  0,
 			}).Error
 		if errCreate != nil {

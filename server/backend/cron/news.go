@@ -2,7 +2,6 @@ package cron
 
 import (
 	"crypto/md5"
-	"database/sql"
 	"errors"
 	"fmt"
 	"regexp"
@@ -102,14 +101,14 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var enclosureUrl null.String
+			var enclosureUrl = null.StringFrom("")
 			var file *model.Files
 			if pickedEnclosure != nil {
 				file, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
 					log.WithError(err).Error("can't save news image")
 				}
-				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
+				enclosureUrl = null.StringFrom(pickedEnclosure.URL)
 			}
 			bm := bluemonday.StrictPolicy()
 			sanitizedDesc := bm.Sanitize(item.Description)
@@ -146,8 +145,8 @@ func (c *CronService) saveImage(url string) (*model.Files, error) {
 	file := model.Files{
 		Name:       targetFileName,
 		Path:       ImageDirectory,
-		URL:        sql.NullString{String: url, Valid: true},
-		Downloaded: sql.NullBool{Bool: false, Valid: true},
+		URL:        null.StringFrom(url),
+		Downloaded: null.BoolFrom(false),
 	}
 	if err := c.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "path"}},
