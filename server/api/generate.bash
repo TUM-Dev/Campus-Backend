@@ -6,8 +6,9 @@ echo making sure that this script is run from $BASEDIR
 pushd $BASEDIR > /dev/null
 
 echo updating the generated files
-buf mod update
-buf generate
+export PATH="$PATH:$(go env GOPATH)/bin"
+buf mod update || exit 1
+buf generate || exit 1
 
 echo making sure the openapi document points to the valid api
 grep -q '"basePath": "/v1"' ./tumdev/campus_backend.swagger.json || sed -i '1 a "basePath": "/v1",' ./tumdev/campus_backend.swagger.json

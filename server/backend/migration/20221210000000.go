@@ -1,8 +1,6 @@
 package migration
 
 import (
-	"database/sql"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -30,7 +28,7 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 
 			return tx.Create(&model.Crontab{
 				Interval: 60 * 5, // Every 5 minutes
-				Type:     null.String{NullString: sql.NullString{String: "canteenHeadCount", Valid: true}},
+				Type:     null.StringFrom("canteenHeadCount"),
 			}).Error
 		},
 
