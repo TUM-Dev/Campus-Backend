@@ -42,9 +42,9 @@ const (
 // The parameter limit defines how many actual ratings should be returned.
 // The optional parameters from and to can define an interval in which the queried ratings have been stored.
 // If these aren't specified, the newest ratings will be returned as the default
-func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CafeteriaRatingRequest) (*pb.CafeteriaRatingReply, error) {
+func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.CanteenRatingRequest) (*pb.CanteenRatingReply, error) {
 	var result model.CafeteriaRatingAverage //get the average rating for this specific cafeteria
-	cafeteriaId := getIDForCafeteriaName(input.CafeteriaId, s.db)
+	cafeteriaId := getIDForCafeteriaName(input.CanteenId, s.db)
 	res := s.db.Model(&model.CafeteriaRatingAverage{}).
 		Where("cafeteriaId = ?", cafeteriaId).
 		First(&result)
@@ -58,7 +58,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaId, s)
 		cafeteriaTags := queryTags(s.db, cafeteriaId, -1, CAFETERIA)
 
-		return &pb.CafeteriaRatingReply{
+		return &pb.CanteenRatingReply{
 			Avg:        float64(result.Average),
 			Std:        float64(result.Std),
 			Min:        int32(result.Min),
@@ -67,7 +67,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 			RatingTags: cafeteriaTags,
 		}, nil
 	} else {
-		return &pb.CafeteriaRatingReply{
+		return &pb.CanteenRatingReply{
 			Avg: -1,
 			Std: -1,
 			Min: -1,
@@ -78,7 +78,7 @@ func (s *CampusServer) GetCafeteriaRatings(_ context.Context, input *pb.Cafeteri
 
 // queryLastCafeteriaRatingsWithLimit
 // Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
-func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.SingleRatingReply {
+func queryLastCafeteriaRatingsWithLimit(input *pb.CanteenRatingRequest, cafeteriaID int32, s *CampusServer) []*pb.SingleRatingReply {
 	var ratings []model.CafeteriaRating
 	var err error
 
@@ -148,7 +148,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.CafeteriaRatingRequest, cafete
 // If these aren't specified, the newest ratings will be returned as the default
 func (s *CampusServer) GetDishRatings(_ context.Context, input *pb.DishRatingRequest) (*pb.DishRatingReply, error) {
 	var result model.DishRatingAverage //get the average rating for this specific dish
-	cafeteriaID := getIDForCafeteriaName(input.CafeteriaId, s.db)
+	cafeteriaID := getIDForCafeteriaName(input.CanteenId, s.db)
 	dishID := getIDForDishName(input.Dish, cafeteriaID, s.db)
 
 	err := s.db.Model(&model.DishRatingAverage{}).
@@ -358,8 +358,8 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
-func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCafeteriaRatingRequest) (*emptypb.Empty, error) {
-	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CafeteriaId, s)
+func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCanteenRatingRequest) (*emptypb.Empty, error) {
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -442,7 +442,7 @@ func storeImage(path string, i []byte) (string, error) {
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
 func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingRequest) (*emptypb.Empty, error) {
 
-	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CafeteriaId, s)
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, s)
 	if errorRes != nil {
 		return nil, errorRes
 	}
@@ -676,8 +676,8 @@ func (s *CampusServer) GetAvailableCafeteriaTags(_ context.Context, _ *emptypb.E
 
 // GetCafeterias RPC endpoint
 // Returns all cafeterias with meta information which are available in the eat-api
-func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCafeteriaReply, error) {
-	var result []*pb.Cafeteria
+func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.GetCanteenReply, error) {
+	var result []*pb.Canteen
 	var requestStatus error = nil
 	err := s.db.Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
 	if err != nil {
@@ -685,8 +685,8 @@ func (s *CampusServer) GetCafeterias(_ context.Context, _ *emptypb.Empty) (*pb.G
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
-	return &pb.GetCafeteriaReply{
-		Cafeteria: result,
+	return &pb.GetCanteenReply{
+		Canteen: result,
 	}, requestStatus
 }
 
@@ -708,7 +708,7 @@ func (s *CampusServer) GetDishes(_ context.Context, request *pb.GetDishesRequest
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", request.CafeteriaId).
+		Where("c.name LIKE ?", request.CanteenId).
 		Select("d.name").
 		Find(&results).Error
 

@@ -73,10 +73,10 @@ service Campus {
   }
 
 
-  // This endpoint retrieves Cafeteria Ratings from the Backend.
-  rpc GetCafeteriaRatings (CafeteriaRatingRequest) returns (CafeteriaRatingReply) {
+  // This endpoint retrieves Canteen Ratings from the Backend.
+  rpc GetCanteenRatings (CanteenRatingRequest) returns (CanteenRatingReply) {
     option (google.api.http) = {
-      post: "/cafeteria/rating/get",
+      post: "/canteen/rating/get",
       body: "*",
     };
   }
@@ -91,9 +91,9 @@ service Campus {
 
 
 
-  rpc NewCafeteriaRating (NewCafeteriaRatingRequest) returns (google.protobuf.Empty) {
+  rpc NewCanteenRating (NewCanteenRatingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/cafeteria/rating/new",
+      post: "/canteen/rating/new",
       body: "*",
     };
   }
@@ -119,17 +119,17 @@ service Campus {
     };
   }
 
-  rpc GetAvailableCafeteriaTags (google.protobuf.Empty) returns (GetTagsReply) {
+  rpc GetAvailableCanteenTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
-      get: "/cafeteria/rating/allRatingTags",
+      get: "/canteen/rating/allRatingTags",
       response_body: "ratingTags"
     };
   }
 
-  rpc GetCafeterias (google.protobuf.Empty) returns (GetCafeteriaReply) {
+  rpc GetCanteens (google.protobuf.Empty) returns (GetCanteenReply) {
     option (google.api.http) = {
-      get: "/cafeteria/allCafeterias",
-      response_body: "cafeteria"
+      get: "/canteen/allCanteens",
+      response_body: "canteen"
     };
   }
 
@@ -422,9 +422,9 @@ message GetTopNewsReply {
   google.protobuf.Timestamp to = 5;
 }
 
-message CafeteriaRatingRequest {
-  // cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
-  string cafeteriaId = 1;
+message CanteenRatingRequest {
+  // canteenId Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
+  string canteenId = 1;
   // Optional Parameter to define an interval for the ratings (Lower bound)
   google.protobuf.Timestamp from = 2;
   // Optional Parameter to define an interval for the ratings (Upper bound)
@@ -435,8 +435,8 @@ message CafeteriaRatingRequest {
 }
 
 message DishRatingRequest {
-  // Mandatory Name of the cafeteria (EAT-API naming scheme "MENSA_GARCHING")
-  string cafeteriaId = 1;
+  // Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
+  string canteenId = 1;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 2;
   // Optional Parameter to define an interval for the ratings (Lower bound)
@@ -447,7 +447,7 @@ message DishRatingRequest {
   int32 limit = 5;
 }
 
-message CafeteriaRatingReply {
+message CanteenRatingReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
   double std = 3;
@@ -477,12 +477,12 @@ message SingleRatingReply{
   google.protobuf.Timestamp visited = 5;
 }
 
-message NewCafeteriaRatingRequest{
+message NewCanteenRatingRequest{
   // number in the range 1-5
   int32 points = 1;
-  string cafeteriaId = 2;
+  string canteenId = 2;
   bytes image = 3;
-  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags
+  // Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags
   repeated RatingTag ratingTags = 4;
   // Optional comment (max 256 chars)
   string comment = 6;
@@ -492,7 +492,7 @@ message NewDishRatingRequest{
   // number in the range 1-5
   int32 points = 1;
   // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
-  string cafeteriaId = 2;
+  string canteenId = 2;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 3;
   // Optional JPEG image in Base64
@@ -531,11 +531,11 @@ message RatingTagResult {
   int32 max = 5;
 }
 
-message GetCafeteriaReply{
-  repeated Cafeteria cafeteria = 1;
+message GetCanteenReply{
+  repeated Canteen canteen = 1;
 }
 
-message Cafeteria{
+message Canteen{
   string id = 1;
   string address = 2;
   double longitude = 3;
@@ -544,7 +544,7 @@ message Cafeteria{
 
 
 message GetDishesRequest{
-  string cafeteriaId = 1;
+  string canteenId = 1;
   // >=2022 until the current year
   int32 year = 2;
   // range 1 - 53
