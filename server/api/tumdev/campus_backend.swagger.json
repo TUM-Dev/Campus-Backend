@@ -166,6 +166,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiCanteen"
               }
             }
@@ -222,6 +223,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -278,6 +280,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -475,6 +478,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -500,6 +504,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -555,6 +560,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
+              "type": "object",
               "properties": {}
             }
           },
@@ -688,6 +694,7 @@
           },
           {
             "name": "imageNr",
+            "description": "todo where does the file come from?",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -773,6 +780,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiGetLocationsReplyLocation"
               }
             }
@@ -836,6 +844,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiNewsSource"
               }
             }
@@ -883,6 +892,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiNewsItem"
               }
             }
@@ -1018,6 +1028,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/GetRoomMapsReplyMap"
               }
             }
@@ -1085,6 +1096,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/GetRoomScheduleReplyRoomScheduleEvent"
               }
             }
@@ -1120,6 +1132,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiRoom"
               }
             }
@@ -1287,6 +1300,7 @@
         "rating": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1309,6 +1323,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1353,6 +1368,7 @@
         "rating": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1375,12 +1391,14 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         },
         "nameTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1420,6 +1438,7 @@
         "areaFacilitiesByBuildingNr": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRoomInformationElement"
           }
         }
@@ -1431,6 +1450,7 @@
         "building2Gps": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiBuilding2GpsElement"
           }
         }
@@ -1467,6 +1487,7 @@
         "canteen": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiCanteen"
           }
         }
@@ -1489,6 +1510,7 @@
         "kinos": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiKinoMsgElement"
           }
         }
@@ -1500,6 +1522,7 @@
         "listOfElevators": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRoomInformationElement"
           }
         }
@@ -1511,6 +1534,7 @@
         "listOfToilets": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRoomInformationElement"
           }
         }
@@ -1522,6 +1546,7 @@
         "locations": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiGetLocationsReplyLocation"
           }
         }
@@ -1568,6 +1593,7 @@
         "information": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiMoreInformationElement"
           }
         }
@@ -1579,6 +1605,7 @@
         "news": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNewsItem"
           }
         }
@@ -1620,6 +1647,7 @@
         "facilities": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiOpeningTimesMsgElement"
           }
         }
@@ -1631,6 +1659,7 @@
         "responsiblePerson": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiResponsiblePersonElement"
           }
         }
@@ -1666,6 +1695,7 @@
         "maps": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/GetRoomMapsReplyMap"
           }
         }
@@ -1685,6 +1715,7 @@
         "events": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/GetRoomScheduleReplyRoomScheduleEvent"
           }
         }
@@ -1713,6 +1744,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiStudyRoomMsgElement"
           }
         }
@@ -1724,6 +1756,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1891,6 +1924,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
@@ -1925,6 +1959,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
@@ -1983,6 +2018,7 @@
         "sources": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNewsSource"
           }
         }
@@ -2201,6 +2237,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRoom"
           }
         }
@@ -2242,6 +2279,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagNewRequest"
           }
         },
@@ -2289,6 +2327,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiStudyRoom"
           }
         }
@@ -2331,6 +2370,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
