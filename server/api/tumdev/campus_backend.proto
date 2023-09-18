@@ -279,26 +279,26 @@ enum DeviceType {
 }
 
 message RegisterDeviceRequest {
-  string deviceId = 1;
-  optional string publicKey = 2;
-  DeviceType deviceType = 3;
+  string device_id = 1;
+  optional string public_key = 2;
+  DeviceType device_type = 3;
 }
 
 message RegisterDeviceReply {
-  string deviceId = 1;
+  string device_id = 1;
 }
 
 message RemoveDeviceRequest {
-  string deviceId = 1;
-  DeviceType deviceType = 2;
+  string device_id = 1;
+  DeviceType device_type = 2;
 }
 
 message RemoveDeviceReply {
-  string deviceId = 1;
+  string device_id = 1;
 }
 
 message IOSDeviceRequestResponseRequest {
-  string requestId = 1;
+  string request_id = 1;
   string payload = 2;
 }
 
@@ -372,7 +372,7 @@ message SearchRoomsReply {
 }
 
 message Room {
-  int32  roomId = 1;
+  int32  room_id = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -424,7 +424,7 @@ message GetTopNewsReply {
 
 message CanteenRatingRequest {
   // canteenId Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
-  string canteenId = 1;
+  string canteen_id = 1;
   // Optional Parameter to define an interval for the ratings (Lower bound)
   google.protobuf.Timestamp from = 2;
   // Optional Parameter to define an interval for the ratings (Upper bound)
@@ -436,7 +436,7 @@ message CanteenRatingRequest {
 
 message DishRatingRequest {
   // Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
-  string canteenId = 1;
+  string canteen_id = 1;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 2;
   // Optional Parameter to define an interval for the ratings (Lower bound)
@@ -453,7 +453,7 @@ message CanteenRatingReply {
   double std = 3;
   int32 min = 4;
   int32 max = 5;
-  repeated RatingTagResult ratingTags = 6;
+  repeated RatingTagResult rating_tags = 6;
 }
 
 message DishRatingReply {
@@ -462,8 +462,8 @@ message DishRatingReply {
   double std = 3;
   int32 min = 4;
   int32 max = 5;
-  repeated RatingTagResult ratingTags = 6;
-  repeated RatingTagResult nameTags = 7;
+  repeated RatingTagResult rating_tags = 6;
+  repeated RatingTagResult name_tags = 7;
 }
 
 message SingleRatingReply{
@@ -473,17 +473,17 @@ message SingleRatingReply{
   bytes image = 2;
   // Optional comment (max 256 chars)
   string comment = 3;
-  repeated RatingTagNewRequest ratingTags = 4;
+  repeated RatingTagNewRequest rating_tags = 4;
   google.protobuf.Timestamp visited = 5;
 }
 
 message NewCanteenRatingRequest{
   // number in the range 1-5
   int32 points = 1;
-  string canteenId = 2;
+  string canteen_id = 2;
   bytes image = 3;
   // Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags
-  repeated RatingTag ratingTags = 4;
+  repeated RatingTag rating_tags = 4;
   // Optional comment (max 256 chars)
   string comment = 6;
 }
@@ -492,39 +492,39 @@ message NewDishRatingRequest{
   // number in the range 1-5
   int32 points = 1;
   // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
-  string canteenId = 2;
+  string canteen_id = 2;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
   string dish = 3;
   // Optional JPEG image in Base64
   bytes image = 4;
   // Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags
-  repeated RatingTag ratingTags = 5;
+  repeated RatingTag rating_tags = 5;
   // Optional comment (max 256 chars)
   string comment = 7;
 }
 
 message GetTagsReply{
-  repeated TagsOverview ratingTags = 1;
+  repeated TagsOverview rating_tags = 1;
 }
 
 message TagsOverview {
-  int32 tagId = 1;
+  int32 tag_id = 1;
   string de = 2;
   string en = 3;
 }
 
 message RatingTag {
-  int32 tagId = 1;
+  int32 tag_id = 1;
   double points = 2;
 }
 
 message RatingTagNewRequest {
-  int32 tagId = 1;
+  int32 tag_id = 1;
   int32 points = 2;
 }
 
 message RatingTagResult {
-  int32 tagId = 1;
+  int32 tag_id = 1;
   double avg = 2;
   double std = 3;
   int32 min = 4;
@@ -544,7 +544,7 @@ message Canteen{
 
 
 message GetDishesRequest{
-  string canteenId = 1;
+  string canteen_id = 1;
   // >=2022 until the current year
   int32 year = 2;
   // range 1 - 53
@@ -558,7 +558,7 @@ message GetDishesReply{
 }
 
 message GetResponsiblePersonReply {
-  repeated ResponsiblePersonElement responsiblePerson = 1;
+  repeated ResponsiblePersonElement responsible_person = 1;
 }
 
 message ResponsiblePersonElement{
@@ -566,23 +566,22 @@ message ResponsiblePersonElement{
   string telephone = 2;
   string email = 3;
   string faculty = 4;
-  string tumID = 5;
+  string tum_id = 5;
 
 }
 
 message GetBuilding2GpsReply {
-  repeated Building2GpsElement building2Gps = 1;
+  repeated Building2GpsElement building_2_gps = 1;
 }
 
 message Building2GpsElement{
   string id = 1;
   string latitude = 2;
   string longitude = 3;
-
 }
 
 message GetAreaFacilitiesByBuildingNrReply {
-  repeated RoomInformationElement areaFacilitiesByBuildingNr = 1;
+  repeated RoomInformationElement area_facilities_by_building_nr = 1;
 }
 
 
@@ -592,11 +591,11 @@ message GetAreaFacilitiesByBuildingNrRequest {
 }
 
 message GetListOfToiletsReply {
-  repeated RoomInformationElement listOfToilets = 1;
+  repeated RoomInformationElement list_of_toilets = 1;
 }
 
 message RoomInformationElement{
-  int32  roomId = 1;
+  int32  room_id = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -608,7 +607,7 @@ message RoomInformationElement{
 }
 
 message GetListOfElevatorsReply {
-  repeated RoomInformationElement listOfElevators = 1;
+  repeated RoomInformationElement list_of_elevators = 1;
 }
 
 
@@ -671,14 +670,14 @@ message StudyRoomMsgElement{
 
 message StudyRoom{
   int32 group_id = 1;
-  int32  roomId = 2;
+  int32  room_id = 2;
   string room_code = 3;
   string room_name = 4;
   string building_name = 5;
 }
 
 message GetKinoRequest{
-  int32 lastId = 1;
+  int32 last_id = 1;
 }
 
 message GetKinoReply{
@@ -707,13 +706,13 @@ message KinoMsgElement{
 message SendFeedbackRequest{
   string topic = 1;
   string email = 2;
-  string emailId = 3;
+  string email_id = 3;
   string message = 4;
   int32 image_count = 5;
   double latitude = 6;
   double longitude = 7;
-  string osVersion = 8;
-  string appVersion = 9;
+  string os_version = 8;
+  string app_version = 9;
 }
 
 message SendFeedbackImageReply{
@@ -728,17 +727,17 @@ message SendFeedbackImageRequest{
 
 
 message GetMembersRequest{
-  string lrzId = 1;
+  string lrz_id = 1;
 }
 
 message GetMembersReply{
-  string lrzId = 1;
+  string lrz_id = 1;
   string name = 2;
-  int32 memberId = 3;
+  int32 member_id = 3;
 }
 
 message GetUploadStatusRequest{
-  string lrzId = 1;
+  string lrz_id = 1;
 }
 
 message GetUploadStatusReply{
@@ -750,7 +749,7 @@ message GetUploadStatusReply{
 }
 
 message GetNotificationsReply{
-  int32 notificationId=1;
+  int32 notification_id=1;
   int32 type=2;
   string title=3;
   string description=4;
@@ -759,7 +758,7 @@ message GetNotificationsReply{
 
 
 message NotificationsRequest{
-  int32 notificationId=1;
+  int32 notification_id=1;
 }
 
 message GetNotificationsConfirmReply{
@@ -768,14 +767,14 @@ message GetNotificationsConfirmReply{
 
 message GetCanteenHeadCountRequest {
   // The requested canteen ID
-  string canteenId = 1;
+  string canteen_id = 1;
 }
 
 message GetCanteenHeadCountReply {
   // The absolut count of humans in the canteen. Only valid in case percent != -1.
   uint32 count = 1;
   // The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1.
-  uint32 maxCount = 2;
+  uint32 max_count = 2;
   // Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available.
   float percent = 3;
   // A time stamp indicating how up to date the response is. Only valid in case percent != -1.
