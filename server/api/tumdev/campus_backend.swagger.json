@@ -760,7 +760,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "$ref": "#/definitions/apiNewsItem"
+                "$ref": "#/definitions/apiNews"
               }
             }
           },
@@ -1278,7 +1278,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiNewsItem"
+            "$ref": "#/definitions/apiNews"
           }
         }
       }
@@ -1561,7 +1561,7 @@
         }
       }
     },
-    "apiNewsItem": {
+    "apiNews": {
       "type": "object",
       "properties": {
         "id": {

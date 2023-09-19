@@ -148,7 +148,7 @@ func (s *NewsSuite) Test_GetNewsNone_withFilters() {
 	response, err := server.GetNews(meta, &pb.GetNewsRequest{NewsSource: 1, LastNewsId: 2})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.GetNewsReply{
-		News: []*pb.NewsItem{},
+		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
@@ -161,7 +161,7 @@ func (s *NewsSuite) Test_GetNewsNone() {
 	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.GetNewsReply{
-		News: []*pb.NewsItem{},
+		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
@@ -178,7 +178,7 @@ func (s *NewsSuite) Test_GetNewsMultiple() {
 	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.GetNewsReply{
-		News: []*pb.NewsItem{
+		News: []*pb.News{
 			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: n1.Image.String, Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created)},
 			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: n2.Image.String, Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created)},
 		},
