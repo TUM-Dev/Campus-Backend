@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -175,7 +176,11 @@ func extractImdbIDFromTUFilmWebsite(url string) (string, error) {
 		}
 	}(resp.Body)
 	// parse the response body
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	return parseImdbIDFromReader(resp.Body)
+}
+
+func parseImdbIDFromReader(body io.Reader) (string, error) {
+	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		log.WithError(err).Error("Error while parsing document")
 		return "", err
@@ -190,14 +195,12 @@ func extractImdbIDFromTUFilmWebsite(url string) (string, error) {
 		return "", errors.New("no imdb link found")
 	}
 	if imdbLinks.Length() > 1 {
-		log.WithField("url", url).Warn("more than one imdb link found. using first one")
+		log.Warn("more than one imdb link found. using first one")
 	}
 	// extract the imdb id from the link
 	href, _ := imdbLinks.First().Attr("href")
-	href = strings.TrimSuffix(href, "/")
-	hrefParts := strings.Split(href, "/")
-	imdbID := hrefParts[len(hrefParts)-1]
-	return imdbID, nil
+	re := regexp.MustCompile(`https?://www.imdb.com/title/(?P<imdb_id>[^/]+)/?`)
+	return re.FindStringSubmatch(href)[re.SubexpIndex("imdb_id")], nil
 }
 
 // parseUpcomingFeed downloads a file from a given url and returns the path to the file
