@@ -17,28 +17,6 @@
     "application/json"
   ],
   "paths": {
-    "/barrierfree/building_2_gps": {
-      "get": {
-        "operationId": "Campus_GetBuilding2Gps",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetBuilding2GpsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/barrierfree/contacts": {
       "get": {
         "operationId": "Campus_GetResponsiblePerson",
@@ -61,28 +39,6 @@
         ]
       }
     },
-    "/barrierfree/elevators": {
-      "get": {
-        "operationId": "Campus_GetListOfElevators",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetListOfElevatorsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/barrierfree/moreInformation": {
       "get": {
         "operationId": "Campus_GetMoreInformation",
@@ -91,58 +47,6 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/apiGetMoreInformationReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/nearby": {
-      "get": {
-        "operationId": "Campus_GetAreaFacilitiesByBuildingNr",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetAreaFacilitiesByBuildingNrReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "buildingNr",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/toilets": {
-      "get": {
-        "operationId": "Campus_GetListOfToilets",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetListOfToiletsReply"
             }
           },
           "default": {
@@ -1075,16 +979,16 @@
     }
   },
   "definitions": {
-    "apiBuilding2GpsElement": {
+    "GetMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
-        "id": {
+        "title": {
           "type": "string"
         },
-        "latitude": {
+        "category": {
           "type": "string"
         },
-        "longitude": {
+        "url": {
           "type": "string"
         }
       }
@@ -1246,30 +1150,6 @@
         }
       }
     },
-    "apiGetAreaFacilitiesByBuildingNrReply": {
-      "type": "object",
-      "properties": {
-        "areaFacilitiesByBuildingNr": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
-    "apiGetBuilding2GpsReply": {
-      "type": "object",
-      "properties": {
-        "building2Gps": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiBuilding2GpsElement"
-          }
-        }
-      }
-    },
     "apiGetCanteenHeadCountReply": {
       "type": "object",
       "properties": {
@@ -1330,30 +1210,6 @@
         }
       }
     },
-    "apiGetListOfElevatorsReply": {
-      "type": "object",
-      "properties": {
-        "listOfElevators": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
-    "apiGetListOfToiletsReply": {
-      "type": "object",
-      "properties": {
-        "listOfToilets": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
     "apiGetMembersReply": {
       "type": "object",
       "properties": {
@@ -1372,11 +1228,11 @@
     "apiGetMoreInformationReply": {
       "type": "object",
       "properties": {
-        "information": {
+        "infos": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiMoreInformationElement"
+            "$ref": "#/definitions/GetMoreInformationReplyMoreInformation"
           }
         }
       }
@@ -1442,7 +1298,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiResponsiblePersonElement"
+            "$ref": "#/definitions/apiResponsiblePerson"
           }
         }
       }
@@ -1597,20 +1453,6 @@
           "type": "string"
         },
         "link": {
-          "type": "string"
-        }
-      }
-    },
-    "apiMoreInformationElement": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "category": {
-          "type": "string"
-        },
-        "url": {
           "type": "string"
         }
       }
@@ -1854,7 +1696,7 @@
         }
       }
     },
-    "apiResponsiblePersonElement": {
+    "apiResponsiblePerson": {
       "type": "object",
       "properties": {
         "name": {
@@ -1875,39 +1717,6 @@
       }
     },
     "apiRoom": {
-      "type": "object",
-      "properties": {
-        "roomId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "roomCode": {
-          "type": "string"
-        },
-        "buildingNr": {
-          "type": "string"
-        },
-        "archId": {
-          "type": "string"
-        },
-        "info": {
-          "type": "string"
-        },
-        "address": {
-          "type": "string"
-        },
-        "purpose": {
-          "type": "string"
-        },
-        "campus": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "apiRoomInformationElement": {
       "type": "object",
       "properties": {
         "roomId": {

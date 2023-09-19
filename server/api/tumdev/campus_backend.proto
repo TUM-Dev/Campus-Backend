@@ -103,27 +103,11 @@ service Campus {
     };
   }
 
-  rpc GetResponsiblePerson(google.protobuf.Empty) returns (GetResponsiblePersonReply) {
+  rpc GetResponsiblePerson(GetResponsiblePersonRequest) returns (GetResponsiblePersonReply) {
     option (google.api.http) = {get: "/barrierfree/contacts"};
   }
 
-  rpc GetBuilding2Gps(google.protobuf.Empty) returns (GetBuilding2GpsReply) {
-    option (google.api.http) = {get: "/barrierfree/building_2_gps"};
-  }
-
-  rpc GetAreaFacilitiesByBuildingNr(GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
-    option (google.api.http) = {get: "/barrierfree/nearby"};
-  }
-
-  rpc GetListOfToilets(google.protobuf.Empty) returns (GetListOfToiletsReply) {
-    option (google.api.http) = {get: "/barrierfree/toilets"};
-  }
-
-  rpc GetListOfElevators(google.protobuf.Empty) returns (GetListOfElevatorsReply) {
-    option (google.api.http) = {get: "/barrierfree/elevators"};
-  }
-
-  rpc GetMoreInformation(google.protobuf.Empty) returns (GetMoreInformationReply) {
+  rpc GetMoreInformation(GetMoreInformationRequest) returns (GetMoreInformationReply) {
     option (google.api.http) = {get: "/barrierfree/moreInformation"};
   }
 
@@ -420,38 +404,17 @@ message GetDishesReply {
   repeated string dish = 1;
 }
 
+message GetResponsiblePersonRequest {}
 message GetResponsiblePersonReply {
-  repeated ResponsiblePersonElement responsible_person = 1;
+  repeated ResponsiblePerson responsible_person = 1;
 }
 
-message ResponsiblePersonElement {
+message ResponsiblePerson {
   string name = 1;
   string telephone = 2;
   string email = 3;
   string faculty = 4;
   string tum_id = 5;
-}
-
-message GetBuilding2GpsReply {
-  repeated Building2GpsElement building_2_gps = 1;
-}
-
-message Building2GpsElement {
-  string id = 1;
-  string latitude = 2;
-  string longitude = 3;
-}
-
-message GetAreaFacilitiesByBuildingNrReply {
-  repeated RoomInformationElement area_facilities_by_building_nr = 1;
-}
-
-message GetAreaFacilitiesByBuildingNrRequest {
-  string building_nr = 1;
-}
-
-message GetListOfToiletsReply {
-  repeated RoomInformationElement list_of_toilets = 1;
 }
 
 message RoomInformationElement {
@@ -466,18 +429,14 @@ message RoomInformationElement {
   string name = 9;
 }
 
-message GetListOfElevatorsReply {
-  repeated RoomInformationElement list_of_elevators = 1;
-}
-
+message GetMoreInformationRequest {}
 message GetMoreInformationReply {
-  repeated MoreInformationElement information = 1;
-}
-
-message MoreInformationElement {
-  string title = 1;
-  string category = 2;
-  string url = 3;
+  message MoreInformation {
+    string title = 1;
+    string category = 2;
+    string url = 3;
+  }
+  repeated MoreInformation infos = 1;
 }
 
 message GetOpeningTimesRequest {

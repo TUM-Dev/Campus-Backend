@@ -417,7 +417,7 @@ func local_request_Campus_GetDishes_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetResponsiblePersonRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetResponsiblePerson(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -426,7 +426,7 @@ func request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetResponsiblePersonRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetResponsiblePerson(ctx, &protoReq)
@@ -434,98 +434,8 @@ func local_request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler 
 
 }
 
-func request_Campus_GetBuilding2Gps_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetBuilding2Gps(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetBuilding2Gps_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetBuilding2Gps(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-var (
-	filter_Campus_GetAreaFacilitiesByBuildingNr_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
-func request_Campus_GetAreaFacilitiesByBuildingNr_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAreaFacilitiesByBuildingNrRequest
-	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetAreaFacilitiesByBuildingNr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.GetAreaFacilitiesByBuildingNr(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetAreaFacilitiesByBuildingNr_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAreaFacilitiesByBuildingNrRequest
-	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetAreaFacilitiesByBuildingNr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.GetAreaFacilitiesByBuildingNr(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_Campus_GetListOfToilets_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetListOfToilets(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetListOfToilets_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetListOfToilets(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_Campus_GetListOfElevators_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetListOfElevators(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetListOfElevators_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetListOfElevators(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
 func request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetMoreInformationRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetMoreInformation(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -534,7 +444,7 @@ func request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.
 }
 
 func local_request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetMoreInformationRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetMoreInformation(ctx, &protoReq)
@@ -1578,106 +1488,6 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetBuilding2Gps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetBuilding2Gps", runtime.WithHTTPPathPattern("/barrierfree/building_2_gps"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetBuilding2Gps_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetBuilding2Gps_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetAreaFacilitiesByBuildingNr_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAreaFacilitiesByBuildingNr", runtime.WithHTTPPathPattern("/barrierfree/nearby"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfToilets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetListOfToilets", runtime.WithHTTPPathPattern("/barrierfree/toilets"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetListOfToilets_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfToilets_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfElevators_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetListOfElevators", runtime.WithHTTPPathPattern("/barrierfree/elevators"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetListOfElevators_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfElevators_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("GET", pattern_Campus_GetMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -2402,94 +2212,6 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetBuilding2Gps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetBuilding2Gps", runtime.WithHTTPPathPattern("/barrierfree/building_2_gps"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetBuilding2Gps_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetBuilding2Gps_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetAreaFacilitiesByBuildingNr_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAreaFacilitiesByBuildingNr", runtime.WithHTTPPathPattern("/barrierfree/nearby"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfToilets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetListOfToilets", runtime.WithHTTPPathPattern("/barrierfree/toilets"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetListOfToilets_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfToilets_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfElevators_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetListOfElevators", runtime.WithHTTPPathPattern("/barrierfree/elevators"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetListOfElevators_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfElevators_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
 	mux.Handle("GET", pattern_Campus_GetMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -2924,14 +2646,6 @@ var (
 
 	pattern_Campus_GetResponsiblePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "contacts"}, ""))
 
-	pattern_Campus_GetBuilding2Gps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "building_2_gps"}, ""))
-
-	pattern_Campus_GetAreaFacilitiesByBuildingNr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "nearby"}, ""))
-
-	pattern_Campus_GetListOfToilets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "toilets"}, ""))
-
-	pattern_Campus_GetListOfElevators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "elevators"}, ""))
-
 	pattern_Campus_GetMoreInformation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "moreInformation"}, ""))
 
 	pattern_Campus_GetOpeningTimes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"openingtimes", "language"}, ""))
@@ -2991,14 +2705,6 @@ var (
 	forward_Campus_GetDishes_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetResponsiblePerson_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetBuilding2Gps_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetAreaFacilitiesByBuildingNr_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetListOfToilets_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetListOfElevators_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetMoreInformation_0 = runtime.ForwardResponseMessage
 
