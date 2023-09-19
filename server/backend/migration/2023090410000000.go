@@ -1,8 +1,6 @@
 package migration
 
 import (
-	"database/sql"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -27,8 +25,8 @@ func (m TumDBMigrator) migrate2023090410000000() *gormigrate.Migration {
 			}
 			if err := tx.Create(&model.Crontab{
 				Interval: 60 * 60 * 24, // daily
-				Type:     null.String{NullString: sql.NullString{String: "movie", Valid: true}},
-				ID:       null.Int{NullInt64: sql.NullInt64{Int64: 2, Valid: true}},
+				Type:     null.StringFrom("movie"),
+				ID:       null.IntFrom(2),
 			}).Error; err != nil {
 				return err
 			}
@@ -48,7 +46,7 @@ func (m TumDBMigrator) migrate2023090410000000() *gormigrate.Migration {
 			}
 			if err := tx.Create(&model.Crontab{
 				Interval: 24 * 60 * 60, // daily
-				Type:     null.String{NullString: sql.NullString{String: "kino", Valid: true}},
+				Type:     null.StringFrom("kino"),
 			}).Error; err != nil {
 				return err
 			}

@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
-	"github.com/guregu/null"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/guregu/null"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
