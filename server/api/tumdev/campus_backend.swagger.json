@@ -1445,8 +1445,8 @@
           "type": "string"
         },
         "movieId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "date": {
           "type": "string",
@@ -1483,8 +1483,8 @@
           "type": "string"
         },
         "coverId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "link": {
           "type": "string",
