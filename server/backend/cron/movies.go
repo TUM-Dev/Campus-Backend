@@ -37,20 +37,9 @@ const (
 	MovieImageDirectory = "movie/"
 )
 
-func (c *CronService) movieCron(cronjob *model.Crontab) error {
-	//Get the news feed we want to get our data from
-	if !cronjob.ID.Valid {
-		log.WithField("cron", cronjob.Cron).Error("skipping movie job, id of source is null")
-		return errors.New("skipping movie job, id of source is null")
-	}
-	var newsSource model.NewsSource
-	if err := c.db.First(&newsSource, cronjob.ID.Int64).Error; err != nil {
-		log.WithField("cron", cronjob.Cron).Error("error getting news source from database")
-		return err
-	}
-	//Parse the data into a struct
-	log.WithField("url", newsSource.URL.String).Trace("parsing upcoming feed")
-	channels, err := parseUpcomingFeed(newsSource.URL.String)
+func (c *CronService) movieCron() error {
+	log.Trace("parsing upcoming feed")
+	channels, err := parseUpcomingFeed()
 	if err != nil {
 		return err
 	}
@@ -116,7 +105,7 @@ func (c *CronService) movieCron(cronjob *model.Crontab) error {
 				log.WithFields(logFields).WithError(err).Error("error while creating movie")
 				continue
 			} else {
-				log.WithFields(logFields).Info("created movie")
+				log.WithFields(logFields).Debug("created movie")
 			}
 		}
 	}
@@ -211,11 +200,10 @@ func extractTUFilmWebsite(url string) (string, error) {
 }
 
 // parseUpcomingFeed downloads a file from a given url and returns the path to the file
-// url: download url of the file, e.g. http://www.tu-film.de/programm/index/upcoming.rss
-func parseUpcomingFeed(url string) ([]MovieChannel, error) {
-	resp, err := http.Get(url)
+func parseUpcomingFeed() ([]MovieChannel, error) {
+	resp, err := http.Get("https://www.tu-film.de/programm/index/upcoming.rss")
 	if err != nil {
-		log.WithField("url", url).WithError(err).Error("Error while getting response for request")
+		log.WithError(err).Error("Error while getting response for request")
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {

@@ -106,10 +106,7 @@ func (c *CronService) Run() error {
 					g.Go(c.averageRatingComputation)
 				}
 			case MovieType:
-				// if this is not copied here, this may not be threads save due to go's guarantees
-				// loop variable cronjob captured by func literal (govet)
-				copyCronjob := cronjob
-				g.Go(func() error { return c.movieCron(&copyCronjob) })
+				g.Go(func() error { return c.movieCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
