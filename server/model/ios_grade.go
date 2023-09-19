@@ -55,7 +55,7 @@ func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) boo
 // IOSEncryptedGrade is a grade that can be encrypted.
 // Whether it is currently encrypted or not is indicated by the IsEncrypted field.
 type IOSEncryptedGrade struct {
-	ID           uint      `gorm:"primaryKey"`
+	ID           int64     `gorm:"primaryKey"`
 	Device       IOSDevice `gorm:"constraint:OnDelete:CASCADE"`
 	DeviceID     string    `gorm:"index;not null"`
 	LectureTitle string    `gorm:"not null"`

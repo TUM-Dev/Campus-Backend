@@ -17,7 +17,7 @@ var (
 
 // RoomfinderMaps struct is a row record of the roomfinder_maps table in the tca database
 type RoomfinderMaps struct {
-	MapID       int32  `gorm:"primary_key;column:map_id;type:int;" json:"map_id"`
+	MapID       int64  `gorm:"primary_key;column:map_id;type:int;" json:"map_id"`
 	Description string `gorm:"column:description;type:varchar(64);" json:"description"`
 	Scale       int32  `gorm:"column:scale;type:int;" json:"scale"`
 	Width       int32  `gorm:"column:width;type:int;" json:"width"`

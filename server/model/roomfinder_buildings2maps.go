@@ -18,7 +18,7 @@ var (
 // RoomfinderBuildings2maps struct is a row record of the roomfinder_buildings2maps table in the tca database
 type RoomfinderBuildings2maps struct {
 	BuildingNr string `gorm:"primary_key;column:building_nr;type:varchar(8);" json:"building_nr"`
-	MapID      int32  `gorm:"primary_key;column:map_id;type:int;" json:"map_id"`
+	MapID      int64  `gorm:"primary_key;column:map_id;type:int;" json:"map_id"`
 }
 
 // TableName sets the insert table name for this struct type
