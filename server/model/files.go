@@ -17,7 +17,7 @@ var (
 
 // Files struct is a row record of the files table in the tca database
 type Files struct {
-	File       int32       `gorm:"primary_key;AUTO_INCREMENT;column:file;type:int;" json:"file"`
+	File       int64       `gorm:"primary_key;AUTO_INCREMENT;column:file;type:int;" json:"file"`
 	Name       string      `gorm:"column:name;type:text;size:16777215;" json:"name"`
 	Path       string      `gorm:"column:path;type:text;size:16777215;" json:"path"`
 	Downloads  int32       `gorm:"column:downloads;type:int;default:0;" json:"downloads"`
