@@ -6,6 +6,7 @@ echo making sure that this script is run from $BASEDIR
 pushd $BASEDIR > /dev/null
 
 echo updating the generated files
+export PATH="$PATH:$(go env GOPATH)/bin"
 buf mod update || exit 1
 buf generate || exit 1
 
@@ -17,8 +18,9 @@ rm -f google/api/*.go
 rm -f google/api/*.swagger.json
 
 echo maing sure that the generated files are formatted
-go fmt tumdev/*.go
-goimports -w tumdev/*.go
+go fmt tumdev/*.go || exit 1
+goimports -w tumdev/*.go || exit 1
+buf format -w --path tumdev || exit 1
 
 # clean up the stack
 popd > /dev/null

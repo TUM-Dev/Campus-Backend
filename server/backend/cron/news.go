@@ -2,7 +2,6 @@ package cron
 
 import (
 	"crypto/md5"
-	"database/sql"
 	"errors"
 	"fmt"
 	"regexp"
@@ -91,7 +90,6 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		if !skipNews(existingNewsLinksForSource, item.Link) {
 			// pick the first enclosure that is an image (if any)
 			var pickedEnclosure *gofeed.Enclosure
-			var enclosureUrl = null.String{NullString: sql.NullString{Valid: true, String: ""}}
 			for _, enclosure := range item.Enclosures {
 				if strings.HasSuffix(enclosure.URL, "jpg") ||
 					strings.HasSuffix(enclosure.URL, "jpeg") ||
@@ -101,13 +99,14 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 					break
 				}
 			}
-			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
+			var enclosureUrl = null.StringFrom("")
+			var file *model.Files
 			if pickedEnclosure != nil {
-				fileId, err = c.saveImage(pickedEnclosure.URL)
+				file, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
 					log.WithError(err).Error("can't save news image")
 				}
-				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
+				enclosureUrl = null.StringFrom(pickedEnclosure.URL)
 			}
 			bm := bluemonday.StrictPolicy()
 			sanitizedDesc := bm.Sanitize(item.Description)
@@ -120,7 +119,8 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				File:        fileId,
+				FilesID:     null.IntFrom(file.File),
+				Files:       file,
 			}
 			newNews = append(newNews, newsItem)
 		}
@@ -138,38 +138,30 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 }
 
 // saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
-func (c *CronService) saveImage(url string) (null.Int, error) {
+func (c *CronService) saveImage(url string) (*model.Files, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
-	var fileId null.Int
-	if err := c.db.Model(model.Files{}).
-		Where("name = ?", targetFileName).
-		Select("file").Scan(&fileId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
-		return null.Int{}, err
+	file := model.Files{
+		Name: targetFileName, // path intentionally omitted
 	}
-	if fileId.Valid { // file already in database -> return for current news.
-		return fileId, nil
+	if err := c.db.First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
+		return nil, err
+	} else if err == nil {
+		return &file, nil
 	}
 
-	// otherwise store in database:
-	file := model.Files{
+	// does not exist, store in database
+	file = model.Files{
 		Name:       targetFileName,
 		Path:       ImageDirectory,
-		URL:        sql.NullString{String: url, Valid: true},
-		Downloaded: sql.NullBool{Bool: false, Valid: true},
+		URL:        null.StringFrom(url),
+		Downloaded: null.BoolFrom(false),
 	}
-	err := c.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&file).Error; err != nil {
-			log.WithError(err).Error("Could not store new file to database")
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return null.Int{}, err
+	if err := c.db.Create(&file).Error; err != nil {
+		log.WithError(err).Error("Could not store new file to database")
+		return nil, err
 	}
-	// creating this int is annoying but i'm too afraid to use real ORM in the model
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
+	return &file, nil
 }
 
 // skipNews returns true if link is in existingLinks or link is invalid
@@ -185,7 +177,7 @@ func skipNews(existingLinks []string, link string) bool {
 	return false
 }
 
-func (c *CronService) cleanOldNewsForSource(source int32) error {
+func (c *CronService) cleanOldNewsForSource(source int64) error {
 	log.WithField("source", source).Trace("Truncating old entries")
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
 		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")

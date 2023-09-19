@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
@@ -43,7 +42,7 @@ func main() {
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Info("Trying to fetch top news")
-	if r, err := c.GetTopNews(ctx, &emptypb.Empty{}); err != nil {
+	if r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{}); err != nil {
 		log.WithError(err).Fatal("could not greet")
 	} else {
 		log.WithField("topNewsResponse", r.String()).Info("fetched top news successfully")
