@@ -24,7 +24,7 @@ func (s *CampusServer) GetMovies(_ context.Context, req *pb.GetMoviesRequest) (*
 			Date:        timestamppb.New(movie.Date),
 			Created:     timestamppb.New(movie.Created),
 			Title:       movie.Title,
-			Year:        movie.Year,
+			ReleaseYear: movie.Year,
 			Runtime:     movie.Runtime,
 			Genre:       movie.Genre,
 			Director:    movie.Director,

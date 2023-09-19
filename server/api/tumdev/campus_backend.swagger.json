@@ -1459,7 +1459,7 @@
         "title": {
           "type": "string"
         },
-        "year": {
+        "releaseYear": {
           "type": "string",
           "title": "release year of the movie"
         },
