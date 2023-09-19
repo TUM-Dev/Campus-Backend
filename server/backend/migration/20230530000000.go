@@ -44,7 +44,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 			}
 
 			return tx.Create(&model.Crontab{
-				Interval: 60, // Every 5 minutes
+				Interval: 60 * 10, // Every 10 minutes
 				Type:     null.StringFrom("newExamResultsHook"),
 			}).Error
 		},
