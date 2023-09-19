@@ -22,7 +22,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesR
 	}
 
 	var sources []model.NewsSource
-	if err := s.db.Joins("Files").Find(&sources).Error; err != nil {
+	if err := s.db.WithContext(ctx).Joins("Files").Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find newsSources")
 		return nil, status.Error(codes.Internal, "could not GetNewsSources")
 	}
@@ -45,7 +45,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 	}
 
 	var newsEntries []model.News
-	tx := s.db.Joins("Files")
+	tx := s.db.WithContext(ctx).Joins("Files")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}

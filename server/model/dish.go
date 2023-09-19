@@ -13,10 +13,10 @@ var (
 
 // Dish represents one dish fin a specific cafeteria
 type Dish struct {
-	Dish        int32  `gorm:"primary_key;AUTO_INCREMENT;column:dish;type:int;not null;" json:"dish"`
+	Dish        int64  `gorm:"primary_key;AUTO_INCREMENT;column:dish;type:int;not null;" json:"dish"`
 	Name        string `gorm:"column:name;type:text;not null;" json:"name" `
 	Type        string `gorm:"column:type;type:text;not null;" json:"type" `
-	CafeteriaID int32  `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
+	CafeteriaID int64  `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 }
 
 // TableName sets the insert table name for this struct type

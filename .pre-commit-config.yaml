@@ -33,7 +33,7 @@ repos:
       - id: go-mod-tidy-client
         name: Check if go.mod and go.sum are up to date for server
         files: server/
-        entry: sh -c "(cd client && go mod tidy)"
+        entry: sh -c "(cd client && go get github.com/TUM-Dev/Campus-Backend/server && go mod tidy)"
         language: system
         pass_filenames: false
         stages: [commit]
