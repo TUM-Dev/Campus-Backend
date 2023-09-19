@@ -190,7 +190,7 @@ func (s *NewsSuite) Test_GetNewsMultiple() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-func newsAlertFile(id int32) *model.Files {
+func newsAlertFile(id int64) *model.Files {
 	return &model.Files{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
