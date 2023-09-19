@@ -2,6 +2,7 @@ package migration
 
 import (
 	_ "embed"
+	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -10,14 +11,30 @@ import (
 	"gorm.io/gorm"
 )
 
+type PublishedExamResult struct {
+	Date         time.Time
+	ExamID       string `gorm:"primary_key"`
+	LectureTitle string
+	LectureType  string
+	LectureSem   string
+	Published    bool
+}
+
+type NewExamResultsSubscriber struct {
+	CallbackUrl    string `gorm:"primary_key"`
+	ApiKey         null.String
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	LastNotifiedAt null.Time
+}
+
 func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230530000000",
 		Migrate: func(tx *gorm.DB) error {
 
 			if err := tx.AutoMigrate(
-				&model.PublishedExamResult{},
-				&model.NewExamResultsSubscriber{},
+				&PublishedExamResult{},
+				&NewExamResultsSubscriber{},
 			); err != nil {
 				return err
 			}
@@ -33,10 +50,10 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := tx.Migrator().DropTable(&model.PublishedExamResult{}); err != nil {
+			if err := tx.Migrator().DropTable(&PublishedExamResult{}); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable(&model.NewExamResultsSubscriber{}); err != nil {
+			if err := tx.Migrator().DropTable(&NewExamResultsSubscriber{}); err != nil {
 				return err
 			}
 
