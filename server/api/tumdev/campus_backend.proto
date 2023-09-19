@@ -3,7 +3,6 @@ syntax = "proto3";
 package api;
 
 import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "CampusApiProto";
@@ -20,7 +19,7 @@ service Campus {
     };
   }
 
-  rpc GetNewsSources(google.protobuf.Empty) returns (NewsSourceReply) {
+  rpc GetNewsSources(GetNewsSourcesRequest) returns (GetNewsSourcesReply) {
     option (google.api.http) = {
       get: "/news/sources",
       response_body: "sources"
@@ -42,88 +41,57 @@ service Campus {
     };
   }
 
-  // a location is a campus location/building, e.g. "Garching Forschungszentrum"
-  rpc GetLocations(GetLocationsRequest) returns (GetLocationsReply) {
-    option (google.api.http) = {
-      get: "/locations/{location}",
-      response_body: "locations"
-    };
-  }
-
-  rpc GetRoomMaps(GetRoomMapsRequest) returns (GetRoomMapsReply) {
-    option (google.api.http) = {
-      post: "/roomfinder/maps",
-      body: "*",
-      response_body: "maps"
-    };
-  }
-
-  rpc GetRoomCoordinates(GetRoomCoordinatesRequest) returns (GetRoomCoordinatesReply) {
-    option (google.api.http) = {
-      post: "/roomfinder/room/coordinates",
-      body: "*"
-    };
-  }
-
-  rpc GetRoomSchedule(GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
-    option (google.api.http) = {
-      post: "/roomfinder/room/schedule_by_id",
-      body: "*",
-      response_body: "events"
-    };
-  }
-
   // This endpoint retrieves Canteen Ratings from the Backend.
-  rpc GetCanteenRatings(CanteenRatingRequest) returns (CanteenRatingReply) {
+  rpc GetCanteenRatings(GetCanteenRatingsRequest) returns (GetCanteenRatingsReply) {
     option (google.api.http) = {
       post: "/canteen/rating/get",
       body: "*",
     };
   }
 
-  rpc GetDishRatings(DishRatingRequest) returns (DishRatingReply) {
+  rpc GetDishRatings(GetDishRatingsRequest) returns (GetDishRatingsReply) {
     option (google.api.http) = {
       post: "/dish/rating/get",
       body: "*",
     };
   }
 
-  rpc NewCanteenRating(NewCanteenRatingRequest) returns (google.protobuf.Empty) {
+  rpc NewCanteenRating(NewCanteenRatingRequest) returns (NewCanteenRatingReply) {
     option (google.api.http) = {
       post: "/canteen/rating/new",
       body: "*",
     };
   }
 
-  rpc NewDishRating(NewDishRatingRequest) returns (google.protobuf.Empty) {
+  rpc NewDishRating(NewDishRatingRequest) returns (NewDishRatingReply) {
     option (google.api.http) = {
       post: "/dish/rating/new",
       body: "*",
     };
   }
 
-  rpc GetAvailableDishTags(google.protobuf.Empty) returns (GetTagsReply) {
+  rpc GetAvailableDishTags(GetAvailableDishTagsRequest) returns (GetAvailableDishTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allRatingTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetNameTags(google.protobuf.Empty) returns (GetTagsReply) {
+  rpc GetNameTags(GetNameTagsRequest) returns (GetNameTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allDishTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetAvailableCanteenTags(google.protobuf.Empty) returns (GetTagsReply) {
+  rpc GetAvailableCanteenTags(GetAvailableCanteenTagsRequest) returns (GetAvailableCanteenTagsReply) {
     option (google.api.http) = {
       get: "/canteen/rating/allRatingTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetCanteens(google.protobuf.Empty) returns (GetCanteenReply) {
+  rpc GetCanteens(GetCanteensRequest) returns (GetCanteensReply) {
     option (google.api.http) = {
       get: "/canteen/allCanteens",
       response_body: "canteen"
@@ -137,27 +105,11 @@ service Campus {
     };
   }
 
-  rpc GetResponsiblePerson(google.protobuf.Empty) returns (GetResponsiblePersonReply) {
+  rpc GetResponsiblePerson(GetResponsiblePersonRequest) returns (GetResponsiblePersonReply) {
     option (google.api.http) = {get: "/barrierfree/contacts"};
   }
 
-  rpc GetBuilding2Gps(google.protobuf.Empty) returns (GetBuilding2GpsReply) {
-    option (google.api.http) = {get: "/barrierfree/building_2_gps"};
-  }
-
-  rpc GetAreaFacilitiesByBuildingNr(GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
-    option (google.api.http) = {get: "/barrierfree/nearby"};
-  }
-
-  rpc GetListOfToilets(google.protobuf.Empty) returns (GetListOfToiletsReply) {
-    option (google.api.http) = {get: "/barrierfree/toilets"};
-  }
-
-  rpc GetListOfElevators(google.protobuf.Empty) returns (GetListOfElevatorsReply) {
-    option (google.api.http) = {get: "/barrierfree/elevators"};
-  }
-
-  rpc GetMoreInformation(google.protobuf.Empty) returns (GetMoreInformationReply) {
+  rpc GetMoreInformation(GetMoreInformationRequest) returns (GetMoreInformationReply) {
     option (google.api.http) = {get: "/barrierfree/moreInformation"};
   }
 
@@ -169,7 +121,7 @@ service Campus {
     option (google.api.http) = {get: "/updatenote/{version}"};
   }
 
-  rpc GetStudyRoomList(google.protobuf.Empty) returns (GetStudyRoomListReply) {
+  rpc GetStudyRoomList(GetStudyRoomListRequest) returns (GetStudyRoomListReply) {
     option (google.api.http) = {get: "/studyrooms"};
   }
 
@@ -177,7 +129,7 @@ service Campus {
     option (google.api.http) = {get: "/kino/{last_id}"};
   }
 
-  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackImageReply) {
+  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackReply) {
     option (google.api.http) = {post: "/feedback"};
   }
 
@@ -189,11 +141,11 @@ service Campus {
     option (google.api.http) = {get: "/device/uploaded/{lrz_id}"};
   }
 
-  rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationReply) {
     option (google.api.http) = {get: "/notifications/{notification_id}"};
   }
 
-  rpc GetNotificationConfirm(NotificationsRequest) returns (GetNotificationsConfirmReply) {
+  rpc GetNotificationConfirm(GetNotificationConfirmRequest) returns (GetNotificationConfirmReply) {
     option (google.api.http) = {get: "/notifications/confirm/{notification_id}"};
   }
 
@@ -261,63 +213,6 @@ message IOSDeviceRequestResponseReply {
   string message = 1;
 }
 
-message GetRoomScheduleRequest {
-  int32 room = 1;
-  google.protobuf.Timestamp start = 2;
-  google.protobuf.Timestamp end = 3;
-}
-
-message GetRoomScheduleReply {
-  message RoomScheduleEvent {
-    google.protobuf.Timestamp start = 1;
-    google.protobuf.Timestamp end = 2;
-    string title = 3;
-    int32 event_id = 4;
-    string course_code = 5;
-  }
-  repeated RoomScheduleEvent events = 1;
-}
-
-message GetRoomCoordinatesRequest {
-  string arch_id = 1;
-}
-
-message GetRoomCoordinatesReply {
-  string utm_zone = 1;
-  float utm_easting = 2;
-  float utm_northing = 3;
-}
-
-message GetRoomMapsRequest {
-  string arch_id = 1;
-}
-
-message GetRoomMapsReply {
-  message Map {
-    int64 map_id = 1;
-    string description = 2;
-    int64 scale = 3;
-    int64 width = 4;
-    int64 height = 5;
-  }
-  repeated Map maps = 1;
-}
-
-message GetLocationsRequest {
-  string location = 1;
-}
-
-message GetLocationsReply {
-  message Location {
-    string location = 1;
-    string name = 2;
-    string lon = 3;
-    string lat = 4;
-    string radius = 5;
-  }
-  repeated Location locations = 1;
-}
-
 message SearchRoomsRequest {
   string query = 1;
 }
@@ -359,7 +254,9 @@ message GetNewsRequest {
   int32 news_source = 2;
 }
 
-message NewsSourceReply {
+message GetNewsSourcesRequest {}
+
+message GetNewsSourcesReply {
   repeated NewsSource sources = 1;
 }
 
@@ -386,7 +283,7 @@ message NewsAlert {
   google.protobuf.Timestamp to = 5;
 }
 
-message CanteenRatingRequest {
+message GetCanteenRatingsRequest {
   // canteenId Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
   string canteen_id = 1;
   // Optional Parameter to define an interval for the ratings (Lower bound)
@@ -397,8 +294,16 @@ message CanteenRatingRequest {
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
+message GetCanteenRatingsReply {
+  repeated SingleRatingReply rating = 1;
+  double avg = 2;
+  double std = 3;
+  int32 min = 4;
+  int32 max = 5;
+  repeated RatingTagResult rating_tags = 6;
+}
 
-message DishRatingRequest {
+message GetDishRatingsRequest {
   // Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
   string canteen_id = 1;
   // Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
@@ -411,16 +316,7 @@ message DishRatingRequest {
   int32 limit = 5;
 }
 
-message CanteenRatingReply {
-  repeated SingleRatingReply rating = 1;
-  double avg = 2;
-  double std = 3;
-  int32 min = 4;
-  int32 max = 5;
-  repeated RatingTagResult rating_tags = 6;
-}
-
-message DishRatingReply {
+message GetDishRatingsReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
   double std = 3;
@@ -441,6 +337,8 @@ message SingleRatingReply {
   google.protobuf.Timestamp visited = 5;
 }
 
+message NewCanteenRatingReply {}
+
 message NewCanteenRatingRequest {
   // number in the range 1-5
   int32 points = 1;
@@ -452,6 +350,7 @@ message NewCanteenRatingRequest {
   string comment = 6;
 }
 
+message NewDishRatingReply {}
 message NewDishRatingRequest {
   // number in the range 1-5
   int32 points = 1;
@@ -467,7 +366,18 @@ message NewDishRatingRequest {
   string comment = 7;
 }
 
-message GetTagsReply {
+message GetAvailableDishTagsRequest {}
+message GetAvailableDishTagsReply {
+  repeated TagsOverview rating_tags = 1;
+}
+
+message GetNameTagsRequest {}
+message GetNameTagsReply {
+  repeated TagsOverview rating_tags = 1;
+}
+
+message GetAvailableCanteenTagsRequest {}
+message GetAvailableCanteenTagsReply {
   repeated TagsOverview rating_tags = 1;
 }
 
@@ -495,7 +405,8 @@ message RatingTagResult {
   int32 max = 5;
 }
 
-message GetCanteenReply {
+message GetCanteensRequest {}
+message GetCanteensReply {
   repeated Canteen canteen = 1;
 }
 
@@ -520,38 +431,17 @@ message GetDishesReply {
   repeated string dish = 1;
 }
 
+message GetResponsiblePersonRequest {}
 message GetResponsiblePersonReply {
-  repeated ResponsiblePersonElement responsible_person = 1;
+  repeated ResponsiblePerson responsible_person = 1;
 }
 
-message ResponsiblePersonElement {
+message ResponsiblePerson {
   string name = 1;
   string telephone = 2;
   string email = 3;
   string faculty = 4;
   string tum_id = 5;
-}
-
-message GetBuilding2GpsReply {
-  repeated Building2GpsElement building_2_gps = 1;
-}
-
-message Building2GpsElement {
-  string id = 1;
-  string latitude = 2;
-  string longitude = 3;
-}
-
-message GetAreaFacilitiesByBuildingNrReply {
-  repeated RoomInformationElement area_facilities_by_building_nr = 1;
-}
-
-message GetAreaFacilitiesByBuildingNrRequest {
-  string building_nr = 1;
-}
-
-message GetListOfToiletsReply {
-  repeated RoomInformationElement list_of_toilets = 1;
 }
 
 message RoomInformationElement {
@@ -566,18 +456,14 @@ message RoomInformationElement {
   string name = 9;
 }
 
-message GetListOfElevatorsReply {
-  repeated RoomInformationElement list_of_elevators = 1;
-}
-
+message GetMoreInformationRequest {}
 message GetMoreInformationReply {
-  repeated MoreInformationElement information = 1;
-}
-
-message MoreInformationElement {
-  string title = 1;
-  string category = 2;
-  string url = 3;
+  message MoreInformation {
+    string title = 1;
+    string category = 2;
+    string url = 3;
+  }
+  repeated MoreInformation infos = 1;
 }
 
 message GetOpeningTimesRequest {
@@ -611,6 +497,7 @@ message GetUpdateNoteReply {
   string version_name = 2;
 }
 
+message GetStudyRoomListRequest {}
 message GetStudyRoomListReply {
   repeated StudyRoomMsgElement rooms = 1;
 }
@@ -656,6 +543,7 @@ message KinoMsgElement {
   string link = 16;
 }
 
+message SendFeedbackReply {}
 message SendFeedbackRequest {
   string topic = 1;
   string email = 2;
@@ -700,7 +588,10 @@ message GetUploadStatusReply {
   bool external_id = 5;
 }
 
-message GetNotificationsReply {
+message GetNotificationRequest {
+  int32 notification_id = 1;
+}
+message GetNotificationReply {
   int32 notification_id = 1;
   int32 type = 2;
   string title = 3;
@@ -708,11 +599,10 @@ message GetNotificationsReply {
   string signature = 5;
 }
 
-message NotificationsRequest {
+message GetNotificationConfirmRequest {
   int32 notification_id = 1;
 }
-
-message GetNotificationsConfirmReply {
+message GetNotificationConfirmReply {
   string status = 1;
 }
 

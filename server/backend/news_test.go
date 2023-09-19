@@ -97,7 +97,7 @@ func (s *NewsSuite) Test_GetNewsSourcesMultiple() {
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
-	expectedResp := &pb.NewsSourceReply{
+	expectedResp := &pb.GetNewsSourcesReply{
 		Sources: []*pb.NewsSource{
 			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, Icon: source1().Files.URL.String},
 			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, Icon: source2().Files.URL.String},
@@ -134,7 +134,7 @@ func (s *NewsSuite) Test_GetNewsSourcesNone() {
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
-	expectedResp := &pb.NewsSourceReply{
+	expectedResp := &pb.GetNewsSourcesReply{
 		Sources: []*pb.NewsSource(nil),
 	}
 	require.Equal(s.T(), expectedResp, response)
