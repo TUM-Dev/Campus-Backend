@@ -29,7 +29,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 
 			return tx.Create(&model.Crontab{
 				Interval: 60, // Every 5 minutes
-				Type:     null.String{NullString: sql.NullString{String: cron.NewExamResultsHook, Valid: true}},
+				Type:     null.StringFrom(cron.NewExamResultsHook),
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {

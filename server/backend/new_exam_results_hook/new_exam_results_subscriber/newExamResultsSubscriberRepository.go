@@ -28,7 +28,7 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 
 	body, err := json.Marshal(newGrades)
 	if err != nil {
-		log.WithError(err).Errorf("Error while marshalling newGrades")
+		log.WithError(err).Error("Error while marshalling newGrades")
 		return err
 	}
 
@@ -41,13 +41,13 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 	}
 
 	if err != nil {
-		log.WithError(err).Errorf("Error while creating request")
+		log.WithError(err).Error("Error while creating request")
 		return err
 	}
 
 	_, err = http.DefaultClient.Do(req)
 	if err != nil {
-		log.WithError(err).Errorf("Error while fetching %s", url)
+		log.WithField("url", url).WithError(err).Error("Error while fetching url")
 		return err
 	}
 

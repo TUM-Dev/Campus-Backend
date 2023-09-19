@@ -7,7 +7,7 @@ import (
 
 type NewExamResultsSubscriber struct {
 	CallbackUrl    string         `gorm:"primary_key" json:"callbackUrl"`
-	ApiKey         sql.NullString `json:"-"`
+	ApiKey         null.String `json:"-"`
 	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"createdAt"`
-	LastNotifiedAt sql.NullTime   `json:"lastNotifiedAt"`
+	LastNotifiedAt null.Time   `json:"lastNotifiedAt"`
 }
