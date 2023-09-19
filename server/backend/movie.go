@@ -20,7 +20,7 @@ func (s *CampusServer) GetMovies(_ context.Context, req *pb.GetMoviesRequest) (*
 	var movieResponse []*pb.Movie
 	for _, movie := range movies {
 		movieResponse = append(movieResponse, &pb.Movie{
-			Id:          movie.Id,
+			MovieId:     movie.Id,
 			Date:        timestamppb.New(movie.Date),
 			Created:     timestamppb.New(movie.Created),
 			Title:       movie.Title,
@@ -33,7 +33,7 @@ func (s *CampusServer) GetMovies(_ context.Context, req *pb.GetMoviesRequest) (*
 			Description: movie.Description,
 			CoverName:   movie.Files.Name,
 			CoverPath:   movie.Files.Path,
-			CoverID:     movie.Files.File,
+			CoverId:     movie.Files.File,
 			Link:        movie.Link,
 		})
 	}

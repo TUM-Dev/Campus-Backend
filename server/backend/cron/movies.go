@@ -1,10 +1,10 @@
 package cron
 
 import (
-	"database/sql"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"github.com/guregu/null"
 	"io"
 	"net/http"
 	"os"
@@ -89,7 +89,7 @@ func (c *CronService) movieCron(cronjob *model.Crontab) error {
 			file := model.Files{
 				Name: item.Title,
 				Path: MovieImageDirectory,
-				URL:  sql.NullString{String: item.Enclosure.Url, Valid: true},
+				URL:  null.StringFrom(item.Enclosure.Url),
 			}
 			if err := c.db.Create(&file).Error; err != nil {
 				log.WithFields(logFields).WithError(err).Error("error while creating file")
