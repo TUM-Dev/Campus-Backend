@@ -59,10 +59,10 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.GetCan
 		cafeteriaTags := queryTags(cafeteriaId, -1, CAFETERIA, tx)
 
 		return &pb.GetCanteenRatingsReply{
-			Avg:        float64(result.Average),
-			Std:        float64(result.Std),
-			Min:        int32(result.Min),
-			Max:        int32(result.Max),
+			Avg:        result.Average,
+			Std:        result.Std,
+			Min:        result.Min,
+			Max:        result.Max,
 			Rating:     ratings,
 			RatingTags: cafeteriaTags,
 		}, nil
@@ -168,10 +168,10 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		nameTags := queryTags(cafeteriaID, dishID, NAME, tx)
 
 		return &pb.GetDishRatingsReply{
-			Avg:        float64(result.Average),
-			Std:        float64(result.Std),
-			Min:        int32(result.Min),
-			Max:        int32(result.Max),
+			Avg:        result.Average,
+			Std:        result.Std,
+			Min:        result.Min,
+			Max:        result.Max,
 			Rating:     ratings,
 			RatingTags: dishTags,
 			NameTags:   nameTags,
@@ -333,7 +333,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType modelType, tx *gorm.D
 
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
-func queryTagRatingsOverviewForRating(dishID int32, ratingType modelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
+func queryTagRatingsOverviewForRating(dishID int64, ratingType modelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
 	var results []*pb.RatingTagNewRequest
 	var err error
 	if ratingType == DISH {
@@ -385,7 +385,7 @@ func (s *CampusServer) NewCanteenRating(ctx context.Context, input *pb.NewCantee
 	return &pb.NewCanteenRatingReply{}, nil
 }
 
-func imageWrapper(image []byte, path string, id int32) string {
+func imageWrapper(image []byte, path string, id int64) string {
 	var resPath = ""
 	if len(image) > 0 {
 		var resError error
@@ -486,8 +486,8 @@ func (s *CampusServer) NewDishRating(ctx context.Context, input *pb.NewDishRatin
 
 // assignDishNameTag
 // Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
-func assignDishNameTag(rating model.DishRating, dishID int32, tx *gorm.DB) {
-	var result []int
+func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
+	var result []int64
 	err := tx.Model(&model.DishToDishNameTag{}).
 		Where("dishID = ? ", dishID).
 		Select("nameTagID").
@@ -510,7 +510,7 @@ func assignDishNameTag(rating model.DishRating, dishID int32, tx *gorm.DB) {
 
 // inputSanitizationForNewRatingElements Checks parameters of the new rating for all cafeteria and dish ratings.
 // Additionally, queries the cafeteria ID, since it checks whether the cafeteria actually exists.
-func inputSanitizationForNewRatingElements(rating int32, comment string, cafeteriaName string, tx *gorm.DB) (int32, error) {
+func inputSanitizationForNewRatingElements(rating int32, comment string, cafeteriaName string, tx *gorm.DB) (int64, error) {
 	if rating > 5 || rating < 0 {
 		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
 	}
@@ -538,7 +538,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 // storeRatingTags
 // Checks whether the rating-tag name is a valid option and if so,
 // it will be saved with a reference to the rating
-func storeRatingTags(parentRatingID int32, tags []*pb.RatingTag, tagType modelType, tx *gorm.DB) error {
+func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType modelType, tx *gorm.DB) error {
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
@@ -571,7 +571,7 @@ func storeRatingTags(parentRatingID int32, tags []*pb.RatingTag, tagType modelTy
 						Create(&model.DishRatingTag{
 							CorrespondingRating: parentRatingID,
 							Points:              int32(currentTag.Points),
-							TagID:               int(currentTag.TagId),
+							TagID:               currentTag.TagId,
 						}).Error
 					if err != nil {
 						log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
