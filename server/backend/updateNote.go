@@ -19,7 +19,7 @@ func (s *CampusServer) GetUpdateNote(ctx context.Context, req *pb.GetUpdateNoteR
 	}
 
 	res := model.UpdateNote{VersionCode: req.Version}
-	if err := s.db.First(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := s.db.WithContext(ctx).First(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "No update note found")
 	} else if err != nil {
 		log.WithField("VersionCode", req.Version).WithError(err).Error("Failed to get update note")

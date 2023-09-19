@@ -80,7 +80,7 @@ func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsReque
 		Campus string
 		Name   string
 	}
-	err := s.db.Raw("SELECT r.*, a.campus, a.name "+
+	err := s.db.WithContext(ctx).Raw("SELECT r.*, a.campus, a.name "+
 		"FROM roomfinder_rooms r "+
 		"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
 		"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error

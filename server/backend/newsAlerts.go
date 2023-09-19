@@ -19,7 +19,7 @@ func (s *CampusServer) GetTopNews(ctx context.Context, _ *pb.GetTopNewsRequest) 
 	}
 
 	var res *model.NewsAlert
-	err := s.db.Joins("Files").Where("NOW() between `from` and `to`").First(&res).Error
+	err := s.db.WithContext(ctx).Joins("Files").Where("NOW() between `from` and `to`").First(&res).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no current active top news")
 	} else if err != nil {
