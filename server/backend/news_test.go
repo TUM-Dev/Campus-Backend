@@ -107,7 +107,7 @@ func news1() *model.News {
 		News:    1,
 		Title:   "Amazing News 1",
 		Link:    "https://example.com/amazing2",
-		FilesID: null.Int{NullInt64: sql.NullInt64{Int64: file(1).File, Valid: true}},
+		FilesID: null.IntFrom(file(1).File),
 		Files:   file(1),
 	}
 }
