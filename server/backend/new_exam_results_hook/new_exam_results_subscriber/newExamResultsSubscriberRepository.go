@@ -3,10 +3,11 @@ package new_exam_results_subscriber
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type Repository struct {

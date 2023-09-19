@@ -1,13 +1,14 @@
 package new_exam_results_scheduling
 
 import (
+	"os"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/new_exam_results_hook/new_exam_results_subscriber"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 var (

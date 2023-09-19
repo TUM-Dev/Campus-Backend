@@ -5,10 +5,11 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
