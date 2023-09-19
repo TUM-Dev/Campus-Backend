@@ -20,7 +20,7 @@ type News struct {
 	Created     time.Time   `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;"`
 	Title       string      `gorm:"column:title;type:text;size:255;"`
 	Description string      `gorm:"column:description;type:text;size:65535;"`
-	Src         int32       `gorm:"column:src;type:int;"`
+	Src         int64       `gorm:"column:src;type:int;"`
 	Link        string      `gorm:"column:link;type:varchar(190);"`
 	Image       null.String `gorm:"column:image;type:text;size:65535;"`
 	FilesID     null.Int    `gorm:"column:file;type:int;"`

@@ -163,7 +163,7 @@ func sumApCounts(aps []AccessPoint) uint32 {
 			log.WithError(err).Error("Canteen HeadCount getting the count failed for access point: ", ap.Target)
 			continue
 		}
-		total += uint32(count)
+		total += count
 	}
 	return total
 }

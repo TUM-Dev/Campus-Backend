@@ -73,7 +73,7 @@ Old tags won't be removed to prevent problems with foreign keys.
 func updateNameTagOptions(db *gorm.DB) {
 	tagsNames := generateNameTagListFromFile("static_data/dishNameTags.json")
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		var parentId int32
+		var parentId int64
 		res := db.Model(&model.DishNameTagOption{}).
 			Where("EN LIKE ? AND DE LIKE ?", v.TagNameEnglish, v.TagNameGerman).
 			Select("DishNameTagOption").
@@ -99,7 +99,7 @@ func updateNameTagOptions(db *gorm.DB) {
 	}
 }
 
-func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
+func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	var count int64
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
@@ -123,7 +123,7 @@ func addNotIncluded(parentId int32, db *gorm.DB, v nameTag) {
 	}
 }
 
-func addCanBeIncluded(parentId int32, db *gorm.DB, v nameTag) {
+func addCanBeIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	var count int64
 	for _, expression := range v.CanBeIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
