@@ -34,16 +34,13 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 	}
 
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-
-	req.Header.Set("Content-Type", "application/json")
-
-	if subscriber.ApiKey.Valid {
-		req.Header.Set("Authorization", subscriber.ApiKey.String)
-	}
-
 	if err != nil {
 		log.WithError(err).Error("Error while creating request")
 		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if subscriber.ApiKey.Valid {
+		req.Header.Set("Authorization", subscriber.ApiKey.String)
 	}
 
 	_, err = http.DefaultClient.Do(req)

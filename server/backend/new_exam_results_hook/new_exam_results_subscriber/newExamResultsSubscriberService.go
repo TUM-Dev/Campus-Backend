@@ -18,8 +18,7 @@ func (service *Service) NotifySubscribers(newGrades *[]model.PublishedExamResult
 	}
 
 	for _, subscriber := range *subscribers {
-		err := repository.NotifySubscriber(&subscriber, newGrades)
-		if err != nil {
+		if err := repository.NotifySubscriber(&subscriber, newGrades); err != nil {
 			log.WithError(err).Error("Failed to notify subscriber")
 			continue
 		}

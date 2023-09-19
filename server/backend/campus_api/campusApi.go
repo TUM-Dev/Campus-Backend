@@ -12,21 +12,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	CampusApiUrl               = "https://campus.tum.de/tumonline"
-	CampusQueryToken           = "pToken"
-	CampusGradesPath           = "/wbservicesbasic.noten"
-	CampusExamResultsPublished = "/wbservicesbasic.pruefungenErgebnisse"
-)
-
-var (
-	ErrCannotCreateRequest  = errors.New("cannot create http request")
-	ErrorWhileUnmarshalling = errors.New("error while unmarshalling")
-)
-
 func FetchExamResultsPublished(token string) (*model.TUMAPIPublishedExamResults, error) {
 	var examResultsPublished model.TUMAPIPublishedExamResults
-	err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished)
+	err := RequestCampusApi("/wbservicesbasic.pruefungenErgebnisse", token, &examResultsPublished)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +24,7 @@ func FetchExamResultsPublished(token string) (*model.TUMAPIPublishedExamResults,
 
 func FetchGrades(token string) (*model.IOSGrades, error) {
 	var grades model.IOSGrades
-	err := RequestCampusApi(CampusGradesPath, token, &grades)
+	err := RequestCampusApi("/wbservicesbasic.noten", token, &grades)
 	if err != nil {
 		return nil, err
 	}
@@ -45,21 +33,12 @@ func FetchGrades(token string) (*model.IOSGrades, error) {
 }
 
 func RequestCampusApi(path string, token string, response any) error {
-	requestUrl := fmt.Sprintf("%s%s?%s=%s", CampusApiUrl, path, CampusQueryToken, token)
-	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
-
-	if err != nil {
-		log.WithError(err).Error("Error while creating request")
-		return ErrCannotCreateRequest
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-
+	requestUrl := fmt.Sprintf("https://campus.tum.de/tumonline%s?pToken=%s", path, token)
+	resp, err := http.Get(requestUrl)
 	if err != nil {
 		log.WithError(err).WithField("path", path).Error("Error while fetching url")
 		return errors.New("error while fetching " + path)
 	}
-
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -67,11 +46,9 @@ func RequestCampusApi(path string, token string, response any) error {
 		}
 	}(resp.Body)
 
-	err = xml.NewDecoder(resp.Body).Decode(&response)
-
-	if err != nil {
+	if err = xml.NewDecoder(resp.Body).Decode(&response); err != nil {
 		log.WithError(err).WithField("path", path).Error("Error while unmarshalling")
-		return ErrorWhileUnmarshalling
+		return errors.New("error while unmarshalling")
 	}
 
 	return nil
