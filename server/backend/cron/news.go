@@ -119,7 +119,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				FilesID:     null.IntFrom(int64(file.File)),
+				FilesID:     null.IntFrom(file.File),
 				Files:       file,
 			}
 			newNews = append(newNews, newsItem)
@@ -177,7 +177,7 @@ func skipNews(existingLinks []string, link string) bool {
 	return false
 }
 
-func (c *CronService) cleanOldNewsForSource(source int32) error {
+func (c *CronService) cleanOldNewsForSource(source int64) error {
 	log.WithField("source", source).Trace("Truncating old entries")
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
 		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")

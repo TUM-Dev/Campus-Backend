@@ -48,7 +48,7 @@ func (s *NewsSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-func file(id int32) *model.Files {
+func file(id int64) *model.Files {
 	return &model.Files{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
@@ -107,7 +107,7 @@ func news1() *model.News {
 		News:    1,
 		Title:   "Amazing News 1",
 		Link:    "https://example.com/amazing2",
-		FilesID: null.Int{NullInt64: sql.NullInt64{Int64: int64(file(1).File), Valid: true}},
+		FilesID: null.Int{NullInt64: sql.NullInt64{Int64: file(1).File, Valid: true}},
 		Files:   file(1),
 	}
 }

@@ -8,12 +8,12 @@ import (
 // IOSSchedulingPriority stores some default priorities for the scheduling of
 // grade updates.
 type IOSSchedulingPriority struct {
-	ID       int `gorm:"primary_key;auto_increment;not_null" json:"id"`
-	FromDay  int `gorm:"not null" json:"from_day"`
-	ToDay    int `gorm:"not null" json:"to_day"`
-	FromHour int `gorm:"not null" json:"from_hour"`
-	ToHour   int `gorm:"not null" json:"to_hour"`
-	Priority int `gorm:"not null" json:"priority"`
+	ID       int64 `gorm:"primary_key;auto_increment;not_null" json:"id"`
+	FromDay  int   `gorm:"not null" json:"from_day"`
+	ToDay    int   `gorm:"not null" json:"to_day"`
+	FromHour int   `gorm:"not null" json:"from_hour"`
+	ToHour   int   `gorm:"not null" json:"to_hour"`
+	Priority int   `gorm:"not null" json:"priority"`
 }
 
 // IsCurrentlyInRange returns true if the current time is in the range of the

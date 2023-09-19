@@ -219,7 +219,7 @@ message SearchRoomsReply {
 }
 
 message Room {
-  int32 room_id = 1;
+  int64 room_id = 1;
   string room_code = 2;
   string building_nr = 3;
   string arch_id = 4;
@@ -231,7 +231,7 @@ message Room {
 }
 
 message NewsItem {
-  int32 id = 1;
+  int64 id = 1;
   string title = 2;
   string text = 3;
   string link = 4;
@@ -377,7 +377,7 @@ message TagsOverview {
 }
 
 message RatingTag {
-  int32 tag_id = 1;
+  int64 tag_id = 1;
   double points = 2;
 }
 
@@ -478,7 +478,7 @@ message OpeningTimesMsgElement {
 }
 
 message GetUpdateNoteRequest {
-  int32 version = 1;
+  int64 version = 1;
 }
 
 message GetUpdateNoteReply {

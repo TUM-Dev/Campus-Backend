@@ -17,7 +17,7 @@ var (
 
 // RoomfinderRooms struct is a row record of the roomfinder_rooms table in the tca database
 type RoomfinderRooms struct {
-	RoomID       int32       `gorm:"primary_key;column:room_id;type:int;" json:"room_id"`
+	RoomID       int64       `gorm:"primary_key;column:room_id;type:int;" json:"room_id"`
 	RoomCode     null.String `gorm:"column:room_code;type:varchar(32);" json:"room_code"`
 	BuildingNr   null.String `gorm:"column:building_nr;type:varchar(8);" json:"building_nr"`
 	ArchID       null.String `gorm:"column:arch_id;type:varchar(16);" json:"arch_id"`
