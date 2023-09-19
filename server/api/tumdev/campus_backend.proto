@@ -66,7 +66,7 @@ service Campus {
 
   rpc GetRoomSchedule (GetRoomScheduleRequest) returns (GetRoomScheduleReply) {
     option (google.api.http) = {
-      post: "/roomfinder/room/scheduleById",
+      post: "/roomfinder/room/schedule_by_id",
       body: "*",
       response_body: "events"
     };
@@ -108,21 +108,21 @@ service Campus {
   rpc GetAvailableDishTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allRatingTags",
-      response_body: "ratingTags"
+      response_body: "rating_tags"
     };
   }
 
   rpc GetNameTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allDishTags",
-      response_body: "ratingTags"
+      response_body: "rating_tags"
     };
   }
 
   rpc GetAvailableCanteenTags (google.protobuf.Empty) returns (GetTagsReply) {
     option (google.api.http) = {
       get: "/canteen/rating/allRatingTags",
-      response_body: "ratingTags"
+      response_body: "rating_tags"
     };
   }
 
@@ -151,6 +151,7 @@ service Campus {
     option (google.api.http) = {
       get: "/barrierfree/building2Gps",
     };
+    option (google.api.http) = {get: "/barrierfree/building_2_gps"};
   }
 
   rpc GetAreaFacilitiesByBuildingNr (GetAreaFacilitiesByBuildingNrRequest) returns (GetAreaFacilitiesByBuildingNrReply) {
@@ -200,9 +201,7 @@ service Campus {
 
 
   rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
-    option (google.api.http) = {
-      get: "/kino/{lastId}",
-    };
+    option (google.api.http) = {get: "/kino/{last_id}"};
   }
 
   rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackImageReply) {
@@ -212,40 +211,28 @@ service Campus {
   }
 
   rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
-    option (google.api.http) = {
-      post: "/feedback/{id}/{imageNr}",
-    };
+    option (google.api.http) = {post: "/feedback/{id}/{image_nr}"};
   }
 
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
-    option (google.api.http) = {
-      get: "/device/uploaded/{lrzId}",
-    };
+    option (google.api.http) = {get: "/device/uploaded/{lrz_id}"};
   }
 
 
   rpc GetNotification(NotificationsRequest) returns (GetNotificationsReply) {
-    option (google.api.http) = {
-      get: "/notifications/{notificationId}",
-    };
+    option (google.api.http) = {get: "/notifications/{notification_id}"};
   }
 
   rpc GetNotificationConfirm(NotificationsRequest) returns (GetNotificationsConfirmReply) {
-    option (google.api.http) = {
-      get: "/notifications/confirm/{notificationId}",
-    };
+    option (google.api.http) = {get: "/notifications/confirm/{notification_id}"};
   }
 
   rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
-    option (google.api.http) = {
-      get: "/members/{lrzId}",
-    };
+    option (google.api.http) = {get: "/members/{lrz_id}"};
   }
 
   rpc GetCanteenHeadCount(GetCanteenHeadCountRequest) returns (GetCanteenHeadCountReply) {
-    option (google.api.http) = {
-      get: "/canteen/headCount/{canteenId}",
-    };
+    option (google.api.http) = {get: "/canteen/headCount/{canteen_id}"};
   }
 
   // Endpoint for the iOS app to respond to background notifications requests
@@ -266,9 +253,7 @@ service Campus {
 
   // Unregister it from push notifications
   rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceReply) {
-    option (google.api.http) = {
-      delete: "/device/{deviceId}",
-    };
+    option (google.api.http) = {delete: "/device/{device_id}"};
   }
 }
 
@@ -721,7 +706,7 @@ message SendFeedbackImageReply{
 
 message SendFeedbackImageRequest{
   int32 id = 1;
-  int32 imageNr = 2;
+  int32 image_nr = 2;
   //todo where does the file come from?
 }
 
