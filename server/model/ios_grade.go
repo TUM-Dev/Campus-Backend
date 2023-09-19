@@ -2,8 +2,9 @@ package model
 
 import (
 	"encoding/xml"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 )
 
 // IOSGrades is a wrapper for a list of grades => XML stuff
@@ -54,7 +55,7 @@ func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) boo
 // IOSEncryptedGrade is a grade that can be encrypted.
 // Whether it is currently encrypted or not is indicated by the IsEncrypted field.
 type IOSEncryptedGrade struct {
-	ID           uint      `gorm:"primaryKey"`
+	ID           int64     `gorm:"primaryKey"`
 	Device       IOSDevice `gorm:"constraint:OnDelete:CASCADE"`
 	DeviceID     string    `gorm:"index;not null"`
 	LectureTitle string    `gorm:"not null"`

@@ -5,8 +5,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"github.com/makasim/sentryhook"
 	"io/fs"
 	"net"
 	"net/http"
@@ -15,12 +13,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/env"
+	"github.com/makasim/sentryhook"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/onrik/gorm-logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
@@ -135,7 +137,7 @@ func setupDB() *gorm.DB {
 		conn = mysql.Open(dbHost)
 	}
 
-	db, err := gorm.Open(conn, &gorm.Config{})
+	db, err := gorm.Open(conn, &gorm.Config{Logger: gorm_logrus.New()})
 	if err != nil {
 		log.WithError(err).Panic("failed to connect database")
 	}

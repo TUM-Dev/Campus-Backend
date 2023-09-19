@@ -22,7 +22,7 @@ const (
 	testImage    = "./localServer/images/sampleimage.jpeg"
 )
 
-// main connects to a seperatly started local server and creates ratings for both, cafeterias and dishes.
+// main connects to a seperatly started local server and creates ratings for both, canteens and dishes.
 // Afterwards, they are queried and displayed on the console
 func main() {
 	// Set up a connection to the local server.
@@ -38,7 +38,7 @@ func main() {
 
 	canteenHeadCount(c, ctx)
 
-	cafeteriaRatingTools(c, ctx)
+	canteenRatingTools(c, ctx)
 
 }
 
@@ -54,28 +54,28 @@ func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
 	}
 }
 
-func cafeteriaRatingTools(c pb.CampusClient, ctx context.Context) {
+func canteenRatingTools(c pb.CampusClient, ctx context.Context) {
 
-	currentCafeteria := "MENSA_GARCHING"
+	currentCanteen := "MENSA_GARCHING"
 	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
-	generateDishRating(c, ctx, currentCafeteria, currentDish, 3)
-	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	queryCafeteria(currentCafeteria, c, ctx, true)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)
-	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	generateCafeteriaRating(c, ctx, currentCafeteria, 2)
-	generateDishRating(c, ctx, currentCafeteria, currentDish, 1)
+	generateDishRating(c, ctx, currentCanteen, currentDish, 3)
+	generateCanteenRating(c, ctx, currentCanteen, 2)
+	queryCanteen(currentCanteen, c, ctx, true)
+	queryDish(currentCanteen, currentDish, c, ctx, false)
+	generateCanteenRating(c, ctx, currentCanteen, 2)
+	generateCanteenRating(c, ctx, currentCanteen, 2)
+	generateDishRating(c, ctx, currentCanteen, currentDish, 1)
 
-	queryCafeteria(currentCafeteria, c, ctx, false)
-	queryDish(currentCafeteria, currentDish, c, ctx, false)
+	queryCanteen(currentCanteen, c, ctx, false)
+	queryDish(currentCanteen, currentDish, c, ctx, false)
 
 }
 
-func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
-	res, err := c.GetDishRatings(ctx, &pb.DishRatingRequest{
-		Dish:        dish,
-		CafeteriaId: cafeteria,
-		Limit:       3,
+func queryDish(canteen string, dish string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
+	res, err := c.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		Dish:      dish,
+		CanteenId: canteen,
+		Limit:     3,
 	})
 
 	if err != nil {
@@ -129,10 +129,10 @@ func queryDish(cafeteria string, dish string, c pb.CampusClient, ctx context.Con
 	}
 }
 
-func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
-	res, err := c.GetCafeteriaRatings(ctx, &pb.CafeteriaRatingRequest{
-		CafeteriaId: s,
-		Limit:       3,
+func queryCanteen(s string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
+	res, err := c.GetCanteenRatings(ctx, &pb.GetCanteenRatingsRequest{
+		CanteenId: s,
+		Limit:     3,
 		//	From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),
 		//	To:            timestamppb.New(time.Date(2022, 7, 8, 17, 0, 0, 0, time.Local)),
 	})
@@ -178,7 +178,7 @@ func queryCafeteria(s string, c pb.CampusClient, ctx context.Context, imageShoul
 	}
 }
 
-func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria string, rating int32) {
+func generateCanteenRating(c pb.CampusClient, ctx context.Context, canteen string, rating int32) {
 	y := make([]*pb.RatingTag, 2)
 	y[0] = &pb.RatingTag{
 		Points: float64(1 + rating),
@@ -189,12 +189,12 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 		TagId:  2,
 	}
 
-	_, err := c.NewCafeteriaRating(ctx, &pb.NewCafeteriaRatingRequest{
-		Points:      rating,
-		CafeteriaId: cafeteria,
-		Comment:     "Alles super, 2 Sterne",
-		RatingTags:  y,
-		Image:       getImageToBytes(testImage),
+	_, err := c.NewCanteenRating(ctx, &pb.NewCanteenRatingRequest{
+		Points:     rating,
+		CanteenId:  canteen,
+		Comment:    "Alles super, 2 Sterne",
+		RatingTags: y,
+		Image:      getImageToBytes(testImage),
 	})
 
 	if err != nil {
@@ -204,7 +204,7 @@ func generateCafeteriaRating(c pb.CampusClient, ctx context.Context, cafeteria s
 	}
 }
 
-func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string, dish string, rating int32) {
+func generateDishRating(c pb.CampusClient, ctx context.Context, canteen string, dish string, rating int32) {
 	y := make([]*pb.RatingTag, 3)
 	y[0] = &pb.RatingTag{
 		Points: float64(1 + rating),
@@ -220,12 +220,12 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, cafeteria string
 	}
 
 	_, err := c.NewDishRating(ctx, &pb.NewDishRatingRequest{
-		Points:      rating,
-		CafeteriaId: cafeteria,
-		Dish:        dish,
-		Comment:     "Alles Hähnchen",
-		RatingTags:  y,
-		Image:       getImageToBytes(testImage),
+		Points:     rating,
+		CanteenId:  canteen,
+		Dish:       dish,
+		Comment:    "Alles Hähnchen",
+		RatingTags: y,
+		Image:      getImageToBytes(testImage),
 	})
 
 	if err != nil {

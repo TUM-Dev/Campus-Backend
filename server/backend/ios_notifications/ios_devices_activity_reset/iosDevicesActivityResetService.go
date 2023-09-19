@@ -1,10 +1,11 @@
 package ios_devices_activity_reset
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Service struct {

@@ -1,0 +1,39 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-json
+        exclude: vscode/launch.json
+      - id: check-yaml
+        exclude: deployment/.*
+      - id: check-added-large-files
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.0
+    hooks:
+      - id: go-fmt
+      - id: go-imports
+  - repo: local
+    hooks:
+      - id: regen-protobuf
+        name: Regenerate protobuf files
+        files: server/api/
+        entry: bash server/api/generate.bash
+        language: system
+        pass_filenames: false
+        stages: [commit]
+      - id: go-mod-tidy-server
+        name: Check if go.mod and go.sum are up to date for server
+        files: server/
+        entry: sh -c "(cd server && go mod tidy)"
+        language: system
+        pass_filenames: false
+        stages: [commit]
+      - id: go-mod-tidy-client
+        name: Check if go.mod and go.sum are up to date for server
+        files: server/
+        entry: sh -c "(cd client && go get github.com/TUM-Dev/Campus-Backend/server && go mod tidy)"
+        language: system
+        pass_filenames: false
+        stages: [commit]

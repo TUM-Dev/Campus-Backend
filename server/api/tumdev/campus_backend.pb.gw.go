@@ -21,7 +21,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Suppress "imported and not used" errors
@@ -33,7 +32,7 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 func request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetTopNewsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetTopNews(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -42,7 +41,7 @@ func request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetTopNewsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetTopNews(ctx, &protoReq)
@@ -51,7 +50,7 @@ func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNewsSourcesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetNewsSources(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -60,7 +59,7 @@ func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNewsSourcesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetNewsSources(ctx, &protoReq)
@@ -68,25 +67,78 @@ func local_request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtim
 
 }
 
-func request_Campus_GetCafeteriaRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CafeteriaRatingRequest
+var (
+	filter_Campus_GetNews_0 = &utilities.DoubleArray{Encoding: map[string]int{"last_news_id": 0, "lastNewsId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+)
+
+func request_Campus_GetNews_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetNewsRequest
 	var metadata runtime.ServerMetadata
 
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["last_news_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_news_id")
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+
+	protoReq.LastNewsId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_news_id", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetNews_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.GetCafeteriaRatings(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetNews(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetCafeteriaRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CafeteriaRatingRequest
+func local_request_Campus_GetNews_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetNewsRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["last_news_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_news_id")
+	}
+
+	protoReq.LastNewsId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_news_id", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetNews_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetNews(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetCanteenRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -97,13 +149,30 @@ func local_request_Campus_GetCafeteriaRatings_0(ctx context.Context, marshaler r
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.GetCafeteriaRatings(ctx, &protoReq)
+	msg, err := client.GetCanteenRatings(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetCanteenRatingsRequest
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetCanteenRatings(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
 func request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DishRatingRequest
+	var protoReq GetDishRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -120,7 +189,7 @@ func request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DishRatingRequest
+	var protoReq GetDishRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -136,8 +205,8 @@ func local_request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtim
 
 }
 
-func request_Campus_NewCafeteriaRating_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NewCafeteriaRatingRequest
+func request_Campus_NewCanteenRating_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq NewCanteenRatingRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -148,13 +217,13 @@ func request_Campus_NewCafeteriaRating_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.NewCafeteriaRating(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.NewCanteenRating(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_NewCafeteriaRating_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NewCafeteriaRatingRequest
+func local_request_Campus_NewCanteenRating_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq NewCanteenRatingRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -165,7 +234,7 @@ func local_request_Campus_NewCafeteriaRating_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.NewCafeteriaRating(ctx, &protoReq)
+	msg, err := server.NewCanteenRating(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -205,7 +274,7 @@ func local_request_Campus_NewDishRating_0(ctx context.Context, marshaler runtime
 }
 
 func request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableDishTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetAvailableDishTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -214,7 +283,7 @@ func request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableDishTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetAvailableDishTags(ctx, &protoReq)
@@ -223,7 +292,7 @@ func local_request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler 
 }
 
 func request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNameTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetNameTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -232,7 +301,7 @@ func request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshal
 }
 
 func local_request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNameTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetNameTags(ctx, &protoReq)
@@ -240,38 +309,38 @@ func local_request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func request_Campus_GetAvailableCafeteriaTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+func request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetAvailableCanteenTagsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetAvailableCafeteriaTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetAvailableCanteenTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetAvailableCafeteriaTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+func local_request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetAvailableCanteenTagsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetAvailableCafeteriaTags(ctx, &protoReq)
+	msg, err := server.GetAvailableCanteenTags(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-func request_Campus_GetCafeterias_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+func request_Campus_GetCanteens_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetCanteensRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetCafeterias(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetCanteens(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetCafeterias_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+func local_request_Campus_GetCanteens_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetCanteensRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetCafeterias(ctx, &protoReq)
+	msg, err := server.GetCanteens(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -313,7 +382,7 @@ func local_request_Campus_GetDishes_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetResponsiblePersonRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetResponsiblePerson(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -322,7 +391,7 @@ func request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetResponsiblePersonRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetResponsiblePerson(ctx, &protoReq)
@@ -330,98 +399,8 @@ func local_request_Campus_GetResponsiblePerson_0(ctx context.Context, marshaler 
 
 }
 
-func request_Campus_GetBuilding2Gps_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetBuilding2Gps(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetBuilding2Gps_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetBuilding2Gps(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-var (
-	filter_Campus_GetAreaFacilitiesByBuildingNr_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
-func request_Campus_GetAreaFacilitiesByBuildingNr_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAreaFacilitiesByBuildingNrRequest
-	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetAreaFacilitiesByBuildingNr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.GetAreaFacilitiesByBuildingNr(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetAreaFacilitiesByBuildingNr_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAreaFacilitiesByBuildingNrRequest
-	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetAreaFacilitiesByBuildingNr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.GetAreaFacilitiesByBuildingNr(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_Campus_GetListOfToilets_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetListOfToilets(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetListOfToilets_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetListOfToilets(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_Campus_GetListOfElevators_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.GetListOfElevators(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Campus_GetListOfElevators_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.GetListOfElevators(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
 func request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetMoreInformationRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetMoreInformation(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -430,7 +409,7 @@ func request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.
 }
 
 func local_request_Campus_GetMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetMoreInformationRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetMoreInformation(ctx, &protoReq)
@@ -506,7 +485,7 @@ func request_Campus_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
 	}
 
-	protoReq.Version, err = runtime.Int32(val)
+	protoReq.Version, err = runtime.Int64(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
 	}
@@ -532,7 +511,7 @@ func local_request_Campus_GetUpdateNote_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
 	}
 
-	protoReq.Version, err = runtime.Int32(val)
+	protoReq.Version, err = runtime.Int64(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
 	}
@@ -543,7 +522,7 @@ func local_request_Campus_GetUpdateNote_0(ctx context.Context, marshaler runtime
 }
 
 func request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetStudyRoomListRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetStudyRoomList(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -552,7 +531,7 @@ func request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func local_request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetStudyRoomListRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetStudyRoomList(ctx, &protoReq)
@@ -571,14 +550,14 @@ func request_Campus_GetKino_0(ctx context.Context, marshaler runtime.Marshaler, 
 		_   = err
 	)
 
-	val, ok = pathParams["lastId"]
+	val, ok = pathParams["last_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lastId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
 	}
 
 	protoReq.LastId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lastId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
 	}
 
 	msg, err := client.GetKino(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -597,14 +576,14 @@ func local_request_Campus_GetKino_0(ctx context.Context, marshaler runtime.Marsh
 		_   = err
 	)
 
-	val, ok = pathParams["lastId"]
+	val, ok = pathParams["last_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lastId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
 	}
 
 	protoReq.LastId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lastId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
 	}
 
 	msg, err := server.GetKino(ctx, &protoReq)
@@ -669,14 +648,14 @@ func request_Campus_SendFeedbackImage_0(ctx context.Context, marshaler runtime.M
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
-	val, ok = pathParams["imageNr"]
+	val, ok = pathParams["image_nr"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "imageNr")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "image_nr")
 	}
 
 	protoReq.ImageNr, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "imageNr", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "image_nr", err)
 	}
 
 	msg, err := client.SendFeedbackImage(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -705,14 +684,14 @@ func local_request_Campus_SendFeedbackImage_0(ctx context.Context, marshaler run
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
-	val, ok = pathParams["imageNr"]
+	val, ok = pathParams["image_nr"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "imageNr")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "image_nr")
 	}
 
 	protoReq.ImageNr, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "imageNr", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "image_nr", err)
 	}
 
 	msg, err := server.SendFeedbackImage(ctx, &protoReq)
@@ -731,14 +710,14 @@ func request_Campus_GetUploadStatus_0(ctx context.Context, marshaler runtime.Mar
 		_   = err
 	)
 
-	val, ok = pathParams["lrzId"]
+	val, ok = pathParams["lrz_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrzId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrz_id")
 	}
 
 	protoReq.LrzId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrzId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrz_id", err)
 	}
 
 	msg, err := client.GetUploadStatus(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -757,14 +736,14 @@ func local_request_Campus_GetUploadStatus_0(ctx context.Context, marshaler runti
 		_   = err
 	)
 
-	val, ok = pathParams["lrzId"]
+	val, ok = pathParams["lrz_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrzId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrz_id")
 	}
 
 	protoReq.LrzId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrzId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrz_id", err)
 	}
 
 	msg, err := server.GetUploadStatus(ctx, &protoReq)
@@ -773,7 +752,7 @@ func local_request_Campus_GetUploadStatus_0(ctx context.Context, marshaler runti
 }
 
 func request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -783,14 +762,14 @@ func request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Mar
 		_   = err
 	)
 
-	val, ok = pathParams["notificationId"]
+	val, ok = pathParams["notification_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notificationId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notification_id")
 	}
 
 	protoReq.NotificationId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notificationId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notification_id", err)
 	}
 
 	msg, err := client.GetNotification(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -799,7 +778,7 @@ func request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -809,14 +788,14 @@ func local_request_Campus_GetNotification_0(ctx context.Context, marshaler runti
 		_   = err
 	)
 
-	val, ok = pathParams["notificationId"]
+	val, ok = pathParams["notification_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notificationId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notification_id")
 	}
 
 	protoReq.NotificationId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notificationId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notification_id", err)
 	}
 
 	msg, err := server.GetNotification(ctx, &protoReq)
@@ -825,7 +804,7 @@ func local_request_Campus_GetNotification_0(ctx context.Context, marshaler runti
 }
 
 func request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationConfirmRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -835,14 +814,14 @@ func request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runt
 		_   = err
 	)
 
-	val, ok = pathParams["notificationId"]
+	val, ok = pathParams["notification_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notificationId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notification_id")
 	}
 
 	protoReq.NotificationId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notificationId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notification_id", err)
 	}
 
 	msg, err := client.GetNotificationConfirm(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -851,7 +830,7 @@ func request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runt
 }
 
 func local_request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationConfirmRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -861,14 +840,14 @@ func local_request_Campus_GetNotificationConfirm_0(ctx context.Context, marshale
 		_   = err
 	)
 
-	val, ok = pathParams["notificationId"]
+	val, ok = pathParams["notification_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notificationId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "notification_id")
 	}
 
 	protoReq.NotificationId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notificationId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "notification_id", err)
 	}
 
 	msg, err := server.GetNotificationConfirm(ctx, &protoReq)
@@ -887,14 +866,14 @@ func request_Campus_GetMembers_0(ctx context.Context, marshaler runtime.Marshale
 		_   = err
 	)
 
-	val, ok = pathParams["lrzId"]
+	val, ok = pathParams["lrz_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrzId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrz_id")
 	}
 
 	protoReq.LrzId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrzId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrz_id", err)
 	}
 
 	msg, err := client.GetMembers(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -913,14 +892,14 @@ func local_request_Campus_GetMembers_0(ctx context.Context, marshaler runtime.Ma
 		_   = err
 	)
 
-	val, ok = pathParams["lrzId"]
+	val, ok = pathParams["lrz_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrzId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lrz_id")
 	}
 
 	protoReq.LrzId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrzId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lrz_id", err)
 	}
 
 	msg, err := server.GetMembers(ctx, &protoReq)
@@ -939,14 +918,14 @@ func request_Campus_GetCanteenHeadCount_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["canteenId"]
+	val, ok = pathParams["canteen_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "canteenId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "canteen_id")
 	}
 
 	protoReq.CanteenId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "canteenId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "canteen_id", err)
 	}
 
 	msg, err := client.GetCanteenHeadCount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -965,14 +944,14 @@ func local_request_Campus_GetCanteenHeadCount_0(ctx context.Context, marshaler r
 		_   = err
 	)
 
-	val, ok = pathParams["canteenId"]
+	val, ok = pathParams["canteen_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "canteenId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "canteen_id")
 	}
 
 	protoReq.CanteenId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "canteenId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "canteen_id", err)
 	}
 
 	msg, err := server.GetCanteenHeadCount(ctx, &protoReq)
@@ -1049,7 +1028,7 @@ func local_request_Campus_RegisterDevice_0(ctx context.Context, marshaler runtim
 }
 
 var (
-	filter_Campus_RemoveDevice_0 = &utilities.DoubleArray{Encoding: map[string]int{"deviceId": 0}, Base: []int{1, 2, 0, 0}, Check: []int{0, 1, 2, 2}}
+	filter_Campus_RemoveDevice_0 = &utilities.DoubleArray{Encoding: map[string]int{"device_id": 0, "deviceId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 )
 
 func request_Campus_RemoveDevice_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -1063,14 +1042,14 @@ func request_Campus_RemoveDevice_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["deviceId"]
+	val, ok = pathParams["device_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "deviceId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
 	}
 
 	protoReq.DeviceId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -1096,14 +1075,14 @@ func local_request_Campus_RemoveDevice_0(ctx context.Context, marshaler runtime.
 		_   = err
 	)
 
-	val, ok = pathParams["deviceId"]
+	val, ok = pathParams["device_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "deviceId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
 	}
 
 	protoReq.DeviceId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -1174,7 +1153,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Campus_GetCafeteriaRatings_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetNews_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1182,12 +1161,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatings", runtime.WithHTTPPathPattern("/cafeteria/rating/get"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNews", runtime.WithHTTPPathPattern("/news/{last_news_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetCafeteriaRatings_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetNews_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1195,7 +1174,32 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetCafeteriaRatings_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetNews_0{resp}, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_Campus_GetCanteenRatings_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCanteenRatings", runtime.WithHTTPPathPattern("/canteen/rating/get"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Campus_GetCanteenRatings_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetCanteenRatings_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1224,7 +1228,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Campus_NewCafeteriaRating_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_NewCanteenRating_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1232,12 +1236,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/NewCafeteriaRating", runtime.WithHTTPPathPattern("/cafeteria/rating/new"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/NewCanteenRating", runtime.WithHTTPPathPattern("/canteen/rating/new"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_NewCafeteriaRating_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_NewCanteenRating_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1245,7 +1249,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_NewCafeteriaRating_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_NewCanteenRating_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1324,7 +1328,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetAvailableCafeteriaTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetAvailableCanteenTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1332,12 +1336,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allRatingTags"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAvailableCanteenTags", runtime.WithHTTPPathPattern("/canteen/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetAvailableCafeteriaTags_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetAvailableCanteenTags_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1345,11 +1349,11 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetAvailableCafeteriaTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetAvailableCafeteriaTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetAvailableCanteenTags_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetCafeterias_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetCanteens_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1357,12 +1361,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCafeterias", runtime.WithHTTPPathPattern("/cafeteria/allCafeterias"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCanteens", runtime.WithHTTPPathPattern("/canteen/allCanteens"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetCafeterias_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetCanteens_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1370,7 +1374,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetCafeterias_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetCafeterias_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetCanteens_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1421,106 +1425,6 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		}
 
 		forward_Campus_GetResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetBuilding2Gps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetBuilding2Gps", runtime.WithHTTPPathPattern("/barrierfree/building2Gps"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetBuilding2Gps_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetBuilding2Gps_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetAreaFacilitiesByBuildingNr_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetAreaFacilitiesByBuildingNr", runtime.WithHTTPPathPattern("/barrierfree/nearby"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfToilets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetListOfToilets", runtime.WithHTTPPathPattern("/barrierfree/toilets"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetListOfToilets_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfToilets_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfElevators_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetListOfElevators", runtime.WithHTTPPathPattern("/barrierfree/elevators"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Campus_GetListOfElevators_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfElevators_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1632,7 +1536,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetKino", runtime.WithHTTPPathPattern("/kino/{lastId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetKino", runtime.WithHTTPPathPattern("/kino/{last_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1682,7 +1586,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/SendFeedbackImage", runtime.WithHTTPPathPattern("/feedback/{id}/{imageNr}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/SendFeedbackImage", runtime.WithHTTPPathPattern("/feedback/{id}/{image_nr}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1707,7 +1611,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetUploadStatus", runtime.WithHTTPPathPattern("/device/uploaded/{lrzId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetUploadStatus", runtime.WithHTTPPathPattern("/device/uploaded/{lrz_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1732,7 +1636,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNotification", runtime.WithHTTPPathPattern("/notifications/{notificationId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNotification", runtime.WithHTTPPathPattern("/notifications/{notification_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1757,7 +1661,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNotificationConfirm", runtime.WithHTTPPathPattern("/notifications/confirm/{notificationId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNotificationConfirm", runtime.WithHTTPPathPattern("/notifications/confirm/{notification_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1782,7 +1686,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetMembers", runtime.WithHTTPPathPattern("/members/{lrzId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetMembers", runtime.WithHTTPPathPattern("/members/{lrz_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1807,7 +1711,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCanteenHeadCount", runtime.WithHTTPPathPattern("/canteen/headCount/{canteenId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetCanteenHeadCount", runtime.WithHTTPPathPattern("/canteen/headCount/{canteen_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1882,7 +1786,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/RemoveDevice", runtime.WithHTTPPathPattern("/device/{deviceId}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/RemoveDevice", runtime.WithHTTPPathPattern("/device/{device_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1984,25 +1888,47 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Campus_GetCafeteriaRatings_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetNews_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCafeteriaRatings", runtime.WithHTTPPathPattern("/cafeteria/rating/get"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNews", runtime.WithHTTPPathPattern("/news/{last_news_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetCafeteriaRatings_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetNews_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetCafeteriaRatings_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetNews_0{resp}, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_Campus_GetCanteenRatings_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCanteenRatings", runtime.WithHTTPPathPattern("/canteen/rating/get"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Campus_GetCanteenRatings_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Campus_GetCanteenRatings_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2028,25 +1954,25 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Campus_NewCafeteriaRating_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_NewCanteenRating_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/NewCafeteriaRating", runtime.WithHTTPPathPattern("/cafeteria/rating/new"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/NewCanteenRating", runtime.WithHTTPPathPattern("/canteen/rating/new"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_NewCafeteriaRating_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_NewCanteenRating_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_NewCafeteriaRating_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_NewCanteenRating_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2116,47 +2042,47 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetAvailableCafeteriaTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetAvailableCanteenTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableCafeteriaTags", runtime.WithHTTPPathPattern("/cafeteria/rating/allRatingTags"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAvailableCanteenTags", runtime.WithHTTPPathPattern("/canteen/rating/allRatingTags"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetAvailableCafeteriaTags_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetAvailableCanteenTags_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetAvailableCafeteriaTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetAvailableCafeteriaTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetAvailableCanteenTags_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Campus_GetCafeterias_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetCanteens_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCafeterias", runtime.WithHTTPPathPattern("/cafeteria/allCafeterias"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCanteens", runtime.WithHTTPPathPattern("/canteen/allCanteens"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetCafeterias_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetCanteens_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetCafeterias_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetCafeterias_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetCanteens_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2201,94 +2127,6 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		}
 
 		forward_Campus_GetResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetBuilding2Gps_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetBuilding2Gps", runtime.WithHTTPPathPattern("/barrierfree/building2Gps"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetBuilding2Gps_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetBuilding2Gps_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetAreaFacilitiesByBuildingNr_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetAreaFacilitiesByBuildingNr", runtime.WithHTTPPathPattern("/barrierfree/nearby"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetAreaFacilitiesByBuildingNr_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfToilets_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetListOfToilets", runtime.WithHTTPPathPattern("/barrierfree/toilets"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetListOfToilets_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfToilets_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Campus_GetListOfElevators_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetListOfElevators", runtime.WithHTTPPathPattern("/barrierfree/elevators"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_Campus_GetListOfElevators_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Campus_GetListOfElevators_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2386,7 +2224,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetKino", runtime.WithHTTPPathPattern("/kino/{lastId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetKino", runtime.WithHTTPPathPattern("/kino/{last_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2430,7 +2268,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/SendFeedbackImage", runtime.WithHTTPPathPattern("/feedback/{id}/{imageNr}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/SendFeedbackImage", runtime.WithHTTPPathPattern("/feedback/{id}/{image_nr}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2452,7 +2290,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetUploadStatus", runtime.WithHTTPPathPattern("/device/uploaded/{lrzId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetUploadStatus", runtime.WithHTTPPathPattern("/device/uploaded/{lrz_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2474,7 +2312,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNotification", runtime.WithHTTPPathPattern("/notifications/{notificationId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNotification", runtime.WithHTTPPathPattern("/notifications/{notification_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2496,7 +2334,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNotificationConfirm", runtime.WithHTTPPathPattern("/notifications/confirm/{notificationId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNotificationConfirm", runtime.WithHTTPPathPattern("/notifications/confirm/{notification_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2518,7 +2356,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetMembers", runtime.WithHTTPPathPattern("/members/{lrzId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetMembers", runtime.WithHTTPPathPattern("/members/{lrz_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2540,7 +2378,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCanteenHeadCount", runtime.WithHTTPPathPattern("/canteen/headCount/{canteenId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetCanteenHeadCount", runtime.WithHTTPPathPattern("/canteen/headCount/{canteen_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2606,7 +2444,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/RemoveDevice", runtime.WithHTTPPathPattern("/device/{deviceId}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/RemoveDevice", runtime.WithHTTPPathPattern("/device/{device_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2630,8 +2468,17 @@ type response_Campus_GetNewsSources_0 struct {
 }
 
 func (m response_Campus_GetNewsSources_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*NewsSourceReply)
+	response := m.Message.(*GetNewsSourcesReply)
 	return response.Sources
+}
+
+type response_Campus_GetNews_0 struct {
+	proto.Message
+}
+
+func (m response_Campus_GetNews_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetNewsReply)
+	return response.News
 }
 
 type response_Campus_GetAvailableDishTags_0 struct {
@@ -2639,7 +2486,7 @@ type response_Campus_GetAvailableDishTags_0 struct {
 }
 
 func (m response_Campus_GetAvailableDishTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+	response := m.Message.(*GetAvailableDishTagsReply)
 	return response.RatingTags
 }
 
@@ -2648,26 +2495,26 @@ type response_Campus_GetNameTags_0 struct {
 }
 
 func (m response_Campus_GetNameTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+	response := m.Message.(*GetNameTagsReply)
 	return response.RatingTags
 }
 
-type response_Campus_GetAvailableCafeteriaTags_0 struct {
+type response_Campus_GetAvailableCanteenTags_0 struct {
 	proto.Message
 }
 
-func (m response_Campus_GetAvailableCafeteriaTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+func (m response_Campus_GetAvailableCanteenTags_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetAvailableCanteenTagsReply)
 	return response.RatingTags
 }
 
-type response_Campus_GetCafeterias_0 struct {
+type response_Campus_GetCanteens_0 struct {
 	proto.Message
 }
 
-func (m response_Campus_GetCafeterias_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetCafeteriaReply)
-	return response.Cafeteria
+func (m response_Campus_GetCanteens_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetCanteensReply)
+	return response.Canteen
 }
 
 type response_Campus_GetDishes_0 struct {
@@ -2684,11 +2531,13 @@ var (
 
 	pattern_Campus_GetNewsSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "sources"}, ""))
 
-	pattern_Campus_GetCafeteriaRatings_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteria", "rating", "get"}, ""))
+	pattern_Campus_GetNews_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"news", "last_news_id"}, ""))
+
+	pattern_Campus_GetCanteenRatings_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"canteen", "rating", "get"}, ""))
 
 	pattern_Campus_GetDishRatings_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "get"}, ""))
 
-	pattern_Campus_NewCafeteriaRating_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteria", "rating", "new"}, ""))
+	pattern_Campus_NewCanteenRating_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"canteen", "rating", "new"}, ""))
 
 	pattern_Campus_NewDishRating_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "new"}, ""))
 
@@ -2696,21 +2545,13 @@ var (
 
 	pattern_Campus_GetNameTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"dish", "rating", "allDishTags"}, ""))
 
-	pattern_Campus_GetAvailableCafeteriaTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"cafeteria", "rating", "allRatingTags"}, ""))
+	pattern_Campus_GetAvailableCanteenTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"canteen", "rating", "allRatingTags"}, ""))
 
-	pattern_Campus_GetCafeterias_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"cafeteria", "allCafeterias"}, ""))
+	pattern_Campus_GetCanteens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"canteen", "allCanteens"}, ""))
 
 	pattern_Campus_GetDishes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"dish", "allDishes"}, ""))
 
 	pattern_Campus_GetResponsiblePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "contacts"}, ""))
-
-	pattern_Campus_GetBuilding2Gps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "building2Gps"}, ""))
-
-	pattern_Campus_GetAreaFacilitiesByBuildingNr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "nearby"}, ""))
-
-	pattern_Campus_GetListOfToilets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "toilets"}, ""))
-
-	pattern_Campus_GetListOfElevators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "elevators"}, ""))
 
 	pattern_Campus_GetMoreInformation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "moreInformation"}, ""))
 
@@ -2720,27 +2561,27 @@ var (
 
 	pattern_Campus_GetStudyRoomList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"studyrooms"}, ""))
 
-	pattern_Campus_GetKino_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"kino", "lastId"}, ""))
+	pattern_Campus_GetKino_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"kino", "last_id"}, ""))
 
 	pattern_Campus_SendFeedback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"feedback"}, ""))
 
-	pattern_Campus_SendFeedbackImage_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"feedback", "id", "imageNr"}, ""))
+	pattern_Campus_SendFeedbackImage_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"feedback", "id", "image_nr"}, ""))
 
-	pattern_Campus_GetUploadStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"device", "uploaded", "lrzId"}, ""))
+	pattern_Campus_GetUploadStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"device", "uploaded", "lrz_id"}, ""))
 
-	pattern_Campus_GetNotification_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"notifications", "notificationId"}, ""))
+	pattern_Campus_GetNotification_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"notifications", "notification_id"}, ""))
 
-	pattern_Campus_GetNotificationConfirm_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"notifications", "confirm", "notificationId"}, ""))
+	pattern_Campus_GetNotificationConfirm_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"notifications", "confirm", "notification_id"}, ""))
 
-	pattern_Campus_GetMembers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"members", "lrzId"}, ""))
+	pattern_Campus_GetMembers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"members", "lrz_id"}, ""))
 
-	pattern_Campus_GetCanteenHeadCount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"canteen", "headCount", "canteenId"}, ""))
+	pattern_Campus_GetCanteenHeadCount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"canteen", "headCount", "canteen_id"}, ""))
 
 	pattern_Campus_IOSDeviceRequestResponse_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"ios", "notifications", "deviceRequestResponse"}, ""))
 
 	pattern_Campus_RegisterDevice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"device"}, ""))
 
-	pattern_Campus_RemoveDevice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"device", "deviceId"}, ""))
+	pattern_Campus_RemoveDevice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"device", "device_id"}, ""))
 )
 
 var (
@@ -2748,11 +2589,13 @@ var (
 
 	forward_Campus_GetNewsSources_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetCafeteriaRatings_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetNews_0 = runtime.ForwardResponseMessage
+
+	forward_Campus_GetCanteenRatings_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetDishRatings_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_NewCafeteriaRating_0 = runtime.ForwardResponseMessage
+	forward_Campus_NewCanteenRating_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_NewDishRating_0 = runtime.ForwardResponseMessage
 
@@ -2760,21 +2603,13 @@ var (
 
 	forward_Campus_GetNameTags_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetAvailableCafeteriaTags_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetAvailableCanteenTags_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_GetCafeterias_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetCanteens_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetDishes_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetResponsiblePerson_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetBuilding2Gps_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetAreaFacilitiesByBuildingNr_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetListOfToilets_0 = runtime.ForwardResponseMessage
-
-	forward_Campus_GetListOfElevators_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetMoreInformation_0 = runtime.ForwardResponseMessage
 

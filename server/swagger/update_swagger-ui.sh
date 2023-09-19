@@ -15,4 +15,3 @@ rm -fr package*.json
 
 echo updating the favicon
 curl https://www.tum.app/assets/img/fav.png --output fav.png
-

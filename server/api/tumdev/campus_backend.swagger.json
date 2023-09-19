@@ -17,28 +17,6 @@
     "application/json"
   ],
   "paths": {
-    "/barrierfree/building2Gps": {
-      "get": {
-        "operationId": "Campus_GetBuilding2Gps",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetBuilding2GpsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/barrierfree/contacts": {
       "get": {
         "operationId": "Campus_GetResponsiblePerson",
@@ -47,28 +25,6 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/apiGetResponsiblePersonReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/elevators": {
-      "get": {
-        "operationId": "Campus_GetListOfElevators",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetListOfElevatorsReply"
             }
           },
           "default": {
@@ -105,61 +61,9 @@
         ]
       }
     },
-    "/barrierfree/nearby": {
+    "/canteen/allCanteens": {
       "get": {
-        "operationId": "Campus_GetAreaFacilitiesByBuildingNr",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetAreaFacilitiesByBuildingNrReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "buildingNr",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/toilets": {
-      "get": {
-        "operationId": "Campus_GetListOfToilets",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetListOfToiletsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/cafeteria/allCafeterias": {
-      "get": {
-        "operationId": "Campus_GetCafeterias",
+        "operationId": "Campus_GetCanteens",
         "responses": {
           "200": {
             "description": "",
@@ -167,7 +71,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "$ref": "#/definitions/apiCafeteria"
+                "$ref": "#/definitions/apiCanteen"
               }
             }
           },
@@ -178,98 +82,6 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/cafeteria/rating/allRatingTags": {
-      "get": {
-        "operationId": "Campus_GetAvailableCafeteriaTags",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/apiTagsOverview"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/cafeteria/rating/get": {
-      "post": {
-        "summary": "This endpoint retrieves Cafeteria Ratings from the Backend.",
-        "operationId": "Campus_GetCafeteriaRatings",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiCafeteriaRatingReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiCafeteriaRatingRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/cafeteria/rating/new": {
-      "post": {
-        "operationId": "Campus_NewCafeteriaRating",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "type": "object",
-              "properties": {}
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiNewCafeteriaRatingRequest"
-            }
-          }
-        ],
         "tags": [
           "Campus"
         ]
@@ -299,6 +111,97 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/canteen/rating/allRatingTags": {
+      "get": {
+        "operationId": "Campus_GetAvailableCanteenTags",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/apiTagsOverview"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/canteen/rating/get": {
+      "post": {
+        "summary": "This endpoint retrieves Canteen Ratings from the Backend.",
+        "operationId": "Campus_GetCanteenRatings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCanteenRatingsReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetCanteenRatingsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/canteen/rating/new": {
+      "post": {
+        "operationId": "Campus_NewCanteenRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiNewCanteenRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiNewCanteenRatingRequest"
+            }
           }
         ],
         "tags": [
@@ -434,7 +337,7 @@
         },
         "parameters": [
           {
-            "name": "cafeteriaId",
+            "name": "canteenId",
             "in": "query",
             "required": false,
             "type": "string"
@@ -528,7 +431,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiDishRatingReply"
+              "$ref": "#/definitions/apiGetDishRatingsReply"
             }
           },
           "default": {
@@ -544,7 +447,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiDishRatingRequest"
+              "$ref": "#/definitions/apiGetDishRatingsRequest"
             }
           }
         ],
@@ -560,8 +463,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/apiNewDishRatingReply"
             }
           },
           "default": {
@@ -593,7 +495,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackImageReply"
+              "$ref": "#/definitions/apiSendFeedbackReply"
             }
           },
           "default": {
@@ -848,6 +750,50 @@
         ]
       }
     },
+    "/news/{lastNewsId}": {
+      "get": {
+        "operationId": "Campus_GetNews",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/apiNewsItem"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lastNewsId",
+            "description": "the last id of the news item received. 0 to get all news items",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "newsSource",
+            "description": "filter by news source id. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/notifications/confirm/{notificationId}": {
       "get": {
         "operationId": "Campus_GetNotificationConfirm",
@@ -855,7 +801,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetNotificationsConfirmReply"
+              "$ref": "#/definitions/apiGetNotificationConfirmReply"
             }
           },
           "default": {
@@ -886,7 +832,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetNotificationsReply"
+              "$ref": "#/definitions/apiGetNotificationReply"
             }
           },
           "default": {
@@ -984,8 +930,8 @@
             "name": "version",
             "in": "path",
             "required": true,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -995,21 +941,21 @@
     }
   },
   "definitions": {
-    "apiBuilding2GpsElement": {
+    "GetMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
-        "id": {
+        "title": {
           "type": "string"
         },
-        "latitude": {
+        "category": {
           "type": "string"
         },
-        "longitude": {
+        "url": {
           "type": "string"
         }
       }
     },
-    "apiCafeteria": {
+    "apiCanteen": {
       "type": "object",
       "properties": {
         "id": {
@@ -1028,7 +974,65 @@
         }
       }
     },
-    "apiCafeteriaRatingReply": {
+    "apiDeviceType": {
+      "type": "string",
+      "enum": [
+        "IOS",
+        "ANDROID",
+        "WINDOWS"
+      ],
+      "default": "IOS"
+    },
+    "apiGetAvailableCanteenTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTagsOverview"
+          }
+        }
+      }
+    },
+    "apiGetAvailableDishTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTagsOverview"
+          }
+        }
+      }
+    },
+    "apiGetCanteenHeadCountReply": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The absolut count of humans in the canteen. Only valid in case percent != -1."
+        },
+        "maxCount": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1."
+        },
+        "percent": {
+          "type": "number",
+          "format": "float",
+          "description": "Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "A time stamp indicating how up to date the response is. Only valid in case percent != -1."
+        }
+      }
+    },
+    "apiGetCanteenRatingsReply": {
       "type": "object",
       "properties": {
         "rating": {
@@ -1063,12 +1067,12 @@
         }
       }
     },
-    "apiCafeteriaRatingRequest": {
+    "apiGetCanteenRatingsRequest": {
       "type": "object",
       "properties": {
-        "cafeteriaId": {
+        "canteenId": {
           "type": "string",
-          "title": "cafeteriaId Mandatory Name of the cafeteria (EAT-API naming scheme \"MENSA_GARCHING\")"
+          "title": "canteenId Mandatory Name of the canteen (EAT-API naming scheme \"MENSA_GARCHING\")"
         },
         "from": {
           "type": "string",
@@ -1087,16 +1091,19 @@
         }
       }
     },
-    "apiDeviceType": {
-      "type": "string",
-      "enum": [
-        "IOS",
-        "ANDROID",
-        "WINDOWS"
-      ],
-      "default": "IOS"
+    "apiGetCanteensReply": {
+      "type": "object",
+      "properties": {
+        "canteen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiCanteen"
+          }
+        }
+      }
     },
-    "apiDishRatingReply": {
+    "apiGetDishRatingsReply": {
       "type": "object",
       "properties": {
         "rating": {
@@ -1138,12 +1145,12 @@
         }
       }
     },
-    "apiDishRatingRequest": {
+    "apiGetDishRatingsRequest": {
       "type": "object",
       "properties": {
-        "cafeteriaId": {
+        "canteenId": {
           "type": "string",
-          "title": "Mandatory Name of the cafeteria (EAT-API naming scheme \"MENSA_GARCHING\")"
+          "title": "Mandatory Name of the canteen (EAT-API naming scheme \"MENSA_GARCHING\")"
         },
         "dish": {
           "type": "string",
@@ -1163,67 +1170,6 @@
           "type": "integer",
           "format": "int32",
           "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
-        }
-      }
-    },
-    "apiGetAreaFacilitiesByBuildingNrReply": {
-      "type": "object",
-      "properties": {
-        "areaFacilitiesByBuildingNr": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
-    "apiGetBuilding2GpsReply": {
-      "type": "object",
-      "properties": {
-        "building2Gps": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiBuilding2GpsElement"
-          }
-        }
-      }
-    },
-    "apiGetCafeteriaReply": {
-      "type": "object",
-      "properties": {
-        "cafeteria": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiCafeteria"
-          }
-        }
-      }
-    },
-    "apiGetCanteenHeadCountReply": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The absolut count of humans in the canteen. Only valid in case percent != -1."
-        },
-        "maxCount": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The maximum nunmber of humans in the canteen for the percent to be 100.00. Only valid in case percent != -1."
-        },
-        "percent": {
-          "type": "number",
-          "format": "float",
-          "description": "Current capacity utilization of the canteen clamped to 0 and 100 or -1 in case no data is available."
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "A time stamp indicating how up to date the response is. Only valid in case percent != -1."
         }
       }
     },
@@ -1250,30 +1196,6 @@
         }
       }
     },
-    "apiGetListOfElevatorsReply": {
-      "type": "object",
-      "properties": {
-        "listOfElevators": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
-    "apiGetListOfToiletsReply": {
-      "type": "object",
-      "properties": {
-        "listOfToilets": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoomInformationElement"
-          }
-        }
-      }
-    },
     "apiGetMembersReply": {
       "type": "object",
       "properties": {
@@ -1292,16 +1214,52 @@
     "apiGetMoreInformationReply": {
       "type": "object",
       "properties": {
-        "information": {
+        "infos": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiMoreInformationElement"
+            "$ref": "#/definitions/GetMoreInformationReplyMoreInformation"
           }
         }
       }
     },
-    "apiGetNotificationsConfirmReply": {
+    "apiGetNameTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTagsOverview"
+          }
+        }
+      }
+    },
+    "apiGetNewsReply": {
+      "type": "object",
+      "properties": {
+        "news": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiNewsItem"
+          }
+        }
+      }
+    },
+    "apiGetNewsSourcesReply": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiNewsSource"
+          }
+        }
+      }
+    },
+    "apiGetNotificationConfirmReply": {
       "type": "object",
       "properties": {
         "status": {
@@ -1309,7 +1267,7 @@
         }
       }
     },
-    "apiGetNotificationsReply": {
+    "apiGetNotificationReply": {
       "type": "object",
       "properties": {
         "notificationId": {
@@ -1350,7 +1308,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/apiResponsiblePersonElement"
+            "$ref": "#/definitions/apiResponsiblePerson"
           }
         }
       }
@@ -1363,18 +1321,6 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiStudyRoomMsgElement"
-          }
-        }
-      }
-    },
-    "apiGetTagsReply": {
-      "type": "object",
-      "properties": {
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiTagsOverview"
           }
         }
       }
@@ -1406,6 +1352,9 @@
       "type": "object",
       "properties": {
         "message": {
+          "type": "string"
+        },
+        "versionName": {
           "type": "string"
         }
       }
@@ -1506,21 +1455,10 @@
         }
       }
     },
-    "apiMoreInformationElement": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "category": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
-      }
+    "apiNewCanteenRatingReply": {
+      "type": "object"
     },
-    "apiNewCafeteriaRatingRequest": {
+    "apiNewCanteenRatingRequest": {
       "type": "object",
       "properties": {
         "points": {
@@ -1528,7 +1466,7 @@
           "format": "int32",
           "title": "number in the range 1-5"
         },
-        "cafeteriaId": {
+        "canteenId": {
           "type": "string"
         },
         "image": {
@@ -1541,13 +1479,16 @@
             "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
-          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of cafeteriaRatingTags"
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
         },
         "comment": {
           "type": "string",
           "title": "Optional comment (max 256 chars)"
         }
       }
+    },
+    "apiNewDishRatingReply": {
+      "type": "object"
     },
     "apiNewDishRatingRequest": {
       "type": "object",
@@ -1557,7 +1498,7 @@
           "format": "int32",
           "title": "number in the range 1-5"
         },
-        "cafeteriaId": {
+        "canteenId": {
           "type": "string",
           "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available int the given mensa"
         },
@@ -1584,6 +1525,34 @@
         }
       }
     },
+    "apiNewsItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "apiNewsSource": {
       "type": "object",
       "properties": {
@@ -1595,18 +1564,6 @@
         },
         "icon": {
           "type": "string"
-        }
-      }
-    },
-    "apiNewsSourceReply": {
-      "type": "object",
-      "properties": {
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiNewsSource"
-          }
         }
       }
     },
@@ -1654,8 +1611,8 @@
       "type": "object",
       "properties": {
         "tagId": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "points": {
           "type": "number",
@@ -1731,7 +1688,7 @@
         }
       }
     },
-    "apiResponsiblePersonElement": {
+    "apiResponsiblePerson": {
       "type": "object",
       "properties": {
         "name": {
@@ -1746,40 +1703,7 @@
         "faculty": {
           "type": "string"
         },
-        "tumID": {
-          "type": "string"
-        }
-      }
-    },
-    "apiRoomInformationElement": {
-      "type": "object",
-      "properties": {
-        "roomId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "roomCode": {
-          "type": "string"
-        },
-        "buildingNr": {
-          "type": "string"
-        },
-        "archId": {
-          "type": "string"
-        },
-        "info": {
-          "type": "string"
-        },
-        "address": {
-          "type": "string"
-        },
-        "purpose": {
-          "type": "string"
-        },
-        "campus": {
-          "type": "string"
-        },
-        "name": {
+        "tumId": {
           "type": "string"
         }
       }
@@ -1791,6 +1715,9 @@
           "type": "string"
         }
       }
+    },
+    "apiSendFeedbackReply": {
+      "type": "object"
     },
     "apiSingleRatingReply": {
       "type": "object",

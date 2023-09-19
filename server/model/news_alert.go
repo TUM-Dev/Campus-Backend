@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/guregu/null"
-	"github.com/satori/go.uuid"
 )
 
 var (
@@ -17,8 +17,8 @@ var (
 
 // NewsAlert struct is a row record of the news_alert table in the tca database
 type NewsAlert struct {
-	NewsAlert int32       `gorm:"primary_key;AUTO_INCREMENT;column:news_alert;type:int;" json:"news_alert"`
-	FilesID   int32       `gorm:"column:file;not null"`
+	NewsAlert int64       `gorm:"primary_key;AUTO_INCREMENT;column:news_alert;type:int;" json:"news_alert"`
+	FilesID   int64       `gorm:"column:file;not null"`
 	Files     Files       `gorm:"foreignKey:FilesID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name      null.String `gorm:"column:name;type:varchar(100);" json:"name"`
 	Link      null.String `gorm:"column:link;type:text;size:65535;" json:"link"`

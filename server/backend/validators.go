@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 )
 

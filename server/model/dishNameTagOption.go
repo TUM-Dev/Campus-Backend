@@ -1,7 +1,7 @@
 package model
 
 type DishNameTagOption struct {
-	DishNameTagOption int32  `gorm:"column:dishNameTagOption;type:int;primary_key;AUTO_INCREMENT;not null;" json:"dishNameTagOption"`
+	DishNameTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
 	DE                string `gorm:"column:DE;type:text;not null;" json:"DE"`
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }

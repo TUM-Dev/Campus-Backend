@@ -1,8 +1,6 @@
 package migration
 
 import (
-	"database/sql"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -16,7 +14,7 @@ func (m TumDBMigrator) migrate20230904000000() *gormigrate.Migration {
 		ID: "20230904000000",
 		Migrate: func(tx *gorm.DB) error {
 			// remove "canteenHeadCount" in the enum
-			if err := tx.Where("type = ?", "ticketsales").Delete(&model.Crontab{}).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'ticketsales'").Error; err != nil {
 				return err
 			}
 			if err := SafeEnumRollback(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
@@ -31,7 +29,7 @@ func (m TumDBMigrator) migrate20230904000000() *gormigrate.Migration {
 			}
 			return tx.Create(&model.Crontab{
 				Interval: 60 * 10, // Every 10 minutes
-				Type:     null.String{NullString: sql.NullString{String: "ticketsales", Valid: true}},
+				Type:     null.StringFrom("ticketsales"),
 			}).Error
 		},
 	}

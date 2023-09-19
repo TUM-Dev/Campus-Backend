@@ -1,9 +1,9 @@
 package migration
 
 import (
-	"database/sql"
 	_ "embed"
 	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
@@ -52,7 +52,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 
 			err := tx.Create(&model.Crontab{
 				Interval: 60,
-				Type:     null.String{NullString: sql.NullString{String: cron.IOSNotifications, Valid: true}},
+				Type:     null.StringFrom(cron.IOSNotifications),
 			}).Error
 
 			if err != nil {
@@ -61,12 +61,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			}
 
 			return tx.Create(&model.Crontab{
-				Type: null.String{
-					NullString: sql.NullString{
-						String: cron.IOSActivityReset,
-						Valid:  true,
-					},
-				},
+				Type:     null.StringFrom(cron.IOSActivityReset),
 				Interval: 86400,
 			}).Error
 		},

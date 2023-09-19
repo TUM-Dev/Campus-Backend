@@ -19,7 +19,7 @@ type cafeteriaName struct {
 
 type cafeteriaWithID struct {
 	Name      string `json:"name"`
-	Cafeteria int32  `json:"cafeteria"`
+	Cafeteria int64  `json:"cafeteria"`
 }
 
 type location struct {
@@ -98,7 +98,7 @@ func downloadDailyDishes(c *CronService) {
 					}
 
 					var count int64
-					var dishId int32
+					var dishId int64
 					errCount := c.db.Model(&model.Dish{}).
 						Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).
 						Select("dish").First(&dishId).
@@ -176,9 +176,9 @@ func downloadCanteenNames(c *CronService) {
 // addDishTagsToMapping
 // Checks whether the dish name includes one of the expressions for the excluded tags as well as the included tags.
 // The corresponding tags for all identified DishNames will be saved in the table DishNameTags.
-func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
+func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 	lowercaseDish := strings.ToLower(dishName)
-	var includedTags []int32
+	var includedTags []int64
 	errIncluded := db.Model(&model.DishNameTagOptionIncluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
@@ -187,7 +187,7 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 		log.WithError(errIncluded).Error("Error while querying all included expressions for the dish: ", lowercaseDish)
 	}
 
-	var excludedTags []int32
+	var excludedTags []int64
 	errExcluded := db.Model(&model.DishNameTagOptionExcluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
@@ -219,10 +219,10 @@ func addDishTagsToMapping(dishID int32, dishName string, db *gorm.DB) {
 		}
 	}
 }
-func contains(s []int32, e int32) int32 {
+func contains(s []int64, e int64) int64 {
 	for i, a := range s {
 		if a == e {
-			return int32(i)
+			return int64(i)
 		}
 	}
 	return -1

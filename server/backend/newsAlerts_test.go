@@ -3,6 +3,10 @@ package backend
 import (
 	"context"
 	"database/sql"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -15,9 +19,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"regexp"
-	"testing"
-	"time"
 )
 
 type NewsAlertSuite struct {
@@ -59,11 +60,11 @@ func (s *NewsAlertSuite) Test_GetTopNewsOne() {
 			Name:       "Tournament_app_02-02.png",
 			Path:       "newsalerts/",
 			Downloads:  0,
-			URL:        sql.NullString{Valid: false},
-			Downloaded: sql.NullBool{Bool: true, Valid: true},
+			URL:        null.String{},
+			Downloaded: null.Bool{},
 		},
-		Name:    null.String{NullString: sql.NullString{String: "Exzellenzuniversität", Valid: true}},
-		Link:    null.String{NullString: sql.NullString{String: "https://tum.de", Valid: true}},
+		Name:    null.StringFrom("Exzellenzuniversität"),
+		Link:    null.StringFrom("https://tum.de"),
 		Created: time.Time.Add(time.Now(), time.Hour*-4),
 		From:    time.Time.Add(time.Now(), time.Hour*-2),
 		To:      time.Time.Add(time.Now(), time.Hour*2),

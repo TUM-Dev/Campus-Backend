@@ -1,7 +1,6 @@
 package migration
 
 import (
-	"database/sql"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -17,8 +16,8 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 		ID: "20210709193000",
 		Migrate: func(tx *gorm.DB) error {
 			type Files struct {
-				URL        sql.NullString `gorm:"column:url;default:null;" json:"url"`                         // URL of the file source (if any)
-				Downloaded sql.NullBool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
+				URL        null.String `gorm:"column:url;default:null;" json:"url"`                         // URL of the file source (if any)
+				Downloaded null.Bool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
 			}
 			if err := tx.AutoMigrate(
 				&Files{},
@@ -28,7 +27,7 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 			}
 			return tx.Create(&model.Crontab{
 				Interval: 300,
-				Type:     null.String{NullString: sql.NullString{String: "fileDownload", Valid: true}},
+				Type:     null.StringFrom("fileDownload"),
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {

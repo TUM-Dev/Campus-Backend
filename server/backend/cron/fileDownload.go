@@ -3,16 +3,17 @@ package cron
 import (
 	"bytes"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/disintegration/imaging"
-	"github.com/gabriel-vasile/mimetype"
-	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"image"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/disintegration/imaging"
+	"github.com/gabriel-vasile/mimetype"
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // fileDownloadCron Downloads all files that are not marked as finished in the database.

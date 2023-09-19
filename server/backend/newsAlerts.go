@@ -3,23 +3,23 @@ package backend
 import (
 	"context"
 	"errors"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
-func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
+func (s *CampusServer) GetTopNews(ctx context.Context, _ *pb.GetTopNewsRequest) (*pb.GetTopNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
 
 	var res *model.NewsAlert
-	err := s.db.Joins("Files").Where("NOW() between `from` and `to`").First(&res).Error
+	err := s.db.WithContext(ctx).Joins("Files").Where("NOW() between `from` and `to`").First(&res).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no current active top news")
 	} else if err != nil {
