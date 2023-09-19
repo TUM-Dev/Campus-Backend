@@ -522,7 +522,7 @@ message Movie {
   google.protobuf.Timestamp created = 5;
   string title = 6;
   // release year of the movie
-  string year = 7;
+  string release_year = 7;
   string runtime = 8;
   string genre = 9;
   string director = 10;
