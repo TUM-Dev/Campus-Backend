@@ -24,8 +24,8 @@ var (
 	ErrorWhileUnmarshalling = errors.New("error while unmarshalling")
 )
 
-func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished, error) {
-	var examResultsPublished model.TUMAPIExamResultsPublished
+func FetchExamResultsPublished(token string) (*model.TUMAPIPublishedExamResults, error) {
+	var examResultsPublished model.TUMAPIPublishedExamResults
 	err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished)
 	if err != nil {
 		return nil, err

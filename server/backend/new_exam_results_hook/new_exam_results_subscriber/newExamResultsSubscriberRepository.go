@@ -24,7 +24,7 @@ func (repository *Repository) FindAllSubscribers() (*[]model.NewExamResultsSubsc
 	return &subscribers, err
 }
 
-func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsSubscriber, newGrades *[]model.ExamResultPublished) error {
+func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsSubscriber, newGrades *[]model.PublishedExamResult) error {
 	url := subscriber.CallbackUrl
 
 	body, err := json.Marshal(newGrades)

@@ -10,11 +10,11 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (repository *Repository) StoreExamResultsPublished(examResultsPublished []model.ExamResultPublished) error {
+func (repository *Repository) StoreExamResultsPublished(examResultsPublished []model.PublishedExamResult) error {
 	db := repository.DB
 
 	return db.Transaction(func(tx *gorm.DB) error {
-		err := tx.Where("1 = 1").Delete(&model.ExamResultPublished{}).Error
+		err := tx.Where("1 = 1").Delete(&model.PublishedExamResult{}).Error
 
 		if err != nil {
 			return err
@@ -27,8 +27,8 @@ func (repository *Repository) StoreExamResultsPublished(examResultsPublished []m
 	})
 }
 
-func (repository *Repository) FindAllExamResultsPublished() (*[]model.ExamResultPublished, error) {
-	var results []model.ExamResultPublished
+func (repository *Repository) FindAllExamResultsPublished() (*[]model.PublishedExamResult, error) {
+	var results []model.PublishedExamResult
 	err := repository.DB.Find(&results).Error
 
 	return &results, err

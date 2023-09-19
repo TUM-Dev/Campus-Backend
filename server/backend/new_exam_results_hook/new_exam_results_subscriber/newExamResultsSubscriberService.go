@@ -9,7 +9,7 @@ type Service struct {
 	Repository *Repository
 }
 
-func (service *Service) NotifySubscribers(newGrades *[]model.ExamResultPublished) error {
+func (service *Service) NotifySubscribers(newGrades *[]model.PublishedExamResult) error {
 	repository := service.Repository
 
 	subscribers, err := repository.FindAllSubscribers()

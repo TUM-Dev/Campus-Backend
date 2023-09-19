@@ -16,7 +16,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 		Migrate: func(tx *gorm.DB) error {
 
 			if err := tx.AutoMigrate(
-				&model.ExamResultPublished{},
+				&model.PublishedExamResult{},
 				&model.NewExamResultsSubscriber{},
 			); err != nil {
 				return err
@@ -33,7 +33,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := tx.Migrator().DropTable(&model.ExamResultPublished{}); err != nil {
+			if err := tx.Migrator().DropTable(&model.PublishedExamResult{}); err != nil {
 				return err
 			}
 			if err := tx.Migrator().DropTable(&model.NewExamResultsSubscriber{}); err != nil {

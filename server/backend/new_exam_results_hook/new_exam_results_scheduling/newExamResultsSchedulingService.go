@@ -30,7 +30,7 @@ func (service *Service) HandleScheduledCron() error {
 		return err
 	}
 
-	var apiExamResults []model.ExamResultPublished
+	var apiExamResults []model.PublishedExamResult
 	for _, apiExamResult := range apiResult.ExamResults {
 		apiExamResults = append(apiExamResults, *apiExamResult.ToDBExamResult())
 	}
@@ -51,18 +51,18 @@ func (service *Service) HandleScheduledCron() error {
 	return service.Repository.StoreExamResultsPublished(apiExamResults)
 }
 
-func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.ExamResultPublished) *[]model.ExamResultPublished {
-	var apiExamResultsMap = make(map[string]model.ExamResultPublished)
+func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.PublishedExamResult) *[]model.PublishedExamResult {
+	var apiExamResultsMap = make(map[string]model.PublishedExamResult)
 	for _, apiExamResult := range *apiExamResults {
 		apiExamResultsMap[apiExamResult.ExamID] = apiExamResult
 	}
 
-	var storedExamResultsMap = make(map[string]model.ExamResultPublished)
+	var storedExamResultsMap = make(map[string]model.PublishedExamResult)
 	for _, storedExamResult := range *storedExamResults {
 		storedExamResultsMap[storedExamResult.ExamID] = storedExamResult
 	}
 
-	var newPublishedExamResults []model.ExamResultPublished
+	var newPublishedExamResults []model.PublishedExamResult
 
 	for id, result := range apiExamResultsMap {
 		if storedResult, ok := storedExamResultsMap[id]; ok && !storedResult.Published && result.Published {
@@ -73,7 +73,7 @@ func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamRe
 	return &newPublishedExamResults
 }
 
-func (service *Service) notifySubscribers(newPublishedExamResults *[]model.ExamResultPublished) {
+func (service *Service) notifySubscribers(newPublishedExamResults *[]model.PublishedExamResult) {
 	log.Infof("Notifying subscribers about %d published exam results", len(*newPublishedExamResults))
 
 	subscribersRepo := new_exam_results_subscriber.NewRepository(service.Repository.DB)
