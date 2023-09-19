@@ -42,7 +42,7 @@ func main() {
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	log.Info("Trying to fetch top news")
-	if r, err := c.GetTopNews(ctx, &pb.GetNewsRequest{}); err != nil {
+	if r, err := c.GetTopNews(ctx, &pb.GetTopNewsRequest{}); err != nil {
 		log.WithError(err).Fatal("could not greet")
 	} else {
 		log.WithField("topNewsResponse", r.String()).Info("fetched top news successfully")
