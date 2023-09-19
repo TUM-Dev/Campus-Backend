@@ -238,6 +238,7 @@ message News {
   string image_url = 5;
   string source = 6;
   google.protobuf.Timestamp created = 7;
+  google.protobuf.Timestamp date = 8;
 }
 
 message GetNewsReply {

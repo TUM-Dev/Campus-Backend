@@ -65,6 +65,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 			ImageUrl: item.Image.String,
 			Source:   fmt.Sprintf("%d", item.Src),
 			Created:  timestamppb.New(item.Created),
+			Date:     timestamppb.New(item.Date),
 		}
 	}
 	return &pb.GetNewsReply{News: resp}, nil
