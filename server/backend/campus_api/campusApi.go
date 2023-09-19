@@ -4,6 +4,7 @@ package campus_api
 import (
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -11,49 +12,44 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	CampusApiUrl     = "https://campus.tum.de/tumonline"
-	CampusQueryToken = "pToken"
-	CampusGradesPath = "/wbservicesbasic.noten"
-)
+func FetchExamResultsPublished(token string) (*model.TUMAPIPublishedExamResults, error) {
+	var examResultsPublished model.TUMAPIPublishedExamResults
+	err := RequestCampusApi("/wbservicesbasic.pruefungenErgebnisse", token, &examResultsPublished)
+	if err != nil {
+		return nil, err
+	}
 
-var (
-	ErrCannotCreateRequest  = errors.New("cannot create http request")
-	ErrWhileFetchingGrades  = errors.New("error while fetching grades")
-	ErrorWhileUnmarshalling = errors.New("error while unmarshalling")
-)
+	return &examResultsPublished, nil
+}
 
 func FetchGrades(token string) (*model.IOSGrades, error) {
-
-	requestUrl := CampusApiUrl + CampusGradesPath
-	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
-
-	if err != nil {
-		log.WithError(err).Error("Failed to create api-request")
-		return nil, ErrCannotCreateRequest
-	}
-
-	q := req.URL.Query()
-	q.Add(CampusQueryToken, token)
-
-	req.URL.RawQuery = q.Encode()
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.WithError(err).Error("failed to fetch grades")
-		return nil, ErrWhileFetchingGrades
-	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			log.WithError(err).Error("Could not close body")
-		}
-	}(resp.Body)
-
 	var grades model.IOSGrades
-	if err = xml.NewDecoder(resp.Body).Decode(&grades); err != nil {
-		log.WithError(err).Error("could not unmarshall grades")
-		return nil, ErrorWhileUnmarshalling
+	err := RequestCampusApi("/wbservicesbasic.noten", token, &grades)
+	if err != nil {
+		return nil, err
 	}
 
 	return &grades, nil
+}
+
+func RequestCampusApi(path string, token string, response any) error {
+	requestUrl := fmt.Sprintf("https://campus.tum.de/tumonline%s?pToken=%s", path, token)
+	resp, err := http.Get(requestUrl)
+	if err != nil {
+		log.WithError(err).WithField("path", path).Error("Error while fetching url")
+		return errors.New("error while fetching " + path)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.WithError(err).Error("Error while closing body")
+		}
+	}(resp.Body)
+
+	if err = xml.NewDecoder(resp.Body).Decode(&response); err != nil {
+		log.WithError(err).WithField("path", path).Error("Error while unmarshalling")
+		return errors.New("error while unmarshalling")
+	}
+
+	return nil
 }

@@ -41,6 +41,7 @@ mariadb:
 
 
 backend:
+  campusApiToken: changeme-changeme-changeme
   sentry:
     dsn: changeme-changeme-changeme
   apns:

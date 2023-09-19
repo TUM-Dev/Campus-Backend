@@ -48,7 +48,6 @@ func (r *Repository) ApnsUrl() string {
 	if env.IsProd() {
 		return ApnsProductionURL
 	}
-
 	return ApnsDevelopmentURL
 }
 
@@ -87,7 +86,6 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	url := r.ApnsUrl() + "/3/device/" + notification.DeviceId
 	body, _ := notification.MarshalJSON()
 
-	client := r.httpClient
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 
 	// can be e.g. alert or background
@@ -99,7 +97,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	bearer := r.Token.GenerateNewTokenIfExpired()
 	req.Header.Set("authorization", "bearer "+bearer)
 
-	resp, err := client.Do(req)
+	resp, err := r.httpClient.Do(req)
 	if err != nil {
 		log.WithError(err).Error("Could not send notification")
 		return nil, ErrCouldNotSendNotification
