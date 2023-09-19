@@ -59,7 +59,7 @@ func (c *CronService) movieCron() error {
 			// data cleanup
 			date, err := time.Parse(time.RFC1123Z, item.PubDate)
 			if err != nil {
-				log.WithFields(logFields).WithError(err).Error("error while parsing date")
+				log.WithError(err).WithFields(logFields).Error("Couldn't check if movie already exists")
 				continue
 			}
 
