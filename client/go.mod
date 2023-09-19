@@ -6,7 +6,6 @@ require (
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230918233004-589371966806
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/grpc v1.58.1
-	google.golang.org/protobuf v1.31.0
 )
 
 require (
@@ -18,4 +17,5 @@ require (
 	google.golang.org/genproto v0.0.0-20230913181813-007df8e322eb // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230913181813-007df8e322eb // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )

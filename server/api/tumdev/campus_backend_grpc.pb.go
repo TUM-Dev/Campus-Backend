@@ -12,7 +12,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -56,31 +55,31 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
-	GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error)
-	GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error)
+	GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetNewsSources(ctx context.Context, in *GetNewsSourcesRequest, opts ...grpc.CallOption) (*GetNewsSourcesReply, error)
 	GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
-	GetCanteenRatings(ctx context.Context, in *CanteenRatingRequest, opts ...grpc.CallOption) (*CanteenRatingReply, error)
-	GetDishRatings(ctx context.Context, in *DishRatingRequest, opts ...grpc.CallOption) (*DishRatingReply, error)
-	NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
-	GetNameTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
-	GetAvailableCanteenTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
-	GetCanteens(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCanteenReply, error)
+	GetCanteenRatings(ctx context.Context, in *GetCanteenRatingsRequest, opts ...grpc.CallOption) (*GetCanteenRatingsReply, error)
+	GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error)
+	NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*NewCanteenRatingReply, error)
+	NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*NewDishRatingReply, error)
+	GetAvailableDishTags(ctx context.Context, in *GetAvailableDishTagsRequest, opts ...grpc.CallOption) (*GetAvailableDishTagsReply, error)
+	GetNameTags(ctx context.Context, in *GetNameTagsRequest, opts ...grpc.CallOption) (*GetNameTagsReply, error)
+	GetAvailableCanteenTags(ctx context.Context, in *GetAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*GetAvailableCanteenTagsReply, error)
+	GetCanteens(ctx context.Context, in *GetCanteensRequest, opts ...grpc.CallOption) (*GetCanteensReply, error)
 	GetDishes(ctx context.Context, in *GetDishesRequest, opts ...grpc.CallOption) (*GetDishesReply, error)
 	GetResponsiblePerson(ctx context.Context, in *GetResponsiblePersonRequest, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error)
 	GetMoreInformation(ctx context.Context, in *GetMoreInformationRequest, opts ...grpc.CallOption) (*GetMoreInformationReply, error)
 	GetOpeningTimes(ctx context.Context, in *GetOpeningTimesRequest, opts ...grpc.CallOption) (*GetOpeningTimesReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
-	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
+	GetStudyRoomList(ctx context.Context, in *GetStudyRoomListRequest, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
 	GetKino(ctx context.Context, in *GetKinoRequest, opts ...grpc.CallOption) (*GetKinoReply, error)
-	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
+	SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackReply, error)
 	SendFeedbackImage(ctx context.Context, in *SendFeedbackImageRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
-	GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error)
-	GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error)
+	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
+	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
 	GetMembers(ctx context.Context, in *GetMembersRequest, opts ...grpc.CallOption) (*GetMembersReply, error)
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
 	// Endpoint for the iOS app to respond to background notifications requests
@@ -99,7 +98,7 @@ func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
 }
 
-func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
+func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
 	out := new(GetTopNewsReply)
 	err := c.cc.Invoke(ctx, Campus_GetTopNews_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -108,8 +107,8 @@ func (c *campusClient) GetTopNews(ctx context.Context, in *emptypb.Empty, opts .
 	return out, nil
 }
 
-func (c *campusClient) GetNewsSources(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NewsSourceReply, error) {
-	out := new(NewsSourceReply)
+func (c *campusClient) GetNewsSources(ctx context.Context, in *GetNewsSourcesRequest, opts ...grpc.CallOption) (*GetNewsSourcesReply, error) {
+	out := new(GetNewsSourcesReply)
 	err := c.cc.Invoke(ctx, Campus_GetNewsSources_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -135,8 +134,8 @@ func (c *campusClient) SearchRooms(ctx context.Context, in *SearchRoomsRequest, 
 	return out, nil
 }
 
-func (c *campusClient) GetCanteenRatings(ctx context.Context, in *CanteenRatingRequest, opts ...grpc.CallOption) (*CanteenRatingReply, error) {
-	out := new(CanteenRatingReply)
+func (c *campusClient) GetCanteenRatings(ctx context.Context, in *GetCanteenRatingsRequest, opts ...grpc.CallOption) (*GetCanteenRatingsReply, error) {
+	out := new(GetCanteenRatingsReply)
 	err := c.cc.Invoke(ctx, Campus_GetCanteenRatings_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -144,8 +143,8 @@ func (c *campusClient) GetCanteenRatings(ctx context.Context, in *CanteenRatingR
 	return out, nil
 }
 
-func (c *campusClient) GetDishRatings(ctx context.Context, in *DishRatingRequest, opts ...grpc.CallOption) (*DishRatingReply, error) {
-	out := new(DishRatingReply)
+func (c *campusClient) GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error) {
+	out := new(GetDishRatingsReply)
 	err := c.cc.Invoke(ctx, Campus_GetDishRatings_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -153,8 +152,8 @@ func (c *campusClient) GetDishRatings(ctx context.Context, in *DishRatingRequest
 	return out, nil
 }
 
-func (c *campusClient) NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *campusClient) NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*NewCanteenRatingReply, error) {
+	out := new(NewCanteenRatingReply)
 	err := c.cc.Invoke(ctx, Campus_NewCanteenRating_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -162,8 +161,8 @@ func (c *campusClient) NewCanteenRating(ctx context.Context, in *NewCanteenRatin
 	return out, nil
 }
 
-func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*NewDishRatingReply, error) {
+	out := new(NewDishRatingReply)
 	err := c.cc.Invoke(ctx, Campus_NewDishRating_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -171,8 +170,8 @@ func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingReque
 	return out, nil
 }
 
-func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
-	out := new(GetTagsReply)
+func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *GetAvailableDishTagsRequest, opts ...grpc.CallOption) (*GetAvailableDishTagsReply, error) {
+	out := new(GetAvailableDishTagsReply)
 	err := c.cc.Invoke(ctx, Campus_GetAvailableDishTags_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -180,8 +179,8 @@ func (c *campusClient) GetAvailableDishTags(ctx context.Context, in *emptypb.Emp
 	return out, nil
 }
 
-func (c *campusClient) GetNameTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
-	out := new(GetTagsReply)
+func (c *campusClient) GetNameTags(ctx context.Context, in *GetNameTagsRequest, opts ...grpc.CallOption) (*GetNameTagsReply, error) {
+	out := new(GetNameTagsReply)
 	err := c.cc.Invoke(ctx, Campus_GetNameTags_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -189,8 +188,8 @@ func (c *campusClient) GetNameTags(ctx context.Context, in *emptypb.Empty, opts 
 	return out, nil
 }
 
-func (c *campusClient) GetAvailableCanteenTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error) {
-	out := new(GetTagsReply)
+func (c *campusClient) GetAvailableCanteenTags(ctx context.Context, in *GetAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*GetAvailableCanteenTagsReply, error) {
+	out := new(GetAvailableCanteenTagsReply)
 	err := c.cc.Invoke(ctx, Campus_GetAvailableCanteenTags_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -198,8 +197,8 @@ func (c *campusClient) GetAvailableCanteenTags(ctx context.Context, in *emptypb.
 	return out, nil
 }
 
-func (c *campusClient) GetCanteens(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCanteenReply, error) {
-	out := new(GetCanteenReply)
+func (c *campusClient) GetCanteens(ctx context.Context, in *GetCanteensRequest, opts ...grpc.CallOption) (*GetCanteensReply, error) {
+	out := new(GetCanteensReply)
 	err := c.cc.Invoke(ctx, Campus_GetCanteens_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -252,7 +251,7 @@ func (c *campusClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteReque
 	return out, nil
 }
 
-func (c *campusClient) GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error) {
+func (c *campusClient) GetStudyRoomList(ctx context.Context, in *GetStudyRoomListRequest, opts ...grpc.CallOption) (*GetStudyRoomListReply, error) {
 	out := new(GetStudyRoomListReply)
 	err := c.cc.Invoke(ctx, Campus_GetStudyRoomList_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -270,8 +269,8 @@ func (c *campusClient) GetKino(ctx context.Context, in *GetKinoRequest, opts ...
 	return out, nil
 }
 
-func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackImageReply, error) {
-	out := new(SendFeedbackImageReply)
+func (c *campusClient) SendFeedback(ctx context.Context, in *SendFeedbackRequest, opts ...grpc.CallOption) (*SendFeedbackReply, error) {
+	out := new(SendFeedbackReply)
 	err := c.cc.Invoke(ctx, Campus_SendFeedback_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -297,8 +296,8 @@ func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusR
 	return out, nil
 }
 
-func (c *campusClient) GetNotification(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsReply, error) {
-	out := new(GetNotificationsReply)
+func (c *campusClient) GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error) {
+	out := new(GetNotificationReply)
 	err := c.cc.Invoke(ctx, Campus_GetNotification_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -306,8 +305,8 @@ func (c *campusClient) GetNotification(ctx context.Context, in *NotificationsReq
 	return out, nil
 }
 
-func (c *campusClient) GetNotificationConfirm(ctx context.Context, in *NotificationsRequest, opts ...grpc.CallOption) (*GetNotificationsConfirmReply, error) {
-	out := new(GetNotificationsConfirmReply)
+func (c *campusClient) GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error) {
+	out := new(GetNotificationConfirmReply)
 	err := c.cc.Invoke(ctx, Campus_GetNotificationConfirm_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -364,31 +363,31 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
-	GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error)
-	GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error)
+	GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error)
+	GetNewsSources(context.Context, *GetNewsSourcesRequest) (*GetNewsSourcesReply, error)
 	GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
-	GetCanteenRatings(context.Context, *CanteenRatingRequest) (*CanteenRatingReply, error)
-	GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error)
-	NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*emptypb.Empty, error)
-	NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error)
-	GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
-	GetNameTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
-	GetAvailableCanteenTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
-	GetCanteens(context.Context, *emptypb.Empty) (*GetCanteenReply, error)
+	GetCanteenRatings(context.Context, *GetCanteenRatingsRequest) (*GetCanteenRatingsReply, error)
+	GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error)
+	NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*NewCanteenRatingReply, error)
+	NewDishRating(context.Context, *NewDishRatingRequest) (*NewDishRatingReply, error)
+	GetAvailableDishTags(context.Context, *GetAvailableDishTagsRequest) (*GetAvailableDishTagsReply, error)
+	GetNameTags(context.Context, *GetNameTagsRequest) (*GetNameTagsReply, error)
+	GetAvailableCanteenTags(context.Context, *GetAvailableCanteenTagsRequest) (*GetAvailableCanteenTagsReply, error)
+	GetCanteens(context.Context, *GetCanteensRequest) (*GetCanteensReply, error)
 	GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error)
 	GetResponsiblePerson(context.Context, *GetResponsiblePersonRequest) (*GetResponsiblePersonReply, error)
 	GetMoreInformation(context.Context, *GetMoreInformationRequest) (*GetMoreInformationReply, error)
 	GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
-	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
+	GetStudyRoomList(context.Context, *GetStudyRoomListRequest) (*GetStudyRoomListReply, error)
 	GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error)
-	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error)
+	SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackReply, error)
 	SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error)
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
-	GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error)
-	GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error)
+	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
+	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
 	GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error)
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// Endpoint for the iOS app to respond to background notifications requests
@@ -404,10 +403,10 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
-func (UnimplementedCampusServer) GetTopNews(context.Context, *emptypb.Empty) (*GetTopNewsReply, error) {
+func (UnimplementedCampusServer) GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
 }
-func (UnimplementedCampusServer) GetNewsSources(context.Context, *emptypb.Empty) (*NewsSourceReply, error) {
+func (UnimplementedCampusServer) GetNewsSources(context.Context, *GetNewsSourcesRequest) (*GetNewsSourcesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
 }
 func (UnimplementedCampusServer) GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error) {
@@ -416,28 +415,28 @@ func (UnimplementedCampusServer) GetNews(context.Context, *GetNewsRequest) (*Get
 func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
 }
-func (UnimplementedCampusServer) GetCanteenRatings(context.Context, *CanteenRatingRequest) (*CanteenRatingReply, error) {
+func (UnimplementedCampusServer) GetCanteenRatings(context.Context, *GetCanteenRatingsRequest) (*GetCanteenRatingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenRatings not implemented")
 }
-func (UnimplementedCampusServer) GetDishRatings(context.Context, *DishRatingRequest) (*DishRatingReply, error) {
+func (UnimplementedCampusServer) GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatings not implemented")
 }
-func (UnimplementedCampusServer) NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*emptypb.Empty, error) {
+func (UnimplementedCampusServer) NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*NewCanteenRatingReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewCanteenRating not implemented")
 }
-func (UnimplementedCampusServer) NewDishRating(context.Context, *NewDishRatingRequest) (*emptypb.Empty, error) {
+func (UnimplementedCampusServer) NewDishRating(context.Context, *NewDishRatingRequest) (*NewDishRatingReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewDishRating not implemented")
 }
-func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
+func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *GetAvailableDishTagsRequest) (*GetAvailableDishTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableDishTags not implemented")
 }
-func (UnimplementedCampusServer) GetNameTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
+func (UnimplementedCampusServer) GetNameTags(context.Context, *GetNameTagsRequest) (*GetNameTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNameTags not implemented")
 }
-func (UnimplementedCampusServer) GetAvailableCanteenTags(context.Context, *emptypb.Empty) (*GetTagsReply, error) {
+func (UnimplementedCampusServer) GetAvailableCanteenTags(context.Context, *GetAvailableCanteenTagsRequest) (*GetAvailableCanteenTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableCanteenTags not implemented")
 }
-func (UnimplementedCampusServer) GetCanteens(context.Context, *emptypb.Empty) (*GetCanteenReply, error) {
+func (UnimplementedCampusServer) GetCanteens(context.Context, *GetCanteensRequest) (*GetCanteensReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCanteens not implemented")
 }
 func (UnimplementedCampusServer) GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error) {
@@ -455,13 +454,13 @@ func (UnimplementedCampusServer) GetOpeningTimes(context.Context, *GetOpeningTim
 func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
 }
-func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error) {
+func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *GetStudyRoomListRequest) (*GetStudyRoomListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStudyRoomList not implemented")
 }
 func (UnimplementedCampusServer) GetKino(context.Context, *GetKinoRequest) (*GetKinoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKino not implemented")
 }
-func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackImageReply, error) {
+func (UnimplementedCampusServer) SendFeedback(context.Context, *SendFeedbackRequest) (*SendFeedbackReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFeedback not implemented")
 }
 func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbackImageRequest) (*SendFeedbackImageReply, error) {
@@ -470,10 +469,10 @@ func (UnimplementedCampusServer) SendFeedbackImage(context.Context, *SendFeedbac
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
 }
-func (UnimplementedCampusServer) GetNotification(context.Context, *NotificationsRequest) (*GetNotificationsReply, error) {
+func (UnimplementedCampusServer) GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNotification not implemented")
 }
-func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *NotificationsRequest) (*GetNotificationsConfirmReply, error) {
+func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNotificationConfirm not implemented")
 }
 func (UnimplementedCampusServer) GetMembers(context.Context, *GetMembersRequest) (*GetMembersReply, error) {
@@ -505,7 +504,7 @@ func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 }
 
 func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetTopNewsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -517,13 +516,13 @@ func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: Campus_GetTopNews_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTopNews(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetTopNews(ctx, req.(*GetTopNewsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetNewsSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetNewsSourcesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -535,7 +534,7 @@ func _Campus_GetNewsSources_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: Campus_GetNewsSources_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNewsSources(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetNewsSources(ctx, req.(*GetNewsSourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -577,7 +576,7 @@ func _Campus_SearchRooms_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _Campus_GetCanteenRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CanteenRatingRequest)
+	in := new(GetCanteenRatingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -589,13 +588,13 @@ func _Campus_GetCanteenRatings_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: Campus_GetCanteenRatings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetCanteenRatings(ctx, req.(*CanteenRatingRequest))
+		return srv.(CampusServer).GetCanteenRatings(ctx, req.(*GetCanteenRatingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DishRatingRequest)
+	in := new(GetDishRatingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -607,7 +606,7 @@ func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: Campus_GetDishRatings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetDishRatings(ctx, req.(*DishRatingRequest))
+		return srv.(CampusServer).GetDishRatings(ctx, req.(*GetDishRatingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -649,7 +648,7 @@ func _Campus_NewDishRating_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _Campus_GetAvailableDishTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetAvailableDishTagsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -661,13 +660,13 @@ func _Campus_GetAvailableDishTags_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: Campus_GetAvailableDishTags_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetAvailableDishTags(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetAvailableDishTags(ctx, req.(*GetAvailableDishTagsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetNameTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetNameTagsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -679,13 +678,13 @@ func _Campus_GetNameTags_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: Campus_GetNameTags_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNameTags(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetNameTags(ctx, req.(*GetNameTagsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetAvailableCanteenTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetAvailableCanteenTagsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -697,13 +696,13 @@ func _Campus_GetAvailableCanteenTags_Handler(srv interface{}, ctx context.Contex
 		FullMethod: Campus_GetAvailableCanteenTags_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetAvailableCanteenTags(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetAvailableCanteenTags(ctx, req.(*GetAvailableCanteenTagsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetCanteens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetCanteensRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -715,7 +714,7 @@ func _Campus_GetCanteens_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: Campus_GetCanteens_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetCanteens(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetCanteens(ctx, req.(*GetCanteensRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -811,7 +810,7 @@ func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _Campus_GetStudyRoomList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetStudyRoomListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -823,7 +822,7 @@ func _Campus_GetStudyRoomList_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: Campus_GetStudyRoomList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetStudyRoomList(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetStudyRoomList(ctx, req.(*GetStudyRoomListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -901,7 +900,7 @@ func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NotificationsRequest)
+	in := new(GetNotificationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -913,13 +912,13 @@ func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: Campus_GetNotification_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotification(ctx, req.(*NotificationsRequest))
+		return srv.(CampusServer).GetNotification(ctx, req.(*GetNotificationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NotificationsRequest)
+	in := new(GetNotificationConfirmRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -931,7 +930,7 @@ func _Campus_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context
 		FullMethod: Campus_GetNotificationConfirm_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotificationConfirm(ctx, req.(*NotificationsRequest))
+		return srv.(CampusServer).GetNotificationConfirm(ctx, req.(*GetNotificationConfirmRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -11,10 +11,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (*pb.NewsSourceReply, error) {
+func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesRequest) (*pb.GetNewsSourcesReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
@@ -34,7 +33,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (*p
 			Icon:   source.Files.URL.String,
 		})
 	}
-	return &pb.NewsSourceReply{Sources: resp}, nil
+	return &pb.GetNewsSourcesReply{Sources: resp}, nil
 }
 
 func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb.GetNewsReply, error) {

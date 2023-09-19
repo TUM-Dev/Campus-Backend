@@ -21,7 +21,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Suppress "imported and not used" errors
@@ -33,7 +32,7 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 func request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetTopNewsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetTopNews(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -42,7 +41,7 @@ func request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetTopNewsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetTopNews(ctx, &protoReq)
@@ -51,7 +50,7 @@ func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNewsSourcesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetNewsSources(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -60,7 +59,7 @@ func request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Campus_GetNewsSources_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNewsSourcesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetNewsSources(ctx, &protoReq)
@@ -173,7 +172,7 @@ func local_request_Campus_SearchRooms_0(ctx context.Context, marshaler runtime.M
 }
 
 func request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CanteenRatingRequest
+	var protoReq GetCanteenRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -190,7 +189,7 @@ func request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler runtime.M
 }
 
 func local_request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CanteenRatingRequest
+	var protoReq GetCanteenRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -207,7 +206,7 @@ func local_request_Campus_GetCanteenRatings_0(ctx context.Context, marshaler run
 }
 
 func request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DishRatingRequest
+	var protoReq GetDishRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -224,7 +223,7 @@ func request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Campus_GetDishRatings_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DishRatingRequest
+	var protoReq GetDishRatingsRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -309,7 +308,7 @@ func local_request_Campus_NewDishRating_0(ctx context.Context, marshaler runtime
 }
 
 func request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableDishTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetAvailableDishTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -318,7 +317,7 @@ func request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtim
 }
 
 func local_request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableDishTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetAvailableDishTags(ctx, &protoReq)
@@ -327,7 +326,7 @@ func local_request_Campus_GetAvailableDishTags_0(ctx context.Context, marshaler 
 }
 
 func request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNameTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetNameTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -336,7 +335,7 @@ func request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshal
 }
 
 func local_request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetNameTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetNameTags(ctx, &protoReq)
@@ -345,7 +344,7 @@ func local_request_Campus_GetNameTags_0(ctx context.Context, marshaler runtime.M
 }
 
 func request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableCanteenTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetAvailableCanteenTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -354,7 +353,7 @@ func request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshaler run
 }
 
 func local_request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetAvailableCanteenTagsRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetAvailableCanteenTags(ctx, &protoReq)
@@ -363,7 +362,7 @@ func local_request_Campus_GetAvailableCanteenTags_0(ctx context.Context, marshal
 }
 
 func request_Campus_GetCanteens_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetCanteensRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetCanteens(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -372,7 +371,7 @@ func request_Campus_GetCanteens_0(ctx context.Context, marshaler runtime.Marshal
 }
 
 func local_request_Campus_GetCanteens_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetCanteensRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetCanteens(ctx, &protoReq)
@@ -557,7 +556,7 @@ func local_request_Campus_GetUpdateNote_0(ctx context.Context, marshaler runtime
 }
 
 func request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetStudyRoomListRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.GetStudyRoomList(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -566,7 +565,7 @@ func request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func local_request_Campus_GetStudyRoomList_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq GetStudyRoomListRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.GetStudyRoomList(ctx, &protoReq)
@@ -787,7 +786,7 @@ func local_request_Campus_GetUploadStatus_0(ctx context.Context, marshaler runti
 }
 
 func request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -813,7 +812,7 @@ func request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_Campus_GetNotification_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -839,7 +838,7 @@ func local_request_Campus_GetNotification_0(ctx context.Context, marshaler runti
 }
 
 func request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationConfirmRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -865,7 +864,7 @@ func request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runt
 }
 
 func local_request_Campus_GetNotificationConfirm_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotificationsRequest
+	var protoReq GetNotificationConfirmRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -2550,7 +2549,7 @@ type response_Campus_GetNewsSources_0 struct {
 }
 
 func (m response_Campus_GetNewsSources_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*NewsSourceReply)
+	response := m.Message.(*GetNewsSourcesReply)
 	return response.Sources
 }
 
@@ -2577,7 +2576,7 @@ type response_Campus_GetAvailableDishTags_0 struct {
 }
 
 func (m response_Campus_GetAvailableDishTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+	response := m.Message.(*GetAvailableDishTagsReply)
 	return response.RatingTags
 }
 
@@ -2586,7 +2585,7 @@ type response_Campus_GetNameTags_0 struct {
 }
 
 func (m response_Campus_GetNameTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+	response := m.Message.(*GetNameTagsReply)
 	return response.RatingTags
 }
 
@@ -2595,7 +2594,7 @@ type response_Campus_GetAvailableCanteenTags_0 struct {
 }
 
 func (m response_Campus_GetAvailableCanteenTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetTagsReply)
+	response := m.Message.(*GetAvailableCanteenTagsReply)
 	return response.RatingTags
 }
 
@@ -2604,7 +2603,7 @@ type response_Campus_GetCanteens_0 struct {
 }
 
 func (m response_Campus_GetCanteens_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*GetCanteenReply)
+	response := m.Message.(*GetCanteensReply)
 	return response.Canteen
 }
 
