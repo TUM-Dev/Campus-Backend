@@ -23,14 +23,14 @@ func (m TumDBMigrator) migrate2023090410000000() *gormigrate.Migration {
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
-			if err := tx.Create(&model.Crontab{
-				Interval: 60 * 60 * 24, // daily
-				Type:     null.StringFrom("movie"),
-				ID:       null.IntFrom(2),
-			}).Error; err != nil {
+			// tu film news source is now inlined
+			if err := tx.Delete(&model.NewsSource{Source: 2}).Error; err != nil {
 				return err
 			}
-			return nil
+			return tx.Create(&model.Crontab{
+				Interval: 60 * 60 * 24, // daily
+				Type:     null.StringFrom("movie"),
+			}).Error
 		},
 
 		Rollback: func(tx *gorm.DB) error {
@@ -44,13 +44,20 @@ func (m TumDBMigrator) migrate2023090410000000() *gormigrate.Migration {
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "kino"); err != nil {
 				return err
 			}
-			if err := tx.Create(&model.Crontab{
-				Interval: 24 * 60 * 60, // daily
-				Type:     null.StringFrom("kino"),
+			if err := tx.Create(&model.NewsSource{
+				Source:  2,
+				Title:   "TU Film",
+				URL:     null.StringFrom("http://www.tu-film.de/programm/index/upcoming.rss"),
+				FilesID: 2,
+				Hook:    null.String{},
 			}).Error; err != nil {
 				return err
 			}
-			return nil
+			return tx.Create(&model.Crontab{
+				Interval: 24 * 60 * 60, // daily
+				Type:     null.StringFrom("kino"),
+				ID:       null.IntFrom(2),
+			}).Error
 		},
 	}
 }
