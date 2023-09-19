@@ -21,39 +21,35 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Campus_GetTopNews_FullMethodName                    = "/api.Campus/GetTopNews"
-	Campus_GetNewsSources_FullMethodName                = "/api.Campus/GetNewsSources"
-	Campus_GetNews_FullMethodName                       = "/api.Campus/GetNews"
-	Campus_SearchRooms_FullMethodName                   = "/api.Campus/SearchRooms"
-	Campus_GetCanteenRatings_FullMethodName             = "/api.Campus/GetCanteenRatings"
-	Campus_GetDishRatings_FullMethodName                = "/api.Campus/GetDishRatings"
-	Campus_NewCanteenRating_FullMethodName              = "/api.Campus/NewCanteenRating"
-	Campus_NewDishRating_FullMethodName                 = "/api.Campus/NewDishRating"
-	Campus_GetAvailableDishTags_FullMethodName          = "/api.Campus/GetAvailableDishTags"
-	Campus_GetNameTags_FullMethodName                   = "/api.Campus/GetNameTags"
-	Campus_GetAvailableCanteenTags_FullMethodName       = "/api.Campus/GetAvailableCanteenTags"
-	Campus_GetCanteens_FullMethodName                   = "/api.Campus/GetCanteens"
-	Campus_GetDishes_FullMethodName                     = "/api.Campus/GetDishes"
-	Campus_GetResponsiblePerson_FullMethodName          = "/api.Campus/GetResponsiblePerson"
-	Campus_GetBuilding2Gps_FullMethodName               = "/api.Campus/GetBuilding2Gps"
-	Campus_GetAreaFacilitiesByBuildingNr_FullMethodName = "/api.Campus/GetAreaFacilitiesByBuildingNr"
-	Campus_GetListOfToilets_FullMethodName              = "/api.Campus/GetListOfToilets"
-	Campus_GetListOfElevators_FullMethodName            = "/api.Campus/GetListOfElevators"
-	Campus_GetMoreInformation_FullMethodName            = "/api.Campus/GetMoreInformation"
-	Campus_GetOpeningTimes_FullMethodName               = "/api.Campus/GetOpeningTimes"
-	Campus_GetUpdateNote_FullMethodName                 = "/api.Campus/GetUpdateNote"
-	Campus_GetStudyRoomList_FullMethodName              = "/api.Campus/GetStudyRoomList"
-	Campus_GetKino_FullMethodName                       = "/api.Campus/GetKino"
-	Campus_SendFeedback_FullMethodName                  = "/api.Campus/SendFeedback"
-	Campus_SendFeedbackImage_FullMethodName             = "/api.Campus/SendFeedbackImage"
-	Campus_GetUploadStatus_FullMethodName               = "/api.Campus/GetUploadStatus"
-	Campus_GetNotification_FullMethodName               = "/api.Campus/GetNotification"
-	Campus_GetNotificationConfirm_FullMethodName        = "/api.Campus/GetNotificationConfirm"
-	Campus_GetMembers_FullMethodName                    = "/api.Campus/GetMembers"
-	Campus_GetCanteenHeadCount_FullMethodName           = "/api.Campus/GetCanteenHeadCount"
-	Campus_IOSDeviceRequestResponse_FullMethodName      = "/api.Campus/IOSDeviceRequestResponse"
-	Campus_RegisterDevice_FullMethodName                = "/api.Campus/RegisterDevice"
-	Campus_RemoveDevice_FullMethodName                  = "/api.Campus/RemoveDevice"
+	Campus_GetTopNews_FullMethodName               = "/api.Campus/GetTopNews"
+	Campus_GetNewsSources_FullMethodName           = "/api.Campus/GetNewsSources"
+	Campus_GetNews_FullMethodName                  = "/api.Campus/GetNews"
+	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
+	Campus_GetCanteenRatings_FullMethodName        = "/api.Campus/GetCanteenRatings"
+	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
+	Campus_NewCanteenRating_FullMethodName         = "/api.Campus/NewCanteenRating"
+	Campus_NewDishRating_FullMethodName            = "/api.Campus/NewDishRating"
+	Campus_GetAvailableDishTags_FullMethodName     = "/api.Campus/GetAvailableDishTags"
+	Campus_GetNameTags_FullMethodName              = "/api.Campus/GetNameTags"
+	Campus_GetAvailableCanteenTags_FullMethodName  = "/api.Campus/GetAvailableCanteenTags"
+	Campus_GetCanteens_FullMethodName              = "/api.Campus/GetCanteens"
+	Campus_GetDishes_FullMethodName                = "/api.Campus/GetDishes"
+	Campus_GetResponsiblePerson_FullMethodName     = "/api.Campus/GetResponsiblePerson"
+	Campus_GetMoreInformation_FullMethodName       = "/api.Campus/GetMoreInformation"
+	Campus_GetOpeningTimes_FullMethodName          = "/api.Campus/GetOpeningTimes"
+	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
+	Campus_GetStudyRoomList_FullMethodName         = "/api.Campus/GetStudyRoomList"
+	Campus_GetKino_FullMethodName                  = "/api.Campus/GetKino"
+	Campus_SendFeedback_FullMethodName             = "/api.Campus/SendFeedback"
+	Campus_SendFeedbackImage_FullMethodName        = "/api.Campus/SendFeedbackImage"
+	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
+	Campus_GetNotification_FullMethodName          = "/api.Campus/GetNotification"
+	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
+	Campus_GetMembers_FullMethodName               = "/api.Campus/GetMembers"
+	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
+	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
+	Campus_RegisterDevice_FullMethodName           = "/api.Campus/RegisterDevice"
+	Campus_RemoveDevice_FullMethodName             = "/api.Campus/RemoveDevice"
 )
 
 // CampusClient is the client API for Campus service.
@@ -74,12 +70,8 @@ type CampusClient interface {
 	GetAvailableCanteenTags(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagsReply, error)
 	GetCanteens(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCanteenReply, error)
 	GetDishes(ctx context.Context, in *GetDishesRequest, opts ...grpc.CallOption) (*GetDishesReply, error)
-	GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error)
-	GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsReply, error)
-	GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrReply, error)
-	GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsReply, error)
-	GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsReply, error)
-	GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationReply, error)
+	GetResponsiblePerson(ctx context.Context, in *GetResponsiblePersonRequest, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error)
+	GetMoreInformation(ctx context.Context, in *GetMoreInformationRequest, opts ...grpc.CallOption) (*GetMoreInformationReply, error)
 	GetOpeningTimes(ctx context.Context, in *GetOpeningTimesRequest, opts ...grpc.CallOption) (*GetOpeningTimesReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
@@ -224,7 +216,7 @@ func (c *campusClient) GetDishes(ctx context.Context, in *GetDishesRequest, opts
 	return out, nil
 }
 
-func (c *campusClient) GetResponsiblePerson(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error) {
+func (c *campusClient) GetResponsiblePerson(ctx context.Context, in *GetResponsiblePersonRequest, opts ...grpc.CallOption) (*GetResponsiblePersonReply, error) {
 	out := new(GetResponsiblePersonReply)
 	err := c.cc.Invoke(ctx, Campus_GetResponsiblePerson_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -233,43 +225,7 @@ func (c *campusClient) GetResponsiblePerson(ctx context.Context, in *emptypb.Emp
 	return out, nil
 }
 
-func (c *campusClient) GetBuilding2Gps(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBuilding2GpsReply, error) {
-	out := new(GetBuilding2GpsReply)
-	err := c.cc.Invoke(ctx, Campus_GetBuilding2Gps_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetAreaFacilitiesByBuildingNr(ctx context.Context, in *GetAreaFacilitiesByBuildingNrRequest, opts ...grpc.CallOption) (*GetAreaFacilitiesByBuildingNrReply, error) {
-	out := new(GetAreaFacilitiesByBuildingNrReply)
-	err := c.cc.Invoke(ctx, Campus_GetAreaFacilitiesByBuildingNr_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetListOfToilets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfToiletsReply, error) {
-	out := new(GetListOfToiletsReply)
-	err := c.cc.Invoke(ctx, Campus_GetListOfToilets_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetListOfElevators(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListOfElevatorsReply, error) {
-	out := new(GetListOfElevatorsReply)
-	err := c.cc.Invoke(ctx, Campus_GetListOfElevators_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetMoreInformation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMoreInformationReply, error) {
+func (c *campusClient) GetMoreInformation(ctx context.Context, in *GetMoreInformationRequest, opts ...grpc.CallOption) (*GetMoreInformationReply, error) {
 	out := new(GetMoreInformationReply)
 	err := c.cc.Invoke(ctx, Campus_GetMoreInformation_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -422,12 +378,8 @@ type CampusServer interface {
 	GetAvailableCanteenTags(context.Context, *emptypb.Empty) (*GetTagsReply, error)
 	GetCanteens(context.Context, *emptypb.Empty) (*GetCanteenReply, error)
 	GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error)
-	GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonReply, error)
-	GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsReply, error)
-	GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrReply, error)
-	GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsReply, error)
-	GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsReply, error)
-	GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationReply, error)
+	GetResponsiblePerson(context.Context, *GetResponsiblePersonRequest) (*GetResponsiblePersonReply, error)
+	GetMoreInformation(context.Context, *GetMoreInformationRequest) (*GetMoreInformationReply, error)
 	GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(context.Context, *emptypb.Empty) (*GetStudyRoomListReply, error)
@@ -491,22 +443,10 @@ func (UnimplementedCampusServer) GetCanteens(context.Context, *emptypb.Empty) (*
 func (UnimplementedCampusServer) GetDishes(context.Context, *GetDishesRequest) (*GetDishesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDishes not implemented")
 }
-func (UnimplementedCampusServer) GetResponsiblePerson(context.Context, *emptypb.Empty) (*GetResponsiblePersonReply, error) {
+func (UnimplementedCampusServer) GetResponsiblePerson(context.Context, *GetResponsiblePersonRequest) (*GetResponsiblePersonReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResponsiblePerson not implemented")
 }
-func (UnimplementedCampusServer) GetBuilding2Gps(context.Context, *emptypb.Empty) (*GetBuilding2GpsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetBuilding2Gps not implemented")
-}
-func (UnimplementedCampusServer) GetAreaFacilitiesByBuildingNr(context.Context, *GetAreaFacilitiesByBuildingNrRequest) (*GetAreaFacilitiesByBuildingNrReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAreaFacilitiesByBuildingNr not implemented")
-}
-func (UnimplementedCampusServer) GetListOfToilets(context.Context, *emptypb.Empty) (*GetListOfToiletsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetListOfToilets not implemented")
-}
-func (UnimplementedCampusServer) GetListOfElevators(context.Context, *emptypb.Empty) (*GetListOfElevatorsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetListOfElevators not implemented")
-}
-func (UnimplementedCampusServer) GetMoreInformation(context.Context, *emptypb.Empty) (*GetMoreInformationReply, error) {
+func (UnimplementedCampusServer) GetMoreInformation(context.Context, *GetMoreInformationRequest) (*GetMoreInformationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMoreInformation not implemented")
 }
 func (UnimplementedCampusServer) GetOpeningTimes(context.Context, *GetOpeningTimesRequest) (*GetOpeningTimesReply, error) {
@@ -799,7 +739,7 @@ func _Campus_GetDishes_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Campus_GetResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetResponsiblePersonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -811,85 +751,13 @@ func _Campus_GetResponsiblePerson_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: Campus_GetResponsiblePerson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetResponsiblePerson(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetBuilding2Gps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetBuilding2Gps(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetBuilding2Gps_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetBuilding2Gps(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetAreaFacilitiesByBuildingNr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAreaFacilitiesByBuildingNrRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetAreaFacilitiesByBuildingNr(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetAreaFacilitiesByBuildingNr_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetAreaFacilitiesByBuildingNr(ctx, req.(*GetAreaFacilitiesByBuildingNrRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetListOfToilets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetListOfToilets(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetListOfToilets_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetListOfToilets(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetListOfElevators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetListOfElevators(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetListOfElevators_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetListOfElevators(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetResponsiblePerson(ctx, req.(*GetResponsiblePersonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetMoreInformationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -901,7 +769,7 @@ func _Campus_GetMoreInformation_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: Campus_GetMoreInformation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMoreInformation(ctx, req.(*emptypb.Empty))
+		return srv.(CampusServer).GetMoreInformation(ctx, req.(*GetMoreInformationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1220,22 +1088,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResponsiblePerson",
 			Handler:    _Campus_GetResponsiblePerson_Handler,
-		},
-		{
-			MethodName: "GetBuilding2Gps",
-			Handler:    _Campus_GetBuilding2Gps_Handler,
-		},
-		{
-			MethodName: "GetAreaFacilitiesByBuildingNr",
-			Handler:    _Campus_GetAreaFacilitiesByBuildingNr_Handler,
-		},
-		{
-			MethodName: "GetListOfToilets",
-			Handler:    _Campus_GetListOfToilets_Handler,
-		},
-		{
-			MethodName: "GetListOfElevators",
-			Handler:    _Campus_GetListOfElevators_Handler,
 		},
 		{
 			MethodName: "GetMoreInformation",
