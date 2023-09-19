@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -39,14 +38,14 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumMigrate(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
+			err := SafeEnumMigrate(tx, model.Crontab{}, "type", "newExamResultsHook")
 			if err != nil {
 				return err
 			}
 
 			return tx.Create(&model.Crontab{
 				Interval: 60, // Every 5 minutes
-				Type:     null.StringFrom(cron.NewExamResultsHook),
+				Type:     null.StringFrom("newExamResultsHook"),
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
@@ -57,12 +56,12 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumRollback(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
+			err := SafeEnumRollback(tx, model.Crontab{}, "type", "newExamResultsHook")
 			if err != nil {
 				return err
 			}
 
-			return tx.Delete(&model.Crontab{}, "type = ?", cron.NewExamResultsHook).Error
+			return tx.Delete(&model.Crontab{}, "type = ?", "newExamResultsHook").Error
 		},
 	}
 }
