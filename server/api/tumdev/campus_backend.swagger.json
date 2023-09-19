@@ -17,7 +17,7 @@
     "application/json"
   ],
   "paths": {
-    "/barrierfree/building2Gps": {
+    "/barrierfree/building_2_gps": {
       "get": {
         "operationId": "Campus_GetBuilding2Gps",
         "responses": {
@@ -1087,7 +1087,7 @@
         ]
       }
     },
-    "/roomfinder/room/scheduleById": {
+    "/roomfinder/room/schedule_by_id": {
       "post": {
         "operationId": "Campus_GetRoomSchedule",
         "responses": {
@@ -2160,7 +2160,7 @@
         "faculty": {
           "type": "string"
         },
-        "tumID": {
+        "tumId": {
           "type": "string"
         }
       }
