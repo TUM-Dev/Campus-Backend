@@ -9,12 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
-func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
+func (s *CampusServer) GetTopNews(ctx context.Context, _ *pb.GetTopNewsRequest) (*pb.GetTopNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
