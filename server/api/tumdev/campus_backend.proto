@@ -230,7 +230,7 @@ message Room {
   string name = 9;
 }
 
-message NewsItem {
+message News {
   int64 id = 1;
   string title = 2;
   string text = 3;
@@ -241,7 +241,7 @@ message NewsItem {
 }
 
 message GetNewsReply {
-  repeated NewsItem news = 1;
+  repeated News news = 1;
 }
 
 message GetNewsRequest {
