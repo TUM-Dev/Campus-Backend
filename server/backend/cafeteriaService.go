@@ -21,7 +21,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
@@ -353,12 +352,12 @@ func queryTagRatingsOverviewForRating(s *CampusServer, dishID int32, ratingType 
 	return results
 }
 
-// NewCafeteriaRating RPC Endpoint
+// NewCanteenRating RPC Endpoint
 // Allows to store a new cafeteria Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
-func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCanteenRatingRequest) (*emptypb.Empty, error) {
+func (s *CampusServer) NewCanteenRating(_ context.Context, input *pb.NewCanteenRatingRequest) (*pb.NewCanteenRatingReply, error) {
 	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, s)
 	if errorRes != nil {
 		return nil, errorRes
@@ -378,7 +377,10 @@ func (s *CampusServer) NewCafeteriaRating(_ context.Context, input *pb.NewCantee
 		return nil, status.Error(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
 
 	}
-	return storeRatingTags(s, rating.CafeteriaRating, input.RatingTags, CAFETERIA)
+	if err := storeRatingTags(s, rating.CafeteriaRating, input.RatingTags, CAFETERIA); err != nil {
+		return &pb.NewCanteenRatingReply{}, err
+	}
+	return &pb.NewCanteenRatingReply{}, nil
 }
 
 func imageWrapper(image []byte, path string, id int32) string {
@@ -440,7 +442,7 @@ func storeImage(path string, i []byte) (string, error) {
 // The ratingNumber will be saved for each corresponding DishNameTag.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
-func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingRequest) (*emptypb.Empty, error) {
+func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingRequest) (*pb.NewDishRatingReply, error) {
 
 	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, s)
 	if errorRes != nil {
@@ -473,7 +475,11 @@ func (s *CampusServer) NewDishRating(_ context.Context, input *pb.NewDishRatingR
 	}
 
 	assignDishNameTag(s, rating, dish.Dish)
-	return storeRatingTags(s, rating.DishRating, input.RatingTags, DISH)
+
+	if err := storeRatingTags(s, rating.DishRating, input.RatingTags, DISH); err != nil {
+		return &pb.NewDishRatingReply{}, err
+	}
+	return &pb.NewDishRatingReply{}, nil
 }
 
 // assignDishNameTag
@@ -530,7 +536,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 // storeRatingTags
 // Checks whether the rating-tag name is a valid option and if so,
 // it will be saved with a reference to the rating
-func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag, tagType modelType) (*emptypb.Empty, error) {
+func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag, tagType modelType) error {
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
@@ -580,13 +586,13 @@ func storeRatingTags(s *CampusServer, parentRatingID int32, tags []*pb.RatingTag
 	}
 
 	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag. The tag(s) %s occurred more than once in this rating.", errorOccurred, warningOccurred))
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag. The tag(s) %s occurred more than once in this rating.", errorOccurred, warningOccurred))
 	} else if len(errorOccurred) > 0 {
-		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag.", errorOccurred))
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag.", errorOccurred))
 	} else if len(warningOccurred) > 0 {
-		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
 	} else {
-		return &emptypb.Empty{}, nil
+		return nil
 	}
 
 }
