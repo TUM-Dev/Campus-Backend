@@ -856,55 +856,12 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/news/alerts/top": {
-      "get": {
-        "operationId": "Campus_GetTopNewsAlert",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiNewsAlert"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/news/alerts/{id}": {
-      "get": {
-        "operationId": "Campus_GetNewsAlert",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiNewsAlert"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "lastNewsAlertId",
+            "description": "the last id of the news item received. 0 to get all news items",
+            "in": "query",
+            "required": false,
             "type": "integer",
             "format": "int32"
           }
@@ -1656,14 +1613,6 @@
         }
       }
     },
-    "apiGetNewsAlertReply": {
-      "type": "object",
-      "properties": {
-        "alert": {
-          "$ref": "#/definitions/apiNewsAlert"
-        }
-      }
-    },
     "apiGetNewsAlertsReply": {
       "type": "object",
       "properties": {
@@ -1836,14 +1785,6 @@
             "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
-        }
-      }
-    },
-    "apiGetTopNewsAlertReply": {
-      "type": "object",
-      "properties": {
-        "alert": {
-          "$ref": "#/definitions/apiNewsAlert"
         }
       }
     },

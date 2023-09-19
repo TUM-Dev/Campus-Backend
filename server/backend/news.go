@@ -2,7 +2,10 @@ package backend
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -69,4 +72,34 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 		}
 	}
 	return &pb.GetNewsReply{News: resp}, nil
+}
+
+func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsRequest) (*pb.GetNewsAlertsReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
+
+	var res []*model.NewsAlert
+	tx := s.db.Joins("Files").Where("news_alert.to >= NOW()")
+	if req.LastNewsAlertId != 0 {
+		tx = tx.Where("news_alert.alert > ?", req.LastNewsAlertId)
+	}
+	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, status.Error(codes.NotFound, "no news alerts")
+	} else if err != nil {
+		log.WithError(err).Error("could not GetNewsAlerts")
+		return nil, status.Error(codes.Internal, "could not GetNewsAlerts")
+	}
+
+	var alerts []*pb.NewsAlert
+	for _, alert := range res {
+		alerts = append(alerts, &pb.NewsAlert{
+			ImageUrl: alert.Files.URL.String,
+			Link:     alert.Link.String,
+			Created:  timestamppb.New(alert.Created),
+			From:     timestamppb.New(alert.From),
+			To:       timestamppb.New(alert.To),
+		})
+	}
+	return &pb.GetNewsAlertsReply{Alerts: alerts}, nil
 }
