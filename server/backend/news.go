@@ -79,7 +79,7 @@ func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsR
 	}
 
 	var res []*model.NewsAlert
-	tx := s.db.Joins("Files").Where("news_alert.to >= NOW()")
+	tx := s.db.WithContext(ctx).Joins("Files").Where("news_alert.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
 		tx = tx.Where("news_alert.alert > ?", req.LastNewsAlertId)
 	}
