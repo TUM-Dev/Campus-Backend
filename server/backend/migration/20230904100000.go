@@ -7,11 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// migrate2023090410000000
+// migrate20230904100000
 // migrates the crontap from kino to movie crontab
-func (m TumDBMigrator) migrate2023090410000000() *gormigrate.Migration {
+func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
-		ID: "2023090410000000",
+		ID: "20230904100000",
 		Migrate: func(tx *gorm.DB) error {
 			// modify the crontab
 			if err := tx.Delete(&model.Crontab{}, "type = ?", "kino").Error; err != nil {
