@@ -16,7 +16,7 @@ services:
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
-      - MensaCronDisabled=false
+      - MensaCronDisabled=true
       - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
     volumes:
       - backend-storage:/Storage
