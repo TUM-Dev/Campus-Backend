@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"errors"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"net"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
@@ -37,7 +38,9 @@ var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	log.Trace("Server starting up")
-	initTagRatingOptions(db)
+	if env.IsMensaCronActive() {
+		initTagRatingOptions(db)
+	}
 
 	return &CampusServer{
 		db:                      db,
