@@ -5,7 +5,6 @@ package ios_apns
 import (
 	"errors"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -27,7 +26,6 @@ type Service struct {
 // and the request ID.
 func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 	campusRequestToken, err := s.Repository.CreateCampusTokenRequest(deviceID)
-
 	if err != nil {
 		log.WithError(err).Error("Could not create campus token request")
 		return ErrCouldNotCreateTokenRequest
@@ -35,15 +33,10 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 
 	notification := model.NewIOSNotificationPayload(deviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
 
-	res, err := s.Repository.SendBackgroundNotification(notification)
-
-	if err != nil {
+	if _, err := s.Repository.SendBackgroundNotification(notification); err != nil {
 		log.WithError(err).Error("Could not send background notification")
 		return ErrCouldNotSendNotification
 	}
-
-	influx.LogIOSBackgroundRequest(deviceID, campusRequestToken.RequestType, res.Reason)
-
 	return nil
 }
 

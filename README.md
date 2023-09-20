@@ -78,8 +78,7 @@ docker compose up -d
 ```
 The docker compose will start the server and a mariadb instance.
 The server will be available at `localhost:50051` and the mariadb instance at `localhost:3306`.
-Additionally, docker creates the volume `campus-db-data` and `campus-influxdb-data`
-to persist the data of the mariadb and influxdb instances.
+Additionally, docker creates the volume `campus-db-data` to persist the data of the mariadb instances.
 
 ### Setting up the Database
 The mariadb schema can be installed by executing the following command inside the mariadb container:
@@ -93,26 +92,15 @@ The following environment variables need to be set for the server to work proper
 * [REQUIRED] `DB_ROOT_PASSWORD`: The password of the root user.
 * [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
-* **[InfluxDB [OPTIONAL]](#influxdb)**:
-  * [OPTIONAL] `INFLUXDB_USER`: The InfluxDB username to set for the systems initial superuser.
-  * [OPTIONAL] `INFLUXDB_PASSWORD`: The InfluxDB password to set for the systems initial superuser.
-  * [OPTIONAL] `INFLUXDB_ORG`: The InfluxDB organization to set for the systems initial organization.
-  * [OPTIONAL] `INFLUXDB_BUCKET`: The InfluxDB bucket to set for the systems initial bucket.
-  * [REQUIRED] `INFLUXDB_URL`: The InfluxDB URL to use for writing metrics.
-  * [REQUIRED] `INFLUXDB_ADMIN_TOKEN`: The InfluxDB admin token to use for authenticating with the InfluxDB server. If set initially the system will associate the token with the initial superuser.
 * **[iOS Push Notification Service [OPTIONAL]](#ios-push-notifications-service)**:
   * [REQUIRED] `APNS_KEY_ID`: The key ID of the APNs key => APNs Key needs to be downloaded from the Apple Developer Portal the name of the file also contains the key ID.
   * [REQUIRED] `APNS_TEAM_ID`: The team ID of the iOS app can be found in AppStoreConnect.
   * [REQUIRED] `APNS_P8_FILE_PATH`: The path to the APNs key file (e.g. `/secrets/AuthKey_XXXX.p8`) in the docker container. The file itself needs to exist in the same directory as the `docker-compose.yml` file and called `apns_auth_key.p8`.
   * [REQUIRED] `CAMPUS_API_TOKEN`: A token used to authenticate with TUMonline (used for example for the grades)
 
-## InfluxDB
-InfluxDB can be used to store metrics.
-
-If an InfluxDB instance is already set up, just the `INFLUXDB_URL` and the `INFLUXDB_ADMIN_TOKEN` environment variable needs to be set
-to enable the metrics endpoint.
-All the other environment variables are optional and only needed if the InfluxDB instance needs to be set up.
-If `INFLUXDB_URL` or `INFLUXDB_ADMIN_TOKEN` are not set, the metrics endpoint will be disabled.
+## Metrics
+Our service uses prometheus to collect metrics to display in grafana.
+To see the metrics we aggregate, head over to `http://localhost:50051/metrics`
 
 ## iOS Push Notifications Service
 The iOS Push Notifications Service can be used to send push notifications to iOS devices.

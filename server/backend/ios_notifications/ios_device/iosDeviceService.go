@@ -3,10 +3,12 @@ package ios_device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 type Service struct {
@@ -16,6 +18,12 @@ type Service struct {
 var (
 	ErrCouldNotRegisterDevice = status.Error(codes.Internal, "Could not register device")
 	ErrCouldNotRemoveDevice   = status.Error(codes.Internal, "Could not remove device")
+
+	iosRegisteredDevices = promauto.NewGauge(prometheus.GaugeOpts{
+		Subsystem: "ios",
+		Name:      "ios_registered_devices",
+		Help:      "The number of currently registered ios devices",
+	})
 )
 
 func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
@@ -24,13 +32,10 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 		PublicKey: request.GetPublicKey(),
 	}
 
-	err := service.Repository.RegisterDevice(&device)
-
-	if err != nil {
+	if err := service.Repository.RegisterDevice(&device); err != nil {
 		return nil, ErrCouldNotRegisterDevice
 	}
-
-	influx.LogIOSRegisterDevice(request.GetDeviceId())
+	iosRegisteredDevices.Inc()
 
 	return &pb.RegisterDeviceReply{
 		DeviceId: device.DeviceID,
@@ -38,14 +43,11 @@ func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.R
 }
 
 func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
-	err := service.Repository.RemoveDevice(request.GetDeviceId())
-
-	if err != nil {
+	if err := service.Repository.RemoveDevice(request.GetDeviceId()); err != nil {
 		return nil, ErrCouldNotRemoveDevice
 	}
 
-	influx.LogIOSRemoveDevice(request.GetDeviceId())
-
+	iosRegisteredDevices.Dec()
 	return &pb.RemoveDeviceReply{
 		DeviceId: request.GetDeviceId(),
 	}, nil

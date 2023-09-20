@@ -6,9 +6,11 @@ package ios_request_response
 import (
 	"fmt"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -28,6 +30,12 @@ var (
 	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
 	ErrCouldNotGetDevice    = status.Error(codes.Internal, "Could not get device")
 	ErrAPNSNotActive        = status.Error(codes.Internal, "APNS is not active")
+
+	collectedNewGrades = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "ios_new_grades",
+		Help:    "The total number of processed events",
+		Buckets: prometheus.LinearBuckets(0, 5, 5),
+	})
 )
 
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
@@ -42,8 +50,6 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 		log.WithError(err).Error("Could not get request")
 		return nil, ErrOutdatedRequest
 	}
-
-	influx.LogIOSBackgroundRequestResponse(requestLog.DeviceID, requestLog.RequestType)
 
 	switch requestLog.RequestType {
 	case model.IOSBackgroundCampusTokenRequest.String():
@@ -94,6 +100,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
+	collectedNewGrades.Observe(float64(len(newGrades)))
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
 		service.deleteRequestLog(requestLog)
@@ -116,7 +123,6 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	if len(newGrades) > 0 && len(oldGrades) > 0 {
 		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
 		sendGradesToDevice(device, newGrades, apnsRepository)
-		influx.LogIOSNewGrades(requestLog.DeviceID, len(newGrades))
 	}
 
 	service.deleteRequestLog(requestLog)

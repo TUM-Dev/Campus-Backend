@@ -5,7 +5,9 @@ package ios_scheduling
 import (
 	"sync"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/influx"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
@@ -17,6 +19,11 @@ const (
 	DevicesToCheckPerCronBase = 10
 	MaxRoutineCount           = 10
 )
+
+var devicesToUpdate = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "ios_scheduling_devices_to_update",
+	Help: "The numer of devices that should be updated for a given priority",
+})
 
 type Service struct {
 	Repository             *Repository
@@ -41,12 +48,9 @@ func (service *Service) HandleScheduledCron() error {
 		log.WithError(err).Error("can't get devices")
 		return err
 	}
+	devicesToUpdate.Set(float64(len(devices)))
 
-	devicesLen := len(devices)
-
-	influx.LogIOSSchedulingDevicesToUpdate(devicesLen, currentPriority.Priority)
-
-	if devicesLen == 0 {
+	if len(devices) == 0 {
 		log.Info("No devices to update")
 		return nil
 	}

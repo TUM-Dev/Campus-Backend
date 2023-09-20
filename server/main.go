@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"errors"
 	"io/fs"
 	"net"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/makasim/sentryhook"
@@ -45,17 +46,7 @@ var swagfs embed.FS
 
 func main() {
 	setupTelemetry()
-	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
-
-	// initializing connection to InfluxDB
-	err := backend.ConnectToInfluxDB()
-	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
-		log.Warn("InfluxDB token not configured - continuing without InfluxDB")
-	} else if errors.Is(err, backend.ErrInfluxURLNotConfigured) {
-		log.Warn("InfluxDB url not configured - continuing without InfluxDB")
-	} else if err != nil {
-		log.WithError(err).Error("InfluxDB connection failed - health check failed")
-	}
+	defer sentry.Flush(10 * time.Second) // make sure that sentry handles shutdowns gracefully
 
 	db := setupDB()
 
@@ -82,6 +73,7 @@ func main() {
 	httpMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("healthy"))
 	})
+	httpMux.Handle("/metrics", promhttp.Handler())
 
 	static, _ := fs.Sub(swagfs, "swagger")
 	httpMux.Handle("/", http.FileServer(http.FS(static)))
