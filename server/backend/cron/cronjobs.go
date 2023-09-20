@@ -30,6 +30,7 @@ const (
 	CanteenHeadcount         = "canteenHeadCount"
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
+	NewExamResultsHook       = "newExamResultsHook"
 	MovieType                = "movie"
 
 	/* MensaType      = "mensa"
@@ -59,7 +60,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -68,6 +69,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				IOSNotifications,
 				IOSActivityReset,
+				NewExamResultsHook,
 				MovieType,
 			).
 			Scan(&res)
@@ -105,12 +107,16 @@ func (c *CronService) Run() error {
 				if env.IsMensaCronActive() {
 					g.Go(c.averageRatingComputation)
 				}
+			case NewExamResultsHook:
+				g.Go(func() error { return c.newExamResultsHookCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
+					case KinoType:
+						g.Go(func() error { return c.kinoCron() })
 					case RoomfinderType:
 						g.Go(func() error { return c.roomFinderCron() })
 					case AlarmType:

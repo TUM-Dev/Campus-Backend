@@ -40,7 +40,7 @@ spec:
             - name: ENVIRONMENT
               value: prod
             - name: MensaCronDisabled
-              value: "false"
+              value: "true"
             - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
             - name: SENTRY_DSN
@@ -48,6 +48,11 @@ spec:
                 secretKeyRef:
                   name: backend-api-keys
                   key: SENTRY_DSN
+            - name: CAMPUS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: CAMPUS_API_TOKEN
             - name: DB_DSN
               value: "{{ $db.username }}:{{ $db.password }}@tcp(tca-backend-mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
             - name: APNS_KEY_ID
@@ -105,6 +110,7 @@ metadata:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend-v2
 data:
+  CAMPUS_API_TOKEN: {{ $.Values.backend.campusApiToken | b64enc }}
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
   apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}
   APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc }}

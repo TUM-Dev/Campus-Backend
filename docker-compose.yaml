@@ -18,6 +18,7 @@ services:
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
       - MensaCronDisabled=false
       - OMDB_API_KEY=${OMDB_API_KEY}
+      - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
     volumes:
       - backend-storage:/Storage
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}

@@ -54,10 +54,10 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 		return nil, status.Error(codes.Internal, "could not GetNews")
 	}
 
-	resp := make([]*pb.NewsItem, len(newsEntries))
+	resp := make([]*pb.News, len(newsEntries))
 	for i, item := range newsEntries {
 		log.WithField("title", item.Title).Trace("sending news")
-		resp[i] = &pb.NewsItem{
+		resp[i] = &pb.News{
 			Id:       item.News,
 			Title:    item.Title,
 			Text:     item.Description,
@@ -65,6 +65,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 			ImageUrl: item.Image.String,
 			Source:   fmt.Sprintf("%d", item.Src),
 			Created:  timestamppb.New(item.Created),
+			Date:     timestamppb.New(item.Date),
 		}
 	}
 	return &pb.GetNewsReply{News: resp}, nil
