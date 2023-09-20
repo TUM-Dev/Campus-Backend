@@ -108,7 +108,7 @@ func main() {
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
-		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
+		log.WithError(err).Fatal("could not RegisterCampusHandlerFromEndpoint")
 	}
 	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
@@ -128,18 +128,15 @@ func main() {
 
 // setupDB connects to the database and migrates it if necessary
 func setupDB() *gorm.DB {
-	// Connect to DB
-	var conn gorm.Dialector
-	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+	dbHost := os.Getenv("DB_DSN")
+	if dbHost == "" {
 		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	} else {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
 	}
 
-	db, err := gorm.Open(conn, &gorm.Config{Logger: gorm_logrus.New()})
+	log.Info("Connecting to dsn")
+	db, err := gorm.Open(mysql.Open(dbHost), &gorm.Config{Logger: gorm_logrus.New()})
 	if err != nil {
-		log.WithError(err).Panic("failed to connect database")
+		log.WithError(err).Fatal("failed to connect database")
 	}
 
 	// Migrate the schema
