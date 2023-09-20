@@ -40,7 +40,7 @@ spec:
             - name: ENVIRONMENT
               value: prod
             - name: MensaCronDisabled
-              value: "false"
+              value: "true"
             - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
             - name: SENTRY_DSN
