@@ -1,9 +1,7 @@
 package cron
 
 import (
-	"bytes"
 	"errors"
-	"image"
 	"io"
 	"net/http"
 	"os"
@@ -20,66 +18,98 @@ import (
 // fileDownloadCron Downloads all files that are not marked as finished in the database.
 func (c *CronService) fileDownloadCron() error {
 	var files []model.Files
-	err := c.db.Find(&files, "downloaded = 0").Error
+	err := c.db.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).Error("Could not get files from database")
 		return err
 	}
 	for _, file := range files {
-		if !file.URL.Valid {
-			log.WithField("fileId", file.File).Info("skipping file without url")
+		// in our case resolves to /Storage/news/newspread/1234abc.jpg
+		dstPath := path.Join(StorageDir, file.Path, file.Name)
+		fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
+		log.WithFields(fields).Info("downloading file")
+
+		if err := ensureFileDoesNotExist(dstPath); err != nil {
+			log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
 			continue
 		}
-		log.WithField("url", file.URL.String).Info("downloading file")
-		if err := downloadFile(&file); err != nil {
-			log.WithError(err).WithField("url", file.URL.String).Warn("Could not download file")
+		if err := downloadFile(file.URL.String, dstPath); err != nil {
+			log.WithError(err).WithFields(fields).Warn("Could not download file")
 			continue
 		}
+		if err := maybeResizeImage(dstPath); err != nil {
+			log.WithError(err).WithFields(fields).Warn("Could not resize image")
+			continue
+		}
+		// everything went well => we can mark the file as downloaded
 		if err = c.db.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
-			log.WithError(err).Error("Could not set image to downloaded.")
+			log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
 			continue
 		}
 	}
 	return nil
 }
 
-// downloadFile Downloads a file, marks it downloaded and resizes it if it's an image.
-// url: download url of the file
-// name: target name of the file
-func downloadFile(file *model.Files) error {
-	resp, err := http.Get(file.URL.String)
+// ensureFileDoesNotExist makes sure that the file does not exist, but the directory in which it should be does
+func ensureFileDoesNotExist(dstPath string) error {
+	if _, err := os.Stat(dstPath); err == nil {
+		// file already exists
+		return os.Remove(dstPath)
+	}
+	return os.MkdirAll(path.Dir(dstPath), 0755)
+}
+
+// maybeResizeImage resizes the image if it's an image and larger than 1280px
+func maybeResizeImage(dstPath string) error {
+	mime, err := mimetype.DetectFile(dstPath)
 	if err != nil {
-		log.WithError(err).WithField("url", file.URL.String).Warn("Could not download image")
 		return err
 	}
-	// read body here because we can't exhaust the io.reader twice
-	body, err := io.ReadAll(resp.Body)
+	if !strings.HasPrefix(mime.String(), "image/") {
+		return nil
+	}
+
+	img, err := imaging.Open(dstPath)
 	if err != nil {
-		log.WithError(err).Warn("Unable to read http body")
+		return err
+	}
+	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
+	return imaging.Save(resizedImage, dstPath, imaging.JPEGQuality(75))
+}
+
+// downloadFile Downloads a file from the given url and saves it to the given path
+func downloadFile(url string, dstPath string) error {
+	fields := log.Fields{"url": url, "dstPath": dstPath}
+	resp, err := http.Get(url)
+	if err != nil {
+		log.WithError(err).WithFields(fields).Warn("Could not download image")
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			log.WithError(err).WithFields(fields).Error("Error while closing body")
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		log.WithError(err).WithFields(fields).Warn("Could not download image")
 		return err
 	}
 
-	// in our case resolves to /Storage/news/newspread/1234abc.jpg
-	dstPath := path.Join(StorageDir, file.Path, file.Name)
-	if strings.HasPrefix(mimetype.Detect(body).String(), "image/") {
-		// save with resizing
-		downloadedImg, _, err := image.Decode(bytes.NewReader(body))
+	// save the file to disk
+	out, err := os.Create(dstPath)
+	if err != nil {
+		log.WithError(err).WithFields(fields).Warn("Could not create file")
+		return err
+	}
+	defer func(out *os.File) {
+		err := out.Close()
 		if err != nil {
-			log.WithError(err).WithField("url", file.URL.String).Warn("Couldn't decode source image")
-			return err
+			log.WithError(err).WithFields(fields).Error("Error while closing file")
 		}
-
-		resizedImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-		if err = imaging.Save(resizedImage, dstPath, imaging.JPEGQuality(75)); err != nil {
-			log.WithError(err).WithField("url", file.URL.String).Warn("Could not save image file")
-			return err
-		}
-	} else {
-		// save without resizing image
-		if err := os.WriteFile(dstPath, body, 0644); err != nil {
-			log.WithError(err).Error("Can't save file to disk")
-			return err
-		}
+	}(out)
+	if _, err := io.Copy(out, resp.Body); err != nil {
+		log.WithError(err).WithFields(fields).Warn("Could not copy file")
+		return err
 	}
 	return nil
 }
