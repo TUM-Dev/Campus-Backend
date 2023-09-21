@@ -59,7 +59,7 @@ func ensureFileDoesNotExist(dstPath string) error {
 	return os.MkdirAll(path.Dir(dstPath), 0755)
 }
 
-// maybeResizeImage resizes the image if it's an image and larger than 1280px
+// maybeResizeImage resizes the image if it's an image to 1280px width keeping the aspect ratio
 func maybeResizeImage(dstPath string) error {
 	mime, err := mimetype.DetectFile(dstPath)
 	if err != nil {
