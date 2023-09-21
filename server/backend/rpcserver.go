@@ -3,8 +3,9 @@ package backend
 import (
 	"context"
 	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"net"
+
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
