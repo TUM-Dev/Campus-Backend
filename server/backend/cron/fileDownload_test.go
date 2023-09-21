@@ -43,6 +43,34 @@ func TestMaybeResizeImage(t *testing.T) {
 	})
 }
 
+func TestEnsureFileDoesNotExist(t *testing.T) {
+	tmpFilePath := "test_dir/test_file.txt"
+	defer func() { _ = os.RemoveAll("test_dir") }()
+
+	t.Run("FileDoesNotExist", func(t *testing.T) {
+		require.NoError(t, ensureFileDoesNotExist(tmpFilePath))
+
+		_, dirErr := os.Stat("test_dir")
+		require.NoError(t, dirErr)
+
+		_, fileErr := os.Stat(tmpFilePath)
+		require.True(t, os.IsNotExist(fileErr))
+	})
+
+	t.Run("FileExists", func(t *testing.T) {
+		_, createErr := os.Create(tmpFilePath)
+		require.NoError(t, createErr)
+
+		require.NoError(t, ensureFileDoesNotExist(tmpFilePath))
+
+		_, dirErr := os.Stat("test_dir")
+		require.NoError(t, dirErr)
+
+		_, fileErr := os.Stat(tmpFilePath)
+		require.True(t, os.IsNotExist(fileErr))
+	})
+}
+
 // createDummyImage creates a dummy image file with the specified dimensions
 func createDummyImage(filePath string, width, height int) error {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
