@@ -1,12 +1,11 @@
 package cron
 
 import (
-	"bytes"
-	"fmt"
-	"image"
+	"errors"
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -16,69 +15,104 @@ import (
 	"gorm.io/gorm"
 )
 
-// fileDownloadCron Downloads all files that are not marked as finished in the database.
+// fileDownloadCron downloads all files that are not marked as finished in the database
 func (c *CronService) fileDownloadCron() error {
-	var files []model.Files
-	err := c.db.Find(&files, "downloaded = 0").Scan(&files).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return err
-	}
-	for i := range files {
-		if files[i].URL.Valid {
-			c.downloadFile(files[i])
+	return c.db.Transaction(func(tx *gorm.DB) error {
+		var files []model.Files
+		err := tx.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.WithError(err).Error("Could not get files from database")
+			return err
 		}
-	}
-	return nil
+		for _, file := range files {
+			// in our case resolves to /Storage/news/newspread/1234abc.jpg
+			dstPath := path.Join(StorageDir, file.Path, file.Name)
+			fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
+			log.WithFields(fields).Info("downloading file")
+
+			if err = tx.Model(&model.Files{File: file.File}).Update("downloads", file.Downloads+1).Error; err != nil {
+				log.WithError(err).WithFields(fields).Error("Could not set update the download-count")
+				continue
+			}
+
+			if err := ensureFileDoesNotExist(dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
+				continue
+			}
+			if err := downloadFile(file.URL.String, dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not download file")
+				continue
+			}
+			if err := maybeResizeImage(dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not resize image")
+				continue
+			}
+			// everything went well => we can mark the file as downloaded
+			if err = tx.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
+				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
+				continue
+			}
+		}
+		return nil
+	})
 }
 
-// downloadFile Downloads a file, marks it downloaded and resizes it if it's an image.
-// url: download url of the file
-// name: target name of the file
-func (c *CronService) downloadFile(file model.Files) {
-	if !file.URL.Valid {
-		log.WithField("fileId", file.File).Info("skipping file without url")
+// ensureFileDoesNotExist makes sure that the file does not exist, but the directory in which it should be does
+func ensureFileDoesNotExist(dstPath string) error {
+	if _, err := os.Stat(dstPath); err == nil {
+		// file already exists
+		return os.Remove(dstPath)
 	}
-	url := file.URL.String
-	log.WithField("url", url).Info("downloading file")
+	return os.MkdirAll(path.Dir(dstPath), 0755)
+}
+
+// maybeResizeImage resizes the image if it's an image to 1280px width keeping the aspect ratio
+func maybeResizeImage(dstPath string) error {
+	mime, err := mimetype.DetectFile(dstPath)
+	if err != nil {
+		return err
+	}
+	if !strings.HasPrefix(mime.String(), "image/") {
+		return nil
+	}
+
+	img, err := imaging.Open(dstPath)
+	if err != nil {
+		return err
+	}
+	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
+	return imaging.Save(resizedImage, dstPath, imaging.JPEGQuality(75))
+}
+
+// downloadFile Downloads a file from the given url and saves it to the given path
+func downloadFile(url string, dstPath string) error {
+	fields := log.Fields{"url": url, "dstPath": dstPath}
 	resp, err := http.Get(url)
 	if err != nil {
-		log.WithError(err).WithField("url", url).Warn("Could not download image")
-		return
+		return err
 	}
-	// read body here because we can't exhaust the io.reader twice
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.WithError(err).Warn("Unable to read http body")
-		return
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			log.WithError(err).WithFields(fields).Error("Error while closing body")
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return err
 	}
 
-	// resize if file is image
-	mime := mimetype.Detect(body)
-	if strings.HasPrefix(mime.String(), "image/") {
-		downloadedImg, _, err := image.Decode(bytes.NewReader(body))
-		if err != nil {
-			log.WithError(err).WithField("url", url).Warn("Couldn't decode source image")
-			return
-		}
-
-		// in our case resolves to /Storage/news/newspread/1234abc.jpg
-		dstFileName := fmt.Sprintf("%s%s", file.Path, file.Name)
-		dstImage := imaging.Resize(downloadedImg, 1280, 0, imaging.Lanczos)
-		err = imaging.Save(dstImage, StorageDir+dstFileName, imaging.JPEGQuality(75))
-		if err != nil {
-			log.WithError(err).WithField("url", url).Warn("Could not save image file")
-			return
-		}
-	} else {
-		// save without resizing image
-		err = os.WriteFile(fmt.Sprintf("%s%s", file.Path, file.Name), body, 0644)
-		if err != nil {
-			log.WithError(err).Error("Can't save file to disk")
-			return
-		}
-	}
-	err = c.db.Model(&model.Files{}).Where("url = ?", url).Update("downloaded", true).Error
+	// save the file to disk
+	out, err := os.Create(dstPath)
 	if err != nil {
-		log.WithError(err).Error("Could not set image to downloaded.")
+		return err
 	}
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.WithError(err).WithFields(fields).Error("Error while closing file")
+		}
+	}(out)
+	if _, err := io.Copy(out, resp.Body); err != nil {
+		return err
+	}
+	return nil
 }
