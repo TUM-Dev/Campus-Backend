@@ -17,37 +17,44 @@ import (
 
 // fileDownloadCron Downloads all files that are not marked as finished in the database.
 func (c *CronService) fileDownloadCron() error {
-	var files []model.Files
-	err := c.db.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.WithError(err).Error("Could not get files from database")
-		return err
-	}
-	for _, file := range files {
-		// in our case resolves to /Storage/news/newspread/1234abc.jpg
-		dstPath := path.Join(StorageDir, file.Path, file.Name)
-		fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
-		log.WithFields(fields).Info("downloading file")
+	return c.db.Transaction(func(tx *gorm.DB) error {
+		var files []model.Files
+		err := tx.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.WithError(err).Error("Could not get files from database")
+			return err
+		}
+		for _, file := range files {
+			// in our case resolves to /Storage/news/newspread/1234abc.jpg
+			dstPath := path.Join(StorageDir, file.Path, file.Name)
+			fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
+			log.WithFields(fields).Info("downloading file")
 
-		if err := ensureFileDoesNotExist(dstPath); err != nil {
-			log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
-			continue
+			if err = tx.Model(&model.Files{File: file.File}).Update("downloads", file.Downloads+1).Error; err != nil {
+				log.WithError(err).WithFields(fields).Error("Could not set update the download-count")
+				continue
+			}
+
+			if err := ensureFileDoesNotExist(dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
+				continue
+			}
+			if err := downloadFile(file.URL.String, dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not download file")
+				continue
+			}
+			if err := maybeResizeImage(dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("Could not resize image")
+				continue
+			}
+			// everything went well => we can mark the file as downloaded
+			if err = tx.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
+				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
+				continue
+			}
 		}
-		if err := downloadFile(file.URL.String, dstPath); err != nil {
-			log.WithError(err).WithFields(fields).Warn("Could not download file")
-			continue
-		}
-		if err := maybeResizeImage(dstPath); err != nil {
-			log.WithError(err).WithFields(fields).Warn("Could not resize image")
-			continue
-		}
-		// everything went well => we can mark the file as downloaded
-		if err = c.db.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
-			log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
-			continue
-		}
-	}
-	return nil
+		return nil
+	})
 }
 
 // ensureFileDoesNotExist makes sure that the file does not exist, but the directory in which it should be does
@@ -82,7 +89,6 @@ func downloadFile(url string, dstPath string) error {
 	fields := log.Fields{"url": url, "dstPath": dstPath}
 	resp, err := http.Get(url)
 	if err != nil {
-		log.WithError(err).WithFields(fields).Warn("Could not download image")
 		return err
 	}
 	defer func(Body io.ReadCloser) {
@@ -91,14 +97,12 @@ func downloadFile(url string, dstPath string) error {
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		log.WithError(err).WithFields(fields).Warn("Could not download image")
 		return err
 	}
 
 	// save the file to disk
 	out, err := os.Create(dstPath)
 	if err != nil {
-		log.WithError(err).WithFields(fields).Warn("Could not create file")
 		return err
 	}
 	defer func(out *os.File) {
@@ -108,7 +112,6 @@ func downloadFile(url string, dstPath string) error {
 		}
 	}(out)
 	if _, err := io.Copy(out, resp.Body); err != nil {
-		log.WithError(err).WithFields(fields).Warn("Could not copy file")
 		return err
 	}
 	return nil
