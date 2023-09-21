@@ -140,7 +140,7 @@ func NewCronRepository(db *gorm.DB) (*Repository, error) {
 
 	token, err := ios_apns_jwt.NewToken()
 	if err != nil {
-		log.WithError(err).Fatal("Could not create APNs token")
+		log.WithError(err).Error("Could not create APNs token")
 	}
 
 	return NewRepository(db, token), nil
