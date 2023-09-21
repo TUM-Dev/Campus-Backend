@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// fileDownloadCron Downloads all files that are not marked as finished in the database.
+// fileDownloadCron downloads all files that are not marked as finished in the database
 func (c *CronService) fileDownloadCron() error {
 	return c.db.Transaction(func(tx *gorm.DB) error {
 		var files []model.Files
