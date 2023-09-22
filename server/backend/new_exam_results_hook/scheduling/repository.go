@@ -1,4 +1,4 @@
-package new_exam_results_scheduling
+package scheduling
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"

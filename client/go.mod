@@ -3,7 +3,7 @@ module github.com/TUM-Dev/Campus-Backend/client
 go 1.21
 
 require (
-	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230922013215-91e5d7e9f078
+	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230922140200-2092d9ee26fb
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/grpc v1.58.1
 )

@@ -1,4 +1,4 @@
-package new_exam_results_subscriber
+package subscriber
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
