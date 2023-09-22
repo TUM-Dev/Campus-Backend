@@ -641,37 +641,6 @@
         ]
       }
     },
-    "/kino/{lastId}": {
-      "get": {
-        "operationId": "Campus_GetKino",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetKinoReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lastId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/members/{lrzId}": {
       "get": {
         "operationId": "Campus_GetMembers",
@@ -695,6 +664,38 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/movies/{lastId}": {
+      "get": {
+        "operationId": "Campus_GetMovies",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetMoviesReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lastId",
+            "description": "the last Id you have requested. Use -1 to get all movies",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -1220,18 +1221,6 @@
         }
       }
     },
-    "apiGetKinoReply": {
-      "type": "object",
-      "properties": {
-        "kinos": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiKinoMsgElement"
-          }
-        }
-      }
-    },
     "apiGetMembersReply": {
       "type": "object",
       "properties": {
@@ -1255,6 +1244,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/GetMoreInformationReplyMoreInformation"
+          }
+        }
+      }
+    },
+    "apiGetMoviesReply": {
+      "type": "object",
+      "properties": {
+        "movies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiMovie"
           }
         }
       }
@@ -1434,18 +1435,18 @@
         }
       }
     },
-    "apiKinoMsgElement": {
+    "apiMovie": {
       "type": "object",
       "properties": {
-        "name": {
+        "coverName": {
           "type": "string"
         },
-        "path": {
+        "coverPath": {
           "type": "string"
         },
-        "kino": {
-          "type": "integer",
-          "format": "int32"
+        "movieId": {
+          "type": "string",
+          "format": "int64"
         },
         "date": {
           "type": "string",
@@ -1458,8 +1459,9 @@
         "title": {
           "type": "string"
         },
-        "year": {
-          "type": "string"
+        "releaseYear": {
+          "type": "string",
+          "title": "release year of the movie"
         },
         "runtime": {
           "type": "string"
@@ -1473,21 +1475,20 @@
         "actors": {
           "type": "string"
         },
-        "rating": {
-          "type": "string"
+        "imdbRating": {
+          "type": "string",
+          "title": "imdb rating"
         },
         "description": {
           "type": "string"
         },
-        "cover": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "trailer": {
-          "type": "string"
+        "coverId": {
+          "type": "string",
+          "format": "int64"
         },
         "link": {
-          "type": "string"
+          "type": "string",
+          "title": "Where to find additional information about this movie"
         }
       }
     },
