@@ -20,8 +20,8 @@ type Kino struct {
 	ImdbRating  string      `gorm:"column:rating;type:varchar(4);not null;"`
 	Description string      `gorm:"column:description;type:text;not null;"`
 	Trailer     null.String `gorm:"column:trailer"`
-	FilesID     int64       `gorm:"column:cover"`
-	Files       Files       `gorm:"foreignKey:FilesID;references:file"`
+	FileID      int64       `gorm:"column:cover"`
+	File        File        `gorm:"foreignKey:FileID;references:file"`
 	Link        string      `gorm:"column:link;type:varchar(190);not null;unique;"`
 }
 

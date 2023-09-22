@@ -78,7 +78,7 @@ func (c *CronService) movieCron() error {
 			}
 
 			// add a file to preview (downloaded in another cronjob)
-			file := model.Files{
+			file := model.File{
 				Name: item.Title,
 				Path: MovieImageDirectory,
 				URL:  null.StringFrom(item.Enclosure.Url),
@@ -99,8 +99,8 @@ func (c *CronService) movieCron() error {
 				Actors:      omdbMovie.Actors,
 				ImdbRating:  omdbMovie.ImdbRating,
 				Description: omdbMovie.Plot, // we get this from imdb as tu-fim does truncate their plot
-				FilesID:     file.File,
-				Files:       file,
+				FileID:      file.File,
+				File:        file,
 				Link:        item.Link,
 			}
 			if err := c.db.Create(&movie).Error; err != nil {

@@ -19,7 +19,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesR
 	}
 
 	var sources []model.NewsSource
-	if err := s.db.WithContext(ctx).Joins("Files").Find(&sources).Error; err != nil {
+	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find newsSources")
 		return nil, status.Error(codes.Internal, "could not GetNewsSources")
 	}
@@ -30,7 +30,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesR
 		resp = append(resp, &pb.NewsSource{
 			Source: fmt.Sprintf("%d", source.Source),
 			Title:  source.Title,
-			Icon:   source.Files.URL.String,
+			Icon:   source.File.URL.String,
 		})
 	}
 	return &pb.GetNewsSourcesReply{Sources: resp}, nil
@@ -42,7 +42,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).Joins("Files")
+	tx := s.db.WithContext(ctx).Joins("File")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}

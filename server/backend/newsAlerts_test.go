@@ -49,13 +49,13 @@ func (s *NewsAlertSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-const ExpectedGetTopNewsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`Files`.`file` AS `Files__file`,`Files`.`name` AS `Files__name`,`Files`.`path` AS `Files__path`,`Files`.`downloads` AS `Files__downloads`,`Files`.`url` AS `Files__url`,`Files`.`downloaded` AS `Files__downloaded` FROM `news_alert` LEFT JOIN `files` `Files` ON `news_alert`.`file` = `Files`.`file` WHERE NOW() between `from` and `to` ORDER BY `news_alert`.`news_alert` LIMIT 1"
+const ExpectedGetTopNewsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE NOW() between `from` and `to` ORDER BY `news_alert`.`news_alert` LIMIT 1"
 
 func (s *NewsAlertSuite) Test_GetTopNewsOne() {
 	expectedAlert := model.NewsAlert{
 		NewsAlert: 1,
-		FilesID:   3001,
-		Files: model.Files{
+		FileID:    3001,
+		File: model.File{
 			File:       3001,
 			Name:       "Tournament_app_02-02.png",
 			Path:       "newsalerts/",
@@ -70,15 +70,15 @@ func (s *NewsAlertSuite) Test_GetTopNewsOne() {
 		To:      time.Time.Add(time.Now(), time.Hour*2),
 	}
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetTopNewsQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}).
-			AddRow(expectedAlert.NewsAlert, expectedAlert.FilesID, expectedAlert.Name, expectedAlert.Link, expectedAlert.Created, expectedAlert.From, expectedAlert.To, expectedAlert.Files.File, expectedAlert.Files.Name, expectedAlert.Files.Path, expectedAlert.Files.Downloads, expectedAlert.Files.URL, expectedAlert.Files.Downloaded))
+		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
+			AddRow(expectedAlert.NewsAlert, expectedAlert.FileID, expectedAlert.Name, expectedAlert.Link, expectedAlert.Created, expectedAlert.From, expectedAlert.To, expectedAlert.File.File, expectedAlert.File.Name, expectedAlert.File.Path, expectedAlert.File.Downloads, expectedAlert.File.URL, expectedAlert.File.Downloaded))
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetTopNews(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.GetTopNewsReply{
-		ImageUrl: expectedAlert.Files.URL.String,
+		ImageUrl: expectedAlert.File.URL.String,
 		Link:     expectedAlert.Link.String,
 		Created:  timestamppb.New(expectedAlert.Created),
 		From:     timestamppb.New(expectedAlert.From),
