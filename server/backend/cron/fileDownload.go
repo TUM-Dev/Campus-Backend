@@ -35,21 +35,22 @@ func (c *CronService) fileDownloadCron() error {
 				continue
 			}
 
+			log.WithFields(fields).Info("ensuring file does not exist")
 			if err := ensureFileDoesNotExist(dstPath); err != nil {
 				log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
 				continue
 			}
+			log.WithFields(fields).Info("downloading file")
 			if err := downloadFile(file.URL.String, dstPath); err != nil {
 				log.WithError(err).WithFields(fields).Warn("Could not download file")
 				continue
 			}
-			log.WithFields(fields).Info("pre maybeResizeImage")
+			log.WithFields(fields).Info("maybeResizeImage")
 			if err := maybeResizeImage(dstPath); err != nil {
 				log.WithError(err).WithFields(fields).Warn("Could not resize image")
 				continue
 			}
-			log.WithFields(fields).Info("post maybeResizeImage")
-
+			log.WithFields(fields).Info("updating downloaded")
 			// everything went well => we can mark the file as downloaded
 			if err = tx.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
@@ -85,7 +86,7 @@ func maybeResizeImage(dstPath string) error {
 		return err
 	}
 	log.WithFields(log.Fields{"Bounds": img.Bounds()}).Info("image opened")
-	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
+	resizedImage := imaging.Resize(img, 1280, 0, imaging.CatmullRom)
 	log.WithFields(log.Fields{"Bounds": resizedImage.Bounds()}).Info("saving image")
 	return imaging.Save(resizedImage, dstPath, imaging.JPEGQuality(75))
 }
