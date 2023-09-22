@@ -34,7 +34,6 @@ const (
 	MovieType                = "movie"
 
 	/* MensaType      = "mensa"
-	RoomfinderType = "roomfinder"
 	AlarmType      = "alarm" */
 )
 
@@ -117,8 +116,6 @@ func (c *CronService) Run() error {
 						g.Go(func() error { return c.mensaCron() })
 					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
-					case RoomfinderType:
-						g.Go(func() error { return c.roomFinderCron() })
 					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
 				*/
