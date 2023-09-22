@@ -43,10 +43,13 @@ func (c *CronService) fileDownloadCron() error {
 				log.WithError(err).WithFields(fields).Warn("Could not download file")
 				continue
 			}
+			log.WithFields(fields).Info("pre maybeResizeImage")
 			if err := maybeResizeImage(dstPath); err != nil {
 				log.WithError(err).WithFields(fields).Warn("Could not resize image")
 				continue
 			}
+			log.WithFields(fields).Info("post maybeResizeImage")
+
 			// everything went well => we can mark the file as downloaded
 			if err = tx.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
