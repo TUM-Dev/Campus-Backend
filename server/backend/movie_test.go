@@ -110,8 +110,12 @@ func (s *MovieSuite) Test_GetMoviesNone() {
 	require.Equal(s.T(), &pb.GetMoviesReply{Movies: []*pb.Movie(nil)}, response)
 }
 
+func (s *MovieSuite) AfterTest(_, _ string) {
+	require.NoError(s.T(), s.mock.ExpectationsWereMet())
+}
+
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
-func TestExampleTestSuite(t *testing.T) {
+func TestMovieSuite(t *testing.T) {
 	suite.Run(t, new(MovieSuite))
 }
