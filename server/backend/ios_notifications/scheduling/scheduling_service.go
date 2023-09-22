@@ -1,6 +1,6 @@
-// Package ios_scheduling provides functionality for updating user information
+// Package scheduling provides functionality for updating user information
 // and optionally sending notifications to iOS devices.
-package ios_scheduling
+package scheduling
 
 import (
 	"sync"
@@ -8,9 +8,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_scheduled_update_log"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/scheduled_update_log"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,10 +27,10 @@ var devicesToUpdate = promauto.NewGauge(prometheus.GaugeOpts{
 
 type Service struct {
 	Repository             *Repository
-	DevicesRepository      *ios_device.Repository
-	SchedulerLogRepository *ios_scheduled_update_log.Repository
+	DevicesRepository      *device.Repository
+	SchedulerLogRepository *scheduled_update_log.Repository
 	Priority               *model.IOSSchedulingPriority
-	APNs                   *ios_apns.Service
+	APNs                   *apns.Service
 }
 
 func (service *Service) HandleScheduledCron() error {
@@ -175,9 +175,9 @@ func mergeIOSSchedulingPriorities(priorities []model.IOSSchedulingPriority) *mod
 }
 
 func NewService(repository *Repository,
-	devicesRepository *ios_device.Repository,
-	schedulerRepository *ios_scheduled_update_log.Repository,
-	apnsService *ios_apns.Service,
+	devicesRepository *device.Repository,
+	schedulerRepository *scheduled_update_log.Repository,
+	apnsService *apns.Service,
 ) *Service {
 	return &Service{
 		Repository:             repository,

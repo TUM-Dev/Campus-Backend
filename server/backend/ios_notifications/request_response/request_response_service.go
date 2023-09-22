@@ -1,7 +1,7 @@
-// Package ios_request_response provides functionality to handle device requests.
+// Package request_response provides functionality to handle device requests.
 // Device Requests are requests that are sent from the device to the server when the
 // device received a background push notification from the backend.
-package ios_request_response
+package request_response
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/device"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -72,7 +72,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
 	log.WithField("DeviceID", requestLog.DeviceID).Info("Handling campus token request")
 
-	userRepo := ios_device.NewRepository(service.Repository.DB)
+	userRepo := device.NewRepository(service.Repository.DB)
 
 	device, err := userRepo.GetDevice(requestLog.DeviceID)
 
@@ -121,7 +121,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	log.WithFields(log.Fields{"old": len(oldGrades), "new": len(newGrades)}).Info("Found grades")
 
 	if len(newGrades) > 0 && len(oldGrades) > 0 {
-		apnsRepository := ios_apns.NewRepository(service.Repository.DB, service.Repository.Token)
+		apnsRepository := apns.NewRepository(service.Repository.DB, service.Repository.Token)
 		sendGradesToDevice(device, newGrades, apnsRepository)
 	}
 
@@ -195,7 +195,7 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 	}
 }
 
-func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *ios_apns.Repository) {
+func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
 
 	if len(grades) == 1 {

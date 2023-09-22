@@ -1,4 +1,4 @@
-package ios_device
+package device
 
 import (
 	"errors"

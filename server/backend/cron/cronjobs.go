@@ -3,7 +3,7 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -16,7 +16,7 @@ import (
 type CronService struct {
 	db   *gorm.DB
 	gf   *gofeed.Parser
-	APNs *ios_apns.Service
+	APNs *apns.Service
 }
 
 const StorageDir = "/Storage/" // target location of files
@@ -41,7 +41,7 @@ func New(db *gorm.DB) *CronService {
 	return &CronService{
 		db:   db,
 		gf:   gofeed.NewParser(),
-		APNs: ios_apns.NewCronService(db),
+		APNs: apns.NewCronService(db),
 	}
 }
 

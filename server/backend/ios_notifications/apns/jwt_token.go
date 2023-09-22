@@ -1,5 +1,5 @@
-// Package ios_apns_jwt handles the generation and validation of the JWT token for the APNs service
-package ios_apns_jwt
+// Package apns handles the generation and validation of the JWT token for the APNs service
+package apns
 
 import (
 	"crypto/ecdsa"
@@ -29,7 +29,7 @@ var (
 	ApnsP8FilePath       = os.Getenv("APNS_P8_FILE_PATH")
 )
 
-type Token struct {
+type JWTToken struct {
 	sync.Mutex
 	EncryptionKey *ecdsa.PrivateKey
 	KeyId         string
@@ -38,13 +38,13 @@ type Token struct {
 	Bearer        string
 }
 
-func NewToken() (*Token, error) {
+func NewToken() (*JWTToken, error) {
 	encryptionKey, err := APNsEncryptionKeyFromFile()
 	if err != nil {
 		return nil, err
 	}
 
-	token := Token{
+	token := JWTToken{
 		EncryptionKey: encryptionKey,
 		KeyId:         ApnsKeyId,
 		TeamId:        ApnsTeamId,
@@ -99,7 +99,7 @@ func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 	return nil, ErrorAuthKeyNotEcdsa
 }
 
-func (t *Token) GenerateNewTokenIfExpired() (bearer string) {
+func (t *JWTToken) GenerateNewTokenIfExpired() (bearer string) {
 	t.Lock()
 	defer t.Unlock()
 
@@ -113,11 +113,11 @@ func (t *Token) GenerateNewTokenIfExpired() (bearer string) {
 	return t.Bearer
 }
 
-func (t *Token) IsExpired() bool {
+func (t *JWTToken) IsExpired() bool {
 	return currentTimestamp() >= (t.IssuedAt + TokenTimeout)
 }
 
-func (t *Token) Generate() error {
+func (t *JWTToken) Generate() error {
 	if t.EncryptionKey == nil {
 		return ErrorAuthKeyNil
 	}

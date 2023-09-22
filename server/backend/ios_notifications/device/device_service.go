@@ -1,5 +1,5 @@
-// Package ios_device provides functions to register and remove ios devices
-package ios_device
+// Package device provides functions to register and remove ios devices
+package device
 
 import (
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"

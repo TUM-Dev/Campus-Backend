@@ -1,4 +1,4 @@
-package ios_apns
+package apns
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -38,7 +37,7 @@ var (
 
 type Repository struct {
 	DB         gorm.DB
-	Token      *ios_apns_jwt.Token
+	Token      *JWTToken
 	httpClient *http.Client
 }
 
@@ -117,7 +116,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	return &response, nil
 }
 
-func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
+func NewRepository(db *gorm.DB, token *JWTToken) *Repository {
 	transport := &http2.Transport{
 		ReadIdleTimeout: ReadIdleTimeout,
 	}
@@ -138,7 +137,7 @@ func NewCronRepository(db *gorm.DB) (*Repository, error) {
 		return nil, err
 	}
 
-	token, err := ios_apns_jwt.NewToken()
+	token, err := NewToken()
 	if err != nil {
 		log.WithError(err).Error("Could not create APNs token")
 	}

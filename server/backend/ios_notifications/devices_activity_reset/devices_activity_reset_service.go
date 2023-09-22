@@ -1,9 +1,9 @@
-package ios_devices_activity_reset
+package devices_activity_reset
 
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/device"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -41,7 +41,7 @@ func (service *Service) HandleScheduledActivityReset() error {
 
 	now := time.Now()
 
-	devicesRepo := ios_device.NewRepository(service.Repository.DB)
+	devicesRepo := device.NewRepository(service.Repository.DB)
 
 	if now.Sub(daily.LastReset).Hours() > 24 {
 		if err := service.Repository.ResettedDevicesDaily(); err != nil {
