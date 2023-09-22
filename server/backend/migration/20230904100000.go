@@ -45,11 +45,11 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 				return err
 			}
 			if err := tx.Create(&model.NewsSource{
-				Source:  2,
-				Title:   "TU Film",
-				URL:     null.StringFrom("http://www.tu-film.de/programm/index/upcoming.rss"),
-				FilesID: 2,
-				Hook:    null.String{},
+				Source: 2,
+				Title:  "TU Film",
+				URL:    null.StringFrom("http://www.tu-film.de/programm/index/upcoming.rss"),
+				FileID: 2,
+				Hook:   null.String{},
 			}).Error; err != nil {
 				return err
 			}

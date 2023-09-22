@@ -18,7 +18,7 @@ import (
 // fileDownloadCron downloads all files that are not marked as finished in the database
 func (c *CronService) fileDownloadCron() error {
 	return c.db.Transaction(func(tx *gorm.DB) error {
-		var files []model.Files
+		var files []model.File
 		err := tx.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.WithError(err).Error("Could not get files from database")
@@ -30,7 +30,7 @@ func (c *CronService) fileDownloadCron() error {
 			fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
 			log.WithFields(fields).Info("downloading file")
 
-			if err = tx.Model(&model.Files{File: file.File}).Update("downloads", file.Downloads+1).Error; err != nil {
+			if err = tx.Model(&model.File{File: file.File}).Update("downloads", file.Downloads+1).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set update the download-count")
 				continue
 			}
@@ -48,7 +48,7 @@ func (c *CronService) fileDownloadCron() error {
 				continue
 			}
 			// everything went well => we can mark the file as downloaded
-			if err = tx.Model(&model.Files{URL: file.URL}).Update("downloaded", true).Error; err != nil {
+			if err = tx.Model(&model.File{URL: file.URL}).Update("downloaded", true).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
 				continue
 			}

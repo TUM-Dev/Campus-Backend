@@ -23,8 +23,8 @@ type News struct {
 	Src         int64       `gorm:"column:src;type:int;"`
 	Link        string      `gorm:"column:link;type:varchar(190);"`
 	Image       null.String `gorm:"column:image;type:text;size:65535;"`
-	FilesID     null.Int    `gorm:"column:file;type:int;"`
-	Files       *Files      `gorm:"foreignKey:FilesID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	FileID      null.Int    `gorm:"column:file;type:int;"`
+	File        *File       `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName sets the insert table name for this struct type

@@ -13,7 +13,7 @@ import (
 
 func (s *CampusServer) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) (*pb.GetMoviesReply, error) {
 	var movies []model.Kino
-	if err := s.db.WithContext(ctx).Joins("Files").Find(&movies, "kino > ?", req.LastId).Error; err != nil {
+	if err := s.db.WithContext(ctx).Joins("File").Find(&movies, "kino > ?", req.LastId).Error; err != nil {
 		log.WithError(err).Error("Error while fetching movies from database")
 		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
 	}
@@ -31,9 +31,9 @@ func (s *CampusServer) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) 
 			Actors:      movie.Actors,
 			ImdbRating:  movie.ImdbRating,
 			Description: movie.Description,
-			CoverName:   movie.Files.Name,
-			CoverPath:   movie.Files.Path,
-			CoverId:     movie.Files.File,
+			CoverName:   movie.File.Name,
+			CoverPath:   movie.File.Path,
+			CoverId:     movie.File.File,
 			Link:        movie.Link,
 		})
 	}
