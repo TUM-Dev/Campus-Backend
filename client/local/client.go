@@ -19,7 +19,7 @@ import (
 
 const (
 	localAddress = "127.0.0.1:50051"
-	testImage    = "./localServer/images/sampleimage.jpeg"
+	testImage    = "./local/images/sampleimage.jpeg"
 )
 
 // main connects to a seperatly started local server and creates ratings for both, canteens and dishes.

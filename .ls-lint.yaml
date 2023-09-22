@@ -1,6 +1,14 @@
 ls:
+  .dir: snake_case
   .pb.gw.go: snake_case
   .pb.go: snake_case
   .go: snake_case
 
-ignore: []
+ignore:
+  - venv
+  - server/swagger/node_modules
+  - .idea
+  - .git
+  - .github
+  - .vscode
+  - apns_auth_key.p8
