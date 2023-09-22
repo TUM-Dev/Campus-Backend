@@ -5,7 +5,7 @@ package model
 import (
 	"encoding/json"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/crypto"
 )
 
 type IOSNotificationPayload struct {
@@ -122,7 +122,7 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) *IOSNotificationPayl
 	np.aps().MutableContent = 1
 
 	if alert.Title != "" {
-		res, err := ios_crypto.AsymmetricEncrypt(alert.Title, publicKey)
+		res, err := crypto.AsymmetricEncrypt(alert.Title, publicKey)
 
 		if err != nil {
 			alert.Title = "You have a new notification"
@@ -132,7 +132,7 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) *IOSNotificationPayl
 	}
 
 	if alert.Body != "" {
-		res, err := ios_crypto.AsymmetricEncrypt(alert.Body, publicKey)
+		res, err := crypto.AsymmetricEncrypt(alert.Body, publicKey)
 
 		if err != nil {
 			alert.Body = ""
@@ -142,7 +142,7 @@ func (np *IOSNotificationPayload) Encrypt(publicKey string) *IOSNotificationPayl
 	}
 
 	if alert.Subtitle != "" {
-		res, err := ios_crypto.AsymmetricEncrypt(alert.Subtitle, publicKey)
+		res, err := crypto.AsymmetricEncrypt(alert.Subtitle, publicKey)
 
 		if err != nil {
 			alert.Subtitle = ""

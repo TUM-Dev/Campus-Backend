@@ -1,4 +1,4 @@
-package ios_devices_activity_reset
+package devices_activity_reset
 
 import (
 	"time"

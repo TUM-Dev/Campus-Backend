@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/crypto"
 )
 
 // IOSGrades is a wrapper for a list of grades => XML stuff
@@ -64,12 +64,12 @@ type IOSEncryptedGrade struct {
 }
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
-	encryptedTitle, err := ios_crypto.SymmetricEncrypt(e.LectureTitle, key)
+	encryptedTitle, err := crypto.SymmetricEncrypt(e.LectureTitle, key)
 	if err != nil {
 		return err
 	}
 
-	encryptedGrade, err := ios_crypto.SymmetricEncrypt(e.Grade, key)
+	encryptedGrade, err := crypto.SymmetricEncrypt(e.Grade, key)
 	if err != nil {
 		return err
 	}
@@ -82,12 +82,12 @@ func (e *IOSEncryptedGrade) Encrypt(key string) error {
 }
 
 func (e *IOSEncryptedGrade) Decrypt(key string) error {
-	decryptedTitle, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.LectureTitle), key)
+	decryptedTitle, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.LectureTitle), key)
 	if err != nil {
 		return err
 	}
 
-	decryptedGrade, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.Grade), key)
+	decryptedGrade, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.Grade), key)
 	if err != nil {
 		return err
 	}

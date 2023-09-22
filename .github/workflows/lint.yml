@@ -31,3 +31,6 @@ jobs:
       - run: bash server/api/installBuf.bash
       - name: pre-commit
         uses: pre-commit/action@v3.0.0
+      - uses: ls-lint/action@v2.0.1
+        with:
+          config: .ls-lint.yaml

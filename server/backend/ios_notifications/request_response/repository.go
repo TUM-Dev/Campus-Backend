@@ -1,14 +1,14 @@
-package ios_request_response
+package request_response
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )
 
 type Repository struct {
 	DB    *gorm.DB
-	Token *ios_apns_jwt.Token
+	Token *apns.JWTToken
 }
 
 func (r *Repository) SaveEncryptedGrade(grade *model.IOSEncryptedGrade) error {
@@ -70,7 +70,7 @@ func (r *Repository) DeleteAllRequestLogsForThisDeviceWithType(requestLog *model
 	return nil
 }
 
-func NewRepository(db *gorm.DB, token *ios_apns_jwt.Token) *Repository {
+func NewRepository(db *gorm.DB, token *apns.JWTToken) *Repository {
 	return &Repository{
 		DB:    db,
 		Token: token,

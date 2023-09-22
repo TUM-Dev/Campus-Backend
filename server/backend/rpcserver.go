@@ -8,8 +8,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -51,7 +50,7 @@ func New(db *gorm.DB) *CampusServer {
 }
 
 func NewIOSNotificationsService() *IOSNotificationsService {
-	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
+	if err := apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
 		log.WithError(err).Warn("failed to validate requirements for ios notifications service")
 
 		return &IOSNotificationsService{
@@ -60,7 +59,7 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 		}
 	}
 
-	token, err := ios_apns_jwt.NewToken()
+	token, err := apns.NewToken()
 	if err != nil {
 		log.WithError(err).Error("failed to create new token")
 	}
