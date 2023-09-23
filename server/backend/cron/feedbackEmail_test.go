@@ -1,10 +1,11 @@
 package cron
 
 import (
-	"github.com/guregu/null"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/guregu/null"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/stretchr/testify/assert"
