@@ -12,6 +12,6 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-{{- range $host := concat $.Values.urls.v1 $.Values.urls.v2 }}
+{{- range $host := concat $.Values.urls.v1 $.Values.urls.v2 $.Values.urls.v2-web-grpc }}
     - {{ $host }}
 {{ end }}

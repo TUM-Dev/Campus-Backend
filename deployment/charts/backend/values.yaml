@@ -9,8 +9,9 @@ urls:
   - tumcabe.in.tum.de
   v2:
   - api-test-v2.tum.app
-  - api-grpc.tum.app
   - api.tum.app
+  v2-web-grpc:
+  - api-grpc.tum.app
 
 # see https://github.com/bitnami/charts/tree/main/bitnami/mariadb for more options, the se are just the most important ones
 mariadb:
