@@ -41,7 +41,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
               - --config-path
-              - /etc/envoy/envoy.yaml
+              - /etc/envoy/envoy.yml
               - --service-cluster
               - backend-v2
               - --service-node
@@ -54,8 +54,8 @@ spec:
             - containerPort: 9901
               name: admin
           volumeMounts:
-            - mountPath: /etc/envoy/envoy.yaml
-              subPath: envoy.yaml
+            - mountPath: /etc/envoy/envoy.yml
+              subPath: envoy.yml
               name: backend-grpc-web-config
               readOnly: true
           livenessProbe:
@@ -159,5 +159,5 @@ metadata:
   name: backend-grpc-web-config
   namespace: {{ $.Values.namespace }}
 data:
-  envoy.yaml: |-
-  {{ .Files.Get "files/envoy.yaml" | indent 4 }}
+  envoy.yml: |-
+  {{ .Files.Get "files/envoy.yml" | indent 4 }}

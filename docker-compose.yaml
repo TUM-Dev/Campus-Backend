@@ -56,7 +56,7 @@ services:
   #  command:
   #    - /docker-entrypoint.sh
   #    - --config-path
-  #    - /etc/envoy/envoy.yaml
+  #    - /etc/envoy/envoy.yml
   #    - --service-cluster
   #    - backend-v2
   #    - --service-node
@@ -67,7 +67,7 @@ services:
   #    - 8081:8081
   #    - 9901:9901
   #  volumes:
-  #    - ./deployment/charts/backend/files/envoy.yml:/etc/envoy/envoy.yaml
+  #    - ./deployment/charts/backend/files/envoy.yml:/etc/envoy/envoy.yml
   #  depends_on:
   #    - backend
 
