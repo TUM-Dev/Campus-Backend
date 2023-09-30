@@ -60,13 +60,13 @@ spec:
               readOnly: true
           livenessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: admin
             failureThreshold: 5
             periodSeconds: 1
           startupProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: admin
             failureThreshold: 60
             periodSeconds: 1
@@ -126,13 +126,13 @@ spec:
               memory: 500Mi
           livenessProbe:
             httpGet:
-              path: /ready
+              path: /health
               port: http
             failureThreshold: 5
             periodSeconds: 1
           startupProbe:
             httpGet:
-              path: /ready
+              path: /health
               port: http
             failureThreshold: 60
             periodSeconds: 1
