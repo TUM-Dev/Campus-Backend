@@ -10,7 +10,7 @@ urls:
   v2:
   - api-test-v2.tum.app
   - api.tum.app
-  v2-web-grpc:
+  v2WebGrpc:
   - api-grpc.tum.app
 
 # see https://github.com/bitnami/charts/tree/main/bitnami/mariadb for more options, the se are just the most important ones

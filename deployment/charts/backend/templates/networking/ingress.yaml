@@ -20,7 +20,7 @@ spec:
         - name: backend-v2-svc
           port: 50051
     - kind: Rule
-      match: Host(`{{ join "`) || Host(`" $.Values.urls.v2-web-grpc }}`)
+      match: Host(`{{ join "`) || Host(`" $.Values.urls.v2WebGrpc }}`)
       services:
         - name: backend-v2-svc
           port: 8081
@@ -45,7 +45,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ join "`) || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2 $.Values.urls.v2-web-grpc) }}`)
+      match: Host(`{{ join "`) || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2 $.Values.urls.v2WebGrpc) }}`)
       services:
         - name: noop@internal
           kind: TraefikService
