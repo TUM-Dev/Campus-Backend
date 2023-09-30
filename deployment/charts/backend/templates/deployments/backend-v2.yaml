@@ -32,44 +32,7 @@ spec:
         - name: backend-api-keys
           secret:
             secretName: backend-api-keys
-        - name: backend-grpc-web-config
-          configMap:
-            name: backend-grpc-web-config
       containers:
-        - name: grpc-web-proxy
-          image: envoyproxy/envoy:v1.27-latest
-          imagePullPolicy: IfNotPresent
-          args:
-              - --config-path
-              - /etc/envoy/envoy.yaml
-              - --service-cluster
-              - backend-v2
-              - --service-node
-              - backend-v2
-              - --log-level
-              - info
-          ports:
-            - containerPort: 8081
-              name: http
-            - containerPort: 9901
-              name: admin
-          volumeMounts:
-            - mountPath: /etc/envoy/envoy.yaml
-              subPath: envoy.yaml
-              name: backend-grpc-web-config
-              readOnly: true
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: admin
-            failureThreshold: 5
-            periodSeconds: 1
-          startupProbe:
-            httpGet:
-              path: /health
-              port: admin
-            failureThreshold: 60
-            periodSeconds: 1
         - name: tca-backend
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
           imagePullPolicy: Always
