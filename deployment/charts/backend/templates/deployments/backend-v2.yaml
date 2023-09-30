@@ -121,6 +121,9 @@ kind: ConfigMap
 metadata:
   name: backend-grpc-web-config
   namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v2
 data:
   envoy.yaml: |-
 {{ .Files.Get "files/envoy.yaml" | indent 4 }}
