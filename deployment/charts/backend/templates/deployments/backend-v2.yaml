@@ -32,6 +32,9 @@ spec:
         - name: backend-api-keys
           secret:
             secretName: backend-api-keys
+        - name: backend-grpc-web-config
+          configMap:
+            name: backend-grpc-web-config
       containers:
         - name: grpc-web-proxy
           image: envoyproxy/envoy:v1.27-latest
