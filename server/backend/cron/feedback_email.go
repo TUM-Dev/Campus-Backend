@@ -16,7 +16,7 @@ import (
 	_ "embed"
 )
 
-// iterate is necessary, as go otherwise cannot count up in a for loop inside templates
+// iterate is a template helper to make counting possible
 func iterate(count int32) []int32 {
 	var items []int32
 	var i int32
