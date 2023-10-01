@@ -203,8 +203,8 @@ func newsAlertFile(id int64) *model.File {
 func alert1() *model.NewsAlert {
 	return &model.NewsAlert{
 		NewsAlert: 1,
-		FilesID:   newsAlertFile(1).File,
-		Files:     *newsAlertFile(1),
+		FileID:    newsAlertFile(1).File,
+		File:      *newsAlertFile(1),
 		Name:      null.String{},
 		Link:      null.String{},
 		Created:   time.Time.Add(time.Now(), time.Hour*-4),
@@ -216,8 +216,8 @@ func alert1() *model.NewsAlert {
 func alert2() *model.NewsAlert {
 	return &model.NewsAlert{
 		NewsAlert: 2,
-		FilesID:   newsAlertFile(1).File,
-		Files:     *newsAlertFile(1),
+		FileID:    newsAlertFile(1).File,
+		File:      *newsAlertFile(1),
 		Name:      null.String{},
 		Link:      null.String{},
 		Created:   time.Time.Add(time.Now(), time.Hour),
@@ -226,7 +226,7 @@ func alert2() *model.NewsAlert {
 	}
 }
 
-const ExpectedGetNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`Files`.`file` AS `Files__file`,`Files`.`name` AS `Files__name`,`Files`.`path` AS `Files__path`,`Files`.`downloads` AS `Files__downloads`,`Files`.`url` AS `Files__url`,`Files`.`downloaded` AS `Files__downloaded` FROM `news_alert` LEFT JOIN `files` `Files` ON `news_alert`.`file` = `Files`.`file` WHERE news_alert.to >= NOW()"
+const ExpectedGetNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
 
 func (s *NewsSuite) Test_GetNewsAlertsError() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
@@ -257,17 +257,17 @@ func (s *NewsSuite) Test_GetNewsAlertsMultiple() {
 	a1 := alert1()
 	a2 := alert2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "Files__name", "Files__path", "Files__downloads", "Files__url", "Files__downloaded"}).
-			AddRow(a1.NewsAlert, a1.FilesID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.Files.File, a1.Files.Name, a1.Files.Path, a1.Files.Downloads, a1.Files.URL, a1.Files.Downloaded).
-			AddRow(a2.NewsAlert, a2.FilesID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.Files.File, a2.Files.Name, a2.Files.Path, a2.Files.Downloads, a2.Files.URL, a2.Files.Downloaded))
+		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "File__name", "File__path", "Files__downloads", "Files__url", "Files__downloaded"}).
+			AddRow(a1.NewsAlert, a1.FileID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.File.File, a1.File.Name, a1.File.Path, a1.File.Downloads, a1.File.URL, a1.File.Downloaded).
+			AddRow(a2.NewsAlert, a2.FileID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.File.File, a2.File.Name, a2.File.Path, a2.File.Downloads, a2.File.URL, a2.File.Downloaded))
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.GetNewsAlertsReply{
 		Alerts: []*pb.NewsAlert{
-			{ImageUrl: a1.Files.URL.String, Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
-			{ImageUrl: a2.Files.URL.String, Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},
+			{ImageUrl: a1.File.URL.String, Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
+			{ImageUrl: a2.File.URL.String, Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},
 		}}
 	require.Equal(s.T(), expectedResp, response)
 }

@@ -80,7 +80,7 @@ func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsR
 	}
 
 	var res []*model.NewsAlert
-	tx := s.db.WithContext(ctx).Joins("Files").Where("news_alert.to >= NOW()")
+	tx := s.db.WithContext(ctx).Joins("File").Where("news_alert.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
 		tx = tx.Where("news_alert.alert > ?", req.LastNewsAlertId)
 	}
@@ -94,7 +94,7 @@ func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsR
 	var alerts []*pb.NewsAlert
 	for _, alert := range res {
 		alerts = append(alerts, &pb.NewsAlert{
-			ImageUrl: alert.Files.URL.String,
+			ImageUrl: alert.File.URL.String,
 			Link:     alert.Link.String,
 			Created:  timestamppb.New(alert.Created),
 			From:     timestamppb.New(alert.From),
