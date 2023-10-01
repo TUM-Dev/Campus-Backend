@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"errors"
 	"io/fs"
 	"net"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/makasim/sentryhook"
@@ -45,17 +46,7 @@ var swagfs embed.FS
 
 func main() {
 	setupTelemetry()
-	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
-
-	// initializing connection to InfluxDB
-	err := backend.ConnectToInfluxDB()
-	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
-		log.Warn("InfluxDB token not configured - continuing without InfluxDB")
-	} else if errors.Is(err, backend.ErrInfluxURLNotConfigured) {
-		log.Warn("InfluxDB url not configured - continuing without InfluxDB")
-	} else if err != nil {
-		log.WithError(err).Error("InfluxDB connection failed - health check failed")
-	}
+	defer sentry.Flush(10 * time.Second) // make sure that sentry handles shutdowns gracefully
 
 	db := setupDB()
 
@@ -82,6 +73,7 @@ func main() {
 	httpMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("healthy"))
 	})
+	httpMux.Handle("/metrics", promhttp.Handler())
 
 	static, _ := fs.Sub(swagfs, "swagger")
 	httpMux.Handle("/", http.FileServer(http.FS(static)))
@@ -108,7 +100,7 @@ func main() {
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
-		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
+		log.WithError(err).Fatal("could not RegisterCampusHandlerFromEndpoint")
 	}
 	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
@@ -128,18 +120,15 @@ func main() {
 
 // setupDB connects to the database and migrates it if necessary
 func setupDB() *gorm.DB {
-	// Connect to DB
-	var conn gorm.Dialector
-	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+	dbHost := os.Getenv("DB_DSN")
+	if dbHost == "" {
 		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	} else {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
 	}
 
-	db, err := gorm.Open(conn, &gorm.Config{Logger: gorm_logrus.New()})
+	log.Info("Connecting to dsn")
+	db, err := gorm.Open(mysql.Open(dbHost), &gorm.Config{Logger: gorm_logrus.New()})
 	if err != nil {
-		log.WithError(err).Panic("failed to connect database")
+		log.WithError(err).Fatal("failed to connect database")
 	}
 
 	// Migrate the schema

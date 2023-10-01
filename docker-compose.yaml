@@ -1,6 +1,5 @@
 services:
   backend:
-    container_name: campus-backend
     image: ghcr.io/tum-dev/campus-backend/backend-server:latest
     restart: always
     build:
@@ -16,7 +15,9 @@ services:
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
       - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
-      - MensaCronDisabled=false
+      - MensaCronDisabled=true
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
     volumes:
       - backend-storage:/Storage
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
@@ -26,7 +27,6 @@ services:
         condition: service_healthy
 
   db:
-    container_name: campus-db
     image: bitnami/mariadb:latest
     ports:
       - ${DB_PORT:-3306}:3306
@@ -41,6 +41,35 @@ services:
       interval: 15s
       timeout: 5s
       retries: 6
+  # The following code can be used to test the envoy proxy locally
+  # The reason why this is commented out is that this working requires the following change:
+  #
+  # ./deployment/charts/backend/files/envoy.yaml
+  #   socket_address:
+  # -   address: localhost
+  # +   address: backend
+  #     port_value: 50051
+  #
+  #grpc-web:
+  #  image: envoyproxy/envoy:v1.27-latest
+  #  restart: always
+  #  command:
+  #    - /docker-entrypoint.sh
+  #    - --config-path
+  #    - /etc/envoy/envoy.yaml
+  #    - --service-cluster
+  #    - backend-v2
+  #    - --service-node
+  #    - backend-v2
+  #    - --log-level
+  #    - info
+  #  ports:
+  #    - 8081:8081
+  #    - 9901:9901
+  #  volumes:
+  #    - ./deployment/charts/backend/files/envoy.yaml:/etc/envoy/envoy.yaml
+  #  depends_on:
+  #    - backend
 
 volumes:
   campus-db-data:

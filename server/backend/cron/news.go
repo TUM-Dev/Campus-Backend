@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	ImageDirectory = "news/newspread/"
-	NewspreadHook  = "newspread"
-	ImpulsivHook   = "impulsivHook"
+	NewsImageDirectory = "news/newspread/"
+	NewspreadHook      = "newspread"
+	ImpulsivHook       = "impulsivHook"
 	//MAX_IMAGE_RETRYS = 3
 )
 
@@ -100,7 +100,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				}
 			}
 			var enclosureUrl = null.StringFrom("")
-			var file *model.Files
+			var file *model.File
 			if pickedEnclosure != nil {
 				file, err = c.saveImage(pickedEnclosure.URL)
 				if err != nil {
@@ -119,8 +119,8 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 				Src:         source.Source,
 				Link:        item.Link,
 				Image:       enclosureUrl,
-				FilesID:     null.IntFrom(file.File),
-				Files:       file,
+				FileID:      null.IntFrom(file.File),
+				File:        file,
 			}
 			newNews = append(newNews, newsItem)
 		}
@@ -137,10 +137,10 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
-func (c *CronService) saveImage(url string) (*model.Files, error) {
+// saveImage saves an image to the database, so it can be downloaded by another cronjob and returns its id
+func (c *CronService) saveImage(url string) (*model.File, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
-	file := model.Files{
+	file := model.File{
 		Name: targetFileName, // path intentionally omitted
 	}
 	if err := c.db.First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -151,9 +151,9 @@ func (c *CronService) saveImage(url string) (*model.Files, error) {
 	}
 
 	// does not exist, store in database
-	file = model.Files{
+	file = model.File{
 		Name:       targetFileName,
-		Path:       ImageDirectory,
+		Path:       NewsImageDirectory,
 		URL:        null.StringFrom(url),
 		Downloaded: null.BoolFrom(false),
 	}

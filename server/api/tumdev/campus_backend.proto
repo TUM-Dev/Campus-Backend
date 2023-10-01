@@ -125,8 +125,8 @@ service Campus {
     option (google.api.http) = {get: "/studyrooms"};
   }
 
-  rpc GetKino(GetKinoRequest) returns (GetKinoReply) {
-    option (google.api.http) = {get: "/kino/{last_id}"};
+  rpc GetMovies(GetMoviesRequest) returns (GetMoviesReply) {
+    option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
   rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackReply) {
@@ -233,7 +233,7 @@ message Room {
   string name = 9;
 }
 
-message NewsItem {
+message News {
   int64 id = 1;
   string title = 2;
   string text = 3;
@@ -241,10 +241,11 @@ message NewsItem {
   string image_url = 5;
   string source = 6;
   google.protobuf.Timestamp created = 7;
+  google.protobuf.Timestamp date = 8;
 }
 
 message GetNewsReply {
-  repeated NewsItem news = 1;
+  repeated News news = 1;
 }
 
 message GetNewsRequest {
@@ -516,30 +517,35 @@ message StudyRoom {
   string building_name = 5;
 }
 
-message GetKinoRequest {
+message GetMoviesRequest {
+  // the last Id you have requested. Use -1 to get all movies
   int32 last_id = 1;
 }
 
-message GetKinoReply {
-  repeated KinoMsgElement kinos = 1;
+message GetMoviesReply {
+  repeated Movie movies = 1;
 }
 
-message KinoMsgElement {
-  string name = 1;
-  string path = 2;
-  int32 kino = 3;
+message Movie {
+  string cover_name = 1;
+  string cover_path = 2;
+  int64 movie_id = 3;
   google.protobuf.Timestamp date = 4;
   google.protobuf.Timestamp created = 5;
   string title = 6;
-  string year = 7;
+  // release year of the movie
+  string release_year = 7;
   string runtime = 8;
   string genre = 9;
   string director = 10;
   string actors = 11;
-  string rating = 12;
+  // imdb rating
+  string imdb_rating = 12;
   string description = 13;
-  int32 cover = 14;
-  string trailer = 15;
+  int64 cover_id = 14;
+  // was previously the trailer
+  reserved 15;
+  // Where to find additional information about this movie
   string link = 16;
 }
 

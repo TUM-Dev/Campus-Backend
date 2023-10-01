@@ -18,23 +18,22 @@ import (
 
 // deviceBuffer stores all recent device calls in a buffer and flushes them to the database periodically
 type deviceBuffer struct {
-	lock     sync.Mutex
-	devices  map[string]*model.Devices // key is uuid
-	interval time.Duration             // flush interval
+	lock    sync.Mutex
+	devices map[string]*model.Devices // key is uuid
 }
 
 func newDeviceBuffer() *deviceBuffer {
 	return &deviceBuffer{
-		lock:     sync.Mutex{},
-		devices:  make(map[string]*model.Devices),
-		interval: time.Minute,
+		lock:    sync.Mutex{},
+		devices: make(map[string]*model.Devices),
 	}
-
 }
+
+const FlushingInterval = time.Minute
 
 func (s *CampusServer) RunDeviceFlusher() error {
 	for {
-		time.Sleep(s.deviceBuf.interval)
+		time.Sleep(FlushingInterval)
 		if err := s.deviceBuf.flush(s.db); err != nil {
 			log.WithError(err).Error("Error flushing device buffer")
 		}

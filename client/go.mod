@@ -3,9 +3,9 @@ module github.com/TUM-Dev/Campus-Backend/client
 go 1.21
 
 require (
-	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230919162132-71bec88330f7
+	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230930202539-cc909730b13d
 	github.com/sirupsen/logrus v1.9.3
-	google.golang.org/grpc v1.58.1
+	google.golang.org/grpc v1.58.2
 )
 
 require (
