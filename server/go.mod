@@ -17,7 +17,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/mmcdole/gofeed v1.2.1
 	github.com/onrik/gorm-logrus v0.5.0
-	github.com/prometheus/client_golang v1.16.0
+	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.4
@@ -47,9 +47,9 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.10.1 // indirect
+	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
+	github.com/prometheus/common v0.44.0 // indirect
+	github.com/prometheus/procfs v0.11.1 // indirect
 	golang.org/x/image v0.5.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
