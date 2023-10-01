@@ -23,22 +23,13 @@ import (
 func (s *CampusServer) NewFeedback(stream pb.Campus_NewFeedbackServer) error {
 	return s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
 		// receive metadata
-		req, err := stream.Recv()
-		if err == io.EOF {
-			return status.Error(codes.InvalidArgument, "no actual feedback provided") // The client has closed the stream
-		}
+		imageCount := int32(0)
+		id, err := uuid.NewGen().NewV7()
 		if err != nil {
-			log.WithError(err).Error("Error receiving feedback")
-			return status.Error(codes.Internal, "Error receiving feedback")
+			log.WithError(err).Error("Error generating uuid")
+			return status.Error(codes.Internal, "Error starting feedback submission")
 		}
-		imageCounter := int32(0)
-		feedback, err := convertReqToFeedback(req)
-		if err != nil {
-			return status.Error(codes.Internal, "Error converting request to feedback")
-		}
-		if len(req.Attachment) > 0 {
-			imageCounter = handleImageUpload(tx, &req.Attachment, imageCounter, feedback.EmailId.String)
-		}
+		feedback := &model.Feedback{EmailId: null.StringFrom(id.String())}
 
 		// download images
 		for {
@@ -51,17 +42,22 @@ func (s *CampusServer) NewFeedback(stream pb.Campus_NewFeedbackServer) error {
 				deleteUploaded(tx, feedback.EmailId.String)
 				return status.Error(codes.Internal, "Error receiving feedback")
 			}
+			mergeFeedback(feedback, req)
 
 			if len(req.Attachment) > 0 {
-				imageCounter = handleImageUpload(tx, &req.Attachment, imageCounter, feedback.EmailId.String)
+				imageCount = handleImageUpload(tx, &req.Attachment, imageCount, feedback.EmailId.String)
 			}
 		}
-		feedback.ImageCount = imageCounter
+		feedback.ImageCount = imageCount
 		if err := tx.Create(feedback).Error; err != nil {
 			log.WithError(err).Error("Error creating feedback")
 			return status.Error(codes.Internal, "Error creating feedback")
 		}
-		return stream.SendAndClose(&pb.NewFeedbackReply{})
+		if err := stream.SendAndClose(&pb.NewFeedbackReply{}); err != nil {
+			log.WithError(err).Error("Error sending feedbackreply")
+			return status.Error(codes.Internal, "Error sending feedbackreply")
+		}
+		return nil
 	})
 }
 
@@ -118,36 +114,22 @@ func inferFileName(content *[]byte, counter int32) string {
 	return fmt.Sprintf("%d%s", counter, ext)
 }
 
-func convertReqToFeedback(req *pb.NewFeedbackRequest) (*model.Feedback, error) {
-	id, err := uuid.NewGen().NewV7()
-	if err != nil {
-		log.WithError(err).Error("Error generating uuid")
-		return nil, err
+func mergeFeedback(feedback *model.Feedback, req *pb.NewFeedbackRequest) {
+	if req.Recipient.Enum() != nil {
+		feedback.Recipient = null.StringFrom(receiverFromTopic(req.Recipient))
 	}
-	result := model.Feedback{
-		EmailId:   null.StringFrom(id.String()),
-		Recipient: null.StringFrom(receiverFromTopic(req.Recipient)),
-	}
-	if req.Metadata.OsVersion != "" {
-		result.OsVersion = null.StringFrom(req.Metadata.OsVersion)
-	}
-	if req.Metadata.AppVersion != "" {
-		result.AppVersion = null.StringFrom(req.Metadata.AppVersion)
+	if req.Metadata != nil {
+		feedback.OsVersion = null.StringFrom(req.Metadata.OsVersion)
+		feedback.AppVersion = null.StringFrom(req.Metadata.AppVersion)
+		feedback.Longitude = null.FloatFrom(req.Metadata.Longitude)
+		feedback.Latitude = null.FloatFrom(req.Metadata.Latitude)
 	}
 	if req.Message != "" {
-		result.Feedback = null.StringFrom(req.Message)
+		feedback.Feedback = null.StringFrom(req.Message)
 	}
 	if req.FromEmail != "" {
-		result.ReplyTo = null.StringFrom(req.FromEmail)
+		feedback.ReplyTo = null.StringFrom(req.FromEmail)
 	}
-	if req.Metadata.Longitude != 0 {
-		result.Longitude = null.FloatFrom(req.Metadata.Longitude)
-	}
-	if req.Metadata.Latitude != 0 {
-		result.Latitude = null.FloatFrom(req.Metadata.Latitude)
-	}
-
-	return &result, nil
 }
 
 func receiverFromTopic(topic pb.NewFeedbackRequest_Recipient) string {
