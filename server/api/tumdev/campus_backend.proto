@@ -12,8 +12,11 @@ option java_outer_classname = "CampusApiProto";
 option java_package = "app.tum.campus.api";
 
 service Campus {
-  rpc GetTopNews(GetTopNewsRequest) returns (GetTopNewsReply) {
-    option (google.api.http) = {get: "/news/top"};
+  rpc GetNewsAlerts(GetNewsAlertsRequest) returns (GetNewsAlertsReply) {
+    option (google.api.http) = {
+      get: "/news/alerts"
+      response_body: "alerts"
+    };
   }
 
   rpc GetNewsSources(GetNewsSourcesRequest) returns (GetNewsSourcesReply) {
@@ -264,8 +267,16 @@ message NewsSource {
   string icon = 3;
 }
 
-message GetTopNewsRequest {}
-message GetTopNewsReply {
+message GetNewsAlertsRequest {
+  // the last id of the news item received. 0 to get all news items
+  int32 last_news_alert_id = 1;
+}
+
+message GetNewsAlertsReply {
+  repeated NewsAlert alerts = 1;
+}
+
+message NewsAlert {
   string image_url = 1;
   string link = 2;
   google.protobuf.Timestamp created = 3;

@@ -31,20 +31,38 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetTopNewsRequest
+var (
+	filter_Campus_GetNewsAlerts_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
+func request_Campus_GetNewsAlerts_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetNewsAlertsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetTopNews(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetNewsAlerts_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.GetNewsAlerts(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_GetTopNews_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetTopNewsRequest
+func local_request_Campus_GetNewsAlerts_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetNewsAlertsRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetTopNews(ctx, &protoReq)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_GetNewsAlerts_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.GetNewsAlerts(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1137,7 +1155,7 @@ func local_request_Campus_RemoveDevice_0(ctx context.Context, marshaler runtime.
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCampusHandlerFromEndpoint instead.
 func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CampusServer) error {
 
-	mux.Handle("GET", pattern_Campus_GetTopNews_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetNewsAlerts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1145,12 +1163,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetTopNews", runtime.WithHTTPPathPattern("/news/top"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetNewsAlerts", runtime.WithHTTPPathPattern("/news/alerts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_GetTopNews_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_GetNewsAlerts_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1158,7 +1176,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_GetTopNews_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetNewsAlerts_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1903,25 +1921,25 @@ func RegisterCampusHandler(ctx context.Context, mux *runtime.ServeMux, conn *grp
 // "CampusClient" to call the correct interceptors.
 func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CampusClient) error {
 
-	mux.Handle("GET", pattern_Campus_GetTopNews_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_GetNewsAlerts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetTopNews", runtime.WithHTTPPathPattern("/news/top"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetNewsAlerts", runtime.WithHTTPPathPattern("/news/alerts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_GetTopNews_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_GetNewsAlerts_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_GetTopNews_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_GetNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_GetNewsAlerts_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2544,6 +2562,15 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 	return nil
 }
 
+type response_Campus_GetNewsAlerts_0 struct {
+	proto.Message
+}
+
+func (m response_Campus_GetNewsAlerts_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*GetNewsAlertsReply)
+	return response.Alerts
+}
+
 type response_Campus_GetNewsSources_0 struct {
 	proto.Message
 }
@@ -2617,7 +2644,7 @@ func (m response_Campus_GetDishes_0) XXX_ResponseBody() interface{} {
 }
 
 var (
-	pattern_Campus_GetTopNews_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "top"}, ""))
+	pattern_Campus_GetNewsAlerts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "alerts"}, ""))
 
 	pattern_Campus_GetNewsSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"news", "sources"}, ""))
 
@@ -2677,7 +2704,7 @@ var (
 )
 
 var (
-	forward_Campus_GetTopNews_0 = runtime.ForwardResponseMessage
+	forward_Campus_GetNewsAlerts_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetNewsSources_0 = runtime.ForwardResponseMessage
 
