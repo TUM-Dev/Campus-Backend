@@ -490,12 +490,12 @@
     },
     "/feedback": {
       "post": {
-        "operationId": "Campus_SendFeedback",
+        "operationId": "Campus_NewFeedback",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackReply"
+              "$ref": "#/definitions/apiNewFeedbackReply"
             }
           },
           "default": {
@@ -958,7 +958,7 @@
         }
       }
     },
-    "SendFeedbackRequestMetadata": {
+    "NewFeedbackRequestMetadata": {
       "type": "object",
       "properties": {
         "latitude": {
@@ -977,7 +977,7 @@
         }
       }
     },
-    "SendFeedbackRequestRecipient": {
+    "NewFeedbackRequestRecipient": {
       "type": "string",
       "enum": [
         "TUM_DEV",
@@ -1556,6 +1556,9 @@
         }
       }
     },
+    "apiNewFeedbackReply": {
+      "type": "object"
+    },
     "apiNews": {
       "type": "object",
       "properties": {
@@ -1795,9 +1798,6 @@
           "type": "string"
         }
       }
-    },
-    "apiSendFeedbackReply": {
-      "type": "object"
     },
     "apiSingleRatingReply": {
       "type": "object",

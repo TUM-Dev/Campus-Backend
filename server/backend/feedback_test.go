@@ -51,12 +51,12 @@ func (s *FeedbackSuite) SetupSuite() {
 
 type mockedFeedbackStream struct {
 	grpc.ServerStream
-	recived []*pb.SendFeedbackRequest
-	reply   *pb.SendFeedbackReply
+	recived []*pb.NewFeedbackRequest
+	reply   *pb.NewFeedbackReply
 	T       *testing.T
 }
 
-func (f mockedFeedbackStream) SendAndClose(reply *pb.SendFeedbackReply) error {
+func (f mockedFeedbackStream) SendAndClose(reply *pb.NewFeedbackReply) error {
 	require.Equal(f.T, f.reply, reply)
 	return nil
 }
@@ -66,7 +66,7 @@ func (f mockedFeedbackStream) SendAndClose(reply *pb.SendFeedbackReply) error {
 // => tracking this as  a global variable is the only way
 var index = uint(0)
 
-func (f mockedFeedbackStream) Recv() (*pb.SendFeedbackRequest, error) {
+func (f mockedFeedbackStream) Recv() (*pb.NewFeedbackRequest, error) {
 	if int(index) >= len(f.recived) {
 		return nil, io.EOF
 	}
@@ -90,7 +90,7 @@ func createDummyImage(t *testing.T, width, height int) []byte {
 	return buf.Bytes()
 }
 
-func (s *FeedbackSuite) Test_SendFeedback_OneImage() {
+func (s *FeedbackSuite) Test_NewFeedback_OneImage() {
 	cron.StorageDir = "test_one_image/"
 	defer func(path string) {
 		err := os.RemoveAll(path)
@@ -117,13 +117,13 @@ func (s *FeedbackSuite) Test_SendFeedback_OneImage() {
 	dummyText := []byte("Dummy Text")
 	stream := mockedFeedbackStream{
 		T: s.T(),
-		recived: []*pb.SendFeedbackRequest{
-			{Recipient: pb.SendFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.SendFeedbackRequest_Metadata{}, Attachment: dummyText},
+		recived: []*pb.NewFeedbackRequest{
+			{Recipient: pb.NewFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.NewFeedbackRequest_Metadata{}, Attachment: dummyText},
 			{Attachment: dummyImage},
 		},
-		reply: &pb.SendFeedbackReply{},
+		reply: &pb.NewFeedbackReply{},
 	}
-	require.NoError(s.T(), server.SendFeedback(stream))
+	require.NoError(s.T(), server.NewFeedback(stream))
 
 	// check that the correct operations happened to the file system
 	files := extractUploadedFiles(s.T(), cron.StorageDir, 2)
@@ -140,7 +140,7 @@ func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime
 	require.Len(t, content, int(info.Size()))
 }
 
-func (s *FeedbackSuite) Test_SendFeedback_NoImage() {
+func (s *FeedbackSuite) Test_NewFeedback_NoImage() {
 	cron.StorageDir = "test_no_image/"
 
 	server := CampusServer{db: s.DB}
@@ -152,13 +152,13 @@ func (s *FeedbackSuite) Test_SendFeedback_NoImage() {
 
 	stream := mockedFeedbackStream{
 		T: s.T(),
-		recived: []*pb.SendFeedbackRequest{
-			{Recipient: pb.SendFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.SendFeedbackRequest_Metadata{}},
+		recived: []*pb.NewFeedbackRequest{
+			{Recipient: pb.NewFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.NewFeedbackRequest_Metadata{}},
 			{}, // empty images should be ignored
 		},
-		reply: &pb.SendFeedbackReply{},
+		reply: &pb.NewFeedbackReply{},
 	}
-	require.NoError(s.T(), server.SendFeedback(stream))
+	require.NoError(s.T(), server.NewFeedback(stream))
 
 	// no image should be uploaded to the file system
 	extractUploadedFiles(s.T(), cron.StorageDir, 0)

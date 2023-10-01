@@ -625,16 +625,16 @@ func local_request_Campus_GetMovies_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-func request_Campus_SendFeedback_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Campus_NewFeedback_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var metadata runtime.ServerMetadata
-	stream, err := client.SendFeedback(ctx)
+	stream, err := client.NewFeedback(ctx)
 	if err != nil {
 		grpclog.Infof("Failed to start streaming: %v", err)
 		return nil, metadata, err
 	}
 	dec := marshaler.NewDecoder(req.Body)
 	for {
-		var protoReq SendFeedbackRequest
+		var protoReq NewFeedbackRequest
 		err = dec.Decode(&protoReq)
 		if err == io.EOF {
 			break
@@ -1548,7 +1548,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("POST", pattern_Campus_SendFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_NewFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2214,25 +2214,25 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("POST", pattern_Campus_SendFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Campus_NewFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/SendFeedback", runtime.WithHTTPPathPattern("/feedback"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/NewFeedback", runtime.WithHTTPPathPattern("/feedback"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_SendFeedback_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_NewFeedback_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_SendFeedback_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Campus_NewFeedback_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2526,7 +2526,7 @@ var (
 
 	pattern_Campus_GetMovies_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"movies", "last_id"}, ""))
 
-	pattern_Campus_SendFeedback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"feedback"}, ""))
+	pattern_Campus_NewFeedback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"feedback"}, ""))
 
 	pattern_Campus_GetUploadStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"device", "uploaded", "lrz_id"}, ""))
 
@@ -2584,7 +2584,7 @@ var (
 
 	forward_Campus_GetMovies_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_SendFeedback_0 = runtime.ForwardResponseMessage
+	forward_Campus_NewFeedback_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_GetUploadStatus_0 = runtime.ForwardResponseMessage
 

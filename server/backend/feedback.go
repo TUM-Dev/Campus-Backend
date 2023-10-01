@@ -19,8 +19,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// SendFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
-func (s *CampusServer) SendFeedback(stream pb.Campus_SendFeedbackServer) error {
+// NewFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
+func (s *CampusServer) NewFeedback(stream pb.Campus_NewFeedbackServer) error {
 	return s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
 		// receive metadata
 		req, err := stream.Recv()
@@ -61,7 +61,7 @@ func (s *CampusServer) SendFeedback(stream pb.Campus_SendFeedbackServer) error {
 			log.WithError(err).Error("Error creating feedback")
 			return status.Error(codes.Internal, "Error creating feedback")
 		}
-		return stream.SendAndClose(&pb.SendFeedbackReply{})
+		return stream.SendAndClose(&pb.NewFeedbackReply{})
 	})
 }
 
@@ -118,7 +118,7 @@ func inferFileName(content *[]byte, counter int32) string {
 	return fmt.Sprintf("%d%s", counter, ext)
 }
 
-func convertReqToFeedback(req *pb.SendFeedbackRequest) (*model.Feedback, error) {
+func convertReqToFeedback(req *pb.NewFeedbackRequest) (*model.Feedback, error) {
 	id, err := uuid.NewGen().NewV7()
 	if err != nil {
 		log.WithError(err).Error("Error generating uuid")
@@ -150,9 +150,9 @@ func convertReqToFeedback(req *pb.SendFeedbackRequest) (*model.Feedback, error) 
 	return &result, nil
 }
 
-func receiverFromTopic(topic pb.SendFeedbackRequest_Recipient) string {
+func receiverFromTopic(topic pb.NewFeedbackRequest_Recipient) string {
 	switch topic {
-	case pb.SendFeedbackRequest_TUM_DEV:
+	case pb.NewFeedbackRequest_TUM_DEV:
 		return "app@tum.de"
 	default:
 		return "kontakt@tum.de"

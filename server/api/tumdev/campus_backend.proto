@@ -126,7 +126,7 @@ service Campus {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
-  rpc SendFeedback(stream SendFeedbackRequest) returns (SendFeedbackReply) {
+  rpc NewFeedback(stream NewFeedbackRequest) returns (NewFeedbackReply) {
     option (google.api.http) = {
       post: "/feedback",
       body: "attachment",
@@ -537,7 +537,7 @@ message Movie {
   string link = 16;
 }
 
-message SendFeedbackRequest {
+message NewFeedbackRequest {
   message Metadata {
     double latitude = 1;
     double longitude = 2;
@@ -564,7 +564,7 @@ message SendFeedbackRequest {
   bytes attachment = 5;
 }
 
-message SendFeedbackReply {}
+message NewFeedbackReply {}
 
 message GetMembersRequest {
   string lrz_id = 1;
