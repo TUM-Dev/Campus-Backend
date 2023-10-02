@@ -3,6 +3,7 @@ package migration
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
@@ -40,11 +41,11 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 		},
 
 		Rollback: func(tx *gorm.DB) error {
-			res := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "dishNameDownload", 300).Error
+			res := tx.Delete(&model.Crontab{Type: null.StringFrom("dishNameDownload")}).Error
 			if res != nil {
 				return res
 			}
-			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "averageRatingComputation", 300).Error
+			return tx.Delete(&model.Crontab{Type: null.StringFrom("averageRatingComputation")}).Error
 		},
 	}
 }

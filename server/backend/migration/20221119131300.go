@@ -85,12 +85,12 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "iosNotifications", 60).Error
+			err := tx.Delete(&model.Crontab{Type: null.StringFrom("iosNotifications")}).Error
 			if err != nil {
 				return err
 			}
 
-			err = tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "iosActivityReset", 86400).Error
+			err = tx.Delete(&model.Crontab{Type: null.StringFrom("iosActivityReset")}).Error
 
 			if err != nil {
 				return err
