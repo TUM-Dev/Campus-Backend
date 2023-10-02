@@ -19,8 +19,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
-func (s *CampusServer) NewFeedback(stream pb.Campus_NewFeedbackServer) error {
+// CreateFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
+func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) error {
 	return s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
 		// receive metadata
 		imageCount := int32(0)
@@ -53,7 +53,7 @@ func (s *CampusServer) NewFeedback(stream pb.Campus_NewFeedbackServer) error {
 			log.WithError(err).Error("Error creating feedback")
 			return status.Error(codes.Internal, "Error creating feedback")
 		}
-		if err := stream.SendAndClose(&pb.NewFeedbackReply{}); err != nil {
+		if err := stream.SendAndClose(&pb.CreateFeedbackReply{}); err != nil {
 			log.WithError(err).Error("Error sending feedbackreply")
 			return status.Error(codes.Internal, "Error sending feedbackreply")
 		}
@@ -114,7 +114,7 @@ func inferFileName(content *[]byte, counter int32) string {
 	return fmt.Sprintf("%d%s", counter, ext)
 }
 
-func mergeFeedback(feedback *model.Feedback, req *pb.NewFeedbackRequest) {
+func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.Recipient.Enum() != nil {
 		feedback.Recipient = null.StringFrom(receiverFromTopic(req.Recipient))
 	}
@@ -132,9 +132,9 @@ func mergeFeedback(feedback *model.Feedback, req *pb.NewFeedbackRequest) {
 	}
 }
 
-func receiverFromTopic(topic pb.NewFeedbackRequest_Recipient) string {
+func receiverFromTopic(topic pb.CreateFeedbackRequest_Recipient) string {
 	switch topic {
-	case pb.NewFeedbackRequest_TUM_DEV:
+	case pb.CreateFeedbackRequest_TUM_DEV:
 		return "app@tum.de"
 	default:
 		return "kontakt@tum.de"
