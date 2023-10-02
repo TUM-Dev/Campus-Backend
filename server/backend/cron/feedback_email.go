@@ -16,6 +16,12 @@ import (
 	_ "embed"
 )
 
+//go:embed email_templates/feedback_body.gohtml
+var htmlFeedbackBody string
+
+//go:embed email_templates/feedback_body.txt.tmpl
+var txtFeedbackBody string
+
 // iterate is a template helper to make counting possible
 func iterate(count int32) []int32 {
 	var items []int32
@@ -25,12 +31,6 @@ func iterate(count int32) []int32 {
 	}
 	return items
 }
-
-//go:embed email_templates/feedback_body.gohtml
-var htmlFeedbackBody string
-
-//go:embed email_templates/feedback_body.txt.tmpl
-var txtFeedbackBody string
 
 func parseTemplates() (*htmlTemplate.Template, *textTemplate.Template, error) {
 	funcMap := textTemplate.FuncMap{"iterate": iterate}
