@@ -61,7 +61,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 				return err
 			}
 
-			return tx.Delete(&model.Crontab{}, "type = ?", "newExamResultsHook").Error
+			return tx.Delete(&model.Crontab{}, "type = 'newExamResultsHook'").Error
 		},
 	}
 }

@@ -12,8 +12,11 @@ option java_outer_classname = "CampusApiProto";
 option java_package = "app.tum.campus.api";
 
 service Campus {
-  rpc GetTopNews(GetTopNewsRequest) returns (GetTopNewsReply) {
-    option (google.api.http) = {get: "/news/top"};
+  rpc GetNewsAlerts(GetNewsAlertsRequest) returns (GetNewsAlertsReply) {
+    option (google.api.http) = {
+      get: "/news/alerts"
+      response_body: "alerts"
+    };
   }
 
   rpc GetNewsSources(GetNewsSourcesRequest) returns (GetNewsSourcesReply) {
@@ -53,14 +56,14 @@ service Campus {
     };
   }
 
-  rpc NewCanteenRating(NewCanteenRatingRequest) returns (NewCanteenRatingReply) {
+  rpc CreateCanteenRating(CreateCanteenRatingRequest) returns (CreateCanteenRatingReply) {
     option (google.api.http) = {
       post: "/canteen/rating/new",
       body: "*",
     };
   }
 
-  rpc NewDishRating(NewDishRatingRequest) returns (NewDishRatingReply) {
+  rpc CreateDishRating(CreateDishRatingRequest) returns (CreateDishRatingReply) {
     option (google.api.http) = {
       post: "/dish/rating/new",
       body: "*",
@@ -126,7 +129,7 @@ service Campus {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
-  rpc NewFeedback(stream NewFeedbackRequest) returns (NewFeedbackReply) {
+  rpc CreateFeedback(stream CreateFeedbackRequest) returns (CreateFeedbackReply) {
     option (google.api.http) = {
       post: "/feedback",
       body: "attachment",
@@ -154,23 +157,23 @@ service Campus {
   }
 
   // Endpoint for the iOS app to respond to background notifications requests
-  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {
+  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) { // TODO naming
     option (google.api.http) = {
       post: "/ios/notifications/deviceRequestResponse",
       body: "*",
     };
   }
 
-  // Register an Android, iOS or Windows device for push notifications
-  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceReply) {
+  // Create an device (Android/iOS/Windows) for push notifications
+  rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceReply) {
     option (google.api.http) = {
       post: "/device",
       body: "*",
     };
   }
 
-  // Unregister it from push notifications
-  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceReply) {
+  // Delete a device from push notifications
+  rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceReply) {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
 }
@@ -181,22 +184,22 @@ enum DeviceType {
   WINDOWS = 2;
 }
 
-message RegisterDeviceRequest {
+message CreateDeviceRequest {
   string device_id = 1;
   optional string public_key = 2;
   DeviceType device_type = 3;
 }
 
-message RegisterDeviceReply {
+message CreateDeviceReply {
   string device_id = 1;
 }
 
-message RemoveDeviceRequest {
+message DeleteDeviceRequest {
   string device_id = 1;
   DeviceType device_type = 2;
 }
 
-message RemoveDeviceReply {
+message DeleteDeviceReply {
   string device_id = 1;
 }
 
@@ -263,8 +266,16 @@ message NewsSource {
   string icon = 3;
 }
 
-message GetTopNewsRequest {}
-message GetTopNewsReply {
+message GetNewsAlertsRequest {
+  // the last id of the news item received. 0 to get all news items
+  int32 last_news_alert_id = 1;
+}
+
+message GetNewsAlertsReply {
+  repeated NewsAlert alerts = 1;
+}
+
+message NewsAlert {
   string image_url = 1;
   string link = 2;
   google.protobuf.Timestamp created = 3;
@@ -326,9 +337,9 @@ message SingleRatingReply {
   google.protobuf.Timestamp visited = 5;
 }
 
-message NewCanteenRatingReply {}
+message CreateCanteenRatingReply {}
 
-message NewCanteenRatingRequest {
+message CreateCanteenRatingRequest {
   // number in the range 1-5
   int32 points = 1;
   string canteen_id = 2;
@@ -339,8 +350,8 @@ message NewCanteenRatingRequest {
   string comment = 6;
 }
 
-message NewDishRatingReply {}
-message NewDishRatingRequest {
+message CreateDishRatingReply {}
+message CreateDishRatingRequest {
   // number in the range 1-5
   int32 points = 1;
   // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
@@ -537,7 +548,7 @@ message Movie {
   string link = 16;
 }
 
-message NewFeedbackRequest {
+message CreateFeedbackRequest {
   message Metadata {
     double latitude = 1;
     double longitude = 2;
@@ -564,7 +575,7 @@ message NewFeedbackRequest {
   bytes attachment = 5;
 }
 
-message NewFeedbackReply {}
+message CreateFeedbackReply {}
 
 message GetMembersRequest {
   string lrz_id = 1;

@@ -2,7 +2,6 @@ package cron
 
 import (
 	"bytes"
-	"crypto/tls"
 	htmlTemplate "html/template"
 	"os"
 	"strconv"
@@ -16,7 +15,13 @@ import (
 	_ "embed"
 )
 
-// iterate is necessary, as go otherwise cannot count up in a for loop inside templates
+//go:embed email_templates/feedback_body.gohtml
+var htmlFeedbackBody string
+
+//go:embed email_templates/feedback_body.txt.tmpl
+var txtFeedbackBody string
+
+// iterate is a template helper to make counting possible
 func iterate(count int32) []int32 {
 	var items []int32
 	var i int32
@@ -25,12 +30,6 @@ func iterate(count int32) []int32 {
 	}
 	return items
 }
-
-//go:embed email_templates/feedback_body.gohtml
-var htmlFeedbackBody string
-
-//go:embed email_templates/feedback_body.txt.tmpl
-var txtFeedbackBody string
 
 func parseTemplates() (*htmlTemplate.Template, *textTemplate.Template, error) {
 	funcMap := textTemplate.FuncMap{"iterate": iterate}
@@ -104,13 +103,10 @@ func (c *CronService) feedbackEmailCron() error {
 		return err
 	}
 
-	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	dialer, err := setupSMTPDialer()
 	if err != nil {
-		log.WithError(err).Fatal("SMTP_PORT is not an integer")
 		return err
 	}
-	d := gomail.NewDialer(os.Getenv("SMTP_URL"), smtpPort, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"))
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	for i, feedback := range results {
 		m := messageWithHeaders(&feedback)
 
@@ -124,7 +120,7 @@ func (c *CronService) feedbackEmailCron() error {
 		m.AddAlternative("text/html", htmlBodyBuffer)
 
 		// send mail
-		if err := d.DialAndSend(m); err != nil {
+		if err := dialer.DialAndSend(m); err != nil {
 			log.WithError(err).Error("could not send mail")
 			continue
 		}
@@ -136,4 +132,15 @@ func (c *CronService) feedbackEmailCron() error {
 		}
 	}
 	return nil
+}
+
+// setupSMTPDialer sets up the SMTP dialer
+func setupSMTPDialer() (*gomail.Dialer, error) {
+	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	if err != nil {
+		log.WithError(err).Fatal("SMTP_PORT is not an integer")
+		return nil, err
+	}
+	d := gomail.NewDialer(os.Getenv("SMTP_URL"), smtpPort, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"))
+	return d, nil
 }

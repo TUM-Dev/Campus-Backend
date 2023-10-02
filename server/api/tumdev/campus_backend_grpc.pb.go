@@ -20,14 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Campus_GetTopNews_FullMethodName               = "/api.Campus/GetTopNews"
+	Campus_GetNewsAlerts_FullMethodName            = "/api.Campus/GetNewsAlerts"
 	Campus_GetNewsSources_FullMethodName           = "/api.Campus/GetNewsSources"
 	Campus_GetNews_FullMethodName                  = "/api.Campus/GetNews"
 	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
 	Campus_GetCanteenRatings_FullMethodName        = "/api.Campus/GetCanteenRatings"
 	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
-	Campus_NewCanteenRating_FullMethodName         = "/api.Campus/NewCanteenRating"
-	Campus_NewDishRating_FullMethodName            = "/api.Campus/NewDishRating"
+	Campus_CreateCanteenRating_FullMethodName      = "/api.Campus/CreateCanteenRating"
+	Campus_CreateDishRating_FullMethodName         = "/api.Campus/CreateDishRating"
 	Campus_GetAvailableDishTags_FullMethodName     = "/api.Campus/GetAvailableDishTags"
 	Campus_GetNameTags_FullMethodName              = "/api.Campus/GetNameTags"
 	Campus_GetAvailableCanteenTags_FullMethodName  = "/api.Campus/GetAvailableCanteenTags"
@@ -39,30 +39,31 @@ const (
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
 	Campus_GetStudyRoomList_FullMethodName         = "/api.Campus/GetStudyRoomList"
 	Campus_GetMovies_FullMethodName                = "/api.Campus/GetMovies"
-	Campus_NewFeedback_FullMethodName              = "/api.Campus/NewFeedback"
+	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
+	Campus_CreateFeedbackImage_FullMethodName      = "/api.Campus/CreateFeedbackImage"
 	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
 	Campus_GetNotification_FullMethodName          = "/api.Campus/GetNotification"
 	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
 	Campus_GetMembers_FullMethodName               = "/api.Campus/GetMembers"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
 	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
-	Campus_RegisterDevice_FullMethodName           = "/api.Campus/RegisterDevice"
-	Campus_RemoveDevice_FullMethodName             = "/api.Campus/RemoveDevice"
+	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
+	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 )
 
 // CampusClient is the client API for Campus service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CampusClient interface {
-	GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error)
+	GetNewsAlerts(ctx context.Context, in *GetNewsAlertsRequest, opts ...grpc.CallOption) (*GetNewsAlertsReply, error)
 	GetNewsSources(ctx context.Context, in *GetNewsSourcesRequest, opts ...grpc.CallOption) (*GetNewsSourcesReply, error)
 	GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	GetCanteenRatings(ctx context.Context, in *GetCanteenRatingsRequest, opts ...grpc.CallOption) (*GetCanteenRatingsReply, error)
 	GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error)
-	NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*NewCanteenRatingReply, error)
-	NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*NewDishRatingReply, error)
+	CreateCanteenRating(ctx context.Context, in *CreateCanteenRatingRequest, opts ...grpc.CallOption) (*CreateCanteenRatingReply, error)
+	CreateDishRating(ctx context.Context, in *CreateDishRatingRequest, opts ...grpc.CallOption) (*CreateDishRatingReply, error)
 	GetAvailableDishTags(ctx context.Context, in *GetAvailableDishTagsRequest, opts ...grpc.CallOption) (*GetAvailableDishTagsReply, error)
 	GetNameTags(ctx context.Context, in *GetNameTagsRequest, opts ...grpc.CallOption) (*GetNameTagsReply, error)
 	GetAvailableCanteenTags(ctx context.Context, in *GetAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*GetAvailableCanteenTagsReply, error)
@@ -74,7 +75,8 @@ type CampusClient interface {
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(ctx context.Context, in *GetStudyRoomListRequest, opts ...grpc.CallOption) (*GetStudyRoomListReply, error)
 	GetMovies(ctx context.Context, in *GetMoviesRequest, opts ...grpc.CallOption) (*GetMoviesReply, error)
-	NewFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_NewFeedbackClient, error)
+	CreateFeedback(ctx context.Context, in *CreateFeedbackRequest, opts ...grpc.CallOption) (*CreateFeedbackReply, error)
+	CreateFeedbackImage(ctx context.Context, in *CreateFeedbackImageRequest, opts ...grpc.CallOption) (*CreateFeedbackImageReply, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
 	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
@@ -82,10 +84,10 @@ type CampusClient interface {
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
 	// Endpoint for the iOS app to respond to background notifications requests
 	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
-	// Register an Android, iOS or Windows device for push notifications
-	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceReply, error)
-	// Unregister it from push notifications
-	RemoveDevice(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceReply, error)
+	// Create an device (Android/iOS/Windows) for push notifications
+	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
+	// Delete a device from push notifications
+	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
 }
 
 type campusClient struct {
@@ -96,9 +98,9 @@ func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
 	return &campusClient{cc}
 }
 
-func (c *campusClient) GetTopNews(ctx context.Context, in *GetTopNewsRequest, opts ...grpc.CallOption) (*GetTopNewsReply, error) {
-	out := new(GetTopNewsReply)
-	err := c.cc.Invoke(ctx, Campus_GetTopNews_FullMethodName, in, out, opts...)
+func (c *campusClient) GetNewsAlerts(ctx context.Context, in *GetNewsAlertsRequest, opts ...grpc.CallOption) (*GetNewsAlertsReply, error) {
+	out := new(GetNewsAlertsReply)
+	err := c.cc.Invoke(ctx, Campus_GetNewsAlerts_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,18 +152,18 @@ func (c *campusClient) GetDishRatings(ctx context.Context, in *GetDishRatingsReq
 	return out, nil
 }
 
-func (c *campusClient) NewCanteenRating(ctx context.Context, in *NewCanteenRatingRequest, opts ...grpc.CallOption) (*NewCanteenRatingReply, error) {
-	out := new(NewCanteenRatingReply)
-	err := c.cc.Invoke(ctx, Campus_NewCanteenRating_FullMethodName, in, out, opts...)
+func (c *campusClient) CreateCanteenRating(ctx context.Context, in *CreateCanteenRatingRequest, opts ...grpc.CallOption) (*CreateCanteenRatingReply, error) {
+	out := new(CreateCanteenRatingReply)
+	err := c.cc.Invoke(ctx, Campus_CreateCanteenRating_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) NewDishRating(ctx context.Context, in *NewDishRatingRequest, opts ...grpc.CallOption) (*NewDishRatingReply, error) {
-	out := new(NewDishRatingReply)
-	err := c.cc.Invoke(ctx, Campus_NewDishRating_FullMethodName, in, out, opts...)
+func (c *campusClient) CreateDishRating(ctx context.Context, in *CreateDishRatingRequest, opts ...grpc.CallOption) (*CreateDishRatingReply, error) {
+	out := new(CreateDishRatingReply)
+	err := c.cc.Invoke(ctx, Campus_CreateDishRating_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -267,38 +269,22 @@ func (c *campusClient) GetMovies(ctx context.Context, in *GetMoviesRequest, opts
 	return out, nil
 }
 
-func (c *campusClient) NewFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_NewFeedbackClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], Campus_NewFeedback_FullMethodName, opts...)
+func (c *campusClient) CreateFeedback(ctx context.Context, in *CreateFeedbackRequest, opts ...grpc.CallOption) (*CreateFeedbackReply, error) {
+	out := new(CreateFeedbackReply)
+	err := c.cc.Invoke(ctx, Campus_CreateFeedback_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &campusNewFeedbackClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type Campus_NewFeedbackClient interface {
-	Send(*NewFeedbackRequest) error
-	CloseAndRecv() (*NewFeedbackReply, error)
-	grpc.ClientStream
-}
-
-type campusNewFeedbackClient struct {
-	grpc.ClientStream
-}
-
-func (x *campusNewFeedbackClient) Send(m *NewFeedbackRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *campusNewFeedbackClient) CloseAndRecv() (*NewFeedbackReply, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
+func (c *campusClient) CreateFeedbackImage(ctx context.Context, in *CreateFeedbackImageRequest, opts ...grpc.CallOption) (*CreateFeedbackImageReply, error) {
+	out := new(CreateFeedbackImageReply)
+	err := c.cc.Invoke(ctx, Campus_CreateFeedbackImage_FullMethodName, in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	m := new(NewFeedbackReply)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
@@ -355,18 +341,18 @@ func (c *campusClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDevi
 	return out, nil
 }
 
-func (c *campusClient) RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceReply, error) {
-	out := new(RegisterDeviceReply)
-	err := c.cc.Invoke(ctx, Campus_RegisterDevice_FullMethodName, in, out, opts...)
+func (c *campusClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
+	out := new(CreateDeviceReply)
+	err := c.cc.Invoke(ctx, Campus_CreateDevice_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceReply, error) {
-	out := new(RemoveDeviceReply)
-	err := c.cc.Invoke(ctx, Campus_RemoveDevice_FullMethodName, in, out, opts...)
+func (c *campusClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error) {
+	out := new(DeleteDeviceReply)
+	err := c.cc.Invoke(ctx, Campus_DeleteDevice_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -377,15 +363,15 @@ func (c *campusClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility
 type CampusServer interface {
-	GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error)
+	GetNewsAlerts(context.Context, *GetNewsAlertsRequest) (*GetNewsAlertsReply, error)
 	GetNewsSources(context.Context, *GetNewsSourcesRequest) (*GetNewsSourcesReply, error)
 	GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	GetCanteenRatings(context.Context, *GetCanteenRatingsRequest) (*GetCanteenRatingsReply, error)
 	GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error)
-	NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*NewCanteenRatingReply, error)
-	NewDishRating(context.Context, *NewDishRatingRequest) (*NewDishRatingReply, error)
+	CreateCanteenRating(context.Context, *CreateCanteenRatingRequest) (*CreateCanteenRatingReply, error)
+	CreateDishRating(context.Context, *CreateDishRatingRequest) (*CreateDishRatingReply, error)
 	GetAvailableDishTags(context.Context, *GetAvailableDishTagsRequest) (*GetAvailableDishTagsReply, error)
 	GetNameTags(context.Context, *GetNameTagsRequest) (*GetNameTagsReply, error)
 	GetAvailableCanteenTags(context.Context, *GetAvailableCanteenTagsRequest) (*GetAvailableCanteenTagsReply, error)
@@ -397,7 +383,8 @@ type CampusServer interface {
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	GetStudyRoomList(context.Context, *GetStudyRoomListRequest) (*GetStudyRoomListReply, error)
 	GetMovies(context.Context, *GetMoviesRequest) (*GetMoviesReply, error)
-	NewFeedback(Campus_NewFeedbackServer) error
+	CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error)
+	CreateFeedbackImage(context.Context, *CreateFeedbackImageRequest) (*CreateFeedbackImageReply, error)
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
@@ -405,10 +392,10 @@ type CampusServer interface {
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// Endpoint for the iOS app to respond to background notifications requests
 	IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error)
-	// Register an Android, iOS or Windows device for push notifications
-	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceReply, error)
-	// Unregister it from push notifications
-	RemoveDevice(context.Context, *RemoveDeviceRequest) (*RemoveDeviceReply, error)
+	// Create an device (Android/iOS/Windows) for push notifications
+	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
+	// Delete a device from push notifications
+	DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -416,8 +403,8 @@ type CampusServer interface {
 type UnimplementedCampusServer struct {
 }
 
-func (UnimplementedCampusServer) GetTopNews(context.Context, *GetTopNewsRequest) (*GetTopNewsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTopNews not implemented")
+func (UnimplementedCampusServer) GetNewsAlerts(context.Context, *GetNewsAlertsRequest) (*GetNewsAlertsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewsAlerts not implemented")
 }
 func (UnimplementedCampusServer) GetNewsSources(context.Context, *GetNewsSourcesRequest) (*GetNewsSourcesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewsSources not implemented")
@@ -434,11 +421,11 @@ func (UnimplementedCampusServer) GetCanteenRatings(context.Context, *GetCanteenR
 func (UnimplementedCampusServer) GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatings not implemented")
 }
-func (UnimplementedCampusServer) NewCanteenRating(context.Context, *NewCanteenRatingRequest) (*NewCanteenRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewCanteenRating not implemented")
+func (UnimplementedCampusServer) CreateCanteenRating(context.Context, *CreateCanteenRatingRequest) (*CreateCanteenRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCanteenRating not implemented")
 }
-func (UnimplementedCampusServer) NewDishRating(context.Context, *NewDishRatingRequest) (*NewDishRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NewDishRating not implemented")
+func (UnimplementedCampusServer) CreateDishRating(context.Context, *CreateDishRatingRequest) (*CreateDishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDishRating not implemented")
 }
 func (UnimplementedCampusServer) GetAvailableDishTags(context.Context, *GetAvailableDishTagsRequest) (*GetAvailableDishTagsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableDishTags not implemented")
@@ -473,8 +460,11 @@ func (UnimplementedCampusServer) GetStudyRoomList(context.Context, *GetStudyRoom
 func (UnimplementedCampusServer) GetMovies(context.Context, *GetMoviesRequest) (*GetMoviesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMovies not implemented")
 }
-func (UnimplementedCampusServer) NewFeedback(Campus_NewFeedbackServer) error {
-	return status.Errorf(codes.Unimplemented, "method NewFeedback not implemented")
+func (UnimplementedCampusServer) CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
+}
+func (UnimplementedCampusServer) CreateFeedbackImage(context.Context, *CreateFeedbackImageRequest) (*CreateFeedbackImageReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedbackImage not implemented")
 }
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
@@ -494,11 +484,11 @@ func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCantee
 func (UnimplementedCampusServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IOSDeviceRequestResponse not implemented")
 }
-func (UnimplementedCampusServer) RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterDevice not implemented")
+func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDevice not implemented")
 }
-func (UnimplementedCampusServer) RemoveDevice(context.Context, *RemoveDeviceRequest) (*RemoveDeviceReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveDevice not implemented")
+func (UnimplementedCampusServer) DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDevice not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 
@@ -513,20 +503,20 @@ func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
 	s.RegisterService(&Campus_ServiceDesc, srv)
 }
 
-func _Campus_GetTopNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTopNewsRequest)
+func _Campus_GetNewsAlerts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNewsAlertsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetTopNews(ctx, in)
+		return srv.(CampusServer).GetNewsAlerts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_GetTopNews_FullMethodName,
+		FullMethod: Campus_GetNewsAlerts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetTopNews(ctx, req.(*GetTopNewsRequest))
+		return srv.(CampusServer).GetNewsAlerts(ctx, req.(*GetNewsAlertsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -621,38 +611,38 @@ func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_NewCanteenRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewCanteenRatingRequest)
+func _Campus_CreateCanteenRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCanteenRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).NewCanteenRating(ctx, in)
+		return srv.(CampusServer).CreateCanteenRating(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_NewCanteenRating_FullMethodName,
+		FullMethod: Campus_CreateCanteenRating_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).NewCanteenRating(ctx, req.(*NewCanteenRatingRequest))
+		return srv.(CampusServer).CreateCanteenRating(ctx, req.(*CreateCanteenRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_NewDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewDishRatingRequest)
+func _Campus_CreateDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDishRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).NewDishRating(ctx, in)
+		return srv.(CampusServer).CreateDishRating(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_NewDishRating_FullMethodName,
+		FullMethod: Campus_CreateDishRating_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).NewDishRating(ctx, req.(*NewDishRatingRequest))
+		return srv.(CampusServer).CreateDishRating(ctx, req.(*CreateDishRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -855,30 +845,40 @@ func _Campus_GetMovies_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_NewFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CampusServer).NewFeedback(&campusNewFeedbackServer{stream})
-}
-
-type Campus_NewFeedbackServer interface {
-	SendAndClose(*NewFeedbackReply) error
-	Recv() (*NewFeedbackRequest, error)
-	grpc.ServerStream
-}
-
-type campusNewFeedbackServer struct {
-	grpc.ServerStream
-}
-
-func (x *campusNewFeedbackServer) SendAndClose(m *NewFeedbackReply) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *campusNewFeedbackServer) Recv() (*NewFeedbackRequest, error) {
-	m := new(NewFeedbackRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _Campus_CreateFeedback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFeedbackRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(CampusServer).CreateFeedback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_CreateFeedback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).CreateFeedback(ctx, req.(*CreateFeedbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_CreateFeedbackImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateFeedbackImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).CreateFeedbackImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_CreateFeedbackImage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).CreateFeedbackImage(ctx, req.(*CreateFeedbackImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -989,38 +989,38 @@ func _Campus_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_RegisterDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterDeviceRequest)
+func _Campus_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).RegisterDevice(ctx, in)
+		return srv.(CampusServer).CreateDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_RegisterDevice_FullMethodName,
+		FullMethod: Campus_CreateDevice_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).RegisterDevice(ctx, req.(*RegisterDeviceRequest))
+		return srv.(CampusServer).CreateDevice(ctx, req.(*CreateDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_RemoveDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveDeviceRequest)
+func _Campus_DeleteDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).RemoveDevice(ctx, in)
+		return srv.(CampusServer).DeleteDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_RemoveDevice_FullMethodName,
+		FullMethod: Campus_DeleteDevice_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).RemoveDevice(ctx, req.(*RemoveDeviceRequest))
+		return srv.(CampusServer).DeleteDevice(ctx, req.(*DeleteDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1033,8 +1033,8 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CampusServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetTopNews",
-			Handler:    _Campus_GetTopNews_Handler,
+			MethodName: "GetNewsAlerts",
+			Handler:    _Campus_GetNewsAlerts_Handler,
 		},
 		{
 			MethodName: "GetNewsSources",
@@ -1057,12 +1057,12 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetDishRatings_Handler,
 		},
 		{
-			MethodName: "NewCanteenRating",
-			Handler:    _Campus_NewCanteenRating_Handler,
+			MethodName: "CreateCanteenRating",
+			Handler:    _Campus_CreateCanteenRating_Handler,
 		},
 		{
-			MethodName: "NewDishRating",
-			Handler:    _Campus_NewDishRating_Handler,
+			MethodName: "CreateDishRating",
+			Handler:    _Campus_CreateDishRating_Handler,
 		},
 		{
 			MethodName: "GetAvailableDishTags",
@@ -1109,6 +1109,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetMovies_Handler,
 		},
 		{
+			MethodName: "CreateFeedback",
+			Handler:    _Campus_CreateFeedback_Handler,
+		},
+		{
+			MethodName: "CreateFeedbackImage",
+			Handler:    _Campus_CreateFeedbackImage_Handler,
+		},
+		{
 			MethodName: "GetUploadStatus",
 			Handler:    _Campus_GetUploadStatus_Handler,
 		},
@@ -1133,20 +1141,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_IOSDeviceRequestResponse_Handler,
 		},
 		{
-			MethodName: "RegisterDevice",
-			Handler:    _Campus_RegisterDevice_Handler,
+			MethodName: "CreateDevice",
+			Handler:    _Campus_CreateDevice_Handler,
 		},
 		{
-			MethodName: "RemoveDevice",
-			Handler:    _Campus_RemoveDevice_Handler,
+			MethodName: "DeleteDevice",
+			Handler:    _Campus_DeleteDevice_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "NewFeedback",
-			Handler:       _Campus_NewFeedback_Handler,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "tumdev/campus_backend.proto",
 }

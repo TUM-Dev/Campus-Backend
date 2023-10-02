@@ -354,12 +354,12 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType modelType, tx *go
 	return results
 }
 
-// NewCanteenRating RPC Endpoint
+// CreateCanteenRating RPC Endpoint
 // Allows to store a new cafeteria Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
-func (s *CampusServer) NewCanteenRating(ctx context.Context, input *pb.NewCanteenRatingRequest) (*pb.NewCanteenRatingReply, error) {
+func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.CreateCanteenRatingRequest) (*pb.CreateCanteenRatingReply, error) {
 	tx := s.db.WithContext(ctx)
 	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
@@ -380,9 +380,9 @@ func (s *CampusServer) NewCanteenRating(ctx context.Context, input *pb.NewCantee
 
 	}
 	if err := storeRatingTags(rating.CafeteriaRating, input.RatingTags, CAFETERIA, tx); err != nil {
-		return &pb.NewCanteenRatingReply{}, err
+		return &pb.CreateCanteenRatingReply{}, err
 	}
-	return &pb.NewCanteenRatingReply{}, nil
+	return &pb.CreateCanteenRatingReply{}, nil
 }
 
 func imageWrapper(image []byte, path string, id int64) string {
@@ -438,13 +438,13 @@ func storeImage(path string, i []byte) (string, error) {
 	return imgPath, errFile
 }
 
-// NewDishRating RPC Endpoint
+// CreateDishRating RPC Endpoint
 // Allows to store a new dish Rating.
 // If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
 // The ratingNumber will be saved for each corresponding DishNameTag.
 // All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
 // invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
-func (s *CampusServer) NewDishRating(ctx context.Context, input *pb.NewDishRatingRequest) (*pb.NewDishRatingReply, error) {
+func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDishRatingRequest) (*pb.CreateDishRatingReply, error) {
 	tx := s.db.WithContext(ctx)
 	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
@@ -479,9 +479,9 @@ func (s *CampusServer) NewDishRating(ctx context.Context, input *pb.NewDishRatin
 	assignDishNameTag(rating, dish.Dish, tx)
 
 	if err := storeRatingTags(rating.DishRating, input.RatingTags, DISH, tx); err != nil {
-		return &pb.NewDishRatingReply{}, err
+		return &pb.CreateDishRatingReply{}, err
 	}
-	return &pb.NewDishRatingReply{}, nil
+	return &pb.CreateDishRatingReply{}, nil
 }
 
 // assignDishNameTag

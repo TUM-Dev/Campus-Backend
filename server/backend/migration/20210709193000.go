@@ -37,7 +37,7 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 			if err := tx.Migrator().DropColumn("files", "finished"); err != nil {
 				return err
 			}
-			return tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "fileDownload", 300).Error
+			return tx.Delete(&model.Crontab{}, "type = 'fileDownload'").Error
 		},
 	}
 }

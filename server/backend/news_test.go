@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -48,7 +52,7 @@ func (s *NewsSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-func file(id int64) *model.File {
+func newsFile(id int64) *model.File {
 	return &model.File{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
@@ -64,8 +68,8 @@ func source1() *model.NewsSource {
 		Source: 1,
 		Title:  "Amazing News 1",
 		URL:    null.StringFrom("https://example.com/amazing1"),
-		FileID: file(2).File,
-		File:   *file(2),
+		FileID: newsFile(2).File,
+		File:   *newsFile(2),
 		Hook:   null.StringFrom(""),
 	}
 }
@@ -75,8 +79,8 @@ func source2() *model.NewsSource {
 		Source: 2,
 		Title:  "Amazing News 2",
 		URL:    null.StringFrom("https://example.com/amazing2"),
-		FileID: file(2).File,
-		File:   *file(2),
+		FileID: newsFile(2).File,
+		File:   *newsFile(2),
 		Hook:   null.StringFrom("hook"),
 	}
 }
@@ -107,8 +111,8 @@ func news1() *model.News {
 		News:   1,
 		Title:  "Amazing News 1",
 		Link:   "https://example.com/amazing2",
-		FileID: null.IntFrom(file(1).File),
-		File:   file(1),
+		FileID: null.IntFrom(newsFile(1).File),
+		File:   newsFile(1),
 	}
 }
 
@@ -183,6 +187,88 @@ func (s *NewsSuite) Test_GetNewsMultiple() {
 			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: n2.Image.String, Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},
 		},
 	}
+	require.Equal(s.T(), expectedResp, response)
+}
+
+func newsAlertFile(id int64) *model.File {
+	return &model.File{
+		File:       id,
+		Name:       fmt.Sprintf("src_%d.png", id),
+		Path:       "news/sources",
+		Downloads:  1,
+		URL:        null.String{},
+		Downloaded: null.BoolFrom(true),
+	}
+}
+func alert1() *model.NewsAlert {
+	return &model.NewsAlert{
+		NewsAlert: 1,
+		FileID:    newsAlertFile(1).File,
+		File:      *newsAlertFile(1),
+		Name:      null.String{},
+		Link:      null.String{},
+		Created:   time.Time.Add(time.Now(), time.Hour*-4),
+		From:      time.Time.Add(time.Now(), time.Hour*-2),
+		To:        time.Time.Add(time.Now(), time.Hour*-2),
+	}
+}
+
+func alert2() *model.NewsAlert {
+	return &model.NewsAlert{
+		NewsAlert: 2,
+		FileID:    newsAlertFile(1).File,
+		File:      *newsAlertFile(1),
+		Name:      null.String{},
+		Link:      null.String{},
+		Created:   time.Time.Add(time.Now(), time.Hour),
+		From:      time.Time.Add(time.Now(), time.Hour*2),
+		To:        time.Time.Add(time.Now(), time.Hour*3),
+	}
+}
+
+const ExpectedGetNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
+
+func (s *NewsSuite) Test_GetNewsAlertsError() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
+
+	meta := metadata.MD{}
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), meta), &pb.GetNewsAlertsRequest{})
+	require.Equal(s.T(), status.Error(codes.Internal, "could not GetNewsAlerts"), err)
+	require.Nil(s.T(), response)
+}
+func (s *NewsSuite) Test_GetNewsAlertsNone_noFilter() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).WillReturnError(gorm.ErrRecordNotFound)
+
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{})
+	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
+	require.Nil(s.T(), response)
+}
+func (s *NewsSuite) Test_GetNewsAlertsNone_Filter() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery + " AND news_alert.alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
+
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{LastNewsAlertId: 42})
+	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
+	require.Nil(s.T(), response)
+}
+func (s *NewsSuite) Test_GetNewsAlertsMultiple() {
+	a1 := alert1()
+	a2 := alert2()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "File__name", "File__path", "Files__downloads", "Files__url", "Files__downloaded"}).
+			AddRow(a1.NewsAlert, a1.FileID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.File.File, a1.File.Name, a1.File.Path, a1.File.Downloads, a1.File.URL, a1.File.Downloaded).
+			AddRow(a2.NewsAlert, a2.FileID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.File.File, a2.File.Name, a2.File.Path, a2.File.Downloads, a2.File.URL, a2.File.Downloaded))
+
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{})
+	require.NoError(s.T(), err)
+	expectedResp := &pb.GetNewsAlertsReply{
+		Alerts: []*pb.NewsAlert{
+			{ImageUrl: a1.File.URL.String, Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
+			{ImageUrl: a2.File.URL.String, Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},
+		}}
 	require.Equal(s.T(), expectedResp, response)
 }
 

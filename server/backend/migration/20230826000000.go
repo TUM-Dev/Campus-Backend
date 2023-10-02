@@ -1,8 +1,6 @@
 package migration
 
 import (
-	"database/sql"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -10,9 +8,9 @@ import (
 )
 
 type Feedback struct {
-	Processed  bool           `gorm:"column:processed;type:boolean;default:false;not null;"`
-	OsVersion  sql.NullString `gorm:"column:os_version;type:text;null;"`
-	AppVersion sql.NullString `gorm:"column:app_version;type:text;null;"`
+	Processed  bool        `gorm:"column:processed;type:boolean;default:false;not null;"`
+	OsVersion  null.String `gorm:"column:os_version;type:text;null;"`
+	AppVersion null.String `gorm:"column:app_version;type:text;null;"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -43,7 +41,7 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 			}
 			return tx.Create(&model.Crontab{
 				Interval: 60 * 30, // Every 30 minutes
-				Type:     null.String{NullString: sql.NullString{String: "feedbackEmail", Valid: true}},
+				Type:     null.StringFrom("feedbackEmail"),
 			}).Error
 		},
 
@@ -57,7 +55,7 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 			if err := tx.Migrator().DropColumn(&Feedback{}, "AppVersion"); err != nil {
 				return err
 			}
-			if err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", "fileDownload", 30*60).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'fileDownload'").Error; err != nil {
 				return err
 			}
 			return SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail")
