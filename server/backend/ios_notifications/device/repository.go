@@ -11,7 +11,7 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
+func (repository *Repository) CreateDevice(device *model.IOSDevice) error {
 
 	return repository.DB.Transaction(func(tx *gorm.DB) error {
 
@@ -40,7 +40,7 @@ func (repository *Repository) RegisterDevice(device *model.IOSDevice) error {
 	})
 }
 
-func (repository *Repository) RemoveDevice(deviceId string) error {
+func (repository *Repository) DeleteDevice(deviceId string) error {
 	if err := repository.DB.Delete(&model.IOSDevice{DeviceID: deviceId}).Error; err != nil {
 		return err
 	}

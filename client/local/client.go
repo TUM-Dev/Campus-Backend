@@ -189,7 +189,7 @@ func generateCanteenRating(c pb.CampusClient, ctx context.Context, canteen strin
 		TagId:  2,
 	}
 
-	_, err := c.NewCanteenRating(ctx, &pb.NewCanteenRatingRequest{
+	_, err := c.CreateCanteenRating(ctx, &pb.CreateCanteenRatingRequest{
 		Points:     rating,
 		CanteenId:  canteen,
 		Comment:    "Alles super, 2 Sterne",
@@ -219,7 +219,7 @@ func generateDishRating(c pb.CampusClient, ctx context.Context, canteen string, 
 		TagId:  3,
 	}
 
-	_, err := c.NewDishRating(ctx, &pb.NewDishRatingRequest{
+	_, err := c.CreateDishRating(ctx, &pb.CreateDishRatingRequest{
 		Points:     rating,
 		CanteenId:  canteen,
 		Dish:       dish,

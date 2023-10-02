@@ -1,4 +1,4 @@
-// Package device provides functions to register and remove ios devices
+// Package device provides functions to create/delete ios devices
 package device
 
 import (
@@ -16,39 +16,39 @@ type Service struct {
 }
 
 var (
-	ErrCouldNotRegisterDevice = status.Error(codes.Internal, "Could not register device")
-	ErrCouldNotRemoveDevice   = status.Error(codes.Internal, "Could not remove device")
+	ErrCouldNotCreateDevice = status.Error(codes.Internal, "Could not create device")
+	ErrCouldNotDeleteDevice = status.Error(codes.Internal, "Could not delete device")
 
 	iosRegisteredDevices = promauto.NewGauge(prometheus.GaugeOpts{
 		Subsystem: "ios",
-		Name:      "ios_registered_devices",
-		Help:      "The number of currently registered ios devices",
+		Name:      "ios_created_devices",
+		Help:      "The number of currently created ios devices",
 	})
 )
 
-func (service *Service) RegisterDevice(request *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
+func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
 	device := model.IOSDevice{
 		DeviceID:  request.GetDeviceId(),
 		PublicKey: request.GetPublicKey(),
 	}
 
-	if err := service.Repository.RegisterDevice(&device); err != nil {
-		return nil, ErrCouldNotRegisterDevice
+	if err := service.Repository.CreateDevice(&device); err != nil {
+		return nil, ErrCouldNotCreateDevice
 	}
 	iosRegisteredDevices.Inc()
 
-	return &pb.RegisterDeviceReply{
+	return &pb.CreateDeviceReply{
 		DeviceId: device.DeviceID,
 	}, nil
 }
 
-func (service *Service) RemoveDevice(request *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
-	if err := service.Repository.RemoveDevice(request.GetDeviceId()); err != nil {
-		return nil, ErrCouldNotRemoveDevice
+func (service *Service) DeleteDevice(request *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+	if err := service.Repository.DeleteDevice(request.GetDeviceId()); err != nil {
+		return nil, ErrCouldNotDeleteDevice
 	}
 
 	iosRegisteredDevices.Dec()
-	return &pb.RemoveDeviceReply{
+	return &pb.DeleteDeviceReply{
 		DeviceId: request.GetDeviceId(),
 	}, nil
 }

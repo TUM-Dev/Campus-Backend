@@ -56,14 +56,14 @@ service Campus {
     };
   }
 
-  rpc NewCanteenRating(NewCanteenRatingRequest) returns (NewCanteenRatingReply) {
+  rpc CreateCanteenRating(CreateCanteenRatingRequest) returns (CreateCanteenRatingReply) {
     option (google.api.http) = {
       post: "/canteen/rating/new",
       body: "*",
     };
   }
 
-  rpc NewDishRating(NewDishRatingRequest) returns (NewDishRatingReply) {
+  rpc CreateDishRating(CreateDishRatingRequest) returns (CreateDishRatingReply) {
     option (google.api.http) = {
       post: "/dish/rating/new",
       body: "*",
@@ -129,11 +129,11 @@ service Campus {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
-  rpc SendFeedback(SendFeedbackRequest) returns (SendFeedbackReply) {
+  rpc CreateFeedback(CreateFeedbackRequest) returns (CreateFeedbackReply) {
     option (google.api.http) = {post: "/feedback"};
   }
 
-  rpc SendFeedbackImage(SendFeedbackImageRequest) returns (SendFeedbackImageReply) {
+  rpc CreateFeedbackImage(CreateFeedbackImageRequest) returns (CreateFeedbackImageReply) {
     option (google.api.http) = {post: "/feedback/{id}/{image_nr}"};
   }
 
@@ -158,23 +158,23 @@ service Campus {
   }
 
   // Endpoint for the iOS app to respond to background notifications requests
-  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {
+  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) { // TODO naming
     option (google.api.http) = {
       post: "/ios/notifications/deviceRequestResponse",
       body: "*",
     };
   }
 
-  // Register an Android, iOS or Windows device for push notifications
-  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceReply) {
+  // Create an device (Android/iOS/Windows) for push notifications
+  rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceReply) {
     option (google.api.http) = {
       post: "/device",
       body: "*",
     };
   }
 
-  // Unregister it from push notifications
-  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceReply) {
+  // Delete a device from push notifications
+  rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceReply) {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
 }
@@ -185,22 +185,22 @@ enum DeviceType {
   WINDOWS = 2;
 }
 
-message RegisterDeviceRequest {
+message CreateDeviceRequest {
   string device_id = 1;
   optional string public_key = 2;
   DeviceType device_type = 3;
 }
 
-message RegisterDeviceReply {
+message CreateDeviceReply {
   string device_id = 1;
 }
 
-message RemoveDeviceRequest {
+message DeleteDeviceRequest {
   string device_id = 1;
   DeviceType device_type = 2;
 }
 
-message RemoveDeviceReply {
+message DeleteDeviceReply {
   string device_id = 1;
 }
 
@@ -338,9 +338,9 @@ message SingleRatingReply {
   google.protobuf.Timestamp visited = 5;
 }
 
-message NewCanteenRatingReply {}
+message CreateCanteenRatingReply {}
 
-message NewCanteenRatingRequest {
+message CreateCanteenRatingRequest {
   // number in the range 1-5
   int32 points = 1;
   string canteen_id = 2;
@@ -351,8 +351,8 @@ message NewCanteenRatingRequest {
   string comment = 6;
 }
 
-message NewDishRatingReply {}
-message NewDishRatingRequest {
+message CreateDishRatingReply {}
+message CreateDishRatingRequest {
   // number in the range 1-5
   int32 points = 1;
   // Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
@@ -549,8 +549,8 @@ message Movie {
   string link = 16;
 }
 
-message SendFeedbackReply {}
-message SendFeedbackRequest {
+message CreateFeedbackReply {}
+message CreateFeedbackRequest {
   string topic = 1;
   string email = 2;
   string email_id = 3;
@@ -562,11 +562,11 @@ message SendFeedbackRequest {
   string app_version = 9;
 }
 
-message SendFeedbackImageReply {
+message CreateFeedbackImageReply {
   string status = 1;
 }
 
-message SendFeedbackImageRequest {
+message CreateFeedbackImageRequest {
   int32 id = 1;
   int32 image_nr = 2;
   //todo where does the file come from?

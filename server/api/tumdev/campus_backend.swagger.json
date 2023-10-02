@@ -179,12 +179,12 @@
     },
     "/canteen/rating/new": {
       "post": {
-        "operationId": "Campus_NewCanteenRating",
+        "operationId": "Campus_CreateCanteenRating",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiNewCanteenRatingReply"
+              "$ref": "#/definitions/apiCreateCanteenRatingReply"
             }
           },
           "default": {
@@ -200,7 +200,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiNewCanteenRatingRequest"
+              "$ref": "#/definitions/apiCreateCanteenRatingRequest"
             }
           }
         ],
@@ -211,13 +211,13 @@
     },
     "/device": {
       "post": {
-        "summary": "Register an Android, iOS or Windows device for push notifications",
-        "operationId": "Campus_RegisterDevice",
+        "summary": "Create an device (Android/iOS/Windows) for push notifications",
+        "operationId": "Campus_CreateDevice",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiRegisterDeviceReply"
+              "$ref": "#/definitions/apiCreateDeviceReply"
             }
           },
           "default": {
@@ -233,7 +233,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiRegisterDeviceRequest"
+              "$ref": "#/definitions/apiCreateDeviceRequest"
             }
           }
         ],
@@ -274,13 +274,13 @@
     },
     "/device/{deviceId}": {
       "delete": {
-        "summary": "Unregister it from push notifications",
-        "operationId": "Campus_RemoveDevice",
+        "summary": "Delete a device from push notifications",
+        "operationId": "Campus_DeleteDevice",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiRemoveDeviceReply"
+              "$ref": "#/definitions/apiDeleteDeviceReply"
             }
           },
           "default": {
@@ -458,12 +458,12 @@
     },
     "/dish/rating/new": {
       "post": {
-        "operationId": "Campus_NewDishRating",
+        "operationId": "Campus_CreateDishRating",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiNewDishRatingReply"
+              "$ref": "#/definitions/apiCreateDishRatingReply"
             }
           },
           "default": {
@@ -479,7 +479,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiNewDishRatingRequest"
+              "$ref": "#/definitions/apiCreateDishRatingRequest"
             }
           }
         ],
@@ -490,12 +490,12 @@
     },
     "/feedback": {
       "post": {
-        "operationId": "Campus_SendFeedback",
+        "operationId": "Campus_CreateFeedback",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackReply"
+              "$ref": "#/definitions/apiCreateFeedbackReply"
             }
           },
           "default": {
@@ -571,12 +571,12 @@
     },
     "/feedback/{id}/{imageNr}": {
       "post": {
-        "operationId": "Campus_SendFeedbackImage",
+        "operationId": "Campus_CreateFeedbackImage",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiSendFeedbackImageReply"
+              "$ref": "#/definitions/apiCreateFeedbackImageReply"
             }
           },
           "default": {
@@ -611,6 +611,7 @@
     "/ios/notifications/deviceRequestResponse": {
       "post": {
         "summary": "Endpoint for the iOS app to respond to background notifications requests",
+        "description": "TODO naming",
         "operationId": "Campus_IOSDeviceRequestResponse",
         "responses": {
           "200": {
@@ -1022,6 +1023,117 @@
         "latitude": {
           "type": "number",
           "format": "double"
+        }
+      }
+    },
+    "apiCreateCanteenRatingReply": {
+      "type": "object"
+    },
+    "apiCreateCanteenRatingRequest": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
+        "canteenId": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTag"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
+        },
+        "comment": {
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
+        }
+      }
+    },
+    "apiCreateDeviceReply": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCreateDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "deviceType": {
+          "$ref": "#/definitions/apiDeviceType"
+        }
+      }
+    },
+    "apiCreateDishRatingReply": {
+      "type": "object"
+    },
+    "apiCreateDishRatingRequest": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
+        "canteenId": {
+          "type": "string",
+          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available int the given mensa"
+        },
+        "dish": {
+          "type": "string",
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte",
+          "title": "Optional JPEG image in Base64"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTag"
+          },
+          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
+        },
+        "comment": {
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
+        }
+      }
+    },
+    "apiCreateFeedbackImageReply": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCreateFeedbackReply": {
+      "type": "object"
+    },
+    "apiDeleteDeviceReply": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
         }
       }
     },
@@ -1495,76 +1607,6 @@
         }
       }
     },
-    "apiNewCanteenRatingReply": {
-      "type": "object"
-    },
-    "apiNewCanteenRatingRequest": {
-      "type": "object",
-      "properties": {
-        "points": {
-          "type": "integer",
-          "format": "int32",
-          "title": "number in the range 1-5"
-        },
-        "canteenId": {
-          "type": "string"
-        },
-        "image": {
-          "type": "string",
-          "format": "byte"
-        },
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRatingTag"
-          },
-          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
-        },
-        "comment": {
-          "type": "string",
-          "title": "Optional comment (max 256 chars)"
-        }
-      }
-    },
-    "apiNewDishRatingReply": {
-      "type": "object"
-    },
-    "apiNewDishRatingRequest": {
-      "type": "object",
-      "properties": {
-        "points": {
-          "type": "integer",
-          "format": "int32",
-          "title": "number in the range 1-5"
-        },
-        "canteenId": {
-          "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available int the given mensa"
-        },
-        "dish": {
-          "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
-        },
-        "image": {
-          "type": "string",
-          "format": "byte",
-          "title": "Optional JPEG image in Base64"
-        },
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRatingTag"
-          },
-          "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
-        },
-        "comment": {
-          "type": "string",
-          "title": "Optional comment (max 256 chars)"
-        }
-      }
-    },
     "apiNews": {
       "type": "object",
       "properties": {
@@ -1725,36 +1767,6 @@
         }
       }
     },
-    "apiRegisterDeviceReply": {
-      "type": "object",
-      "properties": {
-        "deviceId": {
-          "type": "string"
-        }
-      }
-    },
-    "apiRegisterDeviceRequest": {
-      "type": "object",
-      "properties": {
-        "deviceId": {
-          "type": "string"
-        },
-        "publicKey": {
-          "type": "string"
-        },
-        "deviceType": {
-          "$ref": "#/definitions/apiDeviceType"
-        }
-      }
-    },
-    "apiRemoveDeviceReply": {
-      "type": "object",
-      "properties": {
-        "deviceId": {
-          "type": "string"
-        }
-      }
-    },
     "apiResponsiblePerson": {
       "type": "object",
       "properties": {
@@ -1827,17 +1839,6 @@
           "type": "string"
         }
       }
-    },
-    "apiSendFeedbackImageReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSendFeedbackReply": {
-      "type": "object"
     },
     "apiSingleRatingReply": {
       "type": "object",

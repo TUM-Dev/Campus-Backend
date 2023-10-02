@@ -123,26 +123,26 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	return nil
 }
 
-func (s *CampusServer) RegisterDevice(_ context.Context, req *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
-	if err := ValidateRegisterDevice(req); err != nil {
+func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
+	if err := ValidateCreateDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	switch req.GetDeviceType() {
 	case pb.DeviceType_ANDROID:
-		return nil, status.Error(codes.Unimplemented, "android device register not implemented")
+		return nil, status.Error(codes.Unimplemented, "android device creation not implemented")
 	case pb.DeviceType_IOS:
 		service := s.GetIOSDeviceService()
-		return service.RegisterDevice(req)
+		return service.CreateDevice(req)
 	case pb.DeviceType_WINDOWS:
-		return nil, status.Error(codes.Unimplemented, "windows device register not implemented")
+		return nil, status.Error(codes.Unimplemented, "windows device creation not implemented")
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "invalid device type")
 }
 
-func (s *CampusServer) RemoveDevice(_ context.Context, req *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
-	if err := ValidateRemoveDevice(req); err != nil {
+func (s *CampusServer) DeleteDevice(_ context.Context, req *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+	if err := ValidateDeleteDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -151,7 +151,7 @@ func (s *CampusServer) RemoveDevice(_ context.Context, req *pb.RemoveDeviceReque
 		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
 	case pb.DeviceType_IOS:
 		service := s.GetIOSDeviceService()
-		return service.RemoveDevice(req)
+		return service.DeleteDevice(req)
 	case pb.DeviceType_WINDOWS:
 		return nil, status.Error(codes.Unimplemented, "windows device remove not implemented")
 	}
