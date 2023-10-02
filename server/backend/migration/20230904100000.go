@@ -14,7 +14,7 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 		ID: "20230904100000",
 		Migrate: func(tx *gorm.DB) error {
 			// modify the crontab
-			if err := tx.Delete(&model.Crontab{Type: null.StringFrom("kino")}).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'kino'").Error; err != nil {
 				return err
 			}
 			if err := SafeEnumRollback(tx, &model.Crontab{}, "type", "kino"); err != nil {
@@ -35,7 +35,7 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 
 		Rollback: func(tx *gorm.DB) error {
 			// modify the crontab
-			if err := tx.Delete(&model.Crontab{Type: null.StringFrom("movie")}).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'movie'").Error; err != nil {
 				return err
 			}
 			if err := SafeEnumRollback(tx, &model.Crontab{}, "type", "movie"); err != nil {

@@ -55,7 +55,7 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 			if err := tx.Migrator().DropColumn(&Feedback{}, "AppVersion"); err != nil {
 				return err
 			}
-			if err := tx.Delete(&model.Crontab{Type: null.StringFrom("fileDownload")}).Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'fileDownload'").Error; err != nil {
 				return err
 			}
 			return SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail")

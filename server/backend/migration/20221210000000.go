@@ -33,7 +33,7 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 		},
 
 		Rollback: func(tx *gorm.DB) error {
-			err := tx.Delete(&model.Crontab{Type: null.StringFrom("canteenHeadCount")}).Error
+			err := tx.Delete(&model.Crontab{}, "type = 'canteenHeadCount'").Error
 			if err != nil {
 				return err
 			}
