@@ -32,7 +32,44 @@ spec:
         - name: backend-api-keys
           secret:
             secretName: backend-api-keys
+        - name: backend-grpc-web-config
+          configMap:
+            name: backend-grpc-web-config
       containers:
+        - name: grpc-web-proxy
+          image: envoyproxy/envoy:v1.27-latest
+          imagePullPolicy: IfNotPresent
+          args:
+              - --config-path
+              - /etc/envoy/envoy.yaml
+              - --service-cluster
+              - backend-v2
+              - --service-node
+              - backend-v2
+              - --log-level
+              - info
+          ports:
+            - containerPort: 8081
+              name: http
+            - containerPort: 9901
+              name: admin
+          volumeMounts:
+            - mountPath: /etc/envoy/envoy.yaml
+              subPath: envoy.yaml
+              name: backend-grpc-web-config
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: admin
+            failureThreshold: 5
+            periodSeconds: 1
+          startupProbe:
+            httpGet:
+              path: /ready
+              port: admin
+            failureThreshold: 60
+            periodSeconds: 1
         - name: tca-backend
           image: ghcr.io/tum-dev/campus-backend/backend-server:{{ $.Values.tag }}
           imagePullPolicy: Always
@@ -91,13 +128,13 @@ spec:
             httpGet:
               path: /health
               port: http
-            failureThreshold: 1
+            failureThreshold: 5
             periodSeconds: 1
           startupProbe:
             httpGet:
               path: /health
               port: http
-            failureThreshold: 20
+            failureThreshold: 60
             periodSeconds: 1
 ---
 apiVersion: v1
@@ -115,3 +152,15 @@ data:
   apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}
   APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc }}
   APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-grpc-web-config
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+    app.kubernetes.io/name: backend-v2
+data:
+  envoy.yaml: |-
+{{ .Files.Get "files/envoy.yaml" | indent 4 }}

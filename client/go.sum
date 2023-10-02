@@ -1,5 +1,5 @@
-github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230922221907-9ec2b923010a h1:t7ahAwtri1UztDL6t0kce0OOkblQVHdMIWrhHkuEelQ=
-github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230922221907-9ec2b923010a/go.mod h1:FIIdW5aglREN0ULXZXDQtvuBdbTMa/fCrKSTS8FYP7k=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230930202539-cc909730b13d h1:lGv6MEIHYsKX7hqb1iwZmQujCDmHD9UU474tg2VBWfI=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20230930202539-cc909730b13d/go.mod h1:FIIdW5aglREN0ULXZXDQtvuBdbTMa/fCrKSTS8FYP7k=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -35,8 +35,8 @@ google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb h1:
 google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb/go.mod h1:KjSP20unUpOx5kyQUFa7k4OJg0qeJ7DEZflGDu2p6Bk=
 google.golang.org/genproto/googleapis/rpc v0.0.0-20230913181813-007df8e322eb h1:Isk1sSH7bovx8Rti2wZK0UZF6oraBDK74uoyLEEVFN0=
 google.golang.org/genproto/googleapis/rpc v0.0.0-20230913181813-007df8e322eb/go.mod h1:+Bk1OCOj40wS2hwAMA+aCW9ypzm63QTBBHp6lQ3p+9M=
-google.golang.org/grpc v1.58.1 h1:OL+Vz23DTtrrldqHK49FUOPHyY75rvFqJfXC84NYW58=
-google.golang.org/grpc v1.58.1/go.mod h1:tgX3ZQDlNJGU96V6yHh1T/JeoBQ2TXdr43YbYSsCJk0=
+google.golang.org/grpc v1.58.2 h1:SXUpjxeVF3FKrTYQI4f4KvbGD5u2xccdYdurwowix5I=
+google.golang.org/grpc v1.58.2/go.mod h1:tgX3ZQDlNJGU96V6yHh1T/JeoBQ2TXdr43YbYSsCJk0=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.31.0 h1:g0LDEJHgrBl9N9r17Ru3sqWhkIx2NB67okBHPwC7hs8=
