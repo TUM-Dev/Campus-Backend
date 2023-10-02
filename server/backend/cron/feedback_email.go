@@ -2,7 +2,6 @@ package cron
 
 import (
 	"bytes"
-	"crypto/tls"
 	htmlTemplate "html/template"
 	"os"
 	"strconv"
@@ -104,13 +103,10 @@ func (c *CronService) feedbackEmailCron() error {
 		return err
 	}
 
-	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	dialer, err := setupSMTPDialer()
 	if err != nil {
-		log.WithError(err).Fatal("SMTP_PORT is not an integer")
 		return err
 	}
-	d := gomail.NewDialer(os.Getenv("SMTP_URL"), smtpPort, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"))
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	for i, feedback := range results {
 		m := messageWithHeaders(&feedback)
 
@@ -124,11 +120,11 @@ func (c *CronService) feedbackEmailCron() error {
 		m.AddAlternative("text/html", htmlBodyBuffer)
 
 		// send mail
-		if err := d.DialAndSend(m); err != nil {
+		if err := dialer.DialAndSend(m); err != nil {
 			log.WithError(err).Error("could not send mail")
 			continue
 		}
-		log.Tracef("sending feedback %d to %v successfull", i, feedback.Receiver)
+		log.Tracef("sending feedback %dialer to %v successfull", i, feedback.Receiver)
 
 		// prevent the message being send the next time around
 		if err := c.db.Find(model.Feedback{}, "id = ?", feedback.Id).Update("processed", "true").Error; err != nil {
@@ -136,4 +132,15 @@ func (c *CronService) feedbackEmailCron() error {
 		}
 	}
 	return nil
+}
+
+// setupSMTPDialer sets up the SMTP dialer
+func setupSMTPDialer() (*gomail.Dialer, error) {
+	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	if err != nil {
+		log.WithError(err).Fatal("SMTP_PORT is not an integer")
+		return nil, err
+	}
+	d := gomail.NewDialer(os.Getenv("SMTP_URL"), smtpPort, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"))
+	return d, nil
 }
