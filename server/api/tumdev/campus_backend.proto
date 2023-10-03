@@ -548,18 +548,35 @@ message Movie {
   string link = 16;
 }
 
-message CreateFeedbackReply {}
 message CreateFeedbackRequest {
-  string topic = 1;
-  string email = 2;
-  string email_id = 3;
-  string message = 4;
-  int32 image_count = 5;
-  double latitude = 6;
-  double longitude = 7;
-  string os_version = 8;
-  string app_version = 9;
+  enum Recipient {
+    // Feedback for the TUM Dev Team
+    TUM_DEV = 0;
+    // Feedback for the general TUM Contact Form
+    TUM_CONTACT = 1;
+  }
+
+  // who is the feedback for
+  Recipient recipient = 1;
+  // the email address of the user
+  string from_email = 2;
+  // The actual message
+  string message = 3;
+  // Optional location which the user can choose (data protection) to attach or not
+  Coordinate location = 4;
+  // Optional os information which the user can choose (data protection) to attach or not
+  string os_version = 5;
+  // Optional app information which the user can choose (data protection) to attach or not
+  string app_version = 6;
+  // Optional file in Base64
+  bytes attachment = 7;
 }
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message CreateFeedbackReply {}
 
 message CreateFeedbackImageReply {
   string status = 1;

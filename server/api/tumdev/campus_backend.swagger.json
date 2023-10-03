@@ -507,45 +507,50 @@
         },
         "parameters": [
           {
-            "name": "topic",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "attachment",
+            "description": "Optional file in Base64 (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
           },
           {
-            "name": "email",
+            "name": "recipient",
+            "description": "who is the feedback for\n\n - TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "TUM_DEV",
+              "TUM_CONTACT"
+            ],
+            "default": "TUM_DEV"
           },
           {
-            "name": "emailId",
+            "name": "fromEmail",
+            "description": "the email address of the user",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "message",
+            "description": "The actual message",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "imageCount",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "latitude",
+            "name": "location.latitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "longitude",
+            "name": "location.longitude",
             "in": "query",
             "required": false,
             "type": "number",
@@ -553,54 +558,17 @@
           },
           {
             "name": "osVersion",
+            "description": "Optional os information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "appVersion",
+            "description": "Optional app information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/feedback/{id}/{imageNr}": {
-      "post": {
-        "operationId": "Campus_CreateFeedbackImage",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiCreateFeedbackImageReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "imageNr",
-            "description": "todo where does the file come from?",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
           }
         ],
         "tags": [
@@ -993,6 +961,15 @@
     }
   },
   "definitions": {
+    "CreateFeedbackRequestRecipient": {
+      "type": "string",
+      "enum": [
+        "TUM_DEV",
+        "TUM_CONTACT"
+      ],
+      "default": "TUM_DEV",
+      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+    },
     "ListMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
@@ -1021,6 +998,19 @@
           "format": "double"
         },
         "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "apiCoordinate": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
           "type": "number",
           "format": "double"
         }
@@ -1118,14 +1108,6 @@
         }
       }
     },
-    "apiCreateFeedbackImageReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        }
-      }
-    },
     "apiCreateFeedbackReply": {
       "type": "object"
     },
@@ -1145,30 +1127,6 @@
         "WINDOWS"
       ],
       "default": "IOS"
-    },
-    "apiListAvailableCanteenTagsReply": {
-      "type": "object",
-      "properties": {
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiTagsOverview"
-          }
-        }
-      }
-    },
-    "apiListAvailableDishTagsReply": {
-      "type": "object",
-      "properties": {
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiTagsOverview"
-          }
-        }
-      }
     },
     "apiGetCanteenHeadCountReply": {
       "type": "object",
@@ -1192,6 +1150,207 @@
           "type": "string",
           "format": "date-time",
           "description": "A time stamp indicating how up to date the response is. Only valid in case percent != -1."
+        }
+      }
+    },
+    "apiGetDishRatingsReply": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiSingleRatingReply"
+          }
+        },
+        "avg": {
+          "type": "number",
+          "format": "double"
+        },
+        "std": {
+          "type": "number",
+          "format": "double"
+        },
+        "min": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "max": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTagResult"
+          }
+        },
+        "nameTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTagResult"
+          }
+        }
+      }
+    },
+    "apiGetDishRatingsRequest": {
+      "type": "object",
+      "properties": {
+        "canteenId": {
+          "type": "string",
+          "title": "Mandatory Name of the canteen (EAT-API naming scheme \"MENSA_GARCHING\")"
+        },
+        "dish": {
+          "type": "string",
+          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
+        }
+      }
+    },
+    "apiGetMemberReply": {
+      "type": "object",
+      "properties": {
+        "lrzId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "memberId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "apiGetNewsReply": {
+      "type": "object",
+      "properties": {
+        "news": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiNews"
+          }
+        }
+      }
+    },
+    "apiGetNotificationConfirmReply": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetNotificationReply": {
+      "type": "object",
+      "properties": {
+        "notificationId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetUpdateNoteReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "versionName": {
+          "type": "string"
+        }
+      }
+    },
+    "apiGetUploadStatusReply": {
+      "type": "object",
+      "properties": {
+        "fcmToken": {
+          "type": "string"
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "studentId": {
+          "type": "boolean"
+        },
+        "employeeId": {
+          "type": "boolean"
+        },
+        "externalId": {
+          "type": "boolean"
+        }
+      }
+    },
+    "apiIOSDeviceRequestResponseReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "apiIOSDeviceRequestResponseRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "string"
+        }
+      }
+    },
+    "apiListAvailableCanteenTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTagsOverview"
+          }
+        }
+      }
+    },
+    "apiListAvailableDishTagsReply": {
+      "type": "object",
+      "properties": {
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTagsOverview"
+          }
         }
       }
     },
@@ -1266,76 +1425,6 @@
         }
       }
     },
-    "apiGetDishRatingsReply": {
-      "type": "object",
-      "properties": {
-        "rating": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiSingleRatingReply"
-          }
-        },
-        "avg": {
-          "type": "number",
-          "format": "double"
-        },
-        "std": {
-          "type": "number",
-          "format": "double"
-        },
-        "min": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "max": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "ratingTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRatingTagResult"
-          }
-        },
-        "nameTags": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRatingTagResult"
-          }
-        }
-      }
-    },
-    "apiGetDishRatingsRequest": {
-      "type": "object",
-      "properties": {
-        "canteenId": {
-          "type": "string",
-          "title": "Mandatory Name of the canteen (EAT-API naming scheme \"MENSA_GARCHING\")"
-        },
-        "dish": {
-          "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
-        },
-        "from": {
-          "type": "string",
-          "format": "date-time",
-          "title": "Optional Parameter to define an interval for the ratings (Lower bound)"
-        },
-        "to": {
-          "type": "string",
-          "format": "date-time",
-          "title": "Optional Parameter to define an interval for the ratings (Upper bound)"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int32",
-          "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
-        }
-      }
-    },
     "apiListDishesReply": {
       "type": "object",
       "properties": {
@@ -1344,21 +1433,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "apiGetMemberReply": {
-      "type": "object",
-      "properties": {
-        "lrzId": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "memberId": {
-          "type": "integer",
-          "format": "int32"
         }
       }
     },
@@ -1410,18 +1484,6 @@
         }
       }
     },
-    "apiGetNewsReply": {
-      "type": "object",
-      "properties": {
-        "news": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiNews"
-          }
-        }
-      }
-    },
     "apiListNewsSourcesReply": {
       "type": "object",
       "properties": {
@@ -1431,36 +1493,6 @@
             "type": "object",
             "$ref": "#/definitions/apiNewsSource"
           }
-        }
-      }
-    },
-    "apiGetNotificationConfirmReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        }
-      }
-    },
-    "apiGetNotificationReply": {
-      "type": "object",
-      "properties": {
-        "notificationId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "type": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "signature": {
-          "type": "string"
         }
       }
     },
@@ -1497,56 +1529,6 @@
             "type": "object",
             "$ref": "#/definitions/apiStudyRoomMsgElement"
           }
-        }
-      }
-    },
-    "apiGetUpdateNoteReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "versionName": {
-          "type": "string"
-        }
-      }
-    },
-    "apiGetUploadStatusReply": {
-      "type": "object",
-      "properties": {
-        "fcmToken": {
-          "type": "string"
-        },
-        "publicKey": {
-          "type": "string"
-        },
-        "studentId": {
-          "type": "boolean"
-        },
-        "employeeId": {
-          "type": "boolean"
-        },
-        "externalId": {
-          "type": "boolean"
-        }
-      }
-    },
-    "apiIOSDeviceRequestResponseReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "apiIOSDeviceRequestResponseRequest": {
-      "type": "object",
-      "properties": {
-        "requestId": {
-          "type": "string"
-        },
-        "payload": {
-          "type": "string"
         }
       }
     },
