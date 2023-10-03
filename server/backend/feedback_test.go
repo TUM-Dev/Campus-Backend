@@ -118,7 +118,7 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneImage() {
 	stream := mockedFeedbackStream{
 		T: s.T(),
 		recived: []*pb.CreateFeedbackRequest{
-			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.CreateFeedbackRequest_Metadata{}, Attachment: dummyText},
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Attachment: dummyText},
 			{Attachment: dummyImage},
 		},
 		reply: &pb.CreateFeedbackReply{},
@@ -153,7 +153,7 @@ func (s *FeedbackSuite) Test_CreateFeedback_NoImage() {
 	stream := mockedFeedbackStream{
 		T: s.T(),
 		recived: []*pb.CreateFeedbackRequest{
-			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Metadata: &pb.CreateFeedbackRequest_Metadata{}},
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World"},
 			{}, // empty images should be ignored
 		},
 		reply: &pb.CreateFeedbackReply{},

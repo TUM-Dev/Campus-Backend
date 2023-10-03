@@ -549,13 +549,6 @@ message Movie {
 }
 
 message CreateFeedbackRequest {
-  message Metadata {
-    double latitude = 1;
-    double longitude = 2;
-    string osVersion = 3;
-    string appVersion = 4;
-  }
-
   enum Recipient {
     // Feedback for the TUM Dev Team
     TUM_DEV = 0;
@@ -569,10 +562,18 @@ message CreateFeedbackRequest {
   string from_email = 2;
   // The actual message
   string message = 3;
-  // Optional metadata which the user can choose to attach or not
-  Metadata metadata = 4;
+  // Optional location which the user can choose (data protection) to attach or not
+  Coordinate location = 4;
+  // Optional os information which the user can choose (data protection) to attach or not
+  string os_version = 5;
+  // Optional app information which the user can choose (data protection) to attach or not
+  string app_version = 6;
   // Optional file in Base64
-  bytes attachment = 5;
+  bytes attachment = 7;
+}
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
 }
 
 message CreateFeedbackReply {}

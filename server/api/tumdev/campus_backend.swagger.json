@@ -543,27 +543,29 @@
             "type": "string"
           },
           {
-            "name": "metadata.latitude",
+            "name": "location.latitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "metadata.longitude",
+            "name": "location.longitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "metadata.osVersion",
+            "name": "osVersion",
+            "description": "Optional os information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "metadata.appVersion",
+            "name": "appVersion",
+            "description": "Optional app information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
@@ -959,25 +961,6 @@
     }
   },
   "definitions": {
-    "CreateFeedbackRequestMetadata": {
-      "type": "object",
-      "properties": {
-        "latitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "longitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "osVersion": {
-          "type": "string"
-        },
-        "appVersion": {
-          "type": "string"
-        }
-      }
-    },
     "CreateFeedbackRequestRecipient": {
       "type": "string",
       "enum": [
@@ -1015,6 +998,19 @@
           "format": "double"
         },
         "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "apiCoordinate": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
           "type": "number",
           "format": "double"
         }

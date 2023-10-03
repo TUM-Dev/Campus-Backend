@@ -118,11 +118,15 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.Recipient.Enum() != nil {
 		feedback.Recipient = null.StringFrom(receiverFromTopic(req.Recipient))
 	}
-	if req.Metadata != nil {
-		feedback.OsVersion = null.StringFrom(req.Metadata.OsVersion)
-		feedback.AppVersion = null.StringFrom(req.Metadata.AppVersion)
-		feedback.Longitude = null.FloatFrom(req.Metadata.Longitude)
-		feedback.Latitude = null.FloatFrom(req.Metadata.Latitude)
+	if req.OsVersion != "" {
+		feedback.OsVersion = null.StringFrom(req.OsVersion)
+	}
+	if req.AppVersion != "" {
+		feedback.AppVersion = null.StringFrom(req.AppVersion)
+	}
+	if req.Location != nil {
+		feedback.Longitude = null.FloatFrom(req.Location.Longitude)
+		feedback.Latitude = null.FloatFrom(req.Location.Latitude)
 	}
 	if req.Message != "" {
 		feedback.Feedback = null.StringFrom(req.Message)
