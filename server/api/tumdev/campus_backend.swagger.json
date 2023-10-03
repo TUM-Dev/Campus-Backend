@@ -19,12 +19,12 @@
   "paths": {
     "/barrierfree/contacts": {
       "get": {
-        "operationId": "Campus_GetResponsiblePerson",
+        "operationId": "Campus_ListResponsiblePerson",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetResponsiblePersonReply"
+              "$ref": "#/definitions/apiListResponsiblePersonReply"
             }
           },
           "default": {
@@ -41,12 +41,12 @@
     },
     "/barrierfree/moreInformation": {
       "get": {
-        "operationId": "Campus_GetMoreInformation",
+        "operationId": "Campus_ListMoreInformation",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetMoreInformationReply"
+              "$ref": "#/definitions/apiListMoreInformationReply"
             }
           },
           "default": {
@@ -63,7 +63,7 @@
     },
     "/canteen/allCanteens": {
       "get": {
-        "operationId": "Campus_GetCanteens",
+        "operationId": "Campus_ListCanteens",
         "responses": {
           "200": {
             "description": "",
@@ -120,7 +120,7 @@
     },
     "/canteen/rating/allRatingTags": {
       "get": {
-        "operationId": "Campus_GetAvailableCanteenTags",
+        "operationId": "Campus_ListAvailableCanteenTags",
         "responses": {
           "200": {
             "description": "",
@@ -147,12 +147,12 @@
     "/canteen/rating/get": {
       "post": {
         "summary": "This endpoint retrieves Canteen Ratings from the Backend.",
-        "operationId": "Campus_GetCanteenRatings",
+        "operationId": "Campus_ListCanteenRatings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetCanteenRatingsReply"
+              "$ref": "#/definitions/apiListCanteenRatingsReply"
             }
           },
           "default": {
@@ -168,7 +168,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiGetCanteenRatingsRequest"
+              "$ref": "#/definitions/apiListCanteenRatingsRequest"
             }
           }
         ],
@@ -317,7 +317,7 @@
     },
     "/dish/allDishes": {
       "get": {
-        "operationId": "Campus_GetDishes",
+        "operationId": "Campus_ListDishes",
         "responses": {
           "200": {
             "description": "",
@@ -374,7 +374,7 @@
     },
     "/dish/rating/allDishTags": {
       "get": {
-        "operationId": "Campus_GetNameTags",
+        "operationId": "Campus_ListNameTags",
         "responses": {
           "200": {
             "description": "",
@@ -400,7 +400,7 @@
     },
     "/dish/rating/allRatingTags": {
       "get": {
-        "operationId": "Campus_GetAvailableDishTags",
+        "operationId": "Campus_ListAvailableDishTags",
         "responses": {
           "200": {
             "description": "",
@@ -507,50 +507,45 @@
         },
         "parameters": [
           {
-            "name": "attachment",
-            "description": "Optional file in Base64 (streaming inputs)",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "byte"
-            }
-          },
-          {
-            "name": "recipient",
-            "description": "who is the feedback for\n\n - TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form",
+            "name": "topic",
             "in": "query",
             "required": false,
-            "type": "string",
-            "enum": [
-              "TUM_DEV",
-              "TUM_CONTACT"
-            ],
-            "default": "TUM_DEV"
+            "type": "string"
           },
           {
-            "name": "fromEmail",
-            "description": "the email address of the user",
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "emailId",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "message",
-            "description": "The actual message",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "location.latitude",
+            "name": "imageCount",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "latitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "location.longitude",
+            "name": "longitude",
             "in": "query",
             "required": false,
             "type": "number",
@@ -558,17 +553,54 @@
           },
           {
             "name": "osVersion",
-            "description": "Optional os information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "appVersion",
-            "description": "Optional app information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/feedback/{id}/{imageNr}": {
+      "post": {
+        "operationId": "Campus_CreateFeedbackImage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiCreateFeedbackImageReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "imageNr",
+            "description": "todo where does the file come from?",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -612,12 +644,12 @@
     },
     "/members/{lrzId}": {
       "get": {
-        "operationId": "Campus_GetMembers",
+        "operationId": "Campus_GetMember",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetMembersReply"
+              "$ref": "#/definitions/apiGetMemberReply"
             }
           },
           "default": {
@@ -642,12 +674,12 @@
     },
     "/movies/{lastId}": {
       "get": {
-        "operationId": "Campus_GetMovies",
+        "operationId": "Campus_ListMovies",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetMoviesReply"
+              "$ref": "#/definitions/apiListMoviesReply"
             }
           },
           "default": {
@@ -674,7 +706,7 @@
     },
     "/news/alerts": {
       "get": {
-        "operationId": "Campus_GetNewsAlerts",
+        "operationId": "Campus_ListNewsAlerts",
         "responses": {
           "200": {
             "description": "",
@@ -710,7 +742,7 @@
     },
     "/news/sources": {
       "get": {
-        "operationId": "Campus_GetNewsSources",
+        "operationId": "Campus_ListNewsSources",
         "responses": {
           "200": {
             "description": "",
@@ -842,12 +874,12 @@
     },
     "/openingtimes/{language}": {
       "get": {
-        "operationId": "Campus_GetOpeningTimes",
+        "operationId": "Campus_ListOpeningTimes",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetOpeningTimesReply"
+              "$ref": "#/definitions/apiListOpeningTimesReply"
             }
           },
           "default": {
@@ -908,12 +940,12 @@
     },
     "/studyrooms": {
       "get": {
-        "operationId": "Campus_GetStudyRoomList",
+        "operationId": "Campus_ListStudyRooms",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiGetStudyRoomListReply"
+              "$ref": "#/definitions/apiListStudyRoomsReply"
             }
           },
           "default": {
@@ -961,16 +993,7 @@
     }
   },
   "definitions": {
-    "CreateFeedbackRequestRecipient": {
-      "type": "string",
-      "enum": [
-        "TUM_DEV",
-        "TUM_CONTACT"
-      ],
-      "default": "TUM_DEV",
-      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
-    },
-    "GetMoreInformationReplyMoreInformation": {
+    "ListMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
         "title": {
@@ -998,19 +1021,6 @@
           "format": "double"
         },
         "latitude": {
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
-    "apiCoordinate": {
-      "type": "object",
-      "properties": {
-        "latitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "longitude": {
           "type": "number",
           "format": "double"
         }
@@ -1108,6 +1118,14 @@
         }
       }
     },
+    "apiCreateFeedbackImageReply": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    },
     "apiCreateFeedbackReply": {
       "type": "object"
     },
@@ -1128,7 +1146,7 @@
       ],
       "default": "IOS"
     },
-    "apiGetAvailableCanteenTagsReply": {
+    "apiListAvailableCanteenTagsReply": {
       "type": "object",
       "properties": {
         "ratingTags": {
@@ -1140,7 +1158,7 @@
         }
       }
     },
-    "apiGetAvailableDishTagsReply": {
+    "apiListAvailableDishTagsReply": {
       "type": "object",
       "properties": {
         "ratingTags": {
@@ -1177,7 +1195,7 @@
         }
       }
     },
-    "apiGetCanteenRatingsReply": {
+    "apiListCanteenRatingsReply": {
       "type": "object",
       "properties": {
         "rating": {
@@ -1212,7 +1230,7 @@
         }
       }
     },
-    "apiGetCanteenRatingsRequest": {
+    "apiListCanteenRatingsRequest": {
       "type": "object",
       "properties": {
         "canteenId": {
@@ -1236,7 +1254,7 @@
         }
       }
     },
-    "apiGetCanteensReply": {
+    "apiListCanteensReply": {
       "type": "object",
       "properties": {
         "canteen": {
@@ -1318,7 +1336,7 @@
         }
       }
     },
-    "apiGetDishesReply": {
+    "apiListDishesReply": {
       "type": "object",
       "properties": {
         "dish": {
@@ -1329,7 +1347,7 @@
         }
       }
     },
-    "apiGetMembersReply": {
+    "apiGetMemberReply": {
       "type": "object",
       "properties": {
         "lrzId": {
@@ -1344,19 +1362,19 @@
         }
       }
     },
-    "apiGetMoreInformationReply": {
+    "apiListMoreInformationReply": {
       "type": "object",
       "properties": {
         "infos": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/GetMoreInformationReplyMoreInformation"
+            "$ref": "#/definitions/ListMoreInformationReplyMoreInformation"
           }
         }
       }
     },
-    "apiGetMoviesReply": {
+    "apiListMoviesReply": {
       "type": "object",
       "properties": {
         "movies": {
@@ -1368,7 +1386,7 @@
         }
       }
     },
-    "apiGetNameTagsReply": {
+    "apiListNameTagsReply": {
       "type": "object",
       "properties": {
         "ratingTags": {
@@ -1380,7 +1398,7 @@
         }
       }
     },
-    "apiGetNewsAlertsReply": {
+    "apiListNewsAlertsReply": {
       "type": "object",
       "properties": {
         "alerts": {
@@ -1404,7 +1422,7 @@
         }
       }
     },
-    "apiGetNewsSourcesReply": {
+    "apiListNewsSourcesReply": {
       "type": "object",
       "properties": {
         "sources": {
@@ -1446,7 +1464,7 @@
         }
       }
     },
-    "apiGetOpeningTimesReply": {
+    "apiListOpeningTimesReply": {
       "type": "object",
       "properties": {
         "facilities": {
@@ -1458,7 +1476,7 @@
         }
       }
     },
-    "apiGetResponsiblePersonReply": {
+    "apiListResponsiblePersonReply": {
       "type": "object",
       "properties": {
         "responsiblePerson": {
@@ -1470,7 +1488,7 @@
         }
       }
     },
-    "apiGetStudyRoomListReply": {
+    "apiListStudyRoomsReply": {
       "type": "object",
       "properties": {
         "rooms": {

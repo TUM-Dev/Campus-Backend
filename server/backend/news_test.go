@@ -87,7 +87,7 @@ func source2() *model.NewsSource {
 
 const ExpectedGetSourceQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
 
-func (s *NewsSuite) Test_GetNewsSourcesMultiple() {
+func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(source1().Source, source1().Title, source1().URL, source1().FileID, source1().Hook, source1().File.File, source1().File.Name, source1().File.Path, source1().File.Downloads, source1().File.URL, source1().File.Downloaded).
@@ -95,9 +95,9 @@ func (s *NewsSuite) Test_GetNewsSourcesMultiple() {
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
+	response, err := server.ListNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsSourcesReply{
+	expectedResp := &pb.ListNewsSourcesReply{
 		Sources: []*pb.NewsSource{
 			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, Icon: source1().File.URL.String},
 			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, Icon: source2().File.URL.String},
@@ -126,15 +126,15 @@ func news2() *model.News {
 	}
 }
 
-func (s *NewsSuite) Test_GetNewsSourcesNone() {
+func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
+	response, err := server.ListNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsSourcesReply{
+	expectedResp := &pb.ListNewsSourcesReply{
 		Sources: []*pb.NewsSource(nil),
 	}
 	require.Equal(s.T(), expectedResp, response)
@@ -226,45 +226,45 @@ func alert2() *model.NewsAlert {
 	}
 }
 
-const ExpectedGetNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
+const ExpectedListNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
 
-func (s *NewsSuite) Test_GetNewsAlertsError() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
+func (s *NewsSuite) Test_ListNewsAlertsError() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), meta), &pb.GetNewsAlertsRequest{})
-	require.Equal(s.T(), status.Error(codes.Internal, "could not GetNewsAlerts"), err)
+	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), meta), &pb.ListNewsAlertsRequest{})
+	require.Equal(s.T(), status.Error(codes.Internal, "could not ListNewsAlerts"), err)
 	require.Nil(s.T(), response)
 }
-func (s *NewsSuite) Test_GetNewsAlertsNone_noFilter() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).WillReturnError(gorm.ErrRecordNotFound)
+func (s *NewsSuite) Test_ListNewsAlertsNone_noFilter() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrRecordNotFound)
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{})
+	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{})
 	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
 	require.Nil(s.T(), response)
 }
-func (s *NewsSuite) Test_GetNewsAlertsNone_Filter() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery + " AND news_alert.alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
+func (s *NewsSuite) Test_ListNewsAlertsNone_Filter() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alert.alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{LastNewsAlertId: 42})
+	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{LastNewsAlertId: 42})
 	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
 	require.Nil(s.T(), response)
 }
-func (s *NewsSuite) Test_GetNewsAlertsMultiple() {
+func (s *NewsSuite) Test_ListNewsAlertsMultiple() {
 	a1 := alert1()
 	a2 := alert2()
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsAlertsQuery)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "File__name", "File__path", "Files__downloads", "Files__url", "Files__downloaded"}).
 			AddRow(a1.NewsAlert, a1.FileID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.File.File, a1.File.Name, a1.File.Path, a1.File.Downloads, a1.File.URL, a1.File.Downloaded).
 			AddRow(a2.NewsAlert, a2.FileID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.File.File, a2.File.Name, a2.File.Path, a2.File.Downloads, a2.File.URL, a2.File.Downloaded))
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.GetNewsAlertsRequest{})
+	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsAlertsReply{
+	expectedResp := &pb.ListNewsAlertsReply{
 		Alerts: []*pb.NewsAlert{
 			{ImageUrl: a1.File.URL.String, Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
 			{ImageUrl: a2.File.URL.String, Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},

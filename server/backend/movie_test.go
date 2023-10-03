@@ -77,37 +77,37 @@ var (
 	}
 )
 
-func (s *MovieSuite) Test_GetMoviesAll() {
+func (s *MovieSuite) Test_ListMoviesAll() {
 	server := CampusServer{db: s.DB}
 	s.mock.ExpectQuery("SELECT `kino`.`kino`,`kino`.`date`,`kino`.`created`,`kino`.`title`,`kino`.`year`,`kino`.`runtime`,`kino`.`genre`,`kino`.`director`,`kino`.`actors`,`kino`.`rating`,`kino`.`description`,`kino`.`trailer`,`kino`.`cover`,`kino`.`link`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `kino` LEFT JOIN `files` `File` ON `kino`.`cover` = `File`.`file` WHERE kino > ?").
 		WithArgs(-1).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(movie2.MovieId, movie2.Date.AsTime(), movie2.Created.AsTime(), movie2.Title, movie2.ReleaseYear, movie2.Runtime, movie2.Genre, movie2.Director, movie2.Actors, movie2.ImdbRating, movie2.Description, nil, movie2.CoverId, movie2.Link, movie2.CoverId, movie2.CoverName, movie2.CoverPath, 1, "", 1).
 			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.Link, movie1.CoverId, movie1.CoverName, movie1.CoverPath, 1, "", 1))
-	response, err := server.GetMovies(context.Background(), &pb.GetMoviesRequest{LastId: -1})
+	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: -1})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), &pb.GetMoviesReply{Movies: []*pb.Movie{&movie2, &movie1}}, response)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie2, &movie1}}, response)
 }
 
-func (s *MovieSuite) Test_GetMoviesOne() {
+func (s *MovieSuite) Test_ListMoviesOne() {
 	server := CampusServer{db: s.DB}
 	s.mock.ExpectQuery("SELECT `kino`.`kino`,`kino`.`date`,`kino`.`created`,`kino`.`title`,`kino`.`year`,`kino`.`runtime`,`kino`.`genre`,`kino`.`director`,`kino`.`actors`,`kino`.`rating`,`kino`.`description`,`kino`.`trailer`,`kino`.`cover`,`kino`.`link`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `kino` LEFT JOIN `files` `File` ON `kino`.`cover` = `File`.`file` WHERE kino > ?").
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.Link, movie1.CoverId, movie1.CoverName, movie1.CoverPath, 1, "", 1))
-	response, err := server.GetMovies(context.Background(), &pb.GetMoviesRequest{LastId: 1})
+	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: 1})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), &pb.GetMoviesReply{Movies: []*pb.Movie{&movie1}}, response)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie1}}, response)
 }
 
-func (s *MovieSuite) Test_GetMoviesNone() {
+func (s *MovieSuite) Test_ListMoviesNone() {
 	server := CampusServer{db: s.DB}
 	s.mock.ExpectQuery("SELECT `kino`.`kino`,`kino`.`date`,`kino`.`created`,`kino`.`title`,`kino`.`year`,`kino`.`runtime`,`kino`.`genre`,`kino`.`director`,`kino`.`actors`,`kino`.`rating`,`kino`.`description`,`kino`.`trailer`,`kino`.`cover`,`kino`.`link`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `kino` LEFT JOIN `files` `File` ON `kino`.`cover` = `File`.`file` WHERE kino > ?").
 		WithArgs(42).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
-	response, err := server.GetMovies(context.Background(), &pb.GetMoviesRequest{LastId: 42})
+	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: 42})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), &pb.GetMoviesReply{Movies: []*pb.Movie(nil)}, response)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie(nil)}, response)
 }
 
 func (s *MovieSuite) AfterTest(_, _ string) {

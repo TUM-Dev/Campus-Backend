@@ -130,7 +130,7 @@ func queryDish(canteen string, dish string, c pb.CampusClient, ctx context.Conte
 }
 
 func queryCanteen(s string, c pb.CampusClient, ctx context.Context, imageShouldBeStored bool) {
-	res, err := c.GetCanteenRatings(ctx, &pb.GetCanteenRatingsRequest{
+	res, err := c.ListCanteenRatings(ctx, &pb.ListCanteenRatingsRequest{
 		CanteenId: s,
 		Limit:     3,
 		//	From:          timestamppb.New(time.Date(2022, 7, 8, 16, 0, 0, 0, time.Local)),

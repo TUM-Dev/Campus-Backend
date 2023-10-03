@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *CampusServer) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) (*pb.GetMoviesReply, error) {
+func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
 	var movies []model.Kino
 	if err := s.db.WithContext(ctx).Joins("File").Find(&movies, "kino > ?", req.LastId).Error; err != nil {
 		log.WithError(err).Error("Error while fetching movies from database")
@@ -37,7 +37,7 @@ func (s *CampusServer) GetMovies(ctx context.Context, req *pb.GetMoviesRequest) 
 			Link:        movie.Link,
 		})
 	}
-	return &pb.GetMoviesReply{
+	return &pb.ListMoviesReply{
 		Movies: movieResponse,
 	}, nil
 }
