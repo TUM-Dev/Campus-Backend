@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesRequest) (*pb.GetNewsSourcesReply, error) {
+func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSourcesRequest) (*pb.ListNewsSourcesReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesR
 	var sources []model.NewsSource
 	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find newsSources")
-		return nil, status.Error(codes.Internal, "could not GetNewsSources")
+		return nil, status.Error(codes.Internal, "could not ListNewsSources")
 	}
 
 	var resp []*pb.NewsSource
@@ -36,7 +36,7 @@ func (s *CampusServer) GetNewsSources(ctx context.Context, _ *pb.GetNewsSourcesR
 			Icon:   source.File.URL.String,
 		})
 	}
-	return &pb.GetNewsSourcesReply{Sources: resp}, nil
+	return &pb.ListNewsSourcesReply{Sources: resp}, nil
 }
 
 func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb.GetNewsReply, error) {
@@ -74,7 +74,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 	return &pb.GetNewsReply{News: resp}, nil
 }
 
-func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsRequest) (*pb.GetNewsAlertsReply, error) {
+func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlertsRequest) (*pb.ListNewsAlertsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
@@ -87,8 +87,8 @@ func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsR
 	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no news alerts")
 	} else if err != nil {
-		log.WithError(err).Error("could not GetNewsAlerts")
-		return nil, status.Error(codes.Internal, "could not GetNewsAlerts")
+		log.WithError(err).Error("could not ListNewsAlerts")
+		return nil, status.Error(codes.Internal, "could not ListNewsAlerts")
 	}
 
 	var alerts []*pb.NewsAlert
@@ -101,5 +101,5 @@ func (s *CampusServer) GetNewsAlerts(ctx context.Context, req *pb.GetNewsAlertsR
 			To:       timestamppb.New(alert.To),
 		})
 	}
-	return &pb.GetNewsAlertsReply{Alerts: alerts}, nil
+	return &pb.ListNewsAlertsReply{Alerts: alerts}, nil
 }

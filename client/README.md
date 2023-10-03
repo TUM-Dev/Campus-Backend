@@ -5,5 +5,5 @@ standard system TLS CA's configured to securely connect via `api-grpc.tum.app` t
 
 Alternatively you can also test the API using [grpcurl](https://github.com/fullstorydev/grpcurl) (also located in the `testLiveApi.sh`):
 ```
-grpcurl -protoset <(buf build -o -) -H "x-device-id:grpc-tests" api-grpc.tum.app:443 api.Campus/GetNewsSources
+grpcurl -protoset <(buf build -o -) -H "x-device-id:grpc-tests" api-grpc.tum.app:443 api.Campus/ListNewsSources
 ```

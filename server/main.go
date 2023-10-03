@@ -167,7 +167,7 @@ func setupTelemetry() {
 	}
 }
 
-// addMethodNameInterceptor adds the method name (e.g. "GetNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
+// addMethodNameInterceptor adds the method name (e.g. "ListNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
 func addMethodNameInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-campus-method", method)
 	return invoker(ctx, method, req, reply, cc, opts...)

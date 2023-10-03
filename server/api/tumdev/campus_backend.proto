@@ -12,14 +12,14 @@ option java_outer_classname = "CampusApiProto";
 option java_package = "app.tum.campus.api";
 
 service Campus {
-  rpc GetNewsAlerts(GetNewsAlertsRequest) returns (GetNewsAlertsReply) {
+  rpc ListNewsAlerts(ListNewsAlertsRequest) returns (ListNewsAlertsReply) {
     option (google.api.http) = {
       get: "/news/alerts"
       response_body: "alerts"
     };
   }
 
-  rpc GetNewsSources(GetNewsSourcesRequest) returns (GetNewsSourcesReply) {
+  rpc ListNewsSources(ListNewsSourcesRequest) returns (ListNewsSourcesReply) {
     option (google.api.http) = {
       get: "/news/sources",
       response_body: "sources"
@@ -42,7 +42,7 @@ service Campus {
   }
 
   // This endpoint retrieves Canteen Ratings from the Backend.
-  rpc GetCanteenRatings(GetCanteenRatingsRequest) returns (GetCanteenRatingsReply) {
+  rpc ListCanteenRatings(ListCanteenRatingsRequest) returns (ListCanteenRatingsReply) {
     option (google.api.http) = {
       post: "/canteen/rating/get",
       body: "*",
@@ -70,50 +70,50 @@ service Campus {
     };
   }
 
-  rpc GetAvailableDishTags(GetAvailableDishTagsRequest) returns (GetAvailableDishTagsReply) {
+  rpc ListAvailableDishTags(ListAvailableDishTagsRequest) returns (ListAvailableDishTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allRatingTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetNameTags(GetNameTagsRequest) returns (GetNameTagsReply) {
+  rpc ListNameTags(ListNameTagsRequest) returns (ListNameTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allDishTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetAvailableCanteenTags(GetAvailableCanteenTagsRequest) returns (GetAvailableCanteenTagsReply) {
+  rpc ListAvailableCanteenTags(ListAvailableCanteenTagsRequest) returns (ListAvailableCanteenTagsReply) {
     option (google.api.http) = {
       get: "/canteen/rating/allRatingTags",
       response_body: "rating_tags"
     };
   }
 
-  rpc GetCanteens(GetCanteensRequest) returns (GetCanteensReply) {
+  rpc ListCanteens(ListCanteensRequest) returns (ListCanteensReply) {
     option (google.api.http) = {
       get: "/canteen/allCanteens",
       response_body: "canteen"
     };
   }
 
-  rpc GetDishes(GetDishesRequest) returns (GetDishesReply) {
+  rpc ListDishes(ListDishesRequest) returns (ListDishesReply) {
     option (google.api.http) = {
       get: "/dish/allDishes",
       response_body: "dish"
     };
   }
 
-  rpc GetResponsiblePerson(GetResponsiblePersonRequest) returns (GetResponsiblePersonReply) {
+  rpc ListResponsiblePerson(ListResponsiblePersonRequest) returns (ListResponsiblePersonReply) {
     option (google.api.http) = {get: "/barrierfree/contacts"};
   }
 
-  rpc GetMoreInformation(GetMoreInformationRequest) returns (GetMoreInformationReply) {
+  rpc ListMoreInformation(ListMoreInformationRequest) returns (ListMoreInformationReply) {
     option (google.api.http) = {get: "/barrierfree/moreInformation"};
   }
 
-  rpc GetOpeningTimes(GetOpeningTimesRequest) returns (GetOpeningTimesReply) {
+  rpc ListOpeningTimes(ListOpeningTimesRequest) returns (ListOpeningTimesReply) {
     option (google.api.http) = {get: "/openingtimes/{language}"};
   }
 
@@ -121,20 +121,16 @@ service Campus {
     option (google.api.http) = {get: "/updatenote/{version}"};
   }
 
-  rpc GetStudyRoomList(GetStudyRoomListRequest) returns (GetStudyRoomListReply) {
+  rpc ListStudyRooms(ListStudyRoomsRequest) returns (ListStudyRoomsReply) {
     option (google.api.http) = {get: "/studyrooms"};
   }
 
-  rpc GetMovies(GetMoviesRequest) returns (GetMoviesReply) {
+  rpc ListMovies(ListMoviesRequest) returns (ListMoviesReply) {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
   rpc CreateFeedback(CreateFeedbackRequest) returns (CreateFeedbackReply) {
     option (google.api.http) = {post: "/feedback"};
-  }
-
-  rpc CreateFeedbackImage(CreateFeedbackImageRequest) returns (CreateFeedbackImageReply) {
-    option (google.api.http) = {post: "/feedback/{id}/{image_nr}"};
   }
 
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
@@ -149,7 +145,7 @@ service Campus {
     option (google.api.http) = {get: "/notifications/confirm/{notification_id}"};
   }
 
-  rpc GetMembers(GetMembersRequest) returns (GetMembersReply) {
+  rpc GetMember(GetMemberRequest) returns (GetMemberReply) {
     option (google.api.http) = {get: "/members/{lrz_id}"};
   }
 
@@ -255,9 +251,9 @@ message GetNewsRequest {
   int32 news_source = 2;
 }
 
-message GetNewsSourcesRequest {}
+message ListNewsSourcesRequest {}
 
-message GetNewsSourcesReply {
+message ListNewsSourcesReply {
   repeated NewsSource sources = 1;
 }
 
@@ -267,12 +263,12 @@ message NewsSource {
   string icon = 3;
 }
 
-message GetNewsAlertsRequest {
+message ListNewsAlertsRequest {
   // the last id of the news item received. 0 to get all news items
   int32 last_news_alert_id = 1;
 }
 
-message GetNewsAlertsReply {
+message ListNewsAlertsReply {
   repeated NewsAlert alerts = 1;
 }
 
@@ -284,7 +280,7 @@ message NewsAlert {
   google.protobuf.Timestamp to = 5;
 }
 
-message GetCanteenRatingsRequest {
+message ListCanteenRatingsRequest {
   // canteenId Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
   string canteen_id = 1;
   // Optional Parameter to define an interval for the ratings (Lower bound)
@@ -295,7 +291,7 @@ message GetCanteenRatingsRequest {
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
-message GetCanteenRatingsReply {
+message ListCanteenRatingsReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
   double std = 3;
@@ -367,18 +363,18 @@ message CreateDishRatingRequest {
   string comment = 7;
 }
 
-message GetAvailableDishTagsRequest {}
-message GetAvailableDishTagsReply {
+message ListAvailableDishTagsRequest {}
+message ListAvailableDishTagsReply {
   repeated TagsOverview rating_tags = 1;
 }
 
-message GetNameTagsRequest {}
-message GetNameTagsReply {
+message ListNameTagsRequest {}
+message ListNameTagsReply {
   repeated TagsOverview rating_tags = 1;
 }
 
-message GetAvailableCanteenTagsRequest {}
-message GetAvailableCanteenTagsReply {
+message ListAvailableCanteenTagsRequest {}
+message ListAvailableCanteenTagsReply {
   repeated TagsOverview rating_tags = 1;
 }
 
@@ -406,8 +402,8 @@ message RatingTagResult {
   int32 max = 5;
 }
 
-message GetCanteensRequest {}
-message GetCanteensReply {
+message ListCanteensRequest {}
+message ListCanteensReply {
   repeated Canteen canteen = 1;
 }
 
@@ -418,7 +414,7 @@ message Canteen {
   double latitude = 4;
 }
 
-message GetDishesRequest {
+message ListDishesRequest {
   string canteen_id = 1;
   // >=2022 until the current year
   int32 year = 2;
@@ -428,12 +424,12 @@ message GetDishesRequest {
   int32 day = 4;
 }
 
-message GetDishesReply {
+message ListDishesReply {
   repeated string dish = 1;
 }
 
-message GetResponsiblePersonRequest {}
-message GetResponsiblePersonReply {
+message ListResponsiblePersonRequest {}
+message ListResponsiblePersonReply {
   repeated ResponsiblePerson responsible_person = 1;
 }
 
@@ -457,8 +453,8 @@ message RoomInformationElement {
   string name = 9;
 }
 
-message GetMoreInformationRequest {}
-message GetMoreInformationReply {
+message ListMoreInformationRequest {}
+message ListMoreInformationReply {
   message MoreInformation {
     string title = 1;
     string category = 2;
@@ -467,11 +463,11 @@ message GetMoreInformationReply {
   repeated MoreInformation infos = 1;
 }
 
-message GetOpeningTimesRequest {
+message ListOpeningTimesRequest {
   string language = 1;
 }
 
-message GetOpeningTimesReply {
+message ListOpeningTimesReply {
   repeated OpeningTimesMsgElement facilities = 1;
 }
 
@@ -498,8 +494,8 @@ message GetUpdateNoteReply {
   string version_name = 2;
 }
 
-message GetStudyRoomListRequest {}
-message GetStudyRoomListReply {
+message ListStudyRoomsRequest {}
+message ListStudyRoomsReply {
   repeated StudyRoomMsgElement rooms = 1;
 }
 message StudyRoomMsgElement {
@@ -517,12 +513,12 @@ message StudyRoom {
   string building_name = 5;
 }
 
-message GetMoviesRequest {
+message ListMoviesRequest {
   // the last Id you have requested. Use -1 to get all movies
   int32 last_id = 1;
 }
 
-message GetMoviesReply {
+message ListMoviesReply {
   repeated Movie movies = 1;
 }
 
@@ -572,11 +568,11 @@ message CreateFeedbackImageRequest {
   //todo where does the file come from?
 }
 
-message GetMembersRequest {
+message GetMemberRequest {
   string lrz_id = 1;
 }
 
-message GetMembersReply {
+message GetMemberReply {
   string lrz_id = 1;
   string name = 2;
   int32 member_id = 3;

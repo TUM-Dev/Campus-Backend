@@ -798,14 +798,14 @@ func (x *GetNewsRequest) GetNewsSource() int32 {
 	return 0
 }
 
-type GetNewsSourcesRequest struct {
+type ListNewsSourcesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetNewsSourcesRequest) Reset() {
-	*x = GetNewsSourcesRequest{}
+func (x *ListNewsSourcesRequest) Reset() {
+	*x = ListNewsSourcesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -813,13 +813,13 @@ func (x *GetNewsSourcesRequest) Reset() {
 	}
 }
 
-func (x *GetNewsSourcesRequest) String() string {
+func (x *ListNewsSourcesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNewsSourcesRequest) ProtoMessage() {}
+func (*ListNewsSourcesRequest) ProtoMessage() {}
 
-func (x *GetNewsSourcesRequest) ProtoReflect() protoreflect.Message {
+func (x *ListNewsSourcesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -831,12 +831,12 @@ func (x *GetNewsSourcesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNewsSourcesRequest.ProtoReflect.Descriptor instead.
-func (*GetNewsSourcesRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNewsSourcesRequest.ProtoReflect.Descriptor instead.
+func (*ListNewsSourcesRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{12}
 }
 
-type GetNewsSourcesReply struct {
+type ListNewsSourcesReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -844,8 +844,8 @@ type GetNewsSourcesReply struct {
 	Sources []*NewsSource `protobuf:"bytes,1,rep,name=sources,proto3" json:"sources,omitempty"`
 }
 
-func (x *GetNewsSourcesReply) Reset() {
-	*x = GetNewsSourcesReply{}
+func (x *ListNewsSourcesReply) Reset() {
+	*x = ListNewsSourcesReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -853,13 +853,13 @@ func (x *GetNewsSourcesReply) Reset() {
 	}
 }
 
-func (x *GetNewsSourcesReply) String() string {
+func (x *ListNewsSourcesReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNewsSourcesReply) ProtoMessage() {}
+func (*ListNewsSourcesReply) ProtoMessage() {}
 
-func (x *GetNewsSourcesReply) ProtoReflect() protoreflect.Message {
+func (x *ListNewsSourcesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -871,12 +871,12 @@ func (x *GetNewsSourcesReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNewsSourcesReply.ProtoReflect.Descriptor instead.
-func (*GetNewsSourcesReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNewsSourcesReply.ProtoReflect.Descriptor instead.
+func (*ListNewsSourcesReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *GetNewsSourcesReply) GetSources() []*NewsSource {
+func (x *ListNewsSourcesReply) GetSources() []*NewsSource {
 	if x != nil {
 		return x.Sources
 	}
@@ -946,7 +946,7 @@ func (x *NewsSource) GetIcon() string {
 	return ""
 }
 
-type GetNewsAlertsRequest struct {
+type ListNewsAlertsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -955,8 +955,8 @@ type GetNewsAlertsRequest struct {
 	LastNewsAlertId int32 `protobuf:"varint,1,opt,name=last_news_alert_id,json=lastNewsAlertId,proto3" json:"last_news_alert_id,omitempty"`
 }
 
-func (x *GetNewsAlertsRequest) Reset() {
-	*x = GetNewsAlertsRequest{}
+func (x *ListNewsAlertsRequest) Reset() {
+	*x = ListNewsAlertsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -964,13 +964,13 @@ func (x *GetNewsAlertsRequest) Reset() {
 	}
 }
 
-func (x *GetNewsAlertsRequest) String() string {
+func (x *ListNewsAlertsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNewsAlertsRequest) ProtoMessage() {}
+func (*ListNewsAlertsRequest) ProtoMessage() {}
 
-func (x *GetNewsAlertsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListNewsAlertsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -982,19 +982,19 @@ func (x *GetNewsAlertsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNewsAlertsRequest.ProtoReflect.Descriptor instead.
-func (*GetNewsAlertsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNewsAlertsRequest.ProtoReflect.Descriptor instead.
+func (*ListNewsAlertsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *GetNewsAlertsRequest) GetLastNewsAlertId() int32 {
+func (x *ListNewsAlertsRequest) GetLastNewsAlertId() int32 {
 	if x != nil {
 		return x.LastNewsAlertId
 	}
 	return 0
 }
 
-type GetNewsAlertsReply struct {
+type ListNewsAlertsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1002,8 +1002,8 @@ type GetNewsAlertsReply struct {
 	Alerts []*NewsAlert `protobuf:"bytes,1,rep,name=alerts,proto3" json:"alerts,omitempty"`
 }
 
-func (x *GetNewsAlertsReply) Reset() {
-	*x = GetNewsAlertsReply{}
+func (x *ListNewsAlertsReply) Reset() {
+	*x = ListNewsAlertsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1011,13 +1011,13 @@ func (x *GetNewsAlertsReply) Reset() {
 	}
 }
 
-func (x *GetNewsAlertsReply) String() string {
+func (x *ListNewsAlertsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNewsAlertsReply) ProtoMessage() {}
+func (*ListNewsAlertsReply) ProtoMessage() {}
 
-func (x *GetNewsAlertsReply) ProtoReflect() protoreflect.Message {
+func (x *ListNewsAlertsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1029,12 +1029,12 @@ func (x *GetNewsAlertsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNewsAlertsReply.ProtoReflect.Descriptor instead.
-func (*GetNewsAlertsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNewsAlertsReply.ProtoReflect.Descriptor instead.
+func (*ListNewsAlertsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *GetNewsAlertsReply) GetAlerts() []*NewsAlert {
+func (x *ListNewsAlertsReply) GetAlerts() []*NewsAlert {
 	if x != nil {
 		return x.Alerts
 	}
@@ -1120,7 +1120,7 @@ func (x *NewsAlert) GetTo() *timestamppb.Timestamp {
 	return nil
 }
 
-type GetCanteenRatingsRequest struct {
+type ListCanteenRatingsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1135,8 +1135,8 @@ type GetCanteenRatingsRequest struct {
 	Limit int32 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
-func (x *GetCanteenRatingsRequest) Reset() {
-	*x = GetCanteenRatingsRequest{}
+func (x *ListCanteenRatingsRequest) Reset() {
+	*x = ListCanteenRatingsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1144,13 +1144,13 @@ func (x *GetCanteenRatingsRequest) Reset() {
 	}
 }
 
-func (x *GetCanteenRatingsRequest) String() string {
+func (x *ListCanteenRatingsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteenRatingsRequest) ProtoMessage() {}
+func (*ListCanteenRatingsRequest) ProtoMessage() {}
 
-func (x *GetCanteenRatingsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListCanteenRatingsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1162,40 +1162,40 @@ func (x *GetCanteenRatingsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteenRatingsRequest.ProtoReflect.Descriptor instead.
-func (*GetCanteenRatingsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCanteenRatingsRequest.ProtoReflect.Descriptor instead.
+func (*ListCanteenRatingsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *GetCanteenRatingsRequest) GetCanteenId() string {
+func (x *ListCanteenRatingsRequest) GetCanteenId() string {
 	if x != nil {
 		return x.CanteenId
 	}
 	return ""
 }
 
-func (x *GetCanteenRatingsRequest) GetFrom() *timestamppb.Timestamp {
+func (x *ListCanteenRatingsRequest) GetFrom() *timestamppb.Timestamp {
 	if x != nil {
 		return x.From
 	}
 	return nil
 }
 
-func (x *GetCanteenRatingsRequest) GetTo() *timestamppb.Timestamp {
+func (x *ListCanteenRatingsRequest) GetTo() *timestamppb.Timestamp {
 	if x != nil {
 		return x.To
 	}
 	return nil
 }
 
-func (x *GetCanteenRatingsRequest) GetLimit() int32 {
+func (x *ListCanteenRatingsRequest) GetLimit() int32 {
 	if x != nil {
 		return x.Limit
 	}
 	return 0
 }
 
-type GetCanteenRatingsReply struct {
+type ListCanteenRatingsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1208,8 +1208,8 @@ type GetCanteenRatingsReply struct {
 	RatingTags []*RatingTagResult   `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
 }
 
-func (x *GetCanteenRatingsReply) Reset() {
-	*x = GetCanteenRatingsReply{}
+func (x *ListCanteenRatingsReply) Reset() {
+	*x = ListCanteenRatingsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1217,13 +1217,13 @@ func (x *GetCanteenRatingsReply) Reset() {
 	}
 }
 
-func (x *GetCanteenRatingsReply) String() string {
+func (x *ListCanteenRatingsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteenRatingsReply) ProtoMessage() {}
+func (*ListCanteenRatingsReply) ProtoMessage() {}
 
-func (x *GetCanteenRatingsReply) ProtoReflect() protoreflect.Message {
+func (x *ListCanteenRatingsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1235,47 +1235,47 @@ func (x *GetCanteenRatingsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteenRatingsReply.ProtoReflect.Descriptor instead.
-func (*GetCanteenRatingsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCanteenRatingsReply.ProtoReflect.Descriptor instead.
+func (*ListCanteenRatingsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *GetCanteenRatingsReply) GetRating() []*SingleRatingReply {
+func (x *ListCanteenRatingsReply) GetRating() []*SingleRatingReply {
 	if x != nil {
 		return x.Rating
 	}
 	return nil
 }
 
-func (x *GetCanteenRatingsReply) GetAvg() float64 {
+func (x *ListCanteenRatingsReply) GetAvg() float64 {
 	if x != nil {
 		return x.Avg
 	}
 	return 0
 }
 
-func (x *GetCanteenRatingsReply) GetStd() float64 {
+func (x *ListCanteenRatingsReply) GetStd() float64 {
 	if x != nil {
 		return x.Std
 	}
 	return 0
 }
 
-func (x *GetCanteenRatingsReply) GetMin() int32 {
+func (x *ListCanteenRatingsReply) GetMin() int32 {
 	if x != nil {
 		return x.Min
 	}
 	return 0
 }
 
-func (x *GetCanteenRatingsReply) GetMax() int32 {
+func (x *ListCanteenRatingsReply) GetMax() int32 {
 	if x != nil {
 		return x.Max
 	}
 	return 0
 }
 
-func (x *GetCanteenRatingsReply) GetRatingTags() []*RatingTagResult {
+func (x *ListCanteenRatingsReply) GetRatingTags() []*RatingTagResult {
 	if x != nil {
 		return x.RatingTags
 	}
@@ -1454,7 +1454,7 @@ func (x *GetDishRatingsReply) GetRatingTags() []*RatingTagResult {
 	return nil
 }
 
-func (x *GetDishRatingsReply) GetNameTags() []*RatingTagResult {
+func (x *GetDishRatingsReply) ListNameTags() []*RatingTagResult {
 	if x != nil {
 		return x.NameTags
 	}
@@ -1794,14 +1794,14 @@ func (x *CreateDishRatingRequest) GetComment() string {
 	return ""
 }
 
-type GetAvailableDishTagsRequest struct {
+type ListAvailableDishTagsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetAvailableDishTagsRequest) Reset() {
-	*x = GetAvailableDishTagsRequest{}
+func (x *ListAvailableDishTagsRequest) Reset() {
+	*x = ListAvailableDishTagsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1809,13 +1809,13 @@ func (x *GetAvailableDishTagsRequest) Reset() {
 	}
 }
 
-func (x *GetAvailableDishTagsRequest) String() string {
+func (x *ListAvailableDishTagsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAvailableDishTagsRequest) ProtoMessage() {}
+func (*ListAvailableDishTagsRequest) ProtoMessage() {}
 
-func (x *GetAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1827,12 +1827,12 @@ func (x *GetAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAvailableDishTagsRequest.ProtoReflect.Descriptor instead.
-func (*GetAvailableDishTagsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAvailableDishTagsRequest.ProtoReflect.Descriptor instead.
+func (*ListAvailableDishTagsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{27}
 }
 
-type GetAvailableDishTagsReply struct {
+type ListAvailableDishTagsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1840,8 +1840,8 @@ type GetAvailableDishTagsReply struct {
 	RatingTags []*TagsOverview `protobuf:"bytes,1,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
 }
 
-func (x *GetAvailableDishTagsReply) Reset() {
-	*x = GetAvailableDishTagsReply{}
+func (x *ListAvailableDishTagsReply) Reset() {
+	*x = ListAvailableDishTagsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1849,13 +1849,13 @@ func (x *GetAvailableDishTagsReply) Reset() {
 	}
 }
 
-func (x *GetAvailableDishTagsReply) String() string {
+func (x *ListAvailableDishTagsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAvailableDishTagsReply) ProtoMessage() {}
+func (*ListAvailableDishTagsReply) ProtoMessage() {}
 
-func (x *GetAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
+func (x *ListAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1867,26 +1867,26 @@ func (x *GetAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAvailableDishTagsReply.ProtoReflect.Descriptor instead.
-func (*GetAvailableDishTagsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAvailableDishTagsReply.ProtoReflect.Descriptor instead.
+func (*ListAvailableDishTagsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *GetAvailableDishTagsReply) GetRatingTags() []*TagsOverview {
+func (x *ListAvailableDishTagsReply) GetRatingTags() []*TagsOverview {
 	if x != nil {
 		return x.RatingTags
 	}
 	return nil
 }
 
-type GetNameTagsRequest struct {
+type ListNameTagsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetNameTagsRequest) Reset() {
-	*x = GetNameTagsRequest{}
+func (x *ListNameTagsRequest) Reset() {
+	*x = ListNameTagsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1894,13 +1894,13 @@ func (x *GetNameTagsRequest) Reset() {
 	}
 }
 
-func (x *GetNameTagsRequest) String() string {
+func (x *ListNameTagsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNameTagsRequest) ProtoMessage() {}
+func (*ListNameTagsRequest) ProtoMessage() {}
 
-func (x *GetNameTagsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListNameTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1912,12 +1912,12 @@ func (x *GetNameTagsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNameTagsRequest.ProtoReflect.Descriptor instead.
-func (*GetNameTagsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNameTagsRequest.ProtoReflect.Descriptor instead.
+func (*ListNameTagsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{29}
 }
 
-type GetNameTagsReply struct {
+type ListNameTagsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1925,8 +1925,8 @@ type GetNameTagsReply struct {
 	RatingTags []*TagsOverview `protobuf:"bytes,1,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
 }
 
-func (x *GetNameTagsReply) Reset() {
-	*x = GetNameTagsReply{}
+func (x *ListNameTagsReply) Reset() {
+	*x = ListNameTagsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1934,13 +1934,13 @@ func (x *GetNameTagsReply) Reset() {
 	}
 }
 
-func (x *GetNameTagsReply) String() string {
+func (x *ListNameTagsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetNameTagsReply) ProtoMessage() {}
+func (*ListNameTagsReply) ProtoMessage() {}
 
-func (x *GetNameTagsReply) ProtoReflect() protoreflect.Message {
+func (x *ListNameTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1952,26 +1952,26 @@ func (x *GetNameTagsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetNameTagsReply.ProtoReflect.Descriptor instead.
-func (*GetNameTagsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListNameTagsReply.ProtoReflect.Descriptor instead.
+func (*ListNameTagsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *GetNameTagsReply) GetRatingTags() []*TagsOverview {
+func (x *ListNameTagsReply) GetRatingTags() []*TagsOverview {
 	if x != nil {
 		return x.RatingTags
 	}
 	return nil
 }
 
-type GetAvailableCanteenTagsRequest struct {
+type ListAvailableCanteenTagsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetAvailableCanteenTagsRequest) Reset() {
-	*x = GetAvailableCanteenTagsRequest{}
+func (x *ListAvailableCanteenTagsRequest) Reset() {
+	*x = ListAvailableCanteenTagsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1979,13 +1979,13 @@ func (x *GetAvailableCanteenTagsRequest) Reset() {
 	}
 }
 
-func (x *GetAvailableCanteenTagsRequest) String() string {
+func (x *ListAvailableCanteenTagsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAvailableCanteenTagsRequest) ProtoMessage() {}
+func (*ListAvailableCanteenTagsRequest) ProtoMessage() {}
 
-func (x *GetAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1997,12 +1997,12 @@ func (x *GetAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAvailableCanteenTagsRequest.ProtoReflect.Descriptor instead.
-func (*GetAvailableCanteenTagsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAvailableCanteenTagsRequest.ProtoReflect.Descriptor instead.
+func (*ListAvailableCanteenTagsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{31}
 }
 
-type GetAvailableCanteenTagsReply struct {
+type ListAvailableCanteenTagsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2010,8 +2010,8 @@ type GetAvailableCanteenTagsReply struct {
 	RatingTags []*TagsOverview `protobuf:"bytes,1,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
 }
 
-func (x *GetAvailableCanteenTagsReply) Reset() {
-	*x = GetAvailableCanteenTagsReply{}
+func (x *ListAvailableCanteenTagsReply) Reset() {
+	*x = ListAvailableCanteenTagsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2019,13 +2019,13 @@ func (x *GetAvailableCanteenTagsReply) Reset() {
 	}
 }
 
-func (x *GetAvailableCanteenTagsReply) String() string {
+func (x *ListAvailableCanteenTagsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAvailableCanteenTagsReply) ProtoMessage() {}
+func (*ListAvailableCanteenTagsReply) ProtoMessage() {}
 
-func (x *GetAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
+func (x *ListAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2037,12 +2037,12 @@ func (x *GetAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAvailableCanteenTagsReply.ProtoReflect.Descriptor instead.
-func (*GetAvailableCanteenTagsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListAvailableCanteenTagsReply.ProtoReflect.Descriptor instead.
+func (*ListAvailableCanteenTagsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *GetAvailableCanteenTagsReply) GetRatingTags() []*TagsOverview {
+func (x *ListAvailableCanteenTagsReply) GetRatingTags() []*TagsOverview {
 	if x != nil {
 		return x.RatingTags
 	}
@@ -2301,14 +2301,14 @@ func (x *RatingTagResult) GetMax() int32 {
 	return 0
 }
 
-type GetCanteensRequest struct {
+type ListCanteensRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetCanteensRequest) Reset() {
-	*x = GetCanteensRequest{}
+func (x *ListCanteensRequest) Reset() {
+	*x = ListCanteensRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2316,13 +2316,13 @@ func (x *GetCanteensRequest) Reset() {
 	}
 }
 
-func (x *GetCanteensRequest) String() string {
+func (x *ListCanteensRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteensRequest) ProtoMessage() {}
+func (*ListCanteensRequest) ProtoMessage() {}
 
-func (x *GetCanteensRequest) ProtoReflect() protoreflect.Message {
+func (x *ListCanteensRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2334,12 +2334,12 @@ func (x *GetCanteensRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteensRequest.ProtoReflect.Descriptor instead.
-func (*GetCanteensRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCanteensRequest.ProtoReflect.Descriptor instead.
+func (*ListCanteensRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{37}
 }
 
-type GetCanteensReply struct {
+type ListCanteensReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2347,8 +2347,8 @@ type GetCanteensReply struct {
 	Canteen []*Canteen `protobuf:"bytes,1,rep,name=canteen,proto3" json:"canteen,omitempty"`
 }
 
-func (x *GetCanteensReply) Reset() {
-	*x = GetCanteensReply{}
+func (x *ListCanteensReply) Reset() {
+	*x = ListCanteensReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2356,13 +2356,13 @@ func (x *GetCanteensReply) Reset() {
 	}
 }
 
-func (x *GetCanteensReply) String() string {
+func (x *ListCanteensReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCanteensReply) ProtoMessage() {}
+func (*ListCanteensReply) ProtoMessage() {}
 
-func (x *GetCanteensReply) ProtoReflect() protoreflect.Message {
+func (x *ListCanteensReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2374,12 +2374,12 @@ func (x *GetCanteensReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetCanteensReply.ProtoReflect.Descriptor instead.
-func (*GetCanteensReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListCanteensReply.ProtoReflect.Descriptor instead.
+func (*ListCanteensReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{38}
 }
 
-func (x *GetCanteensReply) GetCanteen() []*Canteen {
+func (x *ListCanteensReply) GetCanteen() []*Canteen {
 	if x != nil {
 		return x.Canteen
 	}
@@ -2457,7 +2457,7 @@ func (x *Canteen) GetLatitude() float64 {
 	return 0
 }
 
-type GetDishesRequest struct {
+type ListDishesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2471,8 +2471,8 @@ type GetDishesRequest struct {
 	Day int32 `protobuf:"varint,4,opt,name=day,proto3" json:"day,omitempty"`
 }
 
-func (x *GetDishesRequest) Reset() {
-	*x = GetDishesRequest{}
+func (x *ListDishesRequest) Reset() {
+	*x = ListDishesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[40]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2480,13 +2480,13 @@ func (x *GetDishesRequest) Reset() {
 	}
 }
 
-func (x *GetDishesRequest) String() string {
+func (x *ListDishesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetDishesRequest) ProtoMessage() {}
+func (*ListDishesRequest) ProtoMessage() {}
 
-func (x *GetDishesRequest) ProtoReflect() protoreflect.Message {
+func (x *ListDishesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2498,40 +2498,40 @@ func (x *GetDishesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetDishesRequest.ProtoReflect.Descriptor instead.
-func (*GetDishesRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDishesRequest.ProtoReflect.Descriptor instead.
+func (*ListDishesRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{40}
 }
 
-func (x *GetDishesRequest) GetCanteenId() string {
+func (x *ListDishesRequest) GetCanteenId() string {
 	if x != nil {
 		return x.CanteenId
 	}
 	return ""
 }
 
-func (x *GetDishesRequest) GetYear() int32 {
+func (x *ListDishesRequest) GetYear() int32 {
 	if x != nil {
 		return x.Year
 	}
 	return 0
 }
 
-func (x *GetDishesRequest) GetWeek() int32 {
+func (x *ListDishesRequest) GetWeek() int32 {
 	if x != nil {
 		return x.Week
 	}
 	return 0
 }
 
-func (x *GetDishesRequest) GetDay() int32 {
+func (x *ListDishesRequest) GetDay() int32 {
 	if x != nil {
 		return x.Day
 	}
 	return 0
 }
 
-type GetDishesReply struct {
+type ListDishesReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2539,8 +2539,8 @@ type GetDishesReply struct {
 	Dish []string `protobuf:"bytes,1,rep,name=dish,proto3" json:"dish,omitempty"`
 }
 
-func (x *GetDishesReply) Reset() {
-	*x = GetDishesReply{}
+func (x *ListDishesReply) Reset() {
+	*x = ListDishesReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[41]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2548,13 +2548,13 @@ func (x *GetDishesReply) Reset() {
 	}
 }
 
-func (x *GetDishesReply) String() string {
+func (x *ListDishesReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetDishesReply) ProtoMessage() {}
+func (*ListDishesReply) ProtoMessage() {}
 
-func (x *GetDishesReply) ProtoReflect() protoreflect.Message {
+func (x *ListDishesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2566,26 +2566,26 @@ func (x *GetDishesReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetDishesReply.ProtoReflect.Descriptor instead.
-func (*GetDishesReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDishesReply.ProtoReflect.Descriptor instead.
+func (*ListDishesReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{41}
 }
 
-func (x *GetDishesReply) GetDish() []string {
+func (x *ListDishesReply) GetDish() []string {
 	if x != nil {
 		return x.Dish
 	}
 	return nil
 }
 
-type GetResponsiblePersonRequest struct {
+type ListResponsiblePersonRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetResponsiblePersonRequest) Reset() {
-	*x = GetResponsiblePersonRequest{}
+func (x *ListResponsiblePersonRequest) Reset() {
+	*x = ListResponsiblePersonRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[42]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2593,13 +2593,13 @@ func (x *GetResponsiblePersonRequest) Reset() {
 	}
 }
 
-func (x *GetResponsiblePersonRequest) String() string {
+func (x *ListResponsiblePersonRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetResponsiblePersonRequest) ProtoMessage() {}
+func (*ListResponsiblePersonRequest) ProtoMessage() {}
 
-func (x *GetResponsiblePersonRequest) ProtoReflect() protoreflect.Message {
+func (x *ListResponsiblePersonRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2611,12 +2611,12 @@ func (x *GetResponsiblePersonRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetResponsiblePersonRequest.ProtoReflect.Descriptor instead.
-func (*GetResponsiblePersonRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListResponsiblePersonRequest.ProtoReflect.Descriptor instead.
+func (*ListResponsiblePersonRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{42}
 }
 
-type GetResponsiblePersonReply struct {
+type ListResponsiblePersonReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2624,8 +2624,8 @@ type GetResponsiblePersonReply struct {
 	ResponsiblePerson []*ResponsiblePerson `protobuf:"bytes,1,rep,name=responsible_person,json=responsiblePerson,proto3" json:"responsible_person,omitempty"`
 }
 
-func (x *GetResponsiblePersonReply) Reset() {
-	*x = GetResponsiblePersonReply{}
+func (x *ListResponsiblePersonReply) Reset() {
+	*x = ListResponsiblePersonReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[43]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2633,13 +2633,13 @@ func (x *GetResponsiblePersonReply) Reset() {
 	}
 }
 
-func (x *GetResponsiblePersonReply) String() string {
+func (x *ListResponsiblePersonReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetResponsiblePersonReply) ProtoMessage() {}
+func (*ListResponsiblePersonReply) ProtoMessage() {}
 
-func (x *GetResponsiblePersonReply) ProtoReflect() protoreflect.Message {
+func (x *ListResponsiblePersonReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2651,12 +2651,12 @@ func (x *GetResponsiblePersonReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetResponsiblePersonReply.ProtoReflect.Descriptor instead.
-func (*GetResponsiblePersonReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListResponsiblePersonReply.ProtoReflect.Descriptor instead.
+func (*ListResponsiblePersonReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{43}
 }
 
-func (x *GetResponsiblePersonReply) GetResponsiblePerson() []*ResponsiblePerson {
+func (x *ListResponsiblePersonReply) ListResponsiblePerson() []*ResponsiblePerson {
 	if x != nil {
 		return x.ResponsiblePerson
 	}
@@ -2853,14 +2853,14 @@ func (x *RoomInformationElement) GetName() string {
 	return ""
 }
 
-type GetMoreInformationRequest struct {
+type ListMoreInformationRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetMoreInformationRequest) Reset() {
-	*x = GetMoreInformationRequest{}
+func (x *ListMoreInformationRequest) Reset() {
+	*x = ListMoreInformationRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[46]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2868,13 +2868,13 @@ func (x *GetMoreInformationRequest) Reset() {
 	}
 }
 
-func (x *GetMoreInformationRequest) String() string {
+func (x *ListMoreInformationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMoreInformationRequest) ProtoMessage() {}
+func (*ListMoreInformationRequest) ProtoMessage() {}
 
-func (x *GetMoreInformationRequest) ProtoReflect() protoreflect.Message {
+func (x *ListMoreInformationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2886,21 +2886,21 @@ func (x *GetMoreInformationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMoreInformationRequest.ProtoReflect.Descriptor instead.
-func (*GetMoreInformationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMoreInformationRequest.ProtoReflect.Descriptor instead.
+func (*ListMoreInformationRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{46}
 }
 
-type GetMoreInformationReply struct {
+type ListMoreInformationReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Infos []*GetMoreInformationReply_MoreInformation `protobuf:"bytes,1,rep,name=infos,proto3" json:"infos,omitempty"`
+	Infos []*ListMoreInformationReply_MoreInformation `protobuf:"bytes,1,rep,name=infos,proto3" json:"infos,omitempty"`
 }
 
-func (x *GetMoreInformationReply) Reset() {
-	*x = GetMoreInformationReply{}
+func (x *ListMoreInformationReply) Reset() {
+	*x = ListMoreInformationReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[47]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2908,13 +2908,13 @@ func (x *GetMoreInformationReply) Reset() {
 	}
 }
 
-func (x *GetMoreInformationReply) String() string {
+func (x *ListMoreInformationReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMoreInformationReply) ProtoMessage() {}
+func (*ListMoreInformationReply) ProtoMessage() {}
 
-func (x *GetMoreInformationReply) ProtoReflect() protoreflect.Message {
+func (x *ListMoreInformationReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2926,19 +2926,19 @@ func (x *GetMoreInformationReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMoreInformationReply.ProtoReflect.Descriptor instead.
-func (*GetMoreInformationReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMoreInformationReply.ProtoReflect.Descriptor instead.
+func (*ListMoreInformationReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{47}
 }
 
-func (x *GetMoreInformationReply) GetInfos() []*GetMoreInformationReply_MoreInformation {
+func (x *ListMoreInformationReply) GetInfos() []*ListMoreInformationReply_MoreInformation {
 	if x != nil {
 		return x.Infos
 	}
 	return nil
 }
 
-type GetOpeningTimesRequest struct {
+type ListOpeningTimesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2946,8 +2946,8 @@ type GetOpeningTimesRequest struct {
 	Language string `protobuf:"bytes,1,opt,name=language,proto3" json:"language,omitempty"`
 }
 
-func (x *GetOpeningTimesRequest) Reset() {
-	*x = GetOpeningTimesRequest{}
+func (x *ListOpeningTimesRequest) Reset() {
+	*x = ListOpeningTimesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[48]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2955,13 +2955,13 @@ func (x *GetOpeningTimesRequest) Reset() {
 	}
 }
 
-func (x *GetOpeningTimesRequest) String() string {
+func (x *ListOpeningTimesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetOpeningTimesRequest) ProtoMessage() {}
+func (*ListOpeningTimesRequest) ProtoMessage() {}
 
-func (x *GetOpeningTimesRequest) ProtoReflect() protoreflect.Message {
+func (x *ListOpeningTimesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2973,19 +2973,19 @@ func (x *GetOpeningTimesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetOpeningTimesRequest.ProtoReflect.Descriptor instead.
-func (*GetOpeningTimesRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListOpeningTimesRequest.ProtoReflect.Descriptor instead.
+func (*ListOpeningTimesRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{48}
 }
 
-func (x *GetOpeningTimesRequest) GetLanguage() string {
+func (x *ListOpeningTimesRequest) GetLanguage() string {
 	if x != nil {
 		return x.Language
 	}
 	return ""
 }
 
-type GetOpeningTimesReply struct {
+type ListOpeningTimesReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2993,8 +2993,8 @@ type GetOpeningTimesReply struct {
 	Facilities []*OpeningTimesMsgElement `protobuf:"bytes,1,rep,name=facilities,proto3" json:"facilities,omitempty"`
 }
 
-func (x *GetOpeningTimesReply) Reset() {
-	*x = GetOpeningTimesReply{}
+func (x *ListOpeningTimesReply) Reset() {
+	*x = ListOpeningTimesReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[49]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3002,13 +3002,13 @@ func (x *GetOpeningTimesReply) Reset() {
 	}
 }
 
-func (x *GetOpeningTimesReply) String() string {
+func (x *ListOpeningTimesReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetOpeningTimesReply) ProtoMessage() {}
+func (*ListOpeningTimesReply) ProtoMessage() {}
 
-func (x *GetOpeningTimesReply) ProtoReflect() protoreflect.Message {
+func (x *ListOpeningTimesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3020,12 +3020,12 @@ func (x *GetOpeningTimesReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetOpeningTimesReply.ProtoReflect.Descriptor instead.
-func (*GetOpeningTimesReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListOpeningTimesReply.ProtoReflect.Descriptor instead.
+func (*ListOpeningTimesReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{49}
 }
 
-func (x *GetOpeningTimesReply) GetFacilities() []*OpeningTimesMsgElement {
+func (x *ListOpeningTimesReply) GetFacilities() []*OpeningTimesMsgElement {
 	if x != nil {
 		return x.Facilities
 	}
@@ -3261,14 +3261,14 @@ func (x *GetUpdateNoteReply) GetVersionName() string {
 	return ""
 }
 
-type GetStudyRoomListRequest struct {
+type ListStudyRoomsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetStudyRoomListRequest) Reset() {
-	*x = GetStudyRoomListRequest{}
+func (x *ListStudyRoomsRequest) Reset() {
+	*x = ListStudyRoomsRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[53]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3276,13 +3276,13 @@ func (x *GetStudyRoomListRequest) Reset() {
 	}
 }
 
-func (x *GetStudyRoomListRequest) String() string {
+func (x *ListStudyRoomsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetStudyRoomListRequest) ProtoMessage() {}
+func (*ListStudyRoomsRequest) ProtoMessage() {}
 
-func (x *GetStudyRoomListRequest) ProtoReflect() protoreflect.Message {
+func (x *ListStudyRoomsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3294,12 +3294,12 @@ func (x *GetStudyRoomListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetStudyRoomListRequest.ProtoReflect.Descriptor instead.
-func (*GetStudyRoomListRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListStudyRoomsRequest.ProtoReflect.Descriptor instead.
+func (*ListStudyRoomsRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{53}
 }
 
-type GetStudyRoomListReply struct {
+type ListStudyRoomsReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3307,8 +3307,8 @@ type GetStudyRoomListReply struct {
 	Rooms []*StudyRoomMsgElement `protobuf:"bytes,1,rep,name=rooms,proto3" json:"rooms,omitempty"`
 }
 
-func (x *GetStudyRoomListReply) Reset() {
-	*x = GetStudyRoomListReply{}
+func (x *ListStudyRoomsReply) Reset() {
+	*x = ListStudyRoomsReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[54]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3316,13 +3316,13 @@ func (x *GetStudyRoomListReply) Reset() {
 	}
 }
 
-func (x *GetStudyRoomListReply) String() string {
+func (x *ListStudyRoomsReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetStudyRoomListReply) ProtoMessage() {}
+func (*ListStudyRoomsReply) ProtoMessage() {}
 
-func (x *GetStudyRoomListReply) ProtoReflect() protoreflect.Message {
+func (x *ListStudyRoomsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3334,12 +3334,12 @@ func (x *GetStudyRoomListReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetStudyRoomListReply.ProtoReflect.Descriptor instead.
-func (*GetStudyRoomListReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListStudyRoomsReply.ProtoReflect.Descriptor instead.
+func (*ListStudyRoomsReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{54}
 }
 
-func (x *GetStudyRoomListReply) GetRooms() []*StudyRoomMsgElement {
+func (x *ListStudyRoomsReply) GetRooms() []*StudyRoomMsgElement {
 	if x != nil {
 		return x.Rooms
 	}
@@ -3496,7 +3496,7 @@ func (x *StudyRoom) GetBuildingName() string {
 	return ""
 }
 
-type GetMoviesRequest struct {
+type ListMoviesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3505,8 +3505,8 @@ type GetMoviesRequest struct {
 	LastId int32 `protobuf:"varint,1,opt,name=last_id,json=lastId,proto3" json:"last_id,omitempty"`
 }
 
-func (x *GetMoviesRequest) Reset() {
-	*x = GetMoviesRequest{}
+func (x *ListMoviesRequest) Reset() {
+	*x = ListMoviesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[57]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3514,13 +3514,13 @@ func (x *GetMoviesRequest) Reset() {
 	}
 }
 
-func (x *GetMoviesRequest) String() string {
+func (x *ListMoviesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMoviesRequest) ProtoMessage() {}
+func (*ListMoviesRequest) ProtoMessage() {}
 
-func (x *GetMoviesRequest) ProtoReflect() protoreflect.Message {
+func (x *ListMoviesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3532,19 +3532,19 @@ func (x *GetMoviesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMoviesRequest.ProtoReflect.Descriptor instead.
-func (*GetMoviesRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMoviesRequest.ProtoReflect.Descriptor instead.
+func (*ListMoviesRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{57}
 }
 
-func (x *GetMoviesRequest) GetLastId() int32 {
+func (x *ListMoviesRequest) GetLastId() int32 {
 	if x != nil {
 		return x.LastId
 	}
 	return 0
 }
 
-type GetMoviesReply struct {
+type ListMoviesReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3552,8 +3552,8 @@ type GetMoviesReply struct {
 	Movies []*Movie `protobuf:"bytes,1,rep,name=movies,proto3" json:"movies,omitempty"`
 }
 
-func (x *GetMoviesReply) Reset() {
-	*x = GetMoviesReply{}
+func (x *ListMoviesReply) Reset() {
+	*x = ListMoviesReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[58]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3561,13 +3561,13 @@ func (x *GetMoviesReply) Reset() {
 	}
 }
 
-func (x *GetMoviesReply) String() string {
+func (x *ListMoviesReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMoviesReply) ProtoMessage() {}
+func (*ListMoviesReply) ProtoMessage() {}
 
-func (x *GetMoviesReply) ProtoReflect() protoreflect.Message {
+func (x *ListMoviesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3579,12 +3579,12 @@ func (x *GetMoviesReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMoviesReply.ProtoReflect.Descriptor instead.
-func (*GetMoviesReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMoviesReply.ProtoReflect.Descriptor instead.
+func (*ListMoviesReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{58}
 }
 
-func (x *GetMoviesReply) GetMovies() []*Movie {
+func (x *ListMoviesReply) ListMovies() []*Movie {
 	if x != nil {
 		return x.Movies
 	}
@@ -4004,7 +4004,7 @@ func (x *CreateFeedbackImageRequest) GetImageNr() int32 {
 	return 0
 }
 
-type GetMembersRequest struct {
+type GetMemberRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4012,8 +4012,8 @@ type GetMembersRequest struct {
 	LrzId string `protobuf:"bytes,1,opt,name=lrz_id,json=lrzId,proto3" json:"lrz_id,omitempty"`
 }
 
-func (x *GetMembersRequest) Reset() {
-	*x = GetMembersRequest{}
+func (x *GetMemberRequest) Reset() {
+	*x = GetMemberRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[64]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4021,13 +4021,13 @@ func (x *GetMembersRequest) Reset() {
 	}
 }
 
-func (x *GetMembersRequest) String() string {
+func (x *GetMemberRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMembersRequest) ProtoMessage() {}
+func (*GetMemberRequest) ProtoMessage() {}
 
-func (x *GetMembersRequest) ProtoReflect() protoreflect.Message {
+func (x *GetMemberRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[64]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4039,19 +4039,19 @@ func (x *GetMembersRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMembersRequest.ProtoReflect.Descriptor instead.
-func (*GetMembersRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetMemberRequest.ProtoReflect.Descriptor instead.
+func (*GetMemberRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{64}
 }
 
-func (x *GetMembersRequest) GetLrzId() string {
+func (x *GetMemberRequest) GetLrzId() string {
 	if x != nil {
 		return x.LrzId
 	}
 	return ""
 }
 
-type GetMembersReply struct {
+type GetMemberReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4061,8 +4061,8 @@ type GetMembersReply struct {
 	MemberId int32  `protobuf:"varint,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
 }
 
-func (x *GetMembersReply) Reset() {
-	*x = GetMembersReply{}
+func (x *GetMemberReply) Reset() {
+	*x = GetMemberReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[65]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4070,13 +4070,13 @@ func (x *GetMembersReply) Reset() {
 	}
 }
 
-func (x *GetMembersReply) String() string {
+func (x *GetMemberReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMembersReply) ProtoMessage() {}
+func (*GetMemberReply) ProtoMessage() {}
 
-func (x *GetMembersReply) ProtoReflect() protoreflect.Message {
+func (x *GetMemberReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[65]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4088,26 +4088,26 @@ func (x *GetMembersReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMembersReply.ProtoReflect.Descriptor instead.
-func (*GetMembersReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetMemberReply.ProtoReflect.Descriptor instead.
+func (*GetMemberReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{65}
 }
 
-func (x *GetMembersReply) GetLrzId() string {
+func (x *GetMemberReply) GetLrzId() string {
 	if x != nil {
 		return x.LrzId
 	}
 	return ""
 }
 
-func (x *GetMembersReply) GetName() string {
+func (x *GetMemberReply) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *GetMembersReply) GetMemberId() int32 {
+func (x *GetMemberReply) GetMemberId() int32 {
 	if x != nil {
 		return x.MemberId
 	}
@@ -4583,7 +4583,7 @@ func (x *GetCanteenHeadCountReply) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
-type GetMoreInformationReply_MoreInformation struct {
+type ListMoreInformationReply_MoreInformation struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4593,8 +4593,8 @@ type GetMoreInformationReply_MoreInformation struct {
 	Url      string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
 }
 
-func (x *GetMoreInformationReply_MoreInformation) Reset() {
-	*x = GetMoreInformationReply_MoreInformation{}
+func (x *ListMoreInformationReply_MoreInformation) Reset() {
+	*x = ListMoreInformationReply_MoreInformation{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[74]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4602,13 +4602,13 @@ func (x *GetMoreInformationReply_MoreInformation) Reset() {
 	}
 }
 
-func (x *GetMoreInformationReply_MoreInformation) String() string {
+func (x *ListMoreInformationReply_MoreInformation) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMoreInformationReply_MoreInformation) ProtoMessage() {}
+func (*ListMoreInformationReply_MoreInformation) ProtoMessage() {}
 
-func (x *GetMoreInformationReply_MoreInformation) ProtoReflect() protoreflect.Message {
+func (x *ListMoreInformationReply_MoreInformation) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[74]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4620,26 +4620,26 @@ func (x *GetMoreInformationReply_MoreInformation) ProtoReflect() protoreflect.Me
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMoreInformationReply_MoreInformation.ProtoReflect.Descriptor instead.
-func (*GetMoreInformationReply_MoreInformation) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMoreInformationReply_MoreInformation.ProtoReflect.Descriptor instead.
+func (*ListMoreInformationReply_MoreInformation) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{47, 0}
 }
 
-func (x *GetMoreInformationReply_MoreInformation) GetTitle() string {
+func (x *ListMoreInformationReply_MoreInformation) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *GetMoreInformationReply_MoreInformation) GetCategory() string {
+func (x *ListMoreInformationReply_MoreInformation) GetCategory() string {
 	if x != nil {
 		return x.Category
 	}
 	return ""
 }
 
-func (x *GetMoreInformationReply_MoreInformation) GetUrl() string {
+func (x *ListMoreInformationReply_MoreInformation) GetUrl() string {
 	if x != nil {
 		return x.Url
 	}
@@ -5386,14 +5386,14 @@ var file_tumdev_campus_backend_proto_goTypes = []interface{}{
 	(*News)(nil),                                    // 10: api.News
 	(*GetNewsReply)(nil),                            // 11: api.GetNewsReply
 	(*GetNewsRequest)(nil),                          // 12: api.GetNewsRequest
-	(*GetNewsSourcesRequest)(nil),                   // 13: api.GetNewsSourcesRequest
-	(*GetNewsSourcesReply)(nil),                     // 14: api.GetNewsSourcesReply
+	(*ListNewsSourcesRequest)(nil),                   // 13: api.ListNewsSourcesRequest
+	(*ListNewsSourcesReply)(nil),                     // 14: api.ListNewsSourcesReply
 	(*NewsSource)(nil),                              // 15: api.NewsSource
-	(*GetNewsAlertsRequest)(nil),                    // 16: api.GetNewsAlertsRequest
-	(*GetNewsAlertsReply)(nil),                      // 17: api.GetNewsAlertsReply
+	(*ListNewsAlertsRequest)(nil),                    // 16: api.ListNewsAlertsRequest
+	(*ListNewsAlertsReply)(nil),                      // 17: api.ListNewsAlertsReply
 	(*NewsAlert)(nil),                               // 18: api.NewsAlert
-	(*GetCanteenRatingsRequest)(nil),                // 19: api.GetCanteenRatingsRequest
-	(*GetCanteenRatingsReply)(nil),                  // 20: api.GetCanteenRatingsReply
+	(*ListCanteenRatingsRequest)(nil),                // 19: api.ListCanteenRatingsRequest
+	(*ListCanteenRatingsReply)(nil),                  // 20: api.ListCanteenRatingsReply
 	(*GetDishRatingsRequest)(nil),                   // 21: api.GetDishRatingsRequest
 	(*GetDishRatingsReply)(nil),                     // 22: api.GetDishRatingsReply
 	(*SingleRatingReply)(nil),                       // 23: api.SingleRatingReply
@@ -5401,45 +5401,45 @@ var file_tumdev_campus_backend_proto_goTypes = []interface{}{
 	(*CreateCanteenRatingRequest)(nil),              // 25: api.CreateCanteenRatingRequest
 	(*CreateDishRatingReply)(nil),                   // 26: api.CreateDishRatingReply
 	(*CreateDishRatingRequest)(nil),                 // 27: api.CreateDishRatingRequest
-	(*GetAvailableDishTagsRequest)(nil),             // 28: api.GetAvailableDishTagsRequest
-	(*GetAvailableDishTagsReply)(nil),               // 29: api.GetAvailableDishTagsReply
-	(*GetNameTagsRequest)(nil),                      // 30: api.GetNameTagsRequest
-	(*GetNameTagsReply)(nil),                        // 31: api.GetNameTagsReply
-	(*GetAvailableCanteenTagsRequest)(nil),          // 32: api.GetAvailableCanteenTagsRequest
-	(*GetAvailableCanteenTagsReply)(nil),            // 33: api.GetAvailableCanteenTagsReply
+	(*ListAvailableDishTagsRequest)(nil),             // 28: api.ListAvailableDishTagsRequest
+	(*ListAvailableDishTagsReply)(nil),               // 29: api.ListAvailableDishTagsReply
+	(*ListNameTagsRequest)(nil),                      // 30: api.ListNameTagsRequest
+	(*ListNameTagsReply)(nil),                        // 31: api.ListNameTagsReply
+	(*ListAvailableCanteenTagsRequest)(nil),          // 32: api.ListAvailableCanteenTagsRequest
+	(*ListAvailableCanteenTagsReply)(nil),            // 33: api.ListAvailableCanteenTagsReply
 	(*TagsOverview)(nil),                            // 34: api.TagsOverview
 	(*RatingTag)(nil),                               // 35: api.RatingTag
 	(*RatingTagNewRequest)(nil),                     // 36: api.RatingTagNewRequest
 	(*RatingTagResult)(nil),                         // 37: api.RatingTagResult
-	(*GetCanteensRequest)(nil),                      // 38: api.GetCanteensRequest
-	(*GetCanteensReply)(nil),                        // 39: api.GetCanteensReply
+	(*ListCanteensRequest)(nil),                      // 38: api.ListCanteensRequest
+	(*ListCanteensReply)(nil),                        // 39: api.ListCanteensReply
 	(*Canteen)(nil),                                 // 40: api.Canteen
-	(*GetDishesRequest)(nil),                        // 41: api.GetDishesRequest
-	(*GetDishesReply)(nil),                          // 42: api.GetDishesReply
-	(*GetResponsiblePersonRequest)(nil),             // 43: api.GetResponsiblePersonRequest
-	(*GetResponsiblePersonReply)(nil),               // 44: api.GetResponsiblePersonReply
+	(*ListDishesRequest)(nil),                        // 41: api.ListDishesRequest
+	(*ListDishesReply)(nil),                          // 42: api.ListDishesReply
+	(*ListResponsiblePersonRequest)(nil),             // 43: api.ListResponsiblePersonRequest
+	(*ListResponsiblePersonReply)(nil),               // 44: api.ListResponsiblePersonReply
 	(*ResponsiblePerson)(nil),                       // 45: api.ResponsiblePerson
 	(*RoomInformationElement)(nil),                  // 46: api.RoomInformationElement
-	(*GetMoreInformationRequest)(nil),               // 47: api.GetMoreInformationRequest
-	(*GetMoreInformationReply)(nil),                 // 48: api.GetMoreInformationReply
-	(*GetOpeningTimesRequest)(nil),                  // 49: api.GetOpeningTimesRequest
-	(*GetOpeningTimesReply)(nil),                    // 50: api.GetOpeningTimesReply
+	(*ListMoreInformationRequest)(nil),               // 47: api.ListMoreInformationRequest
+	(*ListMoreInformationReply)(nil),                 // 48: api.ListMoreInformationReply
+	(*ListOpeningTimesRequest)(nil),                  // 49: api.ListOpeningTimesRequest
+	(*ListOpeningTimesReply)(nil),                    // 50: api.ListOpeningTimesReply
 	(*OpeningTimesMsgElement)(nil),                  // 51: api.OpeningTimesMsgElement
 	(*GetUpdateNoteRequest)(nil),                    // 52: api.GetUpdateNoteRequest
 	(*GetUpdateNoteReply)(nil),                      // 53: api.GetUpdateNoteReply
-	(*GetStudyRoomListRequest)(nil),                 // 54: api.GetStudyRoomListRequest
-	(*GetStudyRoomListReply)(nil),                   // 55: api.GetStudyRoomListReply
+	(*ListStudyRoomsRequest)(nil),                 // 54: api.ListStudyRoomsRequest
+	(*ListStudyRoomsReply)(nil),                   // 55: api.ListStudyRoomsReply
 	(*StudyRoomMsgElement)(nil),                     // 56: api.StudyRoomMsgElement
 	(*StudyRoom)(nil),                               // 57: api.StudyRoom
-	(*GetMoviesRequest)(nil),                        // 58: api.GetMoviesRequest
-	(*GetMoviesReply)(nil),                          // 59: api.GetMoviesReply
+	(*ListMoviesRequest)(nil),                        // 58: api.ListMoviesRequest
+	(*ListMoviesReply)(nil),                          // 59: api.ListMoviesReply
 	(*Movie)(nil),                                   // 60: api.Movie
 	(*CreateFeedbackReply)(nil),                     // 61: api.CreateFeedbackReply
 	(*CreateFeedbackRequest)(nil),                   // 62: api.CreateFeedbackRequest
 	(*CreateFeedbackImageReply)(nil),                // 63: api.CreateFeedbackImageReply
 	(*CreateFeedbackImageRequest)(nil),              // 64: api.CreateFeedbackImageRequest
-	(*GetMembersRequest)(nil),                       // 65: api.GetMembersRequest
-	(*GetMembersReply)(nil),                         // 66: api.GetMembersReply
+	(*GetMemberRequest)(nil),                       // 65: api.GetMemberRequest
+	(*GetMemberReply)(nil),                         // 66: api.GetMemberReply
 	(*GetUploadStatusRequest)(nil),                  // 67: api.GetUploadStatusRequest
 	(*GetUploadStatusReply)(nil),                    // 68: api.GetUploadStatusReply
 	(*GetNotificationRequest)(nil),                  // 69: api.GetNotificationRequest
@@ -5448,7 +5448,7 @@ var file_tumdev_campus_backend_proto_goTypes = []interface{}{
 	(*GetNotificationConfirmReply)(nil),             // 72: api.GetNotificationConfirmReply
 	(*GetCanteenHeadCountRequest)(nil),              // 73: api.GetCanteenHeadCountRequest
 	(*GetCanteenHeadCountReply)(nil),                // 74: api.GetCanteenHeadCountReply
-	(*GetMoreInformationReply_MoreInformation)(nil), // 75: api.GetMoreInformationReply.MoreInformation
+	(*ListMoreInformationReply_MoreInformation)(nil), // 75: api.ListMoreInformationReply.MoreInformation
 	(*timestamppb.Timestamp)(nil),                   // 76: google.protobuf.Timestamp
 }
 var file_tumdev_campus_backend_proto_depIdxs = []int32{
@@ -5458,15 +5458,15 @@ var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	76, // 3: api.News.created:type_name -> google.protobuf.Timestamp
 	76, // 4: api.News.date:type_name -> google.protobuf.Timestamp
 	10, // 5: api.GetNewsReply.news:type_name -> api.News
-	15, // 6: api.GetNewsSourcesReply.sources:type_name -> api.NewsSource
-	18, // 7: api.GetNewsAlertsReply.alerts:type_name -> api.NewsAlert
+	15, // 6: api.ListNewsSourcesReply.sources:type_name -> api.NewsSource
+	18, // 7: api.ListNewsAlertsReply.alerts:type_name -> api.NewsAlert
 	76, // 8: api.NewsAlert.created:type_name -> google.protobuf.Timestamp
 	76, // 9: api.NewsAlert.from:type_name -> google.protobuf.Timestamp
 	76, // 10: api.NewsAlert.to:type_name -> google.protobuf.Timestamp
-	76, // 11: api.GetCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
-	76, // 12: api.GetCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
-	23, // 13: api.GetCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
-	37, // 14: api.GetCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
+	76, // 11: api.ListCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
+	76, // 12: api.ListCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
+	23, // 13: api.ListCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
+	37, // 14: api.ListCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
 	76, // 15: api.GetDishRatingsRequest.from:type_name -> google.protobuf.Timestamp
 	76, // 16: api.GetDishRatingsRequest.to:type_name -> google.protobuf.Timestamp
 	23, // 17: api.GetDishRatingsReply.rating:type_name -> api.SingleRatingReply
@@ -5476,73 +5476,73 @@ var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	76, // 21: api.SingleRatingReply.visited:type_name -> google.protobuf.Timestamp
 	35, // 22: api.CreateCanteenRatingRequest.rating_tags:type_name -> api.RatingTag
 	35, // 23: api.CreateDishRatingRequest.rating_tags:type_name -> api.RatingTag
-	34, // 24: api.GetAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
-	34, // 25: api.GetNameTagsReply.rating_tags:type_name -> api.TagsOverview
-	34, // 26: api.GetAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
-	40, // 27: api.GetCanteensReply.canteen:type_name -> api.Canteen
-	45, // 28: api.GetResponsiblePersonReply.responsible_person:type_name -> api.ResponsiblePerson
-	75, // 29: api.GetMoreInformationReply.infos:type_name -> api.GetMoreInformationReply.MoreInformation
-	51, // 30: api.GetOpeningTimesReply.facilities:type_name -> api.OpeningTimesMsgElement
-	56, // 31: api.GetStudyRoomListReply.rooms:type_name -> api.StudyRoomMsgElement
+	34, // 24: api.ListAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
+	34, // 25: api.ListNameTagsReply.rating_tags:type_name -> api.TagsOverview
+	34, // 26: api.ListAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
+	40, // 27: api.ListCanteensReply.canteen:type_name -> api.Canteen
+	45, // 28: api.ListResponsiblePersonReply.responsible_person:type_name -> api.ResponsiblePerson
+	75, // 29: api.ListMoreInformationReply.infos:type_name -> api.ListMoreInformationReply.MoreInformation
+	51, // 30: api.ListOpeningTimesReply.facilities:type_name -> api.OpeningTimesMsgElement
+	56, // 31: api.ListStudyRoomsReply.rooms:type_name -> api.StudyRoomMsgElement
 	57, // 32: api.StudyRoomMsgElement.rooms:type_name -> api.StudyRoom
-	60, // 33: api.GetMoviesReply.movies:type_name -> api.Movie
+	60, // 33: api.ListMoviesReply.movies:type_name -> api.Movie
 	76, // 34: api.Movie.date:type_name -> google.protobuf.Timestamp
 	76, // 35: api.Movie.created:type_name -> google.protobuf.Timestamp
 	76, // 36: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
-	16, // 37: api.Campus.GetNewsAlerts:input_type -> api.GetNewsAlertsRequest
-	13, // 38: api.Campus.GetNewsSources:input_type -> api.GetNewsSourcesRequest
+	16, // 37: api.Campus.ListNewsAlerts:input_type -> api.ListNewsAlertsRequest
+	13, // 38: api.Campus.ListNewsSources:input_type -> api.ListNewsSourcesRequest
 	12, // 39: api.Campus.GetNews:input_type -> api.GetNewsRequest
 	7,  // 40: api.Campus.SearchRooms:input_type -> api.SearchRoomsRequest
-	19, // 41: api.Campus.GetCanteenRatings:input_type -> api.GetCanteenRatingsRequest
+	19, // 41: api.Campus.ListCanteenRatings:input_type -> api.ListCanteenRatingsRequest
 	21, // 42: api.Campus.GetDishRatings:input_type -> api.GetDishRatingsRequest
 	25, // 43: api.Campus.CreateCanteenRating:input_type -> api.CreateCanteenRatingRequest
 	27, // 44: api.Campus.CreateDishRating:input_type -> api.CreateDishRatingRequest
-	28, // 45: api.Campus.GetAvailableDishTags:input_type -> api.GetAvailableDishTagsRequest
-	30, // 46: api.Campus.GetNameTags:input_type -> api.GetNameTagsRequest
-	32, // 47: api.Campus.GetAvailableCanteenTags:input_type -> api.GetAvailableCanteenTagsRequest
-	38, // 48: api.Campus.GetCanteens:input_type -> api.GetCanteensRequest
-	41, // 49: api.Campus.GetDishes:input_type -> api.GetDishesRequest
-	43, // 50: api.Campus.GetResponsiblePerson:input_type -> api.GetResponsiblePersonRequest
-	47, // 51: api.Campus.GetMoreInformation:input_type -> api.GetMoreInformationRequest
-	49, // 52: api.Campus.GetOpeningTimes:input_type -> api.GetOpeningTimesRequest
+	28, // 45: api.Campus.ListAvailableDishTags:input_type -> api.ListAvailableDishTagsRequest
+	30, // 46: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
+	32, // 47: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
+	38, // 48: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
+	41, // 49: api.Campus.ListDishes:input_type -> api.ListDishesRequest
+	43, // 50: api.Campus.ListResponsiblePerson:input_type -> api.ListResponsiblePersonRequest
+	47, // 51: api.Campus.ListMoreInformation:input_type -> api.ListMoreInformationRequest
+	49, // 52: api.Campus.ListOpeningTimes:input_type -> api.ListOpeningTimesRequest
 	52, // 53: api.Campus.GetUpdateNote:input_type -> api.GetUpdateNoteRequest
-	54, // 54: api.Campus.GetStudyRoomList:input_type -> api.GetStudyRoomListRequest
-	58, // 55: api.Campus.GetMovies:input_type -> api.GetMoviesRequest
+	54, // 54: api.Campus.ListStudyRooms:input_type -> api.ListStudyRoomsRequest
+	58, // 55: api.Campus.ListMovies:input_type -> api.ListMoviesRequest
 	62, // 56: api.Campus.CreateFeedback:input_type -> api.CreateFeedbackRequest
 	64, // 57: api.Campus.CreateFeedbackImage:input_type -> api.CreateFeedbackImageRequest
 	67, // 58: api.Campus.GetUploadStatus:input_type -> api.GetUploadStatusRequest
 	69, // 59: api.Campus.GetNotification:input_type -> api.GetNotificationRequest
 	71, // 60: api.Campus.GetNotificationConfirm:input_type -> api.GetNotificationConfirmRequest
-	65, // 61: api.Campus.GetMembers:input_type -> api.GetMembersRequest
+	65, // 61: api.Campus.GetMember:input_type -> api.GetMemberRequest
 	73, // 62: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
 	5,  // 63: api.Campus.IOSDeviceRequestResponse:input_type -> api.IOSDeviceRequestResponseRequest
 	1,  // 64: api.Campus.CreateDevice:input_type -> api.CreateDeviceRequest
 	3,  // 65: api.Campus.DeleteDevice:input_type -> api.DeleteDeviceRequest
-	17, // 66: api.Campus.GetNewsAlerts:output_type -> api.GetNewsAlertsReply
-	14, // 67: api.Campus.GetNewsSources:output_type -> api.GetNewsSourcesReply
+	17, // 66: api.Campus.ListNewsAlerts:output_type -> api.ListNewsAlertsReply
+	14, // 67: api.Campus.ListNewsSources:output_type -> api.ListNewsSourcesReply
 	11, // 68: api.Campus.GetNews:output_type -> api.GetNewsReply
 	8,  // 69: api.Campus.SearchRooms:output_type -> api.SearchRoomsReply
-	20, // 70: api.Campus.GetCanteenRatings:output_type -> api.GetCanteenRatingsReply
+	20, // 70: api.Campus.ListCanteenRatings:output_type -> api.ListCanteenRatingsReply
 	22, // 71: api.Campus.GetDishRatings:output_type -> api.GetDishRatingsReply
 	24, // 72: api.Campus.CreateCanteenRating:output_type -> api.CreateCanteenRatingReply
 	26, // 73: api.Campus.CreateDishRating:output_type -> api.CreateDishRatingReply
-	29, // 74: api.Campus.GetAvailableDishTags:output_type -> api.GetAvailableDishTagsReply
-	31, // 75: api.Campus.GetNameTags:output_type -> api.GetNameTagsReply
-	33, // 76: api.Campus.GetAvailableCanteenTags:output_type -> api.GetAvailableCanteenTagsReply
-	39, // 77: api.Campus.GetCanteens:output_type -> api.GetCanteensReply
-	42, // 78: api.Campus.GetDishes:output_type -> api.GetDishesReply
-	44, // 79: api.Campus.GetResponsiblePerson:output_type -> api.GetResponsiblePersonReply
-	48, // 80: api.Campus.GetMoreInformation:output_type -> api.GetMoreInformationReply
-	50, // 81: api.Campus.GetOpeningTimes:output_type -> api.GetOpeningTimesReply
+	29, // 74: api.Campus.ListAvailableDishTags:output_type -> api.ListAvailableDishTagsReply
+	31, // 75: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
+	33, // 76: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
+	39, // 77: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
+	42, // 78: api.Campus.ListDishes:output_type -> api.ListDishesReply
+	44, // 79: api.Campus.ListResponsiblePerson:output_type -> api.ListResponsiblePersonReply
+	48, // 80: api.Campus.ListMoreInformation:output_type -> api.ListMoreInformationReply
+	50, // 81: api.Campus.ListOpeningTimes:output_type -> api.ListOpeningTimesReply
 	53, // 82: api.Campus.GetUpdateNote:output_type -> api.GetUpdateNoteReply
-	55, // 83: api.Campus.GetStudyRoomList:output_type -> api.GetStudyRoomListReply
-	59, // 84: api.Campus.GetMovies:output_type -> api.GetMoviesReply
+	55, // 83: api.Campus.ListStudyRooms:output_type -> api.ListStudyRoomsReply
+	59, // 84: api.Campus.ListMovies:output_type -> api.ListMoviesReply
 	61, // 85: api.Campus.CreateFeedback:output_type -> api.CreateFeedbackReply
 	63, // 86: api.Campus.CreateFeedbackImage:output_type -> api.CreateFeedbackImageReply
 	68, // 87: api.Campus.GetUploadStatus:output_type -> api.GetUploadStatusReply
 	70, // 88: api.Campus.GetNotification:output_type -> api.GetNotificationReply
 	72, // 89: api.Campus.GetNotificationConfirm:output_type -> api.GetNotificationConfirmReply
-	66, // 90: api.Campus.GetMembers:output_type -> api.GetMembersReply
+	66, // 90: api.Campus.GetMember:output_type -> api.GetMemberReply
 	74, // 91: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
 	6,  // 92: api.Campus.IOSDeviceRequestResponse:output_type -> api.IOSDeviceRequestResponseReply
 	2,  // 93: api.Campus.CreateDevice:output_type -> api.CreateDeviceReply
@@ -5705,7 +5705,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNewsSourcesRequest); i {
+			switch v := v.(*ListNewsSourcesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5717,7 +5717,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNewsSourcesReply); i {
+			switch v := v.(*ListNewsSourcesReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5741,7 +5741,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNewsAlertsRequest); i {
+			switch v := v.(*ListNewsAlertsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5753,7 +5753,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNewsAlertsReply); i {
+			switch v := v.(*ListNewsAlertsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5777,7 +5777,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteenRatingsRequest); i {
+			switch v := v.(*ListCanteenRatingsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5789,7 +5789,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteenRatingsReply); i {
+			switch v := v.(*ListCanteenRatingsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5885,7 +5885,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetAvailableDishTagsRequest); i {
+			switch v := v.(*ListAvailableDishTagsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5897,7 +5897,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetAvailableDishTagsReply); i {
+			switch v := v.(*ListAvailableDishTagsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5909,7 +5909,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNameTagsRequest); i {
+			switch v := v.(*ListNameTagsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5921,7 +5921,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetNameTagsReply); i {
+			switch v := v.(*ListNameTagsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5933,7 +5933,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetAvailableCanteenTagsRequest); i {
+			switch v := v.(*ListAvailableCanteenTagsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5945,7 +5945,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetAvailableCanteenTagsReply); i {
+			switch v := v.(*ListAvailableCanteenTagsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6005,7 +6005,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteensRequest); i {
+			switch v := v.(*ListCanteensRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6017,7 +6017,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCanteensReply); i {
+			switch v := v.(*ListCanteensReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6041,7 +6041,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetDishesRequest); i {
+			switch v := v.(*ListDishesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6053,7 +6053,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetDishesReply); i {
+			switch v := v.(*ListDishesReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6065,7 +6065,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetResponsiblePersonRequest); i {
+			switch v := v.(*ListResponsiblePersonRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6077,7 +6077,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetResponsiblePersonReply); i {
+			switch v := v.(*ListResponsiblePersonReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6113,7 +6113,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMoreInformationRequest); i {
+			switch v := v.(*ListMoreInformationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6125,7 +6125,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMoreInformationReply); i {
+			switch v := v.(*ListMoreInformationReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6137,7 +6137,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[48].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetOpeningTimesRequest); i {
+			switch v := v.(*ListOpeningTimesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6149,7 +6149,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetOpeningTimesReply); i {
+			switch v := v.(*ListOpeningTimesReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6197,7 +6197,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[53].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetStudyRoomListRequest); i {
+			switch v := v.(*ListStudyRoomsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6209,7 +6209,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[54].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetStudyRoomListReply); i {
+			switch v := v.(*ListStudyRoomsReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6245,7 +6245,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[57].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMoviesRequest); i {
+			switch v := v.(*ListMoviesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6257,7 +6257,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[58].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMoviesReply); i {
+			switch v := v.(*ListMoviesReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6329,7 +6329,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[64].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMembersRequest); i {
+			switch v := v.(*GetMemberRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6341,7 +6341,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[65].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMembersReply); i {
+			switch v := v.(*GetMemberReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6449,7 +6449,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[74].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMoreInformationReply_MoreInformation); i {
+			switch v := v.(*ListMoreInformationReply_MoreInformation); i {
 			case 0:
 				return &v.state
 			case 1:
