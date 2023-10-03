@@ -20,31 +20,30 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Campus_ListNewsAlerts_FullMethodName            = "/api.Campus/ListNewsAlerts"
-	Campus_ListNewsSources_FullMethodName           = "/api.Campus/ListNewsSources"
+	Campus_ListNewsAlerts_FullMethodName           = "/api.Campus/ListNewsAlerts"
+	Campus_ListNewsSources_FullMethodName          = "/api.Campus/ListNewsSources"
 	Campus_GetNews_FullMethodName                  = "/api.Campus/GetNews"
 	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
-	Campus_ListCanteenRatings_FullMethodName        = "/api.Campus/ListCanteenRatings"
+	Campus_ListCanteenRatings_FullMethodName       = "/api.Campus/ListCanteenRatings"
 	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
 	Campus_CreateCanteenRating_FullMethodName      = "/api.Campus/CreateCanteenRating"
 	Campus_CreateDishRating_FullMethodName         = "/api.Campus/CreateDishRating"
-	Campus_ListAvailableDishTags_FullMethodName     = "/api.Campus/ListAvailableDishTags"
-	Campus_ListNameTags_FullMethodName              = "/api.Campus/ListNameTags"
-	Campus_ListAvailableCanteenTags_FullMethodName  = "/api.Campus/ListAvailableCanteenTags"
-	Campus_ListCanteens_FullMethodName              = "/api.Campus/ListCanteens"
-	Campus_ListDishes_FullMethodName                = "/api.Campus/ListDishes"
-	Campus_ListResponsiblePerson_FullMethodName     = "/api.Campus/ListResponsiblePerson"
-	Campus_ListMoreInformation_FullMethodName       = "/api.Campus/ListMoreInformation"
-	Campus_ListOpeningTimes_FullMethodName          = "/api.Campus/ListOpeningTimes"
+	Campus_ListAvailableDishTags_FullMethodName    = "/api.Campus/ListAvailableDishTags"
+	Campus_ListNameTags_FullMethodName             = "/api.Campus/ListNameTags"
+	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
+	Campus_ListCanteens_FullMethodName             = "/api.Campus/ListCanteens"
+	Campus_ListDishes_FullMethodName               = "/api.Campus/ListDishes"
+	Campus_ListResponsiblePerson_FullMethodName    = "/api.Campus/ListResponsiblePerson"
+	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
+	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
-	Campus_ListStudyRooms_FullMethodName         = "/api.Campus/ListStudyRooms"
-	Campus_ListMovies_FullMethodName                = "/api.Campus/ListMovies"
+	Campus_ListStudyRooms_FullMethodName           = "/api.Campus/ListStudyRooms"
+	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
-	Campus_CreateFeedbackImage_FullMethodName      = "/api.Campus/CreateFeedbackImage"
 	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
 	Campus_GetNotification_FullMethodName          = "/api.Campus/GetNotification"
 	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
-	Campus_GetMember_FullMethodName               = "/api.Campus/GetMember"
+	Campus_GetMember_FullMethodName                = "/api.Campus/GetMember"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
 	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
@@ -76,7 +75,6 @@ type CampusClient interface {
 	ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, in *CreateFeedbackRequest, opts ...grpc.CallOption) (*CreateFeedbackReply, error)
-	CreateFeedbackImage(ctx context.Context, in *CreateFeedbackImageRequest, opts ...grpc.CallOption) (*CreateFeedbackImageReply, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
 	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
@@ -278,15 +276,6 @@ func (c *campusClient) CreateFeedback(ctx context.Context, in *CreateFeedbackReq
 	return out, nil
 }
 
-func (c *campusClient) CreateFeedbackImage(ctx context.Context, in *CreateFeedbackImageRequest, opts ...grpc.CallOption) (*CreateFeedbackImageReply, error) {
-	out := new(CreateFeedbackImageReply)
-	err := c.cc.Invoke(ctx, Campus_CreateFeedbackImage_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
 	out := new(GetUploadStatusReply)
 	err := c.cc.Invoke(ctx, Campus_GetUploadStatus_FullMethodName, in, out, opts...)
@@ -384,7 +373,6 @@ type CampusServer interface {
 	ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error)
-	CreateFeedbackImage(context.Context, *CreateFeedbackImageRequest) (*CreateFeedbackImageReply, error)
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
@@ -462,9 +450,6 @@ func (UnimplementedCampusServer) ListMovies(context.Context, *ListMoviesRequest)
 }
 func (UnimplementedCampusServer) CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
-}
-func (UnimplementedCampusServer) CreateFeedbackImage(context.Context, *CreateFeedbackImageRequest) (*CreateFeedbackImageReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedbackImage not implemented")
 }
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
@@ -863,24 +848,6 @@ func _Campus_CreateFeedback_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_CreateFeedbackImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateFeedbackImageRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).CreateFeedbackImage(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_CreateFeedbackImage_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).CreateFeedbackImage(ctx, req.(*CreateFeedbackImageRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUploadStatusRequest)
 	if err := dec(in); err != nil {
@@ -1111,10 +1078,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateFeedback",
 			Handler:    _Campus_CreateFeedback_Handler,
-		},
-		{
-			MethodName: "CreateFeedbackImage",
-			Handler:    _Campus_CreateFeedbackImage_Handler,
 		},
 		{
 			MethodName: "GetUploadStatus",
