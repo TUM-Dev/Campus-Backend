@@ -83,7 +83,7 @@ func updateNameTagOptions(db *gorm.DB) {
 			log.WithError(res.Error).WithFields(fields).Error("Unable to load tag")
 		}
 		if res.RowsAffected == 0 || res.Error != nil {
-			parent := model.DishRatingTagOption{
+			parent := model.DishNameTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
@@ -91,7 +91,7 @@ func updateNameTagOptions(db *gorm.DB) {
 			if err := db.Model(&model.DishNameTagOption{}).Create(&parent).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Error while creating tag")
 			}
-			parentId = parent.DishRatingTagOption
+			parentId = parent.DishNameTagOption
 		}
 
 		addCanBeIncluded(parentId, db, v)
@@ -176,11 +176,21 @@ func updateTagTable(path string, db *gorm.DB, tagType modelType) {
 		}
 
 		if count == 0 {
-			element := model.DishRatingTagOption{
-				DE: v.TagNameGerman,
-				EN: v.TagNameEnglish,
+			var createError error
+			if tagType == CAFETERIA {
+				element := model.CafeteriaRatingTagOption{
+					DE: v.TagNameGerman,
+					EN: v.TagNameEnglish,
+				}
+				createError = insertModel.Create(&element).Error
+			} else {
+				element := model.DishRatingTagOption{
+					DE: v.TagNameGerman,
+					EN: v.TagNameEnglish,
+				}
+				createError = insertModel.Create(&element).Error
 			}
-			createError := insertModel.Create(&element).Error
+
 			if createError != nil {
 				log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
 			} else {
