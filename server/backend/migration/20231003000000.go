@@ -72,50 +72,30 @@ func setNameTagOptions(db *gorm.DB) {
 }
 
 func addNotIncluded(parentId int64, db *gorm.DB, v backend.NameTag) {
-	var count int64
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 		err := db.Model(&model.DishNameTagOptionExcluded{}).
-			Where("expression LIKE ? AND NameTagID = ?", expression, parentId).
-			Select("DishNameTagOptionExcluded").
-			Count(&count).Error
+			Create(&model.DishNameTagOptionExcluded{
+				Expression: expression,
+				NameTagID:  parentId}).Error
 		if err != nil {
-			log.WithError(err).WithFields(fields).Error("Unable to load can be excluded tag")
-		} else {
-			if count == 0 {
-				err := db.Model(&model.DishNameTagOptionExcluded{}).
-					Create(&model.DishNameTagOptionExcluded{
-						Expression: expression,
-						NameTagID:  parentId}).Error
-				if err != nil {
-					log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
-				}
-			}
+			log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
 		}
 	}
 }
 
 func addCanBeIncluded(parentId int64, db *gorm.DB, v backend.NameTag) {
-	var count int64
+
 	for _, expression := range v.CanBeIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
+
 		err := db.Model(&model.DishNameTagOptionIncluded{}).
-			Where("expression LIKE ? AND NameTagID = ?", expression, parentId).
-			Select("DishNameTagOptionIncluded").
-			Count(&count).Error
+			Create(&model.DishNameTagOptionIncluded{
+				Expression: expression,
+				NameTagID:  parentId,
+			}).Error
 		if err != nil {
-			log.WithError(err).WithFields(fields).Error("Unable to load can be included tag")
-		} else {
-			if count == 0 {
-				err := db.Model(&model.DishNameTagOptionIncluded{}).
-					Create(&model.DishNameTagOptionIncluded{
-						Expression: expression,
-						NameTagID:  parentId,
-					}).Error
-				if err != nil {
-					log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
-				}
-			}
+			log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
 		}
 	}
 }
@@ -129,7 +109,7 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 	tagsDish := generateRatingTagListFromFile(path)
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsDish.MultiLanguageTags {
-		var count int64
+		/*var count int64
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		if tagType == backend.CAFETERIA {
 			countError := db.Model(&model.CafeteriaRatingTagOption{}).
@@ -145,30 +125,30 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 			if countError != nil {
 				log.WithError(countError).WithFields(fields).Error("Unable to find dish rating tag")
 			}
+		}*/
+		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
+		//	if count == 0 {
+		var createError error
+		if tagType == backend.CAFETERIA {
+			element := model.CafeteriaRatingTagOption{
+				DE: v.TagNameGerman,
+				EN: v.TagNameEnglish,
+			}
+			createError = insertModel.Create(&element).Error
+		} else {
+			element := model.DishRatingTagOption{
+				DE: v.TagNameGerman,
+				EN: v.TagNameEnglish,
+			}
+			createError = insertModel.Create(&element).Error
 		}
 
-		if count == 0 {
-			var createError error
-			if tagType == backend.CAFETERIA {
-				element := model.CafeteriaRatingTagOption{
-					DE: v.TagNameGerman,
-					EN: v.TagNameEnglish,
-				}
-				createError = insertModel.Create(&element).Error
-			} else {
-				element := model.DishRatingTagOption{
-					DE: v.TagNameGerman,
-					EN: v.TagNameEnglish,
-				}
-				createError = insertModel.Create(&element).Error
-			}
-
-			if createError != nil {
-				log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
-			} else {
-				log.WithFields(fields).Info("New Entry successfully created")
-			}
+		if createError != nil {
+			log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
+		} else {
+			log.WithFields(fields).Info("New Entry successfully created")
 		}
+		//}
 	}
 }
 
