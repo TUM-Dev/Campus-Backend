@@ -12,6 +12,24 @@ import (
 	"gorm.io/gorm"
 )
 
+type MultiLanguageTags struct {
+	MultiLanguageTags []tag `json:"tags"`
+}
+type tag struct {
+	TagNameEnglish string `json:"tagNameEnglish"`
+	TagNameGerman  string `json:"tagNameGerman"`
+}
+
+type MultiLanguageNameTags struct {
+	MultiLanguageNameTags []NameTag `json:"tags"`
+}
+type NameTag struct {
+	TagNameEnglish string   `json:"tagNameEnglish"`
+	TagNameGerman  string   `json:"tagNameGerman"`
+	NotIncluded    []string `json:"notincluded"`
+	CanBeIncluded  []string `json:"canbeincluded"`
+}
+
 //go:embed static_data
 var staticData embed.FS
 
@@ -71,7 +89,7 @@ func setNameTagOptions(db *gorm.DB) {
 	}
 }
 
-func addNotIncluded(parentId int64, db *gorm.DB, v backend.NameTag) {
+func addNotIncluded(parentId int64, db *gorm.DB, v NameTag) {
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 		err := db.Model(&model.DishNameTagOptionExcluded{}).
@@ -84,7 +102,7 @@ func addNotIncluded(parentId int64, db *gorm.DB, v backend.NameTag) {
 	}
 }
 
-func addCanBeIncluded(parentId int64, db *gorm.DB, v backend.NameTag) {
+func addCanBeIncluded(parentId int64, db *gorm.DB, v NameTag) {
 
 	for _, expression := range v.CanBeIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
@@ -160,13 +178,13 @@ func getTagModel(tagType backend.ModelType, db *gorm.DB) *gorm.DB {
 	}
 }
 
-func generateNameTagListFromFile(path string) backend.MultiLanguageNameTags {
+func generateNameTagListFromFile(path string) MultiLanguageNameTags {
 	file, err := staticData.ReadFile(path)
 	if err != nil {
 		log.WithError(err).Error("Error including json.")
 	}
 
-	var tags backend.MultiLanguageNameTags
+	var tags MultiLanguageNameTags
 	errjson := json.Unmarshal(file, &tags)
 	if errjson != nil {
 		log.WithError(errjson).Error("Error parsing nameTagList to json.")
@@ -174,13 +192,13 @@ func generateNameTagListFromFile(path string) backend.MultiLanguageNameTags {
 	return tags
 }
 
-func generateRatingTagListFromFile(path string) backend.MultiLanguageTags {
+func generateRatingTagListFromFile(path string) MultiLanguageTags {
 	file, err := staticData.ReadFile(path)
 	if err != nil {
 		log.WithError(err).Error("Error including json.")
 	}
 
-	var tags backend.MultiLanguageTags
+	var tags MultiLanguageTags
 	errjson := json.Unmarshal(file, &tags)
 	if errjson != nil {
 		log.WithError(errjson).Error("Error parsing ratingTagList to json.")
