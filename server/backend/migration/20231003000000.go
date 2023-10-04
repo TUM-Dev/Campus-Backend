@@ -1,8 +1,9 @@
 package migration
 
 import (
-	embed "embed"
+	"embed"
 	"encoding/json"
+
 	"gorm.io/gorm/logger"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
