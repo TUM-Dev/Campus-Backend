@@ -3,6 +3,7 @@ package migration
 import (
 	embed "embed"
 	"encoding/json"
+	"gorm.io/gorm/logger"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -59,7 +60,7 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 }
 
 func addEntriesForCronJob(tx *gorm.DB, cronName string, interval int32) error {
-	return tx.Create(&model.Crontab{
+	return tx.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&model.Crontab{
 		Interval: interval,
 		Type:     null.StringFrom(cronName),
 		LastRun:  0,
@@ -81,7 +82,7 @@ func setNameTagOptions(db *gorm.DB) {
 			EN: v.TagNameEnglish,
 		}
 
-		if err := db.Model(&model.DishNameTagOption{}).Create(&parent).Error; err != nil {
+		if err := db.Model(&model.DishNameTagOption{}).Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&parent).Error; err != nil {
 			fields := log.Fields{"en": v.TagNameEnglish, "de": v.TagNameGerman}
 			log.WithError(err).WithFields(fields).Error("Error while creating tag")
 		}
@@ -96,6 +97,7 @@ func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 		err := db.Model(&model.DishNameTagOptionExcluded{}).
+			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&model.DishNameTagOptionExcluded{
 				Expression: expression,
 				NameTagID:  parentId}).Error
@@ -110,6 +112,7 @@ func addCanBeIncluded(parentId int64, db *gorm.DB, v nameTag) {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 
 		err := db.Model(&model.DishNameTagOptionIncluded{}).
+			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&model.DishNameTagOptionIncluded{
 				Expression: expression,
 				NameTagID:  parentId,
@@ -142,7 +145,7 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			createError = insertModel.Create(&element).Error
+			createError = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
 		}
 
 		if createError != nil {
