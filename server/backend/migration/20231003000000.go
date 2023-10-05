@@ -130,22 +130,22 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 	insertModel := getTagModel(tagType, db)
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
-		var createError error
+		var err error
 		if tagType == backend.CAFETERIA {
 			element := model.CafeteriaRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			createError = insertModel.Create(&element).Error
+			err = insertModel.Create(&element).Error
 		} else {
 			element := model.DishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			createError = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
+			err = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
 		}
 
-		if createError != nil {
+		if err != nil {
 			log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
 		} else {
 			log.WithFields(fields).Info("New Entry successfully created")
