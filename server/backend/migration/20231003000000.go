@@ -80,7 +80,7 @@ func setNameTagOptions(db *gorm.DB) {
 			EN: v.TagNameEnglish,
 		}
 
-		if err := db.Model(&model.DishNameTagOption{}).Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&parent).Error; err != nil {
+		if err := db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&parent).Error; err != nil {
 			fields := log.Fields{"en": v.TagNameEnglish, "de": v.TagNameGerman}
 			log.WithError(err).WithFields(fields).Error("Error while creating tag")
 		}
