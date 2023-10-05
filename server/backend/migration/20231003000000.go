@@ -44,28 +44,28 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			if err := tx.Delete(&model.DishNameTagOption{}, &model.CafeteriaRatingTagOption{}, &model.DishNameTagOptionIncluded{}, &model.DishNameTagOptionExcluded{}).Error; err != nil {
 				return err
 			}
+			// todo re tables actually created?
 			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
 			setTagTable("static_data/cafeteriaRatingTags.json", tx, backend.CAFETERIA)
 			setNameTagOptions(tx)
-			errRating := addEntriesForCronJob(tx, "averageRatingComputation", 300)
-			if errRating != nil {
-				return errRating
+			err := tx.Create(&model.Crontab{
+				Interval: 300,
+				Type:     null.StringFrom("averageRatingComputation"),
+			}).Error
+			if err != nil {
+				return err
 			}
-			errDish := addEntriesForCronJob(tx, "dishNameDownload", 302400)
-			if errDish != nil {
-				return errDish
-			}
-			return nil
+			err = tx.Create(&model.Crontab{
+				Interval: 302400,
+				Type:     null.StringFrom("dishNameDownload"),
+			}).Error
+			return err
+		},
+		Rollback: func(tx *gorm.DB) error {
+			err := tx.Delete(&model.DishNameTagOption{}, &model.CafeteriaRatingTagOption{}, &model.DishNameTagOptionIncluded{}, &model.DishNameTagOptionExcluded{}).Error
+			return err
 		},
 	}
-}
-
-func addEntriesForCronJob(tx *gorm.DB, cronName string, interval int32) error {
-	return tx.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&model.Crontab{
-		Interval: interval,
-		Type:     null.StringFrom(cronName),
-		LastRun:  0,
-	}).Error
 }
 
 /*
@@ -74,7 +74,16 @@ If a tag with the exact german and english name does not exist yet, it will be c
 Old tags won't be removed to prevent problems with foreign keys.
 */
 func setNameTagOptions(db *gorm.DB) {
-	tagsNames := generateNameTagListFromFile("static_data/dishNameTags.json")
+	file, err := staticData.ReadFile("static_data/dishNameTags.json")
+	if err != nil {
+		log.WithError(err).Error("Error including json.")
+	}
+
+	var tagsNames multiLanguageNameTags
+	errjson := json.Unmarshal(file, &tagsNames)
+	if errjson != nil {
+		log.WithError(errjson).Error("Error parsing nameTagList to json.")
+	}
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		var parentId int64
 
@@ -131,7 +140,14 @@ The TagType is used to identify the corresponding model
 */
 func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 	tagsDish := generateRatingTagListFromFile(path)
-	insertModel := getTagModel(tagType, db)
+
+	var insertModel *gorm.DB
+	if tagType == backend.DISH {
+		insertModel = db.Model(&model.DishRatingTagOption{})
+	} else {
+		insertModel = db.Model(&model.CafeteriaRatingTagOption{})
+	}
+
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		var createError error
@@ -155,28 +171,6 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 			log.WithFields(fields).Info("New Entry successfully created")
 		}
 	}
-}
-
-func getTagModel(tagType backend.ModelType, db *gorm.DB) *gorm.DB {
-	if tagType == backend.DISH {
-		return db.Model(&model.DishRatingTagOption{})
-	} else {
-		return db.Model(&model.CafeteriaRatingTagOption{})
-	}
-}
-
-func generateNameTagListFromFile(path string) multiLanguageNameTags {
-	file, err := staticData.ReadFile(path)
-	if err != nil {
-		log.WithError(err).Error("Error including json.")
-	}
-
-	var tags multiLanguageNameTags
-	errjson := json.Unmarshal(file, &tags)
-	if errjson != nil {
-		log.WithError(errjson).Error("Error parsing nameTagList to json.")
-	}
-	return tags
 }
 
 func generateRatingTagListFromFile(path string) multiLanguageTags {
