@@ -75,7 +75,6 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			if err := tx.Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
 				return err
 			}
-			// todo re tables actually created?
 			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
 			setTagTable("static_data/cafeteriaRatingTags.json", tx, backend.CAFETERIA)
 			setNameTagOptions(tx)
@@ -100,7 +99,7 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 }
 
 /*
-Updates the list of dishtags.
+setNameTagOptions updates the list of dishtags.
 If a tag with the exact german and english name does not exist yet, it will be created.
 Old tags won't be removed to prevent problems with foreign keys.
 */
@@ -116,34 +115,31 @@ func setNameTagOptions(db *gorm.DB) {
 		log.WithError(errjson).Error("Error parsing nameTagList to json.")
 	}
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		var parentId int64
-
 		parent := DishNameTagOption{
 			DE: v.TagNameGerman,
 			EN: v.TagNameEnglish,
 		}
 
-		if err := db.Model(&DishNameTagOption{}).Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&parent).Error; err != nil {
+		if err := db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&parent).Error; err != nil {
 			fields := log.Fields{"en": v.TagNameEnglish, "de": v.TagNameGerman}
 			log.WithError(err).WithFields(fields).Error("Error while creating tag")
 		}
-		parentId = parent.DishNameTagOption
 
-		addCanBeIncluded(parentId, db, v)
-		addNotIncluded(parentId, db, v)
+		addCanBeIncluded(parent.DishNameTagOption, db, v)
+		addNotIncluded(parent.DishNameTagOption, db, v)
 	}
 }
 
 func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
-		err := db.Model(&DishNameTagOptionExcluded{}).
+		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&DishNameTagOptionExcluded{
 				Expression: expression,
 				NameTagID:  parentId}).Error
 		if err != nil {
-			log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
+			log.WithError(err).WithFields(fields).Error("Unable to create new DishNameTagOptionExcluded")
 		}
 	}
 }
@@ -152,7 +148,7 @@ func addCanBeIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	for _, expression := range v.CanBeIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 
-		err := db.Model(&DishNameTagOptionIncluded{}).
+		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&DishNameTagOptionIncluded{
 				Expression: expression,
@@ -181,25 +177,25 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
-		var createError error
+		var err error
 		if tagType == backend.CAFETERIA {
 			element := CafeteriaRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			createError = insertModel.Create(&element).Error
+			err = insertModel.Create(&element).Error
 		} else {
 			element := DishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			createError = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
+			err = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
 		}
 
-		if createError != nil {
-			log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
+		if err != nil {
+			log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
 		} else {
-			log.WithFields(fields).Info("New Entry successfully created")
+			log.WithFields(fields).Debug("New Tag successfully created")
 		}
 	}
 }
