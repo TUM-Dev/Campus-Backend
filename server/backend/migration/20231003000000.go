@@ -156,9 +156,8 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 func getTagModel(tagType backend.ModelType, db *gorm.DB) *gorm.DB {
 	if tagType == backend.DISH {
 		return db.Model(&model.DishRatingTagOption{})
-	} else {
-		return db.Model(&model.CafeteriaRatingTagOption{})
 	}
+	return db.Model(&model.CafeteriaRatingTagOption{})
 }
 
 func generateNameTagListFromFile(path string) multiLanguageNameTags {
