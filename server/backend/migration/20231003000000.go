@@ -47,9 +47,8 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
 			setTagTable("static_data/cafeteriaRatingTags.json", tx, backend.CAFETERIA)
 			setNameTagOptions(tx)
-			errRating := addEntriesForCronJob(tx, "averageRatingComputation", 300)
-			if errRating != nil {
-				return errRating
+			if err := addEntriesForCronJob(tx, "averageRatingComputation", 300); err != nil {
+				return err
 			}
 			errDish := addEntriesForCronJob(tx, "dishNameDownload", 302400)
 			if errDish != nil {
