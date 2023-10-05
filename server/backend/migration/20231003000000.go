@@ -69,7 +69,7 @@ func addEntriesForCronJob(tx *gorm.DB, cronName string, interval int32) error {
 }
 
 /*
-Updates the list of dishtags.
+setNameTagOptions updates the list of dishtags.
 If a tag with the exact german and english name does not exist yet, it will be created.
 Old tags won't be removed to prevent problems with foreign keys.
 */
