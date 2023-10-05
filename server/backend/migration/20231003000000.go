@@ -50,9 +50,8 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			if err := addEntriesForCronJob(tx, "averageRatingComputation", 300); err != nil {
 				return err
 			}
-			errDish := addEntriesForCronJob(tx, "dishNameDownload", 302400)
-			if errDish != nil {
-				return errDish
+			if err := addEntriesForCronJob(tx, "dishNameDownload", 302400); err != nil {
+				return err
 			}
 			return nil
 		},
