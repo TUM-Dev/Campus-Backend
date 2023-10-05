@@ -76,8 +76,6 @@ Old tags won't be removed to prevent problems with foreign keys.
 func setNameTagOptions(db *gorm.DB) {
 	tagsNames := generateNameTagListFromFile("static_data/dishNameTags.json")
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		var parentId int64
-
 		parent := model.DishNameTagOption{
 			DE: v.TagNameGerman,
 			EN: v.TagNameEnglish,
