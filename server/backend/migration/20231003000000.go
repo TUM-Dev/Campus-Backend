@@ -100,7 +100,7 @@ func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 				Expression: expression,
 				NameTagID:  parentId}).Error
 		if err != nil {
-			log.WithError(err).WithFields(fields).Error("Unable to create new can be excluded tag")
+			log.WithError(err).WithFields(fields).Error("Unable to create new DishNameTagOptionExcluded")
 		}
 	}
 }
