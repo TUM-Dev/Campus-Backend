@@ -108,7 +108,7 @@ func addCanBeIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	for _, expression := range v.CanBeIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 
-		err := db.Model(&model.DishNameTagOptionIncluded{}).
+		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&model.DishNameTagOptionIncluded{
 				Expression: expression,
