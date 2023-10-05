@@ -148,7 +148,7 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 		if err != nil {
 			log.WithError(createError).WithFields(fields).Error("Unable to create new can be excluded tag")
 		} else {
-			log.WithFields(fields).Info("New Entry successfully created")
+			log.WithFields(fields).Debug("New Tag successfully created")
 		}
 	}
 }
