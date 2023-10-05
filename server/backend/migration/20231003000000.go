@@ -87,10 +87,9 @@ func setNameTagOptions(db *gorm.DB) {
 			fields := log.Fields{"en": v.TagNameEnglish, "de": v.TagNameGerman}
 			log.WithError(err).WithFields(fields).Error("Error while creating tag")
 		}
-		parentId = parent.DishNameTagOption
 
-		addCanBeIncluded(parentId, db, v)
-		addNotIncluded(parentId, db, v)
+		addCanBeIncluded(parent.DishNameTagOption, db, v)
+		addNotIncluded(parent.DishNameTagOption, db, v)
 	}
 }
 
