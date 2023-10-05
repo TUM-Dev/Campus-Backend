@@ -93,7 +93,7 @@ func setNameTagOptions(db *gorm.DB) {
 func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 	for _, expression := range v.NotIncluded {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
-		err := db.Model(&model.DishNameTagOptionExcluded{}).
+		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
 			Create(&model.DishNameTagOptionExcluded{
 				Expression: expression,
