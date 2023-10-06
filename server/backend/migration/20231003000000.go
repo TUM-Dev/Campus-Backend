@@ -215,9 +215,8 @@ func generateRatingTagListFromFile(path string) multiLanguageTags {
 	}
 
 	var tags multiLanguageTags
-	errjson := json.Unmarshal(file, &tags)
-	if errjson != nil {
-		log.WithError(errjson).Error("Error parsing ratingTagList to json.")
+	if err := json.Unmarshal(file, &tags); err != nil {
+		log.WithError(err).Error("Error parsing ratingTagList to json.")
 	}
 	return tags
 }
