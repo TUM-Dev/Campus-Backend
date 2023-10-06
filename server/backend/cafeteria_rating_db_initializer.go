@@ -40,7 +40,7 @@ func initTagRatingOptions(db *gorm.DB) {
 	updateTagTable("static_data/cafeteriaRatingTags.json", db, CAFETERIA)
 	updateNameTagOptions(db)
 	addEntriesForCronJob(db, "averageRatingComputation", 300)
-	addEntriesForCronJob(db, "dishNameDownload", 302400) //run twice every week*/
+	addEntriesForCronJob(db, "dishNameDownload", 302400) //run twice every week
 }
 
 func addEntriesForCronJob(db *gorm.DB, cronName string, interval int32) {
