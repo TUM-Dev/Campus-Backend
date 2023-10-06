@@ -733,10 +733,10 @@ func (s *CampusServer) ListDishes(ctx context.Context, request *pb.ListDishesReq
 // GetCanteenHeadCount RPC Endpoint
 func (s *CampusServer) GetCanteenHeadCount(ctx context.Context, input *pb.GetCanteenHeadCountRequest) (*pb.GetCanteenHeadCountReply, error) {
 	data := model.CanteenHeadCount{Count: 0, MaxCount: 0, Percent: -1} // Initialize with an empty (not found) value
-	err := s.db.WithContext(ctx).Model(&model.CanteenHeadCount{}).Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).FirstOrInit(&data).Error
+	err := s.db.WithContext(ctx).Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).FirstOrInit(&data).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).Error("while querying the canteen head count for: ", input.CanteenId)
-		return nil, errors.New("failed to query head count")
+		return nil, status.Error(codes.Internal, "failed to query head count")
 	}
 
 	return &pb.GetCanteenHeadCountReply{
