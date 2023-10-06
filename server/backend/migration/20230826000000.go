@@ -24,17 +24,25 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230826000000",
 		Migrate: func(tx *gorm.DB) error {
-			if err := tx.Migrator().AddColumn(&Feedback{}, "Processed"); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AddColumn(&Feedback{}, "OsVersion"); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AddColumn(&Feedback{}, "AppVersion"); err != nil {
-				return err
-			}
-			if err := tx.Exec("UPDATE feedback SET processed = true WHERE processed != true;").Error; err != nil {
-				return err
+			if tx.Migrator().HasTable(&model.Feedback{}) {
+				if err := tx.Migrator().AddColumn(&Feedback{}, "Processed"); err != nil {
+					return err
+				}
+				if err := tx.Migrator().AddColumn(&Feedback{}, "OsVersion"); err != nil {
+					return err
+				}
+				if err := tx.Migrator().AddColumn(&Feedback{}, "AppVersion"); err != nil {
+					return err
+				}
+				if err := tx.Exec("UPDATE feedback SET processed = true WHERE processed != true;").Error; err != nil {
+					return err
+				}
+			} else {
+				if err := m.database.AutoMigrate(
+					&model.Feedback{},
+				); err != nil {
+					return err
+				}
 			}
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail"); err != nil {
 				return err

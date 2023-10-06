@@ -15,6 +15,11 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20210709193000",
 		Migrate: func(tx *gorm.DB) error {
+			if err := m.database.AutoMigrate(
+				&model.File{},
+			); err != nil {
+				return err
+			}
 			type Files struct {
 				URL        null.String `gorm:"column:url;default:null;" json:"url"`                         // URL of the file source (if any)
 				Downloaded null.Bool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
