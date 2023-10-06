@@ -89,11 +89,10 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			if err != nil {
 				return err
 			}
-			err = tx.Create(&model.Crontab{
+			return tx.Create(&model.Crontab{
 				Interval: 302400,
 				Type:     null.StringFrom("dishNameDownload"),
 			}).Error
-			return err
 		},
 		Rollback: func(tx *gorm.DB) error {
 			if tx.Migrator().HasTable(&DishNameTagOption{}) {
