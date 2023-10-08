@@ -140,36 +140,36 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-const ExpectedGetNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file`"
+const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file`"
 
-func (s *NewsSuite) Test_GetNewsNone_withFilters() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery+" WHERE src = ? AND news > ?")).
+func (s *NewsSuite) Test_ListNewsNone_withFilters() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{NewsSource: 1, LastNewsId: 2})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{NewsSource: 1, LastNewsId: 2})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
-func (s *NewsSuite) Test_GetNewsNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery)).
+func (s *NewsSuite) Test_ListNewsNone() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
-func (s *NewsSuite) Test_GetNewsMultiple() {
+func (s *NewsSuite) Test_ListNewsMultiple() {
 	n1 := news1()
 	n2 := news2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(" ")).
@@ -179,9 +179,9 @@ func (s *NewsSuite) Test_GetNewsMultiple() {
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{
 			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: n1.Image.String, Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
 			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: n2.Image.String, Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},

@@ -13,7 +13,11 @@ import (
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
 	var movies []model.Kino
-	if err := s.db.WithContext(ctx).Joins("File").Find(&movies, "kino > ?", req.LastId).Error; err != nil {
+	tx := s.db.WithContext(ctx).Joins("File")
+	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
+		tx = tx.Where("src > ?", req.OldestDateAt)
+	}
+	if err := tx.Find(&movies, "kino > ?", req.LastId).Error; err != nil {
 		log.WithError(err).Error("Error while fetching movies from database")
 		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
 	}

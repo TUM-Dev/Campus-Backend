@@ -26,7 +26,7 @@ service Campus {
     };
   }
 
-  rpc GetNews(GetNewsRequest) returns (GetNewsReply) {
+  rpc ListNews(ListNewsRequest) returns (ListNewsReply) {
     option (google.api.http) = {
       get: "/news/{last_news_id}",
       response_body: "news"
@@ -240,15 +240,17 @@ message News {
   google.protobuf.Timestamp date = 8;
 }
 
-message GetNewsReply {
+message ListNewsReply {
   repeated News news = 1;
 }
 
-message GetNewsRequest {
+message ListNewsRequest {
   // the last id of the news item received. 0 to get all news items
   int32 last_news_id = 1;
   // filter by news source id. 0 to get all news items
   int32 news_source = 2;
+  // the oldest time you want to be included in the response
+  google.protobuf.Timestamp oldest_date_at = 3;
 }
 
 message ListNewsSourcesRequest {}
@@ -516,6 +518,8 @@ message StudyRoom {
 message ListMoviesRequest {
   // the last Id you have requested. Use -1 to get all movies
   int32 last_id = 1;
+  // the oldest time you want to be included in the response
+  google.protobuf.Timestamp oldest_date_at = 2;
 }
 
 message ListMoviesReply {
