@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Campus_ListNewsAlerts_FullMethodName           = "/api.Campus/ListNewsAlerts"
 	Campus_ListNewsSources_FullMethodName          = "/api.Campus/ListNewsSources"
-	Campus_GetNews_FullMethodName                  = "/api.Campus/GetNews"
+	Campus_ListNews_FullMethodName                 = "/api.Campus/ListNews"
 	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
 	Campus_ListCanteenRatings_FullMethodName       = "/api.Campus/ListCanteenRatings"
 	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
@@ -56,7 +56,7 @@ const (
 type CampusClient interface {
 	ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error)
 	ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error)
-	GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error)
+	ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error)
 	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error)
@@ -114,9 +114,9 @@ func (c *campusClient) ListNewsSources(ctx context.Context, in *ListNewsSourcesR
 	return out, nil
 }
 
-func (c *campusClient) GetNews(ctx context.Context, in *GetNewsRequest, opts ...grpc.CallOption) (*GetNewsReply, error) {
-	out := new(GetNewsReply)
-	err := c.cc.Invoke(ctx, Campus_GetNews_FullMethodName, in, out, opts...)
+func (c *campusClient) ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error) {
+	out := new(ListNewsReply)
+	err := c.cc.Invoke(ctx, Campus_ListNews_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +354,7 @@ func (c *campusClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest
 type CampusServer interface {
 	ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error)
 	ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error)
-	GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error)
+	ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error)
 	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error)
@@ -397,8 +397,8 @@ func (UnimplementedCampusServer) ListNewsAlerts(context.Context, *ListNewsAlerts
 func (UnimplementedCampusServer) ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListNewsSources not implemented")
 }
-func (UnimplementedCampusServer) GetNews(context.Context, *GetNewsRequest) (*GetNewsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNews not implemented")
+func (UnimplementedCampusServer) ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNews not implemented")
 }
 func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
@@ -524,20 +524,20 @@ func _Campus_ListNewsSources_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNewsRequest)
+func _Campus_ListNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNewsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetNews(ctx, in)
+		return srv.(CampusServer).ListNews(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_GetNews_FullMethodName,
+		FullMethod: Campus_ListNews_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNews(ctx, req.(*GetNewsRequest))
+		return srv.(CampusServer).ListNews(ctx, req.(*ListNewsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1008,8 +1008,8 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_ListNewsSources_Handler,
 		},
 		{
-			MethodName: "GetNews",
-			Handler:    _Campus_GetNews_Handler,
+			MethodName: "ListNews",
+			Handler:    _Campus_ListNews_Handler,
 		},
 		{
 			MethodName: "SearchRooms",
