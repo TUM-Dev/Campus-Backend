@@ -24,12 +24,10 @@ func (m TumDBMigrator) migrate20210709193000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20210709193000",
 		Migrate: func(tx *gorm.DB) error {
-			if !tx.Migrator().HasTable(&File{}) {
-				if err := m.database.AutoMigrate(
-					&File{},
-				); err != nil {
-					return err
-				}
+			if err := tx.AutoMigrate(
+				&File{},
+			); err != nil {
+				return err
 			}
 			type Files struct {
 				URL        null.String `gorm:"column:url;default:null;" json:"url"`                         // URL of the file source (if any)

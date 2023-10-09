@@ -33,9 +33,7 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
-			if err := m.database.AutoMigrate(
-				&NewsSource{},
-			); err != nil {
+			if err := tx.AutoMigrate(&NewsSource{}); err != nil {
 				return err
 			}
 			// tu film news source is now inlined

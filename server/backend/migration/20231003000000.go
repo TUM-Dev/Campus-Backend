@@ -73,10 +73,8 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231003000000",
 		Migrate: func(tx *gorm.DB) error {
-			if tx.Migrator().HasTable(&DishNameTagOption{}) {
-				if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
-					return err
-				}
+			if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
+				return err
 			}
 
 			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
@@ -95,10 +93,8 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if tx.Migrator().HasTable(&DishNameTagOption{}) {
-				if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
-					return err
-				}
+			if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
+				return err
 			}
 			return nil
 		},
