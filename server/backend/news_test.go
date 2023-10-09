@@ -85,10 +85,10 @@ func source2() *model.NewsSource {
 	}
 }
 
-const ExpectedGetSourceQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
+const ExpectedListNewsSourcesQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(source1().Source, source1().Title, source1().URL, source1().FileID, source1().Hook, source1().File.File, source1().File.Name, source1().File.Path, source1().File.Downloads, source1().File.URL, source1().File.Downloaded).
 			AddRow(source2().Source, source2().Title, source2().URL, source2().FileID, source2().Hook, source2().File.File, source2().File.Name, source2().File.Path, source2().File.Downloads, source2().File.URL, source2().File.Downloaded))
@@ -127,7 +127,7 @@ func news2() *model.News {
 }
 
 func (s *NewsSuite) Test_ListNewsSourcesNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.MD{}
