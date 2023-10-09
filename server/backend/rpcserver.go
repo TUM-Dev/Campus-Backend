@@ -5,8 +5,6 @@ import (
 	"errors"
 	"net"
 
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -38,10 +36,6 @@ var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	log.Trace("Server starting up")
-	if env.IsMensaCronActive() {
-		initTagRatingOptions(db)
-	}
-
 	return &CampusServer{
 		db:                      db,
 		deviceBuf:               newDeviceBuffer(),
