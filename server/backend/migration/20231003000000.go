@@ -175,13 +175,6 @@ The TagType is used to identify the corresponding model
 func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 	tagsDish := generateRatingTagListFromFile(path)
 
-	var insertModel *gorm.DB
-	if tagType == backend.DISH {
-		insertModel = db.Model(&DishRatingTagOption{})
-	} else {
-		insertModel = db.Model(&CafeteriaRatingTagOption{})
-	}
-
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		var err error
@@ -190,13 +183,13 @@ func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			err = insertModel.Create(&element).Error
+			err = db.Create(&element).Error
 		} else {
 			element := DishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
-			err = insertModel.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
+			err = db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(&element).Error
 		}
 
 		if err != nil {

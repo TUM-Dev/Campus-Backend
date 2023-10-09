@@ -18,7 +18,7 @@ type NewsSource struct {
 }
 
 // migrate20230904100000
-// migrates the crontap from kino to movie crontab
+// migrates the crontab from kino to movie crontab
 func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230904100000",
@@ -33,15 +33,13 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
-			if !tx.Migrator().HasTable(&NewsSource{}) {
-				if err := m.database.AutoMigrate(
-					&NewsSource{},
-				); err != nil {
-					return err
-				}
+			if err := m.database.AutoMigrate(
+				&NewsSource{},
+			); err != nil {
+				return err
 			}
 			// tu film news source is now inlined
-			if err := tx.Delete(&model.NewsSource{Source: 2}).Error; err != nil {
+			if err := tx.Delete(&NewsSource{Source: 2}).Error; err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{
@@ -61,7 +59,7 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "kino"); err != nil {
 				return err
 			}
-			if err := tx.Create(&model.NewsSource{
+			if err := tx.Create(&NewsSource{
 				Source: 2,
 				Title:  "TU Film",
 				URL:    null.StringFrom("http://www.tu-film.de/programm/index/upcoming.rss"),
