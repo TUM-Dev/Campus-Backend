@@ -1522,12 +1522,6 @@
     "apiMovie": {
       "type": "object",
       "properties": {
-        "coverName": {
-          "type": "string"
-        },
-        "coverPath": {
-          "type": "string"
-        },
         "movieId": {
           "type": "string",
           "format": "int64"
@@ -1573,6 +1567,10 @@
         "link": {
           "type": "string",
           "title": "Where to find additional information about this movie"
+        },
+        "coverUrl": {
+          "type": "string",
+          "title": "Where to find a cover image for this movie"
         }
       }
     },
@@ -1600,11 +1598,13 @@
         },
         "created": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "when the news item was created in OUR database"
         },
         "date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "the date of the news item"
         }
       }
     },
@@ -1640,7 +1640,7 @@
         "title": {
           "type": "string"
         },
-        "icon": {
+        "iconUrl": {
           "type": "string"
         }
       }

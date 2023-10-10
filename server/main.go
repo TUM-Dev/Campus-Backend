@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -75,8 +74,9 @@ func main() {
 	})
 	httpMux.Handle("/metrics", promhttp.Handler())
 
-	static, _ := fs.Sub(swagfs, "swagger")
-	httpMux.Handle("/", http.FileServer(http.FS(static)))
+	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
+	httpMux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("/Storage"))))
+	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server
 	grpcServer := grpc.NewServer()
