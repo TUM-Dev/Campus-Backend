@@ -188,12 +188,12 @@ func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 	}
 
 	var excludedTags []int64
-	errExcluded := db.Model(&model.DishNameTagOptionExcluded{}).
+	err := db.Model(&model.DishNameTagOptionExcluded{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&excludedTags).Error
-	if errExcluded != nil {
-		log.WithError(errExcluded).Error("Error while querying all excluded expressions for the dish: ", lowercaseDish)
+	if err != nil {
+		log.WithError(err).Error("Error while querying all excluded expressions for the dish: ", lowercaseDish)
 	}
 
 	//set all entries in included to -1 if the excluded tag was recognised for this tag rating.

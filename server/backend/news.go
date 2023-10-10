@@ -39,7 +39,7 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 	return &pb.ListNewsSourcesReply{Sources: resp}, nil
 }
 
-func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb.GetNewsReply, error) {
+func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*pb.ListNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
@@ -49,12 +49,15 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
+	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
+		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
+	}
 	if req.LastNewsId != 0 {
 		tx = tx.Where("news > ?", req.LastNewsId)
 	}
 	if err := tx.Find(&newsEntries).Error; err != nil {
 		log.WithError(err).Error("could not find news item")
-		return nil, status.Error(codes.Internal, "could not GetNews")
+		return nil, status.Error(codes.Internal, "could not ListNews")
 	}
 
 	resp := make([]*pb.News, len(newsEntries))
@@ -71,7 +74,7 @@ func (s *CampusServer) GetNews(ctx context.Context, req *pb.GetNewsRequest) (*pb
 			Date:     timestamppb.New(item.Date),
 		}
 	}
-	return &pb.GetNewsReply{News: resp}, nil
+	return &pb.ListNewsReply{News: resp}, nil
 }
 
 func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlertsRequest) (*pb.ListNewsAlertsReply, error) {

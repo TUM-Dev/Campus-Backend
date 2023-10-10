@@ -665,6 +665,14 @@
             "required": true,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "oldestDateAt",
+            "description": "the oldest time you want to be included in the response",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "tags": [
@@ -736,7 +744,7 @@
     },
     "/news/{lastNewsId}": {
       "get": {
-        "operationId": "Campus_GetNews",
+        "operationId": "Campus_ListNews",
         "responses": {
           "200": {
             "description": "",
@@ -771,6 +779,14 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "oldestDateAt",
+            "description": "the oldest time you want to be included in the response",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "tags": [
@@ -1238,18 +1254,6 @@
         }
       }
     },
-    "apiGetNewsReply": {
-      "type": "object",
-      "properties": {
-        "news": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiNews"
-          }
-        }
-      }
-    },
     "apiGetNotificationConfirmReply": {
       "type": "object",
       "properties": {
@@ -1480,6 +1484,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiNewsAlert"
+          }
+        }
+      }
+    },
+    "apiListNewsReply": {
+      "type": "object",
+      "properties": {
+        "news": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiNews"
           }
         }
       }

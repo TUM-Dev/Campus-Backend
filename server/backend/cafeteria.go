@@ -25,13 +25,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type modelType int
+type ModelType int
 
 // Used to differentiate between the type of the model for different queries to reduce duplicated code.
 const (
-	DISH      modelType = 1
-	CAFETERIA modelType = 2
-	NAME      modelType = 3
+	DISH      ModelType = 1
+	CAFETERIA ModelType = 2
+	NAME      ModelType = 3
 )
 
 // GetCafeteriaRatings RPC Endpoint
@@ -284,7 +284,7 @@ type queryRatingTag struct {
 // queryTags
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
-func queryTags(cafeteriaID int32, dishID int32, ratingType modelType, tx *gorm.DB) []*pb.RatingTagResult {
+func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagResult {
 	var results []queryRatingTag
 	var err error
 	if ratingType == DISH {
@@ -333,7 +333,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType modelType, tx *gorm.D
 
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
-func queryTagRatingsOverviewForRating(dishID int64, ratingType modelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
+func queryTagRatingsOverviewForRating(dishID int64, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
 	var results []*pb.RatingTagNewRequest
 	var err error
 	if ratingType == DISH {
@@ -538,7 +538,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 // storeRatingTags
 // Checks whether the rating-tag name is a valid option and if so,
 // it will be saved with a reference to the rating
-func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType modelType, tx *gorm.DB) error {
+func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelType, tx *gorm.DB) error {
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
@@ -599,7 +599,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType modelTy
 
 }
 
-func getModelStoreTag(tagType modelType, tx *gorm.DB) *gorm.DB {
+func getModelStoreTag(tagType ModelType, tx *gorm.DB) *gorm.DB {
 	if tagType == DISH {
 		return tx.Model(&model.DishRatingTag{})
 	} else {
@@ -728,4 +728,21 @@ func (s *CampusServer) ListDishes(ctx context.Context, request *pb.ListDishesReq
 	return &pb.ListDishesReply{
 		Dish: results,
 	}, requestStatus
+}
+
+// GetCanteenHeadCount RPC Endpoint
+func (s *CampusServer) GetCanteenHeadCount(ctx context.Context, input *pb.GetCanteenHeadCountRequest) (*pb.GetCanteenHeadCountReply, error) {
+	data := model.CanteenHeadCount{Count: 0, MaxCount: 0, Percent: -1} // Initialize with an empty (not found) value
+	err := s.db.WithContext(ctx).Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).FirstOrInit(&data).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).Error("while querying the canteen head count for: ", input.CanteenId)
+		return nil, status.Error(codes.Internal, "failed to query head count")
+	}
+
+	return &pb.GetCanteenHeadCountReply{
+		Count:     data.Count,
+		MaxCount:  data.MaxCount,
+		Percent:   data.Percent,
+		Timestamp: timestamppb.New(data.Timestamp),
+	}, nil
 }

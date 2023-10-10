@@ -17,14 +17,14 @@ func (m TumDBMigrator) migrate20230904000000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'ticketsales'").Error; err != nil {
 				return err
 			}
-			if err := SafeEnumRollback(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
+			if err := SafeEnumRemove(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
 				return err
 			}
 			return nil
 		},
 
 		Rollback: func(tx *gorm.DB) error {
-			if err := SafeEnumMigrate(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
+			if err := SafeEnumAdd(tx, model.Crontab{}, "type", "ticketsales"); err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{

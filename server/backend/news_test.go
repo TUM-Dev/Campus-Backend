@@ -85,10 +85,10 @@ func source2() *model.NewsSource {
 	}
 }
 
-const ExpectedGetSourceQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
+const ExpectedListNewsSourcesQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(source1().Source, source1().Title, source1().URL, source1().FileID, source1().Hook, source1().File.File, source1().File.Name, source1().File.Path, source1().File.Downloads, source1().File.URL, source1().File.Downloaded).
 			AddRow(source2().Source, source2().Title, source2().URL, source2().FileID, source2().Hook, source2().File.File, source2().File.Name, source2().File.Path, source2().File.Downloads, source2().File.URL, source2().File.Downloaded))
@@ -127,7 +127,7 @@ func news2() *model.News {
 }
 
 func (s *NewsSuite) Test_ListNewsSourcesNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetSourceQuery)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.MD{}
@@ -140,36 +140,36 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-const ExpectedGetNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file`"
+const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file`"
 
-func (s *NewsSuite) Test_GetNewsNone_withFilters() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery+" WHERE src = ? AND news > ?")).
+func (s *NewsSuite) Test_ListNewsNone_withFilters() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{NewsSource: 1, LastNewsId: 2})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{NewsSource: 1, LastNewsId: 2})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
-func (s *NewsSuite) Test_GetNewsNone() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetNewsQuery)).
+func (s *NewsSuite) Test_ListNewsNone() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{},
 	}
 	require.Equal(s.T(), expectedResp, response)
 }
-func (s *NewsSuite) Test_GetNewsMultiple() {
+func (s *NewsSuite) Test_ListNewsMultiple() {
 	n1 := news1()
 	n2 := news2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(" ")).
@@ -179,9 +179,9 @@ func (s *NewsSuite) Test_GetNewsMultiple() {
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-	response, err := server.GetNews(meta, &pb.GetNewsRequest{})
+	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.GetNewsReply{
+	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{
 			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: n1.Image.String, Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
 			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: n2.Image.String, Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},

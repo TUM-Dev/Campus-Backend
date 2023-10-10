@@ -36,7 +36,7 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 			if err := tx.Exec("UPDATE feedback SET processed = true WHERE processed != true;").Error; err != nil {
 				return err
 			}
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "feedbackEmail"); err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{
@@ -58,7 +58,7 @@ func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'feedbackEmail'").Error; err != nil {
 				return err
 			}
-			return SafeEnumMigrate(tx, &model.Crontab{}, "type", "feedbackEmail")
+			return SafeEnumAdd(tx, &model.Crontab{}, "type", "feedbackEmail")
 		},
 	}
 }
