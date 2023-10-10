@@ -52,16 +52,31 @@ type DishNameTagOption struct {
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }
 
+// TableName sets the insert table name for this struct type
+func (n *DishNameTagOption) TableName() string {
+	return "dish_name_tag_option"
+}
+
 type DishNameTagOptionExcluded struct {
 	DishNameTagOptionExcluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
 
+// TableName sets the insert table name for this struct type
+func (n *DishNameTagOptionExcluded) TableName() string {
+	return "dish_name_tag_option_excluded"
+}
+
 type DishNameTagOptionIncluded struct {
 	DishNameTagOptionIncluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *DishNameTagOptionIncluded) TableName() string {
+	return "dish_name_tag_option_included"
 }
 
 //go:embed static_data
@@ -80,11 +95,13 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
 			setTagTable("static_data/cafeteriaRatingTags.json", tx, backend.CAFETERIA)
 			setNameTagOptions(tx)
-			err := tx.Create(&model.Crontab{
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation", "dishNameDownload"); err != nil {
+				return err
+			}
+			if err := tx.Create(&model.Crontab{
 				Interval: 300,
 				Type:     null.StringFrom("averageRatingComputation"),
-			}).Error
-			if err != nil {
+			}).Error; err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{
@@ -96,7 +113,13 @@ func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
 			if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
 				return err
 			}
-			return nil
+			if err := tx.Delete(&model.Crontab{}, "type = 'averageRatingComputation'").Error; err != nil {
+				return err
+			}
+			if err := tx.Delete(&model.Crontab{}, "type = 'dishNameDownload'").Error; err != nil {
+				return err
+			}
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "dishNameDownload", "averageRatingComputation")
 		},
 	}
 }
