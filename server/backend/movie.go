@@ -15,7 +15,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 	var movies []model.Kino
 	tx := s.db.WithContext(ctx).Joins("File")
 	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-		tx = tx.Where("src > ?", req.OldestDateAt)
+		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
 	}
 	if err := tx.Find(&movies, "kino > ?", req.LastId).Error; err != nil {
 		log.WithError(err).Error("Error while fetching movies from database")

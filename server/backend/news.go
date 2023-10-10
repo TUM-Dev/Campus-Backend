@@ -50,7 +50,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
 	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-		tx = tx.Where("src > ?", req.OldestDateAt)
+		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
 	}
 	if req.LastNewsId != 0 {
 		tx = tx.Where("news > ?", req.LastNewsId)
