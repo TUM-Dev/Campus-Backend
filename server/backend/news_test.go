@@ -56,7 +56,7 @@ func newsFile(id int64) *model.File {
 	return &model.File{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
-		Path:       "news/sources",
+		Path:       "news/sources/",
 		Downloads:  1,
 		URL:        null.String{},
 		Downloaded: null.BoolFrom(true),
@@ -68,8 +68,8 @@ func source1() *model.NewsSource {
 		Source: 1,
 		Title:  "Amazing News 1",
 		URL:    null.StringFrom("https://example.com/amazing1"),
-		FileID: newsFile(2).File,
-		File:   *newsFile(2),
+		FileID: newsFile(1).File,
+		File:   *newsFile(1),
 		Hook:   null.StringFrom(""),
 	}
 }
@@ -99,8 +99,8 @@ func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsSourcesReply{
 		Sources: []*pb.NewsSource{
-			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, Icon: source1().File.URL.String},
-			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, Icon: source2().File.URL.String},
+			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, IconUrl: "https://api.tum.app/files/news/sources/src_1.png"},
+			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, IconUrl: "https://api.tum.app/files/news/sources/src_2.png"},
 		},
 	}
 	require.Equal(s.T(), expectedResp, response)
@@ -183,8 +183,8 @@ func (s *NewsSuite) Test_ListNewsMultiple() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{
-			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: n1.Image.String, Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
-			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: n2.Image.String, Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},
+			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: "https://api.tum.app/files/news/sources/src_1.png", Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
+			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: "", Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},
 		},
 	}
 	require.Equal(s.T(), expectedResp, response)
@@ -194,7 +194,7 @@ func newsAlertFile(id int64) *model.File {
 	return &model.File{
 		File:       id,
 		Name:       fmt.Sprintf("src_%d.png", id),
-		Path:       "news/sources",
+		Path:       "news/sources/",
 		Downloads:  1,
 		URL:        null.String{},
 		Downloaded: null.BoolFrom(true),
@@ -216,8 +216,8 @@ func alert1() *model.NewsAlert {
 func alert2() *model.NewsAlert {
 	return &model.NewsAlert{
 		NewsAlert: 2,
-		FileID:    newsAlertFile(1).File,
-		File:      *newsAlertFile(1),
+		FileID:    newsAlertFile(2).File,
+		File:      *newsAlertFile(2),
 		Name:      null.String{},
 		Link:      null.String{},
 		Created:   time.Time.Add(time.Now(), time.Hour),
@@ -266,8 +266,8 @@ func (s *NewsSuite) Test_ListNewsAlertsMultiple() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsAlertsReply{
 		Alerts: []*pb.NewsAlert{
-			{ImageUrl: a1.File.URL.String, Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
-			{ImageUrl: a2.File.URL.String, Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},
+			{ImageUrl: "https://api.tum.app/files/news/sources/src_1.png", Link: a1.Link.String, Created: timestamppb.New(a1.Created), From: timestamppb.New(a1.From), To: timestamppb.New(a1.To)},
+			{ImageUrl: "https://api.tum.app/files/news/sources/src_2.png", Link: a2.Link.String, Created: timestamppb.New(a2.Created), From: timestamppb.New(a2.From), To: timestamppb.New(a2.To)},
 		}}
 	require.Equal(s.T(), expectedResp, response)
 }

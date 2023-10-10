@@ -36,7 +36,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 			Actors:      movie.Actors,
 			ImdbRating:  movie.ImdbRating,
 			Description: movie.Description,
-			CoverUrl:    fmt.Sprintf("https://api.tum.app/files/%s/%s", movie.File.Path, movie.File.Name),
+			CoverUrl:    fmt.Sprintf("https://api.tum.app/files/%s%s", movie.File.Path, movie.File.Name),
 			CoverId:     movie.File.File,
 			Link:        movie.Link,
 		})

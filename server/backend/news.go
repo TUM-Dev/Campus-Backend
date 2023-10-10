@@ -33,7 +33,7 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 		resp = append(resp, &pb.NewsSource{
 			Source:  fmt.Sprintf("%d", source.Source),
 			Title:   source.Title,
-			IconUrl: fmt.Sprintf("https://api.tum.app/files/%s/%s", source.File.Path, source.File.Name),
+			IconUrl: fmt.Sprintf("https://api.tum.app/files/%s%s", source.File.Path, source.File.Name),
 		})
 	}
 	return &pb.ListNewsSourcesReply{Sources: resp}, nil
@@ -63,12 +63,16 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	resp := make([]*pb.News, len(newsEntries))
 	for i, item := range newsEntries {
 		log.WithField("title", item.Title).Trace("sending news")
+		imgUrl := ""
+		if item.File != nil {
+			imgUrl = fmt.Sprintf("https://api.tum.app/files/%s%s", item.File.Path, item.File.Name)
+		}
 		resp[i] = &pb.News{
 			Id:       item.News,
 			Title:    item.Title,
 			Text:     item.Description,
 			Link:     item.Link,
-			ImageUrl: fmt.Sprintf("https://api.tum.app/files/%s/%s", item.File.Path, item.File.Name),
+			ImageUrl: imgUrl,
 			Source:   fmt.Sprintf("%d", item.Src),
 			Created:  timestamppb.New(item.Created),
 			Date:     timestamppb.New(item.Date),
@@ -97,7 +101,7 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	var alerts []*pb.NewsAlert
 	for _, alert := range res {
 		alerts = append(alerts, &pb.NewsAlert{
-			ImageUrl: fmt.Sprintf("https://api.tum.app/files/%s/%s", alert.File.Path, alert.File.Name),
+			ImageUrl: fmt.Sprintf("https://api.tum.app/files/%s%s", alert.File.Path, alert.File.Name),
 			Link:     alert.Link.String,
 			Created:  timestamppb.New(alert.Created),
 			From:     timestamppb.New(alert.From),
