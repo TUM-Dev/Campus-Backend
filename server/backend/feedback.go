@@ -21,70 +21,81 @@ import (
 
 // CreateFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
 func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) error {
-	return s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
-		// receive metadata
-		imageCount := int32(0)
-		id, err := uuid.NewGen().NewV7()
+	// receive metadata
+	id, err := uuid.NewGen().NewV4()
+	if err != nil {
+		log.WithError(err).Error("Error generating uuid")
+		return status.Error(codes.Internal, "Error starting feedback submission")
+	}
+	feedback := &model.Feedback{EmailId: null.StringFrom(id.String())}
+
+	// download images
+	dbPath := path.Join("feedback", feedback.EmailId.String)
+	var uploadedFilenames []*string
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
-			log.WithError(err).Error("Error generating uuid")
-			return status.Error(codes.Internal, "Error starting feedback submission")
+			log.WithError(err).Error("Error receiving feedback")
+			deleteUploaded(feedback.EmailId.String)
+			return status.Error(codes.Internal, "Error receiving feedback")
 		}
-		feedback := &model.Feedback{EmailId: null.StringFrom(id.String())}
+		mergeFeedback(feedback, req)
 
-		// download images
-		for {
-			req, err := stream.Recv()
-			if err == io.EOF {
-				break
+		if len(req.Attachment) > 0 {
+			filename := handleImageUpload(&req.Attachment, feedback.ImageCount, dbPath)
+			if filename != nil {
+				uploadedFilenames = append(uploadedFilenames, filename)
 			}
-			if err != nil {
-				log.WithError(err).Error("Error receiving feedback")
-				deleteUploaded(tx, feedback.EmailId.String)
-				return status.Error(codes.Internal, "Error receiving feedback")
+		}
+	}
+	feedback.ImageCount = int32(len(uploadedFilenames))
+	// save feedback to db
+	if err := s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
+		for _, filename := range uploadedFilenames {
+			if err := tx.Create(&model.File{
+				Name:       *filename,
+				Path:       dbPath,
+				Downloads:  1,
+				Downloaded: null.BoolFrom(true),
+			}).Error; err != nil {
+				return err
 			}
-			mergeFeedback(feedback, req)
+		}
+		return tx.Create(feedback).Error
+	}); err != nil {
+		log.WithError(err).Error("Error creating feedback")
+		deleteUploaded(feedback.EmailId.String)
+		return status.Error(codes.Internal, "Error creating feedback")
+	}
 
-			if len(req.Attachment) > 0 {
-				imageCount = handleImageUpload(tx, &req.Attachment, imageCount, feedback.EmailId.String)
-			}
-		}
-		feedback.ImageCount = imageCount
-		if err := tx.Create(feedback).Error; err != nil {
-			log.WithError(err).Error("Error creating feedback")
-			return status.Error(codes.Internal, "Error creating feedback")
-		}
-		if err := stream.SendAndClose(&pb.CreateFeedbackReply{}); err != nil {
-			log.WithError(err).Error("Error sending feedbackreply")
-			return status.Error(codes.Internal, "Error sending feedbackreply")
-		}
-		return nil
-	})
+	if err := stream.SendAndClose(&pb.CreateFeedbackReply{}); err != nil {
+		log.WithError(err).Error("Error sending feedback-reply")
+		return status.Error(codes.Internal, "Error sending feedback-reply")
+	}
+	return nil
 }
 
-func deleteUploaded(tx *gorm.DB, id string) {
-	// delete uploaded images
-	dbPath := fmt.Sprintf("feedback/%s", id)
-	if err := tx.Find(&model.File{Path: dbPath}).Delete(&model.File{}).Error; err != nil {
-		log.WithError(err).WithField("path", dbPath).Error("Error deleting uploaded images from db")
-	}
+// deleteUploaded deletes all uploaded images from the filesystem
+func deleteUploaded(dbPath string) {
 	if err := os.RemoveAll(cron.StorageDir + dbPath); err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error deleting uploaded images from filesystem")
 	}
 }
 
-func handleImageUpload(tx *gorm.DB, content *[]byte, imageCounter int32, id string) int32 {
-	filename := inferFileName(content, imageCounter)
-	dbPath := path.Join("feedback", id)
-	realFilePath := path.Join(cron.StorageDir, dbPath, filename)
+func handleImageUpload(content *[]byte, imageCounter int32, dbPath string) *string {
+	filename, realFilePath := inferFileName(content, dbPath, imageCounter)
 
 	if err := os.MkdirAll(path.Dir(realFilePath), 0755); err != nil {
 		log.WithError(err).WithField("dbPath", dbPath).Error("Error creating directory for feedback")
-		return imageCounter
+		return nil
 	}
 	out, err := os.Create(realFilePath)
 	if err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error creating file for feedback")
-		return imageCounter
+		return nil
 	}
 	defer func(out *os.File) {
 		err := out.Close()
@@ -97,21 +108,16 @@ func handleImageUpload(tx *gorm.DB, content *[]byte, imageCounter int32, id stri
 		if err := os.Remove(realFilePath); err != nil {
 			log.WithError(err).WithField("path", dbPath).Warn("Could not clean up file")
 		}
-		return imageCounter
+		return nil
 	}
-
-	tx.Create(&model.File{
-		Name:       filename,
-		Path:       dbPath,
-		Downloads:  1,
-		Downloaded: null.BoolFrom(true),
-	})
-	return imageCounter + 1
+	return &filename
 }
 
-func inferFileName(content *[]byte, counter int32) string {
+func inferFileName(content *[]byte, dbPath string, counter int32) (string, string) {
 	ext := mimetype.Detect(*content).Extension()
-	return fmt.Sprintf("%d%s", counter, ext)
+	filename := fmt.Sprintf("%d%s", counter, ext)
+	realFilePath := path.Join(cron.StorageDir, dbPath, filename)
+	return filename, realFilePath
 }
 
 func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
