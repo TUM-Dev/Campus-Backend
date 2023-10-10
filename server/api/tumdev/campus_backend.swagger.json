@@ -1591,7 +1591,8 @@
           "type": "string"
         },
         "imageUrl": {
-          "type": "string"
+          "type": "string",
+          "title": "where a news thumbnail is stored. empty string means no image is available"
         },
         "source": {
           "type": "string"
@@ -1641,7 +1642,8 @@
           "type": "string"
         },
         "iconUrl": {
-          "type": "string"
+          "type": "string",
+          "title": "where the icon can be found"
         }
       }
     },

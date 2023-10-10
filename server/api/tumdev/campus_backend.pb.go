@@ -596,10 +596,11 @@ type News struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title    string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Text     string `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
-	Link     string `protobuf:"bytes,4,opt,name=link,proto3" json:"link,omitempty"`
+	Id    int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Text  string `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
+	Link  string `protobuf:"bytes,4,opt,name=link,proto3" json:"link,omitempty"`
+	// where a news thumbnail is stored. empty string means no image is available
 	ImageUrl string `protobuf:"bytes,5,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	Source   string `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`
 	// when the news item was created in OUR database
@@ -899,8 +900,9 @@ type NewsSource struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Source  string `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
-	Title   string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Source string `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	Title  string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// where the icon can be found
 	IconUrl string `protobuf:"bytes,3,opt,name=icon_url,json=iconUrl,proto3" json:"icon_url,omitempty"`
 }
 
