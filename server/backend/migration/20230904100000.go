@@ -27,10 +27,10 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'kino'").Error; err != nil {
 				return err
 			}
-			if err := SafeEnumRollback(tx, &model.Crontab{}, "type", "kino"); err != nil {
+			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "kino"); err != nil {
 				return err
 			}
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "movie"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
 			if err := tx.AutoMigrate(&NewsSource{}); err != nil {
@@ -51,10 +51,10 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'movie'").Error; err != nil {
 				return err
 			}
-			if err := SafeEnumRollback(tx, &model.Crontab{}, "type", "movie"); err != nil {
+			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "kino"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "kino"); err != nil {
 				return err
 			}
 			if err := tx.Create(&NewsSource{

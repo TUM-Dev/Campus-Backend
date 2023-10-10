@@ -22,7 +22,7 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 			}
 
 			// allow "canteenHeadCount" in the enum
-			if err := SafeEnumMigrate(tx, model.Crontab{}, "type", "canteenHeadCount"); err != nil {
+			if err := SafeEnumAdd(tx, model.Crontab{}, "type", "canteenHeadCount"); err != nil {
 				return err
 			}
 
@@ -38,7 +38,7 @@ func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
 				return err
 			}
 			// Remove the 'canteenHeadCount' from the enum
-			return SafeEnumRollback(tx, model.Crontab{}, "type", "canteenHeadCount")
+			return SafeEnumRemove(tx, model.Crontab{}, "type", "canteenHeadCount")
 		},
 	}
 }

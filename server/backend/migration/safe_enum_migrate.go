@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SafeEnumMigrate(tx *gorm.DB, table interface{}, column string, additionalTypes ...string) error {
+func SafeEnumAdd(tx *gorm.DB, table interface{}, column string, additionalTypes ...string) error {
 	enumTypes, err := getEnumTypesFromDB(tx, table, column)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func SafeEnumMigrate(tx *gorm.DB, table interface{}, column string, additionalTy
 	return alterEnumColumn(tx, table, column, enumTypes)
 }
 
-func SafeEnumRollback(tx *gorm.DB, table interface{}, column string, rollbackTypes ...string) error {
+func SafeEnumRemove(tx *gorm.DB, table interface{}, column string, rollbackTypes ...string) error {
 	enumTypes, err := getEnumTypesFromDB(tx, table, column)
 
 	if err != nil {

@@ -33,7 +33,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
 				return err
 			}
 
@@ -96,7 +96,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			return SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 		},
 	}
 }
