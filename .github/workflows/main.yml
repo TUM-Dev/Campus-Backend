@@ -17,9 +17,32 @@ jobs:
       - name: run tests
         run: go test -v ./...
         working-directory: ./server
+  test_migrations:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: bitnami/mariadb:latest
+        ports:
+          - 3306:3306
+        env:
+          MARIADB_ROOT_PASSWORD: super_secret_pa$$w0rd
+          MARIADB_DATABASE: campus_db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: |
+            server/go.sum
+      - name: run migration
+        run: go run migrate.go
+        working-directory: ./server
+        env:
+          DB_DSN: root:super_secret_pa$$w0rd@tcp(db:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
+          ENVIRONMENT: dev
   build:
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [test, test_migrations]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
