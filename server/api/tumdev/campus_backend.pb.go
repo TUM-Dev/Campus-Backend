@@ -3818,7 +3818,9 @@ type CreateFeedbackRequest struct {
 	OsVersion string `protobuf:"bytes,5,opt,name=os_version,json=osVersion,proto3" json:"os_version,omitempty"`
 	// Optional app information which the user can choose (data protection) to attach or not
 	AppVersion string `protobuf:"bytes,6,opt,name=app_version,json=appVersion,proto3" json:"app_version,omitempty"`
-	// Optional file in Base64
+	// Optional file in Base64.
+	// Accepted file formats: jpeg, jpg, png, webp, md, txt, pdf
+	// Maximum file size 4MB as by Protobuf maximum per request message size
 	Attachment []byte `protobuf:"bytes,7,opt,name=attachment,proto3" json:"attachment,omitempty"`
 }
 

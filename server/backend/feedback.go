@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"slices"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
@@ -45,7 +46,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		mergeFeedback(feedback, req)
 
 		if len(req.Attachment) > 0 {
-			filename := handleImageUpload(&req.Attachment, feedback.ImageCount, dbPath)
+			filename := handleImageUpload(req.Attachment, feedback.ImageCount, dbPath)
 			if filename != nil {
 				uploadedFilenames = append(uploadedFilenames, filename)
 			}
@@ -85,14 +86,17 @@ func deleteUploaded(dbPath string) {
 	}
 }
 
-func handleImageUpload(content *[]byte, imageCounter int32, dbPath string) *string {
-	filename, realFilePath := inferFileName(content, dbPath, imageCounter)
+func handleImageUpload(content []byte, imageCounter int32, dbPath string) *string {
+	filename, realFilePath := inferFileName(mimetype.Detect(content), dbPath, imageCounter)
+	if filename == nil {
+		return nil // the filetype is not accepted by us
+	}
 
-	if err := os.MkdirAll(path.Dir(realFilePath), 0755); err != nil {
+	if err := os.MkdirAll(path.Dir(*realFilePath), 0755); err != nil {
 		log.WithError(err).WithField("dbPath", dbPath).Error("Error creating directory for feedback")
 		return nil
 	}
-	out, err := os.Create(realFilePath)
+	out, err := os.Create(*realFilePath)
 	if err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error creating file for feedback")
 		return nil
@@ -103,21 +107,25 @@ func handleImageUpload(content *[]byte, imageCounter int32, dbPath string) *stri
 			log.WithError(err).WithField("path", dbPath).Error("Error while closing file")
 		}
 	}(out)
-	if _, err := io.Copy(out, bytes.NewReader(*content)); err != nil {
+	if _, err := io.Copy(out, bytes.NewReader(content)); err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error while writing file")
-		if err := os.Remove(realFilePath); err != nil {
+		if err := os.Remove(*realFilePath); err != nil {
 			log.WithError(err).WithField("path", dbPath).Warn("Could not clean up file")
 		}
 		return nil
 	}
-	return &filename
+	return filename
 }
 
-func inferFileName(content *[]byte, dbPath string, counter int32) (string, string) {
-	ext := mimetype.Detect(*content).Extension()
-	filename := fmt.Sprintf("%d%s", counter, ext)
+func inferFileName(mime *mimetype.MIME, dbPath string, counter int32) (*string, *string) {
+	allowedExt := []string{"jpeg", "jpg", "png", "webp", "md", "txt", "pdf"}
+	if !slices.Contains(allowedExt, mime.Extension()) {
+		return nil, nil
+	}
+
+	filename := fmt.Sprintf("%d%s", counter, mime.Extension())
 	realFilePath := path.Join(cron.StorageDir, dbPath, filename)
-	return filename, realFilePath
+	return &filename, &realFilePath
 }
 
 func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {

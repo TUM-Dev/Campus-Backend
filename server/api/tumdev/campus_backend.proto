@@ -568,7 +568,9 @@ message CreateFeedbackRequest {
   string os_version = 5;
   // Optional app information which the user can choose (data protection) to attach or not
   string app_version = 6;
-  // Optional file in Base64
+  // Optional file in Base64.
+  // Accepted file formats: jpeg, jpg, png, webp, md, txt, pdf
+  // Maximum file size 4MB as by Protobuf maximum per request message size
   bytes attachment = 7;
 }
 message Coordinate {

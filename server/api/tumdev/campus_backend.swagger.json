@@ -508,7 +508,7 @@
         "parameters": [
           {
             "name": "attachment",
-            "description": "Optional file in Base64 (streaming inputs)",
+            "description": "Optional file in Base64.\nAccepted file formats: jpeg, jpg, png, webp, md, txt, pdf\nMaximum file size 4MB as by Protobuf maximum per request message size (streaming inputs)",
             "in": "body",
             "required": true,
             "schema": {
