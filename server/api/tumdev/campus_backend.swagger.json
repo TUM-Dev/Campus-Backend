@@ -507,45 +507,50 @@
         },
         "parameters": [
           {
-            "name": "topic",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "attachment",
+            "description": "Optional file in Base64.\nAccepted file formats: jpeg, jpg, png, webp, md, txt, pdf\nMaximum file size 4MB as by Protobuf maximum per request message size (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
           },
           {
-            "name": "email",
+            "name": "recipient",
+            "description": "who is the feedback for\n\n - TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "TUM_DEV",
+              "TUM_CONTACT"
+            ],
+            "default": "TUM_DEV"
           },
           {
-            "name": "emailId",
+            "name": "fromEmail",
+            "description": "the email address of the user",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "message",
+            "description": "The actual message",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "imageCount",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "latitude",
+            "name": "location.latitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "longitude",
+            "name": "location.longitude",
             "in": "query",
             "required": false,
             "type": "number",
@@ -553,12 +558,14 @@
           },
           {
             "name": "osVersion",
+            "description": "Optional os information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "appVersion",
+            "description": "Optional app information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
@@ -970,6 +977,15 @@
     }
   },
   "definitions": {
+    "CreateFeedbackRequestRecipient": {
+      "type": "string",
+      "enum": [
+        "TUM_DEV",
+        "TUM_CONTACT"
+      ],
+      "default": "TUM_DEV",
+      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+    },
     "ListMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
@@ -998,6 +1014,19 @@
           "format": "double"
         },
         "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "apiCoordinate": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
           "type": "number",
           "format": "double"
         }

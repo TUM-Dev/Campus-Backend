@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc/reflection"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/TUM-Dev/Campus-Backend/server/env"
@@ -81,6 +83,7 @@ func main() {
 	// Main GRPC Server
 	grpcServer := grpc.NewServer()
 	pb.RegisterCampusServer(grpcServer, campusService)
+	reflection.Register(grpcServer)
 
 	// GRPC Gateway for HTTP REST -> GRPC
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
