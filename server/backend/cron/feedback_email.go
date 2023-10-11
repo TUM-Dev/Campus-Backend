@@ -58,8 +58,8 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 	// From
 	m.SetAddressHeader("From", os.Getenv("SMTP_USERNAME"), "TUM Campus App")
 	// To
-	if feedback.Receiver.Valid {
-		m.SetHeader("To", feedback.Receiver.String)
+	if feedback.Recipient.Valid {
+		m.SetHeader("To", feedback.Recipient.String)
 	} else {
 		m.SetHeader("To", "app@tum.de")
 	}
@@ -124,7 +124,7 @@ func (c *CronService) feedbackEmailCron() error {
 			log.WithError(err).Error("could not send mail")
 			continue
 		}
-		log.Tracef("sending feedback %dialer to %v successfull", i, feedback.Receiver)
+		log.Tracef("sending feedback %d to %v successfull", i, feedback.Recipient)
 
 		// prevent the message being send the next time around
 		if err := c.db.Find(model.Feedback{}, "id = ?", feedback.Id).Update("processed", "true").Error; err != nil {
