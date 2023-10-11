@@ -46,7 +46,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		mergeFeedback(feedback, req)
 
 		if len(req.Attachment) > 0 {
-			filename := handleImageUpload(req.Attachment, feedback.ImageCount, dbPath)
+			filename := handleImageUpload(req.Attachment, len(uploadedFilenames), dbPath)
 			if filename != nil {
 				uploadedFilenames = append(uploadedFilenames, filename)
 			}
@@ -86,7 +86,7 @@ func deleteUploaded(dbPath string) {
 	}
 }
 
-func handleImageUpload(content []byte, imageCounter int32, dbPath string) *string {
+func handleImageUpload(content []byte, imageCounter int, dbPath string) *string {
 	filename, realFilePath := inferFileName(mimetype.Detect(content), dbPath, imageCounter)
 	if filename == nil {
 		return nil // the filetype is not accepted by us
@@ -117,8 +117,8 @@ func handleImageUpload(content []byte, imageCounter int32, dbPath string) *strin
 	return filename
 }
 
-func inferFileName(mime *mimetype.MIME, dbPath string, counter int32) (*string, *string) {
-	allowedExt := []string{"jpeg", "jpg", "png", "webp", "md", "txt", "pdf"}
+func inferFileName(mime *mimetype.MIME, dbPath string, counter int) (*string, *string) {
+	allowedExt := []string{".jpeg", ".jpg", ".png", ".webp", ".md", ".txt", ".pdf"}
 	if !slices.Contains(allowedExt, mime.Extension()) {
 		return nil, nil
 	}

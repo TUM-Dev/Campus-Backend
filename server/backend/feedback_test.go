@@ -90,7 +90,7 @@ func createDummyImage(t *testing.T, width, height int) []byte {
 	return buf.Bytes()
 }
 
-func (s *FeedbackSuite) Test_CreateFeedback_OneImage() {
+func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 	cron.StorageDir = "test_one_image/"
 	defer func(path string) {
 		err := os.RemoveAll(path)
