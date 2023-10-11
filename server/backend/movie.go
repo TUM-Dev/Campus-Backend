@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -35,8 +36,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 			Actors:      movie.Actors,
 			ImdbRating:  movie.ImdbRating,
 			Description: movie.Description,
-			CoverName:   movie.File.Name,
-			CoverPath:   movie.File.Path,
+			CoverUrl:    fmt.Sprintf("https://api.tum.app/files/%s%s", movie.File.Path, movie.File.Name),
 			CoverId:     movie.File.File,
 			Link:        movie.Link,
 		})
