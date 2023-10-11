@@ -26,7 +26,7 @@ func (m TumDBMigrator) Migrate() error {
 		err := m.database.AutoMigrate(
 			&model.TopNews{},
 			&model.Crontab{},
-			&model.Files{},
+			&model.File{},
 			&model.NewsSource{},
 			&model.NewsAlert{},
 			&model.News{},
@@ -50,6 +50,10 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20221210000000(),
 		m.migrate20230825000000(),
 		m.migrate20230904000000(),
+		m.migrate20230530000000(),
+		m.migrate20230904100000(),
+		m.migrate20230826000000(),
+		m.migrate20231003000000(),
 	})
 	err := mig.Migrate()
 	return err

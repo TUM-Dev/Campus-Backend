@@ -16,10 +16,10 @@ func (m TumDBMigrator) migrate20230825000000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'chat'").Error; err != nil {
 				return err
 			}
-			return SafeEnumRollback(tx, &model.Crontab{}, "type", "chat")
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "chat")
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "chat"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "chat"); err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{

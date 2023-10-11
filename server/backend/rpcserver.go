@@ -4,8 +4,7 @@ import (
 	"net"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -32,8 +31,6 @@ var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	log.Trace("Server starting up")
-	initTagRatingOptions(db)
-
 	return &CampusServer{
 		db:                      db,
 		deviceBuf:               newDeviceBuffer(),
@@ -42,7 +39,7 @@ func New(db *gorm.DB) *CampusServer {
 }
 
 func NewIOSNotificationsService() *IOSNotificationsService {
-	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
+	if err := apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
 		log.WithError(err).Warn("failed to validate requirements for ios notifications service")
 
 		return &IOSNotificationsService{
@@ -51,9 +48,9 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 		}
 	}
 
-	token, err := ios_apns_jwt.NewToken()
+	token, err := apns.NewToken()
 	if err != nil {
-		log.WithError(err).Fatal("failed to create new token")
+		log.WithError(err).Error("failed to create new token")
 	}
 
 	return &IOSNotificationsService{

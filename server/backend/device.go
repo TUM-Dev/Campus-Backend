@@ -18,23 +18,22 @@ import (
 
 // deviceBuffer stores all recent device calls in a buffer and flushes them to the database periodically
 type deviceBuffer struct {
-	lock     sync.Mutex
-	devices  map[string]*model.Devices // key is uuid
-	interval time.Duration             // flush interval
+	lock    sync.Mutex
+	devices map[string]*model.Devices // key is uuid
 }
 
 func newDeviceBuffer() *deviceBuffer {
 	return &deviceBuffer{
-		lock:     sync.Mutex{},
-		devices:  make(map[string]*model.Devices),
-		interval: time.Minute,
+		lock:    sync.Mutex{},
+		devices: make(map[string]*model.Devices),
 	}
-
 }
+
+const FlushingInterval = time.Minute
 
 func (s *CampusServer) RunDeviceFlusher() error {
 	for {
-		time.Sleep(s.deviceBuf.interval)
+		time.Sleep(FlushingInterval)
 		if err := s.deviceBuf.flush(s.db); err != nil {
 			log.WithError(err).Error("Error flushing device buffer")
 		}
@@ -124,26 +123,26 @@ func (s *CampusServer) checkDevice(ctx context.Context) error {
 	return nil
 }
 
-func (s *CampusServer) RegisterDevice(_ context.Context, req *pb.RegisterDeviceRequest) (*pb.RegisterDeviceReply, error) {
-	if err := ValidateRegisterDevice(req); err != nil {
+func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
+	if err := ValidateCreateDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	switch req.GetDeviceType() {
 	case pb.DeviceType_ANDROID:
-		return nil, status.Error(codes.Unimplemented, "android device register not implemented")
+		return nil, status.Error(codes.Unimplemented, "android device creation not implemented")
 	case pb.DeviceType_IOS:
 		service := s.GetIOSDeviceService()
-		return service.RegisterDevice(req)
+		return service.CreateDevice(req)
 	case pb.DeviceType_WINDOWS:
-		return nil, status.Error(codes.Unimplemented, "windows device register not implemented")
+		return nil, status.Error(codes.Unimplemented, "windows device creation not implemented")
 	}
 
 	return nil, status.Error(codes.InvalidArgument, "invalid device type")
 }
 
-func (s *CampusServer) RemoveDevice(_ context.Context, req *pb.RemoveDeviceRequest) (*pb.RemoveDeviceReply, error) {
-	if err := ValidateRemoveDevice(req); err != nil {
+func (s *CampusServer) DeleteDevice(_ context.Context, req *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+	if err := ValidateDeleteDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -152,7 +151,7 @@ func (s *CampusServer) RemoveDevice(_ context.Context, req *pb.RemoveDeviceReque
 		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
 	case pb.DeviceType_IOS:
 		service := s.GetIOSDeviceService()
-		return service.RemoveDevice(req)
+		return service.DeleteDevice(req)
 	case pb.DeviceType_WINDOWS:
 		return nil, status.Error(codes.Unimplemented, "windows device remove not implemented")
 	}

@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"encoding/json"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
@@ -34,7 +33,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			if err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
 				return err
 			}
 
@@ -52,7 +51,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 
 			err := tx.Create(&model.Crontab{
 				Interval: 60,
-				Type:     null.StringFrom(cron.IOSNotifications),
+				Type:     null.StringFrom("iosNotifications"),
 			}).Error
 
 			if err != nil {
@@ -61,7 +60,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 			}
 
 			return tx.Create(&model.Crontab{
-				Type:     null.StringFrom(cron.IOSActivityReset),
+				Type:     null.StringFrom("iosActivityReset"),
 				Interval: 86400,
 			}).Error
 		},
@@ -86,18 +85,18 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			err := tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOSNotifications, 60).Error
+			err := tx.Delete(&model.Crontab{}, "type = 'iosNotifications'").Error
 			if err != nil {
 				return err
 			}
 
-			err = tx.Delete(&model.Crontab{}, "type = ? AND interval = ?", cron.IOSActivityReset, 86400).Error
+			err = tx.Delete(&model.Crontab{}, "type = 'iosActivityReset'").Error
 
 			if err != nil {
 				return err
 			}
 
-			return SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 		},
 	}
 }

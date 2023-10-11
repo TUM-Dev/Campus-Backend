@@ -1,0 +1,42 @@
+<h1>Feedback via TumCampusApp:</h1>
+{{ if .Feedback.Valid -}}
+<blockquote>
+    {{- .Feedback.String -}}
+</blockquote>
+{{- else -}}
+<i>no feedback provided</i>
+{{- end }}
+<table>
+    <tr>
+        <th>Inforation type</th>
+        <th>Details</th>
+    </tr>
+    {{- if .Latitude.Valid }}
+    <tr>
+        <th>Nutzer-Standort</th>
+        <td>
+            <a href="https://www.google.com/maps/search/?api=1&query={{ .Latitude.Float64 }},{{ .Longitude.Float64 }}">
+                latitude: {{ .Latitude.Float64 }}, longitude: {{ .Longitude.Float64 }}
+            </a>
+        </td>
+    </tr>
+    {{- end }}
+    <tr>
+        <th>OS-Version</th>
+        <td>{{ if .OsVersion.Valid }}{{.OsVersion.String }}{{else}}unknown{{end}}</td>
+    </tr>
+    <tr>
+        <th>App-Version</th>
+        <td>{{ if .AppVersion.Valid }}{{.AppVersion.String }}{{else}}unknown{{end}}</td>
+    </tr>
+</table>
+{{- if .ImageCount }}
+<h2>Fotos:</h2><br/>
+<ol>
+{{- range $val := iterate .ImageCount }}
+    <li>
+        <a href="https://app.tum.de/File/feedback/{{ $.Id }}/{{ $val }}.png">Foto {{ $val }}</a>
+    </li>
+{{- end }}
+</ol>
+{{- end -}}

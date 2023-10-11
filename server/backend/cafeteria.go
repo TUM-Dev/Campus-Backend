@@ -1,0 +1,748 @@
+package backend
+
+import (
+	"bufio"
+	"bytes"
+	"context"
+	"crypto/md5"
+	"errors"
+	"fmt"
+	"image"
+	"image/jpeg"
+	"math"
+	"os"
+	"strings"
+	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/disintegration/imaging"
+	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/gorm"
+)
+
+type ModelType int
+
+// Used to differentiate between the type of the model for different queries to reduce duplicated code.
+const (
+	DISH      ModelType = 1
+	CAFETERIA ModelType = 2
+	NAME      ModelType = 3
+)
+
+// GetCafeteriaRatings RPC Endpoint
+// Allows to query ratings for a specific cafeteria.
+// It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
+// all cafeteria rating tags which were used to rate this cafeteria.
+// The parameter limit defines how many actual ratings should be returned.
+// The optional parameters from and to can define an interval in which the queried ratings have been stored.
+// If these aren't specified, the newest ratings will be returned as the default
+func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
+	var result model.CafeteriaRatingAverage //get the average rating for this specific cafeteria
+	tx := s.db.WithContext(ctx)
+	cafeteriaId := getIDForCafeteriaName(input.CanteenId, tx)
+	res := tx.Model(&model.CafeteriaRatingAverage{}).
+		Where("cafeteriaId = ?", cafeteriaId).
+		First(&result)
+
+	if res.Error != nil {
+		log.WithError(res.Error).Error("Error while querying the cafeteria with Id ", cafeteriaId)
+		return nil, status.Error(codes.Internal, "This cafeteria has not yet been rated.")
+	}
+
+	if res.RowsAffected > 0 {
+		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaId, tx)
+		cafeteriaTags := queryTags(cafeteriaId, -1, CAFETERIA, tx)
+
+		return &pb.ListCanteenRatingsReply{
+			Avg:        result.Average,
+			Std:        result.Std,
+			Min:        result.Min,
+			Max:        result.Max,
+			Rating:     ratings,
+			RatingTags: cafeteriaTags,
+		}, nil
+	} else {
+		return &pb.ListCanteenRatingsReply{
+			Avg: -1,
+			Std: -1,
+			Min: -1,
+			Max: -1,
+		}, nil
+	}
+}
+
+// queryLastCafeteriaRatingsWithLimit
+// Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
+func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cafeteriaID int32, tx *gorm.DB) []*pb.SingleRatingReply {
+	var ratings []model.CafeteriaRating
+	var err error
+
+	var limit = int(input.Limit)
+	if limit == -1 {
+		limit = math.MaxInt32
+	}
+	if limit > 0 {
+		if input.From != nil || input.To != nil {
+
+			var from time.Time
+			var to time.Time
+			if input.From == nil {
+				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
+			} else {
+				from = input.From.AsTime()
+			}
+
+			if input.To == nil {
+				to = time.Now()
+			} else {
+				to = input.To.AsTime()
+			}
+			err = tx.Model(&model.CafeteriaRating{}).
+				Where("cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).
+				Order("timestamp desc, cafeteriaRating desc").
+				Limit(limit).
+				Find(&ratings).Error
+		} else {
+			err = tx.Model(&model.CafeteriaRating{}).
+				Where("cafeteriaID = ?", cafeteriaID).
+				Order("timestamp desc, cafeteriaRating desc").
+				Limit(limit).
+				Find(&ratings).Error
+		}
+
+		if err != nil {
+			log.WithError(err).Error("while querying last cafeteria ratings.")
+			return make([]*pb.SingleRatingReply, 0)
+		}
+		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
+
+		for i, v := range ratings {
+
+			tagRatings := queryTagRatingsOverviewForRating(v.CafeteriaRating, CAFETERIA, tx)
+			ratingResults[i] = &pb.SingleRatingReply{
+				Points:     v.Points,
+				Comment:    v.Comment,
+				Image:      getImageToBytes(v.Image),
+				Visited:    timestamppb.New(v.Timestamp),
+				RatingTags: tagRatings,
+			}
+		}
+		return ratingResults
+	} else {
+		return make([]*pb.SingleRatingReply, 0)
+	}
+}
+
+// GetDishRatings RPC Endpoint
+// Allows to query ratings for a specific dish in a specific cafeteria.
+// It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
+// all dish rating tags which were used to rate this dish in this cafeteria. Additionally, the average, max/min are
+// returned for every name tag which matches the name of the dish.
+// The parameter limit defines how many actual ratings should be returned.
+// The optional parameters from and to can define a interval in which the queried ratings have been stored.
+// If these aren't specified, the newest ratings will be returned as the default
+func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRatingsRequest) (*pb.GetDishRatingsReply, error) {
+	var result model.DishRatingAverage //get the average rating for this specific dish
+	tx := s.db.WithContext(ctx)
+	cafeteriaID := getIDForCafeteriaName(input.CanteenId, tx)
+	dishID := getIDForDishName(input.Dish, cafeteriaID, tx)
+
+	err := tx.Model(&model.DishRatingAverage{}).
+		Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
+		First(&result)
+
+	if err.Error != nil {
+		fields := log.Fields{"dishID": dishID, "cafeteriaID": cafeteriaID}
+		log.WithError(err.Error).WithFields(fields).Error("Error while querying the average ratings")
+		return nil, status.Error(codes.Internal, "This dish has not yet been rated.")
+	}
+
+	if err.RowsAffected > 0 {
+		ratings := queryLastDishRatingsWithLimit(input, cafeteriaID, dishID, tx)
+		dishTags := queryTags(cafeteriaID, dishID, DISH, tx)
+		nameTags := queryTags(cafeteriaID, dishID, NAME, tx)
+
+		return &pb.GetDishRatingsReply{
+			Avg:        result.Average,
+			Std:        result.Std,
+			Min:        result.Min,
+			Max:        result.Max,
+			Rating:     ratings,
+			RatingTags: dishTags,
+			NameTags:   nameTags,
+		}, nil
+	} else {
+		return &pb.GetDishRatingsReply{
+			Avg: -1,
+			Min: -1,
+			Max: -1,
+			Std: -1,
+		}, nil
+	}
+
+}
+
+// queryLastDishRatingsWithLimit
+// Queries the actual ratings for a dish in a cafeteria and attaches the tag ratings which belong to the ratings
+func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, cafeteriaID int32, dishID int32, tx *gorm.DB) []*pb.SingleRatingReply {
+	var ratings []model.DishRating
+	var err error
+	var limit = int(input.Limit)
+	if limit == -1 {
+		limit = math.MaxInt32
+	}
+	if limit > 0 {
+		if input.From != nil || input.To != nil {
+			var from time.Time
+			var to time.Time
+			if input.From == nil {
+				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
+			} else {
+				from = input.From.AsTime()
+			}
+
+			if input.To == nil {
+				to = time.Now()
+			} else {
+				to = input.To.AsTime()
+			}
+
+			err = tx.Model(&model.DishRating{}).
+				Where("cafeteriaID = ? AND dishID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, dishID, to, from).
+				Order("timestamp desc, dishRating desc").
+				Limit(limit).
+				Find(&ratings).Error
+		} else {
+			err = tx.Model(&model.DishRating{}).
+				Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
+				Order("timestamp desc, dishRating desc").
+				Limit(limit).
+				Find(&ratings).Error
+		}
+
+		if err != nil {
+			log.WithError(err).Error("while querying last dish ratings from Database.")
+			return make([]*pb.SingleRatingReply, 0)
+		}
+		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
+
+		for i, v := range ratings {
+			ratingResults[i] = &pb.SingleRatingReply{
+				Points:     v.Points,
+				Comment:    v.Comment,
+				RatingTags: queryTagRatingsOverviewForRating(v.DishRating, DISH, tx),
+				Image:      getImageToBytes(v.Image),
+				Visited:    timestamppb.New(v.Timestamp),
+			}
+		}
+		return ratingResults
+	} else {
+		return make([]*pb.SingleRatingReply, 0)
+	}
+}
+
+func getImageToBytes(path string) []byte {
+	if len(path) == 0 {
+		return make([]byte, 0)
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		log.WithError(err).Error("while opening image file with path: ", path)
+		return nil
+	}
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			log.WithError(err).Error("Unable to close the file for storing the image.")
+		}
+	}(file)
+
+	fileInfo, _ := file.Stat()
+	var size = fileInfo.Size()
+	imageAsBytes := make([]byte, size)
+
+	buffer := bufio.NewReader(file)
+	if _, err = buffer.Read(imageAsBytes); err != nil {
+		log.WithError(err).Error("while trying to read image as bytes")
+		return nil
+	}
+	return imageAsBytes
+}
+
+type queryRatingTag struct {
+	TagId   int32   `gorm:"column:tagId;type:int32;" json:"tagId"`
+	Average float64 `json:"avg"`
+	Std     float64 `json:"std"`
+	Min     int32   `json:"min"`
+	Max     int32   `json:"max"`
+}
+
+// queryTags
+// Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
+// Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
+func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagResult {
+	var results []queryRatingTag
+	var err error
+	if ratingType == DISH {
+		err = tx.Table("dish_rating_tag_option options").
+			Joins("JOIN dish_rating_tag_average results ON options.dishRatingTagOption = results.tagID").
+			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
+				"results.min as min, results.max as max, results.std as std").
+			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
+			Scan(&results).Error
+	} else if ratingType == CAFETERIA {
+		err = tx.Table("cafeteria_rating_tag_option options").
+			Joins("JOIN cafeteria_rating_tag_average results ON options.cafeteriaRatingTagOption = results.tagID").
+			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
+				"results.min as min, results.max as max, results.std as std").
+			Where("results.cafeteriaID = ?", cafeteriaID).
+			Scan(&results).Error
+	} else { //Query for name tags
+		err = tx.Table("dish_to_dish_name_tag mapping").
+			Where("mapping.dishID = ?", dishID).
+			Select("mapping.nameTagID as tag").
+			Joins("JOIN dish_name_tag_average results ON mapping.nameTagID = results.tagID").
+			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.dishNameTagOption").
+			Select("mapping.nameTagID as tagId, results.average as avg, " +
+				"results.min as min, results.max as max, results.std as std").
+			Scan(&results).Error
+	}
+
+	if err != nil {
+		log.WithError(err).Error("while querying the tags for the request.")
+	}
+
+	//needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
+	elements := make([]*pb.RatingTagResult, len(results))
+	for i, v := range results {
+		elements[i] = &pb.RatingTagResult{
+			TagId: v.TagId,
+			Avg:   v.Average,
+			Std:   v.Std,
+			Min:   v.Min,
+			Max:   v.Max,
+		}
+	}
+
+	return elements
+}
+
+// queryTagRatingOverviewForRating
+// Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
+func queryTagRatingsOverviewForRating(dishID int64, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
+	var results []*pb.RatingTagNewRequest
+	var err error
+	if ratingType == DISH {
+		err = tx.Table("dish_rating_tag_option options").
+			Joins("JOIN dish_rating_tag rating ON options.dishRatingTagOption = rating.tagID").
+			Select("dishRatingTagOption as tagId, points, parentRating").
+			Find(&results, "parentRating = ?", dishID).Error
+	} else {
+		err = tx.Table("cafeteria_rating_tag_option options").
+			Joins("JOIN cafeteria_rating_tag rating ON options.cafeteriaRatingTagOption = rating.tagID").
+			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
+			Find(&results, "correspondingRating = ?", dishID).Error
+	}
+
+	if err != nil {
+		log.WithError(err).Error("while querying the tag rating overview.")
+	}
+	return results
+}
+
+// CreateCanteenRating RPC Endpoint
+// Allows to store a new cafeteria Rating.
+// If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
+// All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
+// invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
+func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.CreateCanteenRatingRequest) (*pb.CreateCanteenRatingReply, error) {
+	tx := s.db.WithContext(ctx)
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
+	if errorRes != nil {
+		return nil, errorRes
+	}
+
+	resPath := imageWrapper(input.Image, "cafeterias", cafeteriaID)
+	rating := model.CafeteriaRating{
+		Comment:     input.Comment,
+		Points:      input.Points,
+		CafeteriaID: cafeteriaID,
+		Timestamp:   time.Now(),
+		Image:       resPath,
+	}
+	if err := tx.Model(&model.CafeteriaRating{}).Create(&rating).Error; err != nil {
+		log.WithError(err).Error("Error occurred while creating the new cafeteria rating.")
+		return nil, status.Error(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
+
+	}
+	if err := storeRatingTags(rating.CafeteriaRating, input.RatingTags, CAFETERIA, tx); err != nil {
+		return &pb.CreateCanteenRatingReply{}, err
+	}
+	return &pb.CreateCanteenRatingReply{}, nil
+}
+
+func imageWrapper(image []byte, path string, id int64) string {
+	var resPath = ""
+	if len(image) > 0 {
+		var resError error
+		path := fmt.Sprintf("%s%s%s%d%s", "/Storage/rating/", path, "/", id, "/")
+		resPath, resError = storeImage(path, image)
+
+		if resError != nil {
+			log.WithError(resError).Error("Error occurred while storing the image.")
+		}
+	}
+	return resPath
+}
+
+// storeImage
+// stores an image and returns the path to this image.
+// if needed, a new directory will be created and the path is extended until it is unique
+func storeImage(path string, i []byte) (string, error) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+			log.WithError(err).WithField("path", path).Error("Directory could not be created successfully")
+			return "", nil
+		}
+	}
+
+	img, _, _ := image.Decode(bytes.NewReader(i))
+	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
+
+	var opts jpeg.Options
+	maxImageSize := 524288 // 0.55MB
+	if len(i) > maxImageSize {
+		opts.Quality = (maxImageSize / len(i)) * 100
+	} else {
+		opts.Quality = 100 // if image small enough use it directly
+	}
+
+	var imgPath = fmt.Sprintf("%s%x.jpeg", path, md5.Sum(i))
+
+	out, errFile := os.Create(imgPath)
+	if errFile != nil {
+		log.WithError(errFile).Error("Error while creating a new file on the path: ", path)
+		return imgPath, errFile
+	}
+	defer func(out *os.File) {
+		if err := out.Close(); err != nil {
+			log.WithError(err).Error("while closing the file.")
+		}
+	}(out)
+
+	errFile = jpeg.Encode(out, resizedImage, &opts)
+	return imgPath, errFile
+}
+
+// CreateDishRating RPC Endpoint
+// Allows to store a new dish Rating.
+// If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
+// The ratingNumber will be saved for each corresponding DishNameTag.
+// All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
+// invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
+func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDishRatingRequest) (*pb.CreateDishRatingReply, error) {
+	tx := s.db.WithContext(ctx)
+	cafeteriaID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
+	if errorRes != nil {
+		return nil, errorRes
+	}
+
+	var dish *model.Dish
+	errDish := tx.Model(&model.Dish{}). //Dish must exist in the given mensa
+						Where("name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).
+						First(&dish).Error
+	if errDish != nil || dish == nil {
+		log.WithError(errDish).Error("Error while creating a new dish rating.")
+		return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+	}
+
+	resPath := imageWrapper(input.Image, "dishes", dish.Dish)
+
+	rating := model.DishRating{
+		Comment:     input.Comment,
+		CafeteriaID: cafeteriaID,
+		DishID:      dish.Dish,
+		Points:      input.Points,
+		Timestamp:   time.Now(),
+		Image:       resPath,
+	}
+
+	if err := tx.Model(&model.DishRating{}).Create(&rating).Error; err != nil {
+		log.WithError(err).Error("while creating a new dish rating.")
+		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
+	}
+
+	assignDishNameTag(rating, dish.Dish, tx)
+
+	if err := storeRatingTags(rating.DishRating, input.RatingTags, DISH, tx); err != nil {
+		return &pb.CreateDishRatingReply{}, err
+	}
+	return &pb.CreateDishRatingReply{}, nil
+}
+
+// assignDishNameTag
+// Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
+func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
+	var result []int64
+	err := tx.Model(&model.DishToDishNameTag{}).
+		Where("dishID = ? ", dishID).
+		Select("nameTagID").
+		Scan(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while loading the dishID for the given name.")
+	} else {
+		for _, tagID := range result {
+			err := tx.Model(&model.DishNameTag{}).Create(&model.DishNameTag{
+				CorrespondingRating: rating.DishRating,
+				Points:              rating.Points,
+				TagNameID:           tagID,
+			}).Error
+			if err != nil {
+				log.WithError(err).Error("while creating a new dish name rating.")
+			}
+		}
+	}
+}
+
+// inputSanitizationForNewRatingElements Checks parameters of the new rating for all cafeteria and dish ratings.
+// Additionally, queries the cafeteria ID, since it checks whether the cafeteria actually exists.
+func inputSanitizationForNewRatingElements(rating int32, comment string, cafeteriaName string, tx *gorm.DB) (int64, error) {
+	if rating > 5 || rating < 0 {
+		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 10. Rating has not been saved.")
+	}
+
+	if len(comment) > 256 {
+		return -1, status.Error(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
+	}
+
+	if strings.Contains(comment, "@") {
+		return -1, status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+	}
+
+	var result *model.Cafeteria
+	res := tx.Model(&model.Cafeteria{}).
+		Where("name LIKE ?", cafeteriaName).
+		First(&result)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
+		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: ", cafeteriaName)
+		return -1, status.Error(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+	}
+
+	return result.Cafeteria, nil
+}
+
+// storeRatingTags
+// Checks whether the rating-tag name is a valid option and if so,
+// it will be saved with a reference to the rating
+func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelType, tx *gorm.DB) error {
+	var errorOccurred = ""
+	var warningOccurred = ""
+	if len(tags) > 0 {
+		usedTagIds := make(map[int]int)
+		insertModel := getModelStoreTag(tagType, tx)
+		for _, currentTag := range tags {
+			var err error
+			var count int64
+
+			if tagType == DISH {
+				err = tx.Model(&model.DishRatingTagOption{}).
+					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
+					Count(&count).Error
+			} else {
+				err = tx.Model(&model.CafeteriaRatingTagOption{}).
+					Where("cafeteriaRatingTagOption LIKE ?", currentTag.TagId).
+					Count(&count).Error
+			}
+
+			if errors.Is(err, gorm.ErrRecordNotFound) || count == 0 {
+				fields := log.Fields{
+					"tagid": currentTag.TagId,
+					"count": count,
+				}
+				log.WithFields(fields).Info("tag does not exist")
+				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
+			} else {
+				if usedTagIds[int(currentTag.TagId)] == 0 {
+					err := insertModel.
+						Create(&model.DishRatingTag{
+							CorrespondingRating: parentRatingID,
+							Points:              int32(currentTag.Points),
+							TagID:               currentTag.TagId,
+						}).Error
+					if err != nil {
+						log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+					}
+					usedTagIds[int(currentTag.TagId)] = 1
+
+				} else {
+					warningOccurred = fmt.Sprintf("%s, %d", warningOccurred, currentTag.TagId)
+					log.Info("Each Rating currentTag must be used at most once in a rating. This currentTag rating was not stored.")
+				}
+			}
+
+		}
+	}
+
+	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag. The tag(s) %s occurred more than once in this rating.", errorOccurred, warningOccurred))
+	} else if len(errorOccurred) > 0 {
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag.", errorOccurred))
+	} else if len(warningOccurred) > 0 {
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
+	} else {
+		return nil
+	}
+
+}
+
+func getModelStoreTag(tagType ModelType, tx *gorm.DB) *gorm.DB {
+	if tagType == DISH {
+		return tx.Model(&model.DishRatingTag{})
+	} else {
+		return tx.Model(&model.CafeteriaRatingTag{})
+	}
+}
+
+func getIDForCafeteriaName(name string, tx *gorm.DB) int32 {
+	var result int32 = -1
+	err := tx.Model(&model.Cafeteria{}).
+		Where("name LIKE ?", name).
+		Select("cafeteria").
+		Scan(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while querying the cafeteria name.")
+		result = -1
+	}
+	return result
+}
+
+func getIDForDishName(name string, cafeteriaID int32, tx *gorm.DB) int32 {
+	var result int32 = -1
+	err := tx.Model(&model.Dish{}).
+		Where("name LIKE ? AND cafeteriaID = ?", name, cafeteriaID).
+		Select("dish").
+		Scan(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while querying the dish name.")
+		result = -1
+	}
+
+	return result
+}
+
+// ListAvailableDishTags RPC Endpoint
+// Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
+func (s *CampusServer) ListAvailableDishTags(ctx context.Context, _ *pb.ListAvailableDishTagsRequest) (*pb.ListAvailableDishTagsReply, error) {
+	var result []*pb.TagsOverview
+	var requestStatus error = nil
+	err := s.db.WithContext(ctx).Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, dishRatingTagOption as TagId").Find(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while loading Cafeterias from database.")
+		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
+	}
+
+	return &pb.ListAvailableDishTagsReply{
+		RatingTags: result,
+	}, requestStatus
+}
+
+// ListNameTags RPC Endpoint
+// Returns all valid Tags to quickly rate dishes in english and german with the corresponding Id
+func (s *CampusServer) ListNameTags(ctx context.Context, _ *pb.ListNameTagsRequest) (*pb.ListNameTagsReply, error) {
+	var result []*pb.TagsOverview
+	var requestStatus error = nil
+	err := s.db.WithContext(ctx).Model(&model.DishNameTagOption{}).Select("DE as de, EN as en, dishNameTagOption as TagId").Find(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while loading available Name Tags from database.")
+		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
+	}
+
+	return &pb.ListNameTagsReply{
+		RatingTags: result,
+	}, requestStatus
+}
+
+// GetAvailableCafeteriaTags  RPC Endpoint
+// Returns all valid Tags to quickly rate dishes in english and german
+func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.ListAvailableCanteenTagsRequest) (*pb.ListAvailableCanteenTagsReply, error) {
+	var result []*pb.TagsOverview
+	var requestStatus error = nil
+	err := s.db.WithContext(ctx).Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while loading Cafeterias from database.")
+		requestStatus = status.Error(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
+	}
+
+	return &pb.ListAvailableCanteenTagsReply{
+		RatingTags: result,
+	}, requestStatus
+}
+
+// GetCafeterias RPC endpoint
+// Returns all cafeterias with meta information which are available in the eat-api
+func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequest) (*pb.ListCanteensReply, error) {
+	var result []*pb.Canteen
+	var requestStatus error = nil
+	err := s.db.WithContext(ctx).Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error
+	if err != nil {
+		log.WithError(err).Error("while loading Cafeterias from database.")
+		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
+	}
+
+	return &pb.ListCanteensReply{
+		Canteen: result,
+	}, requestStatus
+}
+
+func (s *CampusServer) ListDishes(ctx context.Context, request *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
+	if request.Year < 2022 {
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+	}
+	if request.Week < 1 || request.Week > 53 {
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
+	}
+	if request.Day < 0 || request.Day > 4 {
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+	}
+
+	var requestStatus error = nil
+	var results []string
+	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
+		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Week, request.Year).
+		Select("weekly.dishID").
+		Joins("JOIN dish d ON d.dish = weekly.dishID").
+		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
+		Where("c.name LIKE ?", request.CanteenId).
+		Select("d.name").
+		Find(&results).Error
+
+	if err != nil {
+		log.WithError(err).Error("while loading Cafeterias from database.")
+		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
+	}
+
+	return &pb.ListDishesReply{
+		Dish: results,
+	}, requestStatus
+}
+
+// GetCanteenHeadCount RPC Endpoint
+func (s *CampusServer) GetCanteenHeadCount(ctx context.Context, input *pb.GetCanteenHeadCountRequest) (*pb.GetCanteenHeadCountReply, error) {
+	data := model.CanteenHeadCount{Count: 0, MaxCount: 0, Percent: -1} // Initialize with an empty (not found) value
+	err := s.db.WithContext(ctx).Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).FirstOrInit(&data).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).Error("while querying the canteen head count for: ", input.CanteenId)
+		return nil, status.Error(codes.Internal, "failed to query head count")
+	}
+
+	return &pb.GetCanteenHeadCountReply{
+		Count:     data.Count,
+		MaxCount:  data.MaxCount,
+		Percent:   data.Percent,
+		Timestamp: timestamppb.New(data.Timestamp),
+	}, nil
+}
