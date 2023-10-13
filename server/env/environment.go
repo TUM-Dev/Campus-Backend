@@ -18,6 +18,10 @@ func IsProd() bool {
 	return GetEnvironment() == "prod"
 }
 
+func IsMensaCronActive() bool {
+	return os.Getenv("MensaCronDisabled") != "true"
+}
+
 func ApiKey() string {
 	value, ok := os.LookupEnv("API_KEY")
 

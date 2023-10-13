@@ -2,6 +2,8 @@ package migration
 
 import (
 	_ "embed"
+	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
@@ -21,9 +23,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
-
-			if err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset"); err != nil {
 				return err
 			}
 
@@ -41,7 +41,7 @@ func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
 				return err
 			}
 
-			return SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 		},
 	}
 }

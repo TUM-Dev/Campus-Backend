@@ -48,23 +48,15 @@ sudo dnf install go protobuf
 ## Buf
 Buf is required to generate protobuf files automatically.
 Follow the installation instructions detailed here: https://docs.buf.build/installation#github-releases
+Alternatively, we have prepared this installation script:
 
-## Go Dependencies
-
-```bash
-go get google.golang.org/protobuf/cmd/protoc-gen-go \
-       google.golang.org/grpc/cmd/protoc-gen-go-grpc
-
-go install \
-   github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-   github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-   google.golang.org/protobuf/cmd/protoc-gen-go \
-   google.golang.org/grpc/cmd/protoc-gen-go-grpc
+```shell
+sh installBuf.bash
 ```
 
 ## Generating
 
-Once you have installed all dependencies, run `./generate.sh` to update the client and server `Protocol Buffers` definitions.
+Once you have installed all dependencies, run `./generate.bash` to update the client and server `Protocol Buffers` definitions.
 
 # Common Issues
 

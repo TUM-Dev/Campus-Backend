@@ -2,10 +2,11 @@ package backend
 
 import (
 	"errors"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 )
 
-func ValidateRegisterDevice(request *pb.RegisterDeviceRequest) error {
+func ValidateCreateDevice(request *pb.CreateDeviceRequest) error {
 	if request.GetDeviceId() == "" {
 		return errors.New("deviceId is empty")
 	}
@@ -17,7 +18,7 @@ func ValidateRegisterDevice(request *pb.RegisterDeviceRequest) error {
 	return nil
 }
 
-func ValidateRemoveDevice(request *pb.RemoveDeviceRequest) error {
+func ValidateDeleteDevice(request *pb.DeleteDeviceRequest) error {
 	if request.GetDeviceId() == "" {
 		return errors.New("deviceId is empty")
 	}

@@ -3,28 +3,23 @@ package backend
 import (
 	"context"
 	"errors"
-	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns/ios_apns_jwt"
+	"net"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
-	"net"
-	"sync"
-	"time"
 )
 
 func (s *CampusServer) GRPCServe(l net.Listener) error {
 	grpcServer := grpc.NewServer()
 	pb.RegisterCampusServer(grpcServer, s)
 	if err := grpcServer.Serve(l); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.WithError(err).Fatal("failed to serve")
 	}
 	return grpcServer.Serve(l)
 }
@@ -40,23 +35,17 @@ type CampusServer struct {
 var _ pb.CampusServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
-	log.Println("Server starting up")
-	initTagRatingOptions(db)
-
+	log.Trace("Server starting up")
 	return &CampusServer{
-		db: db,
-		deviceBuf: &deviceBuffer{
-			lock:     sync.Mutex{},
-			devices:  make(map[string]*model.Devices),
-			interval: time.Minute,
-		},
+		db:                      db,
+		deviceBuf:               newDeviceBuffer(),
 		iOSNotificationsService: NewIOSNotificationsService(),
 	}
 }
 
 func NewIOSNotificationsService() *IOSNotificationsService {
-	if err := ios_apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
-		log.Warn(err)
+	if err := apns.ValidateRequirementsForIOSNotificationsService(); err != nil {
+		log.WithError(err).Warn("failed to validate requirements for ios notifications service")
 
 		return &IOSNotificationsService{
 			APNSToken: nil,
@@ -64,42 +53,15 @@ func NewIOSNotificationsService() *IOSNotificationsService {
 		}
 	}
 
-	token, err := ios_apns_jwt.NewToken()
-
+	token, err := apns.NewToken()
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Error("failed to create new token")
 	}
 
 	return &IOSNotificationsService{
 		APNSToken: token,
 		IsActive:  true,
 	}
-}
-
-func (s *CampusServer) GetNewsSources(ctx context.Context, _ *emptypb.Empty) (newsSources *pb.NewsSourceArray, err error) {
-	if err = s.checkDevice(ctx); err != nil {
-		return
-	}
-
-	var sources []model.NewsSource
-	if err := s.db.Find(&sources).Error; err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	var resp []*pb.NewsSource
-	for _, source := range sources {
-		var icon model.Files
-		if err := s.db.Where("file = ?", source.Icon).First(&icon).Error; err != nil {
-			icon = model.Files{File: 0}
-		}
-		log.Info("sending news source", source.Title)
-		resp = append(resp, &pb.NewsSource{
-			Source: fmt.Sprintf("%d", source.Source),
-			Title:  source.Title,
-			Icon:   icon.URL.String,
-		})
-	}
-	return &pb.NewsSourceArray{Sources: resp}, nil
 }
 
 // SearchRooms returns all rooms that match the given search query.
@@ -115,7 +77,7 @@ func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsReque
 		Campus string
 		Name   string
 	}
-	err := s.db.Raw("SELECT r.*, a.campus, a.name "+
+	err := s.db.WithContext(ctx).Raw("SELECT r.*, a.campus, a.name "+
 		"FROM roomfinder_rooms r "+
 		"LEFT JOIN roomfinder_building2area a ON a.building_nr = r.building_nr "+
 		"WHERE MATCH(room_code, info, address) AGAINST(?)", req.Query).Scan(&res).Error
@@ -143,25 +105,6 @@ func (s *CampusServer) SearchRooms(ctx context.Context, req *pb.SearchRoomsReque
 		}
 	}
 	return response, nil
-}
-
-func (s *CampusServer) GetTopNews(ctx context.Context, _ *emptypb.Empty) (*pb.GetTopNewsReply, error) {
-	if err := s.checkDevice(ctx); err != nil {
-		return nil, err
-	}
-	log.Printf("Received: get top news")
-	var res *model.NewsAlert
-	err := s.db.Joins("Company").Where("NOW() between `from` and `to`").Limit(1).First(&res).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Errorf("Failed to fetch top news: %w", err)
-	} else if res != nil {
-		return &pb.GetTopNewsReply{
-			//ImageUrl: res.Name,
-			Link: res.Link.String,
-			To:   timestamppb.New(res.To),
-		}, nil
-	}
-	return &pb.GetTopNewsReply{}, nil
 }
 
 func (s *CampusServer) GetIOSNotificationsService() *IOSNotificationsService {

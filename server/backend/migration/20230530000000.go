@@ -22,7 +22,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumMigrate(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
+			err := SafeEnumAdd(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
 			if err != nil {
 				return err
 			}
@@ -40,7 +40,7 @@ func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
 				return err
 			}
 
-			err := SafeEnumRollback(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
+			err := SafeEnumRemove(tx, model.Crontab{}, "type", cron.NewExamResultsHook)
 			if err != nil {
 				return err
 			}

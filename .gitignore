@@ -25,4 +25,4 @@ __debug_bin
 .env.local
 
 apns_auth_key.p8
-
+venv

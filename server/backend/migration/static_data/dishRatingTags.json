@@ -1,0 +1,40 @@
+{
+  "tags": [
+    {
+      "tagNameGerman": "Salz",
+      "tagNameEnglish": "Saltiness"
+    },
+    {
+      "tagNameGerman": "Süße",
+      "tagNameEnglish": "Sweetness"
+    },
+    {
+      "tagNameGerman": "Schärfe",
+      "tagNameEnglish": "Spicy"
+    },
+    {
+      "tagNameGerman": "Konsistenz",
+      "tagNameEnglish": "Consistency"
+    },
+    {
+      "tagNameGerman": "Preisleistungsverhältnis",
+      "tagNameEnglish": "Price-performance ratio"
+    },
+    {
+      "tagNameGerman": "Portionsgröße",
+      "tagNameEnglish": "Portion Size"
+    },
+    {
+      "tagNameGerman": "Frische",
+      "tagNameEnglish": "Freshness"
+    },
+    {
+      "tagNameGerman": "Verfügbarkeit",
+      "tagNameEnglish": "Availability"
+    },
+    {
+      "tagNameGerman": "Aussehen",
+      "tagNameEnglish": "Appearance"
+    }
+  ]
+}
