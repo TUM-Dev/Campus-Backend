@@ -14,7 +14,6 @@ spec:
     accessControlAllowHeaders:
       - "*"
     accessControlAllowOriginList:
-      - "https://api.tum.app"
-      - "https://web.tum.app"
+      - "*"
     accessControlMaxAge: 86400
     addVaryHeader: true
