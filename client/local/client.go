@@ -285,17 +285,14 @@ func storeImage(path string, i []byte) (string, error) {
 		}
 	}
 
-	out, errFile := os.Create(imgPath)
-	if errFile != nil {
-		log.WithError(errFile).Error("Unable to create the new testfile")
+	out, err := os.Create(imgPath)
+	if err != nil {
+		log.WithError(err).Error("Unable to create the new testfile")
 	}
 	defer func(out *os.File) {
 		if err := out.Close(); err != nil {
 			log.WithError(err).Error("File was not closed successfully")
 		}
 	}(out)
-	var opts jpeg.Options
-	opts.Quality = 100
-	errFile = jpeg.Encode(out, img, &opts)
-	return imgPath, errFile
+	return imgPath, jpeg.Encode(out, img, &jpeg.Options{Quality: 100})
 }
