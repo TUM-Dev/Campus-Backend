@@ -78,9 +78,7 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 			if err := tx.AutoMigrate(
 				&model.Cafeteria{},
 				&model.CafeteriaRating{},
-				&InitialCafeteriaRatingAverage{},
 				&model.CafeteriaRatingTag{},
-				&InitialCafeteriaRatingTagsAverage{},
 				&model.CafeteriaRatingTagOption{},
 				&model.Dish{},
 				&model.DishesOfTheWeek{},
@@ -90,11 +88,13 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&model.DishNameTag{},
 				&model.DishNameTagAverage{},
 				&model.DishRating{},
-				&InitialDishRatingAverage{},
 				&model.DishRatingTag{},
-				&InitialDishRatingTagAverage{},
 				&model.DishRatingTagOption{},
 				&model.DishToDishNameTag{},
+				&InitialCafeteriaRatingAverage{},
+				&InitialCafeteriaRatingTagsAverage{},
+				&InitialDishRatingAverage{},
+				&InitialDishRatingTagAverage{},
 			); err != nil {
 				return err
 			}
