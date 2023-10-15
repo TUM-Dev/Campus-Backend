@@ -1,7 +1,9 @@
 package migration
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
@@ -91,12 +93,21 @@ func (m TumDBMigrator) migrate20231015000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231015000000",
 		Migrate: func(tx *gorm.DB) error {
+			// cronjob
+			if err := tx.Delete(&model.Crontab{}, "type = 'averageRatingComputation'").Error; err != nil {
+				return err
+			}
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
+				return err
+			}
+			// tables
 			tables := []string{"cafeteria_rating_average", "dish_rating_average", "dish_rating_tag_average", "cafeteria_rating_tag_average", "dish_name_tag_average"}
 			for _, table := range tables {
 				if err := tx.Migrator().DropTable(table); err != nil {
 					return err
 				}
 			}
+			// views
 			if err := tx.Exec(`CREATE VIEW cafeteria_rating_statistics AS
 SELECT cafeteriaID, Avg(points) AS average, MIN(points) AS min, Max(points) AS max, STD(points) AS std
 FROM cafeteria_rating
@@ -125,23 +136,32 @@ JOIN cafeteria_rating_tag crt ON cr.cafeteriaRating = crt.correspondingRating
 GROUP BY cr.cafeteriaID, crt.tagID`).Error; err != nil {
 				return err
 			}
-			if err := tx.Exec(`CREATE VIEW dish_name_tag_statistics AS
+			return tx.Exec(`CREATE VIEW dish_name_tag_statistics AS
 SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std
 FROM dish_rating mr
 JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating
-GROUP BY mr.cafeteriaID, mnt.tagnameID`).Error; err != nil {
-				return err
-			}
-			return nil
+GROUP BY mr.cafeteriaID, mnt.tagnameID`).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
+			// views
 			createdViews := []string{"cafeteria_rating_statistics", "dish_rating_statistics", "dish_rating_tag_statistics", "cafeteria_rating_tag_statistics", "dish_name_tag_statistics"}
 			for _, view := range createdViews {
 				if err := tx.Exec("DROP VIEW IF EXISTS " + view).Error; err != nil {
 					return err
 				}
 			}
-			return tx.AutoMigrate(&CafeteriaRatingAverage{}, &DishRatingAverage{}, &DishRatingTagAverage{}, &CafeteriaRatingTagsAverage{}, &DishNameTagAverage{})
+			// tables
+			if err := tx.AutoMigrate(&CafeteriaRatingAverage{}, &DishRatingAverage{}, &DishRatingTagAverage{}, &CafeteriaRatingTagsAverage{}, &DishNameTagAverage{}); err != nil {
+				return err
+			}
+			// cronjob
+			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
+				return err
+			}
+			return tx.Create(&model.Crontab{
+				Interval: 300,
+				Type:     null.StringFrom("averageRatingComputation"),
+			}).Error
 		},
 	}
 }
