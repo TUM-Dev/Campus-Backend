@@ -199,7 +199,6 @@ func (c *CronService) newspreadHook(item *gofeed.Item) {
 		extractedImageURL = extractedImageSlice[0]
 	}
 	item.Enclosures = []*gofeed.Enclosure{{URL: extractedImageURL}}
-	item.Link = extractedImageURL
 	item.Description = ""
 }
 
