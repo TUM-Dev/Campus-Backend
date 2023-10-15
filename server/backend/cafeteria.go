@@ -34,46 +34,34 @@ const (
 	NAME      ModelType = 3
 )
 
-// GetCafeteriaRatings RPC Endpoint
+// ListCanteenRatings RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
 // all cafeteria rating tags which were used to rate this cafeteria.
 // The parameter limit defines how many actual ratings should be returned.
 // The optional parameters from and to can define an interval in which the queried ratings have been stored.
 // If these aren't specified, the newest ratings will be returned as the default
-func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
-	var result model.CafeteriaRatingAverage //get the average rating for this specific cafeteria
+func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
+	var statsForCanteen model.CafeteriaRatingStatistic
 	tx := s.db.WithContext(ctx)
 	cafeteriaId := getIDForCafeteriaName(input.CanteenId, tx)
-	res := tx.Model(&model.CafeteriaRatingAverage{}).
-		Where("cafeteriaId = ?", cafeteriaId).
-		First(&result)
-
-	if res.Error != nil {
-		log.WithError(res.Error).Error("Error while querying the cafeteria with Id ", cafeteriaId)
-		return nil, status.Error(codes.Internal, "This cafeteria has not yet been rated.")
+	err := tx.First(&statsForCanteen, "cafeteriaId = ?", cafeteriaId).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, status.Error(codes.NotFound, "No cafeteria with this Id found.")
+	}
+	if err != nil {
+		log.WithError(err).Error("Error while querying the cafeteria with Id ", cafeteriaId)
+		return nil, status.Error(codes.Internal, "could not query the cafeteria with the given Id")
 	}
 
-	if res.RowsAffected > 0 {
-		ratings := queryLastCafeteriaRatingsWithLimit(input, cafeteriaId, tx)
-		cafeteriaTags := queryTags(cafeteriaId, -1, CAFETERIA, tx)
-
-		return &pb.ListCanteenRatingsReply{
-			Avg:        result.Average,
-			Std:        result.Std,
-			Min:        result.Min,
-			Max:        result.Max,
-			Rating:     ratings,
-			RatingTags: cafeteriaTags,
-		}, nil
-	} else {
-		return &pb.ListCanteenRatingsReply{
-			Avg: -1,
-			Std: -1,
-			Min: -1,
-			Max: -1,
-		}, nil
-	}
+	return &pb.ListCanteenRatingsReply{
+		Avg:        statsForCanteen.Average,
+		Std:        statsForCanteen.Std,
+		Min:        statsForCanteen.Min,
+		Max:        statsForCanteen.Max,
+		Rating:     queryLastCafeteriaRatingsWithLimit(input, cafeteriaId, tx),
+		RatingTags: queryTags(cafeteriaId, -1, CAFETERIA, tx),
+	}, nil
 }
 
 // queryLastCafeteriaRatingsWithLimit
