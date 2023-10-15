@@ -10,7 +10,6 @@ import (
 // They are grouped (e.g. All Ratings for "Mensa_garching") and the computed values will then be stored in a table with the suffix "_result"
 func (c *CronService) averageRatingComputation() error {
 	computeAverageCafeteriaTags(c)
-	computeAverageForDishesInCafeteriasTags(c)
 	computeAverageNameTags(c)
 
 	return nil
@@ -18,10 +17,10 @@ func (c *CronService) averageRatingComputation() error {
 
 func computeAverageNameTags(c *CronService) {
 	var results []model.DishNameTagAverage
-	err := c.db.Raw("SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std" +
-		" FROM dish_rating mr" +
-		" JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating" +
-		" GROUP BY mr.cafeteriaID, mnt.tagnameID").Scan(&results).Error
+	err := c.db.Raw(`SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std
+FROM dish_rating mr
+JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating
+GROUP BY mr.cafeteriaID, mnt.tagnameID`).Scan(&results).Error
 
 	if err != nil {
 		log.WithError(err).Error("while precomputing average name tags.")
@@ -34,29 +33,6 @@ func computeAverageNameTags(c *CronService) {
 		if err != nil {
 			log.WithError(err).Error("while creating a new average name tag rating in the database.")
 		}
-	}
-}
-
-func computeAverageForDishesInCafeteriasTags(c *CronService) {
-	var results []model.DishRatingTagAverage //todo namen im select anpassen
-	err := c.db.Raw("SELECT mr.dishID as dishID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std" +
-		" FROM dish_rating mr" +
-		" JOIN dish_rating_tag mrt ON mr.dishRating = mrt.parentRating" +
-		" GROUP BY mr.cafeteriaID, mrt.tagID, mr.dishID").Scan(&results).Error
-
-	if err != nil {
-		log.WithError(err).Error("while precomputing average dish tags.")
-	} else if len(results) > 0 {
-		errDelete := c.db.Where("1=1").Delete(&model.DishRatingTagAverage{}).Error
-		if errDelete != nil {
-			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
-		}
-
-		err := c.db.Model(&model.DishRatingTagAverage{}).Create(&results).Error
-		if err != nil {
-			log.WithError(err).Error("while creating a new average dish tag rating in the database.")
-		}
-
 	}
 }
 
