@@ -246,7 +246,7 @@ func (s *NewsSuite) Test_ListNewsAlertsNone_noFilter() {
 	require.Nil(s.T(), response)
 }
 func (s *NewsSuite) Test_ListNewsAlertsNone_Filter() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alert.alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alert.news_alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{LastNewsAlertId: 42})
