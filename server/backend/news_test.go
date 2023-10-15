@@ -88,10 +88,11 @@ func source2() *model.NewsSource {
 const ExpectedListNewsSourcesQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
+	s1, s2 := source1(), source2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
-			AddRow(source1().Source, source1().Title, source1().URL, source1().FileID, source1().Hook, source1().File.File, source1().File.Name, source1().File.Path, source1().File.Downloads, source1().File.URL, source1().File.Downloaded).
-			AddRow(source2().Source, source2().Title, source2().URL, source2().FileID, source2().Hook, source2().File.File, source2().File.Name, source2().File.Path, source2().File.Downloads, source2().File.URL, source2().File.Downloaded))
+			AddRow(s1.Source, s1.Title, s1.URL, s1.FileID, s1.Hook, s1.File.File, s1.File.Name, s1.File.Path, s1.File.Downloads, s1.File.URL, s1.File.Downloaded).
+			AddRow(s2.Source, s2.Title, s2.URL, s2.FileID, s2.Hook, s2.File.File, s2.File.Name, s2.File.Path, s2.File.Downloads, s2.File.URL, s2.File.Downloaded))
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -99,8 +100,8 @@ func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsSourcesReply{
 		Sources: []*pb.NewsSource{
-			{Source: fmt.Sprintf("%d", source1().Source), Title: source1().Title, IconUrl: "https://api.tum.app/files/news/sources/src_1.png"},
-			{Source: fmt.Sprintf("%d", source2().Source), Title: source2().Title, IconUrl: "https://api.tum.app/files/news/sources/src_2.png"},
+			{Source: fmt.Sprintf("%d", s1.Source), Title: s1.Title, IconUrl: "https://api.tum.app/files/news/sources/src_1.png"},
+			{Source: fmt.Sprintf("%d", s2.Source), Title: s2.Title, IconUrl: "https://api.tum.app/files/news/sources/src_2.png"},
 		},
 	}
 	require.Equal(s.T(), expectedResp, response)
@@ -254,10 +255,9 @@ func (s *NewsSuite) Test_ListNewsAlertsNone_Filter() {
 	require.Nil(s.T(), response)
 }
 func (s *NewsSuite) Test_ListNewsAlertsMultiple() {
-	a1 := alert1()
-	a2 := alert2()
+	a1, a2 := alert1(), alert2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "Files__file", "File__name", "File__path", "Files__downloads", "Files__url", "Files__downloaded"}).
+		WillReturnRows(sqlmock.NewRows([]string{"news_alert", "file", "name", "link", "created", "from", "to", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(a1.NewsAlert, a1.FileID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.File.File, a1.File.Name, a1.File.Path, a1.File.Downloads, a1.File.URL, a1.File.Downloaded).
 			AddRow(a2.NewsAlert, a2.FileID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.File.File, a2.File.Name, a2.File.Path, a2.File.Downloads, a2.File.URL, a2.File.Downloaded))
 
