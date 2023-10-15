@@ -37,6 +37,39 @@ func (n *InitialDishRatingAverage) TableName() string {
 	return "dish_rating_average"
 }
 
+// InitialDishRatingTagAverage stores all precomputed values for the cafeteria ratings
+type InitialDishRatingTagAverage struct {
+	DishRatingTagsAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagsAverage;type:int;not null;"`
+	CafeteriaID           int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;"`
+	TagID                 int64   `gorm:"column:tagID;foreignKey:tagID;type:int;not null;"`
+	DishID                int64   `gorm:"column:dishID;foreignKey:dishID;type:int;not null;"`
+	Average               float32 `gorm:"column:average;type:float;not null;"`
+	Min                   int8    `gorm:"column:min;type:int;not null;"`
+	Max                   int8    `gorm:"column:max;type:int;not null;"`
+	Std                   float32 `gorm:"column:std;type:float;not null;"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *InitialDishRatingTagAverage) TableName() string {
+	return "dish_rating_tag_average"
+}
+
+// InitialCafeteriaRatingTagsAverage stores all precomputed values for the cafeteria ratings
+type InitialCafeteriaRatingTagsAverage struct {
+	CafeteriaRatingTagsAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagsAverage;type:int;not null;" json:"canteenRatingTagsAverage"`
+	CafeteriaID                int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
+	TagID                      int64   `gorm:"column:tagID;foreignKey:cafeteriaRatingTagOption;type:int;not null;" json:"tagID"`
+	Average                    float32 `gorm:"column:average;type:float;not null;" json:"average"`
+	Min                        int8    `gorm:"column:min;type:int;not null;" json:"min"`
+	Max                        int8    `gorm:"column:max;type:int;not null;" json:"max"`
+	Std                        float32 `gorm:"column:std;type:float;not null;" json:"std"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *InitialCafeteriaRatingTagsAverage) TableName() string {
+	return "cafeteria_rating_tag_average"
+}
+
 // migrate20220713000000
 func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
@@ -47,7 +80,7 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&model.CafeteriaRating{},
 				&InitialCafeteriaRatingAverage{},
 				&model.CafeteriaRatingTag{},
-				&model.CafeteriaRatingTagsAverage{},
+				&InitialCafeteriaRatingTagsAverage{},
 				&model.CafeteriaRatingTagOption{},
 				&model.Dish{},
 				&model.DishesOfTheWeek{},
@@ -59,7 +92,7 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&model.DishRating{},
 				&InitialDishRatingAverage{},
 				&model.DishRatingTag{},
-				&model.DishRatingTagAverage{},
+				&InitialDishRatingTagAverage{},
 				&model.DishRatingTagOption{},
 				&model.DishToDishNameTag{},
 			); err != nil {

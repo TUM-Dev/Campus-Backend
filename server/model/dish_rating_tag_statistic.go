@@ -1,6 +1,6 @@
 package model
 
-// DishRatingTagStatistic stores all precomputed values for the cafeteria ratings
+// DishRatingTagStatistic is a view for statistics of dish rating tags
 type DishRatingTagStatistic struct {
 	CafeteriaID int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	TagID       int64   `gorm:"column:tagID;foreignKey:tagID;type:int;not null;" json:"tagID"`

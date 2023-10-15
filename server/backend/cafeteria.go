@@ -262,7 +262,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 			Scan(&results).Error
 	} else if ratingType == CAFETERIA {
 		err = tx.Table("cafeteria_rating_tag_option options").
-			Joins("JOIN cafeteria_rating_tag_average results ON options.cafeteriaRatingTagOption = results.tagID").
+			Joins("JOIN cafeteria_rating_tag_statistics results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
