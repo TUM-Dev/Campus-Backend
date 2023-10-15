@@ -81,7 +81,7 @@ func main() {
 	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(UnaryRequestLogger), grpc.StreamInterceptor(StreamRequestLogger))
 	pb.RegisterCampusServer(grpcServer, campusService)
 	reflection.Register(grpcServer)
 
@@ -119,6 +119,20 @@ func main() {
 	if err := g.Wait(); err != nil {
 		log.WithError(err).Error("encountered issue while running the server")
 	}
+}
+
+func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	start := time.Now()
+	resp, err := handler(ctx, req)
+	fields := log.Fields{"elapsed": time.Now().Sub(start)}
+	log.WithContext(ctx).WithFields(fields).WithError(err).Info(info.FullMethod)
+	return resp, err
+}
+func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	start := time.Now()
+	err := handler(srv, stream)
+	log.WithField("elapsed", time.Now().Sub(start)).WithError(err).Info(info.FullMethod)
+	return err
 }
 
 // setupDB connects to the database and migrates it if necessary
