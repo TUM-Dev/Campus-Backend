@@ -89,7 +89,7 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	var res []*model.NewsAlert
 	tx := s.db.WithContext(ctx).Joins("File").Where("news_alert.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
-		tx = tx.Where("news_alert.alert > ?", req.LastNewsAlertId)
+		tx = tx.Where("news_alert.news_alert > ?", req.LastNewsAlertId)
 	}
 	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no news alerts")
