@@ -9,7 +9,6 @@ import (
 // This cronjob precomputes average ratings of all cafeteria ratings, dish ratings and all three types of tags.
 // They are grouped (e.g. All Ratings for "Mensa_garching") and the computed values will then be stored in a table with the suffix "_result"
 func (c *CronService) averageRatingComputation() error {
-	computeAverageForDishesInCafeterias(c)
 	computeAverageCafeteriaTags(c)
 	computeAverageForDishesInCafeteriasTags(c)
 	computeAverageNameTags(c)
@@ -79,26 +78,6 @@ func computeAverageCafeteriaTags(c *CronService) {
 		err := c.db.Model(&model.CafeteriaRatingTagsAverage{}).Create(&results).Error
 		if err != nil {
 			log.WithError(err).Error("while creating a new average cafeteria tag rating in the database.")
-		}
-	}
-}
-
-func computeAverageForDishesInCafeterias(c *CronService) {
-	var results []model.DishRatingAverage
-	err := c.db.Model(&model.DishRating{}).
-		Select("cafeteriaID, dishID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
-		Group("cafeteriaID,dishID").Scan(&results).Error
-
-	if err != nil {
-		log.WithError(err).Error("while precomputing average dish ratings.")
-	} else if len(results) > 0 {
-		errDelete := c.db.Where("1=1").Delete(&model.DishRatingAverage{}).Error
-		if errDelete != nil {
-			log.WithError(errDelete).Error("Error while deleting old averages in the table.")
-		}
-		err := c.db.Model(&model.DishRatingAverage{}).Create(&results).Error
-		if err != nil {
-			log.WithError(err).Error("while creating a new average dish rating in the database.")
 		}
 	}
 }

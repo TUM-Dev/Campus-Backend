@@ -126,53 +126,31 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, caf
 	}
 }
 
-// GetDishRatings RPC Endpoint
-// Allows to query ratings for a specific dish in a specific cafeteria.
-// It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
-// all dish rating tags which were used to rate this dish in this cafeteria. Additionally, the average, max/min are
-// returned for every name tag which matches the name of the dish.
-// The parameter limit defines how many actual ratings should be returned.
-// The optional parameters from and to can define a interval in which the queried ratings have been stored.
-// If these aren't specified, the newest ratings will be returned as the default
 func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRatingsRequest) (*pb.GetDishRatingsReply, error) {
-	var result model.DishRatingAverage //get the average rating for this specific dish
 	tx := s.db.WithContext(ctx)
 	cafeteriaID := getIDForCafeteriaName(input.CanteenId, tx)
 	dishID := getIDForDishName(input.Dish, cafeteriaID, tx)
 
-	err := tx.Model(&model.DishRatingAverage{}).
-		Where("cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).
-		First(&result)
-
-	if err.Error != nil {
+	var statsForDish model.DishRatingStatistic
+	err := tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", cafeteriaID, dishID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, status.Error(codes.NotFound, "No cafeteria with this Id found.")
+	}
+	if err != nil {
 		fields := log.Fields{"dishID": dishID, "cafeteriaID": cafeteriaID}
-		log.WithError(err.Error).WithFields(fields).Error("Error while querying the average ratings")
+		log.WithError(err).WithFields(fields).Error("Error while querying the average ratings")
 		return nil, status.Error(codes.Internal, "This dish has not yet been rated.")
 	}
 
-	if err.RowsAffected > 0 {
-		ratings := queryLastDishRatingsWithLimit(input, cafeteriaID, dishID, tx)
-		dishTags := queryTags(cafeteriaID, dishID, DISH, tx)
-		nameTags := queryTags(cafeteriaID, dishID, NAME, tx)
-
-		return &pb.GetDishRatingsReply{
-			Avg:        result.Average,
-			Std:        result.Std,
-			Min:        result.Min,
-			Max:        result.Max,
-			Rating:     ratings,
-			RatingTags: dishTags,
-			NameTags:   nameTags,
-		}, nil
-	} else {
-		return &pb.GetDishRatingsReply{
-			Avg: -1,
-			Min: -1,
-			Max: -1,
-			Std: -1,
-		}, nil
-	}
-
+	return &pb.GetDishRatingsReply{
+		Avg:        statsForDish.Average,
+		Std:        statsForDish.Std,
+		Min:        statsForDish.Min,
+		Max:        statsForDish.Max,
+		Rating:     queryLastDishRatingsWithLimit(input, cafeteriaID, dishID, tx),
+		RatingTags: queryTags(cafeteriaID, dishID, DISH, tx),
+		NameTags:   queryTags(cafeteriaID, dishID, NAME, tx),
+	}, nil
 }
 
 // queryLastDishRatingsWithLimit
