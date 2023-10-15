@@ -70,6 +70,22 @@ func (n *InitialCafeteriaRatingTagsAverage) TableName() string {
 	return "cafeteria_rating_tag_average"
 }
 
+// InitialDishNameTagAverage stores all precomputed values for the DishName ratings
+type InitialDishNameTagAverage struct {
+	DishNameTagAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagAverage;type:int;not null;" json:"dishNameTagAverage" `
+	CafeteriaID        int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
+	TagID              int64   `gorm:"column:tagID;foreignKey:DishNameTagOption;type:int;not null;" json:"tagID"`
+	Average            float32 `gorm:"column:average;type:float;not null;" json:"average" `
+	Min                int8    `gorm:"column:min;type:int;not null;" json:"min"`
+	Max                int8    `gorm:"column:max;type:int;not null;" json:"max"`
+	Std                float32 `gorm:"column:std;type:float;not null;" json:"std"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *InitialDishNameTagAverage) TableName() string {
+	return "dish_name_tag_average"
+}
+
 // migrate20220713000000
 func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
@@ -86,11 +102,11 @@ func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
 				&model.DishNameTagOptionIncluded{},
 				&model.DishNameTagOptionExcluded{},
 				&model.DishNameTag{},
-				&model.DishNameTagAverage{},
 				&model.DishRating{},
 				&model.DishRatingTag{},
 				&model.DishRatingTagOption{},
 				&model.DishToDishNameTag{},
+				&InitialDishNameTagAverage{},
 				&InitialCafeteriaRatingAverage{},
 				&InitialCafeteriaRatingTagsAverage{},
 				&InitialDishRatingAverage{},

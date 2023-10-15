@@ -271,7 +271,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 		err = tx.Table("dish_to_dish_name_tag mapping").
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
-			Joins("JOIN dish_name_tag_average results ON mapping.nameTagID = results.tagID").
+			Joins("JOIN dish_name_tag_statistic results ON mapping.nameTagID = results.tagID").
 			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.dishNameTagOption").
 			Select("mapping.nameTagID as tagId, results.average as avg, " +
 				"results.min as min, results.max as max, results.std as std").

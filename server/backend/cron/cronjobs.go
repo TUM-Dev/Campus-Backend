@@ -50,23 +50,16 @@ func New(db *gorm.DB) *CronService {
 
 func (c *CronService) Run() error {
 	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
-	g := new(errgroup.Group)
-
-	if env.IsMensaCronActive() {
-		g.Go(func() error { return c.dishNameDownloadCron() })
-		g.Go(func() error { return c.averageRatingComputation() })
-	}
-
 	for {
+		g := new(errgroup.Group)
 		log.Trace("Cron: checking for pending")
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
-				AverageRatingComputation,
 				DishNameDownload,
 				CanteenHeadcount,
 				IOSNotifications,
@@ -105,10 +98,6 @@ func (c *CronService) Run() error {
 			case DishNameDownload:
 				if env.IsMensaCronActive() {
 					g.Go(c.dishNameDownloadCron)
-				}
-			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
-				if env.IsMensaCronActive() {
-					g.Go(c.averageRatingComputation)
 				}
 			case NewExamResultsHook:
 				g.Go(func() error { return c.newExamResultsHookCron() })
