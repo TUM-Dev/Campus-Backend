@@ -104,25 +104,26 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		}
 		var enclosureUrl = null.StringFrom("")
 		var file *model.File
+		var fileID null.Int
 		if pickedEnclosure != nil {
 			file, err = c.saveImage(pickedEnclosure.URL)
 			if err != nil {
-				log.WithError(err).Error("can't save news image")
+				log.WithError(err).WithField("url", pickedEnclosure.URL).Error("can't save news image")
+			} else {
+				fileID = null.IntFrom(file.File)
 			}
 			enclosureUrl = null.StringFrom(pickedEnclosure.URL)
 		}
-		bm := bluemonday.StrictPolicy()
-		sanitizedDesc := bm.Sanitize(item.Description)
 
 		newsItem := model.News{
 			Date:        *item.PublishedParsed,
 			Created:     time.Now(),
 			Title:       item.Title,
-			Description: sanitizedDesc,
+			Description: bluemonday.StrictPolicy().Sanitize(item.Description),
 			Src:         source.Source,
 			Link:        item.Link,
 			Image:       enclosureUrl,
-			FileID:      null.IntFrom(file.File),
+			FileID:      fileID,
 			File:        file,
 		}
 		newNews = append(newNews, newsItem)
