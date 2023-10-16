@@ -224,7 +224,7 @@ func (canteen CanteenApInformation) requestApData() []AccessPoint {
 	// Parse as JSON
 	var aps []AccessPoint
 	if err = json.NewDecoder(resp.Body).Decode(&aps); err != nil {
-		log.WithError(err).Error("Canteen HeadCount parsing output as JSON failed for: ", canteen.CanteenId)
+		log.WithError(err).WithField("CanteenId", canteen.CanteenId).Error("Canteen HeadCount parsing failed")
 		return []AccessPoint{}
 	}
 	return aps

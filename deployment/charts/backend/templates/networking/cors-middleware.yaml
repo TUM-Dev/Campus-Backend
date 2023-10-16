@@ -1,4 +1,4 @@
-apiVersion: traefik.io/v1alpha1
+apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: cors
@@ -14,7 +14,6 @@ spec:
     accessControlAllowHeaders:
       - "*"
     accessControlAllowOriginList:
-      - "https://api.tum.app"
-      - "https://web.tum.app"
+      - "*"
     accessControlMaxAge: 86400
     addVaryHeader: true
