@@ -35,9 +35,10 @@ jobs:
           cache-dependency-path: |
             server/go.sum
       - name: run migration
-        run: go run migrate.go
+        run: go run main.go
         working-directory: ./server
         env:
+          EXIT_AFTER_MIGRATION: "true"
           DB_DSN: root:super_secret_pa$$w0rd@tcp(db:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
   build:
