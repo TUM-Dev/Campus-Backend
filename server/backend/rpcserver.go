@@ -3,26 +3,15 @@ package backend
 import (
 	"context"
 	"errors"
-	"net"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
-
-func (s *CampusServer) GRPCServe(l net.Listener) error {
-	grpcServer := grpc.NewServer()
-	pb.RegisterCampusServer(grpcServer, s)
-	if err := grpcServer.Serve(l); err != nil {
-		log.WithError(err).Fatal("failed to serve")
-	}
-	return grpcServer.Serve(l)
-}
 
 type CampusServer struct {
 	pb.UnimplementedCampusServer

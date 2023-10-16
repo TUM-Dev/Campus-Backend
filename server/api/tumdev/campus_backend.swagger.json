@@ -69,6 +69,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiCanteen"
               }
             }
@@ -125,6 +126,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -378,6 +380,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -403,6 +406,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -707,6 +711,58 @@
         ]
       }
     },
+    "/news": {
+      "get": {
+        "operationId": "Campus_ListNews",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/apiNews"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lastNewsId",
+            "description": "the last id of the news item received. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "newsSource",
+            "description": "filter by news source id. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "oldestDateAt",
+            "description": "the oldest time you want to be included in the response",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/news/alerts": {
       "get": {
         "operationId": "Campus_ListNewsAlerts",
@@ -716,6 +772,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiNewsAlert"
               }
             }
@@ -751,6 +808,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiNewsSource"
               }
             }
@@ -762,57 +820,6 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/news/{lastNewsId}": {
-      "get": {
-        "operationId": "Campus_ListNews",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/apiNews"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lastNewsId",
-            "description": "the last id of the news item received. 0 to get all news items",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "newsSource",
-            "description": "filter by news source id. 0 to get all news items",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "oldestDateAt",
-            "description": "the oldest time you want to be included in the response",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "date-time"
-          }
-        ],
         "tags": [
           "Campus"
         ]
@@ -919,6 +926,7 @@
             "schema": {
               "type": "array",
               "items": {
+                "type": "object",
                 "$ref": "#/definitions/apiRoom"
               }
             }
@@ -1076,6 +1084,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
@@ -1139,6 +1148,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
@@ -1200,6 +1210,7 @@
         "rating": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1222,12 +1233,14 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         },
         "nameTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1362,6 +1375,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1373,6 +1387,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1384,6 +1399,7 @@
         "rating": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1406,6 +1422,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1441,6 +1458,7 @@
         "canteen": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiCanteen"
           }
         }
@@ -1463,6 +1481,7 @@
         "infos": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/ListMoreInformationReplyMoreInformation"
           }
         }
@@ -1474,6 +1493,7 @@
         "movies": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiMovie"
           }
         }
@@ -1485,6 +1505,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1496,6 +1517,7 @@
         "alerts": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNewsAlert"
           }
         }
@@ -1507,6 +1529,7 @@
         "news": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNews"
           }
         }
@@ -1518,6 +1541,7 @@
         "sources": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNewsSource"
           }
         }
@@ -1529,6 +1553,7 @@
         "facilities": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiOpeningTimesMsgElement"
           }
         }
@@ -1540,6 +1565,7 @@
         "responsiblePerson": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiResponsiblePerson"
           }
         }
@@ -1551,6 +1577,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiStudyRoomMsgElement"
           }
         }
@@ -1641,6 +1668,7 @@
         "publishedExams": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiNewExamPublished"
           }
         }
@@ -1666,8 +1694,17 @@
           "type": "string",
           "title": "where a news thumbnail is stored. empty string means no image is available"
         },
-        "source": {
-          "type": "string"
+        "sourceId": {
+          "type": "string",
+          "title": "the id of the news source"
+        },
+        "sourceIconUrl": {
+          "type": "string",
+          "title": "where the icon can be found"
+        },
+        "sourceTitle": {
+          "type": "string",
+          "title": "human readable title of the news source"
         },
         "created": {
           "type": "string",
@@ -1869,6 +1906,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRoom"
           }
         }
@@ -1902,6 +1940,7 @@
         "ratingTags": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiRatingTagNewRequest"
           }
         },
@@ -1949,6 +1988,7 @@
         "rooms": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/apiStudyRoom"
           }
         }
@@ -1991,6 +2031,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
