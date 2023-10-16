@@ -65,15 +65,12 @@ func (service *Service) HandleScheduledCron() error {
 }
 
 func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
-	routinesCount := routineCount(devices)
-
+	routinesCount := min(len(devices), MaxRoutineCount)
 	chunkSize := len(devices) / routinesCount
-
-	perfectChunkable := (len(devices) % routinesCount) == 0
+	perfectlyChunkable := (len(devices) % routinesCount) == 0
 
 	chunksArrSize := routinesCount
-
-	if !perfectChunkable {
+	if !perfectlyChunkable {
 		chunksArrSize = routinesCount + 1
 	}
 
@@ -83,7 +80,7 @@ func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
 		chunks[i] = devices[i*chunkSize : (i+1)*chunkSize]
 	}
 
-	if !perfectChunkable {
+	if !perfectlyChunkable {
 		chunks[routinesCount] = devices[routinesCount*chunkSize:]
 	}
 
@@ -110,14 +107,6 @@ func (service *Service) handleDevicesChunk(devices []model.IOSDeviceLastUpdated)
 			log.WithError(err).WithField("deviceID", device.DeviceID).Error("could not log scheduled update")
 		}
 	}
-}
-
-func routineCount(devices []model.IOSDeviceLastUpdated) int {
-	if len(devices) < MaxRoutineCount {
-		return len(devices)
-	}
-
-	return MaxRoutineCount
 }
 
 func (service *Service) LogScheduledUpdate(deviceID string) error {

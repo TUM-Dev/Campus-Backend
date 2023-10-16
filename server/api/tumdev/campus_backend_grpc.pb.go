@@ -72,7 +72,7 @@ type CampusClient interface {
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
-	CreateFeedback(ctx context.Context, in *CreateFeedbackRequest, opts ...grpc.CallOption) (*CreateFeedbackReply, error)
+	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
 	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
 	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
@@ -256,13 +256,38 @@ func (c *campusClient) ListMovies(ctx context.Context, in *ListMoviesRequest, op
 	return out, nil
 }
 
-func (c *campusClient) CreateFeedback(ctx context.Context, in *CreateFeedbackRequest, opts ...grpc.CallOption) (*CreateFeedbackReply, error) {
-	out := new(CreateFeedbackReply)
-	err := c.cc.Invoke(ctx, Campus_CreateFeedback_FullMethodName, in, out, opts...)
+func (c *campusClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], Campus_CreateFeedback_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &campusCreateFeedbackClient{stream}
+	return x, nil
+}
+
+type Campus_CreateFeedbackClient interface {
+	Send(*CreateFeedbackRequest) error
+	CloseAndRecv() (*CreateFeedbackReply, error)
+	grpc.ClientStream
+}
+
+type campusCreateFeedbackClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusCreateFeedbackClient) Send(m *CreateFeedbackRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *campusCreateFeedbackClient) CloseAndRecv() (*CreateFeedbackReply, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(CreateFeedbackReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
@@ -360,7 +385,7 @@ type CampusServer interface {
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
-	CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error)
+	CreateFeedback(Campus_CreateFeedbackServer) error
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
@@ -433,8 +458,8 @@ func (UnimplementedCampusServer) ListStudyRooms(context.Context, *ListStudyRooms
 func (UnimplementedCampusServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
 }
-func (UnimplementedCampusServer) CreateFeedback(context.Context, *CreateFeedbackRequest) (*CreateFeedbackReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
+func (UnimplementedCampusServer) CreateFeedback(Campus_CreateFeedbackServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
 }
 func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
@@ -797,22 +822,30 @@ func _Campus_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_CreateFeedback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateFeedbackRequest)
-	if err := dec(in); err != nil {
+func _Campus_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CampusServer).CreateFeedback(&campusCreateFeedbackServer{stream})
+}
+
+type Campus_CreateFeedbackServer interface {
+	SendAndClose(*CreateFeedbackReply) error
+	Recv() (*CreateFeedbackRequest, error)
+	grpc.ServerStream
+}
+
+type campusCreateFeedbackServer struct {
+	grpc.ServerStream
+}
+
+func (x *campusCreateFeedbackServer) SendAndClose(m *CreateFeedbackReply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *campusCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
+	m := new(CreateFeedbackRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).CreateFeedback(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_CreateFeedback_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).CreateFeedback(ctx, req.(*CreateFeedbackRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1039,10 +1072,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_ListMovies_Handler,
 		},
 		{
-			MethodName: "CreateFeedback",
-			Handler:    _Campus_CreateFeedback_Handler,
-		},
-		{
 			MethodName: "GetUploadStatus",
 			Handler:    _Campus_GetUploadStatus_Handler,
 		},
@@ -1075,6 +1104,12 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_DeleteDevice_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "CreateFeedback",
+			Handler:       _Campus_CreateFeedback_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "tumdev/campus_backend.proto",
 }

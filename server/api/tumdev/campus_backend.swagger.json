@@ -507,45 +507,50 @@
         },
         "parameters": [
           {
-            "name": "topic",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "attachment",
+            "description": "Optional file in Base64.\nAccepted file formats: jpeg, jpg, png, webp, md, txt, pdf\nMaximum file size 4MB as by Protobuf maximum per request message size (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
           },
           {
-            "name": "email",
+            "name": "recipient",
+            "description": "who is the feedback for\n\n - TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "TUM_DEV",
+              "TUM_CONTACT"
+            ],
+            "default": "TUM_DEV"
           },
           {
-            "name": "emailId",
+            "name": "fromEmail",
+            "description": "the email address of the user",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "message",
+            "description": "The actual message",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "imageCount",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "latitude",
+            "name": "location.latitude",
             "in": "query",
             "required": false,
             "type": "number",
             "format": "double"
           },
           {
-            "name": "longitude",
+            "name": "location.longitude",
             "in": "query",
             "required": false,
             "type": "number",
@@ -553,12 +558,14 @@
           },
           {
             "name": "osVersion",
+            "description": "Optional os information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "appVersion",
+            "description": "Optional app information which the user can choose (data protection) to attach or not",
             "in": "query",
             "required": false,
             "type": "string"
@@ -673,6 +680,58 @@
         ]
       }
     },
+    "/news": {
+      "get": {
+        "operationId": "Campus_ListNews",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/apiNews"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lastNewsId",
+            "description": "the last id of the news item received. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "newsSource",
+            "description": "filter by news source id. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "oldestDateAt",
+            "description": "the oldest time you want to be included in the response",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/news/alerts": {
       "get": {
         "operationId": "Campus_ListNewsAlerts",
@@ -730,58 +789,6 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/news/{lastNewsId}": {
-      "get": {
-        "operationId": "Campus_ListNews",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/apiNews"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lastNewsId",
-            "description": "the last id of the news item received. 0 to get all news items",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "newsSource",
-            "description": "filter by news source id. 0 to get all news items",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "oldestDateAt",
-            "description": "the oldest time you want to be included in the response",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "date-time"
-          }
-        ],
         "tags": [
           "Campus"
         ]
@@ -934,6 +941,15 @@
     }
   },
   "definitions": {
+    "CreateFeedbackRequestRecipient": {
+      "type": "string",
+      "enum": [
+        "TUM_DEV",
+        "TUM_CONTACT"
+      ],
+      "default": "TUM_DEV",
+      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+    },
     "ListMoreInformationReplyMoreInformation": {
       "type": "object",
       "properties": {
@@ -962,6 +978,19 @@
           "format": "double"
         },
         "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "apiCoordinate": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
           "type": "number",
           "format": "double"
         }
@@ -1486,12 +1515,6 @@
     "apiMovie": {
       "type": "object",
       "properties": {
-        "coverName": {
-          "type": "string"
-        },
-        "coverPath": {
-          "type": "string"
-        },
         "movieId": {
           "type": "string",
           "format": "int64"
@@ -1537,6 +1560,10 @@
         "link": {
           "type": "string",
           "title": "Where to find additional information about this movie"
+        },
+        "coverUrl": {
+          "type": "string",
+          "title": "Where to find a cover image for this movie"
         }
       }
     },
@@ -1557,18 +1584,30 @@
           "type": "string"
         },
         "imageUrl": {
-          "type": "string"
+          "type": "string",
+          "title": "where a news thumbnail is stored. empty string means no image is available"
         },
-        "source": {
-          "type": "string"
+        "sourceId": {
+          "type": "string",
+          "title": "the id of the news source"
+        },
+        "sourceIconUrl": {
+          "type": "string",
+          "title": "where the icon can be found"
+        },
+        "sourceTitle": {
+          "type": "string",
+          "title": "human readable title of the news source"
         },
         "created": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "when the news item was created in OUR database"
         },
         "date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "the date of the news item"
         }
       }
     },
@@ -1604,8 +1643,9 @@
         "title": {
           "type": "string"
         },
-        "icon": {
-          "type": "string"
+        "iconUrl": {
+          "type": "string",
+          "title": "where the icon can be found"
         }
       }
     },
