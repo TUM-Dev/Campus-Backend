@@ -28,7 +28,7 @@ service Campus {
 
   rpc ListNews(ListNewsRequest) returns (ListNewsReply) {
     option (google.api.http) = {
-      get: "/news/{last_news_id}",
+      get: "/news",
       response_body: "news"
     };
   }
