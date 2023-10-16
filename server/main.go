@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/textproto"
-	"strings"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
@@ -24,10 +23,8 @@ import (
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 const httpPort = ":50051"
@@ -136,49 +133,11 @@ func addMethodNameInterceptor(ctx context.Context, method string, req interface{
 
 // errorHandler translates gRPC raised by the backend into HTTP errors.
 func errorHandler(_ context.Context, _ *runtime.ServeMux, _ runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
-	errorResp := errorResponse{Error: "Internal Server Error", StatusCode: http.StatusInternalServerError}
-
-	if strings.HasPrefix(err.Error(), "no device id") {
-		errorResp.Error = "Not Authorized"
-		errorResp.StatusCode = http.StatusForbidden
-	}
-
-	if s, ok := status.FromError(err); ok {
-		switch s.Code() {
-		case codes.NotFound:
-			errorResp.Error = "Not Found"
-			errorResp.StatusCode = http.StatusNotFound
-		case codes.Unimplemented:
-			errorResp.Error = "Not Implemented"
-			errorResp.StatusCode = http.StatusNotImplemented
-		case codes.InvalidArgument:
-			errorResp.Error = "Invalid Argument"
-			errorResp.StatusCode = http.StatusBadRequest
-		case codes.Internal:
-			errorResp.Error = "Internal Server Error"
-			errorResp.StatusCode = http.StatusInternalServerError
-		}
-
-		if s.Message() != "" {
-			errorResp.Error = s.Message()
-		}
-
-		if s.Details() != nil && len(s.Details()) > 0 {
-			errorResp.Details = s.Details()
-		}
-	}
-
+	errorResp := utils.GrpcErrorToWebError(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(errorResp.StatusCode)
 
 	if err = json.NewEncoder(w).Encode(errorResp); err != nil {
 		log.WithError(err).Error("Marshal error response failed")
-		return
 	}
-}
-
-type errorResponse struct {
-	Error      string        `json:"error"`
-	Details    []interface{} `json:"details,omitempty"`
-	StatusCode int           `json:"-"`
 }
