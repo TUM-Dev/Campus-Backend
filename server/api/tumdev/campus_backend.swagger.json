@@ -1107,7 +1107,8 @@
           "$ref": "#/definitions/apiDeviceType"
         },
         "campusApiToken": {
-          "type": "string"
+          "type": "string",
+          "title": "if the campus api token is set, the server can directly hydrate the devices exams and grades"
         }
       }
     },
@@ -1614,7 +1615,8 @@
       "type": "object",
       "properties": {
         "date": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "examId": {
           "type": "string"

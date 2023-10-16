@@ -74,8 +74,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	userRepo := device.NewRepository(service.Repository.DB)
 
-	device, err := userRepo.GetDevice(requestLog.DeviceID)
-
+	userDevice, err := userRepo.GetDevice(requestLog.DeviceID)
 	if err != nil {
 		log.WithError(err).Error("Could not get device")
 		return nil, ErrCouldNotGetDevice
@@ -128,7 +127,7 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 	if len(newGrades) > 0 && len(oldGrades) > 0 {
 		apnsRepository := apns.NewRepository(service.Repository.DB, service.Repository.Token)
-		sendGradesToDevice(device, newGrades, apnsRepository)
+		sendGradesToDevice(userDevice, newGrades, apnsRepository)
 	}
 
 	service.deleteRequestLog(requestLog)

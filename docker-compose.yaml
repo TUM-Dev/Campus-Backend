@@ -22,7 +22,7 @@ services:
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
       - SMTP_USERNAME=${SMTP_USERNAME:-tca-support.os.in@tum.de}
       - SMTP_PORT=${SMTP_PORT:-587}
-      - API_KEY=${API_KEY}
+      - EXAMS_HOOK_CALLBACK_API_KEY=${EXAMS_HOOK_CALLBACK_API_KEY}
       - IOS_EXAMS_HOOK_CALLBACK_URL=${IOS_EXAMS_HOOK_CALLBACK_URL}
     volumes:
       - backend-storage:/Storage

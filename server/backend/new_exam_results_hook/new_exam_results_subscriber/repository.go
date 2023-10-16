@@ -2,9 +2,9 @@ package new_exam_results_subscriber
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
@@ -57,7 +57,7 @@ func (repository *Repository) NotifySubscriber(subscriber *model.NewExamResultsS
 		return err
 	}
 
-	subscriber.LastNotifiedAt = sql.NullTime{Time: time.Now(), Valid: true}
+	subscriber.LastNotifiedAt = null.TimeFrom(time.Now())
 
 	err = repository.DB.Save(subscriber).Error
 	if err != nil {

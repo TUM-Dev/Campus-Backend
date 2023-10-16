@@ -2,8 +2,8 @@ package new_exam_results_scheduling
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_device"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/new_exam_results_hook/new_exam_results_subscriber"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -15,8 +15,8 @@ const (
 
 type Service struct {
 	Repository        *Repository
-	DevicesRepository *ios_device.Repository
-	APNs              *ios_apns.Service
+	DevicesRepository *device.Repository
+	APNs              *apns.Service
 }
 
 func (service *Service) HandleScheduledCron() error {
@@ -82,8 +82,8 @@ func (service *Service) notifySubscribers(newPublishedExamResults *[]model.ExamR
 }
 
 func NewService(repository *Repository,
-	devicesRepository *ios_device.Repository,
-	apnsService *ios_apns.Service,
+	devicesRepository *device.Repository,
+	apnsService *apns.Service,
 ) *Service {
 	return &Service{
 		Repository:        repository,

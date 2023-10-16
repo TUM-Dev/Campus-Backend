@@ -1,15 +1,15 @@
 package ios_new_exams_callback
 
 import (
-	pb "github.com/TUM-Dev/Campus-Backend/server/api"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_exams"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 type Service struct {
-	APNs     *ios_apns.Service
+	APNs     *apns.Service
 	isActive bool
 	DB       *gorm.DB
 }
@@ -54,7 +54,7 @@ func (service *Service) HandleNewExamsCallback(req *pb.NewExamsHookRequest) erro
 	return nil
 }
 
-func NewService(apns *ios_apns.Service, db *gorm.DB, isActive bool) *Service {
+func NewService(apns *apns.Service, db *gorm.DB, isActive bool) *Service {
 	return &Service{
 		APNs:     apns,
 		isActive: isActive,

@@ -186,7 +186,7 @@ service Campus {
 }
 
 message NewExamPublished {
-  string date = 1;
+  google.protobuf.Timestamp date = 1;
   string examId = 2;
   string lectureTitle = 3;
   string lectureType = 4;
@@ -208,6 +208,7 @@ message CreateDeviceRequest {
   string device_id = 1;
   optional string public_key = 2;
   DeviceType device_type = 3;
+  // if the campus api token is set, the server can directly hydrate the devices exams and grades
   optional string campusApiToken = 4;
 }
 

@@ -2,6 +2,7 @@ package device
 
 import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -25,6 +26,7 @@ func (repository *Repository) CreateDevice(device *model.IOSDevice) (bool, error
 func (repository *Repository) CheckIfDeviceExists(deviceId string) (bool, error) {
 	var devices []model.IOSDevice
 	if err := repository.DB.Limit(1).Find(&devices, "device_id = ?", deviceId).Error; err != nil {
+		log.WithError(err).Error("Could not find device")
 		return false, err
 	}
 	return len(devices) > 0, nil
