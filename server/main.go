@@ -8,22 +8,18 @@ import (
 	"net"
 	"net/http"
 	"net/textproto"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/TUM-Dev/Campus-Backend/server/utils"
 
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"github.com/makasim/sentryhook"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/onrik/gorm-logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
@@ -32,8 +28,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 const httpPort = ":50051"
@@ -45,10 +39,10 @@ var Version = "dev"
 var swagfs embed.FS
 
 func main() {
-	setupTelemetry()
+	utils.SetupTelemetry(Version)
 	defer sentry.Flush(10 * time.Second) // make sure that sentry handles shutdowns gracefully
 
-	db := setupDB()
+	db := utils.SetupDB()
 
 	// Create any other background services (these shouldn't do any long-running work here)
 	cronService := cron.New(db)
@@ -115,55 +109,6 @@ func main() {
 	log.Info("running server")
 	if err := g.Wait(); err != nil {
 		log.WithError(err).Error("encountered issue while running the server")
-	}
-}
-
-// setupDB connects to the database and migrates it if necessary
-func setupDB() *gorm.DB {
-	dbHost := os.Getenv("DB_DSN")
-	if dbHost == "" {
-		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	}
-
-	log.Info("Connecting to dsn")
-	db, err := gorm.Open(mysql.Open(dbHost), &gorm.Config{Logger: gorm_logrus.New()})
-	if err != nil {
-		log.WithError(err).Fatal("failed to connect database")
-	}
-
-	// Migrate the schema
-	// currently not activated as
-	if err := migration.New(db, false).Migrate(); err != nil {
-		log.WithError(err).Fatal("Failed to migrate database")
-	}
-	return db
-}
-
-// setupTelemetry initializes our telemetry stack
-// - sentry to be connected with log
-// - logrus to
-func setupTelemetry() {
-	environment := "development"
-	log.SetLevel(log.TraceLevel)
-	if env.IsProd() {
-		log.SetLevel(log.InfoLevel)
-		environment = "production"
-		log.SetFormatter(&log.JSONFormatter{}) // simpler to query but harder to parse in the console
-	}
-
-	if sentryDSN := os.Getenv("SENTRY_DSN"); sentryDSN != "" {
-		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:              sentryDSN,
-			AttachStacktrace: true,
-			Release:          Version,
-			Dist:             Version, // see https://github.com/getsentry/sentry-react-native/issues/516 why this is equal
-			Environment:      environment,
-		}); err != nil {
-			log.WithError(err).Error("Sentry initialization failed")
-		}
-		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel, log.WarnLevel}))
-	} else {
-		log.Info("continuing without sentry")
 	}
 }
 
