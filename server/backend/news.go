@@ -45,7 +45,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).Joins("File").Joins("NewsSource")
+	tx := s.db.WithContext(ctx).Joins("File").Joins("NewsSource").Joins("NewsSource.File")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}

@@ -141,12 +141,12 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `newsSource` `NewsSource` ON `news`.`src` = `NewsSource`.`source`"
+const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook`,`NewsSource__File`.`file` AS `NewsSource__File__file`,`NewsSource__File`.`name` AS `NewsSource__File__name`,`NewsSource__File`.`path` AS `NewsSource__File__path`,`NewsSource__File`.`downloads` AS `NewsSource__File__downloads`,`NewsSource__File`.`url` AS `NewsSource__File__url`,`NewsSource__File`.`downloaded` AS `NewsSource__File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `newsSource` `NewsSource` ON `news`.`src` = `NewsSource`.`source` LEFT JOIN `files` `NewsSource__File` ON `NewsSource`.`icon` = `NewsSource__File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook"}))
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -159,7 +159,7 @@ func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 }
 func (s *NewsSuite) Test_ListNewsNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook"}))
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
