@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/crypto"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,13 +17,13 @@ type EncryptedGrade struct {
 }
 
 func (e *EncryptedGrade) Encrypt(key string) error {
-	encryptedTitle, err := ios_crypto.SymmetricEncrypt(e.LectureTitle, key)
+	encryptedTitle, err := crypto.SymmetricEncrypt(e.LectureTitle, key)
 	if err != nil {
 		log.WithError(err).Error("Failed to encrypt lecture title")
 		return err
 	}
 
-	encryptedGrade, err := ios_crypto.SymmetricEncrypt(e.Grade, key)
+	encryptedGrade, err := crypto.SymmetricEncrypt(e.Grade, key)
 	if err != nil {
 		log.WithError(err).Error("Failed to encrypt grade")
 		return err
@@ -37,15 +37,14 @@ func (e *EncryptedGrade) Encrypt(key string) error {
 }
 
 func (e *EncryptedGrade) Decrypt(key string) error {
-	decryptedTitle, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.LectureTitle), key)
-
+	decryptedTitle, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.LectureTitle), key)
 	if err != nil {
 		return err
 	}
 
-	decryptedGrade, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.Grade), key)
-
+	decryptedGrade, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.Grade), key)
 	if err != nil {
+		log.WithError(err).Error("Failed to decrypt grade")
 		return err
 	}
 
