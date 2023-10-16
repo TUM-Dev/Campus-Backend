@@ -13,7 +13,7 @@ type EncryptedGrade struct {
 	DeviceID     string    `gorm:"index;not null"`
 	LectureTitle string    `gorm:"not null"`
 	Grade        string    `gorm:"not null"`
-	IsEncrypted  bool      `gorm:"not null,default:true"`
+	IsEncrypted  bool      `gorm:"-"`
 }
 
 func (e *EncryptedGrade) Encrypt(key string) error {
