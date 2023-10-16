@@ -45,7 +45,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).Joins("File")
+	tx := s.db.WithContext(ctx).Joins("File").Joins("NewsSource").Joins("NewsSource.File")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
@@ -68,14 +68,16 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 			imgUrl = item.File.FullExternalUrl()
 		}
 		resp[i] = &pb.News{
-			Id:       item.News,
-			Title:    item.Title,
-			Text:     item.Description,
-			Link:     item.Link,
-			ImageUrl: imgUrl,
-			Source:   fmt.Sprintf("%d", item.Src),
-			Created:  timestamppb.New(item.Created),
-			Date:     timestamppb.New(item.Date),
+			Id:            item.News,
+			Title:         item.Title,
+			Text:          item.Description,
+			Link:          item.Link,
+			ImageUrl:      imgUrl,
+			SourceId:      fmt.Sprintf("%d", item.NewsSource.Source),
+			SourceTitle:   item.NewsSource.Title,
+			SourceIconUrl: item.NewsSource.File.FullExternalUrl(),
+			Created:       timestamppb.New(item.Created),
+			Date:          timestamppb.New(item.Date),
 		}
 	}
 	return &pb.ListNewsReply{News: resp}, nil

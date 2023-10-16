@@ -141,12 +141,12 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file`"
+const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook`,`NewsSource__File`.`file` AS `NewsSource__File__file`,`NewsSource__File`.`name` AS `NewsSource__File__name`,`NewsSource__File`.`path` AS `NewsSource__File__path`,`NewsSource__File`.`downloads` AS `NewsSource__File__downloads`,`NewsSource__File`.`url` AS `NewsSource__File__url`,`NewsSource__File`.`downloaded` AS `NewsSource__File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `newsSource` `NewsSource` ON `news`.`src` = `NewsSource`.`source` LEFT JOIN `files` `NewsSource__File` ON `NewsSource`.`icon` = `NewsSource__File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -159,7 +159,7 @@ func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 }
 func (s *NewsSuite) Test_ListNewsNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
-		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
+		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -175,8 +175,8 @@ func (s *NewsSuite) Test_ListNewsMultiple() {
 	n2 := news2()
 	s.mock.ExpectQuery(regexp.QuoteMeta(" ")).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
-			AddRow(n1.News, n1.Date, n1.Created, n1.Title, n1.Description, n1.Src, n1.Link, n1.Image, n1.FileID, n1.File.File, n1.File.Name, n1.File.Path, n1.File.Downloads, n1.File.URL, n1.File.Downloaded).
-			AddRow(n2.News, n2.Date, n2.Created, n2.Title, n2.Description, n2.Src, n2.Link, n2.Image, nil, nil, nil, nil, nil, nil, nil))
+			AddRow(n1.News, n1.Date, n1.Created, n1.Title, n1.Description, n1.NewsSourceID, n1.Link, n1.Image, n1.FileID, n1.File.File, n1.File.Name, n1.File.Path, n1.File.Downloads, n1.File.URL, n1.File.Downloaded).
+			AddRow(n2.News, n2.Date, n2.Created, n2.Title, n2.Description, n2.NewsSourceID, n2.Link, n2.Image, nil, nil, nil, nil, nil, nil, nil))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
@@ -184,8 +184,8 @@ func (s *NewsSuite) Test_ListNewsMultiple() {
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsReply{
 		News: []*pb.News{
-			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: "https://api.tum.app/files/news/sources/src_1.png", Source: fmt.Sprintf("%d", n1.Src), Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
-			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: "", Source: fmt.Sprintf("%d", n2.Src), Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},
+			{Id: n1.News, Title: n1.Title, Text: n1.Description, Link: n1.Link, ImageUrl: "https://api.tum.app/files/news/sources/src_1.png", SourceId: fmt.Sprintf("%d", n1.NewsSourceID), SourceIconUrl: n1.NewsSource.File.FullExternalUrl(), SourceTitle: n1.NewsSource.Title, Created: timestamppb.New(n1.Created), Date: timestamppb.New(n1.Date)},
+			{Id: n2.News, Title: n2.Title, Text: n2.Description, Link: n2.Link, ImageUrl: "", SourceId: fmt.Sprintf("%d", n2.NewsSourceID), SourceIconUrl: n2.NewsSource.File.FullExternalUrl(), SourceTitle: n2.NewsSource.Title, Created: timestamppb.New(n2.Created), Date: timestamppb.New(n2.Date)},
 		},
 	}
 	require.Equal(s.T(), expectedResp, response)

@@ -116,15 +116,16 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		}
 
 		newsItem := model.News{
-			Date:        *item.PublishedParsed,
-			Created:     time.Now(),
-			Title:       item.Title,
-			Description: bluemonday.StrictPolicy().Sanitize(item.Description),
-			Src:         source.Source,
-			Link:        item.Link,
-			Image:       enclosureUrl,
-			FileID:      fileID,
-			File:        file,
+			Date:         *item.PublishedParsed,
+			Created:      time.Now(),
+			Title:        item.Title,
+			Description:  bluemonday.StrictPolicy().Sanitize(item.Description),
+			NewsSourceID: source.Source,
+			NewsSource:   source,
+			Link:         item.Link,
+			Image:        enclosureUrl,
+			FileID:       fileID,
+			File:         file,
 		}
 		newNews = append(newNews, newsItem)
 	}
