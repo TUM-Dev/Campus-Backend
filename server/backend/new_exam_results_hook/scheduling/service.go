@@ -29,7 +29,7 @@ func (service *Service) HandleScheduledCron() error {
 		return err
 	}
 
-	var apiExamResults []model.PublishedExamResult
+	var apiExamResults []model.ExamResultPublished
 	for _, apiExamResult := range apiResult.ExamResults {
 		apiExamResults = append(apiExamResults, *apiExamResult.ToDBExamResult())
 	}
@@ -50,18 +50,18 @@ func (service *Service) HandleScheduledCron() error {
 	return service.Repository.StoreExamResultsPublished(apiExamResults)
 }
 
-func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.PublishedExamResult) *[]model.PublishedExamResult {
-	var apiExamResultsMap = make(map[string]model.PublishedExamResult)
+func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamResults *[]model.ExamResultPublished) *[]model.ExamResultPublished {
+	var apiExamResultsMap = make(map[string]model.ExamResultPublished)
 	for _, apiExamResult := range *apiExamResults {
 		apiExamResultsMap[apiExamResult.ExamID] = apiExamResult
 	}
 
-	var storedExamResultsMap = make(map[string]model.PublishedExamResult)
+	var storedExamResultsMap = make(map[string]model.ExamResultPublished)
 	for _, storedExamResult := range *storedExamResults {
 		storedExamResultsMap[storedExamResult.ExamID] = storedExamResult
 	}
 
-	var newPublishedExamResults []model.PublishedExamResult
+	var newPublishedExamResults []model.ExamResultPublished
 
 	for id, result := range apiExamResultsMap {
 		if storedResult, ok := storedExamResultsMap[id]; ok && !storedResult.Published && result.Published {
@@ -72,7 +72,7 @@ func (service *Service) findNewPublishedExamResults(apiExamResults, storedExamRe
 	return &newPublishedExamResults
 }
 
-func (service *Service) notifySubscribers(newPublishedExamResults *[]model.PublishedExamResult) {
+func (service *Service) notifySubscribers(newPublishedExamResults *[]model.ExamResultPublished) {
 	log.Infof("Notifying subscribers about %d published exam results", len(*newPublishedExamResults))
 
 	subscribersRepo := subscriber.NewRepository(service.Repository.DB)

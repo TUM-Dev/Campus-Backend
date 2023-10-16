@@ -23,8 +23,13 @@ func CheckApiKeyAuthorization(ctx context.Context) error {
 
 	envApiKey := env.ApiKey()
 
+	// If no API key is set, allow all requests
+	if !envApiKey.Valid {
+		return nil
+	}
+
 	for _, authorizationKey := range md["authorization"] {
-		if authorizationKey == envApiKey {
+		if authorizationKey == envApiKey.String {
 			return nil
 		}
 	}

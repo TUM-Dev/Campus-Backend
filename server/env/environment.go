@@ -1,9 +1,8 @@
 package env
 
-import "os"
-
-const (
-	DefaultApiKey = "default-api-key"
+import (
+	"github.com/guregu/null"
+	"os"
 )
 
 func GetEnvironment() string {
@@ -22,12 +21,6 @@ func IsMensaCronActive() bool {
 	return os.Getenv("MensaCronDisabled") != "true"
 }
 
-func ApiKey() string {
-	value, ok := os.LookupEnv("API_KEY")
-
-	if !ok {
-		return DefaultApiKey
-	}
-
-	return value
+func ApiKey() null.String {
+	return null.StringFrom(os.Getenv("API_KEY"))
 }

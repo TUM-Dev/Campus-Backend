@@ -36,12 +36,12 @@ func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.Creat
 		PublicKey: request.GetPublicKey(),
 	}
 
-	deviceAlreadyExisted, err := service.Repository.CreateDevice(&device)
+	deviceAlreadyExists, err := service.Repository.CreateDevice(&device)
 	if err != nil {
 		return nil, ErrCouldNotCreateDevice
 	}
 
-	if !deviceAlreadyExisted {
+	if !deviceAlreadyExists {
 		service.handleFirstDeviceRegistration(request)
 	}
 

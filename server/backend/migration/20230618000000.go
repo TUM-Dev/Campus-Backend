@@ -1,7 +1,6 @@
 package migration
 
 import (
-	"database/sql"
 	_ "embed"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
@@ -37,10 +36,7 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 
 			err = tx.Create(&model.NewExamResultsSubscriber{
 				CallbackUrl: callbackUrl,
-				ApiKey: sql.NullString{
-					String: env.ApiKey(),
-					Valid:  true,
-				},
+				ApiKey:      env.ApiKey(),
 			}).Error
 			if err != nil {
 				log.WithError(err).Info("Could not create new exam results subscriber")
