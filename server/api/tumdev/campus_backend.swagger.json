@@ -1623,8 +1623,17 @@
           "type": "string",
           "title": "where a news thumbnail is stored. empty string means no image is available"
         },
-        "source": {
-          "type": "string"
+        "sourceId": {
+          "type": "string",
+          "title": "the id of the news source"
+        },
+        "sourceIconUrl": {
+          "type": "string",
+          "title": "where the icon can be found"
+        },
+        "sourceTitle": {
+          "type": "string",
+          "title": "human readable title of the news source"
         },
         "created": {
           "type": "string",
