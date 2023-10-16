@@ -1,0 +1,19 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: cors
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+  namespace: {{ $.Values.namespace }}
+spec:
+  headers:
+    accessControlAllowMethods:
+      - GET
+      - DELETE
+      - POST
+    accessControlAllowHeaders:
+      - "*"
+    accessControlAllowOriginList:
+      - "*"
+    accessControlMaxAge: 86400
+    addVaryHeader: true

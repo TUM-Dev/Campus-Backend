@@ -28,7 +28,7 @@ service Campus {
 
   rpc ListNews(ListNewsRequest) returns (ListNewsReply) {
     option (google.api.http) = {
-      get: "/news/{last_news_id}",
+      get: "/news",
       response_body: "news"
     };
   }
@@ -129,8 +129,11 @@ service Campus {
     option (google.api.http) = {get: "/movies/{last_id}"};
   }
 
-  rpc CreateFeedback(CreateFeedbackRequest) returns (CreateFeedbackReply) {
-    option (google.api.http) = {post: "/feedback"};
+  rpc CreateFeedback(stream CreateFeedbackRequest) returns (CreateFeedbackReply) {
+    option (google.api.http) = {
+      post: "/feedback",
+      body: "attachment",
+    };
   }
 
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
@@ -234,9 +237,17 @@ message News {
   string title = 2;
   string text = 3;
   string link = 4;
+  // where a news thumbnail is stored. empty string means no image is available
   string image_url = 5;
-  string source = 6;
+  // the id of the news source
+  string source_id = 6;
+  // where the icon can be found
+  string source_icon_url = 9;
+  // human readable title of the news source
+  string source_title = 10;
+  // when the news item was created in OUR database
   google.protobuf.Timestamp created = 7;
+  // the date of the news item
   google.protobuf.Timestamp date = 8;
 }
 
@@ -262,7 +273,8 @@ message ListNewsSourcesReply {
 message NewsSource {
   string source = 1;
   string title = 2;
-  string icon = 3;
+  // where the icon can be found
+  string icon_url = 3;
 }
 
 message ListNewsAlertsRequest {
@@ -527,8 +539,8 @@ message ListMoviesReply {
 }
 
 message Movie {
-  string cover_name = 1;
-  string cover_path = 2;
+  reserved /*string cover_name = */ 1;
+  reserved /*string cover_path =*/ 2;
   int64 movie_id = 3;
   google.protobuf.Timestamp date = 4;
   google.protobuf.Timestamp created = 5;
@@ -543,24 +555,44 @@ message Movie {
   string imdb_rating = 12;
   string description = 13;
   int64 cover_id = 14;
-  // was previously the trailer
-  reserved 15;
+  reserved /*string trailer*/ 15;
   // Where to find additional information about this movie
   string link = 16;
+  // Where to find a cover image for this movie
+  string cover_url = 17;
+}
+
+message CreateFeedbackRequest {
+  enum Recipient {
+    // Feedback for the TUM Dev Team
+    TUM_DEV = 0;
+    // Feedback for the general TUM Contact Form
+    TUM_CONTACT = 1;
+  }
+
+  // who is the feedback for
+  Recipient recipient = 1;
+  // the email address of the user
+  string from_email = 2;
+  // The actual message
+  string message = 3;
+  // Optional location which the user can choose (data protection) to attach or not
+  Coordinate location = 4;
+  // Optional os information which the user can choose (data protection) to attach or not
+  string os_version = 5;
+  // Optional app information which the user can choose (data protection) to attach or not
+  string app_version = 6;
+  // Optional file in Base64.
+  // Accepted file formats: jpeg, jpg, png, webp, md, txt, pdf
+  // Maximum file size 4MB as by Protobuf maximum per request message size
+  bytes attachment = 7;
+}
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
 }
 
 message CreateFeedbackReply {}
-message CreateFeedbackRequest {
-  string topic = 1;
-  string email = 2;
-  string email_id = 3;
-  string message = 4;
-  int32 image_count = 5;
-  double latitude = 6;
-  double longitude = 7;
-  string os_version = 8;
-  string app_version = 9;
-}
 
 message CreateFeedbackImageReply {
   string status = 1;

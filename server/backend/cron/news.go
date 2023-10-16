@@ -87,43 +87,47 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			}
 		}
 
-		if !skipNews(existingNewsLinksForSource, item.Link) {
-			// pick the first enclosure that is an image (if any)
-			var pickedEnclosure *gofeed.Enclosure
-			for _, enclosure := range item.Enclosures {
-				if strings.HasSuffix(enclosure.URL, "jpg") ||
-					strings.HasSuffix(enclosure.URL, "jpeg") ||
-					strings.HasSuffix(enclosure.URL, "png") ||
-					ImageContentTypeRegex.MatchString(enclosure.Type) {
-					pickedEnclosure = enclosure
-					break
-				}
-			}
-			var enclosureUrl = null.StringFrom("")
-			var file *model.File
-			if pickedEnclosure != nil {
-				file, err = c.saveImage(pickedEnclosure.URL)
-				if err != nil {
-					log.WithError(err).Error("can't save news image")
-				}
-				enclosureUrl = null.StringFrom(pickedEnclosure.URL)
-			}
-			bm := bluemonday.StrictPolicy()
-			sanitizedDesc := bm.Sanitize(item.Description)
-
-			newsItem := model.News{
-				Date:        *item.PublishedParsed,
-				Created:     time.Now(),
-				Title:       item.Title,
-				Description: sanitizedDesc,
-				Src:         source.Source,
-				Link:        item.Link,
-				Image:       enclosureUrl,
-				FileID:      null.IntFrom(file.File),
-				File:        file,
-			}
-			newNews = append(newNews, newsItem)
+		if skipNews(existingNewsLinksForSource, item.Link) {
+			continue
 		}
+
+		// pick the first enclosure that is an image (if any)
+		var pickedEnclosure *gofeed.Enclosure
+		for _, enclosure := range item.Enclosures {
+			if strings.HasSuffix(enclosure.URL, "jpg") ||
+				strings.HasSuffix(enclosure.URL, "jpeg") ||
+				strings.HasSuffix(enclosure.URL, "png") ||
+				ImageContentTypeRegex.MatchString(enclosure.Type) {
+				pickedEnclosure = enclosure
+				break
+			}
+		}
+		var enclosureUrl = null.StringFrom("")
+		var file *model.File
+		var fileID null.Int
+		if pickedEnclosure != nil {
+			file, err = c.saveImage(pickedEnclosure.URL)
+			if err != nil {
+				log.WithError(err).WithField("url", pickedEnclosure.URL).Error("can't save news image")
+			} else {
+				fileID = null.IntFrom(file.File)
+			}
+			enclosureUrl = null.StringFrom(pickedEnclosure.URL)
+		}
+
+		newsItem := model.News{
+			Date:         *item.PublishedParsed,
+			Created:      time.Now(),
+			Title:        item.Title,
+			Description:  bluemonday.StrictPolicy().Sanitize(item.Description),
+			NewsSourceID: source.Source,
+			NewsSource:   source,
+			Link:         item.Link,
+			Image:        enclosureUrl,
+			FileID:       fileID,
+			File:         file,
+		}
+		newNews = append(newNews, newsItem)
 	}
 	if ammountOfNewNews := len(newNews); ammountOfNewNews != 0 {
 		err = c.db.Save(&newNews).Error
@@ -140,10 +144,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 // saveImage saves an image to the database, so it can be downloaded by another cronjob and returns its id
 func (c *CronService) saveImage(url string) (*model.File, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
-	file := model.File{
-		Name: targetFileName, // path intentionally omitted
-	}
-	if err := c.db.First(&file).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	var file model.File
+	// path intentionally omitted in query to allow for deduplication
+	if err := c.db.First(&file, "name = ?", targetFileName).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
 		return nil, err
 	} else if err == nil {
@@ -197,7 +200,6 @@ func (c *CronService) newspreadHook(item *gofeed.Item) {
 		extractedImageURL = extractedImageSlice[0]
 	}
 	item.Enclosures = []*gofeed.Enclosure{{URL: extractedImageURL}}
-	item.Link = extractedImageURL
 	item.Description = ""
 }
 

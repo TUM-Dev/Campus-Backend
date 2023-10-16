@@ -35,8 +35,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 			Actors:      movie.Actors,
 			ImdbRating:  movie.ImdbRating,
 			Description: movie.Description,
-			CoverName:   movie.File.Name,
-			CoverPath:   movie.File.Path,
+			CoverUrl:    movie.File.FullExternalUrl(),
 			CoverId:     movie.File.File,
 			Link:        movie.Link,
 		})

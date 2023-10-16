@@ -136,9 +136,8 @@ func setNameTagOptions(db *gorm.DB) {
 	}
 
 	var tagsNames multiLanguageNameTags
-	errjson := json.Unmarshal(file, &tagsNames)
-	if errjson != nil {
-		log.WithError(errjson).Error("Error parsing nameTagList to json.")
+	if err := json.Unmarshal(file, &tagsNames); err != nil {
+		log.WithError(err).Error("Error parsing nameTagList to json.")
 	}
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		parent := DishNameTagOption{

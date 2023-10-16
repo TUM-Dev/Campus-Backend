@@ -8,7 +8,7 @@ type Feedback struct {
 	Id         int64       `gorm:"column:id;primary_key;AUTO_INCREMENT;type:int;not null;"`
 	ImageCount int32       `gorm:"column:image_count;type:int;not null;"`
 	EmailId    null.String `gorm:"column:email_id;type:text;null"`
-	Receiver   null.String `gorm:"column:receiver;type:text;null"`
+	Recipient  null.String `gorm:"column:receiver;type:text;null"`
 	ReplyTo    null.String `gorm:"column:reply_to;type:text;null"`
 	Feedback   null.String `gorm:"column:feedback;type:text;null"`
 	Latitude   null.Float  `gorm:"column:latitude;type:float;null;"`

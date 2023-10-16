@@ -58,8 +58,8 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 	// From
 	m.SetAddressHeader("From", os.Getenv("SMTP_USERNAME"), "TUM Campus App")
 	// To
-	if feedback.Receiver.Valid {
-		m.SetHeader("To", feedback.Receiver.String)
+	if feedback.Recipient.Valid {
+		m.SetHeader("To", feedback.Recipient.String)
 	} else {
 		m.SetHeader("To", "app@tum.de")
 	}
@@ -94,12 +94,12 @@ func (c *CronService) feedbackEmailCron() error {
 
 	var results []model.Feedback
 	if err := c.db.Find(&results, "processed = false").Scan(&results).Error; err != nil {
-		log.WithError(err).Fatal("could not get unprocessed feedback")
+		log.WithError(err).Error("could not get unprocessed feedback")
 		return err
 	}
 	parsedHtmlBody, parsedTxtBody, err := parseTemplates()
 	if err != nil {
-		log.WithError(err).Fatal("could not parse email templates")
+		log.WithError(err).Error("could not parse email templates")
 		return err
 	}
 
@@ -124,7 +124,7 @@ func (c *CronService) feedbackEmailCron() error {
 			log.WithError(err).Error("could not send mail")
 			continue
 		}
-		log.Tracef("sending feedback %dialer to %v successfull", i, feedback.Receiver)
+		log.Tracef("sending feedback %d to %v successfull", i, feedback.Recipient)
 
 		// prevent the message being send the next time around
 		if err := c.db.Find(model.Feedback{}, "id = ?", feedback.Id).Update("processed", "true").Error; err != nil {
@@ -138,7 +138,7 @@ func (c *CronService) feedbackEmailCron() error {
 func setupSMTPDialer() (*gomail.Dialer, error) {
 	smtpPort, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	if err != nil {
-		log.WithError(err).Fatal("SMTP_PORT is not an integer")
+		log.WithError(err).Error("SMTP_PORT is not an integer")
 		return nil, err
 	}
 	d := gomail.NewDialer(os.Getenv("SMTP_URL"), smtpPort, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"))

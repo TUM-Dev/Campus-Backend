@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -23,4 +24,12 @@ type File struct {
 	Downloads  int32       `gorm:"column:downloads;type:int;default:0;" json:"downloads"`
 	URL        null.String `gorm:"column:url;default:null;" json:"url"`                         // URL of the files source (if any)
 	Downloaded null.Bool   `gorm:"column:downloaded;type:boolean;default:1;" json:"downloaded"` // true when file is ready to be served, false when still being downloaded
+}
+
+// FullExternalUrl is the full url of the file after being downloaded for external use
+func (f *File) FullExternalUrl() string {
+	if !f.Downloaded.Valid || !f.Downloaded.Bool {
+		return ""
+	}
+	return fmt.Sprintf("https://api.tum.app/files/%s%s", f.Path, f.Name)
 }

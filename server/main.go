@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -69,12 +69,14 @@ func main() {
 	})
 	httpMux.Handle("/metrics", promhttp.Handler())
 
-	static, _ := fs.Sub(swagfs, "swagger")
-	httpMux.Handle("/", http.FileServer(http.FS(static)))
+	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
+	httpMux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("/Storage"))))
+	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(UnaryRequestLogger), grpc.StreamInterceptor(StreamRequestLogger))
 	pb.RegisterCampusServer(grpcServer, campusService)
+	reflection.Register(grpcServer)
 
 	// GRPC Gateway for HTTP REST -> GRPC
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
@@ -110,6 +112,20 @@ func main() {
 	if err := g.Wait(); err != nil {
 		log.WithError(err).Error("encountered issue while running the server")
 	}
+}
+
+func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	start := time.Now()
+	resp, err := handler(ctx, req)
+	fields := log.Fields{"elapsed": time.Since(start)}
+	log.WithContext(ctx).WithFields(fields).WithError(err).Info(info.FullMethod)
+	return resp, err
+}
+func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	start := time.Now()
+	err := handler(srv, stream)
+	log.WithField("elapsed", time.Since(start)).WithError(err).Info(info.FullMethod)
+	return err
 }
 
 // addMethodNameInterceptor adds the method name (e.g. "ListNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)

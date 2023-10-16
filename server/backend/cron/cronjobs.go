@@ -19,7 +19,9 @@ type CronService struct {
 	APNs *apns.Service
 }
 
-const StorageDir = "/Storage/" // target location of files
+// StorageDir is the directory where files are stored
+// this is a variable, so it can be changed during tests
+var StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
