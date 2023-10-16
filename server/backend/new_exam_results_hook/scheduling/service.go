@@ -18,7 +18,6 @@ var (
 type Service struct {
 	Repository        *Repository
 	DevicesRepository *device.Repository
-	Priority          *model.IOSSchedulingPriority
 	APNs              *apns.Service
 }
 
@@ -93,7 +92,6 @@ func NewService(repository *Repository,
 	return &Service{
 		Repository:        repository,
 		DevicesRepository: devicesRepository,
-		Priority:          model.DefaultIOSSchedulingPriority(),
 		APNs:              apnsService,
 	}
 }

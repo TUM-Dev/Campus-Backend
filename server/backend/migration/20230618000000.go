@@ -47,7 +47,7 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 				return err
 			}
 
-			err = SafeEnumRollback(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			err = SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 			if err != nil {
 				log.WithError(err).Info("Could not create new exam results subscriber")
 			}
@@ -95,7 +95,7 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 				return err
 			}
 
-			err = SafeEnumMigrate(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
+			err = SafeEnumAdd(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 			if err != nil {
 				log.WithError(err).Info("Could not migrate crontab type enum")
 				return err

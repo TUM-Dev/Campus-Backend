@@ -176,7 +176,27 @@ service Campus {
   rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceReply) {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
+
+  rpc IOSNewExamsHookCallback(NewExamsHookRequest) returns (NewExamsHookReply) {
+    option (google.api.http) = {
+      post: "/ios/exams/new",
+      body: "*",
+    };
+  }
 }
+
+message NewExamPublished {
+  string date = 1;
+  string examId = 2;
+  string lectureTitle = 3;
+  string lectureType = 4;
+  string lectureSem = 5;
+}
+
+message NewExamsHookRequest {
+  repeated NewExamPublished publishedExams = 1;
+}
+message NewExamsHookReply {}
 
 enum DeviceType {
   IOS = 0;
@@ -188,6 +208,7 @@ message CreateDeviceRequest {
   string device_id = 1;
   optional string public_key = 2;
   DeviceType device_type = 3;
+  optional string campusApiToken = 4;
 }
 
 message CreateDeviceReply {

@@ -1,8 +1,6 @@
 package device
 
 import (
-	"errors"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"gorm.io/gorm"
 )

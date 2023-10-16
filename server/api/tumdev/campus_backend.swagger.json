@@ -1,5 +1,4 @@
 {
-"basePath": "/v1",
   "swagger": "2.0",
   "info": {
     "title": "tumdev/campus_backend.proto",
@@ -70,7 +69,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiCanteen"
               }
             }
@@ -127,7 +125,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -381,7 +378,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -407,7 +403,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiTagsOverview"
               }
             }
@@ -576,6 +571,38 @@
         ]
       }
     },
+    "/ios/exams/new": {
+      "post": {
+        "operationId": "Campus_IOSNewExamsHookCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiNewExamsHookReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiNewExamsHookRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/ios/notifications/deviceRequestResponse": {
       "post": {
         "summary": "Endpoint for the iOS app to respond to background notifications requests",
@@ -689,7 +716,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiNewsAlert"
               }
             }
@@ -725,7 +751,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiNewsSource"
               }
             }
@@ -751,7 +776,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiNews"
               }
             }
@@ -895,7 +919,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiRoom"
               }
             }
@@ -1053,7 +1076,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of canteenRatingTags"
@@ -1083,6 +1105,9 @@
         },
         "deviceType": {
           "$ref": "#/definitions/apiDeviceType"
+        },
+        "campusApiToken": {
+          "type": "string"
         }
       }
     },
@@ -1113,7 +1138,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTag"
           },
           "title": "Optional list of tag ratings add as many tags with a rating (1-5) of the list of dishRatingTags"
@@ -1175,7 +1199,6 @@
         "rating": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1198,14 +1221,12 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         },
         "nameTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1340,7 +1361,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1352,7 +1372,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1364,7 +1383,6 @@
         "rating": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
           }
         },
@@ -1387,7 +1405,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
         }
@@ -1423,7 +1440,6 @@
         "canteen": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiCanteen"
           }
         }
@@ -1446,7 +1462,6 @@
         "infos": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/ListMoreInformationReplyMoreInformation"
           }
         }
@@ -1458,7 +1473,6 @@
         "movies": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiMovie"
           }
         }
@@ -1470,7 +1484,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiTagsOverview"
           }
         }
@@ -1482,7 +1495,6 @@
         "alerts": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiNewsAlert"
           }
         }
@@ -1494,7 +1506,6 @@
         "news": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiNews"
           }
         }
@@ -1506,7 +1517,6 @@
         "sources": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiNewsSource"
           }
         }
@@ -1518,7 +1528,6 @@
         "facilities": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiOpeningTimesMsgElement"
           }
         }
@@ -1530,7 +1539,6 @@
         "responsiblePerson": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiResponsiblePerson"
           }
         }
@@ -1542,7 +1550,6 @@
         "rooms": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiStudyRoomMsgElement"
           }
         }
@@ -1600,6 +1607,40 @@
         "coverUrl": {
           "type": "string",
           "title": "Where to find a cover image for this movie"
+        }
+      }
+    },
+    "apiNewExamPublished": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "examId": {
+          "type": "string"
+        },
+        "lectureTitle": {
+          "type": "string"
+        },
+        "lectureType": {
+          "type": "string"
+        },
+        "lectureSem": {
+          "type": "string"
+        }
+      }
+    },
+    "apiNewExamsHookReply": {
+      "type": "object"
+    },
+    "apiNewExamsHookRequest": {
+      "type": "object",
+      "properties": {
+        "publishedExams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiNewExamPublished"
+          }
         }
       }
     },
@@ -1826,7 +1867,6 @@
         "rooms": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRoom"
           }
         }
@@ -1860,7 +1900,6 @@
         "ratingTags": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiRatingTagNewRequest"
           }
         },
@@ -1908,7 +1947,6 @@
         "rooms": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/apiStudyRoom"
           }
         }
@@ -1951,7 +1989,6 @@
         "details": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
