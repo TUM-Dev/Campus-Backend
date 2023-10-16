@@ -720,7 +720,6 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
                 "$ref": "#/definitions/apiNews"
               }
             }
