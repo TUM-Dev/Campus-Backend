@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"net/http"
 	"strings"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func GrpcErrorToWebError(err error) ErrorResponse {
