@@ -32,20 +32,17 @@ type customDate struct {
 
 func (c *customDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
-	err := d.DecodeElement(&v, &start)
-	if err != nil {
+
+	if err := d.DecodeElement(&v, &start); err != nil {
 		return err
 	}
 
-	t, err := time.Parse("2006-01-02", v)
-
-	if err != nil {
+	if t, err := time.Parse("2006-01-02T15:04:05", v); err == nil {
 		return err
+	} else {
+		c.Time = t
+		return nil
 	}
-
-	c.Time = t
-
-	return nil
 }
 
 func (grade *Grade) CompareToEncrypted(encryptedGrade *EncryptedGrade) bool {

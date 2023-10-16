@@ -1,7 +1,6 @@
 package migration
 
 import (
-	_ "embed"
 	"errors"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -24,31 +23,40 @@ func (m TumDBMigrator) migrate20230618000000() *gormigrate.Migration {
 				return err
 			}
 
-			err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_today")
-			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_week")
-			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_month")
-			err = tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_year")
+			if err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_today"); err != nil {
+				log.WithError(err).Info("Could not drop column activity_today")
+				return err
+			}
+
+			if err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_week"); err != nil {
+				log.WithError(err).Info("Could not drop column activity_this_week")
+				return err
+			}
+
+			if err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_month"); err != nil {
+				log.WithError(err).Info("Could not drop column activity_this_month")
+				return err
+			}
+
+			if err := tx.Migrator().DropColumn(&model.IOSDevice{}, "activity_this_year"); err != nil {
+				log.WithError(err).Info("Could not drop column activity_this_year")
+				return err
+			}
 
 			callbackUrl, ok := os.LookupEnv("IOS_EXAMS_HOOK_CALLBACK_URL")
 			if !ok {
 				return errors.New("IOS_EXAMS_HOOK_CALLBACK_URL not set")
 			}
 
-			err = tx.Create(&model.NewExamResultsSubscriber{
+			if err := tx.Create(&model.NewExamResultsSubscriber{
 				CallbackUrl: callbackUrl,
 				ApiKey:      env.ApiKey(),
-			}).Error
-			if err != nil {
+			}).Error; err != nil {
 				log.WithError(err).Info("Could not create new exam results subscriber")
 				return err
 			}
 
-			err = SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
-			if err != nil {
-				log.WithError(err).Info("Could not create new exam results subscriber")
-			}
-
-			return nil
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "iosNotifications", "iosActivityReset")
 		},
 		Rollback: func(tx *gorm.DB) error {
 			if err := tx.Migrator().DropTable(&model.DbExam{}); err != nil {

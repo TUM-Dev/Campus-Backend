@@ -34,8 +34,7 @@ var (
 func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished, error) {
 	var examResultsPublished model.TUMAPIExamResultsPublished
 
-	err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished)
-	if err != nil {
+	if err := RequestCampusApi(CampusExamResultsPublished, token, &examResultsPublished); err != nil {
 		return nil, err
 	}
 
@@ -44,8 +43,8 @@ func FetchExamResultsPublished(token string) (*model.TUMAPIExamResultsPublished,
 
 func FetchGrades(token string) (*model.Grades, error) {
 	var grades model.Grades
-	err := RequestCampusApi(CampusGradesPath, token, &grades)
-	if err != nil {
+
+	if err := RequestCampusApi(CampusGradesPath, token, &grades); err != nil {
 		return nil, err
 	}
 
@@ -54,9 +53,8 @@ func FetchGrades(token string) (*model.Grades, error) {
 
 func FetchPersonalExams(token string) (*model.Exams, error) {
 	var exams model.Exams
-	err := RequestCampusApi(CampusPersonalExamsPath, token, &exams)
 
-	if err != nil {
+	if err := RequestCampusApi(CampusPersonalExamsPath, token, &exams); err != nil {
 		return nil, err
 	}
 

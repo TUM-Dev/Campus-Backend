@@ -13,11 +13,7 @@ var (
 
 func CheckApiKeyAuthorization(ctx context.Context) error {
 	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return ErrUnauthorized
-	}
-
-	if len(md["authorization"]) == 0 {
+	if !ok || len(md["authorization"]) == 0 {
 		return ErrUnauthorized
 	}
 

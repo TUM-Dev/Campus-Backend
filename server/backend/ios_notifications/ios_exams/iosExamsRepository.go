@@ -11,16 +11,6 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func (repo *Repository) SaveExam(exam *model.Exam) error {
-	dbExam := exam.ToDbExam()
-
-	if err := repo.DB.Create(&dbExam).Error; err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (repo *Repository) SaveExams(exams []model.Exam) error {
 	var dbExams []model.DbExam
 
