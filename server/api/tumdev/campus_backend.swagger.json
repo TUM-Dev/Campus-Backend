@@ -681,6 +681,58 @@
         ]
       }
     },
+    "/news": {
+      "get": {
+        "operationId": "Campus_ListNews",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/apiNews"
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lastNewsId",
+            "description": "the last id of the news item received. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "newsSource",
+            "description": "filter by news source id. 0 to get all news items",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "oldestDateAt",
+            "description": "the oldest time you want to be included in the response",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/news/alerts": {
       "get": {
         "operationId": "Campus_ListNewsAlerts",
@@ -738,58 +790,6 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/news/{lastNewsId}": {
-      "get": {
-        "operationId": "Campus_ListNews",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/apiNews"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lastNewsId",
-            "description": "the last id of the news item received. 0 to get all news items",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "newsSource",
-            "description": "filter by news source id. 0 to get all news items",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "oldestDateAt",
-            "description": "the oldest time you want to be included in the response",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "date-time"
-          }
-        ],
         "tags": [
           "Campus"
         ]
@@ -1629,8 +1629,17 @@
           "type": "string",
           "title": "where a news thumbnail is stored. empty string means no image is available"
         },
-        "source": {
-          "type": "string"
+        "sourceId": {
+          "type": "string",
+          "title": "the id of the news source"
+        },
+        "sourceIconUrl": {
+          "type": "string",
+          "title": "where the icon can be found"
+        },
+        "sourceTitle": {
+          "type": "string",
+          "title": "human readable title of the news source"
         },
         "created": {
           "type": "string",
