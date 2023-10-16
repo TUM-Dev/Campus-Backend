@@ -124,14 +124,14 @@ func main() {
 func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	resp, err := handler(ctx, req)
-	fields := log.Fields{"elapsed": time.Now().Sub(start)}
+	fields := log.Fields{"elapsed": time.Since(start)}
 	log.WithContext(ctx).WithFields(fields).WithError(err).Info(info.FullMethod)
 	return resp, err
 }
 func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	start := time.Now()
 	err := handler(srv, stream)
-	log.WithField("elapsed", time.Now().Sub(start)).WithError(err).Info(info.FullMethod)
+	log.WithField("elapsed", time.Since(start)).WithError(err).Info(info.FullMethod)
 	return err
 }
 
