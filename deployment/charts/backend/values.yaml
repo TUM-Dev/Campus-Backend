@@ -42,6 +42,7 @@ mariadb:
 
 
 backend:
+  omdbApiKey: changeme-changeme-changeme
   campusApiToken: changeme-changeme-changeme
   sentry:
     dsn: changeme-changeme-changeme
