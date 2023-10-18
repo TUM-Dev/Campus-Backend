@@ -1,12 +1,14 @@
-package cron
+package movie_parsers
 
 import (
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 )
 
-func TestIMDBExtration(t *testing.T) {
-	reader := strings.NewReader(`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+var website = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <body class="white">
 <div class="container">
@@ -58,12 +60,49 @@ In the end, there is one thing Hollywood does best: Make movies about themselves
 </div>
 </body>
 </html>
-`)
-	imdbID, err := parseImdbIDFromReader(reader)
-	if err != nil {
-		t.Error(err)
-	}
-	if imdbID != "tt10640346" {
-		t.Error("imdbID is not correct")
-	}
+`
+
+func TestExtration(t *testing.T) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(website))
+	require.NoError(t, err)
+	t.Run("imdb", func(t *testing.T) {
+		require.Equal(t, "tt10640346", parseImdbID(doc))
+	})
+	t.Run("imageUrl", func(t *testing.T) {
+		require.Equal(t, "https://www.tu-film.de/img/film/poster/.sized.Babylon.jpg", parseImageUrl(doc))
+	})
+	t.Run("trailerUrl", func(t *testing.T) {
+		require.Equal(t, "https://www.youtube.com/watch?v=5muQK7CuFtY", parseTrailerUrl(doc))
+	})
+	t.Run("location", func(t *testing.T) {
+		require.Equal(t, "Hörsaal MW1801, Campus Garching", parseLocation(doc))
+	})
+	t.Run("shortenedDescription", func(t *testing.T) {
+		header := "Do you know where I can find some drugs?"
+		description := "Its the 1920s, California, a chaotic world of parties and movie sets, crime and exuberance. Newcomers Nellie LaRoy (Margot Robbie) and Manny Torres (Diego Calva) will do everything to find their success. In front of the camera or behind it. When movies start getting lounder and sets get quiet, they and movie stars of old like Jack Conrad (Brad Pitt) will have to adapt or face extinction.\n" +
+			"Dont let that story stop you tough, these three hours are filled with dance and drugs, music and montages, porn and poetry. You might not need that much of an attention span and you might not want it.\n" +
+			"In the end, there is one thing Hollywood does best: Make movies about themselves. Did they forget to mention that these movies were made for nazi germany? Is all this crime and perversion really ok because the movies are just that good? Don&#39;t think about it too much, you will still enjoy it."
+		comment := "Chazelle’s film commemorates the era’s hubris as it indulges in a bit of its own. This is how a world ends. Not with a whimper but a great deal of banging, baby. And vomiting. And snorting. (Irish Times)"
+		require.Equal(t, fmt.Sprintf("<b>%s<b>\n\n%s\n\n<i>%s<i>", header, description, comment), parseShortenedDescription(doc))
+	})
+}
+
+func TestNoExtration(t *testing.T) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader("<html></html>"))
+	require.NoError(t, err)
+	t.Run("imdb", func(t *testing.T) {
+		require.Equal(t, "", parseImdbID(doc))
+	})
+	t.Run("imageUrl", func(t *testing.T) {
+		require.Equal(t, "", parseImageUrl(doc))
+	})
+	t.Run("trailerUrl", func(t *testing.T) {
+		require.Equal(t, "", parseTrailerUrl(doc))
+	})
+	t.Run("location", func(t *testing.T) {
+		require.Equal(t, "", parseLocation(doc))
+	})
+	t.Run("shortenedDescription", func(t *testing.T) {
+		require.Equal(t, "", parseShortenedDescription(doc))
+	})
 }
