@@ -1,0 +1,22 @@
+name: Trigger Client Update
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'server/api/tumdev/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Trigger Client Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.CAMPUS_FLUTTER_TOKEN }}
+          repository: TUM-Dev/Campus-Flutter
+          event-type: trigger_protoc_update
