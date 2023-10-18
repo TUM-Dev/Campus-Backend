@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'server/api/tumdev/**'
+      - 'server/api/tumdev/campus_backend.proto'
 
 jobs:
   deploy:
