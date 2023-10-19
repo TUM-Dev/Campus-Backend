@@ -46,6 +46,11 @@ spec:
               value: "true"
             - name: APNS_P8_FILE_PATH
               value: /etc/apns_auth_key.p8
+            - name: OMDB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: OMDB_API_KEY
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
@@ -147,6 +152,7 @@ metadata:
     app.kubernetes.io/part-of: tum-campus-app
     app.kubernetes.io/name: backend-v2
 data:
+  OMDB_API_KEY: {{ $.Values.backend.omdbApiKey | b64enc }}
   CAMPUS_API_TOKEN: {{ $.Values.backend.campusApiToken | b64enc }}
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
   apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}
