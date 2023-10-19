@@ -36,7 +36,7 @@ jobs:
           echo "BRANCH_NAME=chore/update-protos-to-\$LATEST_TAG" >> $GITHUB_ENV
 
       - name: Clone Repository
-        run: git clone --depth=1 --branch=development https://runner:${{ secrets.ACCESS_TOKEN }}@github.com/${{ env.REPOSITORY }} ${{ env.FOLDER }}
+        run: git clone --depth=1 --branch=development https://runner:${{ secrets.CAMPUS_FLUTTER_TOKEN }}@github.com/${{ env.REPOSITORY }} ${{ env.FOLDER }}
 
       - name: Update Proto Files
         run: |
@@ -65,7 +65,7 @@ jobs:
           # Store the PAT in a file that can be accessed by the
           # GitHub CLI.
           cd ${{ env.FOLDER }}
-          echo "${{ secrets.ACCESS_TOKEN }}" > token.txt
+          echo "${{ secrets.CAMPUS_FLUTTER_TOKEN }}" > token.txt
 
           # Authorize GitHub CLI for the current repository and
           # create a pull-requests containing the updates.
