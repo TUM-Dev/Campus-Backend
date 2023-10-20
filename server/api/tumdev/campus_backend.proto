@@ -33,14 +33,6 @@ service Campus {
     };
   }
 
-  rpc SearchRooms(SearchRoomsRequest) returns (SearchRoomsReply) {
-    option (google.api.http) = {
-      post: "/roomfinder/room/search",
-      body: "*",
-      response_body: "rooms"
-    };
-  }
-
   // This endpoint retrieves Canteen Ratings from the Backend.
   rpc ListCanteenRatings(ListCanteenRatingsRequest) returns (ListCanteenRatingsReply) {
     option (google.api.http) = {
@@ -211,27 +203,6 @@ message IOSDeviceRequestResponseRequest {
 message IOSDeviceRequestResponseReply {
   string message = 1;
 }
-
-message SearchRoomsRequest {
-  string query = 1;
-}
-
-message SearchRoomsReply {
-  repeated Room rooms = 1;
-}
-
-message Room {
-  int64 room_id = 1;
-  string room_code = 2;
-  string building_nr = 3;
-  string arch_id = 4;
-  string info = 5;
-  string address = 6;
-  string purpose = 7;
-  string campus = 8;
-  string name = 9;
-}
-
 message News {
   int64 id = 1;
   string title = 2;
