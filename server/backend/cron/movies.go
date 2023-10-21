@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"regexp"
 	"slices"
 	"time"
 
@@ -19,7 +20,7 @@ const (
 func (c *CronService) movieCron() error {
 	log.Trace("parsing upcoming feed")
 	var allMovieLinks []string
-	if err := c.db.Model(&model.Kino{}).Distinct().Pluck("link", allMovieLinks).Error; err != nil {
+	if err := c.db.Model(&model.Kino{}).Distinct().Pluck("Link", &allMovieLinks).Error; err != nil {
 		return err
 	}
 
@@ -41,6 +42,13 @@ func (c *CronService) movieCron() error {
 				log.WithError(err).WithFields(logFields).Error("Couldn't check if movie already exists")
 				continue
 			}
+			re := regexp.MustCompile(`(?P<date>[\d. ]+): (?P<title>.+)$`)
+			matches := re.FindStringSubmatch(item.Title)
+			if len(matches) < re.NumSubexp() {
+				log.WithFields(logFields).Error("Couldn't parse movie title")
+				continue
+			}
+			item.Title = matches[re.SubexpIndex("title")]
 
 			// populate extra data from omdb
 			movieInformation, err := movie_parsers.GetTuFilmWebsiteInformation(item.Link)
