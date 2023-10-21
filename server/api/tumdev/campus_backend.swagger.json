@@ -1517,49 +1517,67 @@
       "properties": {
         "movieId": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "the id of the movie"
         },
         "date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "the date of the movie"
         },
         "created": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "when the movie was created in OUR database"
         },
         "title": {
-          "type": "string"
+          "type": "string",
+          "title": "title of the movie if available, empty otherwise"
+        },
+        "location": {
+          "type": "string",
+          "title": "Where the movie is shown"
         },
         "releaseYear": {
           "type": "string",
-          "title": "release year of the movie"
+          "title": "release year of the movie if available, empty otherwise"
         },
         "runtime": {
-          "type": "string"
+          "type": "string",
+          "title": "runtime of the movie if available, empty otherwise"
         },
         "genre": {
-          "type": "string"
+          "type": "string",
+          "title": "genre of the movie if available, empty otherwise"
         },
         "director": {
-          "type": "string"
+          "type": "string",
+          "title": "director of the movie as by omdb(/tu-film), empty otherwise"
         },
         "actors": {
-          "type": "string"
+          "type": "string",
+          "title": "actors of the movie as by omdb(/tu-film), empty otherwise"
         },
         "imdbRating": {
           "type": "string",
-          "title": "imdb rating"
+          "title": "imdb rating for the movie if available, empty otherwise"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "title": "short description of the movie including limited html tags (only \u003cb\u003e, \u003ci\u003e)"
+        },
+        "trailerUrl": {
+          "type": "string",
+          "title": "Where to find a trailer for this movie"
+        },
+        "additionalInformationUrl": {
+          "type": "string",
+          "title": "Where to find additional information about this movie"
         },
         "coverId": {
           "type": "string",
-          "format": "int64"
-        },
-        "link": {
-          "type": "string",
-          "title": "Where to find additional information about this movie"
+          "format": "int64",
+          "title": "the id of the cover image"
         },
         "coverUrl": {
           "type": "string",
