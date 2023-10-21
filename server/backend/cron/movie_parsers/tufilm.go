@@ -235,8 +235,6 @@ func GetFeed(channels *MovieChannels, url string) error {
 		log.WithError(err).Error("Error while unmarshalling UpcomingFeed")
 		return err
 	}
-	for _, chanel := range newMovies.Channels {
-		channels.Channels = append(channels.Channels, chanel)
-	}
+	channels.Channels = append(channels.Channels, newMovies.Channels...)
 	return nil
 }
