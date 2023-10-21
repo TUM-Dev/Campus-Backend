@@ -196,12 +196,31 @@ type MovieChannel struct {
 	Items []MovieItems `xml:"item"`
 }
 
-// GetUpcomingFeed downloads a file from a given url and returns the path to the file
-func GetUpcomingFeed() ([]MovieChannel, error) {
-	resp, err := http.Get("https://www.tu-film.de/programm/index/upcoming.rss")
+type MovieChannels struct {
+	Channels []MovieChannel `xml:"channel"`
+}
+
+// GetFeeds downloads a file from a given url and returns the path to the file
+func GetFeeds() ([]MovieChannel, error) {
+	var channels MovieChannels
+	if err := GetFeed(&channels, "https://www.tu-film.de/programm/index/upcoming.rss"); err != nil {
+		return nil, err
+	}
+	for i := 2001; i <= 2023; i++ {
+		for _, semester := range []string{"ws", "ss"} {
+			if err := GetFeed(&channels, fmt.Sprintf("https://www.tu-film.de/programm/index/%s%d.rss", semester, i)); err != nil {
+				log.WithError(err).Warn("Error while getting old movie feed")
+			}
+		}
+	}
+	return channels.Channels, nil
+}
+
+func GetFeed(channels *MovieChannels, url string) error {
+	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).Error("Error while getting response for request")
-		return nil, err
+		return err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -210,13 +229,14 @@ func GetUpcomingFeed() ([]MovieChannel, error) {
 		}
 	}(resp.Body)
 	//Parse the data into a struct
-	var upcomingMovies struct {
-		Channels []MovieChannel `xml:"channel"`
-	}
-	err = xml.NewDecoder(resp.Body).Decode(&upcomingMovies)
+	var newMovies MovieChannels
+	err = xml.NewDecoder(resp.Body).Decode(&newMovies)
 	if err != nil {
 		log.WithError(err).Error("Error while unmarshalling UpcomingFeed")
-		return nil, err
+		return err
 	}
-	return upcomingMovies.Channels, nil
+	for _, chanel := range newMovies.Channels {
+		channels.Channels = append(channels.Channels, chanel)
+	}
+	return nil
 }

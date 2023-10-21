@@ -24,7 +24,7 @@ func (c *CronService) movieCron() error {
 		return err
 	}
 
-	channels, err := movie_parsers.GetUpcomingFeed()
+	channels, err := movie_parsers.GetFeeds()
 	if err != nil {
 		return err
 	}
