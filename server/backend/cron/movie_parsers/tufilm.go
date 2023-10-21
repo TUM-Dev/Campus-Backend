@@ -196,31 +196,31 @@ type MovieChannel struct {
 	Items []MovieItems `xml:"item"`
 }
 
-type MovieChannels struct {
-	Channels []MovieChannel `xml:"channel"`
-}
-
-// GetFeeds downloads a file from a given url and returns the path to the file
+// GetFeeds gets all feeds from the tu-film website
 func GetFeeds() ([]MovieChannel, error) {
-	var channels MovieChannels
-	if err := GetFeed(&channels, "https://www.tu-film.de/programm/index/upcoming.rss"); err != nil {
+	var channels []MovieChannel
+	if newChannels, err := GetFeed("https://www.tu-film.de/programm/index/upcoming.rss"); err != nil {
 		return nil, err
+	} else {
+		channels = append(channels, newChannels...)
 	}
 	for i := 2001; i <= 2023; i++ {
 		for _, semester := range []string{"ws", "ss"} {
-			if err := GetFeed(&channels, fmt.Sprintf("https://www.tu-film.de/programm/index/%s%d.rss", semester, i)); err != nil {
+			if newChannels, err := GetFeed(fmt.Sprintf("https://www.tu-film.de/programm/index/%s%d.rss", semester, i)); err != nil {
 				log.WithError(err).Warn("Error while getting old movie feed")
+			} else {
+				channels = append(channels, newChannels...)
 			}
 		}
 	}
-	return channels.Channels, nil
+	return channels, nil
 }
 
-func GetFeed(channels *MovieChannels, url string) error {
+func GetFeed(url string) ([]MovieChannel, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.WithError(err).Error("Error while getting response for request")
-		return err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -229,12 +229,13 @@ func GetFeed(channels *MovieChannels, url string) error {
 		}
 	}(resp.Body)
 	//Parse the data into a struct
-	var newMovies MovieChannels
+	var newMovies struct {
+		Channels []MovieChannel `xml:"channel"`
+	}
 	err = xml.NewDecoder(resp.Body).Decode(&newMovies)
 	if err != nil {
 		log.WithError(err).Error("Error while unmarshalling UpcomingFeed")
-		return err
+		return nil, err
 	}
-	channels.Channels = append(channels.Channels, newMovies.Channels...)
-	return nil
+	return newMovies.Channels, nil
 }
