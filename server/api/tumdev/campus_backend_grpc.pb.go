@@ -23,7 +23,6 @@ const (
 	Campus_ListNewsAlerts_FullMethodName           = "/api.Campus/ListNewsAlerts"
 	Campus_ListNewsSources_FullMethodName          = "/api.Campus/ListNewsSources"
 	Campus_ListNews_FullMethodName                 = "/api.Campus/ListNews"
-	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
 	Campus_ListCanteenRatings_FullMethodName       = "/api.Campus/ListCanteenRatings"
 	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
 	Campus_CreateCanteenRating_FullMethodName      = "/api.Campus/CreateCanteenRating"
@@ -57,7 +56,6 @@ type CampusClient interface {
 	ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error)
 	ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error)
 	ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error)
-	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error)
 	GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error)
@@ -117,15 +115,6 @@ func (c *campusClient) ListNewsSources(ctx context.Context, in *ListNewsSourcesR
 func (c *campusClient) ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error) {
 	out := new(ListNewsReply)
 	err := c.cc.Invoke(ctx, Campus_ListNews_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error) {
-	out := new(SearchRoomsReply)
-	err := c.cc.Invoke(ctx, Campus_SearchRooms_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -380,7 +369,6 @@ type CampusServer interface {
 	ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error)
 	ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error)
 	ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error)
-	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error)
 	GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error)
@@ -424,9 +412,6 @@ func (UnimplementedCampusServer) ListNewsSources(context.Context, *ListNewsSourc
 }
 func (UnimplementedCampusServer) ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListNews not implemented")
-}
-func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
 }
 func (UnimplementedCampusServer) ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCanteenRatings not implemented")
@@ -563,24 +548,6 @@ func _Campus_ListNews_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).ListNews(ctx, req.(*ListNewsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_SearchRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchRoomsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).SearchRooms(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_SearchRooms_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).SearchRooms(ctx, req.(*SearchRoomsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1043,10 +1010,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListNews",
 			Handler:    _Campus_ListNews_Handler,
-		},
-		{
-			MethodName: "SearchRooms",
-			Handler:    _Campus_SearchRooms_Handler,
 		},
 		{
 			MethodName: "ListCanteenRatings",
