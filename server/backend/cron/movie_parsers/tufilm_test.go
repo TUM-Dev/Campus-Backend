@@ -3,9 +3,10 @@ package movie_parsers
 import (
 	_ "embed"
 	"fmt"
-	"github.com/guregu/null"
 	"strings"
 	"testing"
+
+	"github.com/guregu/null"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/require"
