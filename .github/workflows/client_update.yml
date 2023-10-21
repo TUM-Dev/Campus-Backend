@@ -1,0 +1,81 @@
+name: Trigger Client Update
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'server/api/tumdev/campus_backend.proto'
+
+jobs:
+  deploy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Fetch Changes
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Checkout everything to get access to the tags
+          ref: main
+          repository: TUM-Dev/Campus-Backend
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Needed Information
+        run: |
+          echo "LATEST_TAG=$(git describe --tags --always --abbrev=0)" >> $GITHUB_ENV
+          echo "REPOSITORY=TUM-Dev/Campus-Flutter" >> $GITHUB_ENV
+          echo "FOLDER=bin/\$REPOSITORY" >> $GITHUB_ENV
+          echo "BRANCH_NAME=chore/update-protos-to-\$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Clone Repository
+        run: git clone --depth=1 --branch=development https://runner:${{ secrets.CAMPUS_FLUTTER_TOKEN }}@github.com/${{ env.REPOSITORY }} ${{ env.FOLDER }}
+
+      - name: Update Proto Files
+        run: |
+          cd ${{ env.FOLDER }}
+          git checkout -b ${{ env.BRANCH_NAME }}
+
+          # Update the script files to the latest version.
+          dart pub global activate protoc_plugin
+          export PATH="$PATH:$HOME/.pub-cache/bin"
+          curl -o protos/tumdev/campus_backend.proto https://raw.githubusercontent.com/TUM-Dev/Campus-Backend/main/server/api/tumdev/campus_backend.proto
+          protoc --dart_out=grpc:lib/base/networking/apis -I./protos google/protobuf/timestamp.proto google/protobuf/empty.proto protos/tumdev/campus_backend.proto
+
+      - name: Commit Changes
+        id: commit
+        run: |
+          # Commit the changes and push the feature branch to origin
+          cd ${{ env.FOLDER }}
+          git add .
+          git commit -m "chore: update scripts to ${{ env.LATEST_TAG }}"
+          git push origin ${{ env.BRANCH_NAME }}
+        continue-on-error: true
+
+      - name: Create Pull Request
+        if: steps.commit.outcome == 'success'
+        run: |
+          # Store the PAT in a file that can be accessed by the
+          # GitHub CLI.
+          cd ${{ env.FOLDER }}
+          echo "${{ secrets.CAMPUS_FLUTTER_TOKEN }}" > token.txt
+
+          # Authorize GitHub CLI for the current repository and
+          # create a pull-requests containing the updates.
+          gh auth login --with-token < token.txt
+          gh pr create \
+            --body "" \
+            --title "Chore: Update Protos to ${{ env.LATEST_TAG }}" \
+            --head "${{ env.BRANCH_NAME }}" \
+            --base "development"
+
+      - name: Error Message
+        if: steps.commit.outcome != 'success'
+        run: echo "No Changes made to Proto Files!"
