@@ -887,42 +887,6 @@
         ]
       }
     },
-    "/roomfinder/room/search": {
-      "post": {
-        "operationId": "Campus_SearchRooms",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "$ref": "#/definitions/apiRoom"
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiSearchRoomsRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/studyrooms": {
       "get": {
         "operationId": "Campus_ListStudyRooms",
@@ -1798,59 +1762,6 @@
           "type": "string"
         },
         "tumId": {
-          "type": "string"
-        }
-      }
-    },
-    "apiRoom": {
-      "type": "object",
-      "properties": {
-        "roomId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "roomCode": {
-          "type": "string"
-        },
-        "buildingNr": {
-          "type": "string"
-        },
-        "archId": {
-          "type": "string"
-        },
-        "info": {
-          "type": "string"
-        },
-        "address": {
-          "type": "string"
-        },
-        "purpose": {
-          "type": "string"
-        },
-        "campus": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "apiSearchRoomsReply": {
-      "type": "object",
-      "properties": {
-        "rooms": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiRoom"
-          }
-        }
-      }
-    },
-    "apiSearchRoomsRequest": {
-      "type": "object",
-      "properties": {
-        "query": {
           "type": "string"
         }
       }
