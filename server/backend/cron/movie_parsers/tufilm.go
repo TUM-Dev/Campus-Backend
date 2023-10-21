@@ -4,21 +4,26 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/microcosm-cc/bluemonday"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/guregu/null"
+	"github.com/microcosm-cc/bluemonday"
+	log "github.com/sirupsen/logrus"
 )
 
 type TuFilmWebsiteInformation struct {
-	ImdbID               string
-	TrailerUrl           string
+	ImdbID               null.String
+	TrailerUrl           null.String
 	ImageUrl             string
 	ShortenedDescription string
-	Location             string
+	ReleaseYear          null.String
+	Director             null.String
+	Actors               null.String
+	Runtime              null.String
 }
 
 // GetTuFilmWebsiteInformation scrapes the tu-film website for all usefully information
@@ -41,14 +46,50 @@ func GetTuFilmWebsiteInformation(url string) (*TuFilmWebsiteInformation, error) 
 		return nil, err
 	}
 
-	bm := bluemonday.StrictPolicy()
+	return parseWebsiteInformation(doc)
+}
+
+func parseWebsiteInformation(doc *goquery.Document) (*TuFilmWebsiteInformation, error) {
+	Director, Actors, Runtime := parseDirectorActorsRuntime(doc)
 	return &TuFilmWebsiteInformation{
-		ImdbID:               bm.Sanitize(parseImdbID(doc)),
-		TrailerUrl:           bm.Sanitize(parseTrailerUrl(doc)),
-		ImageUrl:             bm.Sanitize(parseImageUrl(doc)),
+		ImdbID:               parseImdbID(doc),
+		TrailerUrl:           parseTrailerUrl(doc),
+		ImageUrl:             parseImageUrl(doc),
 		ShortenedDescription: parseShortenedDescription(doc),
-		Location:             bm.Sanitize(parseLocation(doc)),
+		ReleaseYear:          parseReleaseYear(doc),
+		Director:             Director,
+		Actors:               Actors,
+		Runtime:              Runtime,
 	}, nil
+}
+
+func parseDirectorActorsRuntime(doc *goquery.Document) (null.String, null.String, null.String) {
+	bm := bluemonday.StrictPolicy()
+	rawTable := doc.Find("td.film").Text()
+	rawTable = bm.Sanitize(rawTable)
+	rawTable = strings.TrimSpace(rawTable)
+	for strings.Contains(rawTable, "  ") {
+		rawTable = strings.ReplaceAll(rawTable, "  ", " ")
+		rawTable = strings.ReplaceAll(rawTable, "\n ", "\n")
+	}
+	re := regexp.MustCompile(`Regie: (?P<director>.+)\nSchauspieler: (?P<actors>.+)\n(?P<runtime>\d+) Minuten`)
+	matches := re.FindStringSubmatch(rawTable)
+	if len(matches) < re.NumSubexp() {
+		return null.String{}, null.String{}, null.String{}
+	}
+	director, actors, runtime := matches[re.SubexpIndex("director")], matches[re.SubexpIndex("actors")], matches[re.SubexpIndex("runtime")]
+	return null.StringFrom(director), null.StringFrom(actors), null.StringFrom(runtime + " min")
+}
+
+func parseReleaseYear(doc *goquery.Document) null.String {
+	releasePlaceYear := doc.Find(".title h4").Text()
+	re := regexp.MustCompile(`(?P<release_place>.+) \((?P<release_year>\d{4})\)`)
+	match := re.FindStringSubmatch(releasePlaceYear)
+	index := re.SubexpIndex("release_year")
+	if len(match) < index+1 {
+		return null.String{}
+	}
+	return null.StringFrom(match[index])
 }
 
 func parseShortenedDescription(doc *goquery.Document) string {
@@ -82,24 +123,31 @@ func parseShortenedDescription(doc *goquery.Document) string {
 	if comment != "" {
 		result += fmt.Sprintf("\n\n<i>%s<i>", bm.Sanitize(comment))
 	}
-
+	// clean up the result
+	for strings.Contains(result, "  ") {
+		result = strings.ReplaceAll(result, "  ", " ")
+	}
+	if result == "" {
+		return "Surprise yourself"
+	}
 	return result
 }
 
 func parseImageUrl(doc *goquery.Document) string {
 	href, exists := doc.Find("img.poster").First().Attr("src")
 	if !exists {
-		return ""
+		return "https://www.tu-film.de/img/film/poster/.sized.berraschungsfilm.jpg"
 	}
-	return "https://www.tu-film.de" + href
+	sanitisedHref := bluemonday.StrictPolicy().Sanitize(href)
+	return "https://www.tu-film.de" + sanitisedHref
 }
 
-func parseTrailerUrl(doc *goquery.Document) string {
+func parseTrailerUrl(doc *goquery.Document) null.String {
 	trailerLinks := doc.Find("a").FilterFunction(func(i int, s *goquery.Selection) bool {
 		return s.Text() == "Zum Trailer"
 	})
 	if trailerLinks.Length() == 0 {
-		return ""
+		return null.String{}
 	}
 	if trailerLinks.Length() > 1 {
 		log.Warn("more than one trailer link found. using first one")
@@ -108,41 +156,28 @@ func parseTrailerUrl(doc *goquery.Document) string {
 	href, exists := trailerLinks.First().Attr("href")
 	if !exists {
 		log.Error("'Zum Trailer' does not have a link")
-		return ""
+		return null.String{}
 	}
 	href = strings.Replace(href, "http://", "https://", 1)
-	return href
+	href = bluemonday.StrictPolicy().Sanitize(href)
+	return null.StringFrom(href)
 }
 
-func parseLocation(doc *goquery.Document) string {
-	locationLinks := doc.Find("a").FilterFunction(func(i int, s *goquery.Selection) bool {
-		href, hrefExists := s.Attr("href")
-		return hrefExists && strings.Contains(href, "https://goo.gl/maps/")
-	})
-	if locationLinks.Length() == 0 {
-		return ""
-	}
-	if locationLinks.Length() > 1 {
-		log.Warn("more than one location link found. using first one")
-	}
-	return locationLinks.First().Text()
-}
-
-func parseImdbID(doc *goquery.Document) string {
+func parseImdbID(doc *goquery.Document) null.String {
 	imdbLinks := doc.Find("a").FilterFunction(func(i int, s *goquery.Selection) bool {
 		href, hrefExists := s.Attr("href")
 		return hrefExists && strings.Contains(href, "imdb.com/title/")
 	})
 	if imdbLinks.Length() == 0 {
-		return ""
+		return null.String{}
 	}
 	if imdbLinks.Length() > 1 {
 		log.Warn("more than one imdb link found. using first one")
 	}
 	// extract the imdb id from the link
 	href, _ := imdbLinks.First().Attr("href")
-	re := regexp.MustCompile(`https?://www.imdb.com/title/(?P<imdb_id>[^/]+)/?`)
-	return re.FindStringSubmatch(href)[re.SubexpIndex("imdb_id")]
+	re := regexp.MustCompile(`.*imdb.com/title/(?P<imdb_id>[a-zA-Z0-9]+)/?`)
+	return null.StringFrom(re.FindStringSubmatch(href)[re.SubexpIndex("imdb_id")])
 }
 
 type MovieItems struct {

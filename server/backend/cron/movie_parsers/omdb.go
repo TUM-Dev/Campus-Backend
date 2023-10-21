@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type OmdbResults struct {
