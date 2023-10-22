@@ -467,7 +467,7 @@ create table if not exists newsSource
     source int auto_increment primary key,
     title  mediumtext                         not null,
     url    mediumtext                         null,
-    icon   int                                null,
+    icon   int                                not null,
     hook   enum ('newspread', 'impulsivHook') null,
     constraint newsSource_ibfk_1 foreign key (icon) references files (file) on update cascade on delete set null
 ) collate = utf8mb4_unicode_ci
