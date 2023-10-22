@@ -43,6 +43,7 @@ func (m TumDBMigrator) Migrate() error {
 		ValidateUnknownMigrations: true,
 	}
 	mig := gormigrate.New(m.database, gormigrateOptions, []*gormigrate.Migration{
+		m.migrate20200000000000(),
 		m.migrate20210709193000(),
 		m.migrate20220126230000(),
 		m.migrate20220713000000(),
