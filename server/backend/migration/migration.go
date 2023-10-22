@@ -40,7 +40,7 @@ func autoMigrate(db *gorm.DB) error {
 		&model.IOSDeviceRequestLog{},
 		&model.IOSDevicesActivityReset{},
 		&model.IOSGrade{},
-		//&model.IOSRemoteNotification{},
+		//&model.IOSRemoteNotification...{}, -- wtf???
 		&model.IOSScheduledUpdateLog{},
 		&model.IOSSchedulingPriority{},
 		&model.Kino{},
