@@ -59,7 +59,7 @@ func computeAverageForDishesInCafeteriasTags(c *CronService) {
 }
 
 func computeAverageCafeteriaTags(c *CronService) {
-	var results []model.CafeteriaRatingTagsAverage
+	var results []model.CafeteriaRatingTagAverage
 	err := c.db.Raw("SELECT cr.cafeteriaID as cafeteriaID, crt.tagID as tagID, AVG(crt.points) as average, MAX(crt.points) as max, MIN(crt.points) as min, STD(crt.points) as std" +
 		" FROM cafeteria_rating cr" +
 		" JOIN cafeteria_rating_tag crt ON cr.cafeteriaRating = crt.correspondingRating" +
@@ -68,7 +68,7 @@ func computeAverageCafeteriaTags(c *CronService) {
 	if err != nil {
 		log.WithError(err).Error("while precomputing average cafeteria tags.")
 	} else if len(results) > 0 {
-		if err := c.db.Where("1=1").Delete(&model.CafeteriaRatingTagsAverage{}).Error; err != nil {
+		if err := c.db.Where("1=1").Delete(&model.CafeteriaRatingTagAverage{}).Error; err != nil {
 			log.WithError(err).Error("Error while deleting old averages in the table.")
 		}
 

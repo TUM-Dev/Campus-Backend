@@ -6,8 +6,8 @@ import (
 	"github.com/guregu/null"
 )
 
-// Devices struct is a row record of the devices table in the tca database
-type Devices struct {
+// Device struct is a row record of the devices table in the tca database
+type Device struct {
 	Device          int64       `gorm:"primary_key;AUTO_INCREMENT;column:device;type:int;" json:"device"`
 	Member          null.Int    `gorm:"column:member;type:int;" json:"member"`
 	UUID            string      `gorm:"column:uuid;type:varchar(50);" json:"uuid"`

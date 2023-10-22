@@ -24,7 +24,6 @@ func (m TumDBMigrator) Migrate() error {
 	if m.shouldAutoMigrate {
 		log.Info("Using automigration")
 		err := m.database.AutoMigrate(
-			&model.TopNews{},
 			&model.Crontab{},
 			&model.File{},
 			&model.NewsSource{},
