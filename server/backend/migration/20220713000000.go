@@ -8,7 +8,7 @@ import (
 
 //migrate20210709193000
 
-func (m TumDBMigrator) migrate20220713000000() *gormigrate.Migration {
+func migrate20220713000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20220713000000",
 		Migrate: func(tx *gorm.DB) error {
