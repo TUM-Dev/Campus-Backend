@@ -2,6 +2,7 @@ package migration
 
 import (
 	_ "embed"
+
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
