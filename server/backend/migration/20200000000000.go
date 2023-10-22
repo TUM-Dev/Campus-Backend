@@ -18,6 +18,10 @@ func (m TumDBMigrator) migrate20200000000000() *gormigrate.Migration {
 		ID: "20200000000000",
 		Migrate: func(tx *gorm.DB) error {
 			for _, line := range strings.Split(sourceSchema, ";") {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
 				if err := tx.Exec(line).Error; err != nil {
 					return err
 				}
