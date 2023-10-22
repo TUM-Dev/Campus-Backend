@@ -40,7 +40,7 @@ jobs:
         run: go run main.go
         working-directory: ./server
         env:
-          EXIT_AFTER_MIGRATION: "true"
+          CI_EXIT_AFTER_MIGRATION: "true"
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
   build:

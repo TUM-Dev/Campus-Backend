@@ -29,7 +29,7 @@ func SetupDB() *gorm.DB {
 		log.WithError(err).Fatal("Failed to migrate database")
 	}
 
-	if os.Getenv("EXIT_AFTER_MIGRATION") == "true" {
+	if os.Getenv("CI_EXIT_AFTER_MIGRATION") == "true" {
 		log.Info("Exiting after migration")
 		os.Exit(0)
 	}
