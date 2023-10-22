@@ -202,8 +202,7 @@ func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *
 
 	log.WithField("DeviceID", device.DeviceID).Info("Sending push notification")
 
-	_, err := apns.SendAlertNotification(notificationPayload)
-	if err != nil {
+	if _, err := apns.SendNotification(notificationPayload, model.IOSAPNSPushTypeAlert); err != nil {
 		log.WithField("DeviceID", device.DeviceID).WithError(err).Error("Could not send notification")
 	}
 }

@@ -33,7 +33,7 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 
 	notification := model.NewIOSNotificationPayload(deviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
 
-	if _, err := s.Repository.SendBackgroundNotification(notification); err != nil {
+	if _, err := s.Repository.SendNotification(notification, model.IOSAPNSPushTypeBackground); err != nil {
 		log.WithError(err).Error("Could not send background notification")
 		return errors.New("could not send notification")
 	}

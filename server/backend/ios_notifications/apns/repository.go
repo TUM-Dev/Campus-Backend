@@ -53,15 +53,7 @@ func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgro
 	return &request, nil
 }
 
-func (r *Repository) SendAlertNotification(payload *model.IOSNotificationPayload) (*model.IOSRemoteNotificationResponse, error) {
-	return r.SendNotification(payload, model.IOSAPNSPushTypeAlert, 10)
-}
-
-func (r *Repository) SendBackgroundNotification(payload *model.IOSNotificationPayload) (*model.IOSRemoteNotificationResponse, error) {
-	return r.SendNotification(payload, model.IOSAPNSPushTypeBackground, 10)
-}
-
-func (r *Repository) SendNotification(notification *model.IOSNotificationPayload, apnsPushType model.IOSAPNSPushType, priority int) (*model.IOSRemoteNotificationResponse, error) {
+func (r *Repository) SendNotification(notification *model.IOSNotificationPayload, apnsPushType model.IOSAPNSPushType) (*model.IOSRemoteNotificationResponse, error) {
 	body, _ := notification.MarshalJSON()
 
 	req, _ := http.NewRequest(http.MethodPost, r.ApnsUrl(notification.DeviceId), bytes.NewBuffer(body))
@@ -70,7 +62,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	req.Header.Set("apns-push-type", apnsPushType.String())
 	req.Header.Set("apns-topic", "de.tum.tca")
 	// can be a value between 1 and 10
-	req.Header.Set("apns-priority", strconv.Itoa(priority))
+	req.Header.Set("apns-priority", strconv.Itoa(10))
 
 	bearer := r.Token.GenerateNewTokenIfExpired()
 	req.Header.Set("authorization", "bearer "+bearer)
@@ -87,7 +79,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	}(resp.Body)
 
 	var response model.IOSRemoteNotificationResponse
-	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
 		log.WithError(err).Error("Could not decode APNs response")
 		return nil, errors.New("could not decode apns response")
 	}
