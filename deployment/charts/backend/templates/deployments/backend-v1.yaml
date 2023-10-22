@@ -63,6 +63,18 @@ spec:
               name: https
           securityContext:
             readOnlyRootFilesystem: true
+        - name: access-legacybackend
+          image: busybox:1.36
+          args: [/bin/sh, -c, 'tail -n+1 -F /var/log/apache2/access.log']
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
+        - name: error-legacybackend
+          image: busybox:1.36
+          args: [/bin/sh, -c, 'tail -n+1 -F /var/log/apache2/error.log']
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
       imagePullSecrets:
         - name: regcred
 ---

@@ -1,0 +1,40 @@
+{
+  "tags": [
+    {
+      "tagNameGerman": "Ausgabe Gut Koordinert",
+      "tagNameEnglish": "Output Well Coordinated"
+    },
+    {
+      "tagNameGerman": "Wartezeit",
+      "tagNameEnglish": "Waitingtime"
+    },
+    {
+      "tagNameGerman": "Sauberkeit",
+      "tagNameEnglish": "Cleanliness "
+    },
+    {
+      "tagNameGerman": "Verfügbarkeit der Gerichte",
+      "tagNameEnglish": "Availability"
+    },
+    {
+      "tagNameGerman": "Genügen freie Plätze",
+      "tagNameEnglish": "Enough Free Tables"
+    },
+    {
+      "tagNameGerman": "Auswahl Vegan",
+      "tagNameEnglish": "Variety Vegan"
+    },
+    {
+      "tagNameGerman": "Auswahl Vegetarisch",
+      "tagNameEnglish": "Variety Vegetarian"
+    },
+    {
+      "tagNameGerman": "Auswahl Allgemein",
+      "tagNameEnglish": "Variety General"
+    },
+    {
+      "tagNameGerman": "Glaubhaftigkeit des Speiseplans",
+      "tagNameEnglish": "Credibility of the menu"
+    }
+  ]
+}

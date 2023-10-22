@@ -2,8 +2,9 @@ package model
 
 import (
 	"encoding/xml"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_crypto"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/crypto"
 )
 
 // IOSGrades is a wrapper for a list of grades => XML stuff
@@ -54,7 +55,7 @@ func (grade *IOSGrade) CompareToEncrypted(encryptedGrade *IOSEncryptedGrade) boo
 // IOSEncryptedGrade is a grade that can be encrypted.
 // Whether it is currently encrypted or not is indicated by the IsEncrypted field.
 type IOSEncryptedGrade struct {
-	ID           uint      `gorm:"primaryKey"`
+	ID           int64     `gorm:"primaryKey"`
 	Device       IOSDevice `gorm:"constraint:OnDelete:CASCADE"`
 	DeviceID     string    `gorm:"index;not null"`
 	LectureTitle string    `gorm:"not null"`
@@ -63,12 +64,12 @@ type IOSEncryptedGrade struct {
 }
 
 func (e *IOSEncryptedGrade) Encrypt(key string) error {
-	encryptedTitle, err := ios_crypto.SymmetricEncrypt(e.LectureTitle, key)
+	encryptedTitle, err := crypto.SymmetricEncrypt(e.LectureTitle, key)
 	if err != nil {
 		return err
 	}
 
-	encryptedGrade, err := ios_crypto.SymmetricEncrypt(e.Grade, key)
+	encryptedGrade, err := crypto.SymmetricEncrypt(e.Grade, key)
 	if err != nil {
 		return err
 	}
@@ -81,12 +82,12 @@ func (e *IOSEncryptedGrade) Encrypt(key string) error {
 }
 
 func (e *IOSEncryptedGrade) Decrypt(key string) error {
-	decryptedTitle, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.LectureTitle), key)
+	decryptedTitle, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.LectureTitle), key)
 	if err != nil {
 		return err
 	}
 
-	decryptedGrade, err := ios_crypto.SymmetricDecrypt(ios_crypto.EncryptedString(e.Grade), key)
+	decryptedGrade, err := crypto.SymmetricDecrypt(crypto.EncryptedString(e.Grade), key)
 	if err != nil {
 		return err
 	}

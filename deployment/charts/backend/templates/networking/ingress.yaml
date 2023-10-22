@@ -16,11 +16,22 @@ spec:
           port: 80
     - kind: Rule
       match: Host(`{{ join "`) || Host(`" $.Values.urls.v2 }}`)
+      middlewares:
+        - name: cors
       services:
         - name: backend-v2-svc
           port: 50051
     - kind: Rule
+      match: Host(`{{ join "`) || Host(`" $.Values.urls.v2WebGrpc }}`)
+      middlewares:
+        - name: cors
+      services:
+        - name: backend-v2-svc
+          port: 8081
+    - kind: Rule
       match: (Host(`{{ join "`) || Host(`" $.Values.urls.v2 }}`)) && Headers(`Content-Type`, `application/grpc`)
+      middlewares:
+        - name: cors
       services:
         - name: backend-v2-svc
           port: 50051
@@ -40,7 +51,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`{{ join "`) || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2) }}`)
+      match: Host(`{{ join "`) || Host(`" (concat $.Values.urls.v1 $.Values.urls.v2 $.Values.urls.v2WebGrpc) }}`)
       services:
         - name: noop@internal
           kind: TraefikService

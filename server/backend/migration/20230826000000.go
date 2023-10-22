@@ -1,72 +1,64 @@
 package migration
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
-type device2stats struct {
-	ChatRoomsActivity  int `gorm:"column:ChatRoomsActivity;default 0;not null"`
-	ChatActivity       int `gorm:"column:ChatActivity;default 0;not null"`
-	WizNavChatActivity int `gorm:"column:WizNavChatActivity;default 0;not null"`
+type Feedback struct {
+	Processed  bool        `gorm:"column:processed;type:boolean;default:false;not null;"`
+	OsVersion  null.String `gorm:"column:os_version;type:text;null;"`
+	AppVersion null.String `gorm:"column:app_version;type:text;null;"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *Feedback) TableName() string {
+	return "feedback"
 }
 
 // migrate20230826000000
-// Removes all traces of the chat from the database.
+// adds a "feedbackEmail" cron job that runs every 30 minutes.
 func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230826000000",
 		Migrate: func(tx *gorm.DB) error {
-			// Remove tracking from device2stats
-			if err := tx.Migrator().DropColumn(&device2stats{}, "ChatRoomsActivity"); err != nil {
+			if err := tx.Migrator().AddColumn(&Feedback{}, "Processed"); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropColumn(&device2stats{}, "ChatActivity"); err != nil {
+			if err := tx.Migrator().AddColumn(&Feedback{}, "OsVersion"); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropColumn(&device2stats{}, "WizNavChatActivity"); err != nil {
+			if err := tx.Migrator().AddColumn(&Feedback{}, "AppVersion"); err != nil {
 				return err
 			}
-
-			// Delete all tables
-			if err := tx.Migrator().DropTable("chat_message"); err != nil {
+			if err := tx.Exec("UPDATE feedback SET processed = true WHERE processed != true;").Error; err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable("chat_room2members"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "feedbackEmail"); err != nil {
 				return err
 			}
-			return tx.Migrator().DropTable("chat_room")
+			return tx.Create(&model.Crontab{
+				Interval: 60 * 30, // Every 30 minutes
+				Type:     null.StringFrom("feedbackEmail"),
+			}).Error
 		},
+
 		Rollback: func(tx *gorm.DB) error {
-			// Restore chat_room
-			if err := tx.Exec("create table chat_room(room int auto_increment primary key, name varchar(100) not null, semester varchar(3) null, constraint `Index 2` unique (semester, name));").Error; err != nil {
+			if err := tx.Migrator().DropColumn(&Feedback{}, "Processed"); err != nil {
 				return err
 			}
-
-			// Add tracking from device2stats
-			if err := tx.Migrator().AutoMigrate(&device2stats{}); err != nil {
+			if err := tx.Migrator().DropColumn(&Feedback{}, "OsVersion"); err != nil {
 				return err
 			}
-
-			// Restore chat_message
-			if err := tx.Exec("create table chat_message (message int auto_increment primary key, member int not null, room int not null, text longtext not null, created datetime not null, signature longtext not null, constraint FK_chat_message_chat_room foreign key (room) references chat_room (room) on update cascade on delete cascade, constraint chat_message_ibfk_1 foreign key (member) references member (member) on update cascade on delete cascade);").Error; err != nil {
+			if err := tx.Migrator().DropColumn(&Feedback{}, "AppVersion"); err != nil {
 				return err
 			}
-			if err := tx.Exec("create index chat_message_b3c09425 on chat_message (member);").Error; err != nil {
+			if err := tx.Delete(&model.Crontab{}, "type = 'feedbackEmail'").Error; err != nil {
 				return err
 			}
-			if err := tx.Exec("create index chat_message_ca20ebca on chat_message (room);").Error; err != nil {
-				return err
-			}
-
-			// Restore chat_room2members
-			if err := tx.Exec("create table chat_room2members(room2members int auto_increment primary key, room int not null, member int not null, constraint chatroom_id unique (room, member), constraint FK_chat_room2members_chat_room foreign key (room) references chat_room (room) on update cascade on delete cascade, constraint chat_room2members_ibfk_2 foreign key (member) references member (member) on update cascade on delete cascade );").Error; err != nil {
-				return err
-			}
-			if err := tx.Exec("create index chat_chatroom_members_29801a33 on chat_room2members (room);").Error; err != nil {
-				return err
-			}
-			return tx.Exec("create index chat_chatroom_members_b3c09425 on chat_room2members (member);").Error
+			return SafeEnumAdd(tx, &model.Crontab{}, "type", "feedbackEmail")
 		},
 	}
 }

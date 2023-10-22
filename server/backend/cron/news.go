@@ -2,24 +2,24 @@ package cron
 
 import (
 	"crypto/md5"
-	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"regexp"
-	"strings"
-	"time"
 )
 
 const (
-	ImageDirectory = "news/newspread/"
-	NewspreadHook  = "newspread"
-	ImpulsivHook   = "impulsivHook"
+	NewsImageDirectory = "news/newspread/"
+	NewspreadHook      = "newspread"
+	ImpulsivHook       = "impulsivHook"
 	//MAX_IMAGE_RETRYS = 3
 )
 
@@ -87,42 +87,47 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 			}
 		}
 
-		if !skipNews(existingNewsLinksForSource, item.Link) {
-			// pick the first enclosure that is an image (if any)
-			var pickedEnclosure *gofeed.Enclosure
-			var enclosureUrl = null.String{NullString: sql.NullString{Valid: true, String: ""}}
-			for _, enclosure := range item.Enclosures {
-				if strings.HasSuffix(enclosure.URL, "jpg") ||
-					strings.HasSuffix(enclosure.URL, "jpeg") ||
-					strings.HasSuffix(enclosure.URL, "png") ||
-					ImageContentTypeRegex.MatchString(enclosure.Type) {
-					pickedEnclosure = enclosure
-					break
-				}
-			}
-			var fileId = null.Int{NullInt64: sql.NullInt64{Valid: false}}
-			if pickedEnclosure != nil {
-				fileId, err = c.saveImage(pickedEnclosure.URL)
-				if err != nil {
-					log.WithError(err).Error("can't save news image")
-				}
-				enclosureUrl = null.String{NullString: sql.NullString{String: pickedEnclosure.URL, Valid: true}}
-			}
-			bm := bluemonday.StrictPolicy()
-			sanitizedDesc := bm.Sanitize(item.Description)
-
-			newsItem := model.News{
-				Date:        *item.PublishedParsed,
-				Created:     time.Now(),
-				Title:       item.Title,
-				Description: sanitizedDesc,
-				Src:         source.Source,
-				Link:        item.Link,
-				Image:       enclosureUrl,
-				File:        fileId,
-			}
-			newNews = append(newNews, newsItem)
+		if skipNews(existingNewsLinksForSource, item.Link) {
+			continue
 		}
+
+		// pick the first enclosure that is an image (if any)
+		var pickedEnclosure *gofeed.Enclosure
+		for _, enclosure := range item.Enclosures {
+			if strings.HasSuffix(enclosure.URL, "jpg") ||
+				strings.HasSuffix(enclosure.URL, "jpeg") ||
+				strings.HasSuffix(enclosure.URL, "png") ||
+				ImageContentTypeRegex.MatchString(enclosure.Type) {
+				pickedEnclosure = enclosure
+				break
+			}
+		}
+		var enclosureUrl = null.StringFrom("")
+		var file *model.File
+		var fileID null.Int
+		if pickedEnclosure != nil {
+			file, err = c.saveImage(pickedEnclosure.URL)
+			if err != nil {
+				log.WithError(err).WithField("url", pickedEnclosure.URL).Error("can't save news image")
+			} else {
+				fileID = null.IntFrom(file.File)
+			}
+			enclosureUrl = null.StringFrom(pickedEnclosure.URL)
+		}
+
+		newsItem := model.News{
+			Date:         *item.PublishedParsed,
+			Created:      time.Now(),
+			Title:        item.Title,
+			Description:  bluemonday.StrictPolicy().Sanitize(item.Description),
+			NewsSourceID: source.Source,
+			NewsSource:   source,
+			Link:         item.Link,
+			Image:        enclosureUrl,
+			FileID:       fileID,
+			File:         file,
+		}
+		newNews = append(newNews, newsItem)
 	}
 	if ammountOfNewNews := len(newNews); ammountOfNewNews != 0 {
 		err = c.db.Save(&newNews).Error
@@ -136,39 +141,30 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	return nil
 }
 
-// saveImage Saves an image to the database so it can be downloaded by another cronjob and returns its id
-func (c *CronService) saveImage(url string) (null.Int, error) {
+// saveImage saves an image to the database, so it can be downloaded by another cronjob and returns its id
+func (c *CronService) saveImage(url string) (*model.File, error) {
 	targetFileName := fmt.Sprintf("%x.jpg", md5.Sum([]byte(url)))
-	var fileId null.Int
-	if err := c.db.Model(model.Files{}).
-		Where("name = ?", targetFileName).
-		Select("file").Scan(&fileId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	var file model.File
+	// path intentionally omitted in query to allow for deduplication
+	if err := c.db.First(&file, "name = ?", targetFileName).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
-		return null.Int{}, err
-	}
-	if fileId.Valid { // file already in database -> return for current news.
-		return fileId, nil
+		return nil, err
+	} else if err == nil {
+		return &file, nil
 	}
 
-	// otherwise store in database:
-	file := model.Files{
+	// does not exist, store in database
+	file = model.File{
 		Name:       targetFileName,
-		Path:       ImageDirectory,
-		URL:        sql.NullString{String: url, Valid: true},
-		Downloaded: sql.NullBool{Bool: false, Valid: true},
+		Path:       NewsImageDirectory,
+		URL:        null.StringFrom(url),
+		Downloaded: null.BoolFrom(false),
 	}
-	err := c.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&file).Error; err != nil {
-			log.WithError(err).Error("Could not store new file to database")
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return null.Int{}, err
+	if err := c.db.Create(&file).Error; err != nil {
+		log.WithError(err).Error("Could not store new file to database")
+		return nil, err
 	}
-	// creating this int is annoying but i'm too afraid to use real ORM in the model
-	return null.Int{NullInt64: sql.NullInt64{Int64: int64(file.File), Valid: true}}, nil
+	return &file, nil
 }
 
 // skipNews returns true if link is in existingLinks or link is invalid
@@ -184,7 +180,7 @@ func skipNews(existingLinks []string, link string) bool {
 	return false
 }
 
-func (c *CronService) cleanOldNewsForSource(source int32) error {
+func (c *CronService) cleanOldNewsForSource(source int64) error {
 	log.WithField("source", source).Trace("Truncating old entries")
 	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
 		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")
@@ -204,7 +200,6 @@ func (c *CronService) newspreadHook(item *gofeed.Item) {
 		extractedImageURL = extractedImageSlice[0]
 	}
 	item.Enclosures = []*gofeed.Enclosure{{URL: extractedImageURL}}
-	item.Link = extractedImageURL
 	item.Description = ""
 }
 

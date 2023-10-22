@@ -1,0 +1,8 @@
+ls:
+  .dir: lowercase
+  .pb.gw.go: snake_case
+  .pb.go: snake_case
+  .go: snake_case
+
+ignore:
+  - swagger

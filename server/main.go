@@ -4,10 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"errors"
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-	"github.com/makasim/sentryhook"
-	"io/fs"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -15,12 +11,20 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc/reflection"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/TUM-Dev/Campus-Backend/server/env"
+	"github.com/makasim/sentryhook"
+
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/getsentry/sentry-go"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/onrik/gorm-logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
@@ -43,17 +47,7 @@ var swagfs embed.FS
 
 func main() {
 	setupTelemetry()
-	defer sentry.Flush(2 * time.Second) // make sure that sentry handles shutdowns gracefully
-
-	// initializing connection to InfluxDB
-	err := backend.ConnectToInfluxDB()
-	if errors.Is(err, backend.ErrInfluxTokenNotConfigured) {
-		log.Warn("InfluxDB token not configured - continuing without InfluxDB")
-	} else if errors.Is(err, backend.ErrInfluxURLNotConfigured) {
-		log.Warn("InfluxDB url not configured - continuing without InfluxDB")
-	} else if err != nil {
-		log.WithError(err).Error("InfluxDB connection failed - health check failed")
-	}
+	defer sentry.Flush(10 * time.Second) // make sure that sentry handles shutdowns gracefully
 
 	db := setupDB()
 
@@ -80,13 +74,16 @@ func main() {
 	httpMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("healthy"))
 	})
+	httpMux.Handle("/metrics", promhttp.Handler())
 
-	static, _ := fs.Sub(swagfs, "swagger")
-	httpMux.Handle("/", http.FileServer(http.FS(static)))
+	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
+	httpMux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("/Storage"))))
+	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(UnaryRequestLogger), grpc.StreamInterceptor(StreamRequestLogger))
 	pb.RegisterCampusServer(grpcServer, campusService)
+	reflection.Register(grpcServer)
 
 	// GRPC Gateway for HTTP REST -> GRPC
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
@@ -106,7 +103,7 @@ func main() {
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
-		log.WithError(err).Panic("could not RegisterCampusHandlerFromEndpoint")
+		log.WithError(err).Fatal("could not RegisterCampusHandlerFromEndpoint")
 	}
 	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
@@ -124,20 +121,31 @@ func main() {
 	}
 }
 
+func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	start := time.Now()
+	resp, err := handler(ctx, req)
+	fields := log.Fields{"elapsed": time.Since(start)}
+	log.WithContext(ctx).WithFields(fields).WithError(err).Info(info.FullMethod)
+	return resp, err
+}
+func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	start := time.Now()
+	err := handler(srv, stream)
+	log.WithField("elapsed", time.Since(start)).WithError(err).Info(info.FullMethod)
+	return err
+}
+
 // setupDB connects to the database and migrates it if necessary
 func setupDB() *gorm.DB {
-	// Connect to DB
-	var conn gorm.Dialector
-	if dbHost := os.Getenv("DB_DSN"); dbHost == "" {
+	dbHost := os.Getenv("DB_DSN")
+	if dbHost == "" {
 		log.Fatal("Failed to start! The 'DB_DSN' environment variable is not defined. Take a look at the README.md for more details.")
-	} else {
-		log.Info("Connecting to dsn")
-		conn = mysql.Open(dbHost)
 	}
 
-	db, err := gorm.Open(conn, &gorm.Config{})
+	log.Info("Connecting to dsn")
+	db, err := gorm.Open(mysql.Open(dbHost), &gorm.Config{Logger: gorm_logrus.New()})
 	if err != nil {
-		log.WithError(err).Panic("failed to connect database")
+		log.WithError(err).Fatal("failed to connect database")
 	}
 
 	// Migrate the schema
@@ -176,7 +184,7 @@ func setupTelemetry() {
 	}
 }
 
-// addMethodNameInterceptor adds the method name (e.g. "GetNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
+// addMethodNameInterceptor adds the method name (e.g. "ListNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
 func addMethodNameInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ctx = metadata.AppendToOutgoingContext(ctx, "x-campus-method", method)
 	return invoker(ctx, method, req, reply, cc, opts...)

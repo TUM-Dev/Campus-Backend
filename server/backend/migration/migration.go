@@ -26,7 +26,7 @@ func (m TumDBMigrator) Migrate() error {
 		err := m.database.AutoMigrate(
 			&model.TopNews{},
 			&model.Crontab{},
-			&model.Files{},
+			&model.File{},
 			&model.NewsSource{},
 			&model.NewsAlert{},
 			&model.News{},
@@ -35,7 +35,14 @@ func (m TumDBMigrator) Migrate() error {
 		return err
 	}
 	log.Info("Using manual migration")
-	mig := gormigrate.New(m.database, gormigrate.DefaultOptions, []*gormigrate.Migration{
+	gormigrateOptions := &gormigrate.Options{
+		TableName:                 gormigrate.DefaultOptions.TableName,
+		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
+		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
+		UseTransaction:            true,
+		ValidateUnknownMigrations: true,
+	}
+	mig := gormigrate.New(m.database, gormigrateOptions, []*gormigrate.Migration{
 		m.migrate20210709193000(),
 		m.migrate20220126230000(),
 		m.migrate20220713000000(),
@@ -46,6 +53,11 @@ func (m TumDBMigrator) Migrate() error {
 		m.migrate20230912000000(),
 		m.migrate20230904000000(),
 		m.migrate20230825000000(),
+		m.migrate20230904000000(),
+		m.migrate20230530000000(),
+		m.migrate20230904100000(),
+		m.migrate20230826000000(),
+		m.migrate20231003000000(),
 	})
 	err := mig.Migrate()
 	return err

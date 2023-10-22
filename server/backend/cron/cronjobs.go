@@ -1,9 +1,10 @@
 package cron
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/ios_apns"
-	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"time"
+
+	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
+	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
@@ -15,10 +16,12 @@ import (
 type CronService struct {
 	db   *gorm.DB
 	gf   *gofeed.Parser
-	APNs *ios_apns.Service
+	APNs *apns.Service
 }
 
-const StorageDir = "/Storage/" // target location of files
+// StorageDir is the directory where files are stored
+// this is a variable, so it can be changed during tests
+var StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
@@ -29,10 +32,11 @@ const (
 	CanteenHeadcount         = "canteenHeadCount"
 	IOSNotifications         = "iosNotifications"
 	IOSActivityReset         = "iosActivityReset"
+	NewExamResultsHook       = "newExamResultsHook"
+	MovieType                = "movie"
+	FeedbackEmail            = "feedbackEmail"
 
 	/* MensaType      = "mensa"
-	KinoType       = "kino"
-	RoomfinderType = "roomfinder"
 	AlarmType      = "alarm" */
 )
 
@@ -40,7 +44,7 @@ func New(db *gorm.DB) *CronService {
 	return &CronService{
 		db:   db,
 		gf:   gofeed.NewParser(),
-		APNs: ios_apns.NewCronService(db),
+		APNs: apns.NewCronService(db),
 	}
 }
 
@@ -58,7 +62,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -67,6 +71,9 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				IOSNotifications,
 				IOSActivityReset,
+				NewExamResultsHook,
+				MovieType,
+				FeedbackEmail,
 			).
 			Scan(&res)
 
@@ -103,14 +110,16 @@ func (c *CronService) Run() error {
 				if env.IsMensaCronActive() {
 					g.Go(c.averageRatingComputation)
 				}
+			case NewExamResultsHook:
+				g.Go(func() error { return c.newExamResultsHookCron() })
+			case MovieType:
+				g.Go(func() error { return c.movieCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
 						g.Go(func() error { return c.mensaCron() })
 					case KinoType:
 						g.Go(func() error { return c.kinoCron() })
-					case RoomfinderType:
-						g.Go(func() error { return c.roomFinderCron() })
 					case AlarmType:
 						g.Go(func() error { return c.alarmCron() })
 				*/
@@ -120,6 +129,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.iosNotificationsCron() })
 			case IOSActivityReset:
 				g.Go(func() error { return c.iosActivityReset() })
+			case FeedbackEmail:
+				g.Go(func() error { return c.feedbackEmailCron() })
 			}
 		}
 
