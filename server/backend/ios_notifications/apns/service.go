@@ -41,22 +41,15 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 }
 
 func ValidateRequirementsForIOSNotificationsService() error {
-	if os.Getenv("APNS_KEY_ID") == "" {
-		return errors.New("APNS_KEY_ID env variable is not set")
+	for _, envVar := range []string{"APNS_KEY_ID", "APNS_TEAM_ID", "APNS_P8_FILE_PATH"} {
+		if os.Getenv(envVar) == "" {
+			return errors.New(envVar + " env variable is not set")
+		}
 	}
 
-	if os.Getenv("APNS_TEAM_ID") == "" {
-		return errors.New("APNS_TEAM_ID env variable is not set")
-	}
-
-	if os.Getenv("APNS_P8_FILE_PATH") == "" {
-		return errors.New("APNS_P8_FILE_PATH env variable is not set")
-	}
-
-	if _, err := APNsEncryptionKeyFromFile(); err != nil {
+	if _, err := EncryptionKeyFromFile(); err != nil {
 		return errors.New("APNS P8 token is not valid or not set")
 	}
-
 	return nil
 }
 

@@ -25,7 +25,7 @@ type JWTToken struct {
 }
 
 func NewToken() (*JWTToken, error) {
-	encryptionKey, err := APNsEncryptionKeyFromFile()
+	encryptionKey, err := EncryptionKeyFromFile()
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +43,10 @@ func NewToken() (*JWTToken, error) {
 	return &token, nil
 }
 
-// APNsEncryptionKeyFromFile reads the APNs encryption key from the file system
+// EncryptionKeyFromFile reads the APNs encryption key from the file system
 // and returns it as an ecdsa.PrivateKey
 // The file location is defined by the APNS_P8_FILE_PATH environment variable
-func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
+func EncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 	path, err := filepath.Abs(os.Getenv("APNS_P8_FILE_PATH"))
 
 	if err != nil {
