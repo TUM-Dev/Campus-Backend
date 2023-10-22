@@ -2,9 +2,10 @@ package migration
 
 import (
 	_ "embed"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/logger"
-	"strings"
 
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
