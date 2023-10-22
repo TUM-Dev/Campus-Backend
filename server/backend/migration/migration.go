@@ -10,7 +10,6 @@ import (
 
 func autoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&model.TopNews{},
 		&model.Crontab{},
 		&model.File{},
 		&model.NewsSource{},
