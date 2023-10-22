@@ -21,7 +21,7 @@ import (
 )
 
 // CreateFeedback accepts a stream of feedback messages from the client and stores them in the database/file system.
-func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) error {
+func (s *CampusServer) CreateFeedback(stream pb.CampusService_CreateFeedbackServer) error {
 	// receive metadata
 	id, err := uuid.NewGen().NewV4()
 	if err != nil {

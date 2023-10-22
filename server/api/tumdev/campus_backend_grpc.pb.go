@@ -20,42 +20,187 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Campus_ListNewsAlerts_FullMethodName           = "/api.Campus/ListNewsAlerts"
-	Campus_ListNewsSources_FullMethodName          = "/api.Campus/ListNewsSources"
-	Campus_ListNews_FullMethodName                 = "/api.Campus/ListNews"
-	Campus_ListCanteenRatings_FullMethodName       = "/api.Campus/ListCanteenRatings"
-	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
-	Campus_CreateCanteenRating_FullMethodName      = "/api.Campus/CreateCanteenRating"
-	Campus_CreateDishRating_FullMethodName         = "/api.Campus/CreateDishRating"
-	Campus_ListAvailableDishTags_FullMethodName    = "/api.Campus/ListAvailableDishTags"
-	Campus_ListNameTags_FullMethodName             = "/api.Campus/ListNameTags"
-	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
-	Campus_ListCanteens_FullMethodName             = "/api.Campus/ListCanteens"
-	Campus_ListDishes_FullMethodName               = "/api.Campus/ListDishes"
-	Campus_ListResponsiblePerson_FullMethodName    = "/api.Campus/ListResponsiblePerson"
-	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
-	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
-	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
-	Campus_ListStudyRooms_FullMethodName           = "/api.Campus/ListStudyRooms"
-	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
-	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
-	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
-	Campus_GetNotification_FullMethodName          = "/api.Campus/GetNotification"
-	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
-	Campus_GetMember_FullMethodName                = "/api.Campus/GetMember"
-	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
-	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
-	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
-	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
+	NewsService_ListNewsAlerts_FullMethodName  = "/api.NewsService/ListNewsAlerts"
+	NewsService_ListNewsSources_FullMethodName = "/api.NewsService/ListNewsSources"
+	NewsService_ListNews_FullMethodName        = "/api.NewsService/ListNews"
 )
 
-// CampusClient is the client API for Campus service.
+// NewsServiceClient is the client API for NewsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CampusClient interface {
+type NewsServiceClient interface {
 	ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error)
 	ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error)
 	ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error)
+}
+
+type newsServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNewsServiceClient(cc grpc.ClientConnInterface) NewsServiceClient {
+	return &newsServiceClient{cc}
+}
+
+func (c *newsServiceClient) ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error) {
+	out := new(ListNewsAlertsReply)
+	err := c.cc.Invoke(ctx, NewsService_ListNewsAlerts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *newsServiceClient) ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error) {
+	out := new(ListNewsSourcesReply)
+	err := c.cc.Invoke(ctx, NewsService_ListNewsSources_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *newsServiceClient) ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error) {
+	out := new(ListNewsReply)
+	err := c.cc.Invoke(ctx, NewsService_ListNews_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NewsServiceServer is the server API for NewsService service.
+// All implementations must embed UnimplementedNewsServiceServer
+// for forward compatibility
+type NewsServiceServer interface {
+	ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error)
+	ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error)
+	ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error)
+	mustEmbedUnimplementedNewsServiceServer()
+}
+
+// UnimplementedNewsServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedNewsServiceServer struct {
+}
+
+func (UnimplementedNewsServiceServer) ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNewsAlerts not implemented")
+}
+func (UnimplementedNewsServiceServer) ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNewsSources not implemented")
+}
+func (UnimplementedNewsServiceServer) ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNews not implemented")
+}
+func (UnimplementedNewsServiceServer) mustEmbedUnimplementedNewsServiceServer() {}
+
+// UnsafeNewsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NewsServiceServer will
+// result in compilation errors.
+type UnsafeNewsServiceServer interface {
+	mustEmbedUnimplementedNewsServiceServer()
+}
+
+func RegisterNewsServiceServer(s grpc.ServiceRegistrar, srv NewsServiceServer) {
+	s.RegisterService(&NewsService_ServiceDesc, srv)
+}
+
+func _NewsService_ListNewsAlerts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNewsAlertsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NewsServiceServer).ListNewsAlerts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NewsService_ListNewsAlerts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NewsServiceServer).ListNewsAlerts(ctx, req.(*ListNewsAlertsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NewsService_ListNewsSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNewsSourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NewsServiceServer).ListNewsSources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NewsService_ListNewsSources_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NewsServiceServer).ListNewsSources(ctx, req.(*ListNewsSourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NewsService_ListNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NewsServiceServer).ListNews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NewsService_ListNews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NewsServiceServer).ListNews(ctx, req.(*ListNewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// NewsService_ServiceDesc is the grpc.ServiceDesc for NewsService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NewsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.NewsService",
+	HandlerType: (*NewsServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListNewsAlerts",
+			Handler:    _NewsService_ListNewsAlerts_Handler,
+		},
+		{
+			MethodName: "ListNewsSources",
+			Handler:    _NewsService_ListNewsSources_Handler,
+		},
+		{
+			MethodName: "ListNews",
+			Handler:    _NewsService_ListNews_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "tumdev/campus_backend.proto",
+}
+
+const (
+	CanteenService_GetCanteenHeadCount_FullMethodName      = "/api.CanteenService/GetCanteenHeadCount"
+	CanteenService_ListCanteenRatings_FullMethodName       = "/api.CanteenService/ListCanteenRatings"
+	CanteenService_GetDishRatings_FullMethodName           = "/api.CanteenService/GetDishRatings"
+	CanteenService_CreateCanteenRating_FullMethodName      = "/api.CanteenService/CreateCanteenRating"
+	CanteenService_CreateDishRating_FullMethodName         = "/api.CanteenService/CreateDishRating"
+	CanteenService_ListAvailableDishTags_FullMethodName    = "/api.CanteenService/ListAvailableDishTags"
+	CanteenService_ListNameTags_FullMethodName             = "/api.CanteenService/ListNameTags"
+	CanteenService_ListAvailableCanteenTags_FullMethodName = "/api.CanteenService/ListAvailableCanteenTags"
+	CanteenService_ListCanteens_FullMethodName             = "/api.CanteenService/ListCanteens"
+	CanteenService_ListDishes_FullMethodName               = "/api.CanteenService/ListDishes"
+)
+
+// CanteenServiceClient is the client API for CanteenService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type CanteenServiceClient interface {
+	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error)
 	GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error)
@@ -66,309 +211,111 @@ type CampusClient interface {
 	ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error)
 	ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error)
-	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
-	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
-	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
-	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
-	ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error)
-	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
-	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error)
-	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
-	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
-	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
-	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
-	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
-	// Endpoint for the iOS app to respond to background notifications requests
-	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
-	// Create an device (Android/iOS/Windows) for push notifications
-	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
-	// Delete a device from push notifications
-	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
 }
 
-type campusClient struct {
+type canteenServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCampusClient(cc grpc.ClientConnInterface) CampusClient {
-	return &campusClient{cc}
+func NewCanteenServiceClient(cc grpc.ClientConnInterface) CanteenServiceClient {
+	return &canteenServiceClient{cc}
 }
 
-func (c *campusClient) ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error) {
-	out := new(ListNewsAlertsReply)
-	err := c.cc.Invoke(ctx, Campus_ListNewsAlerts_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error) {
-	out := new(ListNewsSourcesReply)
-	err := c.cc.Invoke(ctx, Campus_ListNewsSources_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error) {
-	out := new(ListNewsReply)
-	err := c.cc.Invoke(ctx, Campus_ListNews_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error) {
-	out := new(ListCanteenRatingsReply)
-	err := c.cc.Invoke(ctx, Campus_ListCanteenRatings_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error) {
-	out := new(GetDishRatingsReply)
-	err := c.cc.Invoke(ctx, Campus_GetDishRatings_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) CreateCanteenRating(ctx context.Context, in *CreateCanteenRatingRequest, opts ...grpc.CallOption) (*CreateCanteenRatingReply, error) {
-	out := new(CreateCanteenRatingReply)
-	err := c.cc.Invoke(ctx, Campus_CreateCanteenRating_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) CreateDishRating(ctx context.Context, in *CreateDishRatingRequest, opts ...grpc.CallOption) (*CreateDishRatingReply, error) {
-	out := new(CreateDishRatingReply)
-	err := c.cc.Invoke(ctx, Campus_CreateDishRating_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListAvailableDishTags(ctx context.Context, in *ListAvailableDishTagsRequest, opts ...grpc.CallOption) (*ListAvailableDishTagsReply, error) {
-	out := new(ListAvailableDishTagsReply)
-	err := c.cc.Invoke(ctx, Campus_ListAvailableDishTags_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error) {
-	out := new(ListNameTagsReply)
-	err := c.cc.Invoke(ctx, Campus_ListNameTags_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error) {
-	out := new(ListAvailableCanteenTagsReply)
-	err := c.cc.Invoke(ctx, Campus_ListAvailableCanteenTags_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error) {
-	out := new(ListCanteensReply)
-	err := c.cc.Invoke(ctx, Campus_ListCanteens_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error) {
-	out := new(ListDishesReply)
-	err := c.cc.Invoke(ctx, Campus_ListDishes_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error) {
-	out := new(ListResponsiblePersonReply)
-	err := c.cc.Invoke(ctx, Campus_ListResponsiblePerson_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error) {
-	out := new(ListMoreInformationReply)
-	err := c.cc.Invoke(ctx, Campus_ListMoreInformation_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error) {
-	out := new(ListOpeningTimesReply)
-	err := c.cc.Invoke(ctx, Campus_ListOpeningTimes_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
-	out := new(GetUpdateNoteReply)
-	err := c.cc.Invoke(ctx, Campus_GetUpdateNote_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error) {
-	out := new(ListStudyRoomsReply)
-	err := c.cc.Invoke(ctx, Campus_ListStudyRooms_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error) {
-	out := new(ListMoviesReply)
-	err := c.cc.Invoke(ctx, Campus_ListMovies_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Campus_ServiceDesc.Streams[0], Campus_CreateFeedback_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &campusCreateFeedbackClient{stream}
-	return x, nil
-}
-
-type Campus_CreateFeedbackClient interface {
-	Send(*CreateFeedbackRequest) error
-	CloseAndRecv() (*CreateFeedbackReply, error)
-	grpc.ClientStream
-}
-
-type campusCreateFeedbackClient struct {
-	grpc.ClientStream
-}
-
-func (x *campusCreateFeedbackClient) Send(m *CreateFeedbackRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *campusCreateFeedbackClient) CloseAndRecv() (*CreateFeedbackReply, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(CreateFeedbackReply)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
-	out := new(GetUploadStatusReply)
-	err := c.cc.Invoke(ctx, Campus_GetUploadStatus_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error) {
-	out := new(GetNotificationReply)
-	err := c.cc.Invoke(ctx, Campus_GetNotification_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error) {
-	out := new(GetNotificationConfirmReply)
-	err := c.cc.Invoke(ctx, Campus_GetNotificationConfirm_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error) {
-	out := new(GetMemberReply)
-	err := c.cc.Invoke(ctx, Campus_GetMember_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error) {
+func (c *canteenServiceClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error) {
 	out := new(GetCanteenHeadCountReply)
-	err := c.cc.Invoke(ctx, Campus_GetCanteenHeadCount_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, CanteenService_GetCanteenHeadCount_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error) {
-	out := new(IOSDeviceRequestResponseReply)
-	err := c.cc.Invoke(ctx, Campus_IOSDeviceRequestResponse_FullMethodName, in, out, opts...)
+func (c *canteenServiceClient) ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error) {
+	out := new(ListCanteenRatingsReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListCanteenRatings_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
-	out := new(CreateDeviceReply)
-	err := c.cc.Invoke(ctx, Campus_CreateDevice_FullMethodName, in, out, opts...)
+func (c *canteenServiceClient) GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error) {
+	out := new(GetDishRatingsReply)
+	err := c.cc.Invoke(ctx, CanteenService_GetDishRatings_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error) {
-	out := new(DeleteDeviceReply)
-	err := c.cc.Invoke(ctx, Campus_DeleteDevice_FullMethodName, in, out, opts...)
+func (c *canteenServiceClient) CreateCanteenRating(ctx context.Context, in *CreateCanteenRatingRequest, opts ...grpc.CallOption) (*CreateCanteenRatingReply, error) {
+	out := new(CreateCanteenRatingReply)
+	err := c.cc.Invoke(ctx, CanteenService_CreateCanteenRating_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CampusServer is the server API for Campus service.
-// All implementations must embed UnimplementedCampusServer
+func (c *canteenServiceClient) CreateDishRating(ctx context.Context, in *CreateDishRatingRequest, opts ...grpc.CallOption) (*CreateDishRatingReply, error) {
+	out := new(CreateDishRatingReply)
+	err := c.cc.Invoke(ctx, CanteenService_CreateDishRating_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *canteenServiceClient) ListAvailableDishTags(ctx context.Context, in *ListAvailableDishTagsRequest, opts ...grpc.CallOption) (*ListAvailableDishTagsReply, error) {
+	out := new(ListAvailableDishTagsReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListAvailableDishTags_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *canteenServiceClient) ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error) {
+	out := new(ListNameTagsReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListNameTags_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *canteenServiceClient) ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error) {
+	out := new(ListAvailableCanteenTagsReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListAvailableCanteenTags_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *canteenServiceClient) ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error) {
+	out := new(ListCanteensReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListCanteens_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *canteenServiceClient) ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error) {
+	out := new(ListDishesReply)
+	err := c.cc.Invoke(ctx, CanteenService_ListDishes_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CanteenServiceServer is the server API for CanteenService service.
+// All implementations must embed UnimplementedCanteenServiceServer
 // for forward compatibility
-type CampusServer interface {
-	ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error)
-	ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error)
-	ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error)
+type CanteenServiceServer interface {
+	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error)
 	GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error)
@@ -379,468 +326,936 @@ type CampusServer interface {
 	ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error)
 	ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error)
+	mustEmbedUnimplementedCanteenServiceServer()
+}
+
+// UnimplementedCanteenServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCanteenServiceServer struct {
+}
+
+func (UnimplementedCanteenServiceServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCanteenRatings not implemented")
+}
+func (UnimplementedCanteenServiceServer) GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatings not implemented")
+}
+func (UnimplementedCanteenServiceServer) CreateCanteenRating(context.Context, *CreateCanteenRatingRequest) (*CreateCanteenRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCanteenRating not implemented")
+}
+func (UnimplementedCanteenServiceServer) CreateDishRating(context.Context, *CreateDishRatingRequest) (*CreateDishRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDishRating not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListAvailableDishTags(context.Context, *ListAvailableDishTagsRequest) (*ListAvailableDishTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAvailableDishTags not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNameTags not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAvailableCanteenTags not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCanteens not implemented")
+}
+func (UnimplementedCanteenServiceServer) ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDishes not implemented")
+}
+func (UnimplementedCanteenServiceServer) mustEmbedUnimplementedCanteenServiceServer() {}
+
+// UnsafeCanteenServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CanteenServiceServer will
+// result in compilation errors.
+type UnsafeCanteenServiceServer interface {
+	mustEmbedUnimplementedCanteenServiceServer()
+}
+
+func RegisterCanteenServiceServer(s grpc.ServiceRegistrar, srv CanteenServiceServer) {
+	s.RegisterService(&CanteenService_ServiceDesc, srv)
+}
+
+func _CanteenService_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCanteenHeadCountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).GetCanteenHeadCount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_GetCanteenHeadCount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).GetCanteenHeadCount(ctx, req.(*GetCanteenHeadCountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListCanteenRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCanteenRatingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListCanteenRatings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListCanteenRatings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListCanteenRatings(ctx, req.(*ListCanteenRatingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDishRatingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).GetDishRatings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_GetDishRatings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).GetDishRatings(ctx, req.(*GetDishRatingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_CreateCanteenRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCanteenRatingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).CreateCanteenRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_CreateCanteenRating_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).CreateCanteenRating(ctx, req.(*CreateCanteenRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_CreateDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDishRatingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).CreateDishRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_CreateDishRating_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).CreateDishRating(ctx, req.(*CreateDishRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListAvailableDishTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAvailableDishTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListAvailableDishTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListAvailableDishTags_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListAvailableDishTags(ctx, req.(*ListAvailableDishTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListNameTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNameTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListNameTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListNameTags_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListNameTags(ctx, req.(*ListNameTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListAvailableCanteenTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAvailableCanteenTagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListAvailableCanteenTags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListAvailableCanteenTags_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListAvailableCanteenTags(ctx, req.(*ListAvailableCanteenTagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListCanteens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCanteensRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListCanteens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListCanteens_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListCanteens(ctx, req.(*ListCanteensRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CanteenService_ListDishes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDishesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CanteenServiceServer).ListDishes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CanteenService_ListDishes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CanteenServiceServer).ListDishes(ctx, req.(*ListDishesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// CanteenService_ServiceDesc is the grpc.ServiceDesc for CanteenService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var CanteenService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.CanteenService",
+	HandlerType: (*CanteenServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetCanteenHeadCount",
+			Handler:    _CanteenService_GetCanteenHeadCount_Handler,
+		},
+		{
+			MethodName: "ListCanteenRatings",
+			Handler:    _CanteenService_ListCanteenRatings_Handler,
+		},
+		{
+			MethodName: "GetDishRatings",
+			Handler:    _CanteenService_GetDishRatings_Handler,
+		},
+		{
+			MethodName: "CreateCanteenRating",
+			Handler:    _CanteenService_CreateCanteenRating_Handler,
+		},
+		{
+			MethodName: "CreateDishRating",
+			Handler:    _CanteenService_CreateDishRating_Handler,
+		},
+		{
+			MethodName: "ListAvailableDishTags",
+			Handler:    _CanteenService_ListAvailableDishTags_Handler,
+		},
+		{
+			MethodName: "ListNameTags",
+			Handler:    _CanteenService_ListNameTags_Handler,
+		},
+		{
+			MethodName: "ListAvailableCanteenTags",
+			Handler:    _CanteenService_ListAvailableCanteenTags_Handler,
+		},
+		{
+			MethodName: "ListCanteens",
+			Handler:    _CanteenService_ListCanteens_Handler,
+		},
+		{
+			MethodName: "ListDishes",
+			Handler:    _CanteenService_ListDishes_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "tumdev/campus_backend.proto",
+}
+
+const (
+	LegacyService_ListResponsiblePerson_FullMethodName = "/api.LegacyService/ListResponsiblePerson"
+	LegacyService_ListMoreInformation_FullMethodName   = "/api.LegacyService/ListMoreInformation"
+	LegacyService_ListOpeningTimes_FullMethodName      = "/api.LegacyService/ListOpeningTimes"
+)
+
+// LegacyServiceClient is the client API for LegacyService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type LegacyServiceClient interface {
+	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
+	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
+	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
+}
+
+type legacyServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewLegacyServiceClient(cc grpc.ClientConnInterface) LegacyServiceClient {
+	return &legacyServiceClient{cc}
+}
+
+func (c *legacyServiceClient) ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error) {
+	out := new(ListResponsiblePersonReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListResponsiblePerson_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *legacyServiceClient) ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error) {
+	out := new(ListMoreInformationReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListMoreInformation_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *legacyServiceClient) ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error) {
+	out := new(ListOpeningTimesReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListOpeningTimes_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// LegacyServiceServer is the server API for LegacyService service.
+// All implementations must embed UnimplementedLegacyServiceServer
+// for forward compatibility
+type LegacyServiceServer interface {
 	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
 	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
 	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
-	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
-	ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error)
-	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
-	CreateFeedback(Campus_CreateFeedbackServer) error
+	mustEmbedUnimplementedLegacyServiceServer()
+}
+
+// UnimplementedLegacyServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedLegacyServiceServer struct {
+}
+
+func (UnimplementedLegacyServiceServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
+}
+func (UnimplementedLegacyServiceServer) ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMoreInformation not implemented")
+}
+func (UnimplementedLegacyServiceServer) ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOpeningTimes not implemented")
+}
+func (UnimplementedLegacyServiceServer) mustEmbedUnimplementedLegacyServiceServer() {}
+
+// UnsafeLegacyServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LegacyServiceServer will
+// result in compilation errors.
+type UnsafeLegacyServiceServer interface {
+	mustEmbedUnimplementedLegacyServiceServer()
+}
+
+func RegisterLegacyServiceServer(s grpc.ServiceRegistrar, srv LegacyServiceServer) {
+	s.RegisterService(&LegacyService_ServiceDesc, srv)
+}
+
+func _LegacyService_ListResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListResponsiblePersonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LegacyService_ListResponsiblePerson_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, req.(*ListResponsiblePersonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LegacyService_ListMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMoreInformationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LegacyServiceServer).ListMoreInformation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LegacyService_ListMoreInformation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LegacyServiceServer).ListMoreInformation(ctx, req.(*ListMoreInformationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LegacyService_ListOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOpeningTimesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LegacyService_ListOpeningTimes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, req.(*ListOpeningTimesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// LegacyService_ServiceDesc is the grpc.ServiceDesc for LegacyService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var LegacyService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.LegacyService",
+	HandlerType: (*LegacyServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListResponsiblePerson",
+			Handler:    _LegacyService_ListResponsiblePerson_Handler,
+		},
+		{
+			MethodName: "ListMoreInformation",
+			Handler:    _LegacyService_ListMoreInformation_Handler,
+		},
+		{
+			MethodName: "ListOpeningTimes",
+			Handler:    _LegacyService_ListOpeningTimes_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "tumdev/campus_backend.proto",
+}
+
+const (
+	NotificationService_GetUploadStatus_FullMethodName          = "/api.NotificationService/GetUploadStatus"
+	NotificationService_GetNotification_FullMethodName          = "/api.NotificationService/GetNotification"
+	NotificationService_GetNotificationConfirm_FullMethodName   = "/api.NotificationService/GetNotificationConfirm"
+	NotificationService_GetMember_FullMethodName                = "/api.NotificationService/GetMember"
+	NotificationService_IOSDeviceRequestResponse_FullMethodName = "/api.NotificationService/IOSDeviceRequestResponse"
+	NotificationService_CreateDevice_FullMethodName             = "/api.NotificationService/CreateDevice"
+	NotificationService_DeleteDevice_FullMethodName             = "/api.NotificationService/DeleteDevice"
+)
+
+// NotificationServiceClient is the client API for NotificationService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type NotificationServiceClient interface {
+	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
+	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
+	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
+	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
+	// Endpoint for the iOS app to respond to background notifications requests
+	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
+	// Create an device (Android/iOS/Windows) for push notifications
+	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
+	// Delete a device from push notifications
+	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
+}
+
+type notificationServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServiceClient {
+	return &notificationServiceClient{cc}
+}
+
+func (c *notificationServiceClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
+	out := new(GetUploadStatusReply)
+	err := c.cc.Invoke(ctx, NotificationService_GetUploadStatus_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error) {
+	out := new(GetNotificationReply)
+	err := c.cc.Invoke(ctx, NotificationService_GetNotification_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error) {
+	out := new(GetNotificationConfirmReply)
+	err := c.cc.Invoke(ctx, NotificationService_GetNotificationConfirm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error) {
+	out := new(GetMemberReply)
+	err := c.cc.Invoke(ctx, NotificationService_GetMember_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error) {
+	out := new(IOSDeviceRequestResponseReply)
+	err := c.cc.Invoke(ctx, NotificationService_IOSDeviceRequestResponse_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
+	out := new(CreateDeviceReply)
+	err := c.cc.Invoke(ctx, NotificationService_CreateDevice_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error) {
+	out := new(DeleteDeviceReply)
+	err := c.cc.Invoke(ctx, NotificationService_DeleteDevice_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NotificationServiceServer is the server API for NotificationService service.
+// All implementations must embed UnimplementedNotificationServiceServer
+// for forward compatibility
+type NotificationServiceServer interface {
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
 	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
 	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
-	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// Endpoint for the iOS app to respond to background notifications requests
 	IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error)
-	mustEmbedUnimplementedCampusServer()
+	mustEmbedUnimplementedNotificationServiceServer()
 }
 
-// UnimplementedCampusServer must be embedded to have forward compatible implementations.
-type UnimplementedCampusServer struct {
+// UnimplementedNotificationServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedNotificationServiceServer struct {
 }
 
-func (UnimplementedCampusServer) ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListNewsAlerts not implemented")
-}
-func (UnimplementedCampusServer) ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListNewsSources not implemented")
-}
-func (UnimplementedCampusServer) ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListNews not implemented")
-}
-func (UnimplementedCampusServer) ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListCanteenRatings not implemented")
-}
-func (UnimplementedCampusServer) GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetDishRatings not implemented")
-}
-func (UnimplementedCampusServer) CreateCanteenRating(context.Context, *CreateCanteenRatingRequest) (*CreateCanteenRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCanteenRating not implemented")
-}
-func (UnimplementedCampusServer) CreateDishRating(context.Context, *CreateDishRatingRequest) (*CreateDishRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateDishRating not implemented")
-}
-func (UnimplementedCampusServer) ListAvailableDishTags(context.Context, *ListAvailableDishTagsRequest) (*ListAvailableDishTagsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListAvailableDishTags not implemented")
-}
-func (UnimplementedCampusServer) ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListNameTags not implemented")
-}
-func (UnimplementedCampusServer) ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListAvailableCanteenTags not implemented")
-}
-func (UnimplementedCampusServer) ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListCanteens not implemented")
-}
-func (UnimplementedCampusServer) ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListDishes not implemented")
-}
-func (UnimplementedCampusServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
-}
-func (UnimplementedCampusServer) ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMoreInformation not implemented")
-}
-func (UnimplementedCampusServer) ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListOpeningTimes not implemented")
-}
-func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
-}
-func (UnimplementedCampusServer) ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListStudyRooms not implemented")
-}
-func (UnimplementedCampusServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
-}
-func (UnimplementedCampusServer) CreateFeedback(Campus_CreateFeedbackServer) error {
-	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
-}
-func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
+func (UnimplementedNotificationServiceServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
 }
-func (UnimplementedCampusServer) GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error) {
+func (UnimplementedNotificationServiceServer) GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNotification not implemented")
 }
-func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error) {
+func (UnimplementedNotificationServiceServer) GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNotificationConfirm not implemented")
 }
-func (UnimplementedCampusServer) GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error) {
+func (UnimplementedNotificationServiceServer) GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMember not implemented")
 }
-func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
-}
-func (UnimplementedCampusServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
+func (UnimplementedNotificationServiceServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IOSDeviceRequestResponse not implemented")
 }
-func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
+func (UnimplementedNotificationServiceServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDevice not implemented")
 }
-func (UnimplementedCampusServer) DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error) {
+func (UnimplementedNotificationServiceServer) DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDevice not implemented")
 }
-func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
+func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 
-// UnsafeCampusServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CampusServer will
+// UnsafeNotificationServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NotificationServiceServer will
 // result in compilation errors.
-type UnsafeCampusServer interface {
-	mustEmbedUnimplementedCampusServer()
+type UnsafeNotificationServiceServer interface {
+	mustEmbedUnimplementedNotificationServiceServer()
 }
 
-func RegisterCampusServer(s grpc.ServiceRegistrar, srv CampusServer) {
-	s.RegisterService(&Campus_ServiceDesc, srv)
+func RegisterNotificationServiceServer(s grpc.ServiceRegistrar, srv NotificationServiceServer) {
+	s.RegisterService(&NotificationService_ServiceDesc, srv)
 }
 
-func _Campus_ListNewsAlerts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNewsAlertsRequest)
+func _NotificationService_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUploadStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListNewsAlerts(ctx, in)
+		return srv.(NotificationServiceServer).GetUploadStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListNewsAlerts_FullMethodName,
+		FullMethod: NotificationService_GetUploadStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListNewsAlerts(ctx, req.(*ListNewsAlertsRequest))
+		return srv.(NotificationServiceServer).GetUploadStatus(ctx, req.(*GetUploadStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListNewsSources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNewsSourcesRequest)
+func _NotificationService_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNotificationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListNewsSources(ctx, in)
+		return srv.(NotificationServiceServer).GetNotification(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListNewsSources_FullMethodName,
+		FullMethod: NotificationService_GetNotification_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListNewsSources(ctx, req.(*ListNewsSourcesRequest))
+		return srv.(NotificationServiceServer).GetNotification(ctx, req.(*GetNotificationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListNews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNewsRequest)
+func _NotificationService_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNotificationConfirmRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListNews(ctx, in)
+		return srv.(NotificationServiceServer).GetNotificationConfirm(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListNews_FullMethodName,
+		FullMethod: NotificationService_GetNotificationConfirm_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListNews(ctx, req.(*ListNewsRequest))
+		return srv.(NotificationServiceServer).GetNotificationConfirm(ctx, req.(*GetNotificationConfirmRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListCanteenRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCanteenRatingsRequest)
+func _NotificationService_GetMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMemberRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListCanteenRatings(ctx, in)
+		return srv.(NotificationServiceServer).GetMember(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListCanteenRatings_FullMethodName,
+		FullMethod: NotificationService_GetMember_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListCanteenRatings(ctx, req.(*ListCanteenRatingsRequest))
+		return srv.(NotificationServiceServer).GetMember(ctx, req.(*GetMemberRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_GetDishRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetDishRatingsRequest)
+func _NotificationService_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IOSDeviceRequestResponseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetDishRatings(ctx, in)
+		return srv.(NotificationServiceServer).IOSDeviceRequestResponse(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_GetDishRatings_FullMethodName,
+		FullMethod: NotificationService_IOSDeviceRequestResponse_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetDishRatings(ctx, req.(*GetDishRatingsRequest))
+		return srv.(NotificationServiceServer).IOSDeviceRequestResponse(ctx, req.(*IOSDeviceRequestResponseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_CreateCanteenRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateCanteenRatingRequest)
+func _NotificationService_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).CreateCanteenRating(ctx, in)
+		return srv.(NotificationServiceServer).CreateDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_CreateCanteenRating_FullMethodName,
+		FullMethod: NotificationService_CreateDevice_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).CreateCanteenRating(ctx, req.(*CreateCanteenRatingRequest))
+		return srv.(NotificationServiceServer).CreateDevice(ctx, req.(*CreateDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_CreateDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateDishRatingRequest)
+func _NotificationService_DeleteDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).CreateDishRating(ctx, in)
+		return srv.(NotificationServiceServer).DeleteDevice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_CreateDishRating_FullMethodName,
+		FullMethod: NotificationService_DeleteDevice_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).CreateDishRating(ctx, req.(*CreateDishRatingRequest))
+		return srv.(NotificationServiceServer).DeleteDevice(ctx, req.(*DeleteDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListAvailableDishTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListAvailableDishTagsRequest)
-	if err := dec(in); err != nil {
+// NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NotificationService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.NotificationService",
+	HandlerType: (*NotificationServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUploadStatus",
+			Handler:    _NotificationService_GetUploadStatus_Handler,
+		},
+		{
+			MethodName: "GetNotification",
+			Handler:    _NotificationService_GetNotification_Handler,
+		},
+		{
+			MethodName: "GetNotificationConfirm",
+			Handler:    _NotificationService_GetNotificationConfirm_Handler,
+		},
+		{
+			MethodName: "GetMember",
+			Handler:    _NotificationService_GetMember_Handler,
+		},
+		{
+			MethodName: "IOSDeviceRequestResponse",
+			Handler:    _NotificationService_IOSDeviceRequestResponse_Handler,
+		},
+		{
+			MethodName: "CreateDevice",
+			Handler:    _NotificationService_CreateDevice_Handler,
+		},
+		{
+			MethodName: "DeleteDevice",
+			Handler:    _NotificationService_DeleteDevice_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "tumdev/campus_backend.proto",
+}
+
+const (
+	CampusService_GetUpdateNote_FullMethodName  = "/api.CampusService/GetUpdateNote"
+	CampusService_ListMovies_FullMethodName     = "/api.CampusService/ListMovies"
+	CampusService_CreateFeedback_FullMethodName = "/api.CampusService/CreateFeedback"
+)
+
+// CampusServiceClient is the client API for CampusService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type CampusServiceClient interface {
+	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
+	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
+	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error)
+}
+
+type campusServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewCampusServiceClient(cc grpc.ClientConnInterface) CampusServiceClient {
+	return &campusServiceClient{cc}
+}
+
+func (c *campusServiceClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
+	out := new(GetUpdateNoteReply)
+	err := c.cc.Invoke(ctx, CampusService_GetUpdateNote_FullMethodName, in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListAvailableDishTags(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListAvailableDishTags_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListAvailableDishTags(ctx, req.(*ListAvailableDishTagsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Campus_ListNameTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNameTagsRequest)
-	if err := dec(in); err != nil {
+func (c *campusServiceClient) ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error) {
+	out := new(ListMoviesReply)
+	err := c.cc.Invoke(ctx, CampusService_ListMovies_FullMethodName, in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListNameTags(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListNameTags_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListNameTags(ctx, req.(*ListNameTagsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Campus_ListAvailableCanteenTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListAvailableCanteenTagsRequest)
-	if err := dec(in); err != nil {
+func (c *campusServiceClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CampusService_ServiceDesc.Streams[0], CampusService_CreateFeedback_FullMethodName, opts...)
+	if err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListAvailableCanteenTags(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListAvailableCanteenTags_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListAvailableCanteenTags(ctx, req.(*ListAvailableCanteenTagsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	x := &campusServiceCreateFeedbackClient{stream}
+	return x, nil
 }
 
-func _Campus_ListCanteens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCanteensRequest)
-	if err := dec(in); err != nil {
+type CampusService_CreateFeedbackClient interface {
+	Send(*CreateFeedbackRequest) error
+	CloseAndRecv() (*CreateFeedbackReply, error)
+	grpc.ClientStream
+}
+
+type campusServiceCreateFeedbackClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusServiceCreateFeedbackClient) Send(m *CreateFeedbackRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *campusServiceCreateFeedbackClient) CloseAndRecv() (*CreateFeedbackReply, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListCanteens(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListCanteens_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListCanteens(ctx, req.(*ListCanteensRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ListDishes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListDishesRequest)
-	if err := dec(in); err != nil {
+	m := new(CreateFeedbackReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListDishes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListDishes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListDishes(ctx, req.(*ListDishesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
-func _Campus_ListResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResponsiblePersonRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListResponsiblePerson(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListResponsiblePerson_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListResponsiblePerson(ctx, req.(*ListResponsiblePersonRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+// CampusServiceServer is the server API for CampusService service.
+// All implementations must embed UnimplementedCampusServiceServer
+// for forward compatibility
+type CampusServiceServer interface {
+	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
+	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
+	CreateFeedback(CampusService_CreateFeedbackServer) error
+	mustEmbedUnimplementedCampusServiceServer()
 }
 
-func _Campus_ListMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMoreInformationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListMoreInformation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListMoreInformation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListMoreInformation(ctx, req.(*ListMoreInformationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+// UnimplementedCampusServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCampusServiceServer struct {
 }
 
-func _Campus_ListOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListOpeningTimesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListOpeningTimes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListOpeningTimes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListOpeningTimes(ctx, req.(*ListOpeningTimesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+func (UnimplementedCampusServiceServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
+}
+func (UnimplementedCampusServiceServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
+}
+func (UnimplementedCampusServiceServer) CreateFeedback(CampusService_CreateFeedbackServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
+}
+func (UnimplementedCampusServiceServer) mustEmbedUnimplementedCampusServiceServer() {}
+
+// UnsafeCampusServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CampusServiceServer will
+// result in compilation errors.
+type UnsafeCampusServiceServer interface {
+	mustEmbedUnimplementedCampusServiceServer()
 }
 
-func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func RegisterCampusServiceServer(s grpc.ServiceRegistrar, srv CampusServiceServer) {
+	s.RegisterService(&CampusService_ServiceDesc, srv)
+}
+
+func _CampusService_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUpdateNoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).GetUpdateNote(ctx, in)
+		return srv.(CampusServiceServer).GetUpdateNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_GetUpdateNote_FullMethodName,
+		FullMethod: CampusService_GetUpdateNote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetUpdateNote(ctx, req.(*GetUpdateNoteRequest))
+		return srv.(CampusServiceServer).GetUpdateNote(ctx, req.(*GetUpdateNoteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListStudyRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStudyRoomsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListStudyRooms(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListStudyRooms_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListStudyRooms(ctx, req.(*ListStudyRoomsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CampusService_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListMoviesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListMovies(ctx, in)
+		return srv.(CampusServiceServer).ListMovies(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListMovies_FullMethodName,
+		FullMethod: CampusService_ListMovies_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListMovies(ctx, req.(*ListMoviesRequest))
+		return srv.(CampusServiceServer).ListMovies(ctx, req.(*ListMoviesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CampusServer).CreateFeedback(&campusCreateFeedbackServer{stream})
+func _CampusService_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CampusServiceServer).CreateFeedback(&campusServiceCreateFeedbackServer{stream})
 }
 
-type Campus_CreateFeedbackServer interface {
+type CampusService_CreateFeedbackServer interface {
 	SendAndClose(*CreateFeedbackReply) error
 	Recv() (*CreateFeedbackRequest, error)
 	grpc.ServerStream
 }
 
-type campusCreateFeedbackServer struct {
+type campusServiceCreateFeedbackServer struct {
 	grpc.ServerStream
 }
 
-func (x *campusCreateFeedbackServer) SendAndClose(m *CreateFeedbackReply) error {
+func (x *campusServiceCreateFeedbackServer) SendAndClose(m *CreateFeedbackReply) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *campusCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
+func (x *campusServiceCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
 	m := new(CreateFeedbackRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -848,266 +1263,26 @@ func (x *campusCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
 	return m, nil
 }
 
-func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUploadStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetUploadStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetUploadStatus_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetUploadStatus(ctx, req.(*GetUploadStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNotificationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetNotification(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetNotification_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotification(ctx, req.(*GetNotificationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNotificationConfirmRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetNotificationConfirm(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetNotificationConfirm_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotificationConfirm(ctx, req.(*GetNotificationConfirmRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMemberRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetMember(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetMember_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMember(ctx, req.(*GetMemberRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCanteenHeadCountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetCanteenHeadCount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetCanteenHeadCount_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetCanteenHeadCount(ctx, req.(*GetCanteenHeadCountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IOSDeviceRequestResponseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_IOSDeviceRequestResponse_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, req.(*IOSDeviceRequestResponseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateDeviceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).CreateDevice(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_CreateDevice_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).CreateDevice(ctx, req.(*CreateDeviceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_DeleteDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteDeviceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).DeleteDevice(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_DeleteDevice_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).DeleteDevice(ctx, req.(*DeleteDeviceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
+// CampusService_ServiceDesc is the grpc.ServiceDesc for CampusService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Campus_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.Campus",
-	HandlerType: (*CampusServer)(nil),
+var CampusService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.CampusService",
+	HandlerType: (*CampusServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListNewsAlerts",
-			Handler:    _Campus_ListNewsAlerts_Handler,
-		},
-		{
-			MethodName: "ListNewsSources",
-			Handler:    _Campus_ListNewsSources_Handler,
-		},
-		{
-			MethodName: "ListNews",
-			Handler:    _Campus_ListNews_Handler,
-		},
-		{
-			MethodName: "ListCanteenRatings",
-			Handler:    _Campus_ListCanteenRatings_Handler,
-		},
-		{
-			MethodName: "GetDishRatings",
-			Handler:    _Campus_GetDishRatings_Handler,
-		},
-		{
-			MethodName: "CreateCanteenRating",
-			Handler:    _Campus_CreateCanteenRating_Handler,
-		},
-		{
-			MethodName: "CreateDishRating",
-			Handler:    _Campus_CreateDishRating_Handler,
-		},
-		{
-			MethodName: "ListAvailableDishTags",
-			Handler:    _Campus_ListAvailableDishTags_Handler,
-		},
-		{
-			MethodName: "ListNameTags",
-			Handler:    _Campus_ListNameTags_Handler,
-		},
-		{
-			MethodName: "ListAvailableCanteenTags",
-			Handler:    _Campus_ListAvailableCanteenTags_Handler,
-		},
-		{
-			MethodName: "ListCanteens",
-			Handler:    _Campus_ListCanteens_Handler,
-		},
-		{
-			MethodName: "ListDishes",
-			Handler:    _Campus_ListDishes_Handler,
-		},
-		{
-			MethodName: "ListResponsiblePerson",
-			Handler:    _Campus_ListResponsiblePerson_Handler,
-		},
-		{
-			MethodName: "ListMoreInformation",
-			Handler:    _Campus_ListMoreInformation_Handler,
-		},
-		{
-			MethodName: "ListOpeningTimes",
-			Handler:    _Campus_ListOpeningTimes_Handler,
-		},
-		{
 			MethodName: "GetUpdateNote",
-			Handler:    _Campus_GetUpdateNote_Handler,
-		},
-		{
-			MethodName: "ListStudyRooms",
-			Handler:    _Campus_ListStudyRooms_Handler,
+			Handler:    _CampusService_GetUpdateNote_Handler,
 		},
 		{
 			MethodName: "ListMovies",
-			Handler:    _Campus_ListMovies_Handler,
-		},
-		{
-			MethodName: "GetUploadStatus",
-			Handler:    _Campus_GetUploadStatus_Handler,
-		},
-		{
-			MethodName: "GetNotification",
-			Handler:    _Campus_GetNotification_Handler,
-		},
-		{
-			MethodName: "GetNotificationConfirm",
-			Handler:    _Campus_GetNotificationConfirm_Handler,
-		},
-		{
-			MethodName: "GetMember",
-			Handler:    _Campus_GetMember_Handler,
-		},
-		{
-			MethodName: "GetCanteenHeadCount",
-			Handler:    _Campus_GetCanteenHeadCount_Handler,
-		},
-		{
-			MethodName: "IOSDeviceRequestResponse",
-			Handler:    _Campus_IOSDeviceRequestResponse_Handler,
-		},
-		{
-			MethodName: "CreateDevice",
-			Handler:    _Campus_CreateDevice_Handler,
-		},
-		{
-			MethodName: "DeleteDevice",
-			Handler:    _Campus_DeleteDevice_Handler,
+			Handler:    _CampusService_ListMovies_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "CreateFeedback",
-			Handler:       _Campus_CreateFeedback_Handler,
+			Handler:       _CampusService_CreateFeedback_Handler,
 			ClientStreams: true,
 		},
 	},

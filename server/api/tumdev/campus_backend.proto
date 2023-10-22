@@ -11,7 +11,7 @@ option java_multiple_files = true;
 option java_outer_classname = "CampusApiProto";
 option java_package = "app.tum.campus.api";
 
-service Campus {
+service NewsService {
   rpc ListNewsAlerts(ListNewsAlertsRequest) returns (ListNewsAlertsReply) {
     option (google.api.http) = {
       get: "/news/alerts"
@@ -31,6 +31,27 @@ service Campus {
       get: "/news",
       response_body: "news"
     };
+  }
+}
+service CampusService {
+  rpc GetUpdateNote(GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
+    option (google.api.http) = {get: "/updatenote/{version}"};
+  }
+
+  rpc ListMovies(ListMoviesRequest) returns (ListMoviesReply) {
+    option (google.api.http) = {get: "/movies/{last_id}"};
+  }
+
+  rpc CreateFeedback(stream CreateFeedbackRequest) returns (CreateFeedbackReply) {
+    option (google.api.http) = {
+      post: "/feedback",
+      body: "attachment",
+    };
+  }
+}
+service CanteenService {
+  rpc GetCanteenHeadCount(GetCanteenHeadCountRequest) returns (GetCanteenHeadCountReply) {
+    option (google.api.http) = {get: "/canteen/headCount/{canteen_id}"};
   }
 
   // This endpoint retrieves Canteen Ratings from the Backend.
@@ -96,38 +117,8 @@ service Campus {
       response_body: "dish"
     };
   }
-
-  rpc ListResponsiblePerson(ListResponsiblePersonRequest) returns (ListResponsiblePersonReply) {
-    option (google.api.http) = {get: "/barrierfree/contacts"};
-  }
-
-  rpc ListMoreInformation(ListMoreInformationRequest) returns (ListMoreInformationReply) {
-    option (google.api.http) = {get: "/barrierfree/moreInformation"};
-  }
-
-  rpc ListOpeningTimes(ListOpeningTimesRequest) returns (ListOpeningTimesReply) {
-    option (google.api.http) = {get: "/openingtimes/{language}"};
-  }
-
-  rpc GetUpdateNote(GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
-    option (google.api.http) = {get: "/updatenote/{version}"};
-  }
-
-  rpc ListStudyRooms(ListStudyRoomsRequest) returns (ListStudyRoomsReply) {
-    option (google.api.http) = {get: "/studyrooms"};
-  }
-
-  rpc ListMovies(ListMoviesRequest) returns (ListMoviesReply) {
-    option (google.api.http) = {get: "/movies/{last_id}"};
-  }
-
-  rpc CreateFeedback(stream CreateFeedbackRequest) returns (CreateFeedbackReply) {
-    option (google.api.http) = {
-      post: "/feedback",
-      body: "attachment",
-    };
-  }
-
+}
+service NotificationService {
   rpc GetUploadStatus(GetUploadStatusRequest) returns (GetUploadStatusReply) {
     option (google.api.http) = {get: "/device/uploaded/{lrz_id}"};
   }
@@ -144,12 +135,8 @@ service Campus {
     option (google.api.http) = {get: "/members/{lrz_id}"};
   }
 
-  rpc GetCanteenHeadCount(GetCanteenHeadCountRequest) returns (GetCanteenHeadCountReply) {
-    option (google.api.http) = {get: "/canteen/headCount/{canteen_id}"};
-  }
-
   // Endpoint for the iOS app to respond to background notifications requests
-  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) { // TODO naming
+  rpc IOSDeviceRequestResponse(IOSDeviceRequestResponseRequest) returns (IOSDeviceRequestResponseReply) {// TODO naming
     option (google.api.http) = {
       post: "/ios/notifications/deviceRequestResponse",
       body: "*",
@@ -167,6 +154,22 @@ service Campus {
   // Delete a device from push notifications
   rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceReply) {
     option (google.api.http) = {delete: "/device/{device_id}"};
+  }
+}
+service LegacyService {
+  // deprecated as this should be handled by the navigatum instead
+  rpc ListResponsiblePerson(ListResponsiblePersonRequest) returns (ListResponsiblePersonReply) {
+    option (google.api.http) = {get: "/barrierfree/contacts"};
+  }
+
+  // deprecated as this should be handled by the navigatum instead
+  rpc ListMoreInformation(ListMoreInformationRequest) returns (ListMoreInformationReply) {
+    option (google.api.http) = {get: "/barrierfree/moreInformation"};
+  }
+
+  // deprecated as this should be handled by the navigatum instead
+  rpc ListOpeningTimes(ListOpeningTimesRequest) returns (ListOpeningTimesReply) {
+    option (google.api.http) = {get: "/openingtimes/{language}"};
   }
 }
 
@@ -477,25 +480,6 @@ message GetUpdateNoteRequest {
 message GetUpdateNoteReply {
   string message = 1;
   string version_name = 2;
-}
-
-message ListStudyRoomsRequest {}
-message ListStudyRoomsReply {
-  repeated StudyRoomMsgElement rooms = 1;
-}
-message StudyRoomMsgElement {
-  int32 id = 1;
-  string name = 2;
-  string details = 3;
-  repeated StudyRoom rooms = 4;
-}
-
-message StudyRoom {
-  int32 group_id = 1;
-  int32 room_id = 2;
-  string room_code = 3;
-  string room_name = 4;
-  string building_name = 5;
 }
 
 message ListMoviesRequest {

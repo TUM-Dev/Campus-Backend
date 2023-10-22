@@ -8,14 +8,22 @@ import (
 )
 
 type CampusServer struct {
-	pb.UnimplementedCampusServer
+	pb.UnimplementedCampusServiceServer
+	pb.UnimplementedCanteenServiceServer
+	pb.UnimplementedNewsServiceServer
+	pb.UnimplementedLegacyServiceServer
+	pb.UnimplementedNotificationServiceServer
 	db                      *gorm.DB
 	deviceBuf               *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
 	iOSNotificationsService *IOSNotificationsService
 }
 
-// Verify that CampusServer implements the pb.CampusServer interface
-var _ pb.CampusServer = (*CampusServer)(nil)
+// Verify that CampusServer implements the required interfaces
+var _ pb.CampusServiceServer = (*CampusServer)(nil)
+var _ pb.CanteenServiceServer = (*CampusServer)(nil)
+var _ pb.NewsServiceServer = (*CampusServer)(nil)
+var _ pb.LegacyServiceServer = (*CampusServer)(nil)
+var _ pb.NotificationServiceServer = (*CampusServer)(nil)
 
 func New(db *gorm.DB) *CampusServer {
 	log.Trace("Server starting up")

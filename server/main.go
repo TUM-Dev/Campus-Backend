@@ -82,7 +82,11 @@ func main() {
 
 	// Main GRPC Server
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(UnaryRequestLogger), grpc.StreamInterceptor(StreamRequestLogger))
-	pb.RegisterCampusServer(grpcServer, campusService)
+	pb.RegisterCampusServiceServer(grpcServer, campusService)
+	pb.RegisterCanteenServiceServer(grpcServer, campusService)
+	pb.RegisterNewsServiceServer(grpcServer, campusService)
+	pb.RegisterLegacyServiceServer(grpcServer, campusService)
+	pb.RegisterNotificationServiceServer(grpcServer, campusService)
 	reflection.Register(grpcServer)
 
 	// GRPC Gateway for HTTP REST -> GRPC
@@ -102,8 +106,20 @@ func main() {
 		grpc.WithUserAgent("internal"),
 		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
-	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
-		log.WithError(err).Fatal("could not RegisterCampusHandlerFromEndpoint")
+	if err := pb.RegisterCampusServiceHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Fatal("could not RegisterCampusServiceHandlerFromEndpoint")
+	}
+	if err := pb.RegisterCanteenServiceHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Fatal("could not RegisterCanteenServiceHandlerFromEndpoint")
+	}
+	if err := pb.RegisterNewsServiceHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Fatal("could not RegisterNewsServiceHandlerFromEndpoint")
+	}
+	if err := pb.RegisterLegacyServiceHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Fatal("could not RegisterLegacyServiceHandlerFromEndpoint")
+	}
+	if err := pb.RegisterNotificationServiceHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
+		log.WithError(err).Fatal("could not RegisterNotificationServiceHandlerFromEndpoint")
 	}
 	httpMux.Handle("/v1/", http.StripPrefix("/v1", grpcGatewayMux))
 
