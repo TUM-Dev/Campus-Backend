@@ -18,6 +18,6 @@ type Movie struct {
 	ImdbRating  string    `gorm:"column:rating;type:varchar(4);not null;"`
 	Description string    `gorm:"column:description;type:text;not null;"`
 	FilesID     int32     `gorm:"column:cover;not null"`
-	Files       Files     `gorm:"foreignKey:FilesID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Files       File      `gorm:"foreignKey:FilesID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Link        string    `gorm:"column:link;type:varchar(190);not null;unique;"`
 }
