@@ -2,6 +2,7 @@ package migration
 
 import (
 	_ "embed"
+	"regexp"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -34,9 +35,10 @@ func migrate20200000000000() *gormigrate.Migration {
 			return nil
 		},
 		Rollback: func(tx *gorm.DB) error {
-			tables := []string{"actions", "alarm_ban", "alarm_log", "barrierFree_moreInfo", "barrierFree_persons", "card_type", "chat_room", "crontab", "curricula", "dish", "dishflags", "dish2dishflags", "faculty", "feedback", "files", "kino", "lecture", "location", "member", "card", "card_box", "card_comment", "card_option", "chat_message", "chat_room2members", "devices", "device2stats", "members_card", "members_card_answer_history", "mensa", "dish2mensa", "mensaplan_mensa", "mensaprices", "migrations", "newsSource", "news", "news_alert", "notification_type", "notification", "notification_confirmation", "openinghours", "question", "question2answer", "question2faculty", "questionAnswers", "reports", "rights", "menu", "modules", "roles", "roles2rights", "roomfinder_building2area", "roomfinder_buildings", "roomfinder_buildings2gps", "roomfinder_buildings2maps", "roomfinder_maps", "roomfinder_rooms", "roomfinder_rooms2maps", "roomfinder_schedules", "sessions", "tag", "card2tag", "ticket_admin", "ticket_group", "event", "ticket_admin2group", "ticket_payment", "ticket_type", "ticket_history", "update_note", "users", "log", "recover", "users2info", "users2roles", "wifi_measurement"}
+			re := regexp.MustCompile(`create table if not exists (?P<table_name>\S+)`)
+			tables := re.FindAllStringSubmatch(sourceSchema, -1)
 			for _, table := range tables {
-				if err := tx.Migrator().DropTable(table); err != nil {
+				if err := tx.Migrator().DropTable(table[re.SubexpIndex("table_name")]); err != nil {
 					return err
 				}
 			}
