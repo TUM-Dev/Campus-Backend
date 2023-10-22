@@ -4,6 +4,7 @@ package apns
 
 import (
 	"errors"
+	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -34,21 +35,21 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 
 	if _, err := s.Repository.SendBackgroundNotification(notification); err != nil {
 		log.WithError(err).Error("Could not send background notification")
-		return ErrCouldNotSendNotification
+		return errors.New("could not send notification")
 	}
 	return nil
 }
 
 func ValidateRequirementsForIOSNotificationsService() error {
-	if ApnsKeyId == "" {
+	if os.Getenv("APNS_KEY_ID") == "" {
 		return errors.New("APNS_KEY_ID env variable is not set")
 	}
 
-	if ApnsTeamId == "" {
+	if os.Getenv("APNS_TEAM_ID") == "" {
 		return errors.New("APNS_TEAM_ID env variable is not set")
 	}
 
-	if ApnsP8FilePath == "" {
+	if os.Getenv("APNS_P8_FILE_PATH") == "" {
 		return errors.New("APNS_P8_FILE_PATH env variable is not set")
 	}
 

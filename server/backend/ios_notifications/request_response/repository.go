@@ -12,11 +12,7 @@ type Repository struct {
 }
 
 func (r *Repository) SaveEncryptedGrade(grade *model.IOSEncryptedGrade) error {
-	if err := r.DB.Create(grade).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Create(grade).Error
 }
 
 func (r *Repository) GetIOSDeviceRequest(requestId string) (*model.IOSDeviceRequestLog, error) {
@@ -38,36 +34,21 @@ func (r *Repository) GetIOSEncryptedGrades(deviceId string) ([]model.IOSEncrypte
 }
 
 func (r *Repository) DeleteEncryptedGrades(deviceId string) error {
-	if err := r.DB.Delete(&model.IOSEncryptedGrade{}, "device_id = ?", deviceId).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Delete(&model.IOSEncryptedGrade{}, "device_id = ?", deviceId).Error
 }
 
 func (r *Repository) DeleteRequestLog(requestId string) error {
-	if err := r.DB.Delete(&model.IOSDeviceRequestLog{}, "request_id = ?", requestId).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.DB.Delete(&model.IOSDeviceRequestLog{}, "request_id = ?", requestId).Error
 }
 
 func (r *Repository) DeleteAllRequestLogsForThisDeviceWithType(requestLog *model.IOSDeviceRequestLog) error {
-
-	res := r.DB.
+	return r.DB.
 		Delete(
 			&model.IOSDeviceRequestLog{},
 			"device_id = ? and request_type = ?",
 			requestLog.DeviceID,
 			requestLog.RequestType,
-		)
-
-	if err := res.Error; err != nil {
-		return err
-	}
-
-	return nil
+		).Error
 }
 
 func NewRepository(db *gorm.DB, token *apns.JWTToken) *Repository {

@@ -15,10 +15,7 @@ type Repository struct {
 
 func (repo *Repository) GetDevicesActivityResets() ([]model.IOSDevicesActivityReset, error) {
 	var resets []model.IOSDevicesActivityReset
-
-	err := repo.DB.Find(&resets).Error
-
-	if err != nil {
+	if err := repo.DB.Find(&resets).Error; err != nil {
 		return nil, err
 	}
 

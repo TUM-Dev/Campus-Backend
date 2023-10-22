@@ -15,11 +15,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	DevicesToCheckPerCronBase = 10
-	MaxRoutineCount           = 10
-)
-
 var devicesToUpdate = promauto.NewGauge(prometheus.GaugeOpts{
 	Name: "ios_scheduling_devices_to_update",
 	Help: "The numer of devices that should be updated for a given priority",
@@ -35,7 +30,6 @@ type Service struct {
 
 func (service *Service) HandleScheduledCron() error {
 	priorities, err := service.Repository.FindSchedulingPriorities()
-
 	if err != nil {
 		return err
 	}
@@ -43,11 +37,11 @@ func (service *Service) HandleScheduledCron() error {
 	currentPriority := findIOSSchedulingPriorityForNow(priorities)
 
 	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
-
 	if err != nil {
 		log.WithError(err).Error("can't get devices")
 		return err
 	}
+
 	devicesToUpdate.Set(float64(len(devices)))
 
 	if len(devices) == 0 {
@@ -65,7 +59,7 @@ func (service *Service) HandleScheduledCron() error {
 }
 
 func (service *Service) handleDevices(devices []model.IOSDeviceLastUpdated) {
-	routinesCount := min(len(devices), MaxRoutineCount)
+	routinesCount := min(len(devices), 10)
 	chunkSize := len(devices) / routinesCount
 	perfectlyChunkable := (len(devices) % routinesCount) == 0
 
@@ -118,10 +112,9 @@ func (service *Service) LogScheduledUpdate(deviceID string) error {
 	return service.SchedulerLogRepository.LogScheduledUpdate(&scheduleLog)
 }
 
-// selectDevicesToUpdate selects max DevicesToCheckPerCronBase devices to update
-// based on the priority.
+// selectDevicesToUpdate selects the first DevicesToCheckPerCronBase * priority devices
 func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdated, priority int) []model.IOSDeviceLastUpdated {
-	maxDevicesToCheck := DevicesToCheckPerCronBase * priority
+	maxDevicesToCheck := 10 * priority
 
 	if len(devices) < maxDevicesToCheck {
 		return devices

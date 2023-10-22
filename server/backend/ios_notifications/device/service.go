@@ -16,9 +16,6 @@ type Service struct {
 }
 
 var (
-	ErrCouldNotCreateDevice = status.Error(codes.Internal, "Could not create device")
-	ErrCouldNotDeleteDevice = status.Error(codes.Internal, "Could not delete device")
-
 	iosRegisteredDevices = promauto.NewGauge(prometheus.GaugeOpts{
 		Subsystem: "ios",
 		Name:      "ios_created_devices",
@@ -33,7 +30,7 @@ func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.Creat
 	}
 
 	if err := service.Repository.CreateDevice(&device); err != nil {
-		return nil, ErrCouldNotCreateDevice
+		return nil, status.Error(codes.Internal, "Could not create device")
 	}
 	iosRegisteredDevices.Inc()
 
@@ -44,7 +41,7 @@ func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.Creat
 
 func (service *Service) DeleteDevice(request *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
 	if err := service.Repository.DeleteDevice(request.GetDeviceId()); err != nil {
-		return nil, ErrCouldNotDeleteDevice
+		return nil, status.Error(codes.Internal, "Could not delete device")
 	}
 
 	iosRegisteredDevices.Dec()

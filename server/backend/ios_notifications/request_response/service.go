@@ -23,32 +23,22 @@ type Service struct {
 	Repository *Repository
 }
 
-var (
-	ErrOutdatedRequest      = status.Error(codes.Internal, "Could not get request, probably request is already outdated")
-	ErrEmptyPayload         = status.Error(codes.InvalidArgument, "Payload is empty")
-	ErrUnknownRequestType   = status.Error(codes.InvalidArgument, "Unknown request type")
-	ErrInternalHandleGrades = status.Error(codes.Internal, "Could not handle grades request")
-	ErrCouldNotGetDevice    = status.Error(codes.Internal, "Could not get device")
-	ErrAPNSNotActive        = status.Error(codes.Internal, "APNS is not active")
-
-	collectedNewGrades = promauto.NewHistogram(prometheus.HistogramOpts{
-		Name:    "ios_new_grades",
-		Help:    "The total number of processed events",
-		Buckets: prometheus.LinearBuckets(0, 5, 5),
-	})
-)
+var collectedNewGrades = promauto.NewHistogram(prometheus.HistogramOpts{
+	Name:    "ios_new_grades",
+	Help:    "The total number of processed events",
+	Buckets: prometheus.LinearBuckets(0, 5, 5),
+})
 
 func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
 	// requestId refers to the request id that was sent to the device and stored in the Database
 	requestId := request.GetRequestId()
 
-	log.WithField("requestId", requestId).Info("Handling request")
+	log.WithField("requestId", requestId).Trace("Handling request")
 
 	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
-
 	if err != nil {
 		log.WithError(err).Error("Could not get request")
-		return nil, ErrOutdatedRequest
+		return nil, status.Error(codes.Internal, "Could not get request, probably request is already outdated")
 	}
 
 	switch requestLog.RequestType {
@@ -56,47 +46,46 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 		campusToken := request.GetPayload()
 
 		if campusToken == "" {
-			return nil, ErrEmptyPayload
+			return nil, status.Error(codes.InvalidArgument, "Payload is empty")
 		}
 
 		if !apnsIsActive {
-			return nil, ErrAPNSNotActive
+			return nil, status.Error(codes.Internal, "APNS is not active")
 		}
 
 		return service.handleDeviceCampusTokenRequest(requestLog, campusToken)
 	default:
-		return nil, ErrUnknownRequestType
+		return nil, status.Error(codes.InvalidArgument, "Unknown request type")
 	}
 }
 
 func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDeviceRequestLog, campusToken string) (*pb.IOSDeviceRequestResponseReply, error) {
-	log.WithField("DeviceID", requestLog.DeviceID).Info("Handling campus token request")
+	log.WithField("DeviceID", requestLog.DeviceID).Trace("Handling campus token request")
 
 	userRepo := device.NewRepository(service.Repository.DB)
 
 	device, err := userRepo.GetDevice(requestLog.DeviceID)
-
 	if err != nil {
 		log.WithError(err).Error("Could not get device")
-		return nil, ErrCouldNotGetDevice
+		return nil, status.Error(codes.Internal, "Could not get device")
 	}
 
 	apiGrades, err := campus_api.FetchGrades(campusToken)
 	if err != nil {
 		log.WithError(err).Error("Could not fetch grades")
-		return nil, ErrInternalHandleGrades
+		return nil, status.Error(codes.Internal, "Could not handle grades request")
 	}
 
 	oldEncryptedGrades, err := service.Repository.GetIOSEncryptedGrades(requestLog.DeviceID)
 	if err != nil {
 		log.WithError(err).Error("Could not get old grades")
-		return nil, ErrInternalHandleGrades
+		return nil, status.Error(codes.Internal, "Could not handle grades request")
 	}
 
 	oldGrades, err := decryptGrades(oldEncryptedGrades, campusToken)
 	if err != nil {
 		log.WithError(err).Error("Could not decrypt old grades")
-		return nil, ErrInternalHandleGrades
+		return nil, status.Error(codes.Internal, "Could not handle grades request")
 	}
 
 	newGrades := compareAndFindNewGrades(apiGrades.Grades, oldGrades)
@@ -110,10 +99,9 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	}
 
 	err = service.Repository.DeleteEncryptedGrades(requestLog.DeviceID)
-
 	if err != nil {
 		log.WithError(err).Error("Could not delete old grades")
-		return nil, ErrInternalHandleGrades
+		return nil, status.Error(codes.Internal, "Could not handle grades request")
 	}
 
 	service.encryptGradesAndStoreInDatabase(apiGrades.Grades, requestLog.DeviceID, campusToken)
@@ -134,7 +122,6 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 
 func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) {
 	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
-
 	if err != nil {
 		log.WithError(err).Error("Could not delete request logs")
 	}
@@ -144,7 +131,6 @@ func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]mode
 	oldGrades := make([]model.IOSEncryptedGrade, len(grades))
 	for i, encryptedGrade := range grades {
 		err := encryptedGrade.Decrypt(campusToken)
-
 		if err != nil {
 			log.WithError(err).Error("Could not decrypt grade")
 			return nil, status.Error(codes.Internal, "Could not decrypt grade")
@@ -197,7 +183,6 @@ func (service *Service) encryptGradesAndStoreInDatabase(grades []model.IOSGrade,
 
 func sendGradesToDevice(device *model.IOSDevice, grades []model.IOSGrade, apns *apns.Repository) {
 	alertTitle := fmt.Sprintf("%d New Grades Available", len(grades))
-
 	if len(grades) == 1 {
 		alertTitle = "New Grade Available"
 	}
