@@ -29,14 +29,14 @@ func (f *Files) TableName() string {
 	return "files"
 }
 
-// migrate2023090510000000
+// migrate20230905100000
 // removes the unused trailer column
 // makes the Cover FK into a not null field
 // renames kino -> movie
 // fixes the id being named kino
-func (m TumDBMigrator) migrate2023090510000000() *gormigrate.Migration {
+func (m TumDBMigrator) migrate20230905100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
-		ID: "migrate2023090510000000",
+		ID: "migrate20230905100000",
 		Migrate: func(tx *gorm.DB) error {
 			// fix the movie table
 			if err := tx.Migrator().RenameTable(&Kino{}, &Movie{}); err != nil {
