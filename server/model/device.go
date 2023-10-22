@@ -14,7 +14,7 @@ type Device struct {
 	Created         null.Time   `gorm:"column:created;type:timestamp;" json:"created"`
 	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:'0000-00-00 00:00:00';" json:"last_access"`
 	LastAPI         string      `gorm:"column:lastApi;type:text;size:16777215;" json:"last_api"`
-	Developer       string      `gorm:"column:developer;type:char;size:5;default:false;" json:"developer"`
+	Developer       string      `gorm:"column:developer;type:enum('true','false');default:'false';" json:"developer"`
 	OsVersion       string      `gorm:"column:osVersion;type:text;size:16777215;" json:"os_version"`
 	AppVersion      string      `gorm:"column:appVersion;type:text;size:16777215;" json:"app_version"`
 	Counter         int32       `gorm:"column:counter;type:int;default:0;" json:"counter"`
