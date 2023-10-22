@@ -17,6 +17,11 @@ type NewsSource struct {
 	Hook   null.String `gorm:"column:hook;type:char;size:12;"`
 }
 
+// TableName sets the insert table name for this struct type
+func (n *NewsSource) TableName() string {
+	return "newsSource"
+}
+
 // migrate20230904100000
 // migrates the crontab from kino to movie crontab
 func migrate20230904100000() *gormigrate.Migration {
