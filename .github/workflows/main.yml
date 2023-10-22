@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: |
             server/go.sum
       - name: run migration
-        run: sleep 30 && docker logs $(docker ps -qa) && go run main.go
+        run: docker ps -a && sleep 30 && docker logs $(docker ps -qa) && go run main.go
         working-directory: ./server
         env:
           EXIT_AFTER_MIGRATION: "true"
