@@ -35,11 +35,11 @@ jobs:
           cache-dependency-path: |
             server/go.sum
       - name: run migration
-        run: docker ps -a && sleep 30 && docker logs $(docker ps -qa) && go run main.go
+        run: sleep 20 && docker logs $(docker ps -qa) && go run main.go
         working-directory: ./server
         env:
           EXIT_AFTER_MIGRATION: "true"
-          DB_DSN: root:super_secret_passw0rd@tcp(mariadb:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
+          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
   build:
     runs-on: ubuntu-latest
