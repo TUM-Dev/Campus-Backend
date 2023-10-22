@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: |
             server/go.sum
       - name: wait for db
-        run: sleep 30 && docker logs mariadb
+        run: sleep 15 && docker ps -a
       - name: run migration
         run: go run main.go
         working-directory: ./server
