@@ -121,6 +121,172 @@ func local_request_NewsService_ListNews_0(ctx context.Context, marshaler runtime
 
 }
 
+func request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetUpdateNoteRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["version"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
+	}
+
+	protoReq.Version, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
+	}
+
+	msg, err := client.GetUpdateNote(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetUpdateNoteRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["version"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
+	}
+
+	protoReq.Version, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
+	}
+
+	msg, err := server.GetUpdateNote(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+var (
+	filter_CampusService_ListMovies_0 = &utilities.DoubleArray{Encoding: map[string]int{"last_id": 0, "lastId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+)
+
+func request_CampusService_ListMovies_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMoviesRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["last_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
+	}
+
+	protoReq.LastId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CampusService_ListMovies_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.ListMovies(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_CampusService_ListMovies_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMoviesRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["last_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
+	}
+
+	protoReq.LastId, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CampusService_ListMovies_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.ListMovies(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_CampusService_CreateFeedback_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var metadata runtime.ServerMetadata
+	stream, err := client.CreateFeedback(ctx)
+	if err != nil {
+		grpclog.Infof("Failed to start streaming: %v", err)
+		return nil, metadata, err
+	}
+	dec := marshaler.NewDecoder(req.Body)
+	for {
+		var protoReq CreateFeedbackRequest
+		err = dec.Decode(&protoReq)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			grpclog.Infof("Failed to decode request: %v", err)
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		}
+		if err = stream.Send(&protoReq); err != nil {
+			if err == io.EOF {
+				break
+			}
+			grpclog.Infof("Failed to send request: %v", err)
+			return nil, metadata, err
+		}
+	}
+
+	if err := stream.CloseSend(); err != nil {
+		grpclog.Infof("Failed to terminate client stream: %v", err)
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		grpclog.Infof("Failed to get header from client: %v", err)
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+
+	msg, err := stream.CloseAndRecv()
+	metadata.TrailerMD = stream.Trailer()
+	return msg, metadata, err
+
+}
+
 func request_CanteenService_GetCanteenHeadCount_0(ctx context.Context, marshaler runtime.Marshaler, client CanteenServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetCanteenHeadCountRequest
 	var metadata runtime.ServerMetadata
@@ -413,94 +579,6 @@ func local_request_CanteenService_ListDishes_0(ctx context.Context, marshaler ru
 	}
 
 	msg, err := server.ListDishes(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_LegacyService_ListResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListResponsiblePersonRequest
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.ListResponsiblePerson(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_LegacyService_ListResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListResponsiblePersonRequest
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.ListResponsiblePerson(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_LegacyService_ListMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMoreInformationRequest
-	var metadata runtime.ServerMetadata
-
-	msg, err := client.ListMoreInformation(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_LegacyService_ListMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMoreInformationRequest
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.ListMoreInformation(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_LegacyService_ListOpeningTimes_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListOpeningTimesRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["language"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "language")
-	}
-
-	protoReq.Language, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "language", err)
-	}
-
-	msg, err := client.ListOpeningTimes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_LegacyService_ListOpeningTimes_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListOpeningTimesRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["language"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "language")
-	}
-
-	protoReq.Language, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "language", err)
-	}
-
-	msg, err := server.ListOpeningTimes(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -851,8 +929,44 @@ func local_request_NotificationService_DeleteDevice_0(ctx context.Context, marsh
 
 }
 
-func request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetUpdateNoteRequest
+func request_LegacyService_ListResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListResponsiblePersonRequest
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.ListResponsiblePerson(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_LegacyService_ListResponsiblePerson_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListResponsiblePersonRequest
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.ListResponsiblePerson(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_LegacyService_ListMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMoreInformationRequest
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.ListMoreInformation(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_LegacyService_ListMoreInformation_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMoreInformationRequest
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.ListMoreInformation(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_LegacyService_ListOpeningTimes_0(ctx context.Context, marshaler runtime.Marshaler, client LegacyServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListOpeningTimesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -862,23 +976,23 @@ func request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler runtim
 		_   = err
 	)
 
-	val, ok = pathParams["version"]
+	val, ok = pathParams["language"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "language")
 	}
 
-	protoReq.Version, err = runtime.Int64(val)
+	protoReq.Language, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "language", err)
 	}
 
-	msg, err := client.GetUpdateNote(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListOpeningTimes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetUpdateNoteRequest
+func local_request_LegacyService_ListOpeningTimes_0(ctx context.Context, marshaler runtime.Marshaler, server LegacyServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListOpeningTimesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -888,131 +1002,17 @@ func local_request_CampusService_GetUpdateNote_0(ctx context.Context, marshaler 
 		_   = err
 	)
 
-	val, ok = pathParams["version"]
+	val, ok = pathParams["language"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "language")
 	}
 
-	protoReq.Version, err = runtime.Int64(val)
+	protoReq.Language, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "version", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "language", err)
 	}
 
-	msg, err := server.GetUpdateNote(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-var (
-	filter_CampusService_ListMovies_0 = &utilities.DoubleArray{Encoding: map[string]int{"last_id": 0, "lastId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
-)
-
-func request_CampusService_ListMovies_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMoviesRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["last_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
-	}
-
-	protoReq.LastId, err = runtime.Int32(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
-	}
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CampusService_ListMovies_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.ListMovies(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_CampusService_ListMovies_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMoviesRequest
-	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["last_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
-	}
-
-	protoReq.LastId, err = runtime.Int32(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "last_id", err)
-	}
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CampusService_ListMovies_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.ListMovies(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
-func request_CampusService_CreateFeedback_0(ctx context.Context, marshaler runtime.Marshaler, client CampusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var metadata runtime.ServerMetadata
-	stream, err := client.CreateFeedback(ctx)
-	if err != nil {
-		grpclog.Infof("Failed to start streaming: %v", err)
-		return nil, metadata, err
-	}
-	dec := marshaler.NewDecoder(req.Body)
-	for {
-		var protoReq CreateFeedbackRequest
-		err = dec.Decode(&protoReq)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			grpclog.Infof("Failed to decode request: %v", err)
-			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-		}
-		if err = stream.Send(&protoReq); err != nil {
-			if err == io.EOF {
-				break
-			}
-			grpclog.Infof("Failed to send request: %v", err)
-			return nil, metadata, err
-		}
-	}
-
-	if err := stream.CloseSend(); err != nil {
-		grpclog.Infof("Failed to terminate client stream: %v", err)
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		grpclog.Infof("Failed to get header from client: %v", err)
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-
-	msg, err := stream.CloseAndRecv()
-	metadata.TrailerMD = stream.Trailer()
+	msg, err := server.ListOpeningTimes(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1096,6 +1096,72 @@ func RegisterNewsServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 
 		forward_NewsService_ListNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_NewsService_ListNews_0{resp}, mux.GetForwardResponseOptions()...)
 
+	})
+
+	return nil
+}
+
+// RegisterCampusServiceHandlerServer registers the http handlers for service CampusService to "mux".
+// UnaryRPC     :call CampusServiceServer directly.
+// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCampusServiceHandlerFromEndpoint instead.
+func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CampusServiceServer) error {
+
+	mux.Handle("GET", pattern_CampusService_GetUpdateNote_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.CampusService/GetUpdateNote", runtime.WithHTTPPathPattern("/updatenote/{version}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_CampusService_GetUpdateNote_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CampusService_GetUpdateNote_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_CampusService_ListMovies_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.CampusService/ListMovies", runtime.WithHTTPPathPattern("/movies/{last_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_CampusService_ListMovies_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CampusService_ListMovies_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_CampusService_CreateFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
 	})
 
 	return nil
@@ -1360,90 +1426,6 @@ func RegisterCanteenServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 	return nil
 }
 
-// RegisterLegacyServiceHandlerServer registers the http handlers for service LegacyService to "mux".
-// UnaryRPC     :call LegacyServiceServer directly.
-// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterLegacyServiceHandlerFromEndpoint instead.
-func RegisterLegacyServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server LegacyServiceServer) error {
-
-	mux.Handle("GET", pattern_LegacyService_ListResponsiblePerson_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListResponsiblePerson", runtime.WithHTTPPathPattern("/barrierfree/contacts"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_LegacyService_ListResponsiblePerson_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_LegacyService_ListMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListMoreInformation", runtime.WithHTTPPathPattern("/barrierfree/moreInformation"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_LegacyService_ListMoreInformation_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListMoreInformation_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_LegacyService_ListOpeningTimes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListOpeningTimes", runtime.WithHTTPPathPattern("/openingtimes/{language}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_LegacyService_ListOpeningTimes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListOpeningTimes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	return nil
-}
-
 // RegisterNotificationServiceHandlerServer registers the http handlers for service NotificationService to "mux".
 // UnaryRPC     :call NotificationServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -1628,13 +1610,13 @@ func RegisterNotificationServiceHandlerServer(ctx context.Context, mux *runtime.
 	return nil
 }
 
-// RegisterCampusServiceHandlerServer registers the http handlers for service CampusService to "mux".
-// UnaryRPC     :call CampusServiceServer directly.
+// RegisterLegacyServiceHandlerServer registers the http handlers for service LegacyService to "mux".
+// UnaryRPC     :call LegacyServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCampusServiceHandlerFromEndpoint instead.
-func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CampusServiceServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterLegacyServiceHandlerFromEndpoint instead.
+func RegisterLegacyServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server LegacyServiceServer) error {
 
-	mux.Handle("GET", pattern_CampusService_GetUpdateNote_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LegacyService_ListResponsiblePerson_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1642,12 +1624,12 @@ func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.CampusService/GetUpdateNote", runtime.WithHTTPPathPattern("/updatenote/{version}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListResponsiblePerson", runtime.WithHTTPPathPattern("/barrierfree/contacts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_CampusService_GetUpdateNote_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_LegacyService_ListResponsiblePerson_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1655,11 +1637,11 @@ func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 			return
 		}
 
-		forward_CampusService_GetUpdateNote_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LegacyService_ListResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_CampusService_ListMovies_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LegacyService_ListMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1667,12 +1649,12 @@ func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.CampusService/ListMovies", runtime.WithHTTPPathPattern("/movies/{last_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListMoreInformation", runtime.WithHTTPPathPattern("/barrierfree/moreInformation"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_CampusService_ListMovies_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_LegacyService_ListMoreInformation_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1680,15 +1662,33 @@ func RegisterCampusServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 			return
 		}
 
-		forward_CampusService_ListMovies_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LegacyService_ListMoreInformation_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_CampusService_CreateFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
+	mux.Handle("GET", pattern_LegacyService_ListOpeningTimes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.LegacyService/ListOpeningTimes", runtime.WithHTTPPathPattern("/openingtimes/{language}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_LegacyService_ListOpeningTimes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_LegacyService_ListOpeningTimes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	return nil
@@ -1842,6 +1842,129 @@ var (
 	forward_NewsService_ListNewsSources_0 = runtime.ForwardResponseMessage
 
 	forward_NewsService_ListNews_0 = runtime.ForwardResponseMessage
+)
+
+// RegisterCampusServiceHandlerFromEndpoint is same as RegisterCampusServiceHandler but
+// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
+func RegisterCampusServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+	conn, err := grpc.DialContext(ctx, endpoint, opts...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+			return
+		}
+		go func() {
+			<-ctx.Done()
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+		}()
+	}()
+
+	return RegisterCampusServiceHandler(ctx, mux, conn)
+}
+
+// RegisterCampusServiceHandler registers the http handlers for service CampusService to "mux".
+// The handlers forward requests to the grpc endpoint over "conn".
+func RegisterCampusServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterCampusServiceHandlerClient(ctx, mux, NewCampusServiceClient(conn))
+}
+
+// RegisterCampusServiceHandlerClient registers the http handlers for service CampusService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "CampusServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "CampusServiceClient"
+// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
+// "CampusServiceClient" to call the correct interceptors.
+func RegisterCampusServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CampusServiceClient) error {
+
+	mux.Handle("GET", pattern_CampusService_GetUpdateNote_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/GetUpdateNote", runtime.WithHTTPPathPattern("/updatenote/{version}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_CampusService_GetUpdateNote_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CampusService_GetUpdateNote_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_CampusService_ListMovies_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/ListMovies", runtime.WithHTTPPathPattern("/movies/{last_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_CampusService_ListMovies_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CampusService_ListMovies_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_CampusService_CreateFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/CreateFeedback", runtime.WithHTTPPathPattern("/feedback"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_CampusService_CreateFeedback_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CampusService_CreateFeedback_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	return nil
+}
+
+var (
+	pattern_CampusService_GetUpdateNote_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"updatenote", "version"}, ""))
+
+	pattern_CampusService_ListMovies_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"movies", "last_id"}, ""))
+
+	pattern_CampusService_CreateFeedback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"feedback"}, ""))
+)
+
+var (
+	forward_CampusService_GetUpdateNote_0 = runtime.ForwardResponseMessage
+
+	forward_CampusService_ListMovies_0 = runtime.ForwardResponseMessage
+
+	forward_CampusService_CreateFeedback_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterCanteenServiceHandlerFromEndpoint is same as RegisterCanteenServiceHandler but
@@ -2194,129 +2317,6 @@ var (
 	forward_CanteenService_ListDishes_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterLegacyServiceHandlerFromEndpoint is same as RegisterLegacyServiceHandler but
-// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterLegacyServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
-	conn, err := grpc.DialContext(ctx, endpoint, opts...)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			if cerr := conn.Close(); cerr != nil {
-				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
-			}
-			return
-		}
-		go func() {
-			<-ctx.Done()
-			if cerr := conn.Close(); cerr != nil {
-				grpclog.Infof("Failed to close conn to %s: %v", endpoint, cerr)
-			}
-		}()
-	}()
-
-	return RegisterLegacyServiceHandler(ctx, mux, conn)
-}
-
-// RegisterLegacyServiceHandler registers the http handlers for service LegacyService to "mux".
-// The handlers forward requests to the grpc endpoint over "conn".
-func RegisterLegacyServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterLegacyServiceHandlerClient(ctx, mux, NewLegacyServiceClient(conn))
-}
-
-// RegisterLegacyServiceHandlerClient registers the http handlers for service LegacyService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "LegacyServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "LegacyServiceClient"
-// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "LegacyServiceClient" to call the correct interceptors.
-func RegisterLegacyServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client LegacyServiceClient) error {
-
-	mux.Handle("GET", pattern_LegacyService_ListResponsiblePerson_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListResponsiblePerson", runtime.WithHTTPPathPattern("/barrierfree/contacts"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_LegacyService_ListResponsiblePerson_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_LegacyService_ListMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListMoreInformation", runtime.WithHTTPPathPattern("/barrierfree/moreInformation"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_LegacyService_ListMoreInformation_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListMoreInformation_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_LegacyService_ListOpeningTimes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListOpeningTimes", runtime.WithHTTPPathPattern("/openingtimes/{language}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_LegacyService_ListOpeningTimes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_LegacyService_ListOpeningTimes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	return nil
-}
-
-var (
-	pattern_LegacyService_ListResponsiblePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "contacts"}, ""))
-
-	pattern_LegacyService_ListMoreInformation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "moreInformation"}, ""))
-
-	pattern_LegacyService_ListOpeningTimes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"openingtimes", "language"}, ""))
-)
-
-var (
-	forward_LegacyService_ListResponsiblePerson_0 = runtime.ForwardResponseMessage
-
-	forward_LegacyService_ListMoreInformation_0 = runtime.ForwardResponseMessage
-
-	forward_LegacyService_ListOpeningTimes_0 = runtime.ForwardResponseMessage
-)
-
 // RegisterNotificationServiceHandlerFromEndpoint is same as RegisterNotificationServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterNotificationServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
@@ -2544,9 +2544,9 @@ var (
 	forward_NotificationService_DeleteDevice_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterCampusServiceHandlerFromEndpoint is same as RegisterCampusServiceHandler but
+// RegisterLegacyServiceHandlerFromEndpoint is same as RegisterLegacyServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterCampusServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterLegacyServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.DialContext(ctx, endpoint, opts...)
 	if err != nil {
 		return err
@@ -2566,85 +2566,85 @@ func RegisterCampusServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.
 		}()
 	}()
 
-	return RegisterCampusServiceHandler(ctx, mux, conn)
+	return RegisterLegacyServiceHandler(ctx, mux, conn)
 }
 
-// RegisterCampusServiceHandler registers the http handlers for service CampusService to "mux".
+// RegisterLegacyServiceHandler registers the http handlers for service LegacyService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCampusServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterCampusServiceHandlerClient(ctx, mux, NewCampusServiceClient(conn))
+func RegisterLegacyServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterLegacyServiceHandlerClient(ctx, mux, NewLegacyServiceClient(conn))
 }
 
-// RegisterCampusServiceHandlerClient registers the http handlers for service CampusService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "CampusServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "CampusServiceClient"
+// RegisterLegacyServiceHandlerClient registers the http handlers for service LegacyService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "LegacyServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "LegacyServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "CampusServiceClient" to call the correct interceptors.
-func RegisterCampusServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CampusServiceClient) error {
+// "LegacyServiceClient" to call the correct interceptors.
+func RegisterLegacyServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client LegacyServiceClient) error {
 
-	mux.Handle("GET", pattern_CampusService_GetUpdateNote_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LegacyService_ListResponsiblePerson_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/GetUpdateNote", runtime.WithHTTPPathPattern("/updatenote/{version}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListResponsiblePerson", runtime.WithHTTPPathPattern("/barrierfree/contacts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CampusService_GetUpdateNote_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LegacyService_ListResponsiblePerson_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CampusService_GetUpdateNote_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LegacyService_ListResponsiblePerson_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_CampusService_ListMovies_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LegacyService_ListMoreInformation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/ListMovies", runtime.WithHTTPPathPattern("/movies/{last_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListMoreInformation", runtime.WithHTTPPathPattern("/barrierfree/moreInformation"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CampusService_ListMovies_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LegacyService_ListMoreInformation_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CampusService_ListMovies_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LegacyService_ListMoreInformation_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_CampusService_CreateFeedback_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_LegacyService_ListOpeningTimes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.CampusService/CreateFeedback", runtime.WithHTTPPathPattern("/feedback"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.LegacyService/ListOpeningTimes", runtime.WithHTTPPathPattern("/openingtimes/{language}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CampusService_CreateFeedback_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LegacyService_ListOpeningTimes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CampusService_CreateFeedback_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LegacyService_ListOpeningTimes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2652,17 +2652,17 @@ func RegisterCampusServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_CampusService_GetUpdateNote_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"updatenote", "version"}, ""))
+	pattern_LegacyService_ListResponsiblePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "contacts"}, ""))
 
-	pattern_CampusService_ListMovies_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"movies", "last_id"}, ""))
+	pattern_LegacyService_ListMoreInformation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "moreInformation"}, ""))
 
-	pattern_CampusService_CreateFeedback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"feedback"}, ""))
+	pattern_LegacyService_ListOpeningTimes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"openingtimes", "language"}, ""))
 )
 
 var (
-	forward_CampusService_GetUpdateNote_0 = runtime.ForwardResponseMessage
+	forward_LegacyService_ListResponsiblePerson_0 = runtime.ForwardResponseMessage
 
-	forward_CampusService_ListMovies_0 = runtime.ForwardResponseMessage
+	forward_LegacyService_ListMoreInformation_0 = runtime.ForwardResponseMessage
 
-	forward_CampusService_CreateFeedback_0 = runtime.ForwardResponseMessage
+	forward_LegacyService_ListOpeningTimes_0 = runtime.ForwardResponseMessage
 )

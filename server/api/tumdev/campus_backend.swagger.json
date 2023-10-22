@@ -10,16 +10,16 @@
       "name": "NewsService"
     },
     {
-      "name": "CanteenService"
+      "name": "CampusService"
     },
     {
-      "name": "LegacyService"
+      "name": "CanteenService"
     },
     {
       "name": "NotificationService"
     },
     {
-      "name": "CampusService"
+      "name": "LegacyService"
     }
   ],
   "consumes": [
@@ -31,6 +31,7 @@
   "paths": {
     "/barrierfree/contacts": {
       "get": {
+        "summary": "deprecated as this should be handled by the navigatum instead",
         "operationId": "LegacyService_ListResponsiblePerson",
         "responses": {
           "200": {
@@ -53,6 +54,7 @@
     },
     "/barrierfree/moreInformation": {
       "get": {
+        "summary": "deprecated as this should be handled by the navigatum instead",
         "operationId": "LegacyService_ListMoreInformation",
         "responses": {
           "200": {
@@ -870,6 +872,7 @@
     },
     "/openingtimes/{language}": {
       "get": {
+        "summary": "deprecated as this should be handled by the navigatum instead",
         "operationId": "LegacyService_ListOpeningTimes",
         "responses": {
           "200": {

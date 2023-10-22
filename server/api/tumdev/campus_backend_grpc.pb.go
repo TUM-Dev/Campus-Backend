@@ -184,6 +184,205 @@ var NewsService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
+	CampusService_GetUpdateNote_FullMethodName  = "/api.CampusService/GetUpdateNote"
+	CampusService_ListMovies_FullMethodName     = "/api.CampusService/ListMovies"
+	CampusService_CreateFeedback_FullMethodName = "/api.CampusService/CreateFeedback"
+)
+
+// CampusServiceClient is the client API for CampusService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type CampusServiceClient interface {
+	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
+	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
+	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error)
+}
+
+type campusServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewCampusServiceClient(cc grpc.ClientConnInterface) CampusServiceClient {
+	return &campusServiceClient{cc}
+}
+
+func (c *campusServiceClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
+	out := new(GetUpdateNoteReply)
+	err := c.cc.Invoke(ctx, CampusService_GetUpdateNote_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusServiceClient) ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error) {
+	out := new(ListMoviesReply)
+	err := c.cc.Invoke(ctx, CampusService_ListMovies_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusServiceClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CampusService_ServiceDesc.Streams[0], CampusService_CreateFeedback_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &campusServiceCreateFeedbackClient{stream}
+	return x, nil
+}
+
+type CampusService_CreateFeedbackClient interface {
+	Send(*CreateFeedbackRequest) error
+	CloseAndRecv() (*CreateFeedbackReply, error)
+	grpc.ClientStream
+}
+
+type campusServiceCreateFeedbackClient struct {
+	grpc.ClientStream
+}
+
+func (x *campusServiceCreateFeedbackClient) Send(m *CreateFeedbackRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *campusServiceCreateFeedbackClient) CloseAndRecv() (*CreateFeedbackReply, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(CreateFeedbackReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// CampusServiceServer is the server API for CampusService service.
+// All implementations must embed UnimplementedCampusServiceServer
+// for forward compatibility
+type CampusServiceServer interface {
+	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
+	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
+	CreateFeedback(CampusService_CreateFeedbackServer) error
+	mustEmbedUnimplementedCampusServiceServer()
+}
+
+// UnimplementedCampusServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedCampusServiceServer struct {
+}
+
+func (UnimplementedCampusServiceServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
+}
+func (UnimplementedCampusServiceServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
+}
+func (UnimplementedCampusServiceServer) CreateFeedback(CampusService_CreateFeedbackServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
+}
+func (UnimplementedCampusServiceServer) mustEmbedUnimplementedCampusServiceServer() {}
+
+// UnsafeCampusServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CampusServiceServer will
+// result in compilation errors.
+type UnsafeCampusServiceServer interface {
+	mustEmbedUnimplementedCampusServiceServer()
+}
+
+func RegisterCampusServiceServer(s grpc.ServiceRegistrar, srv CampusServiceServer) {
+	s.RegisterService(&CampusService_ServiceDesc, srv)
+}
+
+func _CampusService_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUpdateNoteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServiceServer).GetUpdateNote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CampusService_GetUpdateNote_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServiceServer).GetUpdateNote(ctx, req.(*GetUpdateNoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CampusService_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMoviesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServiceServer).ListMovies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CampusService_ListMovies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServiceServer).ListMovies(ctx, req.(*ListMoviesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CampusService_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CampusServiceServer).CreateFeedback(&campusServiceCreateFeedbackServer{stream})
+}
+
+type CampusService_CreateFeedbackServer interface {
+	SendAndClose(*CreateFeedbackReply) error
+	Recv() (*CreateFeedbackRequest, error)
+	grpc.ServerStream
+}
+
+type campusServiceCreateFeedbackServer struct {
+	grpc.ServerStream
+}
+
+func (x *campusServiceCreateFeedbackServer) SendAndClose(m *CreateFeedbackReply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *campusServiceCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
+	m := new(CreateFeedbackRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// CampusService_ServiceDesc is the grpc.ServiceDesc for CampusService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var CampusService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.CampusService",
+	HandlerType: (*CampusServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUpdateNote",
+			Handler:    _CampusService_GetUpdateNote_Handler,
+		},
+		{
+			MethodName: "ListMovies",
+			Handler:    _CampusService_ListMovies_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "CreateFeedback",
+			Handler:       _CampusService_CreateFeedback_Handler,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "tumdev/campus_backend.proto",
+}
+
+const (
 	CanteenService_GetCanteenHeadCount_FullMethodName      = "/api.CanteenService/GetCanteenHeadCount"
 	CanteenService_ListCanteenRatings_FullMethodName       = "/api.CanteenService/ListCanteenRatings"
 	CanteenService_GetDishRatings_FullMethodName           = "/api.CanteenService/GetDishRatings"
@@ -609,170 +808,6 @@ var CanteenService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	LegacyService_ListResponsiblePerson_FullMethodName = "/api.LegacyService/ListResponsiblePerson"
-	LegacyService_ListMoreInformation_FullMethodName   = "/api.LegacyService/ListMoreInformation"
-	LegacyService_ListOpeningTimes_FullMethodName      = "/api.LegacyService/ListOpeningTimes"
-)
-
-// LegacyServiceClient is the client API for LegacyService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LegacyServiceClient interface {
-	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
-	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
-	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
-}
-
-type legacyServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewLegacyServiceClient(cc grpc.ClientConnInterface) LegacyServiceClient {
-	return &legacyServiceClient{cc}
-}
-
-func (c *legacyServiceClient) ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error) {
-	out := new(ListResponsiblePersonReply)
-	err := c.cc.Invoke(ctx, LegacyService_ListResponsiblePerson_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *legacyServiceClient) ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error) {
-	out := new(ListMoreInformationReply)
-	err := c.cc.Invoke(ctx, LegacyService_ListMoreInformation_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *legacyServiceClient) ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error) {
-	out := new(ListOpeningTimesReply)
-	err := c.cc.Invoke(ctx, LegacyService_ListOpeningTimes_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// LegacyServiceServer is the server API for LegacyService service.
-// All implementations must embed UnimplementedLegacyServiceServer
-// for forward compatibility
-type LegacyServiceServer interface {
-	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
-	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
-	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
-	mustEmbedUnimplementedLegacyServiceServer()
-}
-
-// UnimplementedLegacyServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedLegacyServiceServer struct {
-}
-
-func (UnimplementedLegacyServiceServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
-}
-func (UnimplementedLegacyServiceServer) ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMoreInformation not implemented")
-}
-func (UnimplementedLegacyServiceServer) ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListOpeningTimes not implemented")
-}
-func (UnimplementedLegacyServiceServer) mustEmbedUnimplementedLegacyServiceServer() {}
-
-// UnsafeLegacyServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LegacyServiceServer will
-// result in compilation errors.
-type UnsafeLegacyServiceServer interface {
-	mustEmbedUnimplementedLegacyServiceServer()
-}
-
-func RegisterLegacyServiceServer(s grpc.ServiceRegistrar, srv LegacyServiceServer) {
-	s.RegisterService(&LegacyService_ServiceDesc, srv)
-}
-
-func _LegacyService_ListResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResponsiblePersonRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LegacyService_ListResponsiblePerson_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, req.(*ListResponsiblePersonRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LegacyService_ListMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMoreInformationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LegacyServiceServer).ListMoreInformation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LegacyService_ListMoreInformation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LegacyServiceServer).ListMoreInformation(ctx, req.(*ListMoreInformationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LegacyService_ListOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListOpeningTimesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LegacyService_ListOpeningTimes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, req.(*ListOpeningTimesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// LegacyService_ServiceDesc is the grpc.ServiceDesc for LegacyService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var LegacyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.LegacyService",
-	HandlerType: (*LegacyServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "ListResponsiblePerson",
-			Handler:    _LegacyService_ListResponsiblePerson_Handler,
-		},
-		{
-			MethodName: "ListMoreInformation",
-			Handler:    _LegacyService_ListMoreInformation_Handler,
-		},
-		{
-			MethodName: "ListOpeningTimes",
-			Handler:    _LegacyService_ListOpeningTimes_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "tumdev/campus_backend.proto",
-}
-
-const (
 	NotificationService_GetUploadStatus_FullMethodName          = "/api.NotificationService/GetUploadStatus"
 	NotificationService_GetNotification_FullMethodName          = "/api.NotificationService/GetNotification"
 	NotificationService_GetNotificationConfirm_FullMethodName   = "/api.NotificationService/GetNotificationConfirm"
@@ -1091,200 +1126,171 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CampusService_GetUpdateNote_FullMethodName  = "/api.CampusService/GetUpdateNote"
-	CampusService_ListMovies_FullMethodName     = "/api.CampusService/ListMovies"
-	CampusService_CreateFeedback_FullMethodName = "/api.CampusService/CreateFeedback"
+	LegacyService_ListResponsiblePerson_FullMethodName = "/api.LegacyService/ListResponsiblePerson"
+	LegacyService_ListMoreInformation_FullMethodName   = "/api.LegacyService/ListMoreInformation"
+	LegacyService_ListOpeningTimes_FullMethodName      = "/api.LegacyService/ListOpeningTimes"
 )
 
-// CampusServiceClient is the client API for CampusService service.
+// LegacyServiceClient is the client API for LegacyService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CampusServiceClient interface {
-	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
-	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
-	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error)
+type LegacyServiceClient interface {
+	// deprecated as this should be handled by the navigatum instead
+	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
+	// deprecated as this should be handled by the navigatum instead
+	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
+	// deprecated as this should be handled by the navigatum instead
+	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
 }
 
-type campusServiceClient struct {
+type legacyServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCampusServiceClient(cc grpc.ClientConnInterface) CampusServiceClient {
-	return &campusServiceClient{cc}
+func NewLegacyServiceClient(cc grpc.ClientConnInterface) LegacyServiceClient {
+	return &legacyServiceClient{cc}
 }
 
-func (c *campusServiceClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
-	out := new(GetUpdateNoteReply)
-	err := c.cc.Invoke(ctx, CampusService_GetUpdateNote_FullMethodName, in, out, opts...)
+func (c *legacyServiceClient) ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error) {
+	out := new(ListResponsiblePersonReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListResponsiblePerson_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusServiceClient) ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error) {
-	out := new(ListMoviesReply)
-	err := c.cc.Invoke(ctx, CampusService_ListMovies_FullMethodName, in, out, opts...)
+func (c *legacyServiceClient) ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error) {
+	out := new(ListMoreInformationReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListMoreInformation_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *campusServiceClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (CampusService_CreateFeedbackClient, error) {
-	stream, err := c.cc.NewStream(ctx, &CampusService_ServiceDesc.Streams[0], CampusService_CreateFeedback_FullMethodName, opts...)
+func (c *legacyServiceClient) ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error) {
+	out := new(ListOpeningTimesReply)
+	err := c.cc.Invoke(ctx, LegacyService_ListOpeningTimes_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &campusServiceCreateFeedbackClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type CampusService_CreateFeedbackClient interface {
-	Send(*CreateFeedbackRequest) error
-	CloseAndRecv() (*CreateFeedbackReply, error)
-	grpc.ClientStream
-}
-
-type campusServiceCreateFeedbackClient struct {
-	grpc.ClientStream
-}
-
-func (x *campusServiceCreateFeedbackClient) Send(m *CreateFeedbackRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *campusServiceCreateFeedbackClient) CloseAndRecv() (*CreateFeedbackReply, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(CreateFeedbackReply)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// CampusServiceServer is the server API for CampusService service.
-// All implementations must embed UnimplementedCampusServiceServer
+// LegacyServiceServer is the server API for LegacyService service.
+// All implementations must embed UnimplementedLegacyServiceServer
 // for forward compatibility
-type CampusServiceServer interface {
-	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
-	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
-	CreateFeedback(CampusService_CreateFeedbackServer) error
-	mustEmbedUnimplementedCampusServiceServer()
+type LegacyServiceServer interface {
+	// deprecated as this should be handled by the navigatum instead
+	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
+	// deprecated as this should be handled by the navigatum instead
+	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
+	// deprecated as this should be handled by the navigatum instead
+	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
+	mustEmbedUnimplementedLegacyServiceServer()
 }
 
-// UnimplementedCampusServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedCampusServiceServer struct {
+// UnimplementedLegacyServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedLegacyServiceServer struct {
 }
 
-func (UnimplementedCampusServiceServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
+func (UnimplementedLegacyServiceServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
 }
-func (UnimplementedCampusServiceServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
+func (UnimplementedLegacyServiceServer) ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMoreInformation not implemented")
 }
-func (UnimplementedCampusServiceServer) CreateFeedback(CampusService_CreateFeedbackServer) error {
-	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
+func (UnimplementedLegacyServiceServer) ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOpeningTimes not implemented")
 }
-func (UnimplementedCampusServiceServer) mustEmbedUnimplementedCampusServiceServer() {}
+func (UnimplementedLegacyServiceServer) mustEmbedUnimplementedLegacyServiceServer() {}
 
-// UnsafeCampusServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CampusServiceServer will
+// UnsafeLegacyServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LegacyServiceServer will
 // result in compilation errors.
-type UnsafeCampusServiceServer interface {
-	mustEmbedUnimplementedCampusServiceServer()
+type UnsafeLegacyServiceServer interface {
+	mustEmbedUnimplementedLegacyServiceServer()
 }
 
-func RegisterCampusServiceServer(s grpc.ServiceRegistrar, srv CampusServiceServer) {
-	s.RegisterService(&CampusService_ServiceDesc, srv)
+func RegisterLegacyServiceServer(s grpc.ServiceRegistrar, srv LegacyServiceServer) {
+	s.RegisterService(&LegacyService_ServiceDesc, srv)
 }
 
-func _CampusService_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUpdateNoteRequest)
+func _LegacyService_ListResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListResponsiblePersonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServiceServer).GetUpdateNote(ctx, in)
+		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CampusService_GetUpdateNote_FullMethodName,
+		FullMethod: LegacyService_ListResponsiblePerson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServiceServer).GetUpdateNote(ctx, req.(*GetUpdateNoteRequest))
+		return srv.(LegacyServiceServer).ListResponsiblePerson(ctx, req.(*ListResponsiblePersonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CampusService_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMoviesRequest)
+func _LegacyService_ListMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMoreInformationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServiceServer).ListMovies(ctx, in)
+		return srv.(LegacyServiceServer).ListMoreInformation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CampusService_ListMovies_FullMethodName,
+		FullMethod: LegacyService_ListMoreInformation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServiceServer).ListMovies(ctx, req.(*ListMoviesRequest))
+		return srv.(LegacyServiceServer).ListMoreInformation(ctx, req.(*ListMoreInformationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CampusService_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CampusServiceServer).CreateFeedback(&campusServiceCreateFeedbackServer{stream})
-}
-
-type CampusService_CreateFeedbackServer interface {
-	SendAndClose(*CreateFeedbackReply) error
-	Recv() (*CreateFeedbackRequest, error)
-	grpc.ServerStream
-}
-
-type campusServiceCreateFeedbackServer struct {
-	grpc.ServerStream
-}
-
-func (x *campusServiceCreateFeedbackServer) SendAndClose(m *CreateFeedbackReply) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *campusServiceCreateFeedbackServer) Recv() (*CreateFeedbackRequest, error) {
-	m := new(CreateFeedbackRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _LegacyService_ListOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOpeningTimesRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LegacyService_ListOpeningTimes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LegacyServiceServer).ListOpeningTimes(ctx, req.(*ListOpeningTimesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-// CampusService_ServiceDesc is the grpc.ServiceDesc for CampusService service.
+// LegacyService_ServiceDesc is the grpc.ServiceDesc for LegacyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CampusService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.CampusService",
-	HandlerType: (*CampusServiceServer)(nil),
+var LegacyService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.LegacyService",
+	HandlerType: (*LegacyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUpdateNote",
-			Handler:    _CampusService_GetUpdateNote_Handler,
+			MethodName: "ListResponsiblePerson",
+			Handler:    _LegacyService_ListResponsiblePerson_Handler,
 		},
 		{
-			MethodName: "ListMovies",
-			Handler:    _CampusService_ListMovies_Handler,
+			MethodName: "ListMoreInformation",
+			Handler:    _LegacyService_ListMoreInformation_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "CreateFeedback",
-			Handler:       _CampusService_CreateFeedback_Handler,
-			ClientStreams: true,
+			MethodName: "ListOpeningTimes",
+			Handler:    _LegacyService_ListOpeningTimes_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "tumdev/campus_backend.proto",
 }
