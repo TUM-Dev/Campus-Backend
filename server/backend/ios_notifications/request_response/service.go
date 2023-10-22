@@ -29,13 +29,10 @@ var collectedNewGrades = promauto.NewHistogram(prometheus.HistogramOpts{
 	Buckets: prometheus.LinearBuckets(0, 5, 5),
 })
 
-func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
-	// requestId refers to the request id that was sent to the device and stored in the Database
-	requestId := request.GetRequestId()
+func (service *Service) HandleDeviceRequestResponse(req *pb.IOSDeviceRequestResponseRequest, apnsIsActive bool) (*pb.IOSDeviceRequestResponseReply, error) {
+	log.WithField("requestId", req.RequestId).Trace("Handling request")
 
-	log.WithField("requestId", requestId).Trace("Handling request")
-
-	requestLog, err := service.Repository.GetIOSDeviceRequest(requestId)
+	requestLog, err := service.Repository.GetIOSDeviceRequest(req.RequestId)
 	if err != nil {
 		log.WithError(err).Error("Could not get request")
 		return nil, status.Error(codes.Internal, "Could not get request, probably request is already outdated")
@@ -43,9 +40,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 
 	switch requestLog.RequestType {
 	case model.IOSBackgroundCampusTokenRequest.String():
-		campusToken := request.GetPayload()
-
-		if campusToken == "" {
+		if req.Payload == "" {
 			return nil, status.Error(codes.InvalidArgument, "Payload is empty")
 		}
 
@@ -53,7 +48,7 @@ func (service *Service) HandleDeviceRequestResponse(request *pb.IOSDeviceRequest
 			return nil, status.Error(codes.Internal, "APNS is not active")
 		}
 
-		return service.handleDeviceCampusTokenRequest(requestLog, campusToken)
+		return service.handleDeviceCampusTokenRequest(requestLog, req.Payload)
 	default:
 		return nil, status.Error(codes.InvalidArgument, "Unknown request type")
 	}
@@ -92,7 +87,9 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 	collectedNewGrades.Observe(float64(len(newGrades)))
 	if len(newGrades) == 0 {
 		log.Info("No new grades found")
-		service.deleteRequestLog(requestLog)
+		if err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog); err != nil {
+			log.WithError(err).Error("Could not delete request logs")
+		}
 		return &pb.IOSDeviceRequestResponseReply{
 			Message: "Successfully handled request",
 		}, nil
@@ -113,18 +110,13 @@ func (service *Service) handleDeviceCampusTokenRequest(requestLog *model.IOSDevi
 		sendGradesToDevice(device, newGrades, apnsRepository)
 	}
 
-	service.deleteRequestLog(requestLog)
+	if err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog); err != nil {
+		log.WithError(err).Error("Could not delete request logs")
+	}
 
 	return &pb.IOSDeviceRequestResponseReply{
 		Message: "Successfully handled request",
 	}, nil
-}
-
-func (service *Service) deleteRequestLog(requestLog *model.IOSDeviceRequestLog) {
-	err := service.Repository.DeleteAllRequestLogsForThisDeviceWithType(requestLog)
-	if err != nil {
-		log.WithError(err).Error("Could not delete request logs")
-	}
 }
 
 func decryptGrades(grades []model.IOSEncryptedGrade, campusToken string) ([]model.IOSEncryptedGrade, error) {

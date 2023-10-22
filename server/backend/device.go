@@ -128,7 +128,7 @@ func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceReque
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	switch req.GetDeviceType() {
+	switch req.DeviceType {
 	case pb.DeviceType_ANDROID:
 		return nil, status.Error(codes.Unimplemented, "android device creation not implemented")
 	case pb.DeviceType_IOS:
@@ -146,7 +146,7 @@ func (s *CampusServer) DeleteDevice(_ context.Context, req *pb.DeleteDeviceReque
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	switch req.GetDeviceType() {
+	switch req.DeviceType {
 	case pb.DeviceType_ANDROID:
 		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
 	case pb.DeviceType_IOS:

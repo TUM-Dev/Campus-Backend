@@ -23,10 +23,10 @@ var (
 	})
 )
 
-func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
+func (service *Service) CreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
 	device := model.IOSDevice{
-		DeviceID:  request.GetDeviceId(),
-		PublicKey: request.GetPublicKey(),
+		DeviceID:  req.DeviceId,
+		PublicKey: req.PublicKey,
 	}
 
 	if err := service.Repository.CreateDevice(&device); err != nil {
@@ -39,14 +39,14 @@ func (service *Service) CreateDevice(request *pb.CreateDeviceRequest) (*pb.Creat
 	}, nil
 }
 
-func (service *Service) DeleteDevice(request *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
-	if err := service.Repository.DeleteDevice(request.GetDeviceId()); err != nil {
+func (service *Service) DeleteDevice(req *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+	if err := service.Repository.DeleteDevice(req.DeviceId); err != nil {
 		return nil, status.Error(codes.Internal, "Could not delete device")
 	}
 
 	iosRegisteredDevices.Dec()
 	return &pb.DeleteDeviceReply{
-		DeviceId: request.GetDeviceId(),
+		DeviceId: req.DeviceId,
 	}, nil
 }
 
