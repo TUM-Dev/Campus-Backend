@@ -41,7 +41,7 @@ jobs:
         working-directory: ./server
         env:
           EXIT_AFTER_MIGRATION: "true"
-          DB_DSN: root:super_secret_passw0rd@tcp(db:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
+          DB_DSN: root:super_secret_passw0rd@tcp(mariadb:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
   build:
     runs-on: ubuntu-latest
