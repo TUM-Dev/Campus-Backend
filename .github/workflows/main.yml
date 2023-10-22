@@ -52,7 +52,7 @@ jobs:
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
       - name: export manual database
-        run: mysqldump --user root --password super_secret_passw0rd --no-data campus_db --result-file=./manual.sql && cat ./manual.sql
+        run: mysqldump --host localhost --port=3306 --user=root --password=super_secret_passw0rd --no-data campus_db --result-file=./manual.sql && cat ./manual.sql
       - name: run auto migrations
         run: go run main.go
         working-directory: ./server
