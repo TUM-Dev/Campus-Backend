@@ -38,9 +38,6 @@ func migrate20230904100000() *gormigrate.Migration {
 			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "movie"); err != nil {
 				return err
 			}
-			if err := tx.AutoMigrate(&NewsSource{}); err != nil {
-				return err
-			}
 			// tu film news source is now inlined
 			if err := tx.Delete(&NewsSource{Source: 2}).Error; err != nil {
 				return err
