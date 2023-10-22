@@ -19,5 +19,5 @@ var (
 type NotificationType struct {
 	Type         int64  `gorm:"primary_key;AUTO_INCREMENT;column:type;type:int;" json:"type"`
 	Name         string `gorm:"column:name;type:text;size:65535;" json:"name"`
-	Confirmation string `gorm:"column:confirmation;type:char;size:5;default:false;" json:"confirmation"`
+	Confirmation string `gorm:"column:confirmation;type:enum('true', 'false');default:'false';" json:"confirmation"`
 }
