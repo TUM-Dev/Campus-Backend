@@ -18,7 +18,7 @@ func migrate20220713000000() *gormigrate.Migration {
 				&model.CafeteriaRating{},
 				&model.CafeteriaRatingAverage{},
 				&model.CafeteriaRatingTag{},
-				&model.CafeteriaRatingTagsAverage{},
+				&model.CafeteriaRatingTagAverage{},
 				&model.CafeteriaRatingTagOption{},
 				&model.Dish{},
 				&model.DishesOfTheWeek{},

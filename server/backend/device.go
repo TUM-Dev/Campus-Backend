@@ -19,13 +19,13 @@ import (
 // deviceBuffer stores all recent device calls in a buffer and flushes them to the database periodically
 type deviceBuffer struct {
 	lock    sync.Mutex
-	devices map[string]*model.Devices // key is uuid
+	devices map[string]*model.Device // key is uuid
 }
 
 func newDeviceBuffer() *deviceBuffer {
 	return &deviceBuffer{
 		lock:    sync.Mutex{},
-		devices: make(map[string]*model.Devices),
+		devices: make(map[string]*model.Device),
 	}
 }
 
@@ -47,7 +47,7 @@ func (b *deviceBuffer) add(deviceID string, method string, osVersion string, app
 	if _, exists := b.devices[deviceID]; exists {
 		b.devices[deviceID].Counter++
 	} else {
-		b.devices[deviceID] = &model.Devices{
+		b.devices[deviceID] = &model.Device{
 			UUID:       deviceID,
 			LastAccess: time.Now(),
 			LastAPI:    method,
@@ -62,7 +62,7 @@ func (b *deviceBuffer) add(deviceID string, method string, osVersion string, app
 func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	devices := make([]*model.Devices, 0, len(b.devices))
+	devices := make([]*model.Device, 0, len(b.devices))
 	for _, device := range b.devices {
 		devices = append(devices, device)
 	}
@@ -86,7 +86,7 @@ func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	if err != nil {
 		log.WithError(err).Error("failed to flush device buffer")
 	}
-	b.devices = make(map[string]*model.Devices)
+	b.devices = make(map[string]*model.Device)
 	return nil
 }
 

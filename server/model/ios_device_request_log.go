@@ -13,8 +13,8 @@ import "time"
 // containing the RequestID and the data.
 type IOSDeviceRequestLog struct {
 	RequestID   string    `gorm:"primary_key;default:UUID()" json:"requestId"`
-	DeviceID    string    `json:"deviceId" gorm:"size:200;not null"`
-	Device      IOSDevice `json:"device" gorm:"constraint:OnDelete:CASCADE;"`
-	RequestType string    `json:"requestType" gorm:"not null;type:enum ('CAMPUS_TOKEN_REQUEST');"`
+	DeviceID    string    `gorm:"size:200;not null" json:"deviceId"`
+	Device      IOSDevice `gorm:"constraint:OnDelete:CASCADE;" json:"device"`
+	RequestType string    `gorm:"not null;type:enum ('CAMPUS_TOKEN_REQUEST');" json:"requestType"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`
 }
