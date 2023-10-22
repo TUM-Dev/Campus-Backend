@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: |
             server/go.sum
       - name: wait for db
-        run: sleep 20 && docker logs $(docker ps -qa) &&
+        run: sleep 20 && docker logs $(docker ps -qa)
       - name: run migration
         run: go run main.go
         working-directory: ./server
