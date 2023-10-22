@@ -2,6 +2,8 @@
 package migration
 
 import (
+	"time"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	log "github.com/sirupsen/logrus"
@@ -64,7 +66,7 @@ func manualMigrate(db *gorm.DB) error {
 		UseTransaction:            true,
 		ValidateUnknownMigrations: true,
 	}
-	mig := gormigrate.New(db, gormigrateOptions, []*gormigrate.Migration{
+	migrations := []*gormigrate.Migration{
 		migrate20200000000000(),
 		migrate20210709193000(),
 		migrate20220126230000(),
@@ -77,16 +79,20 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20230904100000(),
 		migrate20230826000000(),
 		migrate20231003000000(),
-	})
-	return mig.Migrate()
+	}
+	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
 
 // Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
 func Migrate(db *gorm.DB, shouldAutoMigrate bool) error {
-	log.WithField("shouldAutoMigrate", shouldAutoMigrate).Debug("starting migration")
+	log.WithField("shouldAutoMigrate", shouldAutoMigrate).Info("starting migration")
+	start := time.Now()
+	var err error
 	if shouldAutoMigrate {
-		return autoMigrate(db)
+		err = autoMigrate(db)
 	} else {
-		return manualMigrate(db)
+		err = manualMigrate(db)
 	}
+	log.WithField("elapsed", time.Since(start)).Info("migration done")
+	return err
 }
