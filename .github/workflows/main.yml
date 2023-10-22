@@ -51,8 +51,6 @@ jobs:
           CI_AUTO_MIGRATION: "false"
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
-      - name: export manual database
-        run: mysqldump --host localhost --port=3306 --user=root --password=super_secret_passw0rd --no-data campus_db --result-file=./manual.sql && cat ./manual.sql
       - name: run auto migrations
         run: go run main.go
         working-directory: ./server
@@ -61,6 +59,9 @@ jobs:
           CI_AUTO_MIGRATION: "true"
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
+      - uses: ariga/setup-atlas@master
+      - name: export diff the migrations
+        run: atlas schema diff --from "maria://root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --to "maria://root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local"
   build:
     runs-on: ubuntu-latest
     needs: [test, test_migrations]
