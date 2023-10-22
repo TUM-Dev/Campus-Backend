@@ -38,10 +38,10 @@ func autoMigrate(db *gorm.DB) error {
 		&model.Feedback{},
 		&model.File{},
 		&model.IOSDevice{},
-		//&model.IOSDeviceLastUpdated{},
+		//&model.IOSDeviceLastUpdated{}, -- not a gorm model
 		&model.IOSDeviceRequestLog{},
 		&model.IOSDevicesActivityReset{},
-		&model.IOSGrade{},
+		//&model.IOSGrade{}, -- not a gorm model
 		//&model.IOSRemoteNotification...{}, -- wtf???
 		&model.IOSScheduledUpdateLog{},
 		&model.IOSSchedulingPriority{},
