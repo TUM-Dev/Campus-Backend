@@ -19,7 +19,7 @@ type Device struct {
 	AppVersion      string      `gorm:"column:appVersion;type:text;size:16777215;" json:"app_version"`
 	Counter         int32       `gorm:"column:counter;type:int;default:0;" json:"counter"`
 	Pk              null.String `gorm:"column:pk;type:text;size:4294967295;" json:"pk"`
-	PkActive        string      `gorm:"column:pkActive;type:char;size:5;default:false;" json:"pk_active"`
+	PkActive        string      `gorm:"column:pkActive;type:enum('true', 'false');default:'false';" json:"pk_active"`
 	GcmToken        null.String `gorm:"column:gcmToken;type:text;size:65535;" json:"gcm_token"`
 	GcmStatus       null.String `gorm:"column:gcmStatus;type:varchar(200);" json:"gcm_status"`
 	ConfirmationKey null.String `gorm:"column:confirmationKey;type:varchar(35);" json:"confirmation_key"`
