@@ -12,7 +12,7 @@ type Device struct {
 	Member          null.Int    `gorm:"column:member;type:int;" json:"member"`
 	UUID            string      `gorm:"column:uuid;type:varchar(50);" json:"uuid"`
 	Created         null.Time   `gorm:"column:created;type:timestamp;" json:"created"`
-	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:0000-00-00 00:00:00;" json:"last_access"`
+	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:'0000-00-00 00:00:00';" json:"last_access"`
 	LastAPI         string      `gorm:"column:lastApi;type:text;size:16777215;" json:"last_api"`
 	Developer       string      `gorm:"column:developer;type:char;size:5;default:false;" json:"developer"`
 	OsVersion       string      `gorm:"column:osVersion;type:text;size:16777215;" json:"os_version"`
