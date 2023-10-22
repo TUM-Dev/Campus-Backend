@@ -19,7 +19,7 @@ type NewsSource struct {
 
 // migrate20230904100000
 // migrates the crontab from kino to movie crontab
-func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
+func migrate20230904100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230904100000",
 		Migrate: func(tx *gorm.DB) error {

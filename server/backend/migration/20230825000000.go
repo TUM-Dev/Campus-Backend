@@ -9,7 +9,7 @@ import (
 
 // migrate20230825000000
 // Removes the ability to run chat cronjobs
-func (m TumDBMigrator) migrate20230825000000() *gormigrate.Migration {
+func migrate20230825000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230825000000",
 		Migrate: func(tx *gorm.DB) error {

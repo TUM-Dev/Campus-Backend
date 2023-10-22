@@ -8,7 +8,7 @@ import (
 
 // migrate20220126230000
 // adds a fulltext index to the roomfinder_rooms table
-func (m TumDBMigrator) migrate20220126230000() *gormigrate.Migration {
+func migrate20220126230000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20220126230000",
 		Migrate: func(tx *gorm.DB) error {

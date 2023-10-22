@@ -16,7 +16,7 @@ import (
 //go:embed static_data/iosInitialSchedulingPriorities.json
 var iosInitialPrioritiesFile []byte
 
-func (m TumDBMigrator) migrate20221119131300() *gormigrate.Migration {
+func migrate20221119131300() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20221119131300",
 		Migrate: func(tx *gorm.DB) error {

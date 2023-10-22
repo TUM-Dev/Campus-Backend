@@ -25,7 +25,7 @@ func SetupDB() *gorm.DB {
 
 	// Migrate the schema
 	// currently not activated as
-	if err := migration.New(db, false).Migrate(); err != nil {
+	if err := migration.Migrate(db, false); err != nil {
 		log.WithError(err).Fatal("Failed to migrate database")
 	}
 

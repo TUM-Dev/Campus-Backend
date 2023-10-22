@@ -15,8 +15,8 @@ import (
 var sourceSchema string
 
 // migrate20200000000000
-// adds the source shema
-func (m TumDBMigrator) migrate20200000000000() *gormigrate.Migration {
+// adds the source schema
+func migrate20200000000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20200000000000",
 		Migrate: func(tx *gorm.DB) error {
