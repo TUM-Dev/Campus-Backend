@@ -61,7 +61,7 @@ jobs:
           ENVIRONMENT: dev
       - uses: ariga/setup-atlas@master
       - name: export diff the migrations
-        run: atlas schema diff --from "maria://root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --to "maria://root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local"
+        run: atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db"
   build:
     runs-on: ubuntu-latest
     needs: [test, test_migrations]
