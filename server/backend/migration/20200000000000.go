@@ -2,6 +2,8 @@ package migration
 
 import (
 	_ "embed"
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm/logger"
 	"strings"
 
 	"github.com/go-gormigrate/gormigrate/v2"
@@ -17,12 +19,14 @@ func (m TumDBMigrator) migrate20200000000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20200000000000",
 		Migrate: func(tx *gorm.DB) error {
+			tx = tx.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
 			for _, line := range strings.Split(sourceSchema, ";") {
 				line = strings.TrimSpace(line)
 				if line == "" {
 					continue
 				}
 				if err := tx.Exec(line).Error; err != nil {
+					log.WithError(err).WithField("line", line).Error("failed to execute line")
 					return err
 				}
 			}
