@@ -73,19 +73,19 @@ jobs:
             Found the following differences in the sql schema:
             <details>
             <summary>To get from local migrations to auto migration state one would need to</summary>
-            
+
             ```sql
             ${{ steps.diff_migrations.outputs.local_to_auto }}
             ```
-            
+
             </details>
             <details>
             <summary>To get from auto migrations to local migration state one would need to</summary>
-            
+
             ```sql
             ${{ steps.diff_migrations.outputs.auto_to_local }}
             ```
-            
+
             </details>
           edit-mode: replace
           reactions: eyes
