@@ -80,12 +80,6 @@ The docker compose will start the server and a mariadb instance.
 The server will be available at `localhost:50051` and the mariadb instance at `localhost:3306`.
 Additionally, docker creates the volume `campus-db-data` to persist the data of the mariadb instances.
 
-### Setting up the Database
-The mariadb schema can be installed by executing the following command inside the mariadb container:
-```bash
-mysql --user=root --password=secret_root_password campus_db < /entrypoint/schema.sql
-```
-
 ### Environment Variables
 The following environment variables need to be set for the server to work properly:
 * [REQUIRED] `DB_NAME`: The name of the database to use.

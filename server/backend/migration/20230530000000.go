@@ -26,7 +26,7 @@ type NewExamResultsSubscriber struct {
 	LastNotifiedAt null.Time
 }
 
-func (m TumDBMigrator) migrate20230530000000() *gormigrate.Migration {
+func migrate20230530000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230530000000",
 		Migrate: func(tx *gorm.DB) error {
