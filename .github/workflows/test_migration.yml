@@ -65,9 +65,7 @@ jobs:
             Found the following differences in the sql schema:
             <details>
             <summary>To get from local migrations to auto migration state one would need to</summary>
-            
             create-or-update-comment
-            
             </details>
           edit-mode: replace
           reactions: eyes
