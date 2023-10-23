@@ -76,7 +76,7 @@ func (s *CampusServer) GetCafeteriaRatings(ctx context.Context, input *pb.ListCa
 // queryLastCafeteriaRatingsWithLimit
 // Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
 func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cafeteriaID int32, tx *gorm.DB) []*pb.SingleRatingReply {
-	var ratings []model.CafeteriaRating
+	var ratings []model.CanteenRating
 	var err error
 
 	var limit = int(input.Limit)
@@ -355,7 +355,7 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 	}
 
 	resPath := imageWrapper(input.Image, "cafeterias", cafeteriaID)
-	rating := model.CafeteriaRating{
+	rating := model.CanteenRating{
 		Comment:     input.Comment,
 		Points:      input.Points,
 		CafeteriaID: cafeteriaID,
@@ -501,10 +501,10 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 		return -1, status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
-	var result *model.Cafeteria
+	var result *model.Canteen
 	if res := tx.First(&result, "name LIKE ?", cafeteriaName); errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
 		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: ", cafeteriaName)
-		return -1, status.Error(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Canteen does not exist. Rating has not been saved.")
 	}
 
 	return result.Cafeteria, nil
@@ -528,7 +528,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelTy
 					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
 					Count(&count).Error
 			} else {
-				err = tx.Model(&model.CafeteriaRatingTagOption{}).
+				err = tx.Model(&model.CanteenRatingTagOption{}).
 					Where("cafeteriaRatingTagOption LIKE ?", currentTag.TagId).
 					Count(&count).Error
 			}
@@ -578,13 +578,13 @@ func getModelStoreTag(tagType ModelType, tx *gorm.DB) *gorm.DB {
 	if tagType == DISH {
 		return tx.Model(&model.DishRatingTag{})
 	} else {
-		return tx.Model(&model.CafeteriaRatingTag{})
+		return tx.Model(&model.CanteenRatingTag{})
 	}
 }
 
 func getIDForCafeteriaName(name string, tx *gorm.DB) int32 {
 	var result int32 = -1
-	err := tx.Model(&model.Cafeteria{}).
+	err := tx.Model(&model.Canteen{}).
 		Where("name LIKE ?", name).
 		Select("cafeteria").
 		Scan(&result).Error
@@ -646,7 +646,7 @@ func (s *CampusServer) ListNameTags(ctx context.Context, _ *pb.ListNameTagsReque
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.ListAvailableCanteenTagsRequest) (*pb.ListAvailableCanteenTagsReply, error) {
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.WithContext(ctx).Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
+	err := s.db.WithContext(ctx).Model(&model.CanteenRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
@@ -662,7 +662,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.List
 func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequest) (*pb.ListCanteensReply, error) {
 	var result []*pb.Canteen
 	var requestStatus error = nil
-	if err := s.db.WithContext(ctx).Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error; err != nil {
+	if err := s.db.WithContext(ctx).Model(&model.Canteen{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error; err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}

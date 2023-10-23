@@ -13,6 +13,16 @@ type wrongTableName struct {
 var wrongTableNames = []wrongTableName{
 	{"crontab", "crontabs"},
 	{"kino", "movies"},
+	{"dish_name_tag_option_included", "included_dish_name_tag_options"},
+	{"dish_name_tag_option", "dish_name_tag_options"},
+	{"cafeteria", "canteens"},
+	{"cafeteria_rating", "canteen_ratings"},
+	{"cafeteria_rating_tag", "canteen_rating_tags"},
+	{"cafeteria_rating_tag_option", "canteen_rating_tag_options"},
+	{"dish", "dishes"},
+	{"dish_name_tag", "dish_name_tags"},
+	{"dish_name_tag_option_excluded", "excluded_dish_name_tag_options"},
+	{"dish_name_tag_option_included", "included_dish_name_tag_option"},
 }
 
 // migrate20231024000000

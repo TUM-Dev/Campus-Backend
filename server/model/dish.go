@@ -21,5 +21,5 @@ type Dish struct {
 
 // TableName sets the insert table name for this struct type
 func (n *Dish) TableName() string {
-	return "dish"
+	return "dishes"
 }

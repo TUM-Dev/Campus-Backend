@@ -98,7 +98,7 @@ func computeAverageForDishesInCafeterias(c *CronService) {
 
 func computeAverageForCafeteria(c *CronService) {
 	var results []model.CafeteriaRatingAverage
-	err := c.db.Model(&model.CafeteriaRating{}).
+	err := c.db.Model(&model.CanteenRating{}).
 		Select("cafeteriaID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std").
 		Group("cafeteriaID").Find(&results).Error
 
