@@ -70,7 +70,11 @@ jobs:
             Found the following differences in the sql schema:
             <details>
             <summary>To get from local migrations to auto migration state one would need to</summary>
+            
+            ```sql
             ${{join(steps.diff_migrations.outputs.*, '\n')}}
+            ```
+            
             </details>
           edit-mode: replace
           reactions: eyes
