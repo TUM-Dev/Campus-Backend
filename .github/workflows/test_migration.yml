@@ -70,9 +70,10 @@ jobs:
           issue-number: "${{ github.event.number }}"
           comment-id: "${{ steps.fc.outputs.comment-id }}"
           body: |
-            Found the following differences in the sql schema:
+            :eyes: Found the following differences in the sql schema:
+
             <details>
-            <summary>To get from local migrations to auto migration state one would need to</summary>
+            <summary>Needed get from <b>local</b> to <b>auto</b> migration state</summary>
 
             ```sql
             ${{ steps.diff_migrations.outputs.local_to_auto }}
@@ -80,7 +81,7 @@ jobs:
 
             </details>
             <details>
-            <summary>To get from auto migrations to local migration state one would need to</summary>
+            <summary>Needed from <b>auto</b> to <b>local</b> migration state</summary>
 
             ```sql
             ${{ steps.diff_migrations.outputs.auto_to_local }}
@@ -88,4 +89,3 @@ jobs:
 
             </details>
           edit-mode: replace
-          reactions: eyes
