@@ -13,16 +13,24 @@ type wrongTableName struct {
 var wrongTableNames = []wrongTableName{
 	{"crontab", "crontabs"},
 	{"kino", "movies"},
-	{"dish_name_tag_option_included", "included_dish_name_tag_options"},
-	{"dish_name_tag_option", "dish_name_tag_options"},
 	{"cafeteria", "canteens"},
+	{"canteen_head_count", "canteen_head_counts"},
 	{"cafeteria_rating", "canteen_ratings"},
 	{"cafeteria_rating_tag", "canteen_rating_tags"},
 	{"cafeteria_rating_tag_option", "canteen_rating_tag_options"},
 	{"dish", "dishes"},
+	{"dish_rating", "dish_ratings"},
+	{"dish_rating_tag", "dish_rating_tags"},
+	{"dish_rating_tag_option", "dish_rating_tag_options"},
 	{"dish_name_tag", "dish_name_tags"},
+	{"dish_name_tag_option", "dish_name_tag_options"},
 	{"dish_name_tag_option_excluded", "excluded_dish_name_tag_options"},
 	{"dish_name_tag_option_included", "included_dish_name_tag_option"},
+	{"dish_to_dish_name_tag", "dish_to_dish_name_tags"},
+	{"dishes_of_the_week", "dishes_of_the_weeks"},
+	{"update_note", "update_notes"},
+	{"newsSource", "news_sources"},
+	{"news_alert", "news_alerts"},
 }
 
 // migrate20231024000000

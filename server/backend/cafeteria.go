@@ -276,25 +276,25 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 	var results []queryRatingTag
 	var err error
 	if ratingType == DISH {
-		err = tx.Table("dish_rating_tag_option options").
+		err = tx.Table("dish_rating_tag_options options").
 			Joins("JOIN dish_rating_tag_average results ON options.dishRatingTagOption = results.tagID").
 			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
 	} else if ratingType == CAFETERIA {
-		err = tx.Table("cafeteria_rating_tag_option options").
+		err = tx.Table("cafeteria_rating_tag_options options").
 			Joins("JOIN cafeteria_rating_tag_average results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
 	} else { //Query for name tags
-		err = tx.Table("dish_to_dish_name_tag mapping").
+		err = tx.Table("dish_to_dish_name_tags mapping").
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
 			Joins("JOIN dish_name_tag_average results ON mapping.nameTagID = results.tagID").
-			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.dishNameTagOption").
+			Joins("JOIN dish_name_tag_options options ON mapping.nameTagID = options.dishNameTagOption").
 			Select("mapping.nameTagID as tagId, results.average as avg, " +
 				"results.min as min, results.max as max, results.std as std").
 			Scan(&results).Error
@@ -325,13 +325,13 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType ModelType, tx *go
 	var results []*pb.RatingTagNewRequest
 	var err error
 	if ratingType == DISH {
-		err = tx.Table("dish_rating_tag_option options").
-			Joins("JOIN dish_rating_tag rating ON options.dishRatingTagOption = rating.tagID").
+		err = tx.Table("dish_rating_tag_options options").
+			Joins("JOIN dish_rating_tags rating ON options.dishRatingTagOption = rating.tagID").
 			Select("dishRatingTagOption as tagId, points, parentRating").
 			Find(&results, "parentRating = ?", dishID).Error
 	} else {
-		err = tx.Table("cafeteria_rating_tag_option options").
-			Joins("JOIN cafeteria_rating_tag rating ON options.cafeteriaRatingTagOption = rating.tagID").
+		err = tx.Table("cafeteria_rating_tag_options options").
+			Joins("JOIN cafeteria_rating_tags rating ON options.cafeteriaRatingTagOption = rating.tagID").
 			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
 			Find(&results, "correspondingRating = ?", dishID).Error
 	}
@@ -685,7 +685,7 @@ func (s *CampusServer) ListDishes(ctx context.Context, request *pb.ListDishesReq
 
 	var requestStatus error = nil
 	var results []string
-	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
+	err := s.db.WithContext(ctx).Table("dishes_of_the_weeks weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Week, request.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
