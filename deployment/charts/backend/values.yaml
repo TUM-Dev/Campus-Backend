@@ -38,7 +38,6 @@ mariadb:
       storageClass: local-path
   volumePermissions:
     enabled: true
-  initdbScriptsConfigMap: sql-init
 
 
 backend:

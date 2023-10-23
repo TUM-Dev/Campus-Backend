@@ -9,7 +9,7 @@ import (
 
 // migrate20221210000000
 // adds a "canteenHeadCount" cron job that runs every 5 minutes.
-func (m TumDBMigrator) migrate20221210000000() *gormigrate.Migration {
+func migrate20221210000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20221210000000",
 		Migrate: func(tx *gorm.DB) error {

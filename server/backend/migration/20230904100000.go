@@ -17,9 +17,14 @@ type NewsSource struct {
 	Hook   null.String `gorm:"column:hook;type:char;size:12;"`
 }
 
+// TableName sets the insert table name for this struct type
+func (n *NewsSource) TableName() string {
+	return "newsSource"
+}
+
 // migrate20230904100000
 // migrates the crontab from kino to movie crontab
-func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
+func migrate20230904100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230904100000",
 		Migrate: func(tx *gorm.DB) error {
@@ -31,9 +36,6 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 				return err
 			}
 			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "movie"); err != nil {
-				return err
-			}
-			if err := tx.AutoMigrate(&NewsSource{}); err != nil {
 				return err
 			}
 			// tu film news source is now inlined
