@@ -34,7 +34,7 @@ func (f *Files) TableName() string {
 // makes the Cover FK into a not null field
 // renames kino -> movie
 // fixes the id being named kino
-func (m TumDBMigrator) migrate20230905100000() *gormigrate.Migration {
+func migrate20230905100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "migrate20230905100000",
 		Migrate: func(tx *gorm.DB) error {

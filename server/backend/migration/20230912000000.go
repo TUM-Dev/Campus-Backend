@@ -7,7 +7,7 @@ import (
 
 // migrate20230912000000
 // Removes ticketsales from the db
-func (m TumDBMigrator) migrate20230912000000() *gormigrate.Migration {
+func migrate20230912000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230912000000",
 		Migrate: func(tx *gorm.DB) error {

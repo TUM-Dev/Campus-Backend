@@ -13,7 +13,7 @@ type device2stats struct {
 
 // migrate20231023000000
 // Removes all traces of the chat from the database.
-func (m TumDBMigrator) migrate20231023000000() *gormigrate.Migration {
+func migrate20231023000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231023000000",
 		Migrate: func(tx *gorm.DB) error {
