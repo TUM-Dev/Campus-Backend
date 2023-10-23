@@ -4,11 +4,6 @@ import (
 	"github.com/guregu/null"
 )
 
-// TableName overrides the table name used by Crontab to `crontab` (Would otherwise auto-migrate to crontabs)
-func (Crontab) TableName() string {
-	return "crontab"
-}
-
 // Crontab struct is a row record of the crontab table in the tca database
 type Crontab struct {
 	Cron     int64       `gorm:"primary_key;AUTO_INCREMENT;column:cron;type:int;" json:"cron"`
