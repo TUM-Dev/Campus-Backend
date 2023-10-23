@@ -49,7 +49,7 @@ func (c *CronService) movieCron() error {
 		for _, item := range channel.Items {
 			logFields := log.Fields{"link": item.Link, "title": item.Title, "date": item.PubDate, "location": item.Location, "url": item.Enclosure.Url}
 			var exists bool
-			if err := c.db.Model(model.Kino{}).Select("count(*) > 0").Find(&exists, "link = ?", item.Link).Error; err != nil {
+			if err := c.db.Model(model.Movie{}).Select("count(*) > 0").Find(&exists, "link = ?", item.Link).Error; err != nil {
 				log.WithError(err).WithFields(logFields).Error("Cound lot check if movie already exists")
 				continue
 			}
@@ -89,7 +89,7 @@ func (c *CronService) movieCron() error {
 			}
 
 			// save the result of the previous steps (🎉)
-			movie := model.Kino{
+			movie := model.Movie{
 				Date:        date,
 				Title:       item.Title,
 				Year:        omdbMovie.ReleaseYear,

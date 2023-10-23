@@ -12,7 +12,7 @@ import (
 )
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
-	var movies []model.Kino
+	var movies []model.Movie
 	tx := s.db.WithContext(ctx).Joins("File")
 	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
 		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
@@ -24,7 +24,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 	var movieResponse []*pb.Movie
 	for _, movie := range movies {
 		movieResponse = append(movieResponse, &pb.Movie{
-			MovieId:     movie.Id,
+			MovieId:     movie.Movie,
 			Date:        timestamppb.New(movie.Date),
 			Created:     timestamppb.New(movie.Created),
 			Title:       movie.Title,

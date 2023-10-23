@@ -10,7 +10,9 @@ type wrongTableName struct {
 	New      string
 }
 
-var wrongTableNames = []wrongTableName{}
+var wrongTableNames = []wrongTableName{
+	{"kino", "movies"},
+}
 
 // migrate20231024000000
 // - replaces all instances of misleadingly named tables with the correct ones
