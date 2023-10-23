@@ -48,7 +48,8 @@ jobs:
           ENVIRONMENT: dev
       - uses: ariga/setup-atlas@master
       - name: export diff the migrations
-        run: atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}'
+        id: diff_migrations
+        run: atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         id: fc
@@ -65,7 +66,7 @@ jobs:
             Found the following differences in the sql schema:
             <details>
             <summary>To get from local migrations to auto migration state one would need to</summary>
-            create-or-update-comment, should edit the comment
+            ${{join(steps.diff_migrations.outputs.*, '\n')}}
             </details>
           edit-mode: replace
           reactions: eyes
