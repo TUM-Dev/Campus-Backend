@@ -56,10 +56,18 @@ jobs:
           issue-number: "${{ github.event.number }}"
           body-includes: Found the following differences in the sql schema
           comment-author: github-actions[bot]
-      - run: |
-          curl \
-            -X POST \
-            ${{ github.event.pull_request.comments_url }} \
-            -H "Content-Type: application/json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            --data '{ "body": "Found the following differences in the sql schema: <details><summary>To get from local migrations to auto migration state one would need to</summary> Test concurrency</details>" }'
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: "${{ github.event.number }}"
+          comment-id: "${{ steps.fc.outputs.comment-id }}"
+          body: |
+            Found the following differences in the sql schema:
+            <details>
+            <summary>To get from local migrations to auto migration state one would need to</summary>
+            
+            create-or-update-comment
+            
+            </details>
+          edit-mode: replace
+          reactions: eyes
