@@ -2,6 +2,9 @@ name: CI
 on:
   pull_request:
     branches: [ main ]
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
 jobs:
   test_migrations:
     runs-on: ubuntu-latest
