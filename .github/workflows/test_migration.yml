@@ -51,7 +51,10 @@ jobs:
         id: diff_migrations
         run: |
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64) &&
-          echo "text<<$EOF" >> $GITHUB_OUTPUT &&
+          echo "local_to_auto<<$EOF" >> $GITHUB_OUTPUT &&
+          atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
+          echo "$EOF" >> $GITHUB_OUTPUT
+          echo "auto_to_local<<$EOF" >> $GITHUB_OUTPUT &&
           atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Find Comment
@@ -72,7 +75,15 @@ jobs:
             <summary>To get from local migrations to auto migration state one would need to</summary>
             
             ```sql
-            ${{join(steps.diff_migrations.outputs.*, '\n')}}
+            ${{ steps.diff_migrations.outputs.local_to_auto }}
+            ```
+            
+            </details>
+            <details>
+            <summary>To get from auto migrations to local migration state one would need to</summary>
+            
+            ```sql
+            ${{ steps.diff_migrations.outputs.auto_to_local }}
             ```
             
             </details>
