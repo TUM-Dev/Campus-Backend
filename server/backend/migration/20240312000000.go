@@ -26,7 +26,7 @@ func migrate20240312000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table feedback modify timestamp datetime default current_timestamp() not null").Error; err != nil {
 				return err
 			}
-			return tx.Exec("create unique index receiver_reply_to_feedback_app_version_uindex on feedback (receiver,reply_to,feedback,app_version)").Error
+			return tx.Exec("create unique index receiver_reply_to_feedback_app_version_uindex on feedback (unique (receiver(255), reply_to_email(100), feedback(255), app_version(100)) using hash").Error
 		},
 		Rollback: func(tx *gorm.DB) error {
 			if err := tx.Exec("alter table feedback modify email_id text charset utf8mb3 null").Error; err != nil {
