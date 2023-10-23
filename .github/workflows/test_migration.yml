@@ -50,10 +50,9 @@ jobs:
       - name: export diff the migrations
         id: diff_migrations
         run: |
-          export message=atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' &&
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64) &&
           echo "text<<$EOF" >> $GITHUB_OUTPUT &&
-          echo "$message" >> $GITHUB_OUTPUT &&
+          atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Find Comment
         uses: peter-evans/find-comment@v2
