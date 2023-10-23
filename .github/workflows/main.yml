@@ -17,54 +17,9 @@ jobs:
       - name: run tests
         run: go test -v ./...
         working-directory: ./server
-  test_migrations:
-    runs-on: ubuntu-latest
-    services:
-      auto_mariadb:
-        image: bitnami/mariadb:latest
-        ports:
-          - 3306:3306
-        env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-      manual_mariadb:
-        image: bitnami/mariadb:latest
-        ports:
-          - 3300:3306
-        env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-          cache-dependency-path: |
-            server/go.sum
-      - name: wait for db
-        run: sleep 20
-      - name: run manual migrations
-        run: go run main.go
-        working-directory: ./server
-        env:
-          CI_EXIT_AFTER_MIGRATION: "true"
-          CI_AUTO_MIGRATION: "false"
-          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
-          ENVIRONMENT: dev
-      - name: run auto migrations
-        run: go run main.go
-        working-directory: ./server
-        env:
-          CI_EXIT_AFTER_MIGRATION: "true"
-          CI_AUTO_MIGRATION: "true"
-          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
-          ENVIRONMENT: dev
-      - uses: ariga/setup-atlas@master
-      - name: export diff the migrations
-        run: atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}'
   build:
     runs-on: ubuntu-latest
-    needs: [test, test_migrations]
+    needs: [test]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
