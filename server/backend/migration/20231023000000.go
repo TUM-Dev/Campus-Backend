@@ -1,7 +1,9 @@
 package migration
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
@@ -12,11 +14,20 @@ type device2stats struct {
 }
 
 // migrate20231023000000
-// Removes all traces of the chat from the database.
+// - Removes the chat cronjob
+// - Removes all traces of the chat from the database
 func migrate20231023000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231023000000",
 		Migrate: func(tx *gorm.DB) error {
+			//cronjob
+			if err := tx.Delete(&model.Crontab{}, "type = 'chat'").Error; err != nil {
+				return err
+			}
+			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "chat"); err != nil {
+				return err
+			}
+
 			// Remove tracking from device2stats
 			if err := tx.Migrator().DropColumn(&device2stats{}, "ChatRoomsActivity"); err != nil {
 				return err
@@ -66,7 +77,17 @@ func migrate20231023000000() *gormigrate.Migration {
 			if err := tx.Exec("create index chat_chatroom_members_29801a33 on chat_room2members (room);").Error; err != nil {
 				return err
 			}
-			return tx.Exec("create index chat_chatroom_members_b3c09425 on chat_room2members (member);").Error
+			if err := tx.Exec("create index chat_chatroom_members_b3c09425 on chat_room2members (member);").Error; err != nil {
+				return err
+			}
+			//cronjob
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "chat"); err != nil {
+				return err
+			}
+			return tx.Create(&model.Crontab{
+				Interval: 60 * 10, // Every 10 minutes
+				Type:     null.StringFrom("chat"),
+			}).Error
 		},
 	}
 }
