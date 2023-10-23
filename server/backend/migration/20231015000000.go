@@ -97,7 +97,7 @@ func (m TumDBMigrator) migrate20231015000000() *gormigrate.Migration {
 			if err := tx.Delete(&model.Crontab{}, "type = 'averageRatingComputation'").Error; err != nil {
 				return err
 			}
-			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
+			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
 				return err
 			}
 			// tables
@@ -155,7 +155,7 @@ GROUP BY mr.cafeteriaID, mnt.tagnameID`).Error
 				return err
 			}
 			// cronjob
-			if err := SafeEnumRemove(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
+			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation"); err != nil {
 				return err
 			}
 			return tx.Create(&model.Crontab{
