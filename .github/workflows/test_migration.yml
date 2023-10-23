@@ -61,4 +61,4 @@ jobs:
             ${{ github.event.pull_request.comments_url }} \
             -H "Content-Type: application/json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            --data '{ "body": "Found the following differences in the sql schema: <details><summary>To get from local migrations to auto migration state one woud need to</summary> Block with all the details</details>" }'
+            --data '{ "body": "Found the following differences in the sql schema: <details><summary>To get from local migrations to auto migration state one woud need to</summary> Updated block</details>" }'
