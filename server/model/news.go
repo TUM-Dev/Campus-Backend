@@ -27,8 +27,3 @@ type News struct {
 	FileID       null.Int    `gorm:"column:file;type:int;"`
 	File         *File       `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *News) TableName() string {
-	return "news"
-}

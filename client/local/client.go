@@ -57,7 +57,7 @@ func canteenHeadCount(c pb.CampusClient, ctx context.Context) {
 func canteenRatingTools(c pb.CampusClient, ctx context.Context) {
 
 	currentCanteen := "MENSA_GARCHING"
-	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dish table
+	currentDish := "Vegane rote Grütze mit Soja-Vanillesauce" //must be in the dishes table
 	generateDishRating(c, ctx, currentCanteen, currentDish, 3)
 	generateCanteenRating(c, ctx, currentCanteen, 2)
 	queryCanteen(currentCanteen, c, ctx, true)

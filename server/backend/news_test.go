@@ -85,7 +85,7 @@ func source2() *model.NewsSource {
 	}
 }
 
-const ExpectedListNewsSourcesQuery = "SELECT `newsSource`.`source`,`newsSource`.`title`,`newsSource`.`url`,`newsSource`.`icon`,`newsSource`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `newsSource` LEFT JOIN `files` `File` ON `newsSource`.`icon` = `File`.`file`"
+const ExpectedListNewsSourcesQuery = "SELECT `news_sources`.`source`,`news_sources`.`title`,`news_sources`.`url`,`news_sources`.`icon`,`news_sources`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_sources` LEFT JOIN `files` `File` ON `news_sources`.`icon` = `File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 	s1, s2 := source1(), source2()
@@ -141,7 +141,7 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 	require.Equal(s.T(), expectedResp, response)
 }
 
-const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook`,`NewsSource__File`.`file` AS `NewsSource__File__file`,`NewsSource__File`.`name` AS `NewsSource__File__name`,`NewsSource__File`.`path` AS `NewsSource__File__path`,`NewsSource__File`.`downloads` AS `NewsSource__File__downloads`,`NewsSource__File`.`url` AS `NewsSource__File__url`,`NewsSource__File`.`downloaded` AS `NewsSource__File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `newsSource` `NewsSource` ON `news`.`src` = `NewsSource`.`source` LEFT JOIN `files` `NewsSource__File` ON `NewsSource`.`icon` = `NewsSource__File`.`file`"
+const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook`,`NewsSource__File`.`file` AS `NewsSource__File__file`,`NewsSource__File`.`name` AS `NewsSource__File__name`,`NewsSource__File`.`path` AS `NewsSource__File__path`,`NewsSource__File`.`downloads` AS `NewsSource__File__downloads`,`NewsSource__File`.`url` AS `NewsSource__File__url`,`NewsSource__File`.`downloaded` AS `NewsSource__File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `news_sources` `NewsSource` ON `news`.`src` = `NewsSource`.`source` LEFT JOIN `files` `NewsSource__File` ON `NewsSource`.`icon` = `NewsSource__File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
@@ -227,7 +227,7 @@ func alert2() *model.NewsAlert {
 	}
 }
 
-const ExpectedListNewsAlertsQuery = "SELECT `news_alert`.`news_alert`,`news_alert`.`file`,`news_alert`.`name`,`news_alert`.`link`,`news_alert`.`created`,`news_alert`.`from`,`news_alert`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alert` LEFT JOIN `files` `File` ON `news_alert`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
+const ExpectedListNewsAlertsQuery = "SELECT `news_alerts`.`news_alerts`,`news_alerts`.`file`,`news_alerts`.`name`,`news_alerts`.`link`,`news_alerts`.`created`,`news_alerts`.`from`,`news_alerts`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alerts` LEFT JOIN `files` `File` ON `news_alerts`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
 
 func (s *NewsSuite) Test_ListNewsAlertsError() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
@@ -247,7 +247,7 @@ func (s *NewsSuite) Test_ListNewsAlertsNone_noFilter() {
 	require.Nil(s.T(), response)
 }
 func (s *NewsSuite) Test_ListNewsAlertsNone_Filter() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alert.news_alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alerts.news_alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
 
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{LastNewsAlertId: 42})

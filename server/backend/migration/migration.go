@@ -12,12 +12,12 @@ import (
 
 func autoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&model.Cafeteria{},
-		&model.CafeteriaRating{},
+		&model.Canteen{},
+		&model.CanteenRating{},
 		&model.CafeteriaRatingAverage{},
-		&model.CafeteriaRatingTag{},
+		&model.CanteenRatingTag{},
 		&model.CafeteriaRatingTagAverage{},
-		&model.CafeteriaRatingTagOption{},
+		&model.CanteenRatingTagOption{},
 		&model.CanteenHeadCount{},
 		&model.Crontab{},
 		&model.Device{},
@@ -25,8 +25,8 @@ func autoMigrate(db *gorm.DB) error {
 		&model.DishNameTag{},
 		&model.DishNameTagAverage{},
 		&model.DishNameTagOption{},
-		&model.DishNameTagOptionExcluded{},
-		&model.DishNameTagOptionIncluded{},
+		&model.ExcludedDishNameTagOption{},
+		&model.IncludedDishNameTagOption{},
 		&model.DishRating{},
 		&model.DishRatingAverage{},
 		&model.DishRatingTag{},
@@ -45,7 +45,7 @@ func autoMigrate(db *gorm.DB) error {
 		//&model.IOSRemoteNotification...{}, -- wtf???
 		&model.IOSScheduledUpdateLog{},
 		&model.IOSSchedulingPriority{},
-		&model.Kino{},
+		&model.Movie{},
 		&model.NewExamResultsSubscriber{},
 		&model.News{},
 		&model.NewsAlert{},
@@ -73,12 +73,14 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20220713000000(),
 		migrate20221119131300(),
 		migrate20221210000000(),
-		migrate20230825000000(),
+		migrate20230912000000(),
 		migrate20230904000000(),
 		migrate20230530000000(),
 		migrate20230904100000(),
 		migrate20230826000000(),
 		migrate20231003000000(),
+		migrate20231023000000(),
+		migrate20231024000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }

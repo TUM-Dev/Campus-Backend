@@ -23,7 +23,7 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 
 	var sources []model.NewsSource
 	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
-		log.WithError(err).Error("could not find newsSources")
+		log.WithError(err).Error("could not find news_sources")
 		return nil, status.Error(codes.Internal, "could not ListNewsSources")
 	}
 
@@ -89,9 +89,9 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	}
 
 	var res []*model.NewsAlert
-	tx := s.db.WithContext(ctx).Joins("File").Where("news_alert.to >= NOW()")
+	tx := s.db.WithContext(ctx).Joins("File").Where("news_alerts.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
-		tx = tx.Where("news_alert.news_alert > ?", req.LastNewsAlertId)
+		tx = tx.Where("news_alerts.news_alert > ?", req.LastNewsAlertId)
 	}
 	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no news alerts")

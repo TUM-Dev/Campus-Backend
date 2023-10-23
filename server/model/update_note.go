@@ -6,8 +6,3 @@ type UpdateNote struct {
 	VersionName string `gorm:"column:version_name;type:text;"`
 	Message     string `gorm:"column:message;type:text;"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *UpdateNote) TableName() string {
-	return "update_note"
-}

@@ -13,8 +13,3 @@ type DishRating struct {
 	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;not null;" json:"timestamp"`
 	Image       string    `gorm:"column:image;type:text;" json:"image"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *DishRating) TableName() string {
-	return "dish_rating"
-}
