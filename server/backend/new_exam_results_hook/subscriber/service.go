@@ -10,15 +10,13 @@ type Service struct {
 }
 
 func (service *Service) NotifySubscribers(newGrades *[]model.PublishedExamResult) error {
-	repository := service.Repository
-
-	subscribers, err := repository.FindAllSubscribers()
+	subscribers, err := service.Repository.FindAllSubscribers()
 	if err != nil {
 		return err
 	}
 
 	for _, subscriber := range *subscribers {
-		if err := repository.NotifySubscriber(&subscriber, newGrades); err != nil {
+		if err := service.Repository.NotifySubscriber(&subscriber, newGrades); err != nil {
 			log.WithError(err).Error("Failed to notify subscriber")
 			continue
 		}

@@ -1,18 +1,12 @@
 package scheduling
 
 import (
-	"os"
-
 	"github.com/TUM-Dev/Campus-Backend/server/backend/campus_api"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/device"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/new_exam_results_hook/subscriber"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
-)
-
-var (
-	CampusApiToken = os.Getenv("CAMPUS_API_TOKEN")
 )
 
 type Service struct {
@@ -25,7 +19,7 @@ type Service struct {
 func (service *Service) HandleScheduledCron() error {
 	log.Info("Fetching published exam results")
 
-	apiResult, err := campus_api.FetchExamResultsPublished(CampusApiToken)
+	apiResult, err := campus_api.FetchExamResultsPublished()
 	if err != nil {
 		return err
 	}

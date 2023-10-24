@@ -15,7 +15,6 @@ func (repository *Repository) StoreExamResultsPublished(examResultsPublished []m
 
 	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Where("1 = 1").Delete(&model.PublishedExamResult{}).Error
-
 		if err != nil {
 			return err
 		}

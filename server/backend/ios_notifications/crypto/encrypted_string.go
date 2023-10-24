@@ -47,21 +47,19 @@ func AsymmetricEncrypt(plaintext string, publicKey string) (*EncryptedString, er
 
 func StringToPublicKey(pub string) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode([]byte(pub))
-
 	if block == nil {
 		return nil, errors.New("failed to parse PEM block containing the public key")
 	}
 
 	key, err := x509.ParsePKIXPublicKey(block.Bytes)
-
 	if err != nil {
 		return nil, errors.New("failed to parse DER encoded public key: " + err.Error())
 	}
 
-	if pubKey, ok := key.(*rsa.PublicKey); ok {
-		return pubKey, nil
-	} else {
+	if pubKey, ok := key.(*rsa.PublicKey); !ok {
 		return nil, errors.New("failed to parse DER encoded public key: " + err.Error())
+	} else {
+		return pubKey, nil
 	}
 }
 

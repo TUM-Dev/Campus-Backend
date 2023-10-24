@@ -12,11 +12,9 @@ type Repository struct {
 }
 
 func (repository *Repository) CreateDevice(device *model.IOSDevice) error {
-
 	return repository.DB.Transaction(func(tx *gorm.DB) error {
 
 		var foundDevice model.IOSDevice
-
 		res := tx.First(&foundDevice, "device_id = ?", device.DeviceID)
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -41,11 +39,7 @@ func (repository *Repository) CreateDevice(device *model.IOSDevice) error {
 }
 
 func (repository *Repository) DeleteDevice(deviceId string) error {
-	if err := repository.DB.Delete(&model.IOSDevice{DeviceID: deviceId}).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return repository.DB.Delete(&model.IOSDevice{DeviceID: deviceId}).Error
 }
 
 func (repository *Repository) GetDevices() ([]model.IOSDevice, error) {
@@ -72,8 +66,14 @@ func (repository *Repository) GetDevice(id string) (*model.IOSDevice, error) {
 func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDeviceLastUpdated, error) {
 	var devices []model.IOSDeviceLastUpdated
 
-	tx := repository.DB.Raw(
-		buildDevicesThatShouldUpdateGradesQuery(),
+	tx := repository.DB.Raw(`select d.device_id, ul.created_at as last_updated, d.public_key
+		from ios_devices d
+				 left join ios_scheduled_update_logs ul on d.device_id = ul.device_id
+		where ul.created_at is null
+		   or (ul.type = ?
+			and ul.created_at < date_sub(now(), interval ? minute))
+		group by d.device_id, ul.created_at
+		order by ul.created_at`,
 		model.IOSUpdateTypeGrades,
 		model.IOSMinimumUpdateInterval,
 	).Scan(&devices)
@@ -83,19 +83,6 @@ func (repository *Repository) GetDevicesThatShouldUpdateGrades() ([]model.IOSDev
 	}
 
 	return devices, nil
-}
-
-func buildDevicesThatShouldUpdateGradesQuery() string {
-	return `
-		select d.device_id, ul.created_at as last_updated, d.public_key
-		from ios_devices d
-				 left join ios_scheduled_update_logs ul on d.device_id = ul.device_id
-		where ul.created_at is null
-		   or (ul.type = ?
-			and ul.created_at < date_sub(now(), interval ? minute))
-		group by d.device_id, ul.created_at
-		order by ul.created_at;
-	`
 }
 
 func (repository *Repository) ResetDevicesDailyActivity() error {

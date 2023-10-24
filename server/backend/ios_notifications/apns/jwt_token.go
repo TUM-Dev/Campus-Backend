@@ -15,20 +15,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	// TokenTimeout for the token in seconds
-	TokenTimeout = 3000
-)
-
-var (
-	ErrorAuthKeyNotPem   = errors.New("failed to parse token: AuthKey must be a valid .p8 PEM file")
-	ErrorAuthKeyNotEcdsa = errors.New("failed to parse token: AuthKey must be of type ecdsa.PrivateKey")
-	ErrorAuthKeyNil      = errors.New("failed to parse token: AuthKey was nil")
-	ApnsKeyId            = os.Getenv("APNS_KEY_ID")
-	ApnsTeamId           = os.Getenv("APNS_TEAM_ID")
-	ApnsP8FilePath       = os.Getenv("APNS_P8_FILE_PATH")
-)
-
 type JWTToken struct {
 	sync.Mutex
 	EncryptionKey *ecdsa.PrivateKey
@@ -39,15 +25,15 @@ type JWTToken struct {
 }
 
 func NewToken() (*JWTToken, error) {
-	encryptionKey, err := APNsEncryptionKeyFromFile()
+	encryptionKey, err := EncryptionKeyFromFile()
 	if err != nil {
 		return nil, err
 	}
 
 	token := JWTToken{
 		EncryptionKey: encryptionKey,
-		KeyId:         ApnsKeyId,
-		TeamId:        ApnsTeamId,
+		KeyId:         os.Getenv("APNS_KEY_ID"),
+		TeamId:        os.Getenv("APNS_TEAM_ID"),
 	}
 
 	if err = token.Generate(); err != nil {
@@ -57,11 +43,11 @@ func NewToken() (*JWTToken, error) {
 	return &token, nil
 }
 
-// APNsEncryptionKeyFromFile reads the APNs encryption key from the file system
+// EncryptionKeyFromFile reads the APNs encryption key from the file system
 // and returns it as an ecdsa.PrivateKey
 // The file location is defined by the APNS_P8_FILE_PATH environment variable
-func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
-	path, err := filepath.Abs(ApnsP8FilePath)
+func EncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
+	path, err := filepath.Abs(os.Getenv("APNS_P8_FILE_PATH"))
 
 	if err != nil {
 		log.Error("No valid path to AuthKey")
@@ -81,7 +67,7 @@ func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 	if block == nil {
 		log.Error("Could not decode APNs encryption key from file")
 
-		return nil, ErrorAuthKeyNotPem
+		return nil, errors.New("failed to parse token: AuthKey must be a valid .p8 PEM file")
 	}
 
 	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
@@ -96,7 +82,7 @@ func APNsEncryptionKeyFromFile() (*ecdsa.PrivateKey, error) {
 		return ecdsaKey, nil
 	}
 
-	return nil, ErrorAuthKeyNotEcdsa
+	return nil, errors.New("failed to parse token: AuthKey must be of type ecdsa.PrivateKey")
 }
 
 func (t *JWTToken) GenerateNewTokenIfExpired() (bearer string) {
@@ -114,12 +100,12 @@ func (t *JWTToken) GenerateNewTokenIfExpired() (bearer string) {
 }
 
 func (t *JWTToken) IsExpired() bool {
-	return currentTimestamp() >= (t.IssuedAt + TokenTimeout)
+	return currentTimestamp() >= (t.IssuedAt + 3000)
 }
 
 func (t *JWTToken) Generate() error {
 	if t.EncryptionKey == nil {
-		return ErrorAuthKeyNil
+		return errors.New("failed to parse token: AuthKey was nil")
 	}
 
 	issuedAt := currentTimestamp()

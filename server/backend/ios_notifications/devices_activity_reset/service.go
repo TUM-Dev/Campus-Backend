@@ -14,27 +14,22 @@ type Service struct {
 
 func (service *Service) HandleScheduledActivityReset() error {
 	daily, err := service.Repository.GetDevicesActivityResetDaily()
-
 	if err != nil {
 		service.Repository.CreateInitialRecords()
-
 		return nil
 	}
 
 	weekly, err := service.Repository.GetDevicesActivityResetWeekly()
-
 	if err != nil {
 		return err
 	}
 
 	monthly, err := service.Repository.GetDevicesActivityResetMonthly()
-
 	if err != nil {
 		return err
 	}
 
 	yearly, err := service.Repository.GetDevicesActivityResetYearly()
-
 	if err != nil {
 		return err
 	}

@@ -13,18 +13,12 @@ type Repository struct {
 }
 
 func (service *Repository) LogScheduledUpdate(log *model.IOSScheduledUpdateLog) error {
-	tx := service.DB.Clauses(clause.OnConflict{
+	return service.DB.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "device_id"}},
 		DoUpdates: clause.AssignmentColumns([]string{
 			"created_at",
 		}),
-	}).Create(log)
-
-	if err := tx.Error; err != nil {
-		return err
-	}
-
-	return nil
+	}).Create(log).Error
 }
 
 func NewRepository(db *gorm.DB) *Repository {
