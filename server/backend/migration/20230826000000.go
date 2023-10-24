@@ -20,7 +20,7 @@ func (n *Feedback) TableName() string {
 
 // migrate20230826000000
 // adds a "feedbackEmail" cron job that runs every 30 minutes.
-func (m TumDBMigrator) migrate20230826000000() *gormigrate.Migration {
+func migrate20230826000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230826000000",
 		Migrate: func(tx *gorm.DB) error {

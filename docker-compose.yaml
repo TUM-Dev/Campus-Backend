@@ -39,7 +39,6 @@ services:
       - MARIADB_DATABASE=${DB_NAME}
     volumes:
       - campus-db-data:/bitnami/mariadb
-      - ./deployment/charts/backend/files/source-schema.sql:/docker-entrypoint-startdb.d/schema.sql
     healthcheck:
       test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
       interval: 15s
