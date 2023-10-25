@@ -1,5 +1,3 @@
-CREATE USER 'tca-students' IDENTIFIED BY 'strongpassword';
-
 create table if not exists actions
 (
     action      int auto_increment primary key,
