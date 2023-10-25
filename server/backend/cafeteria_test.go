@@ -17,6 +17,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	testImage = "./test_data/sampleimage.jpeg"
+)
+
 type CafeteriaSuite struct {
 	suite.Suite
 	DB        *gorm.DB
@@ -47,37 +51,12 @@ func (s *CafeteriaSuite) SetupSuite() {
 
 const ExpectedGetCafeteriaQuery = "SELECT * FROM `canteen_head_count` WHERE `canteen_head_count`.`canteen_id` = ? ORDER BY `canteen_head_count`.`canteen_id` LIMIT 1"
 
-//"SELECT * FROM `update_note` WHERE `update_note`.`version_code` = ? ORDER BY `update_note`.`version_code` LIMIT 1"
-
 func (s *CafeteriaSuite) Test_GetCafeteriaHeadCount() {
-	//inputString := "2023-10-09 11:45:22"
-
-	// Define a custom layout that matches the input string format
-	//layout := "2006-01-02 15:04:05"
-	test := time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
-
-	// Parse the input string into a time.Time object
-	//t, err := time.Parse(layout, inputString)
-	/*timeWrapper := timestamp.Timestamp{
-		Seconds: t.Unix(),              // The number of seconds since January 1, 1970
-		Nanos:   int32(t.Nanosecond()), // The nanoseconds part
-	}*/
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetCafeteriaQuery)).
 		WithArgs("mensa-garching").
 		WillReturnRows(sqlmock.NewRows([]string{"canteen_id", "count", "max_count", "percent", "timestamp"}).
-			AddRow("mensa-garching", 0, 1000, 0, test))
-	/*
-		all expectations were already fulfilled, call to Query 'SELECT * FROM `canteen_head_count` WHERE `canteen_head_count`.`canteen_id` = ? ORDER BY `canteen_head_count`.`canteen_id` LIMIT 1'
-	*/
-	/*
-		meta := metadata.MD{}
-		server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-		response, err := server.GetCafeteria(metadata.NewIncomingContext(context.Background(), meta), &pb.GetCafeteriaRequest{Version: 1})
-		require.NoError(s.T(), err)
-		expectedResp := &pb.GetCafeteriaReply{
-			Message:     "Test Message",
-			VersionName: "1.0.0",
-		}*/
+			AddRow("mensa-garching", 0, 1000, 0, time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local)))
+
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.GetCanteenHeadCount(metadata.NewIncomingContext(context.Background(), meta),
@@ -86,54 +65,71 @@ func (s *CafeteriaSuite) Test_GetCafeteriaHeadCount() {
 		},
 	)
 	require.NoError(s.T(), err)
-	//	require.NoError(s.T(), err)
 	if err != nil {
 		log.WithError(err).Error("Canteen HeadCount data request failed.")
+		//todo compare results	require.Equal(s.T(), status.Error(codes.NotFound, "No update note found"), err)
 	} else {
 		log.WithField("res", response).Info("Canteen HeadCount data request successful.")
 	}
-	//	require.Equal(s.T(), expectedResp, response)
 }
 
-/*
-meta := metadata.MD{}
+// const ExpectedGetCafeteriaQuery = "SELECT * FROM `canteen_head_count` WHERE `canteen_head_count`.`canteen_id` = ? ORDER BY `canteen_head_count`.`canteen_id` LIMIT 1"
+const ExpectedGetCafeteriaByName = "SELECT * FROM `cafeteria` WHERE name LIKE ? ORDER BY `cafeteria`.`cafeteria` LIMIT 1"
 
-		server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-		res, err := server.GetCanteenHeadCount(ctx, &pb.GetCanteenHeadCountRequest{
-			CanteenId: "mensa-garching",
-		})
+func (s *CafeteriaSuite) Test_CreateCanteenRating() {
+	canteenName := "mensa-garching"
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetCafeteriaByName)).
+		WithArgs(canteenName).
+		WillReturnRows(sqlmock.NewRows([]string{"cafeteria", "name", "address", "latitude", "longitude"}).
+			AddRow(2, "mensa-garching", "Boltzmannstraße 19, Garching", 48.2681, 11.6723))
 
-		if err != nil {
-			log.WithError(err).Error("Canteen HeadCount data request failed.")
-		} else {
-			log.WithField("res", res).Info("Canteen HeadCount data request successful.")
-		}
-		require.Equal(s.T(), expectedResp, response)
+	meta := metadata.MD{}
+	rating := generateCanteenRating(canteenName, 2, s)
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.CreateCanteenRating(metadata.NewIncomingContext(context.Background(), meta),
+		&rating,
+	)
+	require.NoError(s.T(), err)
+	if err != nil {
+		log.WithError(err).Error("Canteen HeadCount data request failed.")
+		//todo compare results	require.Equal(s.T(), status.Error(codes.NotFound, "No update note found"), err)
+	} else {
+		log.WithField("res", response).Info("Canteen HeadCount data request successful.")
+	}
+}
+
+func generateCanteenRating(canteen string, rating int32, s *CafeteriaSuite) pb.CreateCanteenRatingRequest {
+	canteen_id := 1
+	image_name_path := "testimage.txt"
+	//dummyImage := createDummyImage(s.T(), 10, 10)
+	s.mock.ExpectBegin()
+	/*s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`) VALUES (?,?,?,?,?,?) RETURNING `cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`")).
+	WithArgs(1, 2, "custom comment", canteen_id,time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local),image_name_path).
+		WillReturnRows(sqlmock.NewRows([]string{"url", "file"}).AddRow(nil, 1))
+	*/
+	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`) VALUES (?,?,?,?,?,?)")).
+		WithArgs(1, 2, "custom comment", canteen_id, time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local), image_name_path)
+	s.mock.ExpectCommit()
+
+	y := make([]*pb.RatingTag, 2)
+	y[0] = &pb.RatingTag{
+		Points: float64(1 + rating),
+		TagId:  1,
+	}
+	y[1] = &pb.RatingTag{
+		Points: float64(2 + rating),
+		TagId:  2,
 	}
 
-/*
-
-	func (s *CafeteriaSuite) Test_GetCafeteriaNone() {
-		s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetCafeteriaQuery)).
-			WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}))
-
-		meta := metadata.MD{}
-		server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-		response, err := server.GetCafeteria(metadata.NewIncomingContext(context.Background(), meta), &pb.GetCafeteriaRequest{Version: 1})
-		require.Equal(s.T(), status.Error(codes.NotFound, "No update note found"), err)
-		require.Nil(s.T(), response)
+	return pb.CreateCanteenRatingRequest{
+		Points:     rating,
+		CanteenId:  canteen,
+		Comment:    "Everything perfect, 2 Stars",
+		RatingTags: y,
+		Image:      getImageToBytes(testImage),
 	}
+}
 
-	func (s *CafeteriaSuite) Test_GetCafeteriaError() {
-		s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetCafeteriaQuery)).WillReturnError(gorm.ErrInvalidDB)
-
-		meta := metadata.MD{}
-		server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
-		response, err := server.GetCafeteria(metadata.NewIncomingContext(context.Background(), meta), &pb.GetCafeteriaRequest{Version: 1})
-		require.Equal(s.T(), status.Error(codes.Internal, "Internal server error"), err)
-		require.Nil(s.T(), response)
-	}
-*/
 func (s *CafeteriaSuite) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.mock.ExpectationsWereMet())
 }
