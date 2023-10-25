@@ -84,7 +84,7 @@ var staticData embed.FS
 
 // migrate20231003000000
 // migrates the static data for the canteen rating system and adds the necessary cronjob entries
-func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
+func migrate20231003000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231003000000",
 		Migrate: func(tx *gorm.DB) error {

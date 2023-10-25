@@ -7,19 +7,32 @@ import (
 	"gorm.io/gorm"
 )
 
+type NewsSourceFile struct {
+	File int64 `gorm:"primary_key;AUTO_INCREMENT;column:file;type:int;"`
+}
+
+func (n *NewsSourceFile) TableName() string {
+	return "files"
+}
+
 // NewsSource struct is a row record of the newsSource table in the tca database
 type NewsSource struct {
-	Source int64       `gorm:"primary_key;AUTO_INCREMENT;column:source;type:int;"`
-	Title  string      `gorm:"column:title;type:text;size:16777215;"`
-	URL    null.String `gorm:"column:url;type:text;size:16777215;"`
-	FileID int64       `gorm:"column:icon;not null;type:int;"`
-	File   model.File  `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Hook   null.String `gorm:"column:hook;type:char;size:12;"`
+	Source int64          `gorm:"primary_key;AUTO_INCREMENT;column:source;type:int;"`
+	Title  string         `gorm:"column:title;type:text;size:16777215;"`
+	URL    null.String    `gorm:"column:url;type:text;size:16777215;"`
+	FileID int64          `gorm:"column:icon;not null;type:int;"`
+	File   NewsSourceFile `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Hook   null.String    `gorm:"column:hook;type:char;size:12;"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *NewsSource) TableName() string {
+	return "newsSource"
 }
 
 // migrate20230904100000
 // migrates the crontab from kino to movie crontab
-func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
+func migrate20230904100000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230904100000",
 		Migrate: func(tx *gorm.DB) error {
@@ -31,9 +44,6 @@ func (m TumDBMigrator) migrate20230904100000() *gormigrate.Migration {
 				return err
 			}
 			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "movie"); err != nil {
-				return err
-			}
-			if err := tx.AutoMigrate(&NewsSource{}); err != nil {
 				return err
 			}
 			// tu film news source is now inlined

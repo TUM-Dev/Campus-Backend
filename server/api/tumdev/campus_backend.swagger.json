@@ -886,28 +886,6 @@
         ]
       }
     },
-    "/studyrooms": {
-      "get": {
-        "operationId": "Campus_ListStudyRooms",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiListStudyRoomsReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/updatenote/{version}": {
       "get": {
         "operationId": "Campus_GetUpdateNote",
@@ -1500,18 +1478,6 @@
         }
       }
     },
-    "apiListStudyRoomsReply": {
-      "type": "object",
-      "properties": {
-        "rooms": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiStudyRoomMsgElement"
-          }
-        }
-      }
-    },
     "apiMovie": {
       "type": "object",
       "properties": {
@@ -1805,50 +1771,6 @@
         "visited": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "apiStudyRoom": {
-      "type": "object",
-      "properties": {
-        "groupId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "roomId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "roomCode": {
-          "type": "string"
-        },
-        "roomName": {
-          "type": "string"
-        },
-        "buildingName": {
-          "type": "string"
-        }
-      }
-    },
-    "apiStudyRoomMsgElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "name": {
-          "type": "string"
-        },
-        "details": {
-          "type": "string"
-        },
-        "rooms": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiStudyRoom"
-          }
         }
       }
     },
