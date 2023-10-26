@@ -34,6 +34,8 @@ const (
 	NAME      ModelType = 3
 )
 
+var StorageDir = "/Storage/rating/"
+
 // GetCafeteriaRatings RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
@@ -389,7 +391,7 @@ func imageWrapper(image []byte, path string, id int64) string {
 	var resPath = ""
 	if len(image) > 0 {
 		var resError error
-		path := fmt.Sprintf("%s%s%s%d%s", "/Storage/rating/", path, "/", id, "/")
+		path := fmt.Sprintf("%s%s%s%d%s", StorageDir, path, "/", id, "/")
 		resPath, resError = storeImage(path, image)
 
 		if resError != nil {

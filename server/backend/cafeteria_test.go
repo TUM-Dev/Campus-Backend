@@ -77,6 +77,7 @@ func (s *CafeteriaSuite) Test_GetCafeteriaHeadCount() {
 const ExpectedGetCafeteriaByName = "SELECT * FROM `cafeteria` WHERE name LIKE ? ORDER BY `cafeteria`.`cafeteria` LIMIT 1"
 
 func (s *CafeteriaSuite) Test_CreateCanteenRating() {
+	StorageDir = "."
 	canteenName := "mensa-garching"
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetCafeteriaByName)).
 		WithArgs(canteenName).
