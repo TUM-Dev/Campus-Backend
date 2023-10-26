@@ -89,7 +89,7 @@ func (n *DishNameTagAverage) TableName() string {
 
 // migrate20231015000000
 // migrates the static data for the canteen rating system and adds the necessary cronjob entries
-func (m TumDBMigrator) migrate20231015000000() *gormigrate.Migration {
+func migrate20231015000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231015000000",
 		Migrate: func(tx *gorm.DB) error {
