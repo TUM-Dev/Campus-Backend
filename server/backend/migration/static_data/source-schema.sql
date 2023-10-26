@@ -1,5 +1,3 @@
-CREATE USER 'tca-students' IDENTIFIED BY 'strongpassword';
-
 create table if not exists actions
 (
     action      int auto_increment primary key,
@@ -697,8 +695,6 @@ create table if not exists roomfinder_building2area
     name        varchar(32) not null
 ) charset = utf8mb4;
 
-grant select on table roomfinder_building2area to 'tca-students';
-
 create table if not exists roomfinder_buildings
 (
     building_nr    varchar(8)  not null primary key,
@@ -707,8 +703,6 @@ create table if not exists roomfinder_buildings
     utm_northing   varchar(32) null,
     default_map_id int         null
 ) charset = utf8mb4;
-
-grant select on table roomfinder_buildings to 'tca-students';
 
 create table if not exists roomfinder_buildings2gps
 (
@@ -724,8 +718,6 @@ create table if not exists roomfinder_buildings2maps
     primary key (building_nr, map_id)
 ) charset = utf8mb4;
 
-grant select on table roomfinder_buildings2maps to 'tca-students';
-
 create table if not exists roomfinder_maps
 (
     map_id      int         not null primary key,
@@ -734,8 +726,6 @@ create table if not exists roomfinder_maps
     width       int         not null,
     height      int         not null
 ) charset = utf8mb4;
-
-grant select on table roomfinder_maps to 'tca-students';
 
 create table if not exists roomfinder_rooms
 (
@@ -755,8 +745,6 @@ create table if not exists roomfinder_rooms
     default_map_id int          null
 ) charset = utf8mb4;
 
-grant select on table roomfinder_rooms to 'tca-students';
-
 create table if not exists roomfinder_rooms2maps
 (
     room_id int not null,
@@ -774,8 +762,6 @@ create table if not exists roomfinder_schedules
     course_code varchar(32)                null,
     constraint `unique` unique (room_id, start, end)
 ) charset = utf8mb4;
-
-grant select on table roomfinder_schedules to 'tca-students';
 
 create table if not exists sessions
 (

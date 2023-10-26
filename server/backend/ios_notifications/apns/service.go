@@ -4,6 +4,7 @@ package apns
 
 import (
 	"errors"
+	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
@@ -32,30 +33,23 @@ func (s *Service) RequestGradeUpdateForDevice(deviceID string) error {
 
 	notification := model.NewIOSNotificationPayload(deviceID).Background(campusRequestToken.RequestID, model.IOSBackgroundCampusTokenRequest)
 
-	if _, err := s.Repository.SendBackgroundNotification(notification); err != nil {
+	if _, err := s.Repository.SendNotification(notification, model.IOSAPNSPushTypeBackground); err != nil {
 		log.WithError(err).Error("Could not send background notification")
-		return ErrCouldNotSendNotification
+		return errors.New("could not send notification")
 	}
 	return nil
 }
 
 func ValidateRequirementsForIOSNotificationsService() error {
-	if ApnsKeyId == "" {
-		return errors.New("APNS_KEY_ID env variable is not set")
+	for _, envVar := range []string{"APNS_KEY_ID", "APNS_TEAM_ID", "APNS_P8_FILE_PATH"} {
+		if os.Getenv(envVar) == "" {
+			return errors.New(envVar + " env variable is not set")
+		}
 	}
 
-	if ApnsTeamId == "" {
-		return errors.New("APNS_TEAM_ID env variable is not set")
-	}
-
-	if ApnsP8FilePath == "" {
-		return errors.New("APNS_P8_FILE_PATH env variable is not set")
-	}
-
-	if _, err := APNsEncryptionKeyFromFile(); err != nil {
+	if _, err := EncryptionKeyFromFile(); err != nil {
 		return errors.New("APNS P8 token is not valid or not set")
 	}
-
 	return nil
 }
 

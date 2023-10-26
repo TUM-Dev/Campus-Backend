@@ -7,13 +7,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 )
 
-func FetchExamResultsPublished(token string) (*model.TUMAPIPublishedExamResults, error) {
+// FetchExamResultsPublished fetches all published exam results from the TUM Campus API using CAMPUS_API_TOKEN.
+func FetchExamResultsPublished() (*model.TUMAPIPublishedExamResults, error) {
 	var examResultsPublished model.TUMAPIPublishedExamResults
+	token := os.Getenv("CAMPUS_API_TOKEN")
 	err := RequestCampusApi("/wbservicesbasic.pruefungenErgebnisse", token, &examResultsPublished)
 	if err != nil {
 		return nil, err

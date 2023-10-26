@@ -16,25 +16,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	// BundleId from the Apple Developer Portal
-	BundleId = "de.tum.tca"
-	// ReadIdleTimeout is the idle time after which the http2 transport will do a health check
-	ReadIdleTimeout = 15 * time.Second
-	// HTTPClientTimeout is the timeout for the http client used to send notifications
-	HTTPClientTimeout = 60 * time.Second
-)
-
-const (
-	ApnsDevelopmentURL = "https://api.sandbox.push.apple.com:443"
-	ApnsProductionURL  = "https://api.push.apple.com:443"
-)
-
-var (
-	ErrCouldNotSendNotification   = errors.New("could not send notification")
-	ErrCouldNotDecodeAPNsResponse = errors.New("could not decode apns response")
-)
-
 type Repository struct {
 	DB         gorm.DB
 	Token      *JWTToken
@@ -43,11 +24,11 @@ type Repository struct {
 
 // ApnsUrl uses the environment variable ENVIRONMENT to determine whether
 // to use the production or development APNs URL.
-func (r *Repository) ApnsUrl() string {
+func (r *Repository) ApnsUrl(DeviceId string) string {
 	if env.IsProd() {
-		return ApnsProductionURL
+		return "https://api.push.apple.com:443/3/device/" + DeviceId
 	}
-	return ApnsDevelopmentURL
+	return "https://api.sandbox.push.apple.com:443/3/device/" + DeviceId
 }
 
 // CreateCampusTokenRequest creates a request log in the database that can be referred to
@@ -72,26 +53,16 @@ func (r *Repository) CreateRequest(deviceId string, requestType model.IOSBackgro
 	return &request, nil
 }
 
-func (r *Repository) SendAlertNotification(payload *model.IOSNotificationPayload) (*model.IOSRemoteNotificationResponse, error) {
-	return r.SendNotification(payload, model.IOSAPNSPushTypeAlert, 10)
-}
-
-func (r *Repository) SendBackgroundNotification(payload *model.IOSNotificationPayload) (*model.IOSRemoteNotificationResponse, error) {
-	return r.SendNotification(payload, model.IOSAPNSPushTypeBackground, 10)
-}
-
-func (r *Repository) SendNotification(notification *model.IOSNotificationPayload, apnsPushType model.IOSAPNSPushType, priority int) (*model.IOSRemoteNotificationResponse, error) {
-
-	url := r.ApnsUrl() + "/3/device/" + notification.DeviceId
+func (r *Repository) SendNotification(notification *model.IOSNotificationPayload, apnsPushType model.IOSAPNSPushType) (*model.IOSRemoteNotificationResponse, error) {
 	body, _ := notification.MarshalJSON()
 
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	req, _ := http.NewRequest(http.MethodPost, r.ApnsUrl(notification.DeviceId), bytes.NewBuffer(body))
 
 	// can be e.g. alert or background
 	req.Header.Set("apns-push-type", apnsPushType.String())
-	req.Header.Set("apns-topic", BundleId)
+	req.Header.Set("apns-topic", "de.tum.tca")
 	// can be a value between 1 and 10
-	req.Header.Set("apns-priority", strconv.Itoa(priority))
+	req.Header.Set("apns-priority", strconv.Itoa(10))
 
 	bearer := r.Token.GenerateNewTokenIfExpired()
 	req.Header.Set("authorization", "bearer "+bearer)
@@ -99,7 +70,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	resp, err := r.httpClient.Do(req)
 	if err != nil {
 		log.WithError(err).Error("Could not send notification")
-		return nil, ErrCouldNotSendNotification
+		return nil, errors.New("could not send notification")
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -108,9 +79,9 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 	}(resp.Body)
 
 	var response model.IOSRemoteNotificationResponse
-	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil && err != io.EOF {
 		log.WithError(err).Error("Could not decode APNs response")
-		return nil, ErrCouldNotDecodeAPNsResponse
+		return nil, errors.New("could not decode apns response")
 	}
 
 	return &response, nil
@@ -118,7 +89,7 @@ func (r *Repository) SendNotification(notification *model.IOSNotificationPayload
 
 func NewRepository(db *gorm.DB, token *JWTToken) *Repository {
 	transport := &http2.Transport{
-		ReadIdleTimeout: ReadIdleTimeout,
+		ReadIdleTimeout: 15 * time.Second,
 	}
 
 	return &Repository{
@@ -126,7 +97,7 @@ func NewRepository(db *gorm.DB, token *JWTToken) *Repository {
 		Token: token,
 		httpClient: &http.Client{
 			Transport: transport,
-			Timeout:   HTTPClientTimeout,
+			Timeout:   60 * time.Second,
 		},
 	}
 }

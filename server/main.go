@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"net/textproto"
+	"strings"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
@@ -114,14 +115,23 @@ func main() {
 func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 	resp, err := handler(ctx, req)
-	fields := log.Fields{"elapsed": time.Since(start)}
-	log.WithContext(ctx).WithFields(fields).WithError(err).Info(info.FullMethod)
+	fields := log.Fields{"elapsed": time.Since(start), "method": strings.TrimPrefix(info.FullMethod, "/api.Campus/")}
+	if err != nil {
+		log.WithFields(fields).Info("request")
+	} else {
+		log.WithFields(fields).WithError(err).Warn("request")
+	}
 	return resp, err
 }
 func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	start := time.Now()
 	err := handler(srv, stream)
-	log.WithField("elapsed", time.Since(start)).WithError(err).Info(info.FullMethod)
+	fields := log.Fields{"elapsed": time.Since(start), "method": strings.TrimPrefix(info.FullMethod, "/api.Campus/")}
+	if err != nil {
+		log.WithFields(fields).Info("request")
+	} else {
+		log.WithFields(fields).WithError(err).Warn("request")
+	}
 	return err
 }
 

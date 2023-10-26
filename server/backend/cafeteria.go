@@ -271,7 +271,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 	}
 
 	if err != nil {
-		log.WithError(err).Error("while querying the tags for the request.")
+		log.WithError(err).Error("while querying the tags for the request")
 	}
 
 	//needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
@@ -642,25 +642,25 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 	}, requestStatus
 }
 
-func (s *CampusServer) ListDishes(ctx context.Context, request *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
-	if request.Year < 2022 {
+func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
+	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if request.Week < 1 || request.Week > 53 {
+	if req.Week < 1 || req.Week > 53 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
 	}
-	if request.Day < 0 || request.Day > 4 {
+	if req.Day < 0 || req.Day > 4 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
 	var results []string
 	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
-		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", request.Day, request.Week, request.Year).
+		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", request.CanteenId).
+		Where("c.name LIKE ?", req.CanteenId).
 		Select("d.name").
 		Find(&results).Error
 

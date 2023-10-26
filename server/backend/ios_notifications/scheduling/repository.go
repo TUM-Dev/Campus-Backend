@@ -10,11 +10,8 @@ type Repository struct {
 }
 
 func (repository *Repository) FindSchedulingPriorities() ([]model.IOSSchedulingPriority, error) {
-	db := repository.DB
-
 	var priorities []model.IOSSchedulingPriority
-
-	err := db.Find(&priorities).Error
+	err := repository.DB.Find(&priorities).Error
 
 	return priorities, err
 }
