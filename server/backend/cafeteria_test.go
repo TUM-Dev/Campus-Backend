@@ -115,10 +115,10 @@ func (s *CafeteriaSuite) Test_CreateCanteenRating() {
 
 func generateCanteenRating(canteen string, rating int32, s *CafeteriaSuite, comment string) pb.CreateCanteenRatingRequest {
 	y := make([]*pb.RatingTag, 2)
-	var myRating = prepareTagRating(s, 1, 0, 1, 1)
+	var myRating = prepareTagRating(s, 1, 0, 1, 5)
 	y[0] = &myRating
-	myRating = prepareTagRating(s, 2, 0, 3, 2)
-	y[1] = &myRating
+	var myRatingSecond = prepareTagRating(s, 2, 0, 3, 7)
+	y[1] = &myRatingSecond
 
 	return pb.CreateCanteenRatingRequest{
 		Points:     rating,
