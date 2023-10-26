@@ -99,16 +99,21 @@ func (s *CafeteriaSuite) Test_CreateCanteenRating() {
 }
 
 func generateCanteenRating(canteen string, rating int32, s *CafeteriaSuite) pb.CreateCanteenRatingRequest {
-	canteen_id := 1
-	image_name_path := "testimage.txt"
+	//canteen_id := 1
+	image_name_path := "" // "testimage.txt"
 	//dummyImage := createDummyImage(s.T(), 10, 10)
 	s.mock.ExpectBegin()
 	/*s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`) VALUES (?,?,?,?,?,?) RETURNING `cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`")).
 	WithArgs(1, 2, "custom comment", canteen_id,time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local),image_name_path).
 		WillReturnRows(sqlmock.NewRows([]string{"url", "file"}).AddRow(nil, 1))
 	*/
-	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`cafeteriaRating`,`points`,`comment`,`cafeteriaID`,`timestamp`,`image`) VALUES (?,?,?,?,?,?)")).
-		WithArgs(1, 2, "custom comment", canteen_id, time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local), image_name_path)
+	//	var help int32 = 3
+	//todo with timestamp s.mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`points`,`comment`,`cafeteriaID`,`timestamp`,`image`) VALUES (?,?,?,?,?) RETURNING `cafeteriaRating`")).
+	//	WithArgs(rating, "Everything perfect, 2 Star", canteen, time.Now(), image_name_path)
+	s.mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `cafeteria_rating` (`points`,`comment`,`cafeteriaID`,`image`) VALUES (?,?,?,?) RETURNING `cafeteriaRating`")).
+		WithArgs(rating, "Everything perfect, 2 Star", canteen, image_name_path)
+	//WillReturnRows(sqlmock.NewRows([]string{"cafeteria"}).
+	//	AddRow(2))
 	s.mock.ExpectCommit()
 
 	y := make([]*pb.RatingTag, 2)
