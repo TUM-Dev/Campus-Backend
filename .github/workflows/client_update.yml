@@ -7,6 +7,8 @@ on:
     paths:
       - 'server/api/tumdev/campus_backend.proto'
 
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: macos-latest
@@ -36,7 +38,7 @@ jobs:
           echo "BRANCH_NAME=chore/update-protos-to-\$LATEST_TAG" >> $GITHUB_ENV
 
       - name: Clone Repository
-        run: git clone --depth=1 --branch=development https://runner:${{ secrets.CAMPUS_FLUTTER_TOKEN }}@github.com/${{ env.REPOSITORY }} ${{ env.FOLDER }}
+        run: git clone --depth=1 --branch=main https://runner:${{ secrets.CAMPUS_FLUTTER_TOKEN }}@github.com/${{ env.REPOSITORY }} ${{ env.FOLDER }}
 
       - name: Update Proto Files
         run: |
@@ -74,7 +76,7 @@ jobs:
             --body "" \
             --title "Chore: Update Protos to ${{ env.LATEST_TAG }}" \
             --head "${{ env.BRANCH_NAME }}" \
-            --base "development"
+            --base "main"
 
       - name: Error Message
         if: steps.commit.outcome != 'success'
