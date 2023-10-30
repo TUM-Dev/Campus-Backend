@@ -7,6 +7,8 @@ on:
     paths:
       - 'server/api/tumdev/campus_backend.proto'
 
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: macos-latest
