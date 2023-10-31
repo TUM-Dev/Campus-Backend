@@ -152,10 +152,7 @@ func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.ListNews(meta, &pb.ListNewsRequest{NewsSource: 1, LastNewsId: 2})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.ListNewsReply{
-		News: []*pb.News{},
-	}
-	require.Equal(s.T(), expectedResp, response)
+	require.Equal(s.T(), &pb.ListNewsReply{News: nil}, response)
 }
 func (s *NewsSuite) Test_ListNewsNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
@@ -165,10 +162,7 @@ func (s *NewsSuite) Test_ListNewsNone() {
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
-	expectedResp := &pb.ListNewsReply{
-		News: []*pb.News{},
-	}
-	require.Equal(s.T(), expectedResp, response)
+	require.Equal(s.T(), &pb.ListNewsReply{News: nil}, response)
 }
 func (s *NewsSuite) Test_ListNewsMultiple() {
 	n1 := news1()

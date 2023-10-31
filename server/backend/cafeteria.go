@@ -113,20 +113,17 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, caf
 			log.WithError(err).Error("while querying last cafeteria ratings.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
-		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
-
-		for i, v := range ratings {
-
-			tagRatings := queryTagRatingsOverviewForRating(v.CafeteriaRating, CAFETERIA, tx)
-			ratingResults[i] = &pb.SingleRatingReply{
+		var resp []*pb.SingleRatingReply
+		for _, v := range ratings {
+			resp = append(resp, &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
-				RatingTags: tagRatings,
-			}
+				RatingTags: queryTagRatingsOverviewForRating(v.CafeteriaRating, CAFETERIA, tx),
+			})
 		}
-		return ratingResults
+		return resp
 	} else {
 		return make([]*pb.SingleRatingReply, 0)
 	}
@@ -217,18 +214,17 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, cafeteriaID 
 			log.WithError(err).Error("while querying last dish ratings from Database.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
-		ratingResults := make([]*pb.SingleRatingReply, len(ratings))
-
-		for i, v := range ratings {
-			ratingResults[i] = &pb.SingleRatingReply{
+		var resp []*pb.SingleRatingReply
+		for _, v := range ratings {
+			resp = append(resp, &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
 				RatingTags: queryTagRatingsOverviewForRating(v.DishRating, DISH, tx),
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
-			}
+			})
 		}
-		return ratingResults
+		return resp
 	} else {
 		return make([]*pb.SingleRatingReply, 0)
 	}
@@ -305,18 +301,18 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 	}
 
 	//needed since the gRPC element does not specify column names - cannot be directly queried into the grpc message object.
-	elements := make([]*pb.RatingTagResult, len(results))
-	for i, v := range results {
-		elements[i] = &pb.RatingTagResult{
+	var resp []*pb.RatingTagResult
+	for _, v := range results {
+		resp = append(resp, &pb.RatingTagResult{
 			TagId: v.TagId,
 			Avg:   v.Average,
 			Std:   v.Std,
 			Min:   v.Min,
 			Max:   v.Max,
-		}
+		})
 	}
 
-	return elements
+	return resp
 }
 
 // queryTagRatingOverviewForRating

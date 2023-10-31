@@ -29,7 +29,6 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 
 	var resp []*pb.NewsSource
 	for _, source := range sources {
-		log.WithField("title", source.Title).Trace("sending news source")
 		resp = append(resp, &pb.NewsSource{
 			Source:  fmt.Sprintf("%d", source.Source),
 			Title:   source.Title,
@@ -60,14 +59,13 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 		return nil, status.Error(codes.Internal, "could not ListNews")
 	}
 
-	resp := make([]*pb.News, len(newsEntries))
-	for i, item := range newsEntries {
-		log.WithField("title", item.Title).Trace("sending news")
+	var resp []*pb.News
+	for _, item := range newsEntries {
 		imgUrl := ""
 		if item.File != nil {
 			imgUrl = item.File.FullExternalUrl()
 		}
-		resp[i] = &pb.News{
+		resp = append(resp, &pb.News{
 			Id:            item.News,
 			Title:         item.Title,
 			Text:          item.Description,
@@ -78,7 +76,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 			SourceIconUrl: item.NewsSource.File.FullExternalUrl(),
 			Created:       timestamppb.New(item.Created),
 			Date:          timestamppb.New(item.Date),
-		}
+		})
 	}
 	return &pb.ListNewsReply{News: resp}, nil
 }
