@@ -139,8 +139,8 @@ func parseImageUrl(doc *goquery.Document) string {
 		return "https://www.tu-film.de/img/film/poster/berraschungsfilm.jpg"
 	}
 	sanitisedHref := bluemonday.StrictPolicy().Sanitize(href)
-	sanitisedHref = strings.ReplaceAll(sanitisedHref, "/img/film/poster/.sized.", "/img/film/poster/")
-	sanitisedHref = strings.ReplaceAll(sanitisedHref, "/img/film/poster/.thumb.", "/img/film/poster/")
+	sanitisedHref = strings.ReplaceAll(sanitisedHref, "poster/.sized.", "poster/")
+	sanitisedHref = strings.ReplaceAll(sanitisedHref, "poster/.thumb.", "poster/")
 	return "https://www.tu-film.de" + sanitisedHref
 }
 
