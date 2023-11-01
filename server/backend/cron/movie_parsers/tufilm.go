@@ -136,9 +136,11 @@ func parseShortenedDescription(doc *goquery.Document) string {
 func parseImageUrl(doc *goquery.Document) string {
 	href, exists := doc.Find("img.poster").First().Attr("src")
 	if !exists {
-		return "https://www.tu-film.de/img/film/poster/.sized.berraschungsfilm.jpg"
+		return "https://www.tu-film.de/img/film/poster/berraschungsfilm.jpg"
 	}
 	sanitisedHref := bluemonday.StrictPolicy().Sanitize(href)
+	sanitisedHref = strings.ReplaceAll(sanitisedHref, "/img/film/poster/.sized.", "/img/film/poster/")
+	sanitisedHref = strings.ReplaceAll(sanitisedHref, "/img/film/poster/.thumb.", "/img/film/poster/")
 	return "https://www.tu-film.de" + sanitisedHref
 }
 

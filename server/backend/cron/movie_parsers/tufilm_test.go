@@ -29,7 +29,7 @@ func TestOppenheimer(t *testing.T) {
 		"In the further course of the film Lewis Strauss is to be confirmed as Secretary of Commerce in the cabinet of President Dwight D. Eisenhower. Soon it is also about his relations with Oppenheimer after the war, to whom he was superior as head of the Atomic Energy Authority. Thereby it concerns above all the reproaches to old connection to the communism which Oppenheimer is accused of."
 	comment := "An intellectual thriller that is a masterpiece of image and word, of complex ideas made manifest, and all kept at a very human level to maintain constant immediacy. (Andrea Chase, Killer Movie Reviews)"
 	expected := TuFilmWebsiteInformation{
-		ImageUrl:             "https://www.tu-film.de/img/film/poster/.sized.Oppenheimer.jpg",
+		ImageUrl:             "https://www.tu-film.de/img/film/poster/Oppenheimer.jpg",
 		ShortenedDescription: fmt.Sprintf("<b>%s<b>\n\n%s\n\n<i>%s<i>", header, description, comment),
 		Director:             null.StringFrom("Christopher Nolan"),
 		Actors:               null.StringFrom("Cillian Murphy, Emily Blunt, Matt Damon"),
@@ -52,7 +52,7 @@ func TestBabylon(t *testing.T) {
 		"In the end, there is one thing Hollywood does best: Make movies about themselves. Did they forget to mention that these movies were made for nazi germany? Is all this crime and perversion really ok because the movies are just that good? Don&#39;t think about it too much, you will still enjoy it."
 	comment := "Chazelle’s film commemorates the era’s hubris as it indulges in a bit of its own. This is how a world ends. Not with a whimper but a great deal of banging, baby. And vomiting. And snorting. (Irish Times)"
 	expected := TuFilmWebsiteInformation{
-		ImageUrl:             "https://www.tu-film.de/img/film/poster/.sized.Babylon.jpg",
+		ImageUrl:             "https://www.tu-film.de/img/film/poster/Babylon.jpg",
 		ShortenedDescription: fmt.Sprintf("<b>%s<b>\n\n%s\n\n<i>%s<i>", header, description, comment),
 		Director:             null.StringFrom("Damien Chazelle"),
 		Actors:               null.StringFrom("Brad Pitt, Margot Robbie, Jean Smart"),
@@ -74,7 +74,7 @@ func TestSurpriseFilm(t *testing.T) {
 		"Seid also gespannt, welche Perle wir für euch aus dem Zauberhut ziehen! Der Film wird zwei Wochen davor über unsere üblichen Informationskanäle bekannt gegeben.\n" +
 		"Habt ihr Meinungen dazu? Dann lasst es uns wissen und schreibt uns an ueberraschungsfilm@tu-film.de"
 	expected := TuFilmWebsiteInformation{
-		ImageUrl:             "https://www.tu-film.de/img/film/poster/.sized.berraschungsfilm.jpg",
+		ImageUrl:             "https://www.tu-film.de/img/film/poster/berraschungsfilm.jpg",
 		ShortenedDescription: fmt.Sprintf("<b>%s<b>\n\n%s", header, description),
 	}
 	info, err := parseWebsiteInformation(doc)
@@ -86,7 +86,7 @@ func TestNoExtration(t *testing.T) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader("<html></html>"))
 	require.NoError(t, err)
 	expected := TuFilmWebsiteInformation{
-		ImageUrl:             "https://www.tu-film.de/img/film/poster/.sized.berraschungsfilm.jpg",
+		ImageUrl:             "https://www.tu-film.de/img/film/poster/berraschungsfilm.jpg",
 		ShortenedDescription: "Surprise yourself",
 	}
 	info, err := parseWebsiteInformation(doc)

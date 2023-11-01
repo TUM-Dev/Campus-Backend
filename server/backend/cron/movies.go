@@ -1,8 +1,10 @@
 package cron
 
 import (
+	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron/movie_parsers"
@@ -68,10 +70,13 @@ func (c *CronService) movieCron() error {
 				Trailer:     movieInformation.TrailerUrl,
 				Link:        item.Link,
 			}
+			// register the preview file for download
+			seps := strings.SplitAfter(item.Enclosure.Url, ".")
 			previewFile := model.File{
-				Name: item.Title,
-				Path: MovieImageDirectory,
-				URL:  null.StringFrom(item.Enclosure.Url),
+				Name:       fmt.Sprintf("%s.%s", strings.TrimSpace(item.Title), seps[len(seps)-1]),
+				Path:       MovieImageDirectory,
+				URL:        null.StringFrom(item.Enclosure.Url),
+				Downloaded: null.BoolFrom(false),
 			}
 			if movieInformation.ImdbID.ValueOrZero() != "" {
 				omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
