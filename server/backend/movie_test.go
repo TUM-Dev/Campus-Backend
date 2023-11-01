@@ -78,7 +78,7 @@ var (
 	}
 )
 
-const ListMoviesQuery = "SELECT `kino`.`kino`,`kino`.`date`,`kino`.`created`,`kino`.`title`,`kino`.`year`,`kino`.`runtime`,`kino`.`genre`,`kino`.`director`,`kino`.`actors`,`kino`.`rating`,`kino`.`description`,`kino`.`trailer`,`kino`.`cover`,`kino`.`link`,`kino`.`location`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `kino` LEFT JOIN `files` `File` ON `kino`.`cover` = `File`.`file` WHERE kino > ? ORDER BY date DESC"
+const ListMoviesQuery = "SELECT `kino`.`kino`,`kino`.`date`,`kino`.`created`,`kino`.`title`,`kino`.`year`,`kino`.`runtime`,`kino`.`genre`,`kino`.`director`,`kino`.`actors`,`kino`.`rating`,`kino`.`description`,`kino`.`trailer`,`kino`.`cover`,`kino`.`link`,`kino`.`location`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `kino` LEFT JOIN `files` `File` ON `kino`.`cover` = `File`.`file` WHERE kino > ? ORDER BY date ASC"
 
 func (s *MovieSuite) Test_ListMoviesAll() {
 	server := CampusServer{db: s.DB}
