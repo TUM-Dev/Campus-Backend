@@ -13,7 +13,7 @@ import (
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
 	var movies []model.Kino
-	tx := s.db.WithContext(ctx).Joins("File").Order("date DESC")
+	tx := s.db.WithContext(ctx).Joins("File").Order("date ASC")
 	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
 		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
 	}
