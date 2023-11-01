@@ -2,12 +2,13 @@ package cron
 
 import (
 	"errors"
-	"github.com/guregu/null"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/guregu/null"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
