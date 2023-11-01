@@ -2,6 +2,7 @@ package cron
 
 import (
 	"errors"
+	"github.com/guregu/null"
 	"io"
 	"net/http"
 	"os"
@@ -30,7 +31,8 @@ func (c *CronService) fileDownloadCron() error {
 			fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
 			log.WithFields(fields).Info("downloading file")
 
-			if err = tx.Model(&model.File{File: file.File}).Update("downloads", file.Downloads+1).Error; err != nil {
+			file.Downloads = file.Downloads + 1
+			if err = tx.Save(&file).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set update the download-count")
 				continue
 			}
@@ -48,7 +50,8 @@ func (c *CronService) fileDownloadCron() error {
 				continue
 			}
 			// everything went well => we can mark the file as downloaded
-			if err = tx.Model(&model.File{URL: file.URL}).Update("downloaded", true).Error; err != nil {
+			file.Downloaded = null.BoolFrom(true)
+			if err = tx.Save(&file).Error; err != nil {
 				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
 				continue
 			}
