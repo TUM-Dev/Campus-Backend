@@ -8,7 +8,6 @@ metadata:
     app.kubernetes.io/name: backend-v2
   namespace: {{ $.Values.namespace }}
 spec:
-  priorityClassName: tca-backend
   revisionHistoryLimit: 0
   selector:
     matchLabels:
@@ -25,6 +24,7 @@ spec:
         app.kubernetes.io/part-of: tum-campus-app
         app.kubernetes.io/name: backend-v2
     spec:
+      priorityClassName: tca-backend
       volumes:
         - name: storage-vol
           persistentVolumeClaim:
