@@ -1,11 +1,15 @@
 package cron
 
 import (
+	"crypto/md5"
+	"errors"
 	"fmt"
 	"regexp"
 	"slices"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron/movie_parsers"
 
@@ -52,7 +56,7 @@ func (c *CronService) movieCron() error {
 			}
 			item.Title = matches[re.SubexpIndex("title")]
 
-			// populate extra data from omdb
+			// populate extra data from tu-film website
 			movieInformation, err := movie_parsers.GetTuFilmWebsiteInformation(item.Link)
 			if err != nil {
 				log.WithFields(logFields).WithError(err).Error("error while finding imdb id")
@@ -69,14 +73,6 @@ func (c *CronService) movieCron() error {
 				Description: movieInformation.ShortenedDescription,
 				Trailer:     movieInformation.TrailerUrl,
 				Link:        item.Link,
-			}
-			// register the preview file for download
-			seps := strings.SplitAfter(item.Enclosure.Url, ".")
-			previewFile := model.File{
-				Name:       fmt.Sprintf("%s.%s", strings.TrimSpace(item.Title), seps[len(seps)-1]),
-				Path:       MovieImageDirectory,
-				URL:        null.StringFrom(item.Enclosure.Url),
-				Downloaded: null.BoolFrom(false),
 			}
 			if movieInformation.ImdbID.ValueOrZero() != "" {
 				omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
@@ -95,17 +91,47 @@ func (c *CronService) movieCron() error {
 			}
 
 			// save the result of the previous steps (🎉)
-			if err := c.db.Create(&previewFile).Error; err != nil {
-				log.WithFields(logFields).WithError(err).Error("error while creating file")
-				continue
-			}
-			// assign the file_id to make sure the id is assigned
-			movie.File = previewFile
-			movie.FileID = previewFile.File
-			if err := c.db.Create(&movie).Error; err != nil {
+			if err := c.db.Transaction(func(tx *gorm.DB) error {
+				file, err := saveImage(tx, movieInformation.ImageUrl)
+				if err != nil {
+					return err
+				}
+				// assign the file_id to make sure the id is assigned
+				movie.File = *file
+				movie.FileID = file.File
+				return tx.Create(&movie).Error
+			}); err != nil {
 				log.WithFields(logFields).WithError(err).Error("error while creating movie")
 			}
 		}
 	}
 	return nil
+}
+
+// saveImage saves an image to the database, so it can be downloaded by another cronjob and returns the file
+func saveImage(tx *gorm.DB, url string) (*model.File, error) {
+	seps := strings.SplitAfter(url, ".")
+	fileExtension := seps[len(seps)-1]
+	targetFileName := fmt.Sprintf("%x.%s", md5.Sum([]byte(url)), fileExtension)
+	var file model.File
+	// path intentionally omitted in query to allow for deduplication
+	if err := tx.First(&file, "name = ?", targetFileName).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).WithField("targetFileName", targetFileName).Error("Couldn't query database for file")
+		return nil, err
+	} else if err == nil {
+		return &file, nil
+	}
+
+	// does not exist, store in database
+	file = model.File{
+		Name:       targetFileName,
+		Path:       MovieImageDirectory,
+		URL:        null.StringFrom(url),
+		Downloaded: null.BoolFrom(false),
+	}
+	if err := tx.Create(&file).Error; err != nil {
+		log.WithError(err).Error("Could not store new file to database")
+		return nil, err
+	}
+	return &file, nil
 }
