@@ -91,8 +91,8 @@ spec:
             readOnlyRootFilesystem: true
           resources:
             requests:
-              cpu: 1000m
-              memory: 100Mi
+              cpu: 100m
+              memory: 50Mi
             limits:
               memory: 500Mi
           livenessProbe:
