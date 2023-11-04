@@ -1,16 +1,15 @@
 services:
-  backend:
-    image: ghcr.io/tum-dev/campus-backend/backend-server:latest
+  backend-v2:
     restart: always
     build:
       context: server/
       args:
         version: dev # compiled with the git sha in prod
-    ports:
-      - 50051:50051
+    expose:
+      - "50051"
     environment:
       - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
-      - ENVIRONMENT=dev
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
       - SENTRY_DSN=${SENTRY_DSN}
       - APNS_KEY_ID=${APNS_KEY_ID}
       - APNS_TEAM_ID=${APNS_TEAM_ID}
@@ -31,8 +30,9 @@ services:
 
   db:
     image: bitnami/mariadb:latest
-    ports:
-      - ${DB_PORT:-3306}:3306
+    restart: unless-stopped
+    expose:
+      - "${DB_PORT:-3306}"
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
@@ -43,38 +43,61 @@ services:
       interval: 15s
       timeout: 5s
       retries: 6
-  # The following code can be used to test the envoy proxy locally
-  # The reason why this is commented out is that this working requires the following change:
-  #
-  # ./deployment/charts/backend/files/envoy.yaml
-  #   socket_address:
-  # -   address: localhost
-  # +   address: backend
-  #     port_value: 50051
-  #
-  #grpc-web:
-  #  image: envoyproxy/envoy:v1.27-latest
-  #  restart: always
-  #  command:
-  #    - /docker-entrypoint.sh
-  #    - --config-path
-  #    - /etc/envoy/envoy.yaml
-  #    - --service-cluster
-  #    - backend-v2
-  #    - --service-node
-  #    - backend-v2
-  #    - --log-level
-  #    - info
-  #  ports:
-  #    - 8081:8081
-  #    - 9901:9901
-  #  volumes:
-  #    - ./deployment/charts/backend/files/envoy.yaml:/etc/envoy/envoy.yaml
-  #  depends_on:
-  #    - backend
+  grpc-web:
+    image: envoyproxy/envoy:v1.27-latest
+    restart: always
+    command:
+      - /docker-entrypoint.sh
+      - --config-path
+      - /etc/envoy/envoy.yaml
+      - --service-cluster
+      - backend-v2
+      - --service-node
+      - backend-v2
+      - --log-level
+      - info
+    expose:
+      - "8081"
+      #- "9901" # admin interface, not very useful
+    volumes:
+      - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      - backend-v2
+  backend-v1-accesslogs:
+    image: alpine:1.36
+    command: [ /bin/sh, -c, 'tail -n+1 -F /var/log/apache2/access.log' ]
+    volumes:
+      - legacybackend-logs:/var/log/:ro
+    depends_on:
+      - backend-v1
+  backend-v1-errorlogs:
+    image: alpine:1.36
+    command: [ /bin/sh, -c, 'tail -n+1 -F /var/log/apache2/error.log' ]
+    volumes:
+      - legacybackend-logs:/var/log/:ro
+    depends_on:
+      - backend-v1
+  backend-v1:
+    image: ghcr.io/kordianbruck/tca-backend/tca-server:latest
+    restart: always
+    read_only: true
+    tmpfs:
+      - /app/Tmp/
+      - /var/www/html/tmp/
+      - /var/run/apache2/
+    volumes:
+      - legacybackend-logs:/var/log/
+      - legacybackend-config:/app/Config/cfg.ini:ro
+      - backend-storage:/app/Storage/
+    expose:
+      - "80"
 
 volumes:
   campus-db-data:
     driver: local
   backend-storage:
+    driver: local
+  legacybackend-config:
+    driver: local
+  legacybackend-logs:
     driver: local
