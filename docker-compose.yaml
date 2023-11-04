@@ -22,8 +22,9 @@ services:
       - SMTP_PORT=${SMTP_PORT:-587}
     volumes:
       - backend-storage:/Storage
-      - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
+      - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}:ro
     user: 1000:3000
+    read_only: true
     depends_on:
       db:
         condition: service_healthy
