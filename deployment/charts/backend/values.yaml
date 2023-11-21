@@ -2,7 +2,6 @@ namespace: tca-backend
 tag: latest
 urls:
   v1:
-  - api-test-v1.tum.app
   - app.tum.app
   - app.tum.de
   - www.app.tum.de

@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/part-of: tum-campus-app
   namespace: {{ $.Values.namespace }}
 spec:
-  commonName: api-test-v1.tum.app
+  commonName: app.tum.de
   secretName: app.tum.de
   issuerRef:
     name: letsencrypt-production
