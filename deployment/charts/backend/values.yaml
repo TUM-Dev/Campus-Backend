@@ -52,7 +52,7 @@ backend:
     password: change-me
     url: smtp.gmail.com
     username: change-me
-    port: 465
+    port: "465"
 legacy:
   config: changeme-changeme-changeme
   imagepullsecret: changeme-changeme-changeme
