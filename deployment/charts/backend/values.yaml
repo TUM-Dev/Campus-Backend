@@ -48,6 +48,11 @@ backend:
     auth_key: changeme-changeme-changeme
     key_id: changeme-changeme-changeme
     team_id: changeme-changeme-changeme
+  smtp:
+    password: change-me
+    url: smtp.gmail.com
+    username: change-me
+    port: 465
 legacy:
   config: changeme-changeme-changeme
   imagepullsecret: changeme-changeme-changeme
