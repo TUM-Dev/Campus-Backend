@@ -127,7 +127,7 @@ func (c *CronService) feedbackEmailCron() error {
 		log.Tracef("sending feedback %d to %v successfull", i, feedback.Recipient)
 
 		// prevent the message being send the next time around
-		if err := c.db.Find(model.Feedback{}, "id = ?", feedback.Id).Update("processed", "true").Error; err != nil {
+		if err := c.db.Find(model.Feedback{}, "id = ?", feedback.Id).Update("processed", true).Error; err != nil {
 			log.WithError(err).Error("could not prevent mail from being send again")
 		}
 	}
