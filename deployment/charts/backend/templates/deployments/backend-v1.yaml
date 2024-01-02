@@ -23,6 +23,7 @@ spec:
         app.kubernetes.io/part-of: tum-campus-app
         app.kubernetes.io/name: backend-v1
     spec:
+      priorityClassName: tca-backend
       volumes:
         - name: legacybackend-config
           secret:

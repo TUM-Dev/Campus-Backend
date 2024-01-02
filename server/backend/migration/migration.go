@@ -39,7 +39,6 @@ func autoMigrate(db *gorm.DB) error {
 		//&model.IOSGrade{}, -- not a gorm model
 		//&model.IOSRemoteNotification...{}, -- wtf???
 		&model.IOSScheduledUpdateLog{},
-		&model.IOSSchedulingPriority{},
 		&model.Kino{},
 		&model.NewExamResultsSubscriber{},
 		&model.News{},
@@ -74,7 +73,11 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20230904100000(),
 		migrate20230826000000(),
 		migrate20231003000000(),
-		migrate20231015000000(),
+    migrate20231015000000(),
+		migrate20231023000000(),
+		migrate20240101000000(),
+		migrate20240102000000(),
+		migrate20240103000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }

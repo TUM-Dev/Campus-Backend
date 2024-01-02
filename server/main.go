@@ -116,7 +116,7 @@ func UnaryRequestLogger(ctx context.Context, req interface{}, info *grpc.UnarySe
 	start := time.Now()
 	resp, err := handler(ctx, req)
 	fields := log.Fields{"elapsed": time.Since(start), "method": strings.TrimPrefix(info.FullMethod, "/api.Campus/")}
-	if err != nil {
+	if err == nil {
 		log.WithFields(fields).Info("request")
 	} else {
 		log.WithFields(fields).WithError(err).Warn("request")
