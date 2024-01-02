@@ -50,6 +50,7 @@ const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_note` WHERE `update_no
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
+		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}).
 			AddRow(1, "1.0.0", "Test Message"))
 
@@ -66,6 +67,7 @@ func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
+		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}))
 
 	meta := metadata.MD{}
@@ -76,7 +78,9 @@ func (s *UpdateNoteSuite) Test_GetUpdateNoteNone() {
 }
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteError() {
-	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).WillReturnError(gorm.ErrInvalidDB)
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
+		WithArgs(1).
+		WillReturnError(gorm.ErrInvalidDB)
 
 	meta := metadata.MD{}
 	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
