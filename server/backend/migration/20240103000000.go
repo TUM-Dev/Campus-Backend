@@ -13,17 +13,20 @@ func migrate20240103000000() *gormigrate.Migration {
 		Migrate: func(tx *gorm.DB) error {
 			if err := tx.Exec(`alter table question2answer
 					add constraint question2answer_member_member_fk
-					foreign key (member) references member (member);`).Error; err != nil {
+					foreign key (member) references member (member)
+            		on update cascade on delete cascade;`).Error; err != nil {
 				return err
 			}
 			if err := tx.Exec(`alter table question2answer
 					add constraint question2answer_questionAnswers_answer_fk
-					foreign key (answer) references questionAnswers (answer);`).Error; err != nil {
+					foreign key (answer) references questionAnswers (answer)
+            		on update cascade on delete cascade;`).Error; err != nil {
 				return err
 			}
 			if err := tx.Exec(`alter table question2answer
 					add constraint question2answer_question_question_fk
-					foreign key (question) references question (question);`).Error; err != nil {
+					foreign key (question) references question (question)
+            		on update cascade on delete cascade;`).Error; err != nil {
 				return err
 			}
 			return nil
