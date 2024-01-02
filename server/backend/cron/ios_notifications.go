@@ -14,11 +14,10 @@ func (c *CronService) iosNotificationsCron() error {
 		return nil
 	}
 
-	repo := scheduling.NewRepository(c.db)
 	devicesRepo := device.NewRepository(c.db)
 	schedulerRepo := scheduled_update_log.NewRepository(c.db)
 
-	service := scheduling.NewService(repo, devicesRepo, schedulerRepo, c.APNs)
+	service := scheduling.NewService(devicesRepo, schedulerRepo, c.APNs)
 
 	return service.HandleScheduledCron()
 }
