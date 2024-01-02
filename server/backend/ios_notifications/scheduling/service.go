@@ -4,6 +4,7 @@ package scheduling
 
 import (
 	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -21,21 +22,12 @@ var devicesToUpdate = promauto.NewGauge(prometheus.GaugeOpts{
 })
 
 type Service struct {
-	Repository             *Repository
 	DevicesRepository      *device.Repository
 	SchedulerLogRepository *scheduled_update_log.Repository
-	Priority               *model.IOSSchedulingPriority
 	APNs                   *apns.Service
 }
 
 func (service *Service) HandleScheduledCron() error {
-	priorities, err := service.Repository.FindSchedulingPriorities()
-	if err != nil {
-		return err
-	}
-
-	currentPriority := findIOSSchedulingPriorityForNow(priorities)
-
 	devices, err := service.DevicesRepository.GetDevicesThatShouldUpdateGrades()
 	if err != nil {
 		log.WithError(err).Error("can't get devices")
@@ -49,7 +41,8 @@ func (service *Service) HandleScheduledCron() error {
 		return nil
 	}
 
-	devices = service.selectDevicesToUpdate(devices, currentPriority.Priority)
+	priority := findSchedulingPriority()
+	devices = service.selectDevicesToUpdate(devices, priority)
 
 	log.Infof("Updating %d devices", len(devices))
 
@@ -122,50 +115,31 @@ func (service *Service) selectDevicesToUpdate(devices []model.IOSDeviceLastUpdat
 
 	return devices[:maxDevicesToCheck]
 }
+func findSchedulingPriority() int {
+	now := time.Now()
 
-func findIOSSchedulingPriorityForNow(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {
-	var prioritiesThatAreInRange []model.IOSSchedulingPriority
-
-	for _, priority := range priorities {
-		if priority.IsCurrentlyInRange() {
-			prioritiesThatAreInRange = append(prioritiesThatAreInRange, priority)
-		}
+	isNight := 1 <= now.Hour() && now.Hour() <= 6
+	if isNight {
+		return 1
 	}
 
-	if len(prioritiesThatAreInRange) == 0 {
-		return model.DefaultIOSSchedulingPriority()
+	isDuringSummerSemester := 32 <= now.YearDay() && now.YearDay() <= 106
+	isDuringWinterSemester := 152 <= now.YearDay() && now.YearDay() <= 288
+	if isDuringWinterSemester || isDuringSummerSemester {
+		return 10
 	}
 
-	return mergeIOSSchedulingPriorities(prioritiesThatAreInRange)
+	return 5
 }
 
-func mergeIOSSchedulingPriorities(priorities []model.IOSSchedulingPriority) *model.IOSSchedulingPriority {
-	mergedPriority := model.DefaultIOSSchedulingPriority()
-	prioritiesSum := 0
-
-	for _, priority := range priorities {
-		if priority.IsMorePreciseThan(mergedPriority) {
-			mergedPriority = &priority
-		}
-
-		prioritiesSum += priority.Priority
-	}
-
-	mergedPriority.Priority = prioritiesSum / len(priorities)
-
-	return mergedPriority
-}
-
-func NewService(repository *Repository,
+func NewService(
 	devicesRepository *device.Repository,
 	schedulerRepository *scheduled_update_log.Repository,
 	apnsService *apns.Service,
 ) *Service {
 	return &Service{
-		Repository:             repository,
 		DevicesRepository:      devicesRepository,
 		SchedulerLogRepository: schedulerRepository,
-		Priority:               model.DefaultIOSSchedulingPriority(),
 		APNs:                   apnsService,
 	}
 }
