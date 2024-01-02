@@ -24,6 +24,13 @@ func migrate20240102000000() *gormigrate.Migration {
 			if err := tx.Exec("DROP table card_comment").Error; err != nil {
 				return err
 			}
+			// tags
+			if err := tx.Exec("DROP table card2tag").Error; err != nil {
+				return err
+			}
+			if err := tx.Exec("DROP table tag").Error; err != nil {
+				return err
+			}
 			//cards
 			if err := tx.Exec("DROP table card_option").Error; err != nil {
 				return err
@@ -36,13 +43,6 @@ func migrate20240102000000() *gormigrate.Migration {
 				return err
 			}
 			if err := tx.Exec("DROP table card_type").Error; err != nil {
-				return err
-			}
-			// tags
-			if err := tx.Exec("DROP table tag").Error; err != nil {
-				return err
-			}
-			if err := tx.Exec("DROP table card2tag").Error; err != nil {
 				return err
 			}
 			return nil
