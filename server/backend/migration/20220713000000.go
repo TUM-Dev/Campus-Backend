@@ -268,7 +268,6 @@ func migrate20220713000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20220713000000",
 		Migrate: func(tx *gorm.DB) error {
-
 			if err := tx.AutoMigrate(
 				&InitialCafeteria{},
 				&InitialCafeteriaRating{},
@@ -284,9 +283,9 @@ func migrate20220713000000() *gormigrate.Migration {
 				&InitialDishRatingTag{},
 				&InitialDishRatingTagOption{},
 				&InitialDishToDishNameTag{},
+				&InitialDishNameTagAverage{},
 				&InitialCafeteriaRatingAverage{},
 				&InitialCafeteriaRatingTagAverage{},
-				&InitialDishNameTagAverage{},
 				&InitialDishRatingAverage{},
 				&InitialDishRatingTagAverage{},
 			); err != nil {

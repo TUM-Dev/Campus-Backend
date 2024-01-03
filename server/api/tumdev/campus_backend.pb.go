@@ -1246,13 +1246,18 @@ type GetDishRatingsReply struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Rating     []*SingleRatingReply `protobuf:"bytes,1,rep,name=rating,proto3" json:"rating,omitempty"`
-	Avg        float64              `protobuf:"fixed64,2,opt,name=avg,proto3" json:"avg,omitempty"`
-	Std        float64              `protobuf:"fixed64,3,opt,name=std,proto3" json:"std,omitempty"`
-	Min        int32                `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
-	Max        int32                `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
-	RatingTags []*RatingTagResult   `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
-	NameTags   []*RatingTagResult   `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
+	// a number of actual ratings
+	Rating []*SingleRatingReply `protobuf:"bytes,1,rep,name=rating,proto3" json:"rating,omitempty"`
+	// average rating for all dish rating tags which were used to rate this dish in this cafeteria
+	Avg float64 `protobuf:"fixed64,2,opt,name=avg,proto3" json:"avg,omitempty"`
+	// std of all dish rating tags which were used to rate this dish in this cafeteria
+	Std float64 `protobuf:"fixed64,3,opt,name=std,proto3" json:"std,omitempty"`
+	// minimum of all dish rating tags which were used to rate this dish in this cafeteria
+	Min int32 `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
+	// maximum of all dish rating tags which were used to rate this dish in this cafeteria
+	Max        int32              `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
+	RatingTags []*RatingTagResult `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	NameTags   []*RatingTagResult `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
 }
 
 func (x *GetDishRatingsReply) Reset() {

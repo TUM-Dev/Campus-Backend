@@ -426,6 +426,7 @@
     },
     "/dish/rating/get": {
       "post": {
+        "summary": "Allows to query ratings for a specific dish in a specific cafeteria.",
         "operationId": "Campus_GetDishRatings",
         "responses": {
           "200": {
@@ -1119,23 +1120,28 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiSingleRatingReply"
-          }
+          },
+          "title": "a number of actual ratings"
         },
         "avg": {
           "type": "number",
-          "format": "double"
+          "format": "double",
+          "title": "average rating for all dish rating tags which were used to rate this dish in this cafeteria"
         },
         "std": {
           "type": "number",
-          "format": "double"
+          "format": "double",
+          "title": "std of all dish rating tags which were used to rate this dish in this cafeteria"
         },
         "min": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "minimum of all dish rating tags which were used to rate this dish in this cafeteria"
         },
         "max": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "title": "maximum of all dish rating tags which were used to rate this dish in this cafeteria"
         },
         "ratingTags": {
           "type": "array",
