@@ -76,12 +76,12 @@ func (s *CafeteriaSuite) Test_GetCafeteriaHeadCount() {
 const ExpectedGetCafeteriaByName = "SELECT * FROM `cafeteria` WHERE name LIKE ? ORDER BY `cafeteria`.`cafeteria` LIMIT 1"
 
 func (s *CafeteriaSuite) Test_CreateCanteenRating() {
-	StorageDir = "."
+	StorageDir = "." // Override directory used in the production environment
 	canteenName := "mensa-garching"
 	cafeteriaID := 0
 	comment := "Everything perfect, 2 Stars"
 	ratingID := 0
-	image_name_path := ".cafeterias/0/c73f6461a5ae03bb935b54a27f12e0a5.jpeg" // "testimage.txt"
+	image_name_path := ".cafeterias/0/c73f6461a5ae03bb935b54a27f12e0a5.jpeg"
 	var ratingValue int32 = 2
 
 	//	s.mock.ExpectBegin()
@@ -104,6 +104,7 @@ func (s *CafeteriaSuite) Test_CreateCanteenRating() {
 	response, err := server.CreateCanteenRating(metadata.NewIncomingContext(context.Background(), meta),
 		&rating,
 	)
+	// todo test the response
 	require.NoError(s.T(), err)
 	if err != nil {
 		log.WithError(err).Error("Canteen HeadCount data request failed.")
@@ -145,6 +146,70 @@ func prepareTagRating(s *CafeteriaSuite, tagRatingID, ratingID int, points int, 
 	return pb.RatingTag{
 		Points: float64(points),
 		TagId:  int64(tagID),
+	}
+}
+
+const ExpectedGetDishByName = "SELECT * FROM `dish` WHERE name LIKE ? ORDER BY `dish`.`dish` LIMIT 1"
+
+// Test if dish ratings are correctly created
+func (s *CafeteriaSuite) Test_CreateDishRating() {
+	StorageDir = "." // Override directory used in the production environment
+	canteenName := "MENSA_GARCHING"
+	dishName := "Vegane rote Grütze mit Soja-Vanillesauce"
+	dishId := 0
+	dishType := "Pasta"
+	cafeteriaID := 0
+	comment := "Everything perfect, 2 Stars"
+	dishRatingID := 0
+	image_name_path := ".cafeterias/0/c73f6461a5ae03bb935b54a27f12e0a5.jpeg"
+	var ratingValue int32 = 2
+
+	//	s.mock.ExpectBegin()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetDishByName)).
+		WithArgs(dishName).
+		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).
+			AddRow(dishId, dishName, dishType, cafeteriaID))
+
+	s.mock.ExpectBegin()
+	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `dish_rating` (`dishRating`,`points`,`cafeteriaID`,`dishID`,`comment`,`timestamp`,`image`) VALUES (?,?,?,?,?,?) RETURNING `dishRating`")).
+		WithArgs(ratingValue, comment, cafeteriaID, sqlmock.AnyArg(), image_name_path).
+		WillReturnRows(sqlmock.NewRows([]string{"dishRating", "points", "cafeteriaID", "dishID", "comment", "timestamp", "image"}).
+			AddRow(dishRatingID, ratingValue, cafeteriaID, dishId, comment, time.Date(2023, 10, 9, 11, 45, 22, 0, time.Local), image_name_path))
+	s.mock.ExpectCommit()
+
+	meta := metadata.MD{}
+	rating := generateDishRating(canteenName, ratingValue, s, comment, dishName)
+
+	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	response, err := server.CreateDishRating(metadata.NewIncomingContext(context.Background(), meta),
+		&rating,
+	)
+	// todo test the response
+	require.NoError(s.T(), err)
+	if err != nil {
+		log.WithError(err).Error("Canteen HeadCount data request failed.")
+		//todo compare results	require.Equal(s.T(), status.Error(codes.NotFound, "No update note found"), err)
+	} else {
+		log.WithField("res", response).Info("Canteen HeadCount data request successful.")
+	}
+}
+
+func generateDishRating(canteen string, rating int32, s *CafeteriaSuite, comment string, dishName string) pb.CreateDishRatingRequest {
+	y := make([]*pb.RatingTag, 2)
+	// todo cahnge to dish tags
+	// todo add the dish specific tags
+	var myRating = prepareTagRating(s, 1, 0, 1, 5)
+	y[0] = &myRating
+	var myRatingSecond = prepareTagRating(s, 2, 0, 3, 7)
+	y[1] = &myRatingSecond
+
+	return pb.CreateDishRatingRequest{
+		Points:     rating,
+		CanteenId:  canteen,
+		Dish:       dishName,
+		Comment:    comment,
+		RatingTags: y,
+		Image:      getImageToBytes(testImage),
 	}
 }
 
