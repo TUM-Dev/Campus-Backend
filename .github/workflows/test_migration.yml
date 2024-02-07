@@ -58,7 +58,7 @@ jobs:
           atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Find Comment
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: "${{ github.event.number }}"
