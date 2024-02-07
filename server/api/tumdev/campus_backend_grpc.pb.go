@@ -43,7 +43,6 @@ const (
 	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
 	Campus_GetMember_FullMethodName                = "/api.Campus/GetMember"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
-	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 )
@@ -77,8 +76,6 @@ type CampusClient interface {
 	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
 	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
-	// Endpoint for the iOS app to respond to background notifications requests
-	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -325,15 +322,6 @@ func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHe
 	return out, nil
 }
 
-func (c *campusClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error) {
-	out := new(IOSDeviceRequestResponseReply)
-	err := c.cc.Invoke(ctx, Campus_IOSDeviceRequestResponse_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
 	out := new(CreateDeviceReply)
 	err := c.cc.Invoke(ctx, Campus_CreateDevice_FullMethodName, in, out, opts...)
@@ -381,8 +369,6 @@ type CampusServer interface {
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
 	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
-	// Endpoint for the iOS app to respond to background notifications requests
-	IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -462,9 +448,6 @@ func (UnimplementedCampusServer) GetMember(context.Context, *GetMemberRequest) (
 }
 func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
-}
-func (UnimplementedCampusServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IOSDeviceRequestResponse not implemented")
 }
 func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDevice not implemented")
@@ -907,24 +890,6 @@ func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IOSDeviceRequestResponseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_IOSDeviceRequestResponse_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, req.(*IOSDeviceRequestResponseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDeviceRequest)
 	if err := dec(in); err != nil {
@@ -1055,10 +1020,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCanteenHeadCount",
 			Handler:    _Campus_GetCanteenHeadCount_Handler,
-		},
-		{
-			MethodName: "IOSDeviceRequestResponse",
-			Handler:    _Campus_IOSDeviceRequestResponse_Handler,
 		},
 		{
 			MethodName: "CreateDevice",
