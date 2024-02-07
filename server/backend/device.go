@@ -132,8 +132,7 @@ func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceReque
 	case pb.DeviceType_ANDROID:
 		return nil, status.Error(codes.Unimplemented, "android device creation not implemented")
 	case pb.DeviceType_IOS:
-		service := s.GetIOSDeviceService()
-		return service.CreateDevice(req)
+		return nil, status.Error(codes.Unimplemented, "ios device creation not implemented")
 	case pb.DeviceType_WINDOWS:
 		return nil, status.Error(codes.Unimplemented, "windows device creation not implemented")
 	}
@@ -150,8 +149,7 @@ func (s *CampusServer) DeleteDevice(_ context.Context, req *pb.DeleteDeviceReque
 	case pb.DeviceType_ANDROID:
 		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
 	case pb.DeviceType_IOS:
-		service := s.GetIOSDeviceService()
-		return service.DeleteDevice(req)
+		return nil, status.Error(codes.Unimplemented, "ios device remove not implemented")
 	case pb.DeviceType_WINDOWS:
 		return nil, status.Error(codes.Unimplemented, "windows device remove not implemented")
 	}

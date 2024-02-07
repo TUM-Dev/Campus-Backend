@@ -10,7 +10,6 @@ require (
 	github.com/getsentry/sentry-go v0.25.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.1
 	github.com/gofrs/uuid/v5 v5.0.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/makasim/sentryhook v0.4.2
@@ -21,7 +20,6 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/net v0.19.0
 	golang.org/x/sync v0.5.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17
 	google.golang.org/grpc v1.60.1
@@ -52,6 +50,7 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	golang.org/x/image v0.10.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto v0.0.0-20231030173426-d783a09b4405 // indirect
