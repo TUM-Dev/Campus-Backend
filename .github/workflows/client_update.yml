@@ -26,7 +26,7 @@ jobs:
         uses: dart-lang/setup-dart@v1
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v2
+        uses: arduino/setup-protoc@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
