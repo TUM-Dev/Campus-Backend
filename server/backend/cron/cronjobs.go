@@ -3,7 +3,6 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -14,9 +13,8 @@ import (
 )
 
 type CronService struct {
-	db   *gorm.DB
-	gf   *gofeed.Parser
-	APNs *apns.Service
+	db *gorm.DB
+	gf *gofeed.Parser
 }
 
 // StorageDir is the directory where files are stored
@@ -25,15 +23,12 @@ var StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
-	NewsType           = "news"
-	FileDownloadType   = "fileDownload"
-	DishNameDownload   = "dishNameDownload"
-	CanteenHeadcount   = "canteenHeadCount"
-	IOSNotifications   = "iosNotifications"
-	IOSActivityReset   = "iosActivityReset"
-	NewExamResultsHook = "newExamResultsHook"
-	MovieType          = "movie"
-	FeedbackEmail      = "feedbackEmail"
+	NewsType         = "news"
+	FileDownloadType = "fileDownload"
+	DishNameDownload = "dishNameDownload"
+	CanteenHeadcount = "canteenHeadCount"
+	MovieType        = "movie"
+	FeedbackEmail    = "feedbackEmail"
 
 	/* MensaType      = "mensa"
 	AlarmType      = "alarm" */
@@ -41,9 +36,8 @@ const (
 
 func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db:   db,
-		gf:   gofeed.NewParser(),
-		APNs: apns.NewCronService(db),
+		db: db,
+		gf: gofeed.NewParser(),
 	}
 }
 
@@ -61,9 +55,6 @@ func (c *CronService) Run() error {
 				FileDownloadType,
 				DishNameDownload,
 				CanteenHeadcount,
-				IOSNotifications,
-				IOSActivityReset,
-				NewExamResultsHook,
 				MovieType,
 				FeedbackEmail,
 			).
@@ -90,8 +81,6 @@ func (c *CronService) Run() error {
 				if env.IsMensaCronActive() {
 					g.Go(c.dishNameDownloadCron)
 				}
-			case NewExamResultsHook:
-				g.Go(func() error { return c.newExamResultsHookCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
 				/*
@@ -105,10 +94,6 @@ func (c *CronService) Run() error {
 				*/
 			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
-			case IOSNotifications:
-				g.Go(func() error { return c.iosNotificationsCron() })
-			case IOSActivityReset:
-				g.Go(func() error { return c.iosActivityReset() })
 			case FeedbackEmail:
 				g.Go(func() error { return c.feedbackEmailCron() })
 			}

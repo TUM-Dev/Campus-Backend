@@ -10,7 +10,6 @@ require (
 	github.com/getsentry/sentry-go v0.26.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.1
 	github.com/gofrs/uuid/v5 v5.0.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/makasim/sentryhook v0.4.2
