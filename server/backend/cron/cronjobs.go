@@ -29,9 +29,9 @@ const (
 	CanteenHeadcount = "canteenHeadCount"
 	MovieType        = "movie"
 	FeedbackEmail    = "feedbackEmail"
+	AlarmType        = "alarm"
 
-	/* MensaType      = "mensa"
-	AlarmType      = "alarm" */
+	// MensaType      = "mensa"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -57,6 +57,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				MovieType,
 				FeedbackEmail,
+				AlarmType,
 			).
 			Scan(&res)
 
@@ -96,6 +97,8 @@ func (c *CronService) Run() error {
 				g.Go(func() error { return c.canteenHeadCountCron() })
 			case FeedbackEmail:
 				g.Go(func() error { return c.feedbackEmailCron() })
+			case AlarmType:
+				g.Go(func() error { return c.alarmCron() })
 			}
 		}
 
