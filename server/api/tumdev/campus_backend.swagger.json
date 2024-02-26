@@ -577,40 +577,6 @@
         ]
       }
     },
-    "/ios/notifications/deviceRequestResponse": {
-      "post": {
-        "summary": "Endpoint for the iOS app to respond to background notifications requests",
-        "description": "TODO naming",
-        "operationId": "Campus_IOSDeviceRequestResponse",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiIOSDeviceRequestResponseReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiIOSDeviceRequestResponseRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/members/{lrzId}": {
       "get": {
         "operationId": "Campus_GetMember",
@@ -1260,25 +1226,6 @@
         },
         "externalId": {
           "type": "boolean"
-        }
-      }
-    },
-    "apiIOSDeviceRequestResponseReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "apiIOSDeviceRequestResponseRequest": {
-      "type": "object",
-      "properties": {
-        "requestId": {
-          "type": "string"
-        },
-        "payload": {
-          "type": "string"
         }
       }
     },
