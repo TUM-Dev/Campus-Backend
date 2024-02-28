@@ -91,10 +91,10 @@ service Campus {
     };
   }
 
-  rpc ListDishes(ListDishesRequest) returns (ListDishesReply) {
+  rpc ListMeals(ListMealsRequest) returns (ListMealsReply) {
     option (google.api.http) = {
-      get: "/dish/allDishes",
-      response_body: "dish"
+      get: "/meal/allMeals",
+      response_body: "meal"
     };
   }
 
@@ -385,7 +385,7 @@ message Canteen {
   double latitude = 4;
 }
 
-message ListDishesRequest {
+message ListMealsRequest {
   string canteen_id = 1;
   // >=2022 until the current year
   int32 year = 2;
@@ -395,8 +395,8 @@ message ListDishesRequest {
   int32 day = 4;
 }
 
-message ListDishesReply {
-  repeated string dish = 1;
+message ListMealsReply {
+  repeated string meal = 1;
 }
 
 message ListResponsiblePersonRequest {}

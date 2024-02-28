@@ -638,25 +638,29 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 	}, requestStatus
 }
 
-func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
+// ListMeals gRPC Endpoint
+// Returns all meals for a specific cafeteria, year, week and day
+func (s *CampusServer) ListMeals(ctx context.Context, req *pb.ListMealsRequest) (*pb.ListMealsReply, error) {
 	if req.Year < 2022 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
 	if req.Week < 1 || req.Week > 53 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
+		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
 	var results []string
+	cafeteriaName := strings.ReplaceAll(strings.ToUpper(req.CanteenId), "-", "_")
+
 	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", req.CanteenId).
+		Where("c.name LIKE ?", cafeteriaName).
 		Select("d.name").
 		Find(&results).Error
 
@@ -665,8 +669,8 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
-	return &pb.ListDishesReply{
-		Dish: results,
+	return &pb.ListMealsReply{
+		Meal: results,
 	}, requestStatus
 }
 
