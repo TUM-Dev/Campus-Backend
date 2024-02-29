@@ -644,11 +644,11 @@ func (s *CampusServer) ListMeals(ctx context.Context, req *pb.ListMealsRequest) 
 	if req.Year < 2022 {
 		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 53 {
-		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
+	if req.Week < 1 || req.Week > 52 {
+		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
