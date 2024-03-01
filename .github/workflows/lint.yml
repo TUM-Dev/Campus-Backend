@@ -30,7 +30,7 @@ jobs:
       - run: go install golang.org/x/tools/cmd/goimports@latest
       - run: bash server/api/installBuf.bash
       - name: pre-commit
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
       - uses: ls-lint/action@v2.2.2
         with:
           config: .ls-lint.yaml
