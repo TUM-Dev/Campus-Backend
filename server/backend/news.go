@@ -29,11 +29,10 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 
 	var resp []*pb.NewsSource
 	for _, source := range sources {
-		log.WithField("title", source.Title).Trace("sending news source")
 		resp = append(resp, &pb.NewsSource{
-			Source: fmt.Sprintf("%d", source.Source),
-			Title:  source.Title,
-			Icon:   source.File.URL.String,
+			Source:  fmt.Sprintf("%d", source.Source),
+			Title:   source.Title,
+			IconUrl: source.File.FullExternalUrl(),
 		})
 	}
 	return &pb.ListNewsSourcesReply{Sources: resp}, nil
@@ -45,7 +44,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).Joins("File")
+	tx := s.db.WithContext(ctx).Joins("File").Joins("NewsSource").Joins("NewsSource.File")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
@@ -60,19 +59,24 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 		return nil, status.Error(codes.Internal, "could not ListNews")
 	}
 
-	resp := make([]*pb.News, len(newsEntries))
-	for i, item := range newsEntries {
-		log.WithField("title", item.Title).Trace("sending news")
-		resp[i] = &pb.News{
-			Id:       item.News,
-			Title:    item.Title,
-			Text:     item.Description,
-			Link:     item.Link,
-			ImageUrl: item.Image.String,
-			Source:   fmt.Sprintf("%d", item.Src),
-			Created:  timestamppb.New(item.Created),
-			Date:     timestamppb.New(item.Date),
+	var resp []*pb.News
+	for _, item := range newsEntries {
+		imgUrl := ""
+		if item.File != nil {
+			imgUrl = item.File.FullExternalUrl()
 		}
+		resp = append(resp, &pb.News{
+			Id:            item.News,
+			Title:         item.Title,
+			Text:          item.Description,
+			Link:          item.Link,
+			ImageUrl:      imgUrl,
+			SourceId:      fmt.Sprintf("%d", item.NewsSource.Source),
+			SourceTitle:   item.NewsSource.Title,
+			SourceIconUrl: item.NewsSource.File.FullExternalUrl(),
+			Created:       timestamppb.New(item.Created),
+			Date:          timestamppb.New(item.Date),
+		})
 	}
 	return &pb.ListNewsReply{News: resp}, nil
 }
@@ -85,7 +89,7 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	var res []*model.NewsAlert
 	tx := s.db.WithContext(ctx).Joins("File").Where("news_alert.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
-		tx = tx.Where("news_alert.alert > ?", req.LastNewsAlertId)
+		tx = tx.Where("news_alert.news_alert > ?", req.LastNewsAlertId)
 	}
 	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no news alerts")
@@ -97,7 +101,7 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	var alerts []*pb.NewsAlert
 	for _, alert := range res {
 		alerts = append(alerts, &pb.NewsAlert{
-			ImageUrl: alert.File.URL.String,
+			ImageUrl: alert.File.FullExternalUrl(),
 			Link:     alert.Link.String,
 			Created:  timestamppb.New(alert.Created),
 			From:     timestamppb.New(alert.From),

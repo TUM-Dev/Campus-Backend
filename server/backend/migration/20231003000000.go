@@ -84,7 +84,7 @@ var staticData embed.FS
 
 // migrate20231003000000
 // migrates the static data for the canteen rating system and adds the necessary cronjob entries
-func (m TumDBMigrator) migrate20231003000000() *gormigrate.Migration {
+func migrate20231003000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231003000000",
 		Migrate: func(tx *gorm.DB) error {
@@ -136,9 +136,8 @@ func setNameTagOptions(db *gorm.DB) {
 	}
 
 	var tagsNames multiLanguageNameTags
-	errjson := json.Unmarshal(file, &tagsNames)
-	if errjson != nil {
-		log.WithError(errjson).Error("Error parsing nameTagList to json.")
+	if err := json.Unmarshal(file, &tagsNames); err != nil {
+		log.WithError(err).Error("Error parsing nameTagList to json.")
 	}
 	for _, v := range tagsNames.MultiLanguageNameTags {
 		parent := DishNameTagOption{

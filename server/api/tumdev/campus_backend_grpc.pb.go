@@ -23,7 +23,6 @@ const (
 	Campus_ListNewsAlerts_FullMethodName           = "/api.Campus/ListNewsAlerts"
 	Campus_ListNewsSources_FullMethodName          = "/api.Campus/ListNewsSources"
 	Campus_ListNews_FullMethodName                 = "/api.Campus/ListNews"
-	Campus_SearchRooms_FullMethodName              = "/api.Campus/SearchRooms"
 	Campus_ListCanteenRatings_FullMethodName       = "/api.Campus/ListCanteenRatings"
 	Campus_GetDishRatings_FullMethodName           = "/api.Campus/GetDishRatings"
 	Campus_CreateCanteenRating_FullMethodName      = "/api.Campus/CreateCanteenRating"
@@ -37,7 +36,6 @@ const (
 	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
 	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
-	Campus_ListStudyRooms_FullMethodName           = "/api.Campus/ListStudyRooms"
 	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
 	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
@@ -45,7 +43,6 @@ const (
 	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
 	Campus_GetMember_FullMethodName                = "/api.Campus/GetMember"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
-	Campus_IOSDeviceRequestResponse_FullMethodName = "/api.Campus/IOSDeviceRequestResponse"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 )
@@ -57,9 +54,9 @@ type CampusClient interface {
 	ListNewsAlerts(ctx context.Context, in *ListNewsAlertsRequest, opts ...grpc.CallOption) (*ListNewsAlertsReply, error)
 	ListNewsSources(ctx context.Context, in *ListNewsSourcesRequest, opts ...grpc.CallOption) (*ListNewsSourcesReply, error)
 	ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error)
-	SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(ctx context.Context, in *ListCanteenRatingsRequest, opts ...grpc.CallOption) (*ListCanteenRatingsReply, error)
+	// Allows to query ratings for a specific dish in a specific cafeteria.
 	GetDishRatings(ctx context.Context, in *GetDishRatingsRequest, opts ...grpc.CallOption) (*GetDishRatingsReply, error)
 	CreateCanteenRating(ctx context.Context, in *CreateCanteenRatingRequest, opts ...grpc.CallOption) (*CreateCanteenRatingReply, error)
 	CreateDishRating(ctx context.Context, in *CreateDishRatingRequest, opts ...grpc.CallOption) (*CreateDishRatingReply, error)
@@ -72,7 +69,6 @@ type CampusClient interface {
 	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
 	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
-	ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error)
 	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
@@ -80,8 +76,6 @@ type CampusClient interface {
 	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
 	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
-	// Endpoint for the iOS app to respond to background notifications requests
-	IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -117,15 +111,6 @@ func (c *campusClient) ListNewsSources(ctx context.Context, in *ListNewsSourcesR
 func (c *campusClient) ListNews(ctx context.Context, in *ListNewsRequest, opts ...grpc.CallOption) (*ListNewsReply, error) {
 	out := new(ListNewsReply)
 	err := c.cc.Invoke(ctx, Campus_ListNews_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) SearchRooms(ctx context.Context, in *SearchRoomsRequest, opts ...grpc.CallOption) (*SearchRoomsReply, error) {
-	out := new(SearchRoomsReply)
-	err := c.cc.Invoke(ctx, Campus_SearchRooms_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -249,15 +234,6 @@ func (c *campusClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteReque
 	return out, nil
 }
 
-func (c *campusClient) ListStudyRooms(ctx context.Context, in *ListStudyRoomsRequest, opts ...grpc.CallOption) (*ListStudyRoomsReply, error) {
-	out := new(ListStudyRoomsReply)
-	err := c.cc.Invoke(ctx, Campus_ListStudyRooms_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error) {
 	out := new(ListMoviesReply)
 	err := c.cc.Invoke(ctx, Campus_ListMovies_FullMethodName, in, out, opts...)
@@ -346,15 +322,6 @@ func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHe
 	return out, nil
 }
 
-func (c *campusClient) IOSDeviceRequestResponse(ctx context.Context, in *IOSDeviceRequestResponseRequest, opts ...grpc.CallOption) (*IOSDeviceRequestResponseReply, error) {
-	out := new(IOSDeviceRequestResponseReply)
-	err := c.cc.Invoke(ctx, Campus_IOSDeviceRequestResponse_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
 	out := new(CreateDeviceReply)
 	err := c.cc.Invoke(ctx, Campus_CreateDevice_FullMethodName, in, out, opts...)
@@ -380,9 +347,9 @@ type CampusServer interface {
 	ListNewsAlerts(context.Context, *ListNewsAlertsRequest) (*ListNewsAlertsReply, error)
 	ListNewsSources(context.Context, *ListNewsSourcesRequest) (*ListNewsSourcesReply, error)
 	ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error)
-	SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error)
 	// This endpoint retrieves Canteen Ratings from the Backend.
 	ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error)
+	// Allows to query ratings for a specific dish in a specific cafeteria.
 	GetDishRatings(context.Context, *GetDishRatingsRequest) (*GetDishRatingsReply, error)
 	CreateCanteenRating(context.Context, *CreateCanteenRatingRequest) (*CreateCanteenRatingReply, error)
 	CreateDishRating(context.Context, *CreateDishRatingRequest) (*CreateDishRatingReply, error)
@@ -395,7 +362,6 @@ type CampusServer interface {
 	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
 	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
-	ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(Campus_CreateFeedbackServer) error
 	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
@@ -403,8 +369,6 @@ type CampusServer interface {
 	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
 	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
-	// Endpoint for the iOS app to respond to background notifications requests
-	IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -424,9 +388,6 @@ func (UnimplementedCampusServer) ListNewsSources(context.Context, *ListNewsSourc
 }
 func (UnimplementedCampusServer) ListNews(context.Context, *ListNewsRequest) (*ListNewsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListNews not implemented")
-}
-func (UnimplementedCampusServer) SearchRooms(context.Context, *SearchRoomsRequest) (*SearchRoomsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchRooms not implemented")
 }
 func (UnimplementedCampusServer) ListCanteenRatings(context.Context, *ListCanteenRatingsRequest) (*ListCanteenRatingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCanteenRatings not implemented")
@@ -467,9 +428,6 @@ func (UnimplementedCampusServer) ListOpeningTimes(context.Context, *ListOpeningT
 func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
 }
-func (UnimplementedCampusServer) ListStudyRooms(context.Context, *ListStudyRoomsRequest) (*ListStudyRoomsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListStudyRooms not implemented")
-}
 func (UnimplementedCampusServer) ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMovies not implemented")
 }
@@ -490,9 +448,6 @@ func (UnimplementedCampusServer) GetMember(context.Context, *GetMemberRequest) (
 }
 func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
-}
-func (UnimplementedCampusServer) IOSDeviceRequestResponse(context.Context, *IOSDeviceRequestResponseRequest) (*IOSDeviceRequestResponseReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IOSDeviceRequestResponse not implemented")
 }
 func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDevice not implemented")
@@ -563,24 +518,6 @@ func _Campus_ListNews_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).ListNews(ctx, req.(*ListNewsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_SearchRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchRoomsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).SearchRooms(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_SearchRooms_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).SearchRooms(ctx, req.(*SearchRoomsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -819,24 +756,6 @@ func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListStudyRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStudyRoomsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListStudyRooms(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListStudyRooms_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListStudyRooms(ctx, req.(*ListStudyRoomsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_ListMovies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListMoviesRequest)
 	if err := dec(in); err != nil {
@@ -971,24 +890,6 @@ func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_IOSDeviceRequestResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IOSDeviceRequestResponseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_IOSDeviceRequestResponse_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).IOSDeviceRequestResponse(ctx, req.(*IOSDeviceRequestResponseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDeviceRequest)
 	if err := dec(in); err != nil {
@@ -1045,10 +946,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_ListNews_Handler,
 		},
 		{
-			MethodName: "SearchRooms",
-			Handler:    _Campus_SearchRooms_Handler,
-		},
-		{
 			MethodName: "ListCanteenRatings",
 			Handler:    _Campus_ListCanteenRatings_Handler,
 		},
@@ -1101,10 +998,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_GetUpdateNote_Handler,
 		},
 		{
-			MethodName: "ListStudyRooms",
-			Handler:    _Campus_ListStudyRooms_Handler,
-		},
-		{
 			MethodName: "ListMovies",
 			Handler:    _Campus_ListMovies_Handler,
 		},
@@ -1127,10 +1020,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCanteenHeadCount",
 			Handler:    _Campus_GetCanteenHeadCount_Handler,
-		},
-		{
-			MethodName: "IOSDeviceRequestResponse",
-			Handler:    _Campus_IOSDeviceRequestResponse_Handler,
 		},
 		{
 			MethodName: "CreateDevice",

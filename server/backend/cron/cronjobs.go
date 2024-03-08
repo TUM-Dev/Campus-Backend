@@ -3,7 +3,6 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend/ios_notifications/apns"
 	"github.com/TUM-Dev/Campus-Backend/server/env"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -14,9 +13,8 @@ import (
 )
 
 type CronService struct {
-	db   *gorm.DB
-	gf   *gofeed.Parser
-	APNs *apns.Service
+	db *gorm.DB
+	gf *gofeed.Parser
 }
 
 // StorageDir is the directory where files are stored
@@ -25,16 +23,12 @@ var StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
-	NewsType                 = "news"
-	FileDownloadType         = "fileDownload"
-	DishNameDownload         = "dishNameDownload"
-	AverageRatingComputation = "averageRatingComputation"
-	CanteenHeadcount         = "canteenHeadCount"
-	IOSNotifications         = "iosNotifications"
-	IOSActivityReset         = "iosActivityReset"
-	NewExamResultsHook       = "newExamResultsHook"
-	MovieType                = "movie"
-	FeedbackEmail            = "feedbackEmail"
+	NewsType         = "news"
+	FileDownloadType = "fileDownload"
+	DishNameDownload = "dishNameDownload"
+	CanteenHeadcount = "canteenHeadCount"
+	MovieType        = "movie"
+	FeedbackEmail    = "feedbackEmail"
 
 	/* MensaType      = "mensa"
 	AlarmType      = "alarm" */
@@ -42,36 +36,25 @@ const (
 
 func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db:   db,
-		gf:   gofeed.NewParser(),
-		APNs: apns.NewCronService(db),
+		db: db,
+		gf: gofeed.NewParser(),
 	}
 }
 
 func (c *CronService) Run() error {
 	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
-	g := new(errgroup.Group)
-
-	if env.IsMensaCronActive() {
-		g.Go(func() error { return c.dishNameDownloadCron() })
-		g.Go(func() error { return c.averageRatingComputation() })
-	}
-
 	for {
+		g := new(errgroup.Group)
 		log.Trace("Cron: checking for pending")
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
-				AverageRatingComputation,
 				DishNameDownload,
 				CanteenHeadcount,
-				IOSNotifications,
-				IOSActivityReset,
-				NewExamResultsHook,
 				MovieType,
 				FeedbackEmail,
 			).
@@ -79,18 +62,10 @@ func (c *CronService) Run() error {
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
-			var offset int32 = 0
-			if env.IsMensaCronActive() {
-				if cronjob.Type.String == AverageRatingComputation {
-					if time.Now().Hour() == 16 {
-						offset = 18 * 3600 // fast-forward 18 Hours to the next day + does not need to be computed overnight
-					}
-				}
-			}
-			cronFields := log.Fields{"Cron (id)": cronjob.Cron, "type": cronjob.Type.String, "offset": offset, "LastRun": cronjob.LastRun, "interval": cronjob.Interval, "id (not real id)": cronjob.ID.Int64}
+			cronFields := log.Fields{"Cron (id)": cronjob.Cron, "type": cronjob.Type.String, "LastRun": cronjob.LastRun, "interval": cronjob.Interval, "id (not real id)": cronjob.ID.Int64}
 			log.WithFields(cronFields).Trace("Running cronjob")
 
-			cronjob.LastRun = int32(time.Now().Unix()) + offset
+			cronjob.LastRun = int32(time.Now().Unix())
 			c.db.Save(&cronjob)
 
 			// Run each job in a separate goroutine, so we can parallelize them
@@ -106,12 +81,6 @@ func (c *CronService) Run() error {
 				if env.IsMensaCronActive() {
 					g.Go(c.dishNameDownloadCron)
 				}
-			case AverageRatingComputation: //call every five minutes between 11AM and 4 PM on weekdays
-				if env.IsMensaCronActive() {
-					g.Go(c.averageRatingComputation)
-				}
-			case NewExamResultsHook:
-				g.Go(func() error { return c.newExamResultsHookCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
 				/*
@@ -125,10 +94,6 @@ func (c *CronService) Run() error {
 				*/
 			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
-			case IOSNotifications:
-				g.Go(func() error { return c.iosNotificationsCron() })
-			case IOSActivityReset:
-				g.Go(func() error { return c.iosActivityReset() })
 			case FeedbackEmail:
 				g.Go(func() error { return c.feedbackEmailCron() })
 			}

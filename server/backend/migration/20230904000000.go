@@ -9,7 +9,7 @@ import (
 
 // migrate20230904000000
 // Removes ticketsales from the db-enums
-func (m TumDBMigrator) migrate20230904000000() *gormigrate.Migration {
+func migrate20230904000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20230904000000",
 		Migrate: func(tx *gorm.DB) error {
