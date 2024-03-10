@@ -1,10 +1,12 @@
 services:
   backend-v2:
     restart: always
-    build:
-      context: server/
-      args:
-        version: dev # compiled with the git sha in prod
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend-v2.rule=Host(`api.tum.app`)"
+
+      - "traefik.http.routers.backend-v2_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+      - "traefik.http.routers.backend-v2_h2.scheme=h2c"
     expose:
       - "50051"
     environment:
@@ -60,6 +62,9 @@ services:
     expose:
       - "8081"
       #- "9901" # admin interface, not very useful
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend-v2.rule=Host(`api.tum.app`)"
     volumes:
       - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
     depends_on:
