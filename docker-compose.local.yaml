@@ -17,6 +17,7 @@ services:
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
       - SMTP_USERNAME=${SMTP_USERNAME:-tca-support.os.in@tum.de}
       - SMTP_PORT=${SMTP_PORT:-587}
+      - MensaCronDisabled=true
     volumes:
       - backend-storage:/Storage
       - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}:ro
