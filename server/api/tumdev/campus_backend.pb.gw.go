@@ -298,37 +298,37 @@ func local_request_Campus_ListCanteens_0(ctx context.Context, marshaler runtime.
 }
 
 var (
-	filter_Campus_ListMeals_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_Campus_ListDishes_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_Campus_ListMeals_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMealsRequest
+func request_Campus_ListDishes_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListDishesRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_ListMeals_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_ListDishes_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.ListMeals(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListDishes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Campus_ListMeals_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListMealsRequest
+func local_request_Campus_ListDishes_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListDishesRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_ListMeals_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Campus_ListDishes_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.ListMeals(ctx, &protoReq)
+	msg, err := server.ListDishes(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -1224,7 +1224,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 
 	})
 
-	mux.Handle("GET", pattern_Campus_ListMeals_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_ListDishes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -1232,12 +1232,12 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/ListMeals", runtime.WithHTTPPathPattern("/meal/allMeals"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/ListDishes", runtime.WithHTTPPathPattern("/dish/allDishes"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Campus_ListMeals_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Campus_ListDishes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -1245,7 +1245,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListMeals_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListMeals_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1839,25 +1839,25 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 
 	})
 
-	mux.Handle("GET", pattern_Campus_ListMeals_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Campus_ListDishes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/ListMeals", runtime.WithHTTPPathPattern("/meal/allMeals"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/api.Campus/ListDishes", runtime.WithHTTPPathPattern("/dish/allDishes"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Campus_ListMeals_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Campus_ListDishes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Campus_ListMeals_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListMeals_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2213,13 +2213,13 @@ func (m response_Campus_ListCanteens_0) XXX_ResponseBody() interface{} {
 	return response.Canteen
 }
 
-type response_Campus_ListMeals_0 struct {
+type response_Campus_ListDishes_0 struct {
 	proto.Message
 }
 
-func (m response_Campus_ListMeals_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListMealsReply)
-	return response.Meal
+func (m response_Campus_ListDishes_0) XXX_ResponseBody() interface{} {
+	response := m.Message.(*ListDishesReply)
+	return response.Dish
 }
 
 var (
@@ -2245,7 +2245,7 @@ var (
 
 	pattern_Campus_ListCanteens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"canteen", "allCanteens"}, ""))
 
-	pattern_Campus_ListMeals_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"meal", "allMeals"}, ""))
+	pattern_Campus_ListDishes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"dish", "allDishes"}, ""))
 
 	pattern_Campus_ListResponsiblePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"barrierfree", "contacts"}, ""))
 
@@ -2297,7 +2297,7 @@ var (
 
 	forward_Campus_ListCanteens_0 = runtime.ForwardResponseMessage
 
-	forward_Campus_ListMeals_0 = runtime.ForwardResponseMessage
+	forward_Campus_ListDishes_0 = runtime.ForwardResponseMessage
 
 	forward_Campus_ListResponsiblePerson_0 = runtime.ForwardResponseMessage
 

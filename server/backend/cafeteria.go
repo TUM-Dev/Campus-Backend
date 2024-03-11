@@ -638,17 +638,17 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 	}, requestStatus
 }
 
-// ListMeals gRPC Endpoint
-// Returns all meals for a specific cafeteria, year, week and day
-func (s *CampusServer) ListMeals(ctx context.Context, req *pb.ListMealsRequest) (*pb.ListMealsReply, error) {
+// ListDishes gRPC Endpoint
+// Returns all dishes for a specific cafeteria, year, week and day
+func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	if req.Year < 2022 {
-		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
 	if req.Week < 1 || req.Week > 52 {
-		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListMealsReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
@@ -670,8 +670,8 @@ func (s *CampusServer) ListMeals(ctx context.Context, req *pb.ListMealsRequest) 
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
 
-	return &pb.ListMealsReply{
-		Meal: results,
+	return &pb.ListDishesReply{
+		Dish: results,
 	}, requestStatus
 }
 

@@ -31,7 +31,7 @@ const (
 	Campus_ListNameTags_FullMethodName             = "/api.Campus/ListNameTags"
 	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
 	Campus_ListCanteens_FullMethodName             = "/api.Campus/ListCanteens"
-	Campus_ListMeals_FullMethodName                = "/api.Campus/ListMeals"
+	Campus_ListDishes_FullMethodName                = "/api.Campus/ListDishes"
 	Campus_ListResponsiblePerson_FullMethodName    = "/api.Campus/ListResponsiblePerson"
 	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
 	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
@@ -64,7 +64,7 @@ type CampusClient interface {
 	ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error)
-	ListMeals(ctx context.Context, in *ListMealsRequest, opts ...grpc.CallOption) (*ListMealsReply, error)
+	ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error)
 	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
 	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
 	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
@@ -189,9 +189,9 @@ func (c *campusClient) ListCanteens(ctx context.Context, in *ListCanteensRequest
 	return out, nil
 }
 
-func (c *campusClient) ListMeals(ctx context.Context, in *ListMealsRequest, opts ...grpc.CallOption) (*ListMealsReply, error) {
-	out := new(ListMealsReply)
-	err := c.cc.Invoke(ctx, Campus_ListMeals_FullMethodName, in, out, opts...)
+func (c *campusClient) ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error) {
+	out := new(ListDishesReply)
+	err := c.cc.Invoke(ctx, Campus_ListDishes_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +357,7 @@ type CampusServer interface {
 	ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error)
-	ListMeals(context.Context, *ListMealsRequest) (*ListMealsReply, error)
+	ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error)
 	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
 	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
 	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
@@ -413,8 +413,8 @@ func (UnimplementedCampusServer) ListAvailableCanteenTags(context.Context, *List
 func (UnimplementedCampusServer) ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCanteens not implemented")
 }
-func (UnimplementedCampusServer) ListMeals(context.Context, *ListMealsRequest) (*ListMealsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMeals not implemented")
+func (UnimplementedCampusServer) ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDishes not implemented")
 }
 func (UnimplementedCampusServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
@@ -666,20 +666,20 @@ func _Campus_ListCanteens_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListMeals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMealsRequest)
+func _Campus_ListDishes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDishesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CampusServer).ListMeals(ctx, in)
+		return srv.(CampusServer).ListDishes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Campus_ListMeals_FullMethodName,
+		FullMethod: Campus_ListDishes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListMeals(ctx, req.(*ListMealsRequest))
+		return srv.(CampusServer).ListDishes(ctx, req.(*ListDishesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -978,8 +978,8 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Campus_ListCanteens_Handler,
 		},
 		{
-			MethodName: "ListMeals",
-			Handler:    _Campus_ListMeals_Handler,
+			MethodName: "ListDishes",
+			Handler:    _Campus_ListDishes_Handler,
 		},
 		{
 			MethodName: "ListResponsiblePerson",

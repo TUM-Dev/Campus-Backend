@@ -2235,7 +2235,7 @@ func (x *Canteen) GetLatitude() float64 {
 	return 0
 }
 
-type ListMealsRequest struct {
+type ListDishesRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -2249,8 +2249,8 @@ type ListMealsRequest struct {
 	Day int32 `protobuf:"varint,4,opt,name=day,proto3" json:"day,omitempty"`
 }
 
-func (x *ListMealsRequest) Reset() {
-	*x = ListMealsRequest{}
+func (x *ListDishesRequest) Reset() {
+	*x = ListDishesRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2258,13 +2258,13 @@ func (x *ListMealsRequest) Reset() {
 	}
 }
 
-func (x *ListMealsRequest) String() string {
+func (x *ListDishesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListMealsRequest) ProtoMessage() {}
+func (*ListDishesRequest) ProtoMessage() {}
 
-func (x *ListMealsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListDishesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2276,49 +2276,49 @@ func (x *ListMealsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListMealsRequest.ProtoReflect.Descriptor instead.
-func (*ListMealsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDishesRequest.ProtoReflect.Descriptor instead.
+func (*ListDishesRequest) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{35}
 }
 
-func (x *ListMealsRequest) GetCanteenId() string {
+func (x *ListDishesRequest) GetCanteenId() string {
 	if x != nil {
 		return x.CanteenId
 	}
 	return ""
 }
 
-func (x *ListMealsRequest) GetYear() int32 {
+func (x *ListDishesRequest) GetYear() int32 {
 	if x != nil {
 		return x.Year
 	}
 	return 0
 }
 
-func (x *ListMealsRequest) GetWeek() int32 {
+func (x *ListDishesRequest) GetWeek() int32 {
 	if x != nil {
 		return x.Week
 	}
 	return 0
 }
 
-func (x *ListMealsRequest) GetDay() int32 {
+func (x *ListDishesRequest) GetDay() int32 {
 	if x != nil {
 		return x.Day
 	}
 	return 0
 }
 
-type ListMealsReply struct {
+type ListDishesReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Meal []string `protobuf:"bytes,1,rep,name=meal,proto3" json:"meal,omitempty"`
+	Dish []string `protobuf:"bytes,1,rep,name=dish,proto3" json:"dish,omitempty"`
 }
 
-func (x *ListMealsReply) Reset() {
-	*x = ListMealsReply{}
+func (x *ListDishesReply) Reset() {
+	*x = ListDishesReply{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tumdev_campus_backend_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2326,13 +2326,13 @@ func (x *ListMealsReply) Reset() {
 	}
 }
 
-func (x *ListMealsReply) String() string {
+func (x *ListDishesReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListMealsReply) ProtoMessage() {}
+func (*ListDishesReply) ProtoMessage() {}
 
-func (x *ListMealsReply) ProtoReflect() protoreflect.Message {
+func (x *ListDishesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2344,14 +2344,14 @@ func (x *ListMealsReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListMealsReply.ProtoReflect.Descriptor instead.
-func (*ListMealsReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDishesReply.ProtoReflect.Descriptor instead.
+func (*ListDishesReply) Descriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{36}
 }
 
-func (x *ListMealsReply) GetMeal() []string {
+func (x *ListDishesReply) GetDish() []string {
 	if x != nil {
-		return x.Meal
+		return x.Dish
 	}
 	return nil
 }
@@ -4975,8 +4975,8 @@ var file_tumdev_campus_backend_proto_goTypes = []interface{}{
 	(*ListCanteensRequest)(nil),                      // 34: api.ListCanteensRequest
 	(*ListCanteensReply)(nil),                        // 35: api.ListCanteensReply
 	(*Canteen)(nil),                                  // 36: api.Canteen
-	(*ListMealsRequest)(nil),                         // 37: api.ListMealsRequest
-	(*ListMealsReply)(nil),                           // 38: api.ListMealsReply
+	(*ListDishesRequest)(nil),                         // 37: api.ListDishesRequest
+	(*ListDishesReply)(nil),                           // 38: api.ListDishesReply
 	(*ListResponsiblePersonRequest)(nil),             // 39: api.ListResponsiblePersonRequest
 	(*ListResponsiblePersonReply)(nil),               // 40: api.ListResponsiblePersonReply
 	(*ResponsiblePerson)(nil),                        // 41: api.ResponsiblePerson
@@ -5059,7 +5059,7 @@ var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	26, // 46: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
 	28, // 47: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
 	34, // 48: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
-	37, // 49: api.Campus.ListMeals:input_type -> api.ListMealsRequest
+	37, // 49: api.Campus.ListDishes:input_type -> api.ListDishesRequest
 	39, // 50: api.Campus.ListResponsiblePerson:input_type -> api.ListResponsiblePersonRequest
 	43, // 51: api.Campus.ListMoreInformation:input_type -> api.ListMoreInformationRequest
 	45, // 52: api.Campus.ListOpeningTimes:input_type -> api.ListOpeningTimesRequest
@@ -5084,7 +5084,7 @@ var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	27, // 71: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
 	29, // 72: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
 	35, // 73: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
-	38, // 74: api.Campus.ListMeals:output_type -> api.ListMealsReply
+	38, // 74: api.Campus.ListDishes:output_type -> api.ListDishesReply
 	40, // 75: api.Campus.ListResponsiblePerson:output_type -> api.ListResponsiblePersonReply
 	44, // 76: api.Campus.ListMoreInformation:output_type -> api.ListMoreInformationReply
 	46, // 77: api.Campus.ListOpeningTimes:output_type -> api.ListOpeningTimesReply
@@ -5532,7 +5532,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListMealsRequest); i {
+			switch v := v.(*ListDishesRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5544,7 +5544,7 @@ func file_tumdev_campus_backend_proto_init() {
 			}
 		}
 		file_tumdev_campus_backend_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListMealsReply); i {
+			switch v := v.(*ListDishesReply); i {
 			case 0:
 				return &v.state
 			case 1:

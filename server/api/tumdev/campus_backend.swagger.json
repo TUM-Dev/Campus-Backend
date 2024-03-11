@@ -520,9 +520,9 @@
         ]
       }
     },
-    "/meal/allMeals": {
+    "/dishes": {
       "get": {
-        "operationId": "Campus_ListMeals",
+        "operationId": "Campus_ListDishes",
         "responses": {
           "200": {
             "description": "",
@@ -1324,10 +1324,10 @@
         }
       }
     },
-    "apiListMealsReply": {
+    "apiListDishesReply": {
       "type": "object",
       "properties": {
-        "meal": {
+        "dish": {
           "type": "array",
           "items": {
             "type": "string"
