@@ -434,6 +434,7 @@
     },
     "/dishes": {
       "get": {
+        "summary": "Returns all dishes for a specific cafeteria, year, week and day",
         "operationId": "Campus_ListDishes",
         "responses": {
           "200": {
@@ -469,7 +470,7 @@
           },
           {
             "name": "week",
-            "description": "range 1 - 53",
+            "description": "Week of the dish.\nMust be in the range 1 - 52",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -477,7 +478,7 @@
           },
           {
             "name": "day",
-            "description": "range 0 (Monday) - 4 (Friday)",
+            "description": "Day of the week\nDays must be in the range 0 (Monday) - 4 (Friday)",
             "in": "query",
             "required": false,
             "type": "integer",

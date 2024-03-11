@@ -638,8 +638,6 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 	}, requestStatus
 }
 
-// ListDishes gRPC Endpoint
-// Returns all dishes for a specific cafeteria, year, week and day
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
