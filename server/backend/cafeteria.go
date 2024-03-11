@@ -653,6 +653,7 @@ func (s *CampusServer) ListMeals(ctx context.Context, req *pb.ListMealsRequest) 
 
 	var requestStatus error = nil
 	var results []string
+	// the eat api has two types of ids, the enum ids (uppercase, with `_`) and the ids (lowercase, with `-`)
 	cafeteriaName := strings.ReplaceAll(strings.ToUpper(req.CanteenId), "-", "_")
 
 	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").

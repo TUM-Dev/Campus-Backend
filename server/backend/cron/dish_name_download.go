@@ -67,7 +67,7 @@ func downloadDailyDishes(c *CronService) {
 	for _, v := range result {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 
-		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%s.json", cafeteriaName, year, fmt.Sprintf("%02d", week))
+		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", cafeteriaName, year, week)
 		log.WithField("req", req).Debug("Fetching menu")
 		var resp, err = http.Get(req)
 		if err != nil {

@@ -93,7 +93,7 @@ service Campus {
 
   rpc ListMeals(ListMealsRequest) returns (ListMealsReply) {
     option (google.api.http) = {
-      get: "/meal/allMeals",
+      get: "/dishes",
       response_body: "meal"
     };
   }
