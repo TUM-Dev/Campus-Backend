@@ -390,7 +390,6 @@ message ListDishesRequest {
   string canteen_id = 1;
   // >=2022 until the current year
   int32 year = 2;
-  // Week of the dish.
   // Must be in the range 1 - 52
   int32 week = 3;
   // Day of the week
