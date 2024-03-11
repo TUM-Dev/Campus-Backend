@@ -2243,7 +2243,6 @@ type ListDishesRequest struct {
 	CanteenId string `protobuf:"bytes,1,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
 	// >=2022 until the current year
 	Year int32 `protobuf:"varint,2,opt,name=year,proto3" json:"year,omitempty"`
-	// Week of the dish.
 	// Must be in the range 1 - 52
 	Week int32 `protobuf:"varint,3,opt,name=week,proto3" json:"week,omitempty"`
 	// Day of the week

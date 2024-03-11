@@ -470,7 +470,7 @@
           },
           {
             "name": "week",
-            "description": "Week of the dish.\nMust be in the range 1 - 52",
+            "description": "Must be in the range 1 - 52",
             "in": "query",
             "required": false,
             "type": "integer",
