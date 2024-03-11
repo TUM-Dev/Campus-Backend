@@ -3,8 +3,6 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
@@ -42,7 +40,6 @@ func New(db *gorm.DB) *CronService {
 }
 
 func (c *CronService) Run() error {
-	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
 	for {
 		g := new(errgroup.Group)
 		log.Trace("Cron: checking for pending")
@@ -78,9 +75,7 @@ func (c *CronService) Run() error {
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
-				if env.IsMensaCronActive() {
-					g.Go(c.dishNameDownloadCron)
-				}
+				g.Go(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
 				/*
