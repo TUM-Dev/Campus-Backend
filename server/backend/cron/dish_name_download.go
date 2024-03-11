@@ -99,7 +99,8 @@ func downloadDailyDishes(c *CronService) {
 				var dishId int64
 				if err := c.db.Model(&model.Dish{}).
 					Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).
-					Select("CanteenDish").First(&dishId).
+					Select("dish").
+					First(&dishId).
 					Count(&count).Error; err != nil {
 					log.WithError(err).Error("Error while checking whether this is already in database")
 				}
