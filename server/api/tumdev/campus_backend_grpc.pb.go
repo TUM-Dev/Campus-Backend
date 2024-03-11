@@ -31,7 +31,7 @@ const (
 	Campus_ListNameTags_FullMethodName             = "/api.Campus/ListNameTags"
 	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
 	Campus_ListCanteens_FullMethodName             = "/api.Campus/ListCanteens"
-	Campus_ListDishes_FullMethodName                = "/api.Campus/ListDishes"
+	Campus_ListDishes_FullMethodName               = "/api.Campus/ListDishes"
 	Campus_ListResponsiblePerson_FullMethodName    = "/api.Campus/ListResponsiblePerson"
 	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
 	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
