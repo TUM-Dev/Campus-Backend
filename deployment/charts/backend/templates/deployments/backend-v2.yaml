@@ -70,6 +70,11 @@ spec:
                 secretKeyRef:
                   name: backend-api-keys
                   key: SMTP_URL
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: SMTP_FROM
             - name: SMTP_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -179,6 +184,7 @@ data:
   APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc }}
   SMTP_PASSWORD: {{ $.Values.backend.smtp.password | b64enc }}
   SMTP_URL: {{ $.Values.backend.smtp.url | b64enc }}
+  SMTP_FROM: {{ $.Values.backend.smtp.username | b64enc }}
   SMTP_USERNAME: {{ $.Values.backend.smtp.username | b64enc }}
   SMTP_PORT: {{ $.Values.backend.smtp.port | b64enc }}
 ---

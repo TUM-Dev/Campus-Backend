@@ -64,6 +64,7 @@ type CampusClient interface {
 	ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error)
+	// Returns all dishes for a specific cafeteria, year, week and day
 	ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error)
 	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
 	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
@@ -357,6 +358,7 @@ type CampusServer interface {
 	ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error)
+	// Returns all dishes for a specific cafeteria, year, week and day
 	ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error)
 	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
 	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)

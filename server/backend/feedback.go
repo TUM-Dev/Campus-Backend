@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"slices"
+	"strings"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
@@ -28,10 +29,10 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		log.WithError(err).Error("Error generating uuid")
 		return status.Error(codes.Internal, "Error starting feedback submission")
 	}
-	feedback := &model.Feedback{EmailId: null.StringFrom(id.String())}
+	feedback := &model.Feedback{EmailId: id.String(), Recipient: "app@tum.de"}
 
 	// download images
-	dbPath := path.Join("feedback", feedback.EmailId.String)
+	dbPath := path.Join("feedback", feedback.EmailId)
 	var uploadedFilenames []*string
 	for {
 		req, err := stream.Recv()
@@ -40,7 +41,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		if err != nil {
 			log.WithError(err).Error("Error receiving feedback")
-			deleteUploaded(feedback.EmailId.String)
+			deleteUploaded(feedback.EmailId)
 			return status.Error(codes.Internal, "Error receiving feedback")
 		}
 		mergeFeedback(feedback, req)
@@ -53,6 +54,13 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 	}
 	feedback.ImageCount = int32(len(uploadedFilenames))
+	// validate feedback
+	feedback.Feedback = strings.TrimSpace(feedback.Feedback)
+	feedback.Feedback = strings.ReplaceAll(feedback.Feedback, "  ", " ")
+	feedback.Feedback = strings.ToValidUTF8(feedback.Feedback, "?")
+	if feedback.Feedback == "" && feedback.ImageCount == 0 {
+		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
+	}
 	// save feedback to db
 	if err := s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
 		for _, filename := range uploadedFilenames {
@@ -68,7 +76,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		return tx.Create(feedback).Error
 	}); err != nil {
 		log.WithError(err).Error("Error creating feedback")
-		deleteUploaded(feedback.EmailId.String)
+		deleteUploaded(feedback.EmailId)
 		return status.Error(codes.Internal, "Error creating feedback")
 	}
 
@@ -130,7 +138,7 @@ func inferFileName(mime *mimetype.MIME, dbPath string, counter int) (*string, *s
 
 func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.Recipient.Enum() != nil {
-		feedback.Recipient = null.StringFrom(receiverFromTopic(req.Recipient))
+		feedback.Recipient = receiverFromTopic(req.Recipient)
 	}
 	if req.OsVersion != "" {
 		feedback.OsVersion = null.StringFrom(req.OsVersion)
@@ -138,12 +146,12 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.AppVersion != "" {
 		feedback.AppVersion = null.StringFrom(req.AppVersion)
 	}
-	if req.Location != nil {
+	if req.Location != nil && req.Location.Longitude != 0 && req.Location.Latitude != 0 {
 		feedback.Longitude = null.FloatFrom(req.Location.Longitude)
 		feedback.Latitude = null.FloatFrom(req.Location.Latitude)
 	}
 	if req.Message != "" {
-		feedback.Feedback = null.StringFrom(req.Message)
+		feedback.Feedback = req.Message
 	}
 	if req.FromEmail != "" {
 		feedback.ReplyTo = null.StringFrom(req.FromEmail)
