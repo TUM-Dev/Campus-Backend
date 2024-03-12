@@ -53,9 +53,10 @@ func emptyFeedback() *model.Feedback {
 
 func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 	require.NoError(t, os.Setenv("SMTP_USERNAME", "outgoing@example.de"))
+	require.NoError(t, os.Setenv("SMTP_FROM", "from@example.de"))
 	fb := fullFeedback()
 	m := messageWithHeaders(fb)
-	assert.Equal(t, []string{`"TUM Campus App" <outgoing@example.de>`}, m.GetHeader("From"))
+	assert.Equal(t, []string{`"TUM Campus App" <from@example.de>`}, m.GetHeader("From"))
 	assert.Equal(t, []string{fb.Recipient}, m.GetHeader("To"))
 	assert.Equal(t, []string{"test@example.de"}, m.GetHeader("Reply-To"))
 	assert.Equal(t, []string{fb.Timestamp.Time.Format(time.RFC1123Z)}, m.GetHeader("Date"))
@@ -64,8 +65,9 @@ func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 
 func TestHeaderInstantiationWithEmptyFeedback(t *testing.T) {
 	require.NoError(t, os.Setenv("SMTP_USERNAME", "outgoing@example.de"))
+	require.NoError(t, os.Setenv("SMTP_FROM", "from@example.de"))
 	m := messageWithHeaders(emptyFeedback())
-	assert.Equal(t, []string{`"TUM Campus App" <outgoing@example.de>`}, m.GetHeader("From"))
+	assert.Equal(t, []string{`"TUM Campus App" <from@example.de>`}, m.GetHeader("From"))
 	assert.Equal(t, []string{"app@tum.de"}, m.GetHeader("To"))
 	assert.Equal(t, []string(nil), m.GetHeader("Reply-To"))
 	// Date is set to now in messageWithHeaders => checking that this is actually now is a bit tricker

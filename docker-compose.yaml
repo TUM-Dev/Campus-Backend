@@ -19,7 +19,8 @@ services:
       - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
-      - SMTP_USERNAME=${SMTP_USERNAME:-tca-support.os.in@tum.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
       - SMTP_PORT=${SMTP_PORT:-587}
     volumes:
       - backend-storage:/Storage

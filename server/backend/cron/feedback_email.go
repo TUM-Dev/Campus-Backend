@@ -56,7 +56,7 @@ type MailHeaders struct {
 func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 	m := gomail.NewMessage()
 	// From
-	m.SetAddressHeader("From", os.Getenv("SMTP_USERNAME"), "TUM Campus App")
+	m.SetAddressHeader("From", os.Getenv("SMTP_FROM"), "TUM Campus App")
 	// To
 	if feedback.Recipient != "" {
 		m.SetHeader("To", feedback.Recipient)
