@@ -1,7 +1,7 @@
 <h1>Feedback via TumCampusApp:</h1>
-{{ if .Feedback.Valid -}}
+{{ if .Feedback -}}
 <blockquote>
-    {{- .Feedback.String -}}
+    {{- .Feedback -}}
 </blockquote>
 {{- else -}}
 <i>no feedback provided</i>

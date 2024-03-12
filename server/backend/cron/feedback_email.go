@@ -58,10 +58,10 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 	// From
 	m.SetAddressHeader("From", os.Getenv("SMTP_USERNAME"), "TUM Campus App")
 	// To
-	if feedback.Recipient.Valid {
-		m.SetHeader("To", feedback.Recipient.String)
+	if feedback.Recipient != "" {
+		m.SetHeader("To", feedback.Recipient)
 	} else {
-		m.SetHeader("To", "app@tum.de")
+		m.SetHeader("To", "app@tum.de") // should not ever happen as checked in the api
 	}
 	// ReplyTo
 	if feedback.ReplyTo.Valid {

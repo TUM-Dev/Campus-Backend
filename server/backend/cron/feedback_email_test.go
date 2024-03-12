@@ -23,10 +23,10 @@ func TestIterate(t *testing.T) {
 
 func fullFeedback() *model.Feedback {
 	return &model.Feedback{
-		EmailId:    null.StringFrom("magic-id"),
-		Recipient:  null.StringFrom("tca"),
+		EmailId:    "magic-id",
+		Recipient:  "tca",
 		ReplyTo:    null.StringFrom("test@example.de"),
-		Feedback:   null.StringFrom("This is a Test"),
+		Feedback:   "This is a Test",
 		ImageCount: 1,
 		Latitude:   null.FloatFrom(0),
 		Longitude:  null.FloatFrom(0),
@@ -38,10 +38,10 @@ func fullFeedback() *model.Feedback {
 
 func emptyFeedback() *model.Feedback {
 	return &model.Feedback{
-		EmailId:    null.String{},
-		Recipient:  null.String{},
+		EmailId:    "",
+		Recipient:  "",
 		ReplyTo:    null.String{},
-		Feedback:   null.String{},
+		Feedback:   "",
 		ImageCount: 0,
 		Latitude:   null.Float{},
 		Longitude:  null.Float{},
@@ -56,7 +56,7 @@ func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 	fb := fullFeedback()
 	m := messageWithHeaders(fb)
 	assert.Equal(t, []string{`"TUM Campus App" <outgoing@example.de>`}, m.GetHeader("From"))
-	assert.Equal(t, []string{fb.Recipient.String}, m.GetHeader("To"))
+	assert.Equal(t, []string{fb.Recipient}, m.GetHeader("To"))
 	assert.Equal(t, []string{"test@example.de"}, m.GetHeader("Reply-To"))
 	assert.Equal(t, []string{fb.Timestamp.Time.Format(time.RFC1123Z)}, m.GetHeader("Date"))
 	assert.Equal(t, []string{"Feedback via Tum Campus App"}, m.GetHeader("Subject"))
