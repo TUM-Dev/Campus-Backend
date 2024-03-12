@@ -142,7 +142,7 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.AppVersion != "" {
 		feedback.AppVersion = null.StringFrom(req.AppVersion)
 	}
-	if req.Location != nil {
+	if req.Location != nil && req.Location.Longitude != 0 && req.Location.Latitude != 0 {
 		feedback.Longitude = null.FloatFrom(req.Location.Longitude)
 		feedback.Latitude = null.FloatFrom(req.Location.Latitude)
 	}
