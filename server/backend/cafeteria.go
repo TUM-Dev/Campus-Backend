@@ -642,21 +642,24 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 53 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
+	if req.Week < 1 || req.Week > 52 {
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
 	var results []string
+	// the eat api has two types of ids, the enum ids (uppercase, with `_`) and the ids (lowercase, with `-`)
+	cafeteriaName := strings.ReplaceAll(strings.ToUpper(req.CanteenId), "-", "_")
+
 	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", req.CanteenId).
+		Where("c.name LIKE ?", cafeteriaName).
 		Select("d.name").
 		Find(&results).Error
 

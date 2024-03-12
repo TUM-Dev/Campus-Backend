@@ -1,7 +1,7 @@
-Feedback via TumCampusApp:
+Feedback via the TUM Campus App:
 
-{{ if .Feedback.Valid }}
-{{- .Feedback.String -}}
+{{ if .Feedback }}
+{{- .Feedback -}}
 {{ else -}}
 no feedback provided
 {{- end }}
