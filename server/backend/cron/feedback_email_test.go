@@ -60,7 +60,7 @@ func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 	assert.Equal(t, []string{fb.Recipient}, m.GetHeader("To"))
 	assert.Equal(t, []string{"test@example.de"}, m.GetHeader("Reply-To"))
 	assert.Equal(t, []string{fb.Timestamp.Time.Format(time.RFC1123Z)}, m.GetHeader("Date"))
-	assert.Equal(t, []string{"Feedback via Tum Campus App"}, m.GetHeader("Subject"))
+	assert.Equal(t, []string{"Feedback via the TUM Campus App"}, m.GetHeader("Subject"))
 }
 
 func TestHeaderInstantiationWithEmptyFeedback(t *testing.T) {
@@ -76,7 +76,16 @@ func TestHeaderInstantiationWithEmptyFeedback(t *testing.T) {
 	date, err := time.Parse(time.RFC1123Z, dates[0])
 	require.NoError(t, err)
 	assert.WithinDuration(t, time.Now(), date, time.Minute)
-	assert.Equal(t, []string{"Feedback via Tum Campus App"}, m.GetHeader("Subject"))
+	assert.Equal(t, []string{"Feedback via the TUM Campus App"}, m.GetHeader("Subject"))
+}
+
+func TestTrunaction(t *testing.T) {
+	require.Equal(t, truncate("abc", -1), "")
+	require.Equal(t, truncate("abc", 0), "")
+	require.Equal(t, truncate("abc", 1), "a..")
+	require.Equal(t, truncate("abc", 2), "ab..")
+	require.Equal(t, truncate("abc", 3), "abc")
+	require.Equal(t, truncate("abc", 200), "abc")
 }
 
 func TestTemplatingResultsWithFullFeedback(t *testing.T) {
@@ -84,7 +93,7 @@ func TestTemplatingResultsWithFullFeedback(t *testing.T) {
 	require.NoError(t, err)
 	htmlBody, txtBody, err := generateTemplatedMail(html, txt, fullFeedback())
 	require.NoError(t, err)
-	assert.Equal(t, `<h1>Feedback via TumCampusApp:</h1>
+	assert.Equal(t, `<b>Feedback via the TUM Campus App:</b>
 <blockquote>This is a Test</blockquote>
 <table>
     <tr>
@@ -114,7 +123,7 @@ func TestTemplatingResultsWithFullFeedback(t *testing.T) {
         <a href="https://app.tum.de/File/feedback/0/0.png">Foto 0</a>
     </li>
 </ol>`, htmlBody)
-	assert.Equal(t, `Feedback via TumCampusApp:
+	assert.Equal(t, `Feedback via the TUM Campus App:
 
 This is a Test
 
@@ -133,7 +142,7 @@ func TestTemplatingResultsWithEmptyFeedback(t *testing.T) {
 	require.NoError(t, err)
 	htmlBody, txtBody, err := generateTemplatedMail(html, txt, emptyFeedback())
 	require.NoError(t, err)
-	assert.Equal(t, `<h1>Feedback via TumCampusApp:</h1>
+	assert.Equal(t, `<b>Feedback via the TUM Campus App:</b>
 <i>no feedback provided</i>
 <table>
     <tr>
@@ -149,7 +158,7 @@ func TestTemplatingResultsWithEmptyFeedback(t *testing.T) {
         <td>unknown</td>
     </tr>
 </table>`, htmlBody)
-	assert.Equal(t, `Feedback via TumCampusApp:
+	assert.Equal(t, `Feedback via the TUM Campus App:
 
 no feedback provided
 

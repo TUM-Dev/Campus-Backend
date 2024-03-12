@@ -2,6 +2,7 @@ package cron
 
 import (
 	"bytes"
+	"fmt"
 	htmlTemplate "html/template"
 	"os"
 	"strconv"
@@ -74,8 +75,35 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 		m.SetDateHeader("Date", time.Now())
 	}
 	// Subject
-	m.SetHeader("Subject", "Feedback via Tum Campus App")
+	if feedback.Recipient == "app@tum.de" {
+		versionString := "TCA"
+		if feedback.AppVersion.Valid {
+			versionString = fmt.Sprintf("TCA %s", feedback.AppVersion.String)
+		}
+		m.SetHeader("Subject", fmt.Sprintf("[%s] %s", truncate(versionString, 10), truncate(feedback.Feedback, 150)))
+	} else {
+		m.SetHeader("Subject", "Feedback via the TUM Campus App")
+	}
+
 	return m
+}
+
+func truncate(str string, length int) string {
+	if length <= 0 {
+		return ""
+	}
+	if len(str) <= length {
+		return str
+	}
+	truncated := ""
+	for i, char := range str {
+		if i >= length {
+			break
+		}
+		truncated += string(char)
+	}
+	truncated += ".."
+	return truncated
 }
 
 func generateTemplatedMail(parsedHtmlBody *htmlTemplate.Template, parsedTxtBody *textTemplate.Template, feedback *model.Feedback) (string, string, error) {

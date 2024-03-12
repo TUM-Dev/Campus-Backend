@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"slices"
+	"strings"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
@@ -54,6 +55,9 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	}
 	feedback.ImageCount = int32(len(uploadedFilenames))
 	// validate feedback
+	feedback.Feedback = strings.TrimSpace(feedback.Feedback)
+	feedback.Feedback = strings.ReplaceAll(feedback.Feedback, "  ", " ")
+	feedback.Feedback = strings.ToValidUTF8(feedback.Feedback, "?")
 	if feedback.Feedback == "" && feedback.ImageCount == 0 {
 		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
 	}
