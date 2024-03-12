@@ -11,10 +11,10 @@ func migrate20240311000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20240311000000",
 		Migrate: func(tx *gorm.DB) error {
-			return tx.Raw("create unique index dish_name_cafeteriaID_uindex on dish (name, cafeteriaID)").Error
+			return tx.Exec("create unique index dish_name_cafeteriaID_uindex on dish (name, cafeteriaID)").Error
 		},
 		Rollback: func(tx *gorm.DB) error {
-			return tx.Raw("drop index dish_name_cafeteriaID_uindex on dish").Error
+			return tx.Exec("drop index dish_name_cafeteriaID_uindex on dish").Error
 		},
 	}
 }
