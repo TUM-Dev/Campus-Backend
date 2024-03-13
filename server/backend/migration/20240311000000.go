@@ -13,6 +13,9 @@ func migrate20240311000000() *gormigrate.Migration {
 		ID: "20240311000000",
 		Migrate: func(tx *gorm.DB) error {
 			// make sure that dish_rating is FK-bound to dish
+			if err := tx.Exec("alter table dish_rating modify dishID int").Error; err != nil {
+				return err
+			}
 			if err := tx.Exec("alter table dish_rating add constraint dish_rating_dish_dish_fk foreign key (dishID) references dish (dish) on update cascade on delete cascade").Error; err != nil {
 				return err
 			}
@@ -26,6 +29,9 @@ func migrate20240311000000() *gormigrate.Migration {
 		Rollback: func(tx *gorm.DB) error {
 			// make sure that dish_rating is FK-bound to dishes
 			if err := tx.Exec("alter table dish_rating drop constraint dish_rating_dish_dish_fk").Error; err != nil {
+				return err
+			}
+			if err := tx.Exec("alter table dish_rating modify dishID int not null").Error; err != nil {
 				return err
 			}
 			// because dishes already have a cafeteria, storing this agiain is not nessesary
