@@ -44,10 +44,6 @@ backend:
   campusApiToken: changeme-changeme-changeme
   sentry:
     dsn: changeme-changeme-changeme
-  apns:
-    auth_key: changeme-changeme-changeme
-    key_id: changeme-changeme-changeme
-    team_id: changeme-changeme-changeme
   smtp:
     password: change-me
     url: smtp.gmail.com

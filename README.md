@@ -87,11 +87,6 @@ The following environment variables need to be set for the server to work proper
 * [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 * [OPTIONAL] `OMDB_API_KEY`: The key to get more information for tu-film movies from [omdbapi](https://omdbapi.com/). See [omdbapi](https://omdbapi.com/apikey.aspx) for a key.
-* **[iOS Push Notification Service [OPTIONAL]](#ios-push-notifications-service)**:
-  * [REQUIRED] `APNS_KEY_ID`: The key ID of the APNs key => APNs Key needs to be downloaded from the Apple Developer Portal the name of the file also contains the key ID.
-  * [REQUIRED] `APNS_TEAM_ID`: The team ID of the iOS app can be found in AppStoreConnect.
-  * [REQUIRED] `APNS_P8_FILE_PATH`: The path to the APNs key file (e.g. `/secrets/AuthKey_XXXX.p8`) in the docker container. The file itself needs to exist in the same directory as the `docker-compose.yml` file and called `apns_auth_key.p8`.
-  * [REQUIRED] `CAMPUS_API_TOKEN`: A token used to authenticate with TUMonline (used for example for the grades)
 
 ## Metrics
 Our service uses prometheus to collect metrics to display in grafana.
