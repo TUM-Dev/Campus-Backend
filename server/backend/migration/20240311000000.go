@@ -16,7 +16,7 @@ func migrate20240311000000() *gormigrate.Migration {
 			if err := tx.Exec(`alter table dish_rating
 					add constraint dish_rating_dish_dish_fk
 					foreign key (dishID) references dish (dish)
-					on update cascade 
+					on update cascade
 				    on delete cascade;`).Error; err != nil {
 				return err
 			}
