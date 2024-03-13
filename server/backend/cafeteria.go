@@ -34,6 +34,8 @@ const (
 	NAME      ModelType = 3
 )
 
+var StorageDir = "/Storage/rating/"
+
 // ListCanteenRatings RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
@@ -340,10 +342,11 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 }
 
 func imageWrapper(image []byte, path string, id int64) string {
+
 	if len(image) == 0 {
 		return ""
 	}
-	path = fmt.Sprintf("/Storage/rating/%s/%d/", path, id)
+	path := fmt.Sprintf("%s%s%s%d%s", StorageDir, path, "/", id, "/")
 	resPath, err := storeImage(path, image)
 	if err != nil {
 		log.WithError(err).Error("Error occurred while storing the image.")
