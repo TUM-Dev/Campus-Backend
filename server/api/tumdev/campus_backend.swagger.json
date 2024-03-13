@@ -1009,11 +1009,11 @@
         },
         "canteenId": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available in the given cafeteria"
         },
         "dish": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme)\nMust be available in the given cafeteria"
         },
         "image": {
           "type": "string",
@@ -1135,7 +1135,7 @@
         },
         "dish": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme)\nMust be available in the given cafeteria"
         },
         "from": {
           "type": "string",

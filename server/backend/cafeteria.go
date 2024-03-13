@@ -400,27 +400,27 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, errorRes
 	}
 
-	var dishInMensa *model.Dish
-	if err := tx.First(&dishInMensa, "name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).Error; err != nil || dishInMensa == nil {
-		log.WithError(err).Error("Error while creating a new dishInMensa rating.")
+	var dishInCafeteria *model.Dish
+	if err := tx.First(&dishInCafeteria, "name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).Error; err != nil || dishInCafeteria == nil {
+		log.WithError(err).Error("Error while creating a new dishInCafeteria rating.")
 		return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
-	resPath := imageWrapper(input.Image, "dishes", dishInMensa.Dish)
+	resPath := imageWrapper(input.Image, "dishes", dishInCafeteria.Dish)
 
 	rating := model.DishRating{
 		Comment:   input.Comment,
-		DishID:    dishInMensa.Dish,
+		DishID:    dishInCafeteria.Dish,
 		Points:    input.Points,
 		Timestamp: time.Now(),
 		Image:     resPath,
 	}
 	if err := tx.Create(&rating).Error; err != nil {
-		log.WithError(err).Error("while creating a new dishInMensa rating.")
+		log.WithError(err).Error("while creating a new dishInCafeteria rating.")
 		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
-	assignDishNameTag(rating, dishInMensa.Dish, tx)
+	assignDishNameTag(rating, dishInCafeteria.Dish, tx)
 
 	if err := storeRatingTags(rating.DishRating, input.RatingTags, DISH, tx); err != nil {
 		return &pb.CreateDishRatingReply{}, err

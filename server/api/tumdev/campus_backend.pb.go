@@ -1062,7 +1062,8 @@ type GetDishRatingsRequest struct {
 
 	// Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
 	CanteenId string `protobuf:"bytes,1,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
-	// Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
+	// Mandatory Name of the dish (EAT-API naming scheme)
+	// Must be available in the given cafeteria
 	Dish string `protobuf:"bytes,2,opt,name=dish,proto3" json:"dish,omitempty"`
 	// Optional Parameter to define an interval for the ratings (Lower bound)
 	From *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=from,proto3" json:"from,omitempty"`
@@ -1486,9 +1487,10 @@ type CreateDishRatingRequest struct {
 
 	// number in the range 1-5
 	Points int32 `protobuf:"varint,1,opt,name=points,proto3" json:"points,omitempty"`
-	// Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available int the given mensa
+	// Mandatory Name of the dish (EAT-API naming scheme "MENSA_GARCHING") Must be available in the given cafeteria
 	CanteenId string `protobuf:"bytes,2,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
-	// Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa
+	// Mandatory Name of the dish (EAT-API naming scheme)
+	// Must be available in the given cafeteria
 	Dish string `protobuf:"bytes,3,opt,name=dish,proto3" json:"dish,omitempty"`
 	// Optional JPEG image in Base64
 	Image []byte `protobuf:"bytes,4,opt,name=image,proto3" json:"image,omitempty"`
