@@ -5,11 +5,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// migrate20240212000000
+// migrate20240312000000
 // implemented a basic variant of spam protection
-func migrate20240212000000() *gormigrate.Migration {
+func migrate20240312000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
-		ID: "20240212000000",
+		ID: "20240312000000",
 		Migrate: func(tx *gorm.DB) error {
 			if err := tx.Exec("alter table feedback modify email_id text charset utf8mb3 not null").Error; err != nil {
 				return err
