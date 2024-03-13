@@ -409,12 +409,11 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 	resPath := imageWrapper(input.Image, "dishes", dishInMensa.Dish)
 
 	rating := model.DishRating{
-		Comment:     input.Comment,
-		CafeteriaID: cafeteriaID,
-		DishID:      dishInMensa.Dish,
-		Points:      input.Points,
-		Timestamp:   time.Now(),
-		Image:       resPath,
+		Comment:   input.Comment,
+		DishID:    dishInMensa.Dish,
+		Points:    input.Points,
+		Timestamp: time.Now(),
+		Image:     resPath,
 	}
 	if err := tx.Create(&rating).Error; err != nil {
 		log.WithError(err).Error("while creating a new dishInMensa rating.")
