@@ -8,7 +8,7 @@ import (
 )
 
 func tablesWithWrongCOLLATE() []string {
-	return []string{"crontab", "devices", "dish", "files", "kino", "news", "newsSource", "notifications", "notification_types"}
+	return []string{"crontab", "devices", "dish", "files", "kino", "news", "newsSource", "notification_types"}
 }
 
 // migrate20240317000000
