@@ -121,7 +121,7 @@ func migrate20240317000000() *gormigrate.Migration {
 			}
 			// then convert single columns in each table
 			for _, f := range feedbackColumnsWithWrongCOLLATE() {
-				if err := tx.Exec(fmt.Sprintf("alter table %s modify %s %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", f.tableName, f.columnName, f.columnType)).Error; err != nil {
+				if err := tx.Exec(fmt.Sprintf("alter table `%s` modify `%s` %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", f.tableName, f.columnName, f.columnType)).Error; err != nil {
 					return err
 				}
 			}
@@ -140,7 +140,7 @@ func migrate20240317000000() *gormigrate.Migration {
 			}
 			// revert changes to fields
 			for _, f := range feedbackColumnsWithWrongCOLLATE() {
-				if err := tx.Exec(fmt.Sprintf("alter table %s modify %s %s CHARACTER SET %s COLLATE %s", f.tableName, f.columnName, f.columnType, f.characterSetName, f.collationName)).Error; err != nil {
+				if err := tx.Exec(fmt.Sprintf("alter table `%s` modify `%s` %s CHARACTER SET %s COLLATE %s", f.tableName, f.columnName, f.columnType, f.characterSetName, f.collationName)).Error; err != nil {
 					return err
 				}
 			}
