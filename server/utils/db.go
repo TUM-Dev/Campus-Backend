@@ -33,5 +33,6 @@ func SetupDB() *gorm.DB {
 		log.Info("Exiting after migration")
 		os.Exit(0)
 	}
+	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8mb4_unicode_ci")
 	return db
 }
