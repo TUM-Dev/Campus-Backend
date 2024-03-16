@@ -85,6 +85,8 @@ spec:
                   key: SMTP_PORT
             - name: DB_DSN
               value: "{{ $db.username }}:{{ $db.password }}@tcp(tca-backend-mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
+            - name: DB_NAME
+              value: {{ $db.database }}
           volumeMounts:
             - mountPath: /Storage/
               name: storage-vol
