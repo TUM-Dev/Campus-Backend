@@ -21,3 +21,8 @@ type NotificationType struct {
 	Name         string `gorm:"column:name;type:text;size:65535;" json:"name"`
 	Confirmation string `gorm:"column:confirmation;type:enum('true', 'false');default:'false';" json:"confirmation"`
 }
+
+// TableName sets the insert table name for this struct type
+func (n *NotificationType) TableName() string {
+	return "notification_type"
+}

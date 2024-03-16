@@ -23,3 +23,8 @@ type NotificationConfirmation struct {
 	Created      time.Time `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;" json:"created"`
 	Received     null.Time `gorm:"column:received;type:timestamp;" json:"received"`
 }
+
+// TableName sets the insert table name for this struct type
+func (n *NotificationConfirmation) TableName() string {
+	return "notification_confirmation"
+}
