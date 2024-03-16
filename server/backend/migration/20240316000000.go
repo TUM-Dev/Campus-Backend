@@ -152,7 +152,7 @@ func tablesWithWrongFk() []fkNeedingMigration {
 
 func migrateField(tx *gorm.DB, table string, field string, typeDefiniton string) error {
 	// change both the origin of the fk and the destination to be a bigint
-	if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` %s", table, field, field, typeDefiniton)).Error; err != nil {
+	if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s", table, field, typeDefiniton)).Error; err != nil {
 		return err
 	}
 	// data is still stored as int32, but we can change this
@@ -170,11 +170,11 @@ func migrate20240316000000() *gormigrate.Migration {
 		Migrate: func(tx *gorm.DB) error {
 			log.Info("started migrating all keys to be i64 based")
 			for _, f := range tablesWithWrongFk() {
-				if err := tx.Exec(fmt.Sprintf("alter table `%s` DROP FOREIGN KEY `%s`", f.fromTable, f.constraintName)).Error; err != nil {
+				if err := tx.Exec(fmt.Sprintf("alter table `%s` DROP FOREIGN KEY IF EXISTS `%s`", f.fromTable, f.constraintName)).Error; err != nil {
 					return err
 				}
 			}
-			log.Info("removed all FK-relationships")
+			log.Info("removed all FK-relationships to be i64 based")
 			for _, f := range tablesWithWrongFk() {
 				if err := migrateField(tx, f.fromTable, f.fromColumn, "BIGINT NOT NULL"); err != nil {
 					return err
@@ -182,14 +182,13 @@ func migrate20240316000000() *gormigrate.Migration {
 				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 					return err
 				}
-				log.WithField("constraint", f.constraintName).WithField("fromTable", f.fromTable).Info("migrated FK-field")
 			}
 			for _, f := range tablesWithWrongFk() {
 				if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`%s`)", f.fromTable, f.constraintName, f.fromColumn, f.toTable, f.toColumn)).Error; err != nil {
 					return err
 				}
 			}
-			log.Info("added all FK-relationships")
+			log.Info("migrated added all FK-relationships to be i64 based")
 			// because we have migrated all fk relationships, this does not mean that we have migrated all primary keys => this is done this way
 			for _, t := range tablesWithWrongId() {
 				if err := migrateField(tx, t.table, t.field, "BIGINT NOT NULL"); err != nil {
