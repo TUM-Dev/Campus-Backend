@@ -16,6 +16,7 @@ type tableWithWrongfield struct {
 type fkNeedingMigration struct {
 	fromTable      string
 	fromColumn     string
+	nullability    string
 	toTable        string
 	toColumn       string
 	constraintName string
@@ -99,54 +100,54 @@ func tablesWithWrongId() []tableWithWrongfield {
 //	  and t.COLUMN_NAME = f.from_columns);
 func tablesWithWrongFk() []fkNeedingMigration {
 	return []fkNeedingMigration{
-		{"chat_message", "member", "member", "member", "chat_message_ibfk_1"},
-		{"chat_message", "room", "chat_room", "room", "FK_chat_message_chat_room"},
-		{"chat_room2members", "room", "chat_room", "room", "FK_chat_room2members_chat_room"},
-		{"chat_room2members", "member", "member", "member", "chat_room2members_ibfk_2"},
-		{"device2stats", "device", "devices", "device", "device2stats_ibfk_2"},
-		{"devices", "member", "member", "member", "devices_ibfk_1"},
-		{"dish2dishflags", "dish", "dish", "dish", "dish2dishflags_ibfk_1"},
-		{"dish2dishflags", "flag", "dishflags", "flag", "dish2dishflags_ibfk_2"},
-		{"dish2mensa", "mensa", "mensa", "mensa", "dish2mensa_ibfk_1"},
-		{"dish2mensa", "dish", "dish", "dish", "dish2mensa_ibfk_2"},
-		{"dish_rating", "dishID", "dish", "dish", "dish_rating_dish_dish_fk"},
-		{"event", "news", "news", "news", "fkNews"},
-		{"event", "kino", "kino", "kino", "fkKino"},
-		{"event", "file", "files", "file", "fkEventFile"},
-		{"event", "ticket_group", "ticket_group", "ticket_group", "fkEventGroup"},
-		{"kino", "cover", "files", "file", "kino_ibfk_1"},
-		{"log", "user_executed", "users", "user", "fkLog2UsersEx"},
-		{"log", "user_affected", "users", "user", "fkLog2UsersAf"},
-		{"log", "action", "actions", "action", "fkLog2Actions"},
-		{"menu", "right", "rights", "right", "menu_ibfk_1"},
-		{"menu", "parent", "menu", "menu", "menu_ibfk_2"},
-		{"modules", "right", "rights", "right", "fkMod2Rights"},
-		{"news", "src", "newsSource", "source", "news_ibfk_1"},
-		{"news", "file", "files", "file", "news_ibfk_2"},
-		{"newsSource", "icon", "files", "file", "newsSource_ibfk_1"},
-		{"notification", "type", "notification_type", "type", "notification_ibfk_1"},
-		{"notification", "location", "location", "location", "notification_ibfk_2"},
-		{"notification_confirmation", "notification", "notification", "notification", "notification_confirmation_ibfk_1"},
-		{"notification_confirmation", "device", "devices", "device", "notification_confirmation_ibfk_2"},
-		{"question2answer", "question", "question", "question", "question2answer_question_question_fk"},
-		{"question2answer", "answer", "questionAnswers", "answer", "question2answer_questionAnswers_answer_fk"},
-		{"question2answer", "member", "member", "member", "question2answer_member_member_fk"},
-		{"question2faculty", "question", "question", "question", "question2faculty_ibfk_1"},
-		{"question2faculty", "faculty", "faculty", "faculty", "question2faculty_ibfk_2"},
-		{"recover", "user", "users", "user", "fkRecover2User"},
-		{"reports", "device", "devices", "device", "reports_ibfk_3"},
-		{"roles2rights", "role", "roles", "role", "fkRole"},
-		{"roles2rights", "right", "rights", "right", "fkRight"},
-		{"ticket_admin2group", "ticket_admin", "ticket_admin", "ticket_admin", "fkTicketAdmin"},
-		{"ticket_admin2group", "ticket_group", "ticket_group", "ticket_group", "fkTicketGroup"},
-		{"ticket_history", "member", "member", "member", "fkMember"},
-		{"ticket_history", "ticket_payment", "ticket_payment", "ticket_payment", "fkTicketPayment"},
-		{"ticket_history", "ticket_type", "ticket_type", "ticket_type", "fkTicketType"},
-		{"ticket_type", "event", "event", "event", "fkEvent"},
-		{"ticket_type", "ticket_payment", "ticket_payment", "ticket_payment", "fkPayment"},
-		{"users2info", "user", "users", "user", "fkUsers"},
-		{"users2roles", "user", "users", "user", "fkUser2RolesUser"},
-		{"users2roles", "role", "roles", "role", "fkUser2RolesRole"},
+		{"chat_message", "member", "NOT NULL", "member", "member", "chat_message_ibfk_1"},
+		{"chat_message", "room", "NOT NULL", "chat_room", "room", "FK_chat_message_chat_room"},
+		{"chat_room2members", "room", "NOT NULL", "chat_room", "room", "FK_chat_room2members_chat_room"},
+		{"chat_room2members", "member", "NOT NULL", "member", "member", "chat_room2members_ibfk_2"},
+		{"device2stats", "device", "NOT NULL", "devices", "device", "device2stats_ibfk_2"},
+		{"devices", "member", "NULL", "member", "member", "devices_ibfk_1"},
+		{"dish2dishflags", "dish", "NOT NULL", "dish", "dish", "dish2dishflags_ibfk_1"},
+		{"dish2dishflags", "flag", "NOT NULL", "dishflags", "flag", "dish2dishflags_ibfk_2"},
+		{"dish2mensa", "mensa", "NOT NULL", "mensa", "mensa", "dish2mensa_ibfk_1"},
+		{"dish2mensa", "dish", "NOT NULL", "dish", "dish", "dish2mensa_ibfk_2"},
+		{"dish_rating", "dishID", "NOT NULL", "dish", "dish", "dish_rating_dish_dish_fk"},
+		{"event", "news", "NULL", "news", "news", "fkNews"},
+		{"event", "kino", "NULL", "kino", "kino", "fkKino"},
+		{"event", "file", "NULL", "files", "file", "fkEventFile"},
+		{"event", "ticket_group", "NULL", "ticket_group", "ticket_group", "fkEventGroup"},
+		{"kino", "cover", "NULL", "files", "file", "kino_ibfk_1"},
+		{"log", "user_executed", "NULL", "users", "user", "fkLog2UsersEx"},
+		{"log", "user_affected", "NULL", "users", "user", "fkLog2UsersAf"},
+		{"log", "action", "NULL", "actions", "action", "fkLog2Actions"},
+		{"menu", "right", "NULL", "rights", "right", "menu_ibfk_1"},
+		{"menu", "parent", "NULL", "menu", "menu", "menu_ibfk_2"},
+		{"modules", "right", "NULL", "rights", "right", "fkMod2Rights"},
+		{"news", "src", "NOT NULL", "newsSource", "source", "news_ibfk_1"},
+		{"news", "file", "NULL", "files", "file", "news_ibfk_2"},
+		{"newsSource", "icon", "NOT NULL", "files", "file", "newsSource_ibfk_1"},
+		{"notification", "type", "NOT NULL", "notification_type", "type", "notification_ibfk_1"},
+		{"notification", "location", "NULL", "location", "location", "notification_ibfk_2"},
+		{"notification_confirmation", "notification", "NOT NULL", "notification", "notification", "notification_confirmation_ibfk_1"},
+		{"notification_confirmation", "device", "NOT NULL", "devices", "device", "notification_confirmation_ibfk_2"},
+		{"question2answer", "question", "NOT NULL", "question", "question", "question2answer_question_question_fk"},
+		{"question2answer", "answer", "NOT NULL", "questionAnswers", "answer", "question2answer_questionAnswers_answer_fk"},
+		{"question2answer", "member", "NOT NULL", "member", "member", "question2answer_member_member_fk"},
+		{"question2faculty", "question", "NOT NULL", "question", "question", "question2faculty_ibfk_1"},
+		{"question2faculty", "faculty", "NOT NULL", "faculty", "faculty", "question2faculty_ibfk_2"},
+		{"recover", "user", "NOT NULL", "users", "user", "fkRecover2User"},
+		{"reports", "device", "NULL", "devices", "device", "reports_ibfk_3"},
+		{"roles2rights", "role", "NOT NULL", "roles", "role", "fkRole"},
+		{"roles2rights", "right", "NOT NULL", "rights", "right", "fkRight"},
+		{"ticket_admin2group", "ticket_admin", "NOT NULL", "ticket_admin", "ticket_admin", "fkTicketAdmin"},
+		{"ticket_admin2group", "ticket_group", "NOT NULL", "ticket_group", "ticket_group", "fkTicketGroup"},
+		{"ticket_history", "member", "NOT NULL", "member", "member", "fkMember"},
+		{"ticket_history", "ticket_payment", "NULL", "ticket_payment", "ticket_payment", "fkTicketPayment"},
+		{"ticket_history", "ticket_type", "NOT NULL", "ticket_type", "ticket_type", "fkTicketType"},
+		{"ticket_type", "event", "NOT NULL", "event", "event", "fkEvent"},
+		{"ticket_type", "ticket_payment", "NOT NULL", "ticket_payment", "ticket_payment", "fkPayment"},
+		{"users2info", "user", "NOT NULL", "users", "user", "fkUsers"},
+		{"users2roles", "user", "NOT NULL", "users", "user", "fkUser2RolesUser"},
+		{"users2roles", "role", "NOT NULL", "roles", "role", "fkUser2RolesRole"},
 	}
 }
 
@@ -176,10 +177,10 @@ func migrate20240316000000() *gormigrate.Migration {
 			}
 			log.Info("removed all FK-relationships to be i64 based")
 			for _, f := range tablesWithWrongFk() {
-				if err := migrateField(tx, f.fromTable, f.fromColumn, "BIGINT NOT NULL"); err != nil {
+				if err := migrateField(tx, f.fromTable, f.fromColumn, "BIGINT "+f.nullability); err != nil {
 					return err
 				}
-				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
+				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT "+f.nullability+" AUTO_INCREMENT"); err != nil {
 					return err
 				}
 			}
