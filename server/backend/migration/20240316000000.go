@@ -168,11 +168,13 @@ func migrate20240316000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20240316000000",
 		Migrate: func(tx *gorm.DB) error {
+			log.Info("started migrating all keys to be i64 based")
 			for _, f := range tablesWithWrongFk() {
 				if err := tx.Exec(fmt.Sprintf("alter table `%s` DROP FOREIGN KEY `%s`", f.fromTable, f.constraintName)).Error; err != nil {
 					return err
 				}
 			}
+			log.Info("removed all FK-relationships")
 			for _, f := range tablesWithWrongFk() {
 				if err := migrateField(tx, f.fromTable, f.fromColumn, "BIGINT NOT NULL"); err != nil {
 					return err
@@ -180,17 +182,20 @@ func migrate20240316000000() *gormigrate.Migration {
 				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 					return err
 				}
+				log.WithField("constraint", f.constraintName).WithField("fromTable", f.fromTable).Info("migrated FK-field")
 			}
 			for _, f := range tablesWithWrongFk() {
 				if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`%s`)", f.fromTable, f.constraintName, f.fromColumn, f.toTable, f.toColumn)).Error; err != nil {
 					return err
 				}
 			}
+			log.Info("added all FK-relationships")
 			// because we have migrated all fk relationships, this does not mean that we have migrated all primary keys => this is done this way
 			for _, t := range tablesWithWrongId() {
 				if err := migrateField(tx, t.table, t.field, "BIGINT NOT NULL"); err != nil {
 					return err
 				}
+				log.WithField("table", t.table).Info("migrated PK-field")
 			}
 			return nil
 		},
