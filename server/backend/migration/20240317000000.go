@@ -102,6 +102,13 @@ func migrate20240317000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20240317000000",
 		Migrate: func(tx *gorm.DB) error {
+			// delete legacy indexes
+			if err := tx.Exec("drop index searchTitle on event").Error; err != nil {
+				return err
+			}
+			if err := tx.Exec("drop index search_index on roomfinder_rooms").Error; err != nil {
+				return err
+			}
 			// first migrate the db
 			if err := tx.Exec(fmt.Sprintf("ALTER DATABASE `%s` CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci", os.Getenv("DB_NAME"))).Error; err != nil {
 				return err
@@ -137,7 +144,11 @@ func migrate20240317000000() *gormigrate.Migration {
 					return err
 				}
 			}
-			return nil
+			// re-add legacy indexes
+			if err := tx.Exec("create fulltext index searchTitle on event (title)").Error; err != nil {
+				return err
+			}
+			return tx.Exec("create fulltext index search_index on roomfinder_rooms (info, address, room_code)").Error
 		},
 	}
 }
