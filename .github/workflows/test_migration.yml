@@ -36,6 +36,7 @@ jobs:
         env:
           CI_EXIT_AFTER_MIGRATION: "true"
           CI_AUTO_MIGRATION: "false"
+          DB_NAME: campus_db
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
       - name: run auto migrations
@@ -44,6 +45,7 @@ jobs:
         env:
           CI_EXIT_AFTER_MIGRATION: "true"
           CI_AUTO_MIGRATION: "true"
+          DB_NAME: campus_db
           DB_DSN: root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
       - uses: ariga/setup-atlas@master
