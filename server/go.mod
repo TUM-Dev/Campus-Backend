@@ -21,7 +21,7 @@ require (
 	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.6.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240311173647-c811ad7063a7
+	google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
