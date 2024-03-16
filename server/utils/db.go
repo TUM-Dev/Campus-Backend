@@ -22,6 +22,8 @@ func SetupDB() *gorm.DB {
 	if err != nil {
 		log.WithError(err).Fatal("failed to connect database")
 	}
+	// without this comment, the `COLLATE` will not be set correctly
+	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
 
 	// Migrate the schema
 	// currently not activated as
