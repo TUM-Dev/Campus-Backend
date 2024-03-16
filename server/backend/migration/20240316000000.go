@@ -3,6 +3,8 @@ package migration
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
@@ -192,6 +194,9 @@ func migrate20240316000000() *gormigrate.Migration {
 			}
 			return nil
 		},
-		// intentionally no rollback function as this would be lossy!
+		Rollback: func(_ *gorm.DB) error {
+			log.Fatal("intentionally no rollback function as this would be lossy!")
+			return nil
+		},
 	}
 }
