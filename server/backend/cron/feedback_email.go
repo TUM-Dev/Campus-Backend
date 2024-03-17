@@ -119,9 +119,8 @@ func generateTemplatedMail(parsedHtmlBody *htmlTemplate.Template, parsedTxtBody 
 }
 
 func (c *CronService) feedbackEmailCron() error {
-
 	var results []model.Feedback
-	if err := c.db.Find(&results, "processed = false").Scan(&results).Error; err != nil {
+	if err := c.db.Find(&results, "processed = false").Error; err != nil {
 		log.WithError(err).Error("could not get unprocessed feedback")
 		return err
 	}

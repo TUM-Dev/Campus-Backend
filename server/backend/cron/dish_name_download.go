@@ -51,8 +51,8 @@ func (c *CronService) dishNameDownloadCron() error {
 }
 
 func downloadDailyDishes(c *CronService) {
-	var result []CafeteriaWithID
-	if err := c.db.Model(&model.Cafeteria{}).Select("name,cafeteria").Scan(&result).Error; err != nil {
+	var results []model.Cafeteria
+	if err := c.db.Find(&results).Error; err != nil {
 		log.WithError(err).Error("Error while querying all cafeteria names from the database.")
 	}
 
@@ -65,7 +65,7 @@ func downloadDailyDishes(c *CronService) {
 		log.WithError(err).Error("Error while checking whether the meals of the current week have already been added to the weekly table.")
 	}
 
-	for _, v := range result {
+	for _, v := range results {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 
 		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", cafeteriaName, year, week)
