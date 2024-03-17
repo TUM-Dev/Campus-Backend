@@ -103,10 +103,10 @@ func migrate20240317000000() *gormigrate.Migration {
 		ID: "20240317000000",
 		Migrate: func(tx *gorm.DB) error {
 			// delete legacy indexes
-			if err := tx.Exec("drop index searchTitle on event").Error; err != nil {
+			if err := tx.Exec("drop index if exists searchTitle on event").Error; err != nil {
 				return err
 			}
-			if err := tx.Exec("drop index search_index on roomfinder_rooms").Error; err != nil {
+			if err := tx.Exec("drop index if exists search_index on roomfinder_rooms").Error; err != nil {
 				return err
 			}
 			// first migrate the db
