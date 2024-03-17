@@ -81,6 +81,9 @@ func manualMigrate(db *gorm.DB) error {
 
 // Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
 func Migrate(db *gorm.DB, shouldAutoMigrate bool) error {
+	// without this set, the `COLLATE` will not be set correctly
+	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
+
 	log.WithField("shouldAutoMigrate", shouldAutoMigrate).Info("starting migration")
 	start := time.Now()
 	var err error
