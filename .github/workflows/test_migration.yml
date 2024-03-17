@@ -16,6 +16,8 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: super_secret_passw0rd
           MARIADB_DATABASE: campus_db
+          MARIADB_CHARACTER_SET: utf8mb4
+          MARIADB_COLLATE: utf8mb4_unicode_ci
       manual_mariadb:
         image: bitnami/mariadb:latest
         ports:
@@ -23,6 +25,8 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: super_secret_passw0rd
           MARIADB_DATABASE: campus_db
+          MARIADB_CHARACTER_SET: utf8mb4
+          MARIADB_COLLATE: utf8mb4_unicode_ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

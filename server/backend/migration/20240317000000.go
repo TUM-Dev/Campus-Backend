@@ -8,8 +8,32 @@ import (
 	"gorm.io/gorm"
 )
 
-func tablesWithWrongCOLLATE() []string {
-	return []string{"crontab", "devices", "dish", "files", "kino", "news", "newsSource", "notification", "notification_type", "notification_confirmation", "feedback", "update_note", "news_alert"}
+func tablesWithWrongCOLLATEorCharSet() []string {
+	return []string{
+		"crontab",
+		"devices",
+		"dish",
+		"files",
+		"kino",
+		"news",
+		"newsSource",
+		"notification",
+		"notification_type",
+		"notification_confirmation",
+		"feedback",
+		"update_note",
+		"news_alert",
+		"cafeteria_rating",
+		"cafeteria_rating_tag",
+		"cafeteria_rating_tag_option",
+		"canteen_head_count",
+		"migrations",
+		"new_exam_results_subscribers",
+		"published_exam_results",
+		"question",
+		"question2answer",
+		"question2faculty",
+		"questionAnswers"}
 }
 
 type columnsWithWrongCollationOrCharset struct {
@@ -114,7 +138,7 @@ func migrate20240317000000() *gormigrate.Migration {
 				return err
 			}
 			// then set the tables
-			for _, t := range tablesWithWrongCOLLATE() {
+			for _, t := range tablesWithWrongCOLLATEorCharSet() {
 				if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", t)).Error; err != nil {
 					return err
 				}
@@ -133,7 +157,7 @@ func migrate20240317000000() *gormigrate.Migration {
 				return err
 			}
 			// revert changes to tables
-			for _, t := range tablesWithWrongCOLLATE() {
+			for _, t := range tablesWithWrongCOLLATEorCharSet() {
 				if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` COLLATE utf8mb4_general_ci", t)).Error; err != nil {
 					return err
 				}

@@ -24,12 +24,18 @@ mariadb:
     forcePassword: true
     database: tca
   primary:
+    extraEnvVars:
+      MARIADB_CHARACTER_SET: utf8mb4
+      MARIADB_COLLATE: utf8mb4_unicode_ci
     pdb:
       create: true
     persistence:
       size: 1Gi
       storageClass: local-path
   secondary:
+    extraEnvVars:
+      MARIADB_CHARACTER_SET: utf8mb4
+      MARIADB_COLLATE: utf8mb4_unicode_ci
     pdb:
       create: true
     persistence:
