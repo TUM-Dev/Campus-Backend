@@ -54,6 +54,7 @@ func downloadDailyDishes(c *CronService) {
 	var results []model.Cafeteria
 	if err := c.db.Find(&results).Error; err != nil {
 		log.WithError(err).Error("Error while querying all cafeteria names from the database.")
+		return
 	}
 
 	year, week := time.Now().UTC().ISOWeek()
@@ -63,6 +64,7 @@ func downloadDailyDishes(c *CronService) {
 		Where("year = ? AND week = ?", year, week).
 		Count(&weekliesWereAdded).Error; err != nil {
 		log.WithError(err).Error("Error while checking whether the meals of the current week have already been added to the weekly table.")
+		return
 	}
 
 	for _, v := range results {
@@ -86,6 +88,7 @@ func downloadDailyDishes(c *CronService) {
 		var dishes CanteenDays
 		if err := json.NewDecoder(resp.Body).Decode(&dishes); err != nil {
 			log.WithError(err).Error("Error in Parsing")
+			return
 		}
 
 		for weekDayIndex, day := range dishes.Days {
