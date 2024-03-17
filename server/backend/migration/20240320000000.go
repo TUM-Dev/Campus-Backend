@@ -43,7 +43,7 @@ func migrate20240320000000() *gormigrate.Migration {
 		Rollback: func(tx *gorm.DB) error {
 			for _, fk := range missingDishFKs() {
 				tx.Exec(fmt.Sprintf("alter table `%s` drop foreign key %s_%s_%s_fk",
-					fk.fromTable, fk.fromTable, fk.toTable, fk.toColumn, fk.fromColumn, fk.toTable, fk.toColumn))
+					fk.fromTable, fk.fromTable, fk.toTable, fk.toColumn))
 			}
 			return nil
 		},
