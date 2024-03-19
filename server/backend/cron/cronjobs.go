@@ -27,9 +27,7 @@ const (
 	CanteenHeadcount = "canteenHeadCount"
 	MovieType        = "movie"
 	FeedbackEmail    = "feedbackEmail"
-
-	/* MensaType      = "mensa"
-	AlarmType      = "alarm" */
+	// AlarmType      = "alarm"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -67,25 +65,17 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine, so we can parallelize them
 			switch cronjob.Type.String {
 			case NewsType:
-				// if this is not copied here, this may not be threads save due to go's guarantees
-				// loop variable cronjob captured by func literal (govet)
-				copyCronjob := cronjob
-				g.Go(func() error { return c.newsCron(&copyCronjob) })
+				g.Go(func() error { return c.newsCron(&cronjob) })
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
 				g.Go(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
-				/*
-					TODO: Implement handlers for other cronjobs
-					case MensaType:
-						g.Go(func() error { return c.mensaCron() })
-					case KinoType:
-						g.Go(func() error { return c.kinoCron() })
-					case AlarmType:
-						g.Go(func() error { return c.alarmCron() })
-				*/
+			/*  TODO: Implement handlers for other cronjobs
+			case AlarmType:
+				g.Go(func() error { return c.alarmCron() })
+			*/
 			case CanteenHeadcount:
 				g.Go(func() error { return c.canteenHeadCountCron() })
 			case FeedbackEmail:
