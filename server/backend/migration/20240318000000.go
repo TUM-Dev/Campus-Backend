@@ -2,6 +2,7 @@ package migration
 
 import (
 	"fmt"
+
 	"github.com/go-gormigrate/gormigrate/v2"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
