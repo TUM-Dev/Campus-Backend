@@ -82,7 +82,9 @@ func downloadDailyDishes(c *CronService) {
 				"Name":       v.Name,
 				"StatusCode": resp.StatusCode,
 			}
-			log.WithError(err).WithFields(fields).Error("Menu does not exist")
+			// sometimes the eat-api does not have the required data.
+			// This might be because of a lot of factors, but most commonly no menu was posted for a certain week at the time of scraping
+			log.WithError(err).WithFields(fields).Info("Menu does not exist")
 			continue
 		}
 		var dishes CanteenDays
