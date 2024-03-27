@@ -46,7 +46,7 @@ func migrate20240327000000() *gormigrate.Migration {
 				return err
 			}
 			// roomfinder_schedules does not have a PK set
-			if err := tx.Exec("alter table roomfinder_schedules add constraint roomfinder_schedules_pk primary key (room_id)").Error; err != nil {
+			if err := tx.Exec("alter table roomfinder_schedules add constraint roomfinder_schedules_pk primary key (room_id, start, end)").Error; err != nil {
 				return err
 			}
 			return nil
