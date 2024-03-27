@@ -15,7 +15,7 @@ func migrate20240327000000() *gormigrate.Migration {
 		ID: "20240327000000",
 		Migrate: func(tx *gorm.DB) error {
 			// news_alert does have a FK on the wrong field set
-			if err := tx.Exec("alter table news_alert drop foreign key news_alert").Error; err != nil {
+			if err := tx.Exec("alter table news_alert drop foreign key if exists news_alert").Error; err != nil {
 				return err
 			}
 			if err := tx.Exec("alter table news_alert add constraint news_alert_files_file_fk foreign key (file) references files (file) on delete cascade").Error; err != nil {
@@ -36,7 +36,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL"); err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table crontab drop key cron").Error; err != nil {
+			if err := tx.Exec("alter table crontab drop key if exists cron").Error; err != nil {
 				return err
 			}
 			if err := tx.Exec("alter table crontab add constraint crontab_pk primary key (cron)").Error; err != nil {
@@ -53,7 +53,7 @@ func migrate20240327000000() *gormigrate.Migration {
 		},
 		Rollback: func(tx *gorm.DB) error {
 			// news_alert does have a FK on the wrong field set
-			if err := tx.Exec("alter table news_alert drop foreign key news_alert_files_file_fk").Error; err != nil {
+			if err := tx.Exec("alter table news_alert drop foreign key if exists news_alert_files_file_fk").Error; err != nil {
 				return err
 			}
 			if err := tx.Exec("alter table news_alert add constraint news_alert foreign key (news_alert) references files (file) on delete cascade").Error; err != nil {
@@ -74,7 +74,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL"); err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table crontab drop key crontab_pk").Error; err != nil {
+			if err := tx.Exec("alter table crontab drop key if exists crontab_pk").Error; err != nil {
 				return err
 			}
 			if err := tx.Exec("alter table crontab add constraint cron unique (cron)").Error; err != nil {
