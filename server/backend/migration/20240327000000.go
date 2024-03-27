@@ -18,6 +18,9 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table news_alert drop foreign key if exists news_alert").Error; err != nil {
 				return err
 			}
+			if err := tx.Exec("alter table news_alert drop foreign key if exists news_alert_files_file_fk").Error; err != nil {
+				return err
+			}
 			if err := tx.Exec("alter table news_alert add constraint news_alert_files_file_fk foreign key (file) references files (file) on delete cascade").Error; err != nil {
 				return err
 			}
