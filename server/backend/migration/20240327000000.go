@@ -42,7 +42,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table crontab drop key if exists cron").Error; err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table crontab add constraint crontab_pk primary key (cron)").Error; err != nil {
+			if err := tx.Exec("alter table crontab add constraint primary key (cron)").Error; err != nil {
 				return err
 			}
 			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
@@ -77,7 +77,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL"); err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table crontab drop key if exists crontab_pk").Error; err != nil {
+			if err := tx.Exec("alter table crontab drop primary key").Error; err != nil {
 				return err
 			}
 			if err := tx.Exec("alter table crontab add constraint cron unique (cron)").Error; err != nil {
