@@ -14,6 +14,14 @@ func migrate20240327000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20240327000000",
 		Migrate: func(tx *gorm.DB) error {
+			// news_alert does have a FK on the wrong field set
+			if err := tx.Exec("alter table news_alert drop foreign key news_alert").Error; err != nil {
+				return err
+			}
+			if err := tx.Exec("alter table news_alert add constraint news_alert_files_file_fk foreign key (file) references files (file) on delete cascade").Error; err != nil {
+				return err
+			}
+			// some tables PK don't have AUTO_INCREMENT set, despite that they should
 			for _, t := range tablesWithWrongId() {
 				tablesWithCorrectIds := []string{"roomfinder_buildings2maps", "roomfinder_rooms2maps", "question"}
 				if slices.Contains(tablesWithCorrectIds, t.table) {
@@ -44,6 +52,14 @@ func migrate20240327000000() *gormigrate.Migration {
 			return nil
 		},
 		Rollback: func(tx *gorm.DB) error {
+			// news_alert does have a FK on the wrong field set
+			if err := tx.Exec("alter table news_alert drop foreign key news_alert_files_file_fk").Error; err != nil {
+				return err
+			}
+			if err := tx.Exec("alter table news_alert add constraint news_alert foreign key (news_alert) references files (file) on delete cascade").Error; err != nil {
+				return err
+			}
+			// some tables PK don't have AUTO_INCREMENT set, despite that they should
 			for _, t := range tablesWithWrongId() {
 				tablesWithCorrectIds := []string{"roomfinder_buildings2maps", "roomfinder_rooms2maps", "question"}
 				if slices.Contains(tablesWithCorrectIds, t.table) {
