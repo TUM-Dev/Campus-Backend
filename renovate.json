@@ -11,7 +11,7 @@
   "packageRules": [
     {
       "matchPackagePatterns": [".*Campus-Backend/.*"],
-      "groupName": "server" 
+      "groupName": "server"
     }
   ]
 }
