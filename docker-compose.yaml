@@ -80,3 +80,7 @@ volumes:
     driver: local
   backend-storage:
     driver: local
+
+networks:
+    traefik_traefik:
+        external: true
