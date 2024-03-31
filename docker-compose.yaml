@@ -13,8 +13,8 @@ services:
     expose:
       - "50051"
     environment:
-      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:3306)/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:3306)/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - DB_NAME=${DB_NAME}
       - SENTRY_DSN=${SENTRY_DSN}
       - OMDB_API_KEY=${OMDB_API_KEY}
