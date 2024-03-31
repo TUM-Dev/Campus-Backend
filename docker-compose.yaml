@@ -1,12 +1,12 @@
 services:
-  backend-v2:
+  backend:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend-v2.rule=Host(`api.tum.app`)"
+      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
 
-      - "traefik.http.routers.backend-v2_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
-      - "traefik.http.routers.backend-v2_h2.scheme=h2c"
+      - "traefik.http.routers.backend_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+      - "traefik.http.routers.backend_h2.scheme=h2c"
     expose:
       - "50051"
     environment:
@@ -56,9 +56,9 @@ services:
       - --config-path
       - /etc/envoy/envoy.yaml
       - --service-cluster
-      - backend-v2
+      - backend
       - --service-node
-      - backend-v2
+      - backend
       - --log-level
       - info
     expose:
@@ -66,46 +66,14 @@ services:
       #- "9901" # admin interface, not very useful
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend-v2.rule=Host(`api.tum.app`)"
+      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
     volumes:
       - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
     depends_on:
-      - backend-v2
-  backend-v1-accesslogs:
-    image: alpine:1.36
-    command: [ /bin/sh, -c, 'tail -n+1 -F /var/log/apache2/access.log' ]
-    volumes:
-      - legacybackend-logs:/var/log/:ro
-    depends_on:
-      - backend-v1
-  backend-v1-errorlogs:
-    image: alpine:1.36
-    command: [ /bin/sh, -c, 'tail -n+1 -F /var/log/apache2/error.log' ]
-    volumes:
-      - legacybackend-logs:/var/log/:ro
-    depends_on:
-      - backend-v1
-  backend-v1:
-    image: ghcr.io/kordianbruck/tca-backend/tca-server:latest
-    restart: always
-    read_only: true
-    tmpfs:
-      - /app/Tmp/
-      - /var/www/html/tmp/
-      - /var/run/apache2/
-    volumes:
-      - legacybackend-logs:/var/log/
-      - legacybackend-config:/app/Config/cfg.ini:ro
-      - backend-storage:/app/Storage/
-    expose:
-      - "80"
+      - backend
 
 volumes:
   campus-db-data:
     driver: local
   backend-storage:
-    driver: local
-  legacybackend-config:
-    driver: local
-  legacybackend-logs:
     driver: local
