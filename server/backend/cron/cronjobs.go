@@ -46,7 +46,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
+			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -54,8 +54,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				MovieType,
 				FeedbackEmail,
-			).
-			Scan(&res)
+			)
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
@@ -97,7 +96,7 @@ func (c *CronService) Run() error {
 		if err := g.Wait(); err != nil {
 			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
-		log.Trace("Cron: sleeping for 60 seconds")
-		time.Sleep(60 * time.Second)
+		log.Trace("Cron: sleeping for 30 seconds")
+		time.Sleep(30 * time.Second)
 	}
 }

@@ -2,6 +2,7 @@ package backend
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -63,6 +64,13 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	}
 	// save feedback to db
 	if err := s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
+		var existingFeeedbackCnt int64
+		if err := tx.Model(&feedback).Where("receiver=? AND reply_to=? AND feedback=? AND app_version=?", feedback.Recipient, feedback.ReplyTo, feedback.Feedback, feedback.AppVersion).Count(&existingFeeedbackCnt).Error; err != nil {
+			return err
+		}
+		if existingFeeedbackCnt != 0 {
+			return gorm.ErrDuplicatedKey
+		}
 		for _, filename := range uploadedFilenames {
 			if err := tx.Create(&model.File{
 				Name:       *filename,
@@ -75,6 +83,9 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		return tx.Create(feedback).Error
 	}); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return status.Error(codes.AlreadyExists, "Feedback already exists")
+		}
 		log.WithError(err).Error("Error creating feedback")
 		deleteUploaded(feedback.EmailId)
 		return status.Error(codes.Internal, "Error creating feedback")

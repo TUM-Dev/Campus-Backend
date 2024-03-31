@@ -15,10 +15,8 @@ services:
     environment:
       - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_NAME=${DB_NAME}
       - SENTRY_DSN=${SENTRY_DSN}
-      - APNS_KEY_ID=${APNS_KEY_ID}
-      - APNS_TEAM_ID=${APNS_TEAM_ID}
-      - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
       - OMDB_API_KEY=${OMDB_API_KEY}
       - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
@@ -29,7 +27,6 @@ services:
       - MensaCronDisabled=true
     volumes:
       - backend-storage:/Storage
-      - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}:ro
     user: 1000:3000
     read_only: true
     depends_on:
@@ -43,6 +40,8 @@ services:
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
     volumes:
       - campus-db-data:/bitnami/mariadb
     healthcheck:

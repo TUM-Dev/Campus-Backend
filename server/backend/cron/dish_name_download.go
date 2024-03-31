@@ -2,6 +2,7 @@ package cron
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -50,9 +51,10 @@ func (c *CronService) dishNameDownloadCron() error {
 }
 
 func downloadDailyDishes(c *CronService) {
-	var result []CafeteriaWithID
-	if err := c.db.Model(&model.Cafeteria{}).Select("name,cafeteria").Scan(&result).Error; err != nil {
+	var results []model.Cafeteria
+	if err := c.db.Find(&results).Error; err != nil {
 		log.WithError(err).Error("Error while querying all cafeteria names from the database.")
+		return
 	}
 
 	year, week := time.Now().UTC().ISOWeek()
@@ -62,9 +64,10 @@ func downloadDailyDishes(c *CronService) {
 		Where("year = ? AND week = ?", year, week).
 		Count(&weekliesWereAdded).Error; err != nil {
 		log.WithError(err).Error("Error while checking whether the meals of the current week have already been added to the weekly table.")
+		return
 	}
 
-	for _, v := range result {
+	for _, v := range results {
 		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
 
 		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", cafeteriaName, year, week)
@@ -79,12 +82,15 @@ func downloadDailyDishes(c *CronService) {
 				"Name":       v.Name,
 				"StatusCode": resp.StatusCode,
 			}
-			log.WithError(err).WithFields(fields).Error("Menu does not exist")
+			// sometimes the eat-api does not have the required data.
+			// This might be because of a lot of factors, but most commonly no menu was posted for a certain week at the time of scraping
+			log.WithError(err).WithFields(fields).Info("Menu does not exist")
 			continue
 		}
 		var dishes CanteenDays
 		if err := json.NewDecoder(resp.Body).Decode(&dishes); err != nil {
 			log.WithError(err).Error("Error in Parsing")
+			return
 		}
 
 		for weekDayIndex, day := range dishes.Days {
@@ -95,25 +101,26 @@ func downloadDailyDishes(c *CronService) {
 					CafeteriaID: v.Cafeteria,
 				}
 
-				var count int64
-				var dishId int64
-				if err := c.db.Model(&model.Dish{}).
-					Where("name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).
-					Select("dish").
-					First(&dishId).
-					Count(&count).Error; err != nil {
-					log.WithError(err).Error("Error while checking whether this is already in database")
-				}
-				if count == 0 {
+				var dbDish model.Dish
+				if err := c.db.First(&dbDish, "name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).Error; err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 					if err := c.db.Create(&dish).Error; err != nil {
-						log.WithError(err).Error("Error while creating new CanteenDish entry with name {}. CanteenDish won't be saved", dish.Name)
+						log.WithError(err).WithField("name", dish.Name).Error("Error while creating new CanteenDish entry. CanteenDish won't be saved")
 					}
 					addDishTagsToMapping(dish.Dish, dish.Name, c.db)
-					dishId = dish.Dish
+					dbDish = dish
+				} else if err != nil {
+					log.WithError(err).Error("Error while checking whether the dish is already in database")
 				}
+
+				if dbDish.Type != dish.Type {
+					if err := c.db.Where("dish = ?", dbDish.Dish).Updates(&dish).Error; err != nil {
+						log.WithError(err).WithField("from", dish.Type).WithField("to", dish.Type).Error("Error while updating dish to new type")
+					}
+				}
+
 				if weekliesWereAdded == 0 {
 					errCreate := c.db.Create(&model.DishesOfTheWeek{
-						DishID: dishId,
+						DishID: dbDish.Dish,
 						Year:   int32(year),
 						Week:   int32(week),
 						Day:    int32(weekDayIndex),

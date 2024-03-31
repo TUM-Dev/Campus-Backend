@@ -26,3 +26,8 @@ type Notification struct {
 	Signature    null.String `gorm:"column:signature;type:text;size:65535;" json:"signature"`
 	Silent       int32       `gorm:"column:silent;type:tinyint;default:0;" json:"silent"`
 }
+
+// TableName sets the insert table name for this struct type
+func (n *Notification) TableName() string {
+	return "notification"
+}

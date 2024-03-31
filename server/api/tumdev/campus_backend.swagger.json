@@ -17,50 +17,6 @@
     "application/json"
   ],
   "paths": {
-    "/barrierfree/contacts": {
-      "get": {
-        "operationId": "Campus_ListResponsiblePerson",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiListResponsiblePersonReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/barrierfree/moreInformation": {
-      "get": {
-        "operationId": "Campus_ListMoreInformation",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiListMoreInformationReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/canteen/allCanteens": {
       "get": {
         "operationId": "Campus_ListCanteens",
@@ -824,36 +780,6 @@
         ]
       }
     },
-    "/openingtimes/{language}": {
-      "get": {
-        "operationId": "Campus_ListOpeningTimes",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiListOpeningTimesReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "language",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/updatenote/{version}": {
       "get": {
         "operationId": "Campus_GetUpdateNote",
@@ -895,20 +821,6 @@
       ],
       "default": "TUM_DEV",
       "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
-    },
-    "ListMoreInformationReplyMoreInformation": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "category": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
-      }
     },
     "apiCanteen": {
       "type": "object",
@@ -1009,11 +921,11 @@
         },
         "canteenId": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme \"MENSA_GARCHING\") Must be available in the given cafeteria"
         },
         "dish": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme)\nMust be available in the given cafeteria"
         },
         "image": {
           "type": "string",
@@ -1135,7 +1047,7 @@
         },
         "dish": {
           "type": "string",
-          "title": "Mandatory Name of the dish (EAT-API naming scheme) Must be available int the given mensa"
+          "title": "Mandatory Name of the dish (EAT-API naming scheme)\nMust be available in the given cafeteria"
         },
         "from": {
           "type": "string",
@@ -1336,18 +1248,6 @@
         }
       }
     },
-    "apiListMoreInformationReply": {
-      "type": "object",
-      "properties": {
-        "infos": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/ListMoreInformationReplyMoreInformation"
-          }
-        }
-      }
-    },
     "apiListMoviesReply": {
       "type": "object",
       "properties": {
@@ -1404,30 +1304,6 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiNewsSource"
-          }
-        }
-      }
-    },
-    "apiListOpeningTimesReply": {
-      "type": "object",
-      "properties": {
-        "facilities": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiOpeningTimesMsgElement"
-          }
-        }
-      }
-    },
-    "apiListResponsiblePersonReply": {
-      "type": "object",
-      "properties": {
-        "responsiblePerson": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiResponsiblePerson"
           }
         }
       }
@@ -1587,46 +1463,6 @@
         }
       }
     },
-    "apiOpeningTimesMsgElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "category": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "address": {
-          "type": "string"
-        },
-        "room": {
-          "type": "string"
-        },
-        "transportStation": {
-          "type": "string"
-        },
-        "openingHours": {
-          "type": "string"
-        },
-        "infos": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        },
-        "language": {
-          "type": "string"
-        },
-        "referenceId": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
     "apiRatingTag": {
       "type": "object",
       "properties": {
@@ -1675,26 +1511,6 @@
         "max": {
           "type": "integer",
           "format": "int32"
-        }
-      }
-    },
-    "apiResponsiblePerson": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "telephone": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "faculty": {
-          "type": "string"
-        },
-        "tumId": {
-          "type": "string"
         }
       }
     },

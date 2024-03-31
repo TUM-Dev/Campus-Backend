@@ -102,6 +102,9 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 	server := CampusServer{db: s.DB}
 	s.mock.ExpectBegin()
 	returnedTime := time.Now()
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to=? AND feedback=? AND app_version=?")).
+		WithArgs("app@tum.de", "testing@example.com", "Hello with image", nil).
+		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}))
 	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `files` (`name`,`path`,`downloads`,`downloaded`) VALUES (?,?,?,?) RETURNING `url`,`file`")).
 		WithArgs("0.txt", sqlmock.AnyArg(), 1, true).
 		WillReturnRows(sqlmock.NewRows([]string{"url", "file"}).AddRow(nil, 1))
@@ -109,7 +112,7 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 		WithArgs("1.png", sqlmock.AnyArg(), 1, true).
 		WillReturnRows(sqlmock.NewRows([]string{"url", "file"}).AddRow(nil, 1))
 	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
-		WithArgs(2, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello World", nil, nil, nil, nil, false).
+		WithArgs(2, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello with image", nil, nil, nil, nil, false).
 		WillReturnRows(sqlmock.NewRows([]string{"timestamp", "id"}).AddRow(returnedTime, 1))
 	s.mock.ExpectCommit()
 
@@ -118,7 +121,7 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 	stream := mockedFeedbackStream{
 		T: s.T(),
 		recived: []*pb.CreateFeedbackRequest{
-			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World", Attachment: dummyText},
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello with image", Attachment: dummyText},
 			{Attachment: dummyImage},
 		},
 		reply: &pb.CreateFeedbackReply{},
@@ -145,15 +148,18 @@ func (s *FeedbackSuite) Test_CreateFeedback_NoImage() {
 
 	server := CampusServer{db: s.DB}
 	s.mock.ExpectBegin()
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to=? AND feedback=? AND app_version=?")).
+		WithArgs("app@tum.de", "testing@example.com", "Hello without image", nil).
+		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}))
 	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
-		WithArgs(0, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello World", nil, nil, nil, nil, false).
+		WithArgs(0, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello without image", nil, nil, nil, nil, false).
 		WillReturnRows(sqlmock.NewRows([]string{"timestamp", "id"}).AddRow(time.Now(), 1))
 	s.mock.ExpectCommit()
 
 	stream := mockedFeedbackStream{
 		T: s.T(),
 		recived: []*pb.CreateFeedbackRequest{
-			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello World"},
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello without image"},
 			{}, // empty images should be ignored
 		},
 		reply: &pb.CreateFeedbackReply{},
