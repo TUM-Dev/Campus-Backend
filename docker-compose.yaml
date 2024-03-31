@@ -1,6 +1,9 @@
 services:
   backend:
-    restart: always
+    image: ghcr.io/tum-dev/campus-backend/backend-server:main
+    restart: unless-stopped
+    networks:
+      - traefik_traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
@@ -32,7 +35,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
   db:
     image: bitnami/mariadb:latest
     restart: unless-stopped
@@ -50,7 +52,9 @@ services:
       retries: 6
   grpc-web:
     image: envoyproxy/envoy:v1.27-latest
-    restart: always
+    restart: unless-stopped
+    networks:
+      - traefik_traefik
     command:
       - /docker-entrypoint.sh
       - --config-path
