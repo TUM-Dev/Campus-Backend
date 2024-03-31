@@ -2,14 +2,15 @@ services:
   backend:
     image: ghcr.io/tum-dev/campus-backend/backend-server:main
     restart: unless-stopped
-    networks:
-      - traefik_traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
 
       - "traefik.http.routers.backend_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
       - "traefik.http.routers.backend_h2.scheme=h2c"
+    networks:
+      - traefik_traefik
+      - campus_db
     expose:
       - "50051"
     environment:
@@ -35,6 +36,8 @@ services:
   db:
     image: bitnami/mariadb:latest
     restart: unless-stopped
+    networks:
+      - campus_db
     expose:
       - 3306
     environment:
@@ -82,5 +85,6 @@ volumes:
     driver: local
 
 networks:
-    traefik_traefik:
-        external: true
+  campus_db:
+  traefik_traefik:
+    external: true
