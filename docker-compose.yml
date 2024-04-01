@@ -19,7 +19,6 @@ services:
       - DB_NAME=${DB_NAME}
       - SENTRY_DSN=${SENTRY_DSN}
       - OMDB_API_KEY=${OMDB_API_KEY}
-      - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
       - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
