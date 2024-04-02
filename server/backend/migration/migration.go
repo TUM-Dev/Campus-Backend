@@ -78,6 +78,7 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240318000000(),
 		migrate20240319000000(),
 		migrate20240327000000(),
+		migrate20240402000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
