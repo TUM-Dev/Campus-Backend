@@ -12,6 +12,10 @@
     {
       "matchPackagePatterns": [".*Campus-Backend/.*"],
       "groupName": "server"
+    },
+    {
+      "matchPackagePatterns": [".*gorm.*"],
+      "groupName": "gorm"
     }
   ]
 }
