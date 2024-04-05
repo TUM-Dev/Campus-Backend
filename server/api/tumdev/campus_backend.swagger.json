@@ -494,6 +494,13 @@
             "type": "string"
           },
           {
+            "name": "fromName",
+            "description": "how the person wants to be called",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "message",
             "description": "The actual message",
             "in": "query",
