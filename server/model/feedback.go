@@ -9,8 +9,8 @@ type Feedback struct {
 	ImageCount   int32       `gorm:"column:image_count;type:int;not null;"`
 	EmailId      string      `gorm:"column:email_id;type:text;not null"`
 	Recipient    string      `gorm:"column:receiver;type:text;not null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex"`
-	ReplyToName  null.String `gorm:"column:reply_to_name;type:text;null"`
 	ReplyToEmail null.String `gorm:"column:reply_to_email;type:text;null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex"`
+	ReplyToName  null.String `gorm:"column:reply_to_name;type:text;null"`
 	Feedback     string      `gorm:"column:feedback;type:text;not null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex"`
 	Latitude     null.Float  `gorm:"column:latitude;type:float;null;"`
 	Longitude    null.Float  `gorm:"column:longitude;type:float;null;"`

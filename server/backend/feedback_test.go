@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sync"
 	"testing"
 	"time"
 
@@ -99,10 +100,10 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 		}
 	}(cron.StorageDir)
 
-	server := CampusServer{db: s.DB}
+	server := CampusServer{db: s.DB, feedbackEmailLastReuestAt: &sync.Map{}}
 	s.mock.ExpectBegin()
 	returnedTime := time.Now()
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to=? AND feedback=? AND app_version=?")).
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to_email=? AND feedback=? AND app_version=?")).
 		WithArgs("app@tum.de", "testing@example.com", "Hello with image", nil).
 		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}))
 	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `files` (`name`,`path`,`downloads`,`downloaded`) VALUES (?,?,?,?) RETURNING `url`,`file`")).
@@ -111,8 +112,8 @@ func (s *FeedbackSuite) Test_CreateFeedback_OneFile() {
 	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `files` (`name`,`path`,`downloads`,`downloaded`) VALUES (?,?,?,?) RETURNING `url`,`file`")).
 		WithArgs("1.png", sqlmock.AnyArg(), 1, true).
 		WillReturnRows(sqlmock.NewRows([]string{"url", "file"}).AddRow(nil, 1))
-	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
-		WithArgs(2, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello with image", nil, nil, nil, nil, false).
+	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to_email`,`reply_to_name`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
+		WithArgs(2, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", nil, "Hello with image", nil, nil, nil, nil, false).
 		WillReturnRows(sqlmock.NewRows([]string{"timestamp", "id"}).AddRow(returnedTime, 1))
 	s.mock.ExpectCommit()
 
@@ -146,13 +147,13 @@ func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime
 func (s *FeedbackSuite) Test_CreateFeedback_NoImage() {
 	cron.StorageDir = "test_no_image/"
 
-	server := CampusServer{db: s.DB}
+	server := CampusServer{db: s.DB, feedbackEmailLastReuestAt: &sync.Map{}}
 	s.mock.ExpectBegin()
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to=? AND feedback=? AND app_version=?")).
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `feedback` WHERE receiver=? AND reply_to_email=? AND feedback=? AND app_version=?")).
 		WithArgs("app@tum.de", "testing@example.com", "Hello without image", nil).
 		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}))
-	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
-		WithArgs(0, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", "Hello without image", nil, nil, nil, nil, false).
+	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO `feedback` (`image_count`,`email_id`,`receiver`,`reply_to_email`,`reply_to_name`,`feedback`,`latitude`,`longitude`,`os_version`,`app_version`,`processed`) VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING `timestamp`,`id`")).
+		WithArgs(0, sqlmock.AnyArg(), "app@tum.de", "testing@example.com", nil, "Hello without image", nil, nil, nil, nil, false).
 		WillReturnRows(sqlmock.NewRows([]string{"timestamp", "id"}).AddRow(time.Now(), 1))
 	s.mock.ExpectCommit()
 
