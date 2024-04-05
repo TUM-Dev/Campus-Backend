@@ -9,6 +9,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
@@ -62,10 +63,18 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	if feedback.Feedback == "" && feedback.ImageCount == 0 {
 		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
 	}
+	if feedback.ReplyToEmail.Valid {
+		now := time.Now()
+		fiveMinutesAgo := now.Add(time.Minute * -5).Unix()
+		lastFeedback, feedbackExisted := s.feedbackEmailLastReuestAt.LoadOrStore(feedback.ReplyToEmail.String, now.Unix())
+		if feedbackExisted && lastFeedback.(int64) >= fiveMinutesAgo {
+			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", lastFeedback.(int64)-fiveMinutesAgo))
+		}
+	}
 	// save feedback to db
 	if err := s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
 		var existingFeeedbackCnt int64
-		if err := tx.Model(&feedback).Where("receiver=? AND reply_to=? AND feedback=? AND app_version=?", feedback.Recipient, feedback.ReplyTo, feedback.Feedback, feedback.AppVersion).Count(&existingFeeedbackCnt).Error; err != nil {
+		if err := tx.Model(&feedback).Where("receiver=? AND reply_to_email=? AND feedback=? AND app_version=?", feedback.Recipient, feedback.ReplyToEmail, feedback.Feedback, feedback.AppVersion).Count(&existingFeeedbackCnt).Error; err != nil {
 			return err
 		}
 		if existingFeeedbackCnt != 0 {
@@ -165,7 +174,10 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 		feedback.Feedback = req.Message
 	}
 	if req.FromEmail != "" {
-		feedback.ReplyTo = null.StringFrom(req.FromEmail)
+		feedback.ReplyToEmail = null.StringFrom(req.FromEmail)
+	}
+	if req.FromName != "" {
+		feedback.ReplyToName = null.StringFrom(req.FromEmail)
 	}
 }
 
