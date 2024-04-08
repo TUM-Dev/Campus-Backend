@@ -23,7 +23,7 @@ func main() {
 	// error handling omitted
 	creds := credentials.NewClientTLSFromCert(pool, "")
 
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
+	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.WithError(err).Fatal("did not connect")
 	}
