@@ -32,9 +32,6 @@ const (
 	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
 	Campus_ListCanteens_FullMethodName             = "/api.Campus/ListCanteens"
 	Campus_ListDishes_FullMethodName               = "/api.Campus/ListDishes"
-	Campus_ListResponsiblePerson_FullMethodName    = "/api.Campus/ListResponsiblePerson"
-	Campus_ListMoreInformation_FullMethodName      = "/api.Campus/ListMoreInformation"
-	Campus_ListOpeningTimes_FullMethodName         = "/api.Campus/ListOpeningTimes"
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
 	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
@@ -64,10 +61,8 @@ type CampusClient interface {
 	ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(ctx context.Context, in *ListCanteensRequest, opts ...grpc.CallOption) (*ListCanteensReply, error)
+	// Returns all dishes for a specific cafeteria, year, week and day
 	ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error)
-	ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error)
-	ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error)
-	ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (Campus_CreateFeedbackClient, error)
@@ -192,33 +187,6 @@ func (c *campusClient) ListCanteens(ctx context.Context, in *ListCanteensRequest
 func (c *campusClient) ListDishes(ctx context.Context, in *ListDishesRequest, opts ...grpc.CallOption) (*ListDishesReply, error) {
 	out := new(ListDishesReply)
 	err := c.cc.Invoke(ctx, Campus_ListDishes_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListResponsiblePerson(ctx context.Context, in *ListResponsiblePersonRequest, opts ...grpc.CallOption) (*ListResponsiblePersonReply, error) {
-	out := new(ListResponsiblePersonReply)
-	err := c.cc.Invoke(ctx, Campus_ListResponsiblePerson_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListMoreInformation(ctx context.Context, in *ListMoreInformationRequest, opts ...grpc.CallOption) (*ListMoreInformationReply, error) {
-	out := new(ListMoreInformationReply)
-	err := c.cc.Invoke(ctx, Campus_ListMoreInformation_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) ListOpeningTimes(ctx context.Context, in *ListOpeningTimesRequest, opts ...grpc.CallOption) (*ListOpeningTimesReply, error) {
-	out := new(ListOpeningTimesReply)
-	err := c.cc.Invoke(ctx, Campus_ListOpeningTimes_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -357,10 +325,8 @@ type CampusServer interface {
 	ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error)
 	ListCanteens(context.Context, *ListCanteensRequest) (*ListCanteensReply, error)
+	// Returns all dishes for a specific cafeteria, year, week and day
 	ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error)
-	ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error)
-	ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error)
-	ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(Campus_CreateFeedbackServer) error
@@ -415,15 +381,6 @@ func (UnimplementedCampusServer) ListCanteens(context.Context, *ListCanteensRequ
 }
 func (UnimplementedCampusServer) ListDishes(context.Context, *ListDishesRequest) (*ListDishesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDishes not implemented")
-}
-func (UnimplementedCampusServer) ListResponsiblePerson(context.Context, *ListResponsiblePersonRequest) (*ListResponsiblePersonReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResponsiblePerson not implemented")
-}
-func (UnimplementedCampusServer) ListMoreInformation(context.Context, *ListMoreInformationRequest) (*ListMoreInformationReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMoreInformation not implemented")
-}
-func (UnimplementedCampusServer) ListOpeningTimes(context.Context, *ListOpeningTimesRequest) (*ListOpeningTimesReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListOpeningTimes not implemented")
 }
 func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUpdateNote not implemented")
@@ -684,60 +641,6 @@ func _Campus_ListDishes_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Campus_ListResponsiblePerson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResponsiblePersonRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListResponsiblePerson(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListResponsiblePerson_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListResponsiblePerson(ctx, req.(*ListResponsiblePersonRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ListMoreInformation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMoreInformationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListMoreInformation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListMoreInformation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListMoreInformation(ctx, req.(*ListMoreInformationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_ListOpeningTimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListOpeningTimesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).ListOpeningTimes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_ListOpeningTimes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListOpeningTimes(ctx, req.(*ListOpeningTimesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUpdateNoteRequest)
 	if err := dec(in); err != nil {
@@ -980,18 +883,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDishes",
 			Handler:    _Campus_ListDishes_Handler,
-		},
-		{
-			MethodName: "ListResponsiblePerson",
-			Handler:    _Campus_ListResponsiblePerson_Handler,
-		},
-		{
-			MethodName: "ListMoreInformation",
-			Handler:    _Campus_ListMoreInformation_Handler,
-		},
-		{
-			MethodName: "ListOpeningTimes",
-			Handler:    _Campus_ListOpeningTimes_Handler,
 		},
 		{
 			MethodName: "GetUpdateNote",

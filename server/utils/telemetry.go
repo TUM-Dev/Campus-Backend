@@ -3,7 +3,6 @@ package utils
 import (
 	"os"
 
-	"github.com/TUM-Dev/Campus-Backend/server/env"
 	"github.com/getsentry/sentry-go"
 	"github.com/makasim/sentryhook"
 	log "github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ import (
 func SetupTelemetry(Version string) {
 	environment := "development"
 	log.SetLevel(log.TraceLevel)
-	if env.IsProd() {
+	if os.Getenv("ENVIRONMENT") == "prod" {
 		log.SetLevel(log.InfoLevel)
 		environment = "production"
 		log.SetFormatter(&log.JSONFormatter{}) // simpler to query but harder to parse in the console

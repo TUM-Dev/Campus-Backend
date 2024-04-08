@@ -71,7 +71,9 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	}
 	// get all news for this source so we only process new ones, using map for performance reasons
 	existingNewsLinksForSource := make([]string, 0)
-	if err := c.db.Table("`news`").Select("`link`").Where("`src` = ?", source.Source).Scan(&existingNewsLinksForSource).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := c.db.Table("`news`").
+		Select("`link`").
+		Find(&existingNewsLinksForSource, "`src` = ?", source.Source).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).Error("failed to fetch existing news")
 		return err
 	}
@@ -182,7 +184,8 @@ func skipNews(existingLinks []string, link string) bool {
 
 func (c *CronService) cleanOldNewsForSource(source int64) error {
 	log.WithField("source", source).Trace("Truncating old entries")
-	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, time.Now().Add(time.Hour*24*365*-1)); res.Error == nil {
+	oneYearAgo := time.Now().Add(time.Hour * 24 * 365 * -1)
+	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, oneYearAgo); res.Error == nil {
 		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")
 	} else {
 		log.WithError(res.Error).Error("failed to clean up old news")

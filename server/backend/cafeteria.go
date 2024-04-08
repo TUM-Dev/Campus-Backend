@@ -403,28 +403,27 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, errorRes
 	}
 
-	var dishInMensa *model.Dish
-	if err := tx.First(&dishInMensa, "name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).Error; err != nil || dishInMensa == nil {
-		log.WithError(err).Error("Error while creating a new dishInMensa rating.")
+	var dishInCafeteria *model.Dish
+	if err := tx.First(&dishInCafeteria, "name LIKE ? AND cafeteriaID = ?", input.Dish, cafeteriaID).Error; err != nil || dishInCafeteria == nil {
+		log.WithError(err).Error("Error while creating a new dishInCafeteria rating.")
 		return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
 	}
 
-	resPath := imageWrapper(input.Image, "dishes", dishInMensa.Dish)
+	resPath := imageWrapper(input.Image, "dishes", dishInCafeteria.Dish)
 
 	rating := model.DishRating{
-		Comment:     input.Comment,
-		CafeteriaID: cafeteriaID,
-		DishID:      dishInMensa.Dish,
-		Points:      input.Points,
-		Timestamp:   time.Now(),
-		Image:       resPath,
+		Comment:   input.Comment,
+		DishID:    dishInCafeteria.Dish,
+		Points:    input.Points,
+		Timestamp: time.Now(),
+		Image:     resPath,
 	}
 	if err := tx.Create(&rating).Error; err != nil {
-		log.WithError(err).Error("while creating a new dishInMensa rating.")
+		log.WithError(err).Error("while creating a new dishInCafeteria rating.")
 		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
-	assignDishNameTag(rating, dishInMensa.Dish, tx)
+	assignDishNameTag(rating, dishInCafeteria.Dish, tx)
 
 	if err := storeRatingTags(rating.DishRating, input.RatingTags, DISH, tx); err != nil {
 		return &pb.CreateDishRatingReply{}, err
@@ -435,15 +434,15 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 // assignDishNameTag
 // Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
 func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
-	var result []int64
+	var nameTagIDs []int64
 	err := tx.Model(&model.DishToDishNameTag{}).
 		Where("dishID = ? ", dishID).
 		Select("nameTagID").
-		Scan(&result).Error
+		Scan(&nameTagIDs).Error
 	if err != nil {
 		log.WithError(err).Error("while loading the dishID for the given name.")
 	} else {
-		for _, tagID := range result {
+		for _, tagID := range nameTagIDs {
 			if err := tx.Create(&model.DishNameTag{
 				CorrespondingRating: rating.DishRating,
 				Points:              rating.Points,
@@ -583,7 +582,10 @@ func getIDForDishName(name string, cafeteriaID int32, tx *gorm.DB) int32 {
 func (s *CampusServer) ListAvailableDishTags(ctx context.Context, _ *pb.ListAvailableDishTagsRequest) (*pb.ListAvailableDishTagsReply, error) {
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.WithContext(ctx).Model(&model.DishRatingTagOption{}).Select("DE as de, EN as en, dishRatingTagOption as TagId").Find(&result).Error
+	err := s.db.WithContext(ctx).
+		Model(&model.DishRatingTagOption{}).
+		Select("DE as de, EN as en, dishRatingTagOption as TagId").
+		Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
@@ -599,7 +601,10 @@ func (s *CampusServer) ListAvailableDishTags(ctx context.Context, _ *pb.ListAvai
 func (s *CampusServer) ListNameTags(ctx context.Context, _ *pb.ListNameTagsRequest) (*pb.ListNameTagsReply, error) {
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.WithContext(ctx).Model(&model.DishNameTagOption{}).Select("DE as de, EN as en, dishNameTagOption as TagId").Find(&result).Error
+	err := s.db.WithContext(ctx).
+		Model(&model.DishNameTagOption{}).
+		Select("DE as de, EN as en, dishNameTagOption as TagId").
+		Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading available Name Tags from database.")
 		requestStatus = status.Error(codes.Internal, "Available dish tags could not be loaded from the database.")
@@ -615,7 +620,10 @@ func (s *CampusServer) ListNameTags(ctx context.Context, _ *pb.ListNameTagsReque
 func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.ListAvailableCanteenTagsRequest) (*pb.ListAvailableCanteenTagsReply, error) {
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
-	err := s.db.WithContext(ctx).Model(&model.CafeteriaRatingTagOption{}).Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").Find(&result).Error
+	err := s.db.WithContext(ctx).
+		Model(&model.CafeteriaRatingTagOption{}).
+		Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").
+		Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Available cafeteria tags could not be loaded from the database.")
@@ -631,7 +639,10 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.List
 func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequest) (*pb.ListCanteensReply, error) {
 	var result []*pb.Canteen
 	var requestStatus error = nil
-	if err := s.db.WithContext(ctx).Model(&model.Cafeteria{}).Select("cafeteria as id,address,latitude,longitude").Scan(&result).Error; err != nil {
+	if err := s.db.WithContext(ctx).
+		Model(&model.Cafeteria{}).
+		Select("cafeteria as id,address,latitude,longitude").
+		Scan(&result).Error; err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
 	}
@@ -645,21 +656,25 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 53 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 53")
+	if req.Week < 1 || req.Week > 52 {
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 1 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
 	var results []string
-	err := s.db.WithContext(ctx).Table("dishes_of_the_week weekly").
+	// the eat api has two types of ids, the enum ids (uppercase, with `_`) and the ids (lowercase, with `-`)
+	cafeteriaName := strings.ReplaceAll(strings.ToUpper(req.CanteenId), "-", "_")
+
+	err := s.db.WithContext(ctx).
+		Table("dishes_of_the_week weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").
 		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", req.CanteenId).
+		Where("c.name LIKE ?", cafeteriaName).
 		Select("d.name").
 		Find(&results).Error
 
@@ -676,7 +691,9 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 // GetCanteenHeadCount RPC Endpoint
 func (s *CampusServer) GetCanteenHeadCount(ctx context.Context, input *pb.GetCanteenHeadCountRequest) (*pb.GetCanteenHeadCountReply, error) {
 	data := model.CanteenHeadCount{Count: 0, MaxCount: 0, Percent: -1} // Initialize with an empty (not found) value
-	err := s.db.WithContext(ctx).Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).FirstOrInit(&data).Error
+	err := s.db.WithContext(ctx).
+		Where(model.CanteenHeadCount{CanteenId: input.CanteenId}).
+		FirstOrInit(&data).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.WithError(err).Error("while querying the canteen head count for: ", input.CanteenId)
 		return nil, status.Error(codes.Internal, "failed to query head count")

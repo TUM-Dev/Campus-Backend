@@ -2,6 +2,7 @@ package cron
 
 import (
 	"bytes"
+	"fmt"
 	htmlTemplate "html/template"
 	"os"
 	"strconv"
@@ -56,16 +57,18 @@ type MailHeaders struct {
 func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 	m := gomail.NewMessage()
 	// From
-	m.SetAddressHeader("From", os.Getenv("SMTP_USERNAME"), "TUM Campus App")
+	m.SetAddressHeader("From", os.Getenv("SMTP_FROM"), "TUM Campus App")
 	// To
-	if feedback.Recipient.Valid {
-		m.SetHeader("To", feedback.Recipient.String)
+	if feedback.Recipient != "" {
+		m.SetHeader("To", feedback.Recipient)
 	} else {
-		m.SetHeader("To", "app@tum.de")
+		m.SetAddressHeader("To", "app@tum.de", "TCA Support") // should not ever happen as checked in the api
 	}
 	// ReplyTo
-	if feedback.ReplyTo.Valid {
-		m.SetHeader("Reply-To", feedback.ReplyTo.String)
+	if feedback.ReplyToName.Valid && feedback.ReplyToEmail.Valid {
+		m.SetAddressHeader("Reply-To", feedback.ReplyToEmail.String, feedback.ReplyToName.String)
+	} else if feedback.ReplyToEmail.Valid {
+		m.SetHeader("Reply-To", feedback.ReplyToEmail.String)
 	}
 	// Timestamp
 	if feedback.Timestamp.Valid {
@@ -74,8 +77,35 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 		m.SetDateHeader("Date", time.Now())
 	}
 	// Subject
-	m.SetHeader("Subject", "Feedback via Tum Campus App")
+	if feedback.Recipient == "app@tum.de" {
+		versionString := "TCA"
+		if feedback.AppVersion.Valid {
+			versionString = fmt.Sprintf("TCA %s", feedback.AppVersion.String)
+		}
+		m.SetHeader("Subject", fmt.Sprintf("[%s] %s", truncate(versionString, 10), truncate(feedback.Feedback, 150)))
+	} else {
+		m.SetHeader("Subject", "Feedback via the TUM Campus App")
+	}
+
 	return m
+}
+
+func truncate(str string, length int) string {
+	if length <= 0 {
+		return ""
+	}
+	if len(str) <= length {
+		return str
+	}
+	truncated := ""
+	for i, char := range str {
+		if i >= length {
+			break
+		}
+		truncated += string(char)
+	}
+	truncated += ".."
+	return truncated
 }
 
 func generateTemplatedMail(parsedHtmlBody *htmlTemplate.Template, parsedTxtBody *textTemplate.Template, feedback *model.Feedback) (string, string, error) {
@@ -91,9 +121,8 @@ func generateTemplatedMail(parsedHtmlBody *htmlTemplate.Template, parsedTxtBody 
 }
 
 func (c *CronService) feedbackEmailCron() error {
-
 	var results []model.Feedback
-	if err := c.db.Find(&results, "processed = false").Scan(&results).Error; err != nil {
+	if err := c.db.Find(&results, "processed = false").Error; err != nil {
 		log.WithError(err).Error("could not get unprocessed feedback")
 		return err
 	}

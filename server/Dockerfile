@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine3.18 as builder
+FROM golang:1.22-alpine3.19 as builder
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -40,8 +40,8 @@ USER appuser
 
 # metadata
 EXPOSE 50051
-HEALTHCHECK  --interval=5m --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health && exit 0 || exit 1
+HEALTHCHECK  --interval=5s --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health
 
 # Run the main binary
 CMD ["/backend"]

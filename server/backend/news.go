@@ -22,7 +22,9 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 	}
 
 	var sources []model.NewsSource
-	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
+	if err := s.db.WithContext(ctx).
+		Joins("File").
+		Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find newsSources")
 		return nil, status.Error(codes.Internal, "could not ListNewsSources")
 	}
@@ -44,7 +46,10 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).Joins("File").Joins("NewsSource").Joins("NewsSource.File")
+	tx := s.db.WithContext(ctx).
+		Joins("File").
+		Joins("NewsSource").
+		Joins("NewsSource.File")
 	if req.NewsSource != 0 {
 		tx = tx.Where("src = ?", req.NewsSource)
 	}
@@ -87,7 +92,9 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	}
 
 	var res []*model.NewsAlert
-	tx := s.db.WithContext(ctx).Joins("File").Where("news_alert.to >= NOW()")
+	tx := s.db.WithContext(ctx).
+		Joins("File").
+		Where("news_alert.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
 		tx = tx.Where("news_alert.news_alert > ?", req.LastNewsAlertId)
 	}

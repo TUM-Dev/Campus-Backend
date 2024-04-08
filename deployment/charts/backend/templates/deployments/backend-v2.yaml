@@ -43,10 +43,6 @@ spec:
           env:
             - name: ENVIRONMENT
               value: prod
-            - name: MensaCronDisabled
-              value: "true"
-            - name: APNS_P8_FILE_PATH
-              value: /etc/apns_auth_key.p8
             - name: OMDB_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -72,6 +68,11 @@ spec:
                 secretKeyRef:
                   name: backend-api-keys
                   key: SMTP_URL
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: backend-api-keys
+                  key: SMTP_FROM
             - name: SMTP_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -84,24 +85,12 @@ spec:
                   key: SMTP_PORT
             - name: DB_DSN
               value: "{{ $db.username }}:{{ $db.password }}@tcp(tca-backend-mariadb.{{ $.Values.namespace }}.svc.cluster.local:3306)/{{ $db.database }}?charset=utf8mb4&parseTime=True&loc=Local"
-            - name: APNS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backend-api-keys
-                  key: APNS_KEY_ID
-            - name: APNS_TEAM_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backend-api-keys
-                  key: APNS_TEAM_ID
+            - name: DB_NAME
+              value: {{ $db.database }}
           volumeMounts:
             - mountPath: /Storage/
               name: storage-vol
               readOnly: false
-            - mountPath: /etc/apns_auth_key.p8
-              subPath: apns_auth_key.p8
-              name: backend-api-keys
-              readOnly: true
           ports:
             - containerPort: 50051
               name: http
@@ -176,11 +165,9 @@ data:
   OMDB_API_KEY: {{ $.Values.backend.omdbApiKey | b64enc }}
   CAMPUS_API_TOKEN: {{ $.Values.backend.campusApiToken | b64enc }}
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
-  apns_auth_key.p8: {{ $.Values.backend.apns.auth_key }}
-  APNS_KEY_ID: {{ $.Values.backend.apns.key_id | b64enc }}
-  APNS_TEAM_ID: {{ $.Values.backend.apns.team_id | b64enc }}
   SMTP_PASSWORD: {{ $.Values.backend.smtp.password | b64enc }}
   SMTP_URL: {{ $.Values.backend.smtp.url | b64enc }}
+  SMTP_FROM: {{ $.Values.backend.smtp.username | b64enc }}
   SMTP_USERNAME: {{ $.Values.backend.smtp.username | b64enc }}
   SMTP_PORT: {{ $.Values.backend.smtp.port | b64enc }}
 ---

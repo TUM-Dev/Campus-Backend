@@ -26,7 +26,9 @@ const (
 func (c *CronService) movieCron() error {
 	log.Trace("parsing upcoming feed")
 	var allMovieLinks []string
-	if err := c.db.Model(&model.Kino{}).Distinct().Pluck("Link", &allMovieLinks).Error; err != nil {
+	if err := c.db.Model(&model.Kino{}).
+		Distinct().
+		Pluck("Link", &allMovieLinks).Error; err != nil {
 		return err
 	}
 

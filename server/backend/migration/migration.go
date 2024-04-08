@@ -71,12 +71,24 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240102000000(),
 		migrate20240103000000(),
 		migrate20240207000000(),
+		migrate20240311000000(),
+		migrate20240312000000(),
+		migrate20240316000000(),
+		migrate20240317000000(),
+		migrate20240318000000(),
+		migrate20240319000000(),
+		migrate20240327000000(),
+		migrate20240402000000(),
+		migrate20240405000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
 
 // Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
 func Migrate(db *gorm.DB, shouldAutoMigrate bool) error {
+	// without this set, the `COLLATE` will not be set correctly
+	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
+
 	log.WithField("shouldAutoMigrate", shouldAutoMigrate).Info("starting migration")
 	start := time.Now()
 	var err error

@@ -10,21 +10,18 @@ services:
       - 50051:50051
     environment:
       - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_NAME=${DB_NAME}
       - ENVIRONMENT=dev
       - SENTRY_DSN=${SENTRY_DSN}
-      - APNS_KEY_ID=${APNS_KEY_ID}
-      - APNS_TEAM_ID=${APNS_TEAM_ID}
-      - APNS_P8_FILE_PATH=${APNS_P8_FILE_PATH}
-      - MensaCronDisabled=true
       - OMDB_API_KEY=${OMDB_API_KEY}
       - CAMPUS_API_TOKEN=${CAMPUS_API_TOKEN}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
-      - SMTP_USERNAME=${SMTP_USERNAME:-tca-support.os.in@tum.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
       - SMTP_PORT=${SMTP_PORT:-587}
     volumes:
       - backend-storage:/Storage
-      - ./apns_auth_key.p8:${APNS_P8_FILE_PATH}
     user: 1000:3000
     depends_on:
       db:
@@ -37,6 +34,8 @@ services:
     environment:
       - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
     volumes:
       - campus-db-data:/bitnami/mariadb
     healthcheck:

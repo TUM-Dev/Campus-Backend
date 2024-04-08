@@ -3,8 +3,6 @@ package cron
 import (
 	"time"
 
-	"github.com/TUM-Dev/Campus-Backend/server/env"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
@@ -42,14 +40,13 @@ func New(db *gorm.DB) *CronService {
 }
 
 func (c *CronService) Run() error {
-	log.WithField("MensaCronActive", env.IsMensaCronActive()).Debug("running cron service")
 	for {
 		g := new(errgroup.Group)
 		log.Trace("Cron: checking for pending")
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Where("`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
+			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -57,8 +54,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				MovieType,
 				FeedbackEmail,
-			).
-			Scan(&res)
+			)
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
@@ -78,9 +74,7 @@ func (c *CronService) Run() error {
 			case FileDownloadType:
 				g.Go(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
-				if env.IsMensaCronActive() {
-					g.Go(c.dishNameDownloadCron)
-				}
+				g.Go(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
 				g.Go(func() error { return c.movieCron() })
 				/*
@@ -102,7 +96,7 @@ func (c *CronService) Run() error {
 		if err := g.Wait(); err != nil {
 			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
-		log.Trace("Cron: sleeping for 60 seconds")
-		time.Sleep(60 * time.Second)
+		log.Trace("Cron: sleeping for 30 seconds")
+		time.Sleep(30 * time.Second)
 	}
 }
