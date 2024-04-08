@@ -1,8 +1,8 @@
 #!/bin/bash
 
 BASEDIR=$(dirname "$0")
-echo making sure that this script is run from $BASEDIR
-pushd $BASEDIR > /dev/null
+echo "making sure that this script is run from $BASEDIR"
+pushd "$BASEDIR" > /dev/null || exit
 
 echo downloading...
 go get github.com/bufbuild/buf/cmd/buf \
@@ -23,4 +23,4 @@ go install \
 echo tidiing up
 go mod tidy
 
-popd
+popd || exit

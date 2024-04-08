@@ -23,31 +23,33 @@ func TestIterate(t *testing.T) {
 
 func fullFeedback() *model.Feedback {
 	return &model.Feedback{
-		EmailId:    "magic-id",
-		Recipient:  "tca",
-		ReplyTo:    null.StringFrom("test@example.de"),
-		Feedback:   "This is a Test",
-		ImageCount: 1,
-		Latitude:   null.FloatFrom(0),
-		Longitude:  null.FloatFrom(0),
-		AppVersion: null.StringFrom("TCA 10.2"),
-		OsVersion:  null.StringFrom("Android 10.0"),
-		Timestamp:  null.TimeFrom(time.Now()),
+		EmailId:      "magic-id",
+		Recipient:    "tca",
+		ReplyToEmail: null.StringFrom("test@example.de"),
+		ReplyToName:  null.StringFrom("Erika Mustermann"),
+		Feedback:     "This is a Test",
+		ImageCount:   1,
+		Latitude:     null.FloatFrom(0),
+		Longitude:    null.FloatFrom(0),
+		AppVersion:   null.StringFrom("TCA 10.2"),
+		OsVersion:    null.StringFrom("Android 10.0"),
+		Timestamp:    null.TimeFrom(time.Now()),
 	}
 }
 
 func emptyFeedback() *model.Feedback {
 	return &model.Feedback{
-		EmailId:    "",
-		Recipient:  "",
-		ReplyTo:    null.String{},
-		Feedback:   "",
-		ImageCount: 0,
-		Latitude:   null.Float{},
-		Longitude:  null.Float{},
-		AppVersion: null.String{},
-		OsVersion:  null.String{},
-		Timestamp:  null.Time{},
+		EmailId:      "",
+		Recipient:    "",
+		ReplyToEmail: null.String{},
+		ReplyToName:  null.String{},
+		Feedback:     "",
+		ImageCount:   0,
+		Latitude:     null.Float{},
+		Longitude:    null.Float{},
+		AppVersion:   null.String{},
+		OsVersion:    null.String{},
+		Timestamp:    null.Time{},
 	}
 }
 
@@ -58,7 +60,7 @@ func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 	m := messageWithHeaders(fb)
 	assert.Equal(t, []string{`"TUM Campus App" <from@example.de>`}, m.GetHeader("From"))
 	assert.Equal(t, []string{fb.Recipient}, m.GetHeader("To"))
-	assert.Equal(t, []string{"test@example.de"}, m.GetHeader("Reply-To"))
+	assert.Equal(t, []string{"\"Erika Mustermann\" <test@example.de>"}, m.GetHeader("Reply-To"))
 	assert.Equal(t, []string{fb.Timestamp.Time.Format(time.RFC1123Z)}, m.GetHeader("Date"))
 	assert.Equal(t, []string{"Feedback via the TUM Campus App"}, m.GetHeader("Subject"))
 }
@@ -68,7 +70,7 @@ func TestHeaderInstantiationWithEmptyFeedback(t *testing.T) {
 	require.NoError(t, os.Setenv("SMTP_FROM", "from@example.de"))
 	m := messageWithHeaders(emptyFeedback())
 	assert.Equal(t, []string{`"TUM Campus App" <from@example.de>`}, m.GetHeader("From"))
-	assert.Equal(t, []string{"app@tum.de"}, m.GetHeader("To"))
+	assert.Equal(t, []string{"\"TCA Support\" <app@tum.de>"}, m.GetHeader("To"))
 	assert.Equal(t, []string(nil), m.GetHeader("Reply-To"))
 	// Date is set to now in messageWithHeaders => checking that this is actually now is a bit tricker
 	dates := m.GetHeader("Date")

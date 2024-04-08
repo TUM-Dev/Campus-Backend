@@ -96,7 +96,7 @@ func (c *CronService) Run() error {
 		if err := g.Wait(); err != nil {
 			log.WithError(err).Error("Couldn't run all cron jobs")
 		}
-		log.Trace("Cron: sleeping for 60 seconds")
-		time.Sleep(60 * time.Second)
+		log.Trace("Cron: sleeping for 30 seconds")
+		time.Sleep(30 * time.Second)
 	}
 }

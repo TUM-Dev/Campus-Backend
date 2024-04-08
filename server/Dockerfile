@@ -40,8 +40,8 @@ USER appuser
 
 # metadata
 EXPOSE 50051
-HEALTHCHECK  --interval=5m --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health && exit 0 || exit 1
+HEALTHCHECK  --interval=5s --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:50051/health
 
 # Run the main binary
 CMD ["/backend"]
