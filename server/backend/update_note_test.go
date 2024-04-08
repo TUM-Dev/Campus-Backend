@@ -46,11 +46,11 @@ func (s *UpdateNoteSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_note` WHERE `update_note`.`version_code` = ? ORDER BY `update_note`.`version_code` LIMIT 1"
+const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_note` WHERE `update_note`.`version_code` = ? ORDER BY `update_note`.`version_code` LIMIT ?"
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
-		WithArgs(1).
+		WithArgs(1, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}).
 			AddRow(1, "1.0.0", "Test Message"))
 
@@ -67,7 +67,7 @@ func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
-		WithArgs(1).
+		WithArgs(1, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"version_code", "version_name", "message"}))
 
 	meta := metadata.MD{}
@@ -79,7 +79,7 @@ func (s *UpdateNoteSuite) Test_GetUpdateNoteNone() {
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteError() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).
-		WithArgs(1).
+		WithArgs(1, 1).
 		WillReturnError(gorm.ErrInvalidDB)
 
 	meta := metadata.MD{}
