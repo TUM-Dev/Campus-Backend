@@ -28,7 +28,7 @@ func main() {
 	// Set up a connection to the local server.
 	log.Info("Connecting...")
 
-	conn, err := grpc.Dial(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(localAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.WithError(err).Error("could not dial localAddress")
 	}
