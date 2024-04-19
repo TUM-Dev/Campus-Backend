@@ -9,7 +9,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.2
-	github.com/gofrs/uuid/v5 v5.0.1
+	github.com/gofrs/uuid/v5 v5.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/makasim/sentryhook v0.5.0
