@@ -1,17 +1,16 @@
-{{ range $name := (list "backend-v1" "backend-v2") }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ $name }}
+  name: backend
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ $name }}
+    name: backend
   minReplicas: 1
   maxReplicas: 3
   metrics:
@@ -21,4 +20,3 @@ spec:
       target:
         type: Utilization
         averageUtilization: 75
-{{ end }}

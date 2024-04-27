@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-v2
+  name: backend
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend-v2
+    app.kubernetes.io/name: backend
   namespace: {{ $.Values.namespace }}
 spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
       app.kubernetes.io/part-of: tum-campus-app
-      app.kubernetes.io/name: backend-v2
+      app.kubernetes.io/name: backend
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/part-of: tum-campus-app
-        app.kubernetes.io/name: backend-v2
+        app.kubernetes.io/name: backend
     spec:
       priorityClassName: tca-backend
       volumes:
@@ -124,9 +124,9 @@ spec:
             - --config-path
             - /etc/envoy/envoy.yaml
             - --service-cluster
-            - backend-v2
+            - backend
             - --service-node
-            - backend-v2
+            - backend
             - --log-level
             - info
           ports:
@@ -160,7 +160,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend-v2
+    app.kubernetes.io/name: backend
 data:
   OMDB_API_KEY: {{ $.Values.backend.omdbApiKey | b64enc }}
   CAMPUS_API_TOKEN: {{ $.Values.backend.campusApiToken | b64enc }}
@@ -178,7 +178,7 @@ metadata:
   namespace: {{ $.Values.namespace }}
   labels:
     app.kubernetes.io/part-of: tum-campus-app
-    app.kubernetes.io/name: backend-v2
+    app.kubernetes.io/name: backend
 data:
   envoy.yaml: |-
 {{ .Files.Get "files/envoy.yaml" | indent 4 }}

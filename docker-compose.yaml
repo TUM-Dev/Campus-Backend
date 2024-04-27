@@ -60,9 +60,9 @@ services:
   #    - --config-path
   #    - /etc/envoy/envoy.yaml
   #    - --service-cluster
-  #    - backend-v2
+  #    - backend
   #    - --service-node
-  #    - backend-v2
+  #    - backend
   #    - --log-level
   #    - info
   #  ports:

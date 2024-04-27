@@ -1,0 +1,11 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-new-backend
+  labels:
+    app.kubernetes.io/part-of: tum-campus-app
+  namespace: {{ $.Values.namespace }}
+spec:
+  redirectRegex:
+    regex: .*
+    replacement: http://tum.app/
