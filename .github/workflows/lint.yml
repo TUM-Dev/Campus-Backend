@@ -18,13 +18,13 @@ jobs:
       - name: golangci-lint-server
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.54
+          version: v1.58
           working-directory: server
           args: --timeout=30m
       - name: golangci-lint-client
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.54
+          version: v1.58
           working-directory: client
           args: --timeout=30m
       - run: go install golang.org/x/tools/cmd/goimports@latest
