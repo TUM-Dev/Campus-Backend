@@ -17,14 +17,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=webs"
       - "traefik.http.routers.backend.tls.certresolver=leacme"
-      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
+      - "traefik.http.routers.backend.rule=Host(`newapi.tum.app`)"
       - "traefik.http.services.backend.loadbalancer.server.port=50051"
 
-      - "traefik.http.routers.backend_h2.entrypoints=webs"
-      - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
-      - "traefik.http.routers.backend_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
-      - "traefik.http.routers.backend_h2.scheme=h2c"
-      - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
+    #  - "traefik.http.routers.backend_h2.entrypoints=webs"
+    #  - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
+    #  - "traefik.http.routers.backend_h2.rule=Host(`api-grpc.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+    #  - "traefik.http.routers.backend_h2.scheme=h2c"
+    #  - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
     networks:
       - traefik_traefik
       - campus_db
@@ -70,7 +70,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.grpc-web.entrypoints=webs"
       - "traefik.http.routers.grpc-web.tls.certresolver=leacme"
-      - "traefik.http.routers.grpc-web.rule=Host(`api.tum.app`)"
+      - "traefik.http.routers.grpc-web.rule=Host(`newapi.tum.app`)"
       - "traefik.http.services.grpc-web.loadbalancer.server.port=8081"
     volumes:
       - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
