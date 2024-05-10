@@ -36,23 +36,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  db:
-    image: bitnami/mariadb:latest
-    ports:
-      - ${DB_PORT:-3306}:3306
-    environment:
-      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - MARIADB_DATABASE=${DB_NAME}
-      - MARIADB_CHARACTER_SET=utf8mb4
-      - MARIADB_COLLATE=utf8mb4_unicode_ci
-    volumes:
-      - campus-db-data:/bitnami/mariadb
-    healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
-      interval: 15s
-      timeout: 5s
-      retries: 6
   # The following code can be used to test the envoy proxy locally
   # The reason why this is commented out is that this working requires the following change:
   #
