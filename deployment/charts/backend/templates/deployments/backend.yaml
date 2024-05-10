@@ -53,11 +53,6 @@ spec:
                 secretKeyRef:
                   name: backend-api-keys
                   key: SENTRY_DSN
-            - name: CAMPUS_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: backend-api-keys
-                  key: CAMPUS_API_TOKEN
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -132,8 +127,6 @@ spec:
           ports:
             - containerPort: 8081
               name: http
-            - containerPort: 9901
-              name: admin
           volumeMounts:
             - mountPath: /etc/envoy/envoy.yaml
               subPath: envoy.yaml
@@ -163,7 +156,6 @@ metadata:
     app.kubernetes.io/name: backend
 data:
   OMDB_API_KEY: {{ $.Values.backend.omdbApiKey | b64enc }}
-  CAMPUS_API_TOKEN: {{ $.Values.backend.campusApiToken | b64enc }}
   SENTRY_DSN: {{ $.Values.backend.sentry.dsn | b64enc }}
   SMTP_PASSWORD: {{ $.Values.backend.smtp.password | b64enc }}
   SMTP_URL: {{ $.Values.backend.smtp.url | b64enc }}

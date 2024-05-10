@@ -1,0 +1,51 @@
+
+services:
+  backend:
+    build:
+      context: server/
+      args:
+        version: dev # compiled with the git sha in prod
+    restart: always
+    ports:
+      - "50051:50051"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_NAME=${DB_NAME}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_URL=${SMTP_URL:-postout.lrz.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
+      - SMTP_PORT=${SMTP_PORT:-587}
+    user: 1000:3000
+    read_only: true
+    volumes:
+      - backend-storage:/Storage
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: bitnami/mariadb:latest
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    volumes:
+      - campus-db-data:/bitnami/mariadb
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  campus-db-data:
+    driver: local
+  backend-storage:
+    driver: local
