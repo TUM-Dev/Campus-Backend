@@ -83,5 +83,6 @@ volumes:
     driver: local
 
 networks:
+  campus_db:
   traefik_traefik:
     external: true
