@@ -4,9 +4,9 @@ services:
     image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
     command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 5432
     networks:
-      - campus_db
-    ports:
-      - 127.0.0.1:5432:5432
+      - traefik_traefik
+    expose:
+      - "5432"
     volumes:
       - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
 
@@ -27,7 +27,6 @@ services:
       - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
     networks:
       - traefik_traefik
-      - campus_db
     expose:
       - "50051"
     environment:
@@ -83,6 +82,5 @@ volumes:
     driver: local
 
 networks:
-  campus_db:
   traefik_traefik:
     external: true
