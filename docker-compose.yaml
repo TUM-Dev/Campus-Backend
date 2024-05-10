@@ -1,5 +1,5 @@
 services:
-  cloudsql-proxy:
+  db:
     container_name: cloudsql-proxy
     image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
     command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 5432
@@ -9,6 +9,7 @@ services:
       - 127.0.0.1:5432:5432
     volumes:
       - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
+
   backend:
     image: ghcr.io/tum-dev/campus-backend/backend-server:latest
     restart: always
@@ -36,6 +37,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # For local development, you can use the following mariadb container. Uncomment the volume down below to persist the data.
+  # You will also need to remove the cloud sql configuration above.
+  #db:
+  #  image: bitnami/mariadb:latest
+  #  ports:
+  #    - ${DB_PORT:-3306}:3306
+  #  environment:
+  #    - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+  #    - MARIADB_DATABASE=${DB_NAME}
+  #    - MARIADB_CHARACTER_SET=utf8mb4
+  #    - MARIADB_COLLATE=utf8mb4_unicode_ci
+  #  volumes:
+  #    - campus-db-data:/bitnami/mariadb
+  #  healthcheck:
+  #    test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
+  #    interval: 15s
+  #    timeout: 5s
+  #    retries: 6
   # The following code can be used to test the envoy proxy locally
   # The reason why this is commented out is that this working requires the following change:
   #
@@ -67,7 +87,7 @@ services:
   #    - backend
 
 volumes:
-  campus-db-data:
-    driver: local
+  #campus-db-data:
+  #  driver: local
   backend-storage:
     driver: local
