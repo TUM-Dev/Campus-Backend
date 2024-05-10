@@ -47,7 +47,7 @@ services:
     read_only: true
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_started
   grpc-web:
     image: envoyproxy/envoy:v1.27-latest
     restart: unless-stopped
