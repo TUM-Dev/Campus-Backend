@@ -1,4 +1,14 @@
 services:
+  cloudsql-proxy:
+    container_name: cloudsql-proxy
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
+    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 5432
+    networks:
+      - dashboard
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - /root/credentials/:/secrets/cloudsql/credentials.json
   backend:
     image: ghcr.io/tum-dev/campus-backend/backend-server:latest
     restart: always
