@@ -10,7 +10,7 @@ services:
       - "50051:50051"
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-dev}
-      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_DSN=${DB_USER_NAME:-root}:${DB_USER_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - DB_NAME=${DB_NAME}
       - SENTRY_DSN=${SENTRY_DSN}
       - OMDB_API_KEY=${OMDB_API_KEY}
@@ -32,7 +32,7 @@ services:
     ports:
       - "${DB_PORT:-3306}:3306"
     environment:
-      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${DB_USER_PASSWORD}
       - MARIADB_DATABASE=${DB_NAME}
       - MARIADB_CHARACTER_SET=utf8mb4
       - MARIADB_COLLATE=utf8mb4_unicode_ci

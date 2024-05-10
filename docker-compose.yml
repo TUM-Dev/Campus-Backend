@@ -2,11 +2,11 @@ services:
   db:
     container_name: cloudsql-proxy
     image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
-    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 3306
+    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port ${DB_PORT:-3306}
     networks:
       - traefik_traefik
     expose:
-      - "3306"
+      - "${DB_PORT:-3306}"
     volumes:
       - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
 
@@ -31,7 +31,7 @@ services:
       - "50051"
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-dev}
-      - DB_DSN=root:${DB_ROOT_PASSWORD}@tcp(db:3306)/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_DSN=${DB_USER_NAME:-root}:${DB_USER_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
       - DB_NAME=${DB_NAME}
       - SENTRY_DSN=${SENTRY_DSN}
       - OMDB_API_KEY=${OMDB_API_KEY}

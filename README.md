@@ -85,7 +85,8 @@ Additionally, docker creates the volume `campus-db-data` to persist the data of 
 ### Environment Variables
 The following environment variables need to be set for the server to work properly:
 * [REQUIRED] `DB_NAME`: The name of the database to use.
-* [REQUIRED] `DB_ROOT_PASSWORD`: The password of the root user.
+* [REQUIRED] `DB_USER_PASSWORD`: The password of the user.
+* [OPTIONAL] `DB_USER_NAME`: Name of the user to connect as. Defaults to `root`.
 * [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 * [OPTIONAL] `OMDB_API_KEY`: The key to get more information for tu-film movies from [omdbapi](https://omdbapi.com/). See [omdbapi](https://omdbapi.com/apikey.aspx) for a key.
