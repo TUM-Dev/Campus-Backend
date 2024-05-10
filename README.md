@@ -13,32 +13,10 @@ The API is publicly available for anyone, but most notably, it's the main backen
 ### Installing Requirements
 
 The backend uses MySQL as its backend for storing data.
-In the following, we provide instructions for installing [MariaDB](https://mariadb.org/) as the DB server of choice.
-
-#### Fedora
+While it is possible to install [mysql](https://mysql.com/) natively (instructions are on their website), we recommend the following:
 
 ```bash
-sudo dnf install mariadb-server
-
-# Start the MariaDB server
-sudo systemctl start mariadb
-
-# Optional: Enable autostart
-sudo systemctl enable mariadb
-```
-
-More details are available here: https://docs.fedoraproject.org/en-US/quick-docs/installing-mysql-mariadb/
-
-#### Debian/Ubuntu
-
-```bash
-sudo apt install mariadb-server
-
-# Start the MariaDB server
-sudo systemctl start mariadb
-
-# Optional: Enable autostart
-sudo systemctl enable mariadb
+docker run 
 ```
 
 ### Setting up the DB

@@ -107,7 +107,7 @@ create table if not exists dish2dishflags
     constraint dish2dishflags_ibfk_2 foreign key (flag) references dishflags (flag) on update cascade on delete cascade
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index flag on dish2dishflags (flag);
+create index flag on dish2dishflags (flag);
 
 create table if not exists faculty
 (
@@ -162,7 +162,7 @@ create table if not exists kino
 ) collate = utf8mb4_unicode_ci
   auto_increment = 219;
 
-create or replace index cover on kino (cover);
+create index cover on kino (cover);
 
 create table if not exists lecture
 (
@@ -216,13 +216,13 @@ create table if not exists card
     constraint card_ibfk_4 foreign key (duplicate_card) references card (card) on delete set null
 );
 
-create or replace index card_type on card (card_type);
+create index card_type on card (card_type);
 
-create or replace index duplicate_card on card (duplicate_card);
+create index duplicate_card on card (duplicate_card);
 
-create or replace index lecture on card (lecture);
+create index lecture on card (lecture);
 
-create or replace index member on card (member);
+create index member on card (member);
 
 create table if not exists card_box
 (
@@ -233,7 +233,7 @@ create table if not exists card_box
     constraint card_box_ibfk_1 foreign key (member) references member (member) on delete cascade
 ) auto_increment = 6;
 
-create or replace index member on card_box (member);
+create index member on card_box (member);
 
 create table if not exists card_comment
 (
@@ -246,9 +246,9 @@ create table if not exists card_comment
     constraint card_comment_ibfk_2 foreign key (card) references card (card) on delete cascade
 );
 
-create or replace index card on card_comment (card);
+create index card on card_comment (card);
 
-create or replace index member on card_comment (member);
+create index member on card_comment (member);
 
 create table if not exists card_option
 (
@@ -261,7 +261,7 @@ create table if not exists card_option
     constraint card_option_ibfk_1 foreign key (card) references card (card) on delete cascade
 );
 
-create or replace index card on card_option (card);
+create index card on card_option (card);
 
 create table if not exists chat_message
 (
@@ -276,9 +276,9 @@ create table if not exists chat_message
 ) collate = utf8mb4_unicode_ci
   auto_increment = 1977;
 
-create or replace index chat_message_b3c09425 on chat_message (member);
+create index chat_message_b3c09425 on chat_message (member);
 
-create or replace index chat_message_ca20ebca on chat_message (room);
+create index chat_message_ca20ebca on chat_message (room);
 
 create table if not exists chat_room2members
 (
@@ -291,9 +291,9 @@ create table if not exists chat_room2members
 ) collate = utf8mb4_unicode_ci
   auto_increment = 63377426;
 
-create or replace index chat_chatroom_members_29801a33 on chat_room2members (room);
+create index chat_chatroom_members_29801a33 on chat_room2members (room);
 
-create or replace index chat_chatroom_members_b3c09425 on chat_room2members (member);
+create index chat_chatroom_members_b3c09425 on chat_room2members (member);
 
 create table if not exists devices
 (
@@ -366,7 +366,7 @@ create table if not exists device2stats
     constraint device2stats_ibfk_2 foreign key (device) references devices (device) on update cascade on delete cascade
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index member on devices (member);
+create index member on devices (member);
 
 create table if not exists members_card
 (
@@ -380,9 +380,9 @@ create table if not exists members_card
     constraint members_card_ibfk_3 foreign key (card_box) references card_box (card_box) on delete set null
 );
 
-create or replace index card on members_card (card);
+create index card on members_card (card);
 
-create or replace index card_box on members_card (card_box);
+create index card_box on members_card (card_box);
 
 create table if not exists members_card_answer_history
 (
@@ -398,11 +398,11 @@ create table if not exists members_card_answer_history
     constraint members_card_answer_history_ibfk_3 foreign key (card_box) references card_box (card_box) on delete set null
 );
 
-create or replace index card on members_card_answer_history (card);
+create index card on members_card_answer_history (card);
 
-create or replace index card_box on members_card_answer_history (card_box);
+create index card_box on members_card_answer_history (card_box);
 
-create or replace index member on members_card_answer_history (member);
+create index member on members_card_answer_history (member);
 
 create table if not exists mensa
 (
@@ -428,9 +428,9 @@ create table if not exists dish2mensa
     constraint dish2mensa_ibfk_2 foreign key (dish) references dish (dish) on update cascade on delete cascade
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index dish on dish2mensa (dish);
+create index dish on dish2mensa (dish);
 
-create or replace index mensa on dish2mensa (mensa);
+create index mensa on dish2mensa (mensa);
 
 create table if not exists mensaplan_mensa
 (
@@ -488,11 +488,11 @@ create table if not exists news
 ) collate = utf8mb4_unicode_ci
   auto_increment = 770113;
 
-create or replace index file on news (file);
+create index file on news (file);
 
-create or replace index src on news (src);
+create index src on news (src);
 
-create or replace index icon on newsSource (icon);
+create index icon on newsSource (icon);
 
 create table if not exists news_alert
 (
@@ -530,9 +530,9 @@ create table if not exists notification
 ) charset = utf8
   auto_increment = 107;
 
-create or replace index location on notification (location);
+create index location on notification (location);
 
-create or replace index type on notification (type);
+create index type on notification (type);
 
 create table if not exists notification_confirmation
 (
@@ -546,7 +546,7 @@ create table if not exists notification_confirmation
     constraint notification_confirmation_ibfk_2 foreign key (device) references devices (device)
 ) charset = utf8;
 
-create or replace index device on notification_confirmation (device);
+create index device on notification_confirmation (device);
 
 create table if not exists openinghours
 (
@@ -573,7 +573,7 @@ create table if not exists question
     end      timestamp /* mariadb-5.3 */                             null
 ) auto_increment = 282;
 
-create or replace index member on question (member);
+create index member on question (member);
 
 create table if not exists question2answer
 (
@@ -592,7 +592,7 @@ create table if not exists question2faculty
     constraint question2faculty_ibfk_2 foreign key (faculty) references faculty (faculty) on update cascade on delete cascade
 );
 
-create or replace index faculty on question2faculty (faculty);
+create index faculty on question2faculty (faculty);
 
 create table if not exists questionAnswers
 (
@@ -625,7 +625,7 @@ create table if not exists reports
     constraint reports_ibfk_3 foreign key (device) references devices (device) on update cascade on delete set null
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index device on reports (device);
+create index device on reports (device);
 
 create table if not exists rights
 (
@@ -653,9 +653,9 @@ create table if not exists menu
 ) collate = utf8mb4_unicode_ci
   auto_increment = 25;
 
-create or replace index parent on menu (parent);
+create index parent on menu (parent);
 
-create or replace index `right` on menu (`right`);
+create index `right` on menu (`right`);
 
 create table if not exists modules
 (
@@ -666,7 +666,7 @@ create table if not exists modules
 ) collate = utf8mb4_unicode_ci
   auto_increment = 31;
 
-create or replace index module_right on modules (`right`);
+create index module_right on modules (`right`);
 
 create table if not exists roles
 (
@@ -685,7 +685,7 @@ create table if not exists roles2rights
     constraint fkRole foreign key (role) references roles (role) on delete cascade
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index fkRight_idx on roles2rights (`right`);
+create index fkRight_idx on roles2rights (`right`);
 
 create table if not exists roomfinder_building2area
 (
@@ -786,7 +786,7 @@ create table if not exists card2tag
     constraint card2tag_ibfk_2 foreign key (card) references card (card) on delete cascade
 );
 
-create or replace index card on card2tag (card);
+create index card on card2tag (card);
 
 create table if not exists ticket_admin
 (
@@ -825,7 +825,7 @@ create table if not exists event
 ) charset = utf8
   auto_increment = 39;
 
-create or replace index file on event (file);
+create index file on event (file);
 
 create or replace fulltext index searchTitle on event (title);
 
@@ -839,9 +839,9 @@ create table if not exists ticket_admin2group
 ) charset = utf8
   auto_increment = 10;
 
-create or replace index ticket_admin on ticket_admin2group (ticket_admin);
+create index ticket_admin on ticket_admin2group (ticket_admin);
 
-create or replace index ticket_group on ticket_admin2group (ticket_group);
+create index ticket_group on ticket_admin2group (ticket_group);
 
 create table if not exists ticket_payment
 (
@@ -882,15 +882,15 @@ create table if not exists ticket_history
 ) charset = utf8
   auto_increment = 776;
 
-create or replace index member on ticket_history (member);
+create index member on ticket_history (member);
 
-create or replace index ticket_payment on ticket_history (ticket_payment);
+create index ticket_payment on ticket_history (ticket_payment);
 
-create or replace index ticket_type on ticket_history (ticket_type);
+create index ticket_type on ticket_history (ticket_type);
 
-create or replace index event on ticket_type (event);
+create index event on ticket_type (event);
 
-create or replace index ticket_payment on ticket_type (ticket_payment);
+create index ticket_payment on ticket_type (ticket_payment);
 
 create table if not exists update_note
 (
@@ -931,11 +931,11 @@ create table if not exists log
     constraint fkLog2UsersEx foreign key (user_executed) references users (user) on update set null on delete set null
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index action on log (action);
+create index action on log (action);
 
-create or replace index user on log (user_executed);
+create index user on log (user_executed);
 
-create or replace index user_affected on log (user_affected);
+create index user_affected on log (user_affected);
 
 create table if not exists recover
 (
@@ -948,7 +948,7 @@ create table if not exists recover
     constraint fkRecover2User foreign key (user) references users (user) on delete cascade
 ) collate = utf8mb4_unicode_ci;
 
-create or replace index user on recover (user);
+create index user on recover (user);
 
 create table if not exists users2info
 (
