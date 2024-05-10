@@ -2,11 +2,11 @@ services:
   db:
     container_name: cloudsql-proxy
     image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
-    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 5432
+    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port 3306
     networks:
       - traefik_traefik
     expose:
-      - "5432"
+      - "3306"
     volumes:
       - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
 
