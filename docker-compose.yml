@@ -1,0 +1,86 @@
+services:
+  db:
+    container_name: cloudsql-proxy
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.5.0
+    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port ${DB_PORT:-3306}
+    networks:
+      - traefik_traefik
+    expose:
+      - "${DB_PORT:-3306}"
+    volumes:
+      - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
+
+  backend:
+    image: ghcr.io/tum-dev/campus-backend/backend-server:main
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=webs"
+      - "traefik.http.routers.backend.tls.certresolver=leacme"
+      - "traefik.http.routers.backend.rule=Host(`newapi.tum.app`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=50051"
+
+      - "traefik.http.routers.backend_h2.entrypoints=webs"
+      - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
+      - "traefik.http.routers.backend_h2.rule=Host(`newapi.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+      - "traefik.http.routers.backend_h2.scheme=h2c"
+      - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
+    networks:
+      - traefik_traefik
+    expose:
+      - "50051"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_DSN=${DB_USER_NAME:-root}:${DB_USER_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_NAME=${DB_NAME}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_URL=${SMTP_URL:-postout.lrz.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
+      - SMTP_PORT=${SMTP_PORT:-587}
+    volumes:
+      - backend-storage:/Storage
+    user: 1000:3000
+    read_only: true
+    depends_on:
+      db:
+        condition: service_started
+  grpc-web:
+    image: envoyproxy/envoy:v1.27-latest
+    restart: unless-stopped
+    networks:
+      - traefik_traefik
+    command:
+      - /docker-entrypoint.sh
+      - --config-path
+      - /etc/envoy/envoy.yaml
+      - --service-cluster
+      - backend
+      - --service-node
+      - backend
+      - --log-level
+      - info
+    expose:
+      - "8081"
+      #- "9901" # admin interface, not very useful
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grpc-web.entrypoints=webs"
+      - "traefik.http.routers.grpc-web.tls.certresolver=leacme"
+      - "traefik.http.routers.grpc-web.rule=Host(`newapi.tum.app`)"
+      - "traefik.http.services.grpc-web.loadbalancer.server.port=8081"
+    volumes:
+      - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  backend-storage:
+    driver: local
+
+networks:
+  traefik_traefik:
+    external: true
