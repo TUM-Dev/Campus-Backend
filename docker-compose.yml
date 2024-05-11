@@ -72,7 +72,7 @@ services:
       - "traefik.http.routers.grpc-web.rule=Host(`newapi.tum.app`)"
       - "traefik.http.services.grpc-web.loadbalancer.server.port=8081"
     volumes:
-      - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./envoy.yaml:/etc/envoy/envoy.yaml:ro
     depends_on:
       backend:
         condition: service_healthy
