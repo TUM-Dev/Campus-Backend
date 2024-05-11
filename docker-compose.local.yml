@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql:8
-    restart: unless-stopped
+    restart: no # in dev, this avoids having to crawl through the restart and makes a crash more obvious ^^
     ports:
       - "${DB_PORT:-3306}:3306"
     environment:
@@ -22,7 +22,7 @@ services:
       context: server/
       args:
         version: dev # compiled with the git sha in prod
-    restart: always
+    restart: no # in dev, this avoids having to crawl through the restart and makes a crash more obvious ^^
     ports:
       - "50051:50051"
     environment:
