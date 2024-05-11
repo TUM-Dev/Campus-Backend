@@ -9,24 +9,20 @@ jobs:
   test_migrations:
     runs-on: ubuntu-latest
     services:
-      auto_mariadb:
-        image: bitnami/mariadb:latest
+      auto_mysql:
+        image: mysql:8
         ports:
           - 3306:3306
         env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-          MARIADB_CHARACTER_SET: utf8mb4
-          MARIADB_COLLATE: utf8mb4_unicode_ci
-      manual_mariadb:
-        image: bitnami/mariadb:latest
+          MYSQL_ROOT_PASSWORD: super_secret_passw0rd
+          MYSQL_DATABASE: campus_db
+      manual_mysql:
+        image: mysql:8
         ports:
           - 3300:3306
         env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-          MARIADB_CHARACTER_SET: utf8mb4
-          MARIADB_COLLATE: utf8mb4_unicode_ci
+          MYSQL_ROOT_PASSWORD: super_secret_passw0rd
+          MYSQL_DATABASE: campus_db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
