@@ -116,17 +116,32 @@ ORDER BY COUNT(*) DESC, average DESC`).Error; err != nil {
 				return err
 			}
 			if err := tx.Exec(`CREATE VIEW dish_rating_statistics AS
-SELECT cafeteriaID, dishID, AVG(points) as average, MAX(points) as max, MIN(points) as min, STD(points) as std
-FROM dish_rating
-GROUP BY cafeteriaID,dishID
-ORDER BY COUNT(*) DESC, average DESC`).Error; err != nil {
+select d.cafeteriaID AS cafeteriaID,
+       r.dishID      AS dishID,
+       avg(r.points) AS average,
+       max(r.points) AS max,
+       min(r.points) AS min,
+       std(r.points) AS std
+from dish d,
+     dish_rating r
+WHERE r.dishID=d.dish
+group by d.cafeteriaID, r.dishID
+order by count(0) desc, avg(r.points) desc`).Error; err != nil {
 				return err
 			}
 			if err := tx.Exec(`CREATE VIEW dish_rating_tag_statistics AS
-SELECT mr.dishID as dishID, mr.cafeteriaID as cafeteriaID, mrt.tagID as tagID, AVG(mrt.points) as average, MAX(mrt.points) as max, MIN(mrt.points) as min, STD(mrt.points) as std
-FROM dish_rating mr
-JOIN dish_rating_tag mrt ON mr.dishRating = mrt.parentRating
-GROUP BY mr.cafeteriaID, mrt.tagID, mr.dishID`).Error; err != nil {
+select d.cafeteriaID  AS cafeteriaID,
+       mrt.tagID       AS tagID,
+       mr.dishID       AS dishID,
+       avg(mrt.points) AS average,
+       max(mrt.points) AS max,
+       min(mrt.points) AS min,
+       std(mrt.points) AS std
+from dish d,
+    dish_rating mr,
+    dish_rating_tag mrt
+WHERE mr.dishRating = mrt.parentRating AND d.dish=mr.dishID
+group by d.cafeteriaID, mrt.tagID, mr.dishID;`).Error; err != nil {
 				return err
 			}
 			if err := tx.Exec(`CREATE VIEW cafeteria_rating_tag_statistics AS
@@ -137,10 +152,19 @@ GROUP BY cr.cafeteriaID, crt.tagID`).Error; err != nil {
 				return err
 			}
 			return tx.Exec(`CREATE VIEW dish_name_tag_statistics AS
-SELECT mr.cafeteriaID as cafeteriaID, mnt.tagnameID as tagID, AVG(mnt.points) as average, MAX(mnt.points) as max, MIN(mnt.points) as min, STD(mnt.points) as std
-FROM dish_rating mr
-JOIN dish_name_tag mnt ON mr.dishRating = mnt.correspondingRating
-GROUP BY mr.cafeteriaID, mnt.tagnameID`).Error
+select d.cafeteriaID   AS cafeteriaID,
+       mnt.tagNameID   AS tagID,
+       avg(mnt.points) AS average,
+       max(mnt.points) AS max,
+       min(mnt.points) AS min,
+       std(mnt.points) AS std
+from dish d,
+     dish_rating mr,
+     dish_name_tag mnt
+WHERE d.dish = mr.dishID
+  AND mr.dishRating = mnt.correspondingRating
+group by d.cafeteriaID, mnt.tagNameID;
+`).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
 			// views
