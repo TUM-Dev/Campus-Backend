@@ -423,7 +423,7 @@ create table if not exists dish2mensa
     dish       int                                                       not null,
     date       date                                                      not null,
     created    datetime /* mariadb-5.3 */                                not null,
-    modifierd  timestamp /* mariadb-5.3 */ default '0000-00-00 00:00:00' not null on update current_timestamp(),
+    modifierd  timestamp /* mariadb-5.3 */ default current_timestamp() not null on update current_timestamp(),
     constraint dish2mensa_ibfk_1 foreign key (mensa) references mensa (mensa) on update cascade on delete cascade,
     constraint dish2mensa_ibfk_2 foreign key (dish) references dish (dish) on update cascade on delete cascade
 ) collate = utf8mb4_unicode_ci;
@@ -440,8 +440,7 @@ create table if not exists mensaplan_mensa
     longitude double       null,
     webid     int          null,
     category  varchar(50)  not null
-) engine = MyISAM
-  collate = utf8mb4_unicode_ci
+) collate = utf8mb4_unicode_ci
   auto_increment = 30;
 
 create table if not exists mensaprices
