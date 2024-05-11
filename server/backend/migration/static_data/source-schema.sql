@@ -826,7 +826,7 @@ create table if not exists event
 
 create index file on event (file);
 
-create or replace fulltext index searchTitle on event (title);
+create fulltext index searchTitle on event (title);
 
 create table if not exists ticket_admin2group
 (
