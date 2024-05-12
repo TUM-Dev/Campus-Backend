@@ -3,11 +3,12 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/docker/go-connections/nat"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/docker/go-connections/nat"
 
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"

@@ -2,8 +2,9 @@ package utils
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestAutoMigration(t *testing.T) {
