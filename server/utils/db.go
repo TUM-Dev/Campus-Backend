@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"github.com/docker/go-connections/nat"
 	"os"
 	"strings"
 	"testing"
@@ -63,8 +64,30 @@ func (tcl testContainerLogger) Accept(log testcontainers.Log) {
 }
 
 func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {
+	container := setupMySQLTestContainer(ctx, t)
+	// connect to gorm instance
+	mappedPort, err := container.MappedPort(ctx, "3306/tcp")
+	require.NoError(t, err)
+	return connectToDbAndMigrate(mappedPort, t, true)
+}
+
+// connectToDbAndMigrate connects ot the database and exectes the migrations
+//
+// The option to allow for the auto-migrations is because they are WAY faster and this is an option for testing reasons
+func connectToDbAndMigrate(mappedPort nat.Port, t *testing.T, shouldAutoMigrate bool) *gorm.DB {
+	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Int())
+	t.Log("connecting to " + dsn)
+	db, err := gorm.Open(mysql.Open(dsn))
+	require.NoError(t, err)
+	require.NoError(t, migration.Migrate(db, shouldAutoMigrate))
+	return db
+}
+
+func setupMySQLTestContainer(ctx context.Context, t *testing.T) testcontainers.Container {
 	logger := testContainerLogger{t}
 	// create a container
+	err := os.Setenv("DB_NAME", "campus_db")
+	require.NoError(t, err)
 	req := testcontainers.ContainerRequest{
 		Image: "mysql:8",
 		Env: map[string]string{
@@ -91,14 +114,5 @@ func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {
 	t.Cleanup(func() {
 		require.NoError(t, container.Terminate(ctx))
 	})
-	// connect to gorm instance
-	mappedPort, err := container.MappedPort(ctx, "3306/tcp")
-	require.NoError(t, err)
-	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Int())
-	t.Log("connecting to " + dsn)
-	db, err := gorm.Open(mysql.Open(dsn))
-	require.NoError(t, err)
-	// we run the auto-migrations because they are WAY faster
-	require.NoError(t, migration.Migrate(db, true))
-	return db
+	return container
 }
