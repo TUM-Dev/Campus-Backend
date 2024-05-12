@@ -116,45 +116,45 @@ func deleteUploaded(dbPath string) {
 }
 
 func handleImageUpload(content []byte, imageCounter int, dir string) *string {
-	filename, realFilePath := inferFileName(mimetype.Detect(content), dir, imageCounter)
+	filename := inferFileName(mimetype.Detect(content), imageCounter)
 	if filename == nil {
 		return nil // the filetype is not accepted by us
 	}
+	targetFilePath := path.Join(dir, *filename)
 
-	if err := os.MkdirAll(path.Dir(*realFilePath), 0755); err != nil {
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		log.WithError(err).WithField("dir", dir).Error("Error creating directory for feedback")
 		return nil
 	}
-	out, err := os.Create(*realFilePath)
+	targetFile, err := os.Create(targetFilePath)
 	if err != nil {
-		log.WithError(err).WithField("path", dir).Error("Error creating file for feedback")
+		log.WithError(err).WithField("path", targetFilePath).Error("Error creating file for feedback")
 		return nil
 	}
-	defer func(out *os.File) {
-		err := out.Close()
+	defer func(targetFile *os.File) {
+		err := targetFile.Close()
 		if err != nil {
 			log.WithError(err).WithField("path", dir).Error("Error while closing file")
 		}
-	}(out)
-	if _, err := io.Copy(out, bytes.NewReader(content)); err != nil {
-		log.WithError(err).WithField("path", dir).Error("Error while writing file")
-		if err := os.Remove(*realFilePath); err != nil {
-			log.WithError(err).WithField("path", dir).Warn("Could not clean up file")
+	}(targetFile)
+	if _, err := io.Copy(targetFile, bytes.NewReader(content)); err != nil {
+		log.WithError(err).WithField("path", targetFilePath).Error("Error while writing file")
+		if err := os.Remove(targetFilePath); err != nil {
+			log.WithError(err).WithField("path", targetFilePath).Warn("Could not clean up file")
 		}
 		return nil
 	}
 	return filename
 }
 
-func inferFileName(mime *mimetype.MIME, dbPath string, counter int) (*string, *string) {
+func inferFileName(mime *mimetype.MIME, counter int) *string {
 	allowedExt := []string{".jpeg", ".jpg", ".png", ".webp", ".md", ".txt", ".pdf"}
 	if !slices.Contains(allowedExt, mime.Extension()) {
-		return nil, nil
+		return nil
 	}
 
 	filename := fmt.Sprintf("%d%s", counter, mime.Extension())
-	realFilePath := path.Join(dbPath, filename)
-	return &filename, &realFilePath
+	return &filename
 }
 
 func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {

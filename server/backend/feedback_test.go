@@ -3,8 +3,7 @@ package backend
 import (
 	"bytes"
 	"context"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"errors"
 	"image"
 	"image/png"
 	"io"
@@ -73,7 +72,9 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	// -- setup above
 	dir, err := os.MkdirTemp("", "two_files")
 	require.NoError(t, err)
-	defer require.NoError(t, os.RemoveAll(dir))
+	require.DirExists(t, dir)
+	t.Log("storage: " + dir)
+	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 	cron.StorageDir = dir
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
@@ -93,7 +94,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	require.NoError(t, server.CreateFeedback(stream))
 
 	// check that the correct operations happened to the file system
-	fsFiles := extractUploadedFiles(t, cron.StorageDir, 2)
+	fsFiles := extractUploadedFiles(t, cron.StorageDir, 2, 1)
 	expectFileMatches(t, (*fsFiles)[0], "0.txt", returnedTime, dummyText)
 	expectFileMatches(t, (*fsFiles)[1], "1.png", returnedTime, dummyImage)
 
@@ -128,7 +129,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 		},
 		reply: &pb.CreateFeedbackReply{},
 	}
-	require.Error(t, server.CreateFeedback(stream2), status.Error(codes.ResourceExhausted, "You have already send a feedback recently. Please wait 300 seconds"))
+	require.Error(t, server.CreateFeedback(stream2), "User has already send a feedback recently => has to wait")
 
 	// the db did not change
 	var feeedbacks2 []model.Feedback
@@ -163,7 +164,8 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	// -- setup above
 	dir, err := os.MkdirTemp("", "no_files")
 	require.NoError(t, err)
-	defer require.NoError(t, os.RemoveAll(dir))
+	require.DirExists(t, dir)
+	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
 	stream := mockedFeedbackStream{
@@ -177,7 +179,7 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	require.NoError(t, server.CreateFeedback(stream))
 
 	// no image should be uploaded to the file system
-	extractUploadedFiles(t, cron.StorageDir, 0)
+	extractUploadedFiles(t, cron.StorageDir, 0, 0)
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
@@ -196,18 +198,24 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	require.Equal(t, dbFiles, []model.File{})
 }
 
-func extractUploadedFiles(t *testing.T, storageRoot string, expected int) *[]os.DirEntry {
-	parentDir, err := os.ReadDir(path.Join(storageRoot, "feedback"))
-	if expected == 0 {
-		require.Error(t, err, os.ErrNotExist.Error())
-		require.Empty(t, parentDir)
+func extractUploadedFiles(t *testing.T, storageRoot string, expectedFileCnt int, expectedFeedbackCnt int) *[]os.DirEntry {
+	outerDir := path.Join(storageRoot, "feedback")
+	outerDirContent, err := os.ReadDir(outerDir)
+	if expectedFeedbackCnt == 0 {
+		// the directory may be an error if the feedback folder has been created or may be not if the feedback was rejected
+		if err != nil {
+			require.True(t, errors.Is(err, os.ErrNotExist))
+		} else {
+			require.Empty(t, outerDirContent)
+		}
 		return nil
 	}
 
 	require.NoError(t, err)
-	require.Len(t, parentDir, 1)
-	dir, err := os.ReadDir(path.Join(storageRoot, "feedback", parentDir[0].Name()))
+	require.Len(t, outerDirContent, expectedFeedbackCnt)
+	require.True(t, expectedFeedbackCnt <= 1, "feedback currently has only 1 feedback allowed to make picking it simpler")
+	dir, err := os.ReadDir(path.Join(outerDir, outerDirContent[0].Name()))
 	require.NoError(t, err)
-	require.Len(t, dir, expected)
+	require.Len(t, dir, expectedFileCnt)
 	return &dir
 }
