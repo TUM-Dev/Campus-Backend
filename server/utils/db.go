@@ -96,7 +96,6 @@ func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {
 	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Int())
 	t.Log("connecting to " + dsn)
 	db, err := gorm.Open(mysql.Open(dsn))
-	t.Log("sleeping")
 	require.NoError(t, err)
 	// we run the auto-migrations because they are WAY faster
 	require.NoError(t, migration.Migrate(db, true))

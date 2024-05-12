@@ -39,8 +39,8 @@ To start the server there are environment variables, as well as command line opt
 
 ```bash
 cd  server
-export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
-export DB_DSN="The DB-name from above string for example: campus_backend"
+export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local"
+export DB_NAME="The DB-name from above string for example: campus_backend"
 go run ./main.go
 ```
 
@@ -48,8 +48,8 @@ go run ./main.go
 
 There are a few environment variables available:
 
-* [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_backend`
-* [REQUIRED] `DB_DSN`: The name of the database from above connection string. Example: `campus_backend`
+* [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local`
+* [REQUIRED] `DB_NAME`: The name of the database from above connection string. Example: `campus_backend`
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 
 ## Running the Server (Docker)
