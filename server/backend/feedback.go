@@ -34,7 +34,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	feedback := &model.Feedback{EmailId: id.String(), Recipient: "app@tum.de"}
 
 	// download images
-	dbPath := path.Join("feedback", feedback.EmailId)
+	dbPath := path.Join(cron.StorageDir, "feedback", feedback.EmailId)
 	var uploadedFilenames []*string
 	for {
 		req, err := stream.Recv()
@@ -43,7 +43,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		if err != nil {
 			log.WithError(err).Error("Error receiving feedback")
-			deleteUploaded(feedback.EmailId)
+			deleteUploaded(dbPath)
 			return status.Error(codes.Internal, "Error receiving feedback")
 		}
 		mergeFeedback(feedback, req)
@@ -68,7 +68,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		fiveMinutesAgo := now.Add(time.Minute * -5).Unix()
 		lastFeedback, feedbackExisted := s.feedbackEmailLastReuestAt.LoadOrStore(feedback.ReplyToEmail.String, now.Unix())
 		if feedbackExisted && lastFeedback.(int64) >= fiveMinutesAgo {
-			deleteUploaded(feedback.EmailId)
+			deleteUploaded(dbPath)
 			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", lastFeedback.(int64)-fiveMinutesAgo))
 		}
 	}
@@ -93,7 +93,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		return tx.Create(feedback).Error
 	}); err != nil {
-		deleteUploaded(feedback.EmailId)
+		deleteUploaded(dbPath)
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return status.Error(codes.AlreadyExists, "Feedback already exists")
 		}
@@ -110,36 +110,36 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 
 // deleteUploaded deletes all uploaded images from the filesystem
 func deleteUploaded(dbPath string) {
-	if err := os.RemoveAll(cron.StorageDir + dbPath); err != nil {
+	if err := os.RemoveAll(dbPath); err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error deleting uploaded images from filesystem")
 	}
 }
 
-func handleImageUpload(content []byte, imageCounter int, dbPath string) *string {
-	filename, realFilePath := inferFileName(mimetype.Detect(content), dbPath, imageCounter)
+func handleImageUpload(content []byte, imageCounter int, dir string) *string {
+	filename, realFilePath := inferFileName(mimetype.Detect(content), dir, imageCounter)
 	if filename == nil {
 		return nil // the filetype is not accepted by us
 	}
 
 	if err := os.MkdirAll(path.Dir(*realFilePath), 0755); err != nil {
-		log.WithError(err).WithField("dbPath", dbPath).Error("Error creating directory for feedback")
+		log.WithError(err).WithField("dir", dir).Error("Error creating directory for feedback")
 		return nil
 	}
 	out, err := os.Create(*realFilePath)
 	if err != nil {
-		log.WithError(err).WithField("path", dbPath).Error("Error creating file for feedback")
+		log.WithError(err).WithField("path", dir).Error("Error creating file for feedback")
 		return nil
 	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-			log.WithError(err).WithField("path", dbPath).Error("Error while closing file")
+			log.WithError(err).WithField("path", dir).Error("Error while closing file")
 		}
 	}(out)
 	if _, err := io.Copy(out, bytes.NewReader(content)); err != nil {
-		log.WithError(err).WithField("path", dbPath).Error("Error while writing file")
+		log.WithError(err).WithField("path", dir).Error("Error while writing file")
 		if err := os.Remove(*realFilePath); err != nil {
-			log.WithError(err).WithField("path", dbPath).Warn("Could not clean up file")
+			log.WithError(err).WithField("path", dir).Warn("Could not clean up file")
 		}
 		return nil
 	}
@@ -153,7 +153,7 @@ func inferFileName(mime *mimetype.MIME, dbPath string, counter int) (*string, *s
 	}
 
 	filename := fmt.Sprintf("%d%s", counter, mime.Extension())
-	realFilePath := path.Join(cron.StorageDir, dbPath, filename)
+	realFilePath := path.Join(dbPath, filename)
 	return &filename, &realFilePath
 }
 

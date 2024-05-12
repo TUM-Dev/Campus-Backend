@@ -139,9 +139,10 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, dbFiles, dbFiles2)
 	// all files that were added are cleaned up correctly
-	parentDir, err := os.ReadDir(path.Join(cron.StorageDir, "feedback"))
+	feedbackDir := path.Join(cron.StorageDir, "feedback")
+	parentDir, err := os.ReadDir(feedbackDir)
 	require.NoError(t, err)
-	require.Len(t, parentDir, 1)
+	require.Len(t, parentDir, 1, feedbackDir)
 }
 
 func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime time.Time, content []byte) {
