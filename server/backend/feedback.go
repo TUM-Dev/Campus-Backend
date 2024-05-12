@@ -68,6 +68,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		fiveMinutesAgo := now.Add(time.Minute * -5).Unix()
 		lastFeedback, feedbackExisted := s.feedbackEmailLastReuestAt.LoadOrStore(feedback.ReplyToEmail.String, now.Unix())
 		if feedbackExisted && lastFeedback.(int64) >= fiveMinutesAgo {
+			deleteUploaded(feedback.EmailId)
 			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", lastFeedback.(int64)-fiveMinutesAgo))
 		}
 	}
@@ -92,11 +93,11 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		return tx.Create(feedback).Error
 	}); err != nil {
+		deleteUploaded(feedback.EmailId)
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return status.Error(codes.AlreadyExists, "Feedback already exists")
 		}
 		log.WithError(err).Error("Error creating feedback")
-		deleteUploaded(feedback.EmailId)
 		return status.Error(codes.Internal, "Error creating feedback")
 	}
 

@@ -64,15 +64,17 @@ func createDummyImage(t *testing.T, width, height int) []byte {
 	return buf.Bytes()
 }
 
-func Test_CreateFeedback_OneFile(t *testing.T) {
-	t.Parallel()
+func Test_CreateFeedback_TwoFiles(t *testing.T) {
+	// this is not parallelism because cron.StorageDir is SHARED STATE
+	// => needs to be NOT A RACE CONDITION to be faster
+	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	// -- setup above
-	cron.StorageDir = "test_one_image/"
-	defer func() {
-		require.NoError(t, os.RemoveAll(cron.StorageDir))
-	}()
+	dir, err := os.MkdirTemp("", "two_files")
+	require.NoError(t, err)
+	defer require.NoError(t, os.RemoveAll(dir))
+	cron.StorageDir = dir
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
 	returnedTime := time.Now()
@@ -97,9 +99,8 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(&feeedbacks).Error
-	require.NoError(t, err)
-	require.Equal(t, len(feeedbacks), 1)
+	require.NoError(t, db.WithContext(ctx).Find(&feeedbacks).Error)
+	require.Len(t, feeedbacks, 1)
 	actual := feeedbacks[0]
 	require.Equal(t, "app@tum.de", actual.Recipient)
 	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
@@ -107,9 +108,8 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 
 	// should have created files
 	var dbFiles []model.File
-	err = db.WithContext(ctx).Find(&dbFiles).Error
-	require.NoError(t, err)
-	require.Equal(t, len(dbFiles), 2)
+	require.NoError(t, db.WithContext(ctx).Find(&dbFiles).Error)
+	require.Len(t, dbFiles, 2)
 	actualFile := dbFiles[0]
 	require.Equal(t, "0.txt", actualFile.Name)
 	require.Equal(t, int32(1), actualFile.Downloads)
@@ -132,13 +132,16 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 
 	// the db did not change
 	var feeedbacks2 []model.Feedback
-	err = db.WithContext(ctx).Find(&feeedbacks2).Error
-	require.NoError(t, err)
+	require.NoError(t, db.WithContext(ctx).Find(&feeedbacks2).Error)
 	require.Equal(t, feeedbacks, feeedbacks2)
 	var dbFiles2 []model.File
 	err = db.WithContext(ctx).Find(&dbFiles2).Error
 	require.NoError(t, err)
 	require.Equal(t, dbFiles, dbFiles2)
+	// all files that were added are cleaned up correctly
+	parentDir, err := os.ReadDir(path.Join(cron.StorageDir, "feedback"))
+	require.NoError(t, err)
+	require.Len(t, parentDir, 1)
 }
 
 func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime time.Time, content []byte) {
@@ -151,11 +154,15 @@ func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime
 }
 
 func Test_CreateFeedback_NoImage(t *testing.T) {
-	t.Parallel()
+	// this is not paralelisable because cron.StorageDir is SHARED STATE
+	// => needs to be NOT A RACE CONDITION to be faster
+	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	// -- setup above
-	cron.StorageDir = "test_no_image/"
+	dir, err := os.MkdirTemp("", "no_files")
+	require.NoError(t, err)
+	defer require.NoError(t, os.RemoveAll(dir))
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
 	stream := mockedFeedbackStream{
@@ -173,9 +180,9 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(&feeedbacks).Error
+	err = db.WithContext(ctx).Find(&feeedbacks).Error
 	require.NoError(t, err)
-	require.Equal(t, len(feeedbacks), 1)
+	require.Len(t, feeedbacks, 1)
 	actual := feeedbacks[0]
 	require.Equal(t, "app@tum.de", actual.Recipient)
 	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
