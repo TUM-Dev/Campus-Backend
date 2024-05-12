@@ -56,13 +56,9 @@ func (tcl testContainerLogger) Printf(format string, v ...interface{}) {
 func (tcl testContainerLogger) Accept(log testcontainers.Log) {
 	line := strings.TrimSpace(string(log.Content))
 	if len(line) == 0 {
-		return
+		return // empty lines are just junk..
 	}
-	if log.LogType == "STDOUT" {
-		tcl.t.Logf("[info,testcontainer] %s", line)
-	} else {
-		tcl.t.Errorf("[error,testcontainer] %s", line)
-	}
+	tcl.t.Logf("[%s,testcontainer] %s", log.LogType, line)
 }
 
 func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {

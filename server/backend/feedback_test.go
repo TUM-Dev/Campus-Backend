@@ -94,27 +94,27 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(feeedbacks).Error
+	err := db.WithContext(ctx).Find(&feeedbacks).Error
 	require.NoError(t, err)
 	require.Equal(t, len(feeedbacks), 1)
 	actual := feeedbacks[0]
-	require.Equal(t, "app@tum.de", actual.EmailId)
-	require.Equal(t, "testing@example.com", actual.Recipient)
-	require.Equal(t, null.StringFrom("Hello with image"), actual.ReplyToName)
+	require.Equal(t, "app@tum.de", actual.Recipient)
+	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
+	require.Equal(t, "Hello with image", actual.Feedback)
 
 	// should have created files
 	var dbFiles []model.File
-	err = db.WithContext(ctx).Find(dbFiles).Error
+	err = db.WithContext(ctx).Find(&dbFiles).Error
 	require.NoError(t, err)
-	require.Equal(t, len(dbFiles), 1)
+	require.Equal(t, len(dbFiles), 2)
 	actualFile := dbFiles[0]
 	require.Equal(t, "0.txt", actualFile.Name)
-	require.Equal(t, 1, actualFile.Downloads)
-	require.Equal(t, true, actualFile.Downloaded)
+	require.Equal(t, int32(1), actualFile.Downloads)
+	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
 	actualFile = dbFiles[1]
-	require.Equal(t, "1.txt", actualFile.Name)
-	require.Equal(t, 1, actualFile.Downloads)
-	require.Equal(t, true, actualFile.Downloaded)
+	require.Equal(t, "1.png", actualFile.Name)
+	require.Equal(t, int32(1), actualFile.Downloads)
+	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
 }
 
 func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime time.Time, content []byte) {
@@ -149,13 +149,19 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(feeedbacks).Error
+	err := db.WithContext(ctx).Find(&feeedbacks).Error
 	require.NoError(t, err)
 	require.Equal(t, len(feeedbacks), 1)
 	actual := feeedbacks[0]
-	require.Equal(t, "app@tum.de", actual.EmailId)
-	require.Equal(t, "testing@example.com", actual.Recipient)
-	require.Equal(t, null.StringFrom("Hello with image"), actual.ReplyToName)
+	require.Equal(t, "app@tum.de", actual.Recipient)
+	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
+	require.Equal(t, "Hello without image", actual.Feedback)
+
+	// should have created no files
+	var dbFiles []model.File
+	err = db.WithContext(ctx).Find(&dbFiles).Error
+	require.NoError(t, err)
+	require.Equal(t, dbFiles, []model.File{})
 }
 
 func extractUploadedFiles(t *testing.T, storageRoot string, expected int) *[]os.DirEntry {
