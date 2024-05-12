@@ -34,7 +34,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	feedback := &model.Feedback{EmailId: id.String(), Recipient: "app@tum.de"}
 
 	// download images
-	dbPath := path.Join("feedback", feedback.EmailId)
+	dbPath := path.Join(cron.StorageDir, "feedback", feedback.EmailId)
 	var uploadedFilenames []*string
 	for {
 		req, err := stream.Recv()
@@ -43,7 +43,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		if err != nil {
 			log.WithError(err).Error("Error receiving feedback")
-			deleteUploaded(feedback.EmailId)
+			deleteUploaded(dbPath)
 			return status.Error(codes.Internal, "Error receiving feedback")
 		}
 		mergeFeedback(feedback, req)
@@ -57,9 +57,6 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	}
 	feedback.ImageCount = int32(len(uploadedFilenames))
 	// validate feedback
-	feedback.Feedback = strings.TrimSpace(feedback.Feedback)
-	feedback.Feedback = strings.ReplaceAll(feedback.Feedback, "  ", " ")
-	feedback.Feedback = strings.ToValidUTF8(feedback.Feedback, "?")
 	if feedback.Feedback == "" && feedback.ImageCount == 0 {
 		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
 	}
@@ -68,6 +65,7 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		fiveMinutesAgo := now.Add(time.Minute * -5).Unix()
 		lastFeedback, feedbackExisted := s.feedbackEmailLastReuestAt.LoadOrStore(feedback.ReplyToEmail.String, now.Unix())
 		if feedbackExisted && lastFeedback.(int64) >= fiveMinutesAgo {
+			deleteUploaded(dbPath)
 			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", lastFeedback.(int64)-fiveMinutesAgo))
 		}
 	}
@@ -92,11 +90,11 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		return tx.Create(feedback).Error
 	}); err != nil {
+		deleteUploaded(dbPath)
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return status.Error(codes.AlreadyExists, "Feedback already exists")
 		}
 		log.WithError(err).Error("Error creating feedback")
-		deleteUploaded(feedback.EmailId)
 		return status.Error(codes.Internal, "Error creating feedback")
 	}
 
@@ -109,60 +107,62 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 
 // deleteUploaded deletes all uploaded images from the filesystem
 func deleteUploaded(dbPath string) {
-	if err := os.RemoveAll(cron.StorageDir + dbPath); err != nil {
+	if err := os.RemoveAll(dbPath); err != nil {
 		log.WithError(err).WithField("path", dbPath).Error("Error deleting uploaded images from filesystem")
 	}
 }
 
-func handleImageUpload(content []byte, imageCounter int, dbPath string) *string {
-	filename, realFilePath := inferFileName(mimetype.Detect(content), dbPath, imageCounter)
+func handleImageUpload(content []byte, imageCounter int, dir string) *string {
+	filename := inferFileName(mimetype.Detect(content), imageCounter)
 	if filename == nil {
 		return nil // the filetype is not accepted by us
 	}
+	targetFilePath := path.Join(dir, *filename)
 
-	if err := os.MkdirAll(path.Dir(*realFilePath), 0755); err != nil {
-		log.WithError(err).WithField("dbPath", dbPath).Error("Error creating directory for feedback")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		log.WithError(err).WithField("dir", dir).Error("Error creating directory for feedback")
 		return nil
 	}
-	out, err := os.Create(*realFilePath)
+	targetFile, err := os.Create(targetFilePath)
 	if err != nil {
-		log.WithError(err).WithField("path", dbPath).Error("Error creating file for feedback")
+		log.WithError(err).WithField("path", targetFilePath).Error("Error creating file for feedback")
 		return nil
 	}
-	defer func(out *os.File) {
-		err := out.Close()
+	defer func(targetFile *os.File) {
+		err := targetFile.Close()
 		if err != nil {
-			log.WithError(err).WithField("path", dbPath).Error("Error while closing file")
+			log.WithError(err).WithField("path", dir).Error("Error while closing file")
 		}
-	}(out)
-	if _, err := io.Copy(out, bytes.NewReader(content)); err != nil {
-		log.WithError(err).WithField("path", dbPath).Error("Error while writing file")
-		if err := os.Remove(*realFilePath); err != nil {
-			log.WithError(err).WithField("path", dbPath).Warn("Could not clean up file")
+	}(targetFile)
+	if _, err := io.Copy(targetFile, bytes.NewReader(content)); err != nil {
+		log.WithError(err).WithField("path", targetFilePath).Error("Error while writing file")
+		if err := os.Remove(targetFilePath); err != nil {
+			log.WithError(err).WithField("path", targetFilePath).Warn("Could not clean up file")
 		}
 		return nil
 	}
 	return filename
 }
 
-func inferFileName(mime *mimetype.MIME, dbPath string, counter int) (*string, *string) {
+func inferFileName(mime *mimetype.MIME, counter int) *string {
 	allowedExt := []string{".jpeg", ".jpg", ".png", ".webp", ".md", ".txt", ".pdf"}
 	if !slices.Contains(allowedExt, mime.Extension()) {
-		return nil, nil
+		return nil
 	}
 
 	filename := fmt.Sprintf("%d%s", counter, mime.Extension())
-	realFilePath := path.Join(cron.StorageDir, dbPath, filename)
-	return &filename, &realFilePath
+	return &filename
 }
 
 func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.Recipient.Enum() != nil {
 		feedback.Recipient = receiverFromTopic(req.Recipient)
 	}
+	sanitiseString(&req.OsVersion)
 	if req.OsVersion != "" {
 		feedback.OsVersion = null.StringFrom(req.OsVersion)
 	}
+	sanitiseString(&req.AppVersion)
 	if req.AppVersion != "" {
 		feedback.AppVersion = null.StringFrom(req.AppVersion)
 	}
@@ -170,15 +170,24 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 		feedback.Longitude = null.FloatFrom(req.Location.Longitude)
 		feedback.Latitude = null.FloatFrom(req.Location.Latitude)
 	}
+	sanitiseString(&req.Message)
 	if req.Message != "" {
 		feedback.Feedback = req.Message
 	}
+	sanitiseString(&req.FromEmail)
 	if req.FromEmail != "" {
 		feedback.ReplyToEmail = null.StringFrom(req.FromEmail)
 	}
+	sanitiseString(&req.FromName)
 	if req.FromName != "" {
 		feedback.ReplyToName = null.StringFrom(req.FromEmail)
 	}
+}
+
+func sanitiseString(s *string) {
+	*s = strings.TrimSpace(*s)
+	*s = strings.ReplaceAll(*s, "  ", " ")
+	*s = strings.ToValidUTF8(*s, "?")
 }
 
 func receiverFromTopic(topic pb.CreateFeedbackRequest_Recipient) string {

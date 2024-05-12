@@ -1,11 +1,28 @@
-
 services:
+  db:
+    image: mysql:8
+    restart: no # in dev, this avoids having to crawl through the restart and makes a crash more obvious ^^
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_USER_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: /usr/bin/mysql --user=root --password=${DB_USER_PASSWORD} --execute "SHOW DATABASES"
+      interval: 2s
+      timeout: 20s
+      retries: 10
   backend:
     build:
       context: server/
       args:
         version: dev # compiled with the git sha in prod
-    restart: always
+    restart: no # in dev, this avoids having to crawl through the restart and makes a crash more obvious ^^
     ports:
       - "50051:50051"
     environment:
@@ -26,26 +43,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  db:
-    image: bitnami/mariadb:latest
-    restart: unless-stopped
-    ports:
-      - "${DB_PORT:-3306}:3306"
-    environment:
-      - MARIADB_ROOT_PASSWORD=${DB_USER_PASSWORD}
-      - MARIADB_DATABASE=${DB_NAME}
-      - MARIADB_CHARACTER_SET=utf8mb4
-      - MARIADB_COLLATE=utf8mb4_unicode_ci
-    volumes:
-      - campus-db-data:/bitnami/mariadb
-    healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/mariadb/healthcheck.sh']
-      interval: 15s
-      timeout: 5s
-      retries: 6
 
 volumes:
-  campus-db-data:
+  mysql-data:
     driver: local
   backend-storage:
     driver: local

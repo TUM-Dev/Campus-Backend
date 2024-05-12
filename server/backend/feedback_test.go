@@ -3,13 +3,7 @@ package backend
 import (
 	"bytes"
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/TUM-Dev/Campus-Backend/server/utils"
-	"github.com/guregu/null"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
+	"errors"
 	"image"
 	"image/png"
 	"io"
@@ -18,6 +12,14 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/TUM-Dev/Campus-Backend/server/utils"
+	"github.com/guregu/null"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 )
 
 type mockedFeedbackStream struct {
@@ -61,15 +63,20 @@ func createDummyImage(t *testing.T, width, height int) []byte {
 	return buf.Bytes()
 }
 
-func Test_CreateFeedback_OneFile(t *testing.T) {
-	t.Parallel()
+func Test_CreateFeedback_TwoFiles(t *testing.T) {
+	// this is not parallelism because cron.StorageDir is SHARED STATE
+	// => needs to be NOT A RACE CONDITION to be faster
+	// Hacks like the `index = 0` one are for the same reason
+	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	// -- setup above
-	cron.StorageDir = "test_one_image/"
-	defer func(path string) {
-		require.NoError(t, os.RemoveAll(path))
-	}(cron.StorageDir)
+	dir, err := os.MkdirTemp("", "two_files")
+	require.NoError(t, err)
+	require.DirExists(t, dir)
+	t.Log("storage: " + dir)
+	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
+	cron.StorageDir = dir
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
 	returnedTime := time.Now()
@@ -77,6 +84,7 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 	// execute call
 	dummyImage := createDummyImage(t, 10, 10)
 	dummyText := []byte("Dummy Text")
+	index = 0
 	stream := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{
@@ -88,33 +96,57 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 	require.NoError(t, server.CreateFeedback(stream))
 
 	// check that the correct operations happened to the file system
-	fsFiles := extractUploadedFiles(t, cron.StorageDir, 2)
+	fsFiles := extractUploadedFiles(t, cron.StorageDir, 2, 1)
 	expectFileMatches(t, (*fsFiles)[0], "0.txt", returnedTime, dummyText)
 	expectFileMatches(t, (*fsFiles)[1], "1.png", returnedTime, dummyImage)
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(feeedbacks).Error
-	require.NoError(t, err)
-	require.Equal(t, len(feeedbacks), 1)
+	require.NoError(t, db.WithContext(ctx).Find(&feeedbacks).Error)
+	require.Len(t, feeedbacks, 1)
 	actual := feeedbacks[0]
-	require.Equal(t, "app@tum.de", actual.EmailId)
-	require.Equal(t, "testing@example.com", actual.Recipient)
-	require.Equal(t, null.StringFrom("Hello with image"), actual.ReplyToName)
+	require.Equal(t, "app@tum.de", actual.Recipient)
+	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
+	require.Equal(t, "Hello with image", actual.Feedback)
 
 	// should have created files
 	var dbFiles []model.File
-	err = db.WithContext(ctx).Find(dbFiles).Error
-	require.NoError(t, err)
-	require.Equal(t, len(dbFiles), 1)
+	require.NoError(t, db.WithContext(ctx).Find(&dbFiles).Error)
+	require.Len(t, dbFiles, 2)
 	actualFile := dbFiles[0]
 	require.Equal(t, "0.txt", actualFile.Name)
-	require.Equal(t, 1, actualFile.Downloads)
-	require.Equal(t, true, actualFile.Downloaded)
+	require.Equal(t, int32(1), actualFile.Downloads)
+	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
 	actualFile = dbFiles[1]
-	require.Equal(t, "1.txt", actualFile.Name)
-	require.Equal(t, 1, actualFile.Downloads)
-	require.Equal(t, true, actualFile.Downloaded)
+	require.Equal(t, "1.png", actualFile.Name)
+	require.Equal(t, int32(1), actualFile.Downloads)
+	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
+
+	// test if re-submitting feedback is blocked
+	index = 0
+	stream2 := mockedFeedbackStream{
+		T: t,
+		recived: []*pb.CreateFeedbackRequest{
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello with image", Attachment: dummyText},
+			{Attachment: dummyImage},
+		},
+		reply: &pb.CreateFeedbackReply{},
+	}
+	require.Error(t, server.CreateFeedback(stream2), "User has already send a feedback recently => has to wait")
+
+	// the db did not change
+	var feeedbacks2 []model.Feedback
+	require.NoError(t, db.WithContext(ctx).Find(&feeedbacks2).Error)
+	require.Equal(t, feeedbacks, feeedbacks2)
+	var dbFiles2 []model.File
+	err = db.WithContext(ctx).Find(&dbFiles2).Error
+	require.NoError(t, err)
+	require.Equal(t, dbFiles, dbFiles2)
+	// all files that were added are cleaned up correctly
+	feedbackDir := path.Join(cron.StorageDir, "feedback")
+	parentDir, err := os.ReadDir(feedbackDir)
+	require.NoError(t, err)
+	require.Len(t, parentDir, 1, feedbackDir)
 }
 
 func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime time.Time, content []byte) {
@@ -127,13 +159,20 @@ func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime
 }
 
 func Test_CreateFeedback_NoImage(t *testing.T) {
-	t.Parallel()
+	// this is not paralelisable because cron.StorageDir is SHARED STATE
+	// => needs to be NOT A RACE CONDITION to be faster
+	// Hacks like the `index = 0` one are for the same reason
+	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	// -- setup above
-	cron.StorageDir = "test_no_image/"
+	dir, err := os.MkdirTemp("", "no_files")
+	require.NoError(t, err)
+	require.DirExists(t, dir)
+	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
+	index = 0
 	stream := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{
@@ -145,31 +184,43 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	require.NoError(t, server.CreateFeedback(stream))
 
 	// no image should be uploaded to the file system
-	extractUploadedFiles(t, cron.StorageDir, 0)
+	extractUploadedFiles(t, cron.StorageDir, 0, 0)
 
 	// should have inserted feedback
 	var feeedbacks []model.Feedback
-	err := db.WithContext(ctx).Find(feeedbacks).Error
+	err = db.WithContext(ctx).Find(&feeedbacks).Error
 	require.NoError(t, err)
-	require.Equal(t, len(feeedbacks), 1)
+	require.Len(t, feeedbacks, 1)
 	actual := feeedbacks[0]
-	require.Equal(t, "app@tum.de", actual.EmailId)
-	require.Equal(t, "testing@example.com", actual.Recipient)
-	require.Equal(t, null.StringFrom("Hello with image"), actual.ReplyToName)
+	require.Equal(t, "app@tum.de", actual.Recipient)
+	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
+	require.Equal(t, "Hello without image", actual.Feedback)
+
+	// should have created no files
+	var dbFiles []model.File
+	err = db.WithContext(ctx).Find(&dbFiles).Error
+	require.NoError(t, err)
+	require.Equal(t, dbFiles, []model.File{})
 }
 
-func extractUploadedFiles(t *testing.T, storageRoot string, expected int) *[]os.DirEntry {
-	parentDir, err := os.ReadDir(path.Join(storageRoot, "feedback"))
-	if expected == 0 {
-		require.Error(t, err, os.ErrNotExist.Error())
-		require.Empty(t, parentDir)
+func extractUploadedFiles(t *testing.T, storageRoot string, expectedFileCnt int, expectedFeedbackCnt int) *[]os.DirEntry {
+	outerDir := path.Join(storageRoot, "feedback")
+	outerDirContent, err := os.ReadDir(outerDir)
+	if expectedFeedbackCnt == 0 {
+		// the directory may be an error if the feedback folder has been created or may be not if the feedback was rejected
+		if err != nil {
+			require.True(t, errors.Is(err, os.ErrNotExist))
+		} else {
+			require.Empty(t, outerDirContent)
+		}
 		return nil
 	}
 
 	require.NoError(t, err)
-	require.Len(t, parentDir, 1)
-	dir, err := os.ReadDir(path.Join(storageRoot, "feedback", parentDir[0].Name()))
+	require.Len(t, outerDirContent, expectedFeedbackCnt)
+	require.True(t, expectedFeedbackCnt <= 1, "feedback currently has only 1 feedback allowed to make picking it simpler")
+	dir, err := os.ReadDir(path.Join(outerDir, outerDirContent[0].Name()))
 	require.NoError(t, err)
-	require.Len(t, dir, expected)
+	require.Len(t, dir, expectedFileCnt)
 	return &dir
 }

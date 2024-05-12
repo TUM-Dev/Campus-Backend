@@ -39,7 +39,7 @@ func (s *UpdateNoteSuite) SetupSuite() {
 		DriverName: "mysql",
 	})
 	s.mock.ExpectQuery("SELECT VERSION()").
-		WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("10.11.4-MariaDB"))
+		WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.4.0"))
 	s.DB, err = gorm.Open(dialector, &gorm.Config{})
 	require.NoError(s.T(), err)
 
