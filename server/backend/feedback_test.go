@@ -66,6 +66,7 @@ func createDummyImage(t *testing.T, width, height int) []byte {
 func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	// this is not parallelism because cron.StorageDir is SHARED STATE
 	// => needs to be NOT A RACE CONDITION to be faster
+	// Hacks like the `index = 0` one are for the same reason
 	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
@@ -83,6 +84,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	// execute call
 	dummyImage := createDummyImage(t, 10, 10)
 	dummyText := []byte("Dummy Text")
+	index = 0
 	stream := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{
@@ -121,6 +123,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
 
 	// test if re-submitting feedback is blocked
+	index = 0
 	stream2 := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{
@@ -158,6 +161,7 @@ func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime
 func Test_CreateFeedback_NoImage(t *testing.T) {
 	// this is not paralelisable because cron.StorageDir is SHARED STATE
 	// => needs to be NOT A RACE CONDITION to be faster
+	// Hacks like the `index = 0` one are for the same reason
 	// t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
@@ -168,6 +172,7 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
+	index = 0
 	stream := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{

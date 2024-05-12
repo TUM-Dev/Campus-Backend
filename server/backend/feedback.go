@@ -57,9 +57,6 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	}
 	feedback.ImageCount = int32(len(uploadedFilenames))
 	// validate feedback
-	feedback.Feedback = strings.TrimSpace(feedback.Feedback)
-	feedback.Feedback = strings.ReplaceAll(feedback.Feedback, "  ", " ")
-	feedback.Feedback = strings.ToValidUTF8(feedback.Feedback, "?")
 	if feedback.Feedback == "" && feedback.ImageCount == 0 {
 		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
 	}
@@ -161,9 +158,11 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	if req.Recipient.Enum() != nil {
 		feedback.Recipient = receiverFromTopic(req.Recipient)
 	}
+	sanitiseString(&req.OsVersion)
 	if req.OsVersion != "" {
 		feedback.OsVersion = null.StringFrom(req.OsVersion)
 	}
+	sanitiseString(&req.AppVersion)
 	if req.AppVersion != "" {
 		feedback.AppVersion = null.StringFrom(req.AppVersion)
 	}
@@ -171,15 +170,24 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 		feedback.Longitude = null.FloatFrom(req.Location.Longitude)
 		feedback.Latitude = null.FloatFrom(req.Location.Latitude)
 	}
+	sanitiseString(&req.Message)
 	if req.Message != "" {
 		feedback.Feedback = req.Message
 	}
+	sanitiseString(&req.FromEmail)
 	if req.FromEmail != "" {
 		feedback.ReplyToEmail = null.StringFrom(req.FromEmail)
 	}
+	sanitiseString(&req.FromName)
 	if req.FromName != "" {
 		feedback.ReplyToName = null.StringFrom(req.FromEmail)
 	}
+}
+
+func sanitiseString(s *string) {
+	*s = strings.TrimSpace(*s)
+	*s = strings.ReplaceAll(*s, "  ", " ")
+	*s = strings.ToValidUTF8(*s, "?")
 }
 
 func receiverFromTopic(topic pb.CreateFeedbackRequest_Recipient) string {
