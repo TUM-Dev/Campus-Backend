@@ -3,13 +3,14 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	gormlogrus "github.com/onrik/gorm-logrus"

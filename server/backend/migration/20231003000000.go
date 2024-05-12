@@ -3,6 +3,7 @@ package migration
 import (
 	"embed"
 	"encoding/json"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 

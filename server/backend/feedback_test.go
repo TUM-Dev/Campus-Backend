@@ -3,13 +3,6 @@ package backend
 import (
 	"bytes"
 	"context"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
-	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/TUM-Dev/Campus-Backend/server/utils"
-	"github.com/guregu/null"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
 	"image"
 	"image/png"
 	"io"
@@ -18,6 +11,14 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/TUM-Dev/Campus-Backend/server/utils"
+	"github.com/guregu/null"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 )
 
 type mockedFeedbackStream struct {

@@ -16,7 +16,7 @@ The backend uses MySQL as its backend for storing data.
 While it is possible to install [mysql](https://mysql.com/) natively (instructions are on their website), we recommend the following:
 
 ```bash
-docker run 
+docker run
 ```
 
 ### Setting up the DB
