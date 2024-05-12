@@ -25,15 +25,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ModelType int
-
-// Used to differentiate between the type of the model for different queries to reduce duplicated code.
-const (
-	DISH      ModelType = 1
-	CAFETERIA ModelType = 2
-	NAME      ModelType = 3
-)
-
 // ListCanteenRatings RPC Endpoint
 // Allows to query ratings for a specific cafeteria.
 // It returns the average rating, max/min rating as well as a number of actual ratings and the average ratings for
@@ -60,7 +51,7 @@ func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCan
 		Min:        statsForCanteen.Min,
 		Max:        statsForCanteen.Max,
 		Rating:     queryLastCafeteriaRatingsWithLimit(input, cafeteriaId, tx),
-		RatingTags: queryTags(cafeteriaId, -1, CAFETERIA, tx),
+		RatingTags: queryTags(cafeteriaId, -1, model.CAFETERIA, tx),
 	}, nil
 }
 
@@ -110,7 +101,7 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, caf
 				Comment:    v.Comment,
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
-				RatingTags: queryTagRatingsOverviewForRating(v.CafeteriaRating, CAFETERIA, tx),
+				RatingTags: queryTagRatingsOverviewForRating(v.CafeteriaRating, model.CAFETERIA, tx),
 			})
 		}
 		return resp
@@ -141,8 +132,8 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		Min:        statsForDish.Min,
 		Max:        statsForDish.Max,
 		Rating:     queryLastDishRatingsWithLimit(input, cafeteriaID, dishID, tx),
-		RatingTags: queryTags(cafeteriaID, dishID, DISH, tx),
-		NameTags:   queryTags(cafeteriaID, dishID, NAME, tx),
+		RatingTags: queryTags(cafeteriaID, dishID, model.DISH, tx),
+		NameTags:   queryTags(cafeteriaID, dishID, model.NAME, tx),
 	}, nil
 }
 
@@ -189,7 +180,7 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, cafeteriaID 
 			resp = append(resp, &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
-				RatingTags: queryTagRatingsOverviewForRating(v.DishRating, DISH, tx),
+				RatingTags: queryTagRatingsOverviewForRating(v.DishRating, model.DISH, tx),
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
 			})
@@ -238,17 +229,17 @@ type queryRatingTag struct {
 // queryTags
 // Queries the average ratings for either cafeteriaRatingTags, dishRatingTags or NameTags.
 // Since the db only stores IDs in the results, the tags must be joined to retrieve their names form the rating_options tables.
-func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagResult {
+func queryTags(cafeteriaID int32, dishID int32, ratingType model.ModelType, tx *gorm.DB) []*pb.RatingTagResult {
 	var results []queryRatingTag
 	var err error
-	if ratingType == DISH {
+	if ratingType == model.DISH {
 		err = tx.Table("dish_rating_tag_option options").
 			Joins("JOIN dish_rating_tag_statistics results ON options.dishRatingTagOption = results.tagID").
 			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
-	} else if ratingType == CAFETERIA {
+	} else if ratingType == model.CAFETERIA {
 		err = tx.Table("cafeteria_rating_tag_option options").
 			Joins("JOIN cafeteria_rating_tag_statistics results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
@@ -287,10 +278,10 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType ModelType, tx *gorm.D
 
 // queryTagRatingOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
-func queryTagRatingsOverviewForRating(dishID int64, ratingType ModelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
+func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
 	var results []*pb.RatingTagNewRequest
 	var err error
-	if ratingType == DISH {
+	if ratingType == model.DISH {
 		err = tx.Table("dish_rating_tag_option options").
 			Joins("JOIN dish_rating_tag rating ON options.dishRatingTagOption = rating.tagID").
 			Select("dishRatingTagOption as tagId, points, parentRating").
@@ -333,7 +324,7 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 		return nil, status.Error(codes.InvalidArgument, "Error while creating new cafeteria rating. Rating has not been saved.")
 
 	}
-	if err := storeRatingTags(rating.CafeteriaRating, input.RatingTags, CAFETERIA, tx); err != nil {
+	if err := storeRatingTags(rating.CafeteriaRating, input.RatingTags, model.CAFETERIA, tx); err != nil {
 		return &pb.CreateCanteenRatingReply{}, err
 	}
 	return &pb.CreateCanteenRatingReply{}, nil
@@ -422,7 +413,7 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 
 	assignDishNameTag(rating, dishInCafeteria.Dish, tx)
 
-	if err := storeRatingTags(rating.DishRating, input.RatingTags, DISH, tx); err != nil {
+	if err := storeRatingTags(rating.DishRating, input.RatingTags, model.DISH, tx); err != nil {
 		return &pb.CreateDishRatingReply{}, err
 	}
 	return &pb.CreateDishRatingReply{}, nil
@@ -478,7 +469,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 // storeRatingTags
 // Checks whether the rating-tag name is a valid option and if so,
 // it will be saved with a reference to the rating
-func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelType, tx *gorm.DB) error {
+func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.ModelType, tx *gorm.DB) error {
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
@@ -488,7 +479,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelTy
 			var err error
 			var count int64
 
-			if tagType == DISH {
+			if tagType == model.DISH {
 				err = tx.Model(&model.DishRatingTagOption{}).
 					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
 					Count(&count).Error
@@ -539,8 +530,8 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType ModelTy
 
 }
 
-func getModelStoreTag(tagType ModelType, tx *gorm.DB) *gorm.DB {
-	if tagType == DISH {
+func getModelStoreTag(tagType model.ModelType, tx *gorm.DB) *gorm.DB {
+	if tagType == model.DISH {
 		return tx.Model(&model.DishRatingTag{})
 	} else {
 		return tx.Model(&model.CafeteriaRatingTag{})
