@@ -3,6 +3,8 @@ package backend
 import (
 	"bytes"
 	"context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"image"
 	"image/png"
 	"io"
@@ -68,9 +70,9 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 	db := utils.SetupTestContainer(ctx, t)
 	// -- setup above
 	cron.StorageDir = "test_one_image/"
-	defer func(path string) {
-		require.NoError(t, os.RemoveAll(path))
-	}(cron.StorageDir)
+	defer func() {
+		require.NoError(t, os.RemoveAll(cron.StorageDir))
+	}()
 
 	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
 	returnedTime := time.Now()
@@ -116,6 +118,27 @@ func Test_CreateFeedback_OneFile(t *testing.T) {
 	require.Equal(t, "1.png", actualFile.Name)
 	require.Equal(t, int32(1), actualFile.Downloads)
 	require.Equal(t, null.BoolFrom(true), actualFile.Downloaded)
+
+	// test if re-submitting feedback is blocked
+	stream2 := mockedFeedbackStream{
+		T: t,
+		recived: []*pb.CreateFeedbackRequest{
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello with image", Attachment: dummyText},
+			{Attachment: dummyImage},
+		},
+		reply: &pb.CreateFeedbackReply{},
+	}
+	require.Error(t, server.CreateFeedback(stream2), status.Error(codes.ResourceExhausted, "You have already send a feedback recently. Please wait 300 seconds"))
+
+	// the db did not change
+	var feeedbacks2 []model.Feedback
+	err = db.WithContext(ctx).Find(&feeedbacks2).Error
+	require.NoError(t, err)
+	require.Equal(t, feeedbacks, feeedbacks2)
+	var dbFiles2 []model.File
+	err = db.WithContext(ctx).Find(&dbFiles2).Error
+	require.NoError(t, err)
+	require.Equal(t, dbFiles, dbFiles2)
 }
 
 func expectFileMatches(t *testing.T, file os.DirEntry, name string, returnedTime time.Time, content []byte) {
