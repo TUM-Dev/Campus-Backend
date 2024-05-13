@@ -17,7 +17,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=webs"
       - "traefik.http.routers.backend.tls.certresolver=leacme"
-      - "traefik.http.routers.backend.rule=Host(`newapi.tum.app`)"
+      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
       - "traefik.http.services.backend.loadbalancer.server.port=50051"
     networks:
       - traefik_traefik
@@ -48,7 +48,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend_h2.entrypoints=webs"
       - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
-      - "traefik.http.routers.backend_h2.rule=Host(`newapi.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+      - "traefik.http.routers.backend_h2.rule=Host(`api.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
       - "traefik.http.services.backend_h2.loadbalancer.server.scheme=h2c"
       - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
     networks:
