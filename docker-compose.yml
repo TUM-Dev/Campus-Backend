@@ -47,35 +47,6 @@ services:
     depends_on:
       db:
         condition: service_started
-  grpc-web:
-    image: envoyproxy/envoy:v1.27-latest
-    restart: unless-stopped
-    networks:
-      - traefik_traefik
-    command:
-      - /docker-entrypoint.sh
-      - --config-path
-      - /etc/envoy/envoy.yaml
-      - --service-cluster
-      - backend
-      - --service-node
-      - backend
-      - --log-level
-      - info
-    expose:
-      - "8081"
-      #- "9901" # admin interface, not very useful
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grpc-web.entrypoints=webs"
-      - "traefik.http.routers.grpc-web.tls.certresolver=leacme"
-      - "traefik.http.routers.grpc-web.rule=Host(`newapi.tum.app`)"
-      - "traefik.http.services.grpc-web.loadbalancer.server.port=8081"
-    volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml:ro
-    depends_on:
-      backend:
-        condition: service_healthy
 
 volumes:
   backend-storage:

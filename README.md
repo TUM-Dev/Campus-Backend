@@ -56,7 +56,7 @@ There are a few environment variables available:
 ```bash
 docker compose -f docker-compose.local.yml up -d
 ```
-The docker compose will start the server and a mysql instance (=> without the grpc-web layer and without routing/certificates to worry about)
+The docker compose will start the server and a mysql instance (=> without routing/certificates to worry about)
 The server will be available at `localhost:50051` and the mysql instance at `localhost:3306`.
 Additionally, docker creates the volume `campus-db-data` to persist the data of the mysql instances.
 
