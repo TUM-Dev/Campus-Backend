@@ -12,6 +12,10 @@
     {
       "matchPackagePatterns": [".*Campus-Backend/.*"],
       "groupName": "server"
+    },
+    {
+      "matchPackagePatterns": ["google.golang.org/genproto/googleapis/api"],
+      "groupName": "googleapis"
     }
   ]
 }
