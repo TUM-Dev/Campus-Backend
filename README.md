@@ -13,32 +13,10 @@ The API is publicly available for anyone, but most notably, it's the main backen
 ### Installing Requirements
 
 The backend uses MySQL as its backend for storing data.
-In the following, we provide instructions for installing [MariaDB](https://mariadb.org/) as the DB server of choice.
-
-#### Fedora
+While it is possible to install [mysql](https://mysql.com/) natively (instructions are on their website), we recommend the following:
 
 ```bash
-sudo dnf install mariadb-server
-
-# Start the MariaDB server
-sudo systemctl start mariadb
-
-# Optional: Enable autostart
-sudo systemctl enable mariadb
-```
-
-More details are available here: https://docs.fedoraproject.org/en-US/quick-docs/installing-mysql-mariadb/
-
-#### Debian/Ubuntu
-
-```bash
-sudo apt install mariadb-server
-
-# Start the MariaDB server
-sudo systemctl start mariadb
-
-# Optional: Enable autostart
-sudo systemctl enable mariadb
+docker run
 ```
 
 ### Setting up the DB
@@ -61,8 +39,8 @@ To start the server there are environment variables, as well as command line opt
 
 ```bash
 cd  server
-export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend"
-export DB_DSN="The DB-name from above string for example: campus_backend"
+export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local"
+export DB_NAME="The DB-name from above string for example: campus_backend"
 go run ./main.go
 ```
 
@@ -70,22 +48,23 @@ go run ./main.go
 
 There are a few environment variables available:
 
-* [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_backend`
-* [REQUIRED] `DB_DSN`: The name of the database from above connection string. Example: `campus_backend`
+* [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local`
+* [REQUIRED] `DB_NAME`: The name of the database from above connection string. Example: `campus_backend`
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 
 ## Running the Server (Docker)
 ```bash
-docker compose up -d
+docker compose -f docker-compose.local.yml up -d
 ```
-The docker compose will start the server and a mariadb instance.
-The server will be available at `localhost:50051` and the mariadb instance at `localhost:3306`.
-Additionally, docker creates the volume `campus-db-data` to persist the data of the mariadb instances.
+The docker compose will start the server and a mysql instance (=> without routing/certificates to worry about)
+The server will be available at `localhost:50051` and the mysql instance at `localhost:3306`.
+Additionally, docker creates the volume `campus-db-data` to persist the data of the mysql instances.
 
 ### Environment Variables
 The following environment variables need to be set for the server to work properly:
 * [REQUIRED] `DB_NAME`: The name of the database to use.
-* [REQUIRED] `DB_ROOT_PASSWORD`: The password of the root user.
+* [REQUIRED] `DB_USER_PASSWORD`: The password of the user.
+* [OPTIONAL] `DB_USER_NAME`: Name of the user to connect as. Defaults to `root`.
 * [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 * [OPTIONAL] `OMDB_API_KEY`: The key to get more information for tu-film movies from [omdbapi](https://omdbapi.com/). See [omdbapi](https://omdbapi.com/apikey.aspx) for a key.

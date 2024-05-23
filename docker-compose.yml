@@ -1,0 +1,83 @@
+services:
+  db:
+    container_name: cloudsql-proxy
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.2
+    command: tum-app-422909:europe-west1:tum-app-backend --credentials-file=/secrets/cloudsql/credentials.json --address 0.0.0.0 --port ${DB_PORT:-3306}
+    networks:
+      - traefik_traefik
+    expose:
+      - "${DB_PORT:-3306}"
+    volumes:
+      - /root/credentials/backend-gcp-cloudsql-credentials.json:/secrets/cloudsql/credentials.json
+
+  backend_h1:
+    image: ghcr.io/tum-dev/campus-backend/backend-server:main
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=webs"
+      - "traefik.http.routers.backend.tls.certresolver=leacme"
+      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=50051"
+    networks:
+      - traefik_traefik
+    expose:
+      - "50051"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_DSN=${DB_USER_NAME:-root}:${DB_USER_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_NAME=${DB_NAME}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_URL=${SMTP_URL:-postout.lrz.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
+      - SMTP_PORT=${SMTP_PORT:-587}
+    volumes:
+      - backend-storage:/Storage
+    user: 1000:3000
+    read_only: true
+    depends_on:
+      db:
+        condition: service_started
+  backend_h2:
+    image: ghcr.io/tum-dev/campus-backend/backend-server:main
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend_h2.entrypoints=webs"
+      - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
+      - "traefik.http.routers.backend_h2.rule=Host(`api.tum.app`) && Headers(`Content-Type`, `application/grpc`)"
+      - "traefik.http.services.backend_h2.loadbalancer.server.scheme=h2c"
+      - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
+    networks:
+      - traefik_traefik
+    expose:
+      - "50051"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - DB_DSN=${DB_USER_NAME:-root}:${DB_USER_PASSWORD}@tcp(db:${DB_PORT:-3306})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+      - DB_NAME=${DB_NAME}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_URL=${SMTP_URL:-postout.lrz.de}
+      - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}
+      - SMTP_FROM=${SMTP_FROM:-bot@tum.app}
+      - SMTP_PORT=${SMTP_PORT:-587}
+    volumes:
+      - backend-storage:/Storage
+    user: 1000:3000
+    read_only: true
+    depends_on:
+      db:
+        condition: service_started
+
+volumes:
+  backend-storage:
+    driver: local
+
+networks:
+  traefik_traefik:
+    external: true

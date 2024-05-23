@@ -9,7 +9,6 @@ import (
 
 	"gorm.io/gorm/logger"
 
-	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/go-gormigrate/gormigrate/v2"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -36,14 +35,14 @@ type nameTag struct {
 // State of the models at this migration
 type CafeteriaRatingTagOption struct {
 	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;" json:"canteenRatingTagOption"`
-	DE                        string `gorm:"column:DE;text;default:de;not null;" json:"DE"`
-	EN                        string `gorm:"column:EN;text;default:en;not null;" json:"EN"`
+	DE                        string `gorm:"column:DE;text;default:('de');not null;" json:"DE"`
+	EN                        string `gorm:"column:EN;text;default:('en');not null;" json:"EN"`
 }
 
 type DishRatingTagOption struct {
 	DishRatingTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
-	DE                  string `gorm:"column:DE;type:text;default:de;not null;" json:"DE"`
-	EN                  string `gorm:"column:EN;type:text;default:en;not null;" json:"EN"`
+	DE                  string `gorm:"column:DE;type:text;default:('de');not null;" json:"DE"`
+	EN                  string `gorm:"column:EN;type:text;default:('en');not null;" json:"EN"`
 }
 
 type DishNameTagOption struct {
@@ -92,8 +91,8 @@ func migrate20231003000000() *gormigrate.Migration {
 				return err
 			}
 
-			setTagTable("static_data/dishRatingTags.json", tx, backend.DISH)
-			setTagTable("static_data/cafeteriaRatingTags.json", tx, backend.CAFETERIA)
+			setTagTable("static_data/dishRatingTags.json", tx, model.DISH)
+			setTagTable("static_data/cafeteriaRatingTags.json", tx, model.CAFETERIA)
 			setNameTagOptions(tx)
 			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation", "dishNameDownload"); err != nil {
 				return err
@@ -190,13 +189,13 @@ Reads the json file at the given path and checks whether the values have already
 If an entry with the same German and English name exists, the entry won't be added.
 The TagType is used to identify the corresponding model
 */
-func setTagTable(path string, db *gorm.DB, tagType backend.ModelType) {
+func setTagTable(path string, db *gorm.DB, tagType model.ModelType) {
 	tagsDish := generateRatingTagListFromFile(path)
 
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		var err error
-		if tagType == backend.CAFETERIA {
+		if tagType == model.CAFETERIA {
 			element := CafeteriaRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,

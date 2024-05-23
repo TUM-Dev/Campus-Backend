@@ -61,7 +61,7 @@ func (p *InitialIOSScheduledUpdateLog) TableName() string {
 }
 
 type InitialIOSDeviceRequestLog struct {
-	RequestID   string           `gorm:"primary_key;default:UUID()" json:"requestId"`
+	RequestID   string           `gorm:"type:char(36);primary_key;default:(UUID())" json:"requestId"`
 	DeviceID    string           `gorm:"size:200;not null" json:"deviceId"`
 	Device      InitialIOSDevice `gorm:"constraint:OnDelete:CASCADE;" json:"device"`
 	RequestType string           `gorm:"not null;type:enum ('CAMPUS_TOKEN_REQUEST');" json:"requestType"`
