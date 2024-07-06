@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     services:
       auto_mysql:
-        image: mysql:8
+        image: mysql:9
         ports:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
       manual_mysql:
-        image: mysql:8
+        image: mysql:9
         ports:
           - 3300:3306
         env:
