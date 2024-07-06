@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:8
+    image: mysql:9
     restart: no # in dev, this avoids having to crawl through the restart and makes a crash more obvious ^^
     ports:
       - "${DB_PORT:-3306}:3306"
