@@ -90,7 +90,7 @@ func setupMySQLTestContainer(ctx context.Context, t *testing.T) testcontainers.C
 	err := os.Setenv("DB_NAME", "campus_db")
 	require.NoError(t, err)
 	req := testcontainers.ContainerRequest{
-		Image: "mysql:8",
+		Image: "mysql:9.0.0",
 		Env: map[string]string{
 			"MYSQL_ROOT_PASSWORD": "super_secret_passw0rd",
 			"MYSQL_DATABASE":      "campus_db",
