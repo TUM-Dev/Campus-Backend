@@ -24,7 +24,7 @@ func migrate20240311000000() *gormigrate.Migration {
 				return err
 			}
 			// uniqueness
-			return tx.Exec("create unique index dish_name_cafeteriaID_uindex on dish (name, cafeteriaID)").Error
+			return tx.Exec("create unique index dish_name_cafeteriaID_uindex on dish (name(255), cafeteriaID)").Error
 		},
 		Rollback: func(tx *gorm.DB) error {
 			// make sure that dish_rating is FK-bound to dishes

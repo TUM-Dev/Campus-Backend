@@ -11,8 +11,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}/server/main.go",
             "env": {
-                "DB_DSN": "gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_backend",
-                "DB_NAME": "campus_backend"
+                "DB_DSN": "gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local",
+                "DB_NAME": "campus_db"
             }
         },
         {

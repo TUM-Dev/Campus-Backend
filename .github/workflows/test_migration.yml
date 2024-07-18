@@ -9,24 +9,20 @@ jobs:
   test_migrations:
     runs-on: ubuntu-latest
     services:
-      auto_mariadb:
-        image: bitnami/mariadb:latest
+      auto_mysql:
+        image: mysql:9
         ports:
           - 3306:3306
         env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-          MARIADB_CHARACTER_SET: utf8mb4
-          MARIADB_COLLATE: utf8mb4_unicode_ci
-      manual_mariadb:
-        image: bitnami/mariadb:latest
+          MYSQL_ROOT_PASSWORD: super_secret_passw0rd
+          MYSQL_DATABASE: campus_db
+      manual_mysql:
+        image: mysql:9
         ports:
           - 3300:3306
         env:
-          MARIADB_ROOT_PASSWORD: super_secret_passw0rd
-          MARIADB_DATABASE: campus_db
-          MARIADB_CHARACTER_SET: utf8mb4
-          MARIADB_COLLATE: utf8mb4_unicode_ci
+          MYSQL_ROOT_PASSWORD: super_secret_passw0rd
+          MYSQL_DATABASE: campus_db
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -58,10 +54,10 @@ jobs:
         run: |
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64) &&
           echo "local_to_auto<<$EOF" >> $GITHUB_OUTPUT &&
-          atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
+          atlas schema diff --from "mysql://root:super_secret_passw0rd@localhost:3300/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --to "mysql://root:super_secret_passw0rd@localhost:3306/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
           echo "$EOF" >> $GITHUB_OUTPUT
           echo "auto_to_local<<$EOF" >> $GITHUB_OUTPUT &&
-          atlas schema diff --from "maria://root:super_secret_passw0rd@localhost:3306/campus_db" --to "maria://root:super_secret_passw0rd@localhost:3300/campus_db" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
+          atlas schema diff --from "mysql://root:super_secret_passw0rd@localhost:3306/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --to "mysql://root:super_secret_passw0rd@localhost:3300/campus_db?charset=utf8mb4&parseTime=True&loc=Local" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
           echo "$EOF" >> $GITHUB_OUTPUT
       - name: Find Comment
         uses: peter-evans/find-comment@v3

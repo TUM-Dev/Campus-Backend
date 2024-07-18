@@ -169,21 +169,23 @@ func migrate20240316000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20240316000000",
 		Migrate: func(tx *gorm.DB) error {
-			log.Info("started migrating all keys to be i64 based")
+			log.Info("started migrating all keys to be i64 based by removing the FK")
 			for _, f := range tablesWithWrongFk() {
-				if err := tx.Exec(fmt.Sprintf("alter table `%s` DROP FOREIGN KEY IF EXISTS `%s`", f.fromTable, f.constraintName)).Error; err != nil {
+				if err := tx.Exec(fmt.Sprintf("alter table `%s` DROP FOREIGN KEY `%s`", f.fromTable, f.constraintName)).Error; err != nil {
 					return err
 				}
 			}
-			log.Info("removed all FK-relationships to be i64 based")
+			log.Info("changing both the source and destination collumn to the same type")
 			for _, f := range tablesWithWrongFk() {
 				if err := migrateField(tx, f.fromTable, f.fromColumn, "BIGINT "+f.nullability); err != nil {
 					return err
 				}
-				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT "+f.nullability+" AUTO_INCREMENT"); err != nil {
+				// mysql does not allow primary keys to have anything other than not null
+				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 					return err
 				}
 			}
+			log.Info("re-adding the FK")
 			for _, f := range tablesWithWrongFk() {
 				if err := tx.Exec(fmt.Sprintf("ALTER TABLE `%s` ADD CONSTRAINT `%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`%s`)", f.fromTable, f.constraintName, f.fromColumn, f.toTable, f.toColumn)).Error; err != nil {
 					return err
