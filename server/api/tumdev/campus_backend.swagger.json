@@ -787,6 +787,29 @@
         ]
       }
     },
+    "/student_clubs": {
+      "delete": {
+        "summary": "Delete a device from push notifications",
+        "operationId": "Campus_ListStudentClub",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListStudentClubReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/updatenote/{version}": {
       "get": {
         "operationId": "Campus_GetUpdateNote",
@@ -1315,6 +1338,18 @@
         }
       }
     },
+    "apiListStudentClubReply": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentClubCollection"
+          }
+        }
+      }
+    },
     "apiMovie": {
       "type": "object",
       "properties": {
@@ -1548,6 +1583,45 @@
         "visited": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "apiStudentClub": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "The name of the club"
+        },
+        "description": {
+          "type": "string",
+          "title": "How the club describes itsself"
+        },
+        "linkUrl": {
+          "type": "string",
+          "title": "Where the clubs main internet presence is"
+        },
+        "coverUrl": {
+          "type": "string",
+          "title": "Where to find a image for this club"
+        }
+      }
+    },
+    "apiStudentClubCollection": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "clubs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentClub"
+          }
         }
       }
     },
