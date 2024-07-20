@@ -13,7 +13,7 @@ import (
 func (s *CampusServer) ListStudentClubs(ctx context.Context, _ *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
 	var dbClubs []model.StudentClub
 	if err := s.db.WithContext(ctx).
-		Joins("File").
+		Joins("Image").
 		Joins("StudentClubCollection").
 		Find(&dbClubs).Error; err != nil {
 		log.WithError(err).Error("Error while querying student clubs")
