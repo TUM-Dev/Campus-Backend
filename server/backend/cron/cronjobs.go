@@ -27,6 +27,7 @@ const (
 	CanteenHeadcount = "canteenHeadCount"
 	MovieType        = "movie"
 	FeedbackEmail    = "feedbackEmail"
+	StudentClubType  = "scrapeStudentClubs"
 
 	/* MensaType      = "mensa"
 	AlarmType      = "alarm" */
@@ -46,7 +47,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		c.db.Model(&model.Crontab{}).
-			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?)",
+			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -54,6 +55,7 @@ func (c *CronService) Run() error {
 				CanteenHeadcount,
 				MovieType,
 				FeedbackEmail,
+				StudentClubType,
 			)
 
 		for _, cronjob := range res {
@@ -66,6 +68,8 @@ func (c *CronService) Run() error {
 
 			// Run each job in a separate goroutine, so we can parallelize them
 			switch cronjob.Type.String {
+			case StudentClubType:
+				g.Go(func() error { return c.studentClubCron() })
 			case NewsType:
 				// if this is not copied here, this may not be threads save due to go's guarantees
 				// loop variable cronjob captured by func literal (govet)

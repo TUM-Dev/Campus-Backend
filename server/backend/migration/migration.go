@@ -40,6 +40,8 @@ func autoMigrate(db *gorm.DB) error {
 		&model.NotificationConfirmation{},
 		&model.NotificationType{},
 		&model.UpdateNote{},
+		&model.StudentClub{},
+		&model.StudentClubCollection{},
 	)
 	return err
 }
@@ -83,6 +85,7 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240510000000(),
 		migrate20240511000000(),
 		migrate20240512000000(),
+		migrate20240706000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
