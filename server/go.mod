@@ -11,7 +11,7 @@ require (
 	github.com/getsentry/sentry-go v0.28.1
 	github.com/go-gormigrate/gormigrate/v2 v2.1.2
 	github.com/gofrs/uuid/v5 v5.2.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/makasim/sentryhook v0.5.0
 	github.com/microcosm-cc/bluemonday v1.0.27
@@ -97,7 +97,7 @@ require (
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240722135656-d784300faade // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240723171418-e6d459c13d2a // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
