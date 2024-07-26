@@ -46,9 +46,17 @@ func (c *CronService) fileDownloadCron() error {
 				log.WithError(err).WithFields(fields).Warn("Could not download file")
 				continue
 			}
-			if err := maybeResizeImage(dstPath); err != nil {
-				log.WithError(err).WithFields(fields).Warn("Could not resize image")
+			var mime *mimetype.MIME
+			if mime, err = mimetype.DetectFile(dstPath); err != nil {
+				log.WithError(err).WithFields(fields).Warn("cannot detect mime type")
 				continue
+			}
+			if !mime.Is("image/svg+xml") &&
+				strings.HasPrefix(mime.String(), "image/") {
+				if err := resizeImage(dstPath); err != nil {
+					log.WithError(err).WithFields(fields).Warn("Could not resize image")
+					continue
+				}
 			}
 			// everything went well => we can mark the file as downloaded
 			file.Downloaded = null.BoolFrom(true)
@@ -70,16 +78,8 @@ func ensureFileDoesNotExist(dstPath string) error {
 	return os.MkdirAll(path.Dir(dstPath), 0755)
 }
 
-// maybeResizeImage resizes the image if it's an image to 1280px width keeping the aspect ratio
-func maybeResizeImage(dstPath string) error {
-	mime, err := mimetype.DetectFile(dstPath)
-	if err != nil {
-		return err
-	}
-	if !strings.HasPrefix(mime.String(), "image/") {
-		return nil
-	}
-
+// resizeImage resizes the image if it's an image to 1280px width keeping the aspect ratio
+func resizeImage(dstPath string) error {
 	img, err := imaging.Open(dstPath)
 	if err != nil {
 		return err
