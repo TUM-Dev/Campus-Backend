@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *CampusServer) ListStudentClubs(ctx context.Context, _ *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
+func (s *CampusServer) ListStudentClub(ctx context.Context, _ *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
 	var dbClubs []model.StudentClub
 	if err := s.db.WithContext(ctx).
 		Joins("Image").

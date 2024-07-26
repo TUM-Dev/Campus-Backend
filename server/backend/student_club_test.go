@@ -13,13 +13,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestCampusServer_ListStudentClubs(t *testing.T) {
+func TestCampusServer_ListStudentClub(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	exampleClubs := genExampleClubData(db, t)
 	server := CampusServer{db: db}
-	response, err := server.ListStudentClubs(ctx, &pb.ListStudentClubRequest{})
+	response, err := server.ListStudentClub(ctx, &pb.ListStudentClubRequest{})
 	require.NoError(t, err)
 	url0 := exampleClubs[0].Image.FullExternalUrl()
 	expectedResp := &pb.ListStudentClubReply{
