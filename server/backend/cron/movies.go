@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"slices"
 	"strings"
@@ -24,6 +25,11 @@ const (
 )
 
 func (c *CronService) movieCron() error {
+	_, omdbKeyExists := os.LookupEnv("OMDB_API_KEY")
+	if !omdbKeyExists {
+		log.Info("Skipping movieCron as no OMDB_API_KEY was set")
+		return nil
+	}
 	log.Trace("parsing upcoming feed")
 	var allMovieLinks []string
 	if err := c.db.Model(&model.Kino{}).

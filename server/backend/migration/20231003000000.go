@@ -32,49 +32,58 @@ type nameTag struct {
 	CanBeIncluded  []string `json:"canbeincluded"`
 }
 
-// State of the models at this migration
-type CafeteriaRatingTagOption struct {
+type ToFillCafeteriaRatingTagOption struct {
 	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;" json:"canteenRatingTagOption"`
 	DE                        string `gorm:"column:DE;text;default:('de');not null;" json:"DE"`
 	EN                        string `gorm:"column:EN;text;default:('en');not null;" json:"EN"`
 }
 
-type DishRatingTagOption struct {
+// TableName sets the insert table name for this struct type
+func (n *ToFillCafeteriaRatingTagOption) TableName() string {
+	return "cafeteria_rating_tag_option"
+}
+
+type ToFillDishRatingTagOption struct {
 	DishRatingTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
 	DE                  string `gorm:"column:DE;type:text;default:('de');not null;" json:"DE"`
 	EN                  string `gorm:"column:EN;type:text;default:('en');not null;" json:"EN"`
 }
 
-type DishNameTagOption struct {
+// TableName sets the insert table name for this struct type
+func (n *ToFillDishRatingTagOption) TableName() string {
+	return "dish_rating_tag_option"
+}
+
+type ToFillDishNameTagOption struct {
 	DishNameTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
 	DE                string `gorm:"column:DE;type:text;not null;" json:"DE"`
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }
 
 // TableName sets the insert table name for this struct type
-func (n *DishNameTagOption) TableName() string {
+func (n *ToFillDishNameTagOption) TableName() string {
 	return "dish_name_tag_option"
 }
 
-type DishNameTagOptionExcluded struct {
+type ToFillDishNameTagOptionExcluded struct {
 	DishNameTagOptionExcluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
 
 // TableName sets the insert table name for this struct type
-func (n *DishNameTagOptionExcluded) TableName() string {
+func (n *ToFillDishNameTagOptionExcluded) TableName() string {
 	return "dish_name_tag_option_excluded"
 }
 
-type DishNameTagOptionIncluded struct {
+type ToFillDishNameTagOptionIncluded struct {
 	DishNameTagOptionIncluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
 
 // TableName sets the insert table name for this struct type
-func (n *DishNameTagOptionIncluded) TableName() string {
+func (n *ToFillDishNameTagOptionIncluded) TableName() string {
 	return "dish_name_tag_option_included"
 }
 
@@ -87,7 +96,7 @@ func migrate20231003000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20231003000000",
 		Migrate: func(tx *gorm.DB) error {
-			if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
+			if err := tx.Where("1=1").Delete(&ToFillDishNameTagOption{}, &ToFillCafeteriaRatingTagOption{}, &ToFillDishNameTagOptionIncluded{}, &ToFillDishNameTagOptionExcluded{}).Error; err != nil {
 				return err
 			}
 
@@ -109,7 +118,7 @@ func migrate20231003000000() *gormigrate.Migration {
 			}).Error
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := tx.Where("1=1").Delete(&DishNameTagOption{}, &CafeteriaRatingTagOption{}, &DishNameTagOptionIncluded{}, &DishNameTagOptionExcluded{}).Error; err != nil {
+			if err := tx.Where("1=1").Delete(&ToFillDishNameTagOption{}, &ToFillCafeteriaRatingTagOption{}, &ToFillDishNameTagOptionIncluded{}, &ToFillDishNameTagOptionExcluded{}).Error; err != nil {
 				return err
 			}
 			if err := tx.Delete(&model.Crontab{}, "type = 'averageRatingComputation'").Error; err != nil {
@@ -139,7 +148,7 @@ func setNameTagOptions(db *gorm.DB) {
 		log.WithError(err).Error("Error parsing nameTagList to json.")
 	}
 	for _, v := range tagsNames.MultiLanguageNameTags {
-		parent := DishNameTagOption{
+		parent := ToFillDishNameTagOption{
 			DE: v.TagNameGerman,
 			EN: v.TagNameEnglish,
 		}
@@ -159,7 +168,7 @@ func addNotIncluded(parentId int64, db *gorm.DB, v nameTag) {
 		fields := log.Fields{"expression": expression, "parentId": parentId}
 		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
-			Create(&DishNameTagOptionExcluded{
+			Create(&ToFillDishNameTagOptionExcluded{
 				Expression: expression,
 				NameTagID:  parentId}).Error
 		if err != nil {
@@ -174,7 +183,7 @@ func addCanBeIncluded(parentId int64, db *gorm.DB, v nameTag) {
 
 		err := db.
 			Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
-			Create(&DishNameTagOptionIncluded{
+			Create(&ToFillDishNameTagOptionIncluded{
 				Expression: expression,
 				NameTagID:  parentId,
 			}).Error
@@ -196,13 +205,13 @@ func setTagTable(path string, db *gorm.DB, tagType model.ModelType) {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		var err error
 		if tagType == model.CAFETERIA {
-			element := CafeteriaRatingTagOption{
+			element := ToFillCafeteriaRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}
 			err = db.Create(&element).Error
 		} else {
-			element := DishRatingTagOption{
+			element := ToFillDishRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
 			}

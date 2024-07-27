@@ -14,7 +14,7 @@ func TestMaybeResizeImage(t *testing.T) {
 		dstPath := "test_image.jpg"
 		require.NoError(t, createDummyImage(dstPath, 2000, 1000))
 		defer os.Remove(dstPath)
-		require.NoError(t, maybeResizeImage(dstPath))
+		require.NoError(t, resizeImage(dstPath))
 		img, err := imaging.Open(dstPath)
 		require.NoError(t, err)
 		require.Equal(t, 1280, img.Bounds().Dx())
@@ -24,22 +24,11 @@ func TestMaybeResizeImage(t *testing.T) {
 		dstPath := "test_image.jpg"
 		require.NoError(t, createDummyImage(dstPath, 1000, 2000))
 		defer os.Remove(dstPath)
-		require.NoError(t, maybeResizeImage(dstPath))
+		require.NoError(t, resizeImage(dstPath))
 		img, err := imaging.Open(dstPath)
 		require.NoError(t, err)
 		require.Equal(t, 1280, img.Bounds().Dx())
 		require.Equal(t, 2560, img.Bounds().Dy())
-	})
-
-	t.Run("Skip Non-Image", func(t *testing.T) {
-		nonImageFile := "non_image.txt"
-		content := []byte("Dummy Text")
-		require.NoError(t, createDummyFile(nonImageFile, content))
-		defer os.Remove(nonImageFile)
-		require.NoError(t, maybeResizeImage(nonImageFile))
-		contentAfterExecution, err := os.ReadFile(nonImageFile)
-		require.NoError(t, err)
-		require.Equal(t, content, contentAfterExecution)
 	})
 }
 
