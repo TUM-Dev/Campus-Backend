@@ -65,16 +65,3 @@ func createDummyImage(filePath string, width, height int) error {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	return imaging.Save(img, filePath, imaging.JPEGQuality(75))
 }
-
-// createDummyFile creates a dummy non-image file
-func createDummyFile(filePath string, content []byte) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	if _, err := file.Write(content); err != nil {
-		return err
-	}
-	return nil
-}
