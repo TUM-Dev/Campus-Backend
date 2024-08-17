@@ -78,7 +78,7 @@ The iOS Push Notifications Service can be used to send push notifications to iOS
 
 ## Visual Studio Code
 There are already predefined Visual Studio Code launch tasks for debugging the client and server.
-Take a look at the [`lauch.json`](.vscode/launch.json) file for more details.
+Take a look at the [`launch.json`](.vscode/launch.json) file for more details.
 
 
 Please be respectful with its usage!
