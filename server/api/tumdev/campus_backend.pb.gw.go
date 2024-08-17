@@ -901,7 +901,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsAlerts_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsAlerts_0{resp.(*ListNewsAlertsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -926,7 +926,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListNewsSources_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsSources_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNewsSources_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsSources_0{resp.(*ListNewsSourcesReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -951,7 +951,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNews_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNews_0{resp.(*ListNewsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1076,7 +1076,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListAvailableDishTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableDishTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListAvailableDishTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableDishTags_0{resp.(*ListAvailableDishTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1101,7 +1101,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListNameTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNameTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNameTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNameTags_0{resp.(*ListNameTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1126,7 +1126,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableCanteenTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableCanteenTags_0{resp.(*ListAvailableCanteenTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1151,7 +1151,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListCanteens_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListCanteens_0{resp.(*ListCanteensReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1176,7 +1176,7 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 			return
 		}
 
-		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp.(*ListDishesReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1496,7 +1496,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsAlerts_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNewsAlerts_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsAlerts_0{resp.(*ListNewsAlertsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1518,7 +1518,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListNewsSources_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsSources_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNewsSources_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNewsSources_0{resp.(*ListNewsSourcesReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1540,7 +1540,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNews_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNews_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNews_0{resp.(*ListNewsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1650,7 +1650,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListAvailableDishTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableDishTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListAvailableDishTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableDishTags_0{resp.(*ListAvailableDishTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1672,7 +1672,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListNameTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNameTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListNameTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListNameTags_0{resp.(*ListNameTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1694,7 +1694,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableCanteenTags_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListAvailableCanteenTags_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListAvailableCanteenTags_0{resp.(*ListAvailableCanteenTagsReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1716,7 +1716,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListCanteens_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListCanteens_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListCanteens_0{resp.(*ListCanteensReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1738,7 +1738,7 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			return
 		}
 
-		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp}, mux.GetForwardResponseOptions()...)
+		forward_Campus_ListDishes_0(annotatedContext, mux, outboundMarshaler, w, req, response_Campus_ListDishes_0{resp.(*ListDishesReply)}, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1988,75 +1988,67 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 }
 
 type response_Campus_ListNewsAlerts_0 struct {
-	proto.Message
+	*ListNewsAlertsReply
 }
 
 func (m response_Campus_ListNewsAlerts_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListNewsAlertsReply)
-	return response.Alerts
+	return m.Alerts
 }
 
 type response_Campus_ListNewsSources_0 struct {
-	proto.Message
+	*ListNewsSourcesReply
 }
 
 func (m response_Campus_ListNewsSources_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListNewsSourcesReply)
-	return response.Sources
+	return m.Sources
 }
 
 type response_Campus_ListNews_0 struct {
-	proto.Message
+	*ListNewsReply
 }
 
 func (m response_Campus_ListNews_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListNewsReply)
-	return response.News
+	return m.News
 }
 
 type response_Campus_ListAvailableDishTags_0 struct {
-	proto.Message
+	*ListAvailableDishTagsReply
 }
 
 func (m response_Campus_ListAvailableDishTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListAvailableDishTagsReply)
-	return response.RatingTags
+	return m.RatingTags
 }
 
 type response_Campus_ListNameTags_0 struct {
-	proto.Message
+	*ListNameTagsReply
 }
 
 func (m response_Campus_ListNameTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListNameTagsReply)
-	return response.RatingTags
+	return m.RatingTags
 }
 
 type response_Campus_ListAvailableCanteenTags_0 struct {
-	proto.Message
+	*ListAvailableCanteenTagsReply
 }
 
 func (m response_Campus_ListAvailableCanteenTags_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListAvailableCanteenTagsReply)
-	return response.RatingTags
+	return m.RatingTags
 }
 
 type response_Campus_ListCanteens_0 struct {
-	proto.Message
+	*ListCanteensReply
 }
 
 func (m response_Campus_ListCanteens_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListCanteensReply)
-	return response.Canteen
+	return m.Canteen
 }
 
 type response_Campus_ListDishes_0 struct {
-	proto.Message
+	*ListDishesReply
 }
 
 func (m response_Campus_ListDishes_0) XXX_ResponseBody() interface{} {
-	response := m.Message.(*ListDishesReply)
-	return response.Dish
+	return m.Dish
 }
 
 var (
