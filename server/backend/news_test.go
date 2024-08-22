@@ -221,7 +221,7 @@ func alert2() *model.NewsAlert {
 	}
 }
 
-const ExpectedListNewsAlertsQuery = "SELECT `news_alerts`.`news_alerts`,`news_alerts`.`file`,`news_alerts`.`name`,`news_alerts`.`link`,`news_alerts`.`created`,`news_alerts`.`from`,`news_alerts`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alerts` LEFT JOIN `files` `File` ON `news_alerts`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
+const ExpectedListNewsAlertsQuery = "SELECT `news_alerts`.`news_alert`,`news_alerts`.`file`,`news_alerts`.`name`,`news_alerts`.`link`,`news_alerts`.`created`,`news_alerts`.`from`,`news_alerts`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alerts` LEFT JOIN `files` `File` ON `news_alerts`.`file` = `File`.`file` WHERE news_alerts.to >= NOW()" with expected regexp "SELECT `news_alerts`.`news_alerts`,`news_alerts`.`file`,`news_alerts`.`name`,`news_alerts`.`link`,`news_alerts`.`created`,`news_alerts`.`from`,`news_alerts`.`to`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_alerts` LEFT JOIN `files` `File` ON `news_alerts`.`file` = `File`.`file` WHERE news_alert.to >= NOW()"
 
 func (s *NewsSuite) Test_ListNewsAlertsError() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)

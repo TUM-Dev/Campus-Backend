@@ -14,9 +14,7 @@ func autoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&model.Canteen{},
 		&model.CanteenRating{},
-		&model.CanteenRatingAverage{},
 		&model.CanteenRatingTag{},
-		&model.CanteenRatingTagAverage{},
 		&model.CanteenRatingTagOption{},
 		&model.CanteenHeadCount{},
 		&model.Crontab{},
@@ -63,7 +61,6 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20220713000000(),
 		migrate20221119131300(),
 		migrate20221210000000(),
-		migrate20230825000000(),
 		migrate20230904000000(),
 		migrate20230530000000(),
 		migrate20230904100000(),
