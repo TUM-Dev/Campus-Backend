@@ -51,7 +51,7 @@ func (c *CronService) dishNameDownloadCron() error {
 }
 
 func downloadDailyDishes(c *CronService) {
-	var results []model.Cafeteria
+	var results []model.Canteen
 	if err := c.db.Find(&results).Error; err != nil {
 		log.WithError(err).Error("Error while querying all cafeteria names from the database.")
 		return
@@ -145,13 +145,13 @@ func downloadCanteenNames(c *CronService) {
 	}
 
 	for _, cafeteriaName := range cafeteriaNames {
-		mensa := model.Cafeteria{
+		mensa := model.Canteen{
 			Name:      cafeteriaName.Name,
 			Address:   cafeteriaName.Location.Address,
 			Latitude:  cafeteriaName.Location.Latitude,
 			Longitude: cafeteriaName.Location.Longitude,
 		}
-		var cafeteriaResult model.Cafeteria
+		var cafeteriaResult model.Canteen
 		if err := c.db.First(&cafeteriaResult, "name = ?", cafeteriaName.Name).Error; err != nil {
 			if err := c.db.Create(&mensa).Error; err != nil {
 				log.WithError(err).Error("Error while creating the db entry for the cafeteria ", cafeteriaName.Name)
@@ -170,7 +170,7 @@ func downloadCanteenNames(c *CronService) {
 func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 	lowercaseDish := strings.ToLower(dishName)
 	var includedTags []int64
-	if err := db.Model(&model.DishNameTagOptionIncluded{}).
+	if err := db.Model(&model.IncludedDishNameTagOption{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&includedTags).Error; err != nil {
@@ -178,7 +178,7 @@ func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 	}
 
 	var excludedTags []int64
-	if err := db.Model(&model.DishNameTagOptionExcluded{}).
+	if err := db.Model(&model.ExcludedDishNameTagOption{}).
 		Where("? LIKE CONCAT('%', expression ,'%')", lowercaseDish).
 		Select("nameTagID").
 		Scan(&excludedTags).Error; err != nil {

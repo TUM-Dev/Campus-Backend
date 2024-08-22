@@ -70,7 +70,7 @@ func (c *CronService) movieCron() error {
 				log.WithFields(logFields).WithError(err).Error("error while finding imdb id")
 				continue
 			}
-			movie := model.Kino{
+			movie := model.Movie{
 				Date:        date,
 				Title:       item.Title,
 				Location:    null.StringFrom(item.Location),

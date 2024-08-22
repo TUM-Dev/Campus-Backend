@@ -12,7 +12,7 @@ import (
 )
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
-	var movies []model.Kino
+	var movies []model.Movie
 	tx := s.db.WithContext(ctx).
 		Joins("File").
 		Order("date ASC")
