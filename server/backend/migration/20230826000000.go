@@ -9,8 +9,8 @@ import (
 
 type Feedback struct {
 	Processed  bool        `gorm:"column:processed;type:boolean;default:false;not null;"`
-	OsVersion  null.String `gorm:"column:os_version;type:text;null;"`
-	AppVersion null.String `gorm:"column:app_version;type:text;null;"`
+	OsVersion  null.String `gorm:"column:os_version;type:text;"`
+	AppVersion null.String `gorm:"column:app_version;type:text;"`
 }
 
 // TableName sets the insert table name for this struct type

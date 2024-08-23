@@ -58,7 +58,7 @@ func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCan
 // queryLastCafeteriaRatingsWithLimit
 // Queries the actual ratings for a cafeteria and attaches the tag ratings which belong to the ratings
 func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cafeteriaID int32, tx *gorm.DB) []*pb.SingleRatingReply {
-	var ratings []model.CafeteriaRating
+	var ratings []model.CanteenRating
 	var err error
 
 	var limit = int(input.Limit)
@@ -81,7 +81,8 @@ func queryLastCafeteriaRatingsWithLimit(input *pb.ListCanteenRatingsRequest, caf
 			} else {
 				to = input.To.AsTime()
 			}
-			err = tx.Order("timestamp desc, cafeteriaRating desc").
+			err = tx.
+				Order("timestamp desc, cafeteriaRating desc").
 				Limit(limit).
 				Find(&ratings, "cafeteriaID = ? AND timestamp < ? AND timestamp > ?", cafeteriaID, to, from).Error
 		} else {
@@ -233,25 +234,25 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType model.ModelType, tx *
 	var results []queryRatingTag
 	var err error
 	if ratingType == model.DISH {
-		err = tx.Table("dish_rating_tag_option options").
+		err = tx.Table("dish_rating_tag_options options").
 			Joins("JOIN dish_rating_tag_statistics results ON options.dishRatingTagOption = results.tagID").
 			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
 	} else if ratingType == model.CAFETERIA {
-		err = tx.Table("cafeteria_rating_tag_option options").
+		err = tx.Table("cafeteria_rating_tag_options options").
 			Joins("JOIN cafeteria_rating_tag_statistics results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
 	} else { //Query for name tags
-		err = tx.Table("dish_to_dish_name_tag mapping").
+		err = tx.Table("dish_to_dish_name_tags mapping").
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
 			Joins("JOIN dish_name_tag_statistics results ON mapping.nameTagID = results.tagID").
-			Joins("JOIN dish_name_tag_option options ON mapping.nameTagID = options.dishNameTagOption").
+			Joins("JOIN dish_name_tag_options options ON mapping.nameTagID = options.dishNameTagOption").
 			Select("mapping.nameTagID as tagId, results.average as avg, " +
 				"results.min as min, results.max as max, results.std as std").
 			Scan(&results).Error
@@ -282,13 +283,13 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, 
 	var results []*pb.RatingTagNewRequest
 	var err error
 	if ratingType == model.DISH {
-		err = tx.Table("dish_rating_tag_option options").
-			Joins("JOIN dish_rating_tag rating ON options.dishRatingTagOption = rating.tagID").
+		err = tx.Table("dish_rating_tag_options options").
+			Joins("JOIN dish_rating_tags rating ON options.dishRatingTagOption = rating.tagID").
 			Select("dishRatingTagOption as tagId, points, parentRating").
 			Find(&results, "parentRating = ?", dishID).Error
 	} else {
-		err = tx.Table("cafeteria_rating_tag_option options").
-			Joins("JOIN cafeteria_rating_tag rating ON options.cafeteriaRatingTagOption = rating.tagID").
+		err = tx.Table("cafeteria_rating_tag_options options").
+			Joins("JOIN cafeteria_rating_tags rating ON options.cafeteriaRatingTagOption = rating.tagID").
 			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
 			Find(&results, "correspondingRating = ?", dishID).Error
 	}
@@ -312,7 +313,7 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 	}
 
 	resPath := imageWrapper(input.Image, "cafeterias", cafeteriaID)
-	rating := model.CafeteriaRating{
+	rating := model.CanteenRating{
 		Comment:     input.Comment,
 		Points:      input.Points,
 		CafeteriaID: cafeteriaID,
@@ -411,7 +412,7 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
-	assignDishNameTag(rating, dishInCafeteria.Dish, tx)
+	assignDishNameTag(&rating, dishInCafeteria.Dish, tx)
 
 	if err := storeRatingTags(rating.DishRating, input.RatingTags, model.DISH, tx); err != nil {
 		return &pb.CreateDishRatingReply{}, err
@@ -421,7 +422,7 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 
 // assignDishNameTag
 // Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
-func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
+func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) {
 	var nameTagIDs []int64
 	err := tx.Model(&model.DishToDishNameTag{}).
 		Where("dishID = ? ", dishID).
@@ -432,9 +433,9 @@ func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
 	} else {
 		for _, tagID := range nameTagIDs {
 			if err := tx.Create(&model.DishNameTag{
-				CorrespondingRating: rating.DishRating,
-				Points:              rating.Points,
-				TagNameID:           tagID,
+				RatingID:  rating.DishRating,
+				Points:    rating.Points,
+				TagNameID: tagID,
 			}).Error; err != nil {
 				log.WithError(err).Error("while creating a new dish name rating.")
 			}
@@ -457,10 +458,10 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, cafeter
 		return -1, status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
 	}
 
-	var result *model.Cafeteria
+	var result *model.Canteen
 	if res := tx.First(&result, "name LIKE ?", cafeteriaName); errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
 		log.WithError(res.Error).Error("Error while querying the cafeteria id by name: ", cafeteriaName)
-		return -1, status.Error(codes.InvalidArgument, "Cafeteria does not exist. Rating has not been saved.")
+		return -1, status.Error(codes.InvalidArgument, "Canteen does not exist. Rating has not been saved.")
 	}
 
 	return result.Cafeteria, nil
@@ -473,8 +474,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
-		usedTagIds := make(map[int]int)
-		insertModel := getModelStoreTag(tagType, tx)
+		usedTagIds := make(map[int64]bool)
 		for _, currentTag := range tags {
 			var err error
 			var count int64
@@ -484,7 +484,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
 					Count(&count).Error
 			} else {
-				err = tx.Model(&model.CafeteriaRatingTagOption{}).
+				err = tx.Model(&model.CanteenRatingTagOption{}).
 					Where("cafeteriaRatingTagOption LIKE ?", currentTag.TagId).
 					Count(&count).Error
 			}
@@ -497,17 +497,25 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 				log.WithFields(fields).Info("tag does not exist")
 				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
 			} else {
-				if usedTagIds[int(currentTag.TagId)] == 0 {
-					err := insertModel.
-						Create(&model.DishRatingTag{
-							CorrespondingRating: parentRatingID,
-							Points:              int32(currentTag.Points),
-							TagID:               currentTag.TagId,
-						}).Error
-					if err != nil {
-						log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+				if !usedTagIds[currentTag.TagId] {
+					if tagType == model.DISH {
+						if err := tx.Create(&model.DishRatingTag{
+							RatingID: parentRatingID,
+							Points:   int32(currentTag.Points),
+							TagID:    currentTag.TagId,
+						}).Error; err != nil {
+							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+						}
+					} else {
+						if err := tx.Create(&model.CanteenRatingTag{
+							RatingID: parentRatingID,
+							Points:   int32(currentTag.Points),
+							TagID:    currentTag.TagId,
+						}).Error; err != nil {
+							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+						}
 					}
-					usedTagIds[int(currentTag.TagId)] = 1
+					usedTagIds[currentTag.TagId] = true
 
 				} else {
 					warningOccurred = fmt.Sprintf("%s, %d", warningOccurred, currentTag.TagId)
@@ -527,20 +535,11 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 	} else {
 		return nil
 	}
-
-}
-
-func getModelStoreTag(tagType model.ModelType, tx *gorm.DB) *gorm.DB {
-	if tagType == model.DISH {
-		return tx.Model(&model.DishRatingTag{})
-	} else {
-		return tx.Model(&model.CafeteriaRatingTag{})
-	}
 }
 
 func getIDForCafeteriaName(name string, tx *gorm.DB) int32 {
 	var result int32 = -1
-	err := tx.Model(&model.Cafeteria{}).
+	err := tx.Model(&model.Canteen{}).
 		Where("name LIKE ?", name).
 		Select("cafeteria").
 		Scan(&result).Error
@@ -609,7 +608,7 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.List
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
 	err := s.db.WithContext(ctx).
-		Model(&model.CafeteriaRatingTagOption{}).
+		Model(&model.CanteenRatingTagOption{}).
 		Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").
 		Find(&result).Error
 	if err != nil {
@@ -628,7 +627,7 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 	var result []*pb.Canteen
 	var requestStatus error = nil
 	if err := s.db.WithContext(ctx).
-		Model(&model.Cafeteria{}).
+		Model(&model.Canteen{}).
 		Select("cafeteria as id,address,latitude,longitude").
 		Scan(&result).Error; err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
@@ -657,7 +656,7 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 	cafeteriaName := strings.ReplaceAll(strings.ToUpper(req.CanteenId), "-", "_")
 
 	err := s.db.WithContext(ctx).
-		Table("dishes_of_the_week weekly").
+		Table("dishes_of_the_weeks weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
 		Joins("JOIN dish d ON d.dish = weekly.dishID").

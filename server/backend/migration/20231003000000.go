@@ -33,7 +33,7 @@ type nameTag struct {
 }
 
 type ToFillCafeteriaRatingTagOption struct {
-	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;" json:"canteenRatingTagOption"`
+	CafeteriaRatingsTagOption int64  `gorm:"primary_key;autoIncrement;column:cafeteriaRatingTagOption;type:int;not null;" json:"canteenRatingTagOption"`
 	DE                        string `gorm:"column:DE;text;default:('de');not null;" json:"DE"`
 	EN                        string `gorm:"column:EN;text;default:('en');not null;" json:"EN"`
 }
@@ -44,7 +44,7 @@ func (n *ToFillCafeteriaRatingTagOption) TableName() string {
 }
 
 type ToFillDishRatingTagOption struct {
-	DishRatingTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
+	DishRatingTagOption int64  `gorm:"primary_key;autoIncrement;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
 	DE                  string `gorm:"column:DE;type:text;default:('de');not null;" json:"DE"`
 	EN                  string `gorm:"column:EN;type:text;default:('en');not null;" json:"EN"`
 }
@@ -55,7 +55,7 @@ func (n *ToFillDishRatingTagOption) TableName() string {
 }
 
 type ToFillDishNameTagOption struct {
-	DishNameTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
+	DishNameTagOption int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
 	DE                string `gorm:"column:DE;type:text;not null;" json:"DE"`
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }
@@ -66,7 +66,7 @@ func (n *ToFillDishNameTagOption) TableName() string {
 }
 
 type ToFillDishNameTagOptionExcluded struct {
-	DishNameTagOptionExcluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
+	DishNameTagOptionExcluded int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
@@ -77,7 +77,7 @@ func (n *ToFillDishNameTagOptionExcluded) TableName() string {
 }
 
 type ToFillDishNameTagOptionIncluded struct {
-	DishNameTagOptionIncluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
+	DishNameTagOptionIncluded int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }

@@ -17,7 +17,7 @@ var (
 
 // NotificationType struct is a row record of the notification_type table in the tca database
 type NotificationType struct {
-	Type         int64  `gorm:"primary_key;AUTO_INCREMENT;column:type;type:int;" json:"type"`
+	Type         int64  `gorm:"primary_key;autoIncrement;column:type;type:int;" json:"type"`
 	Name         string `gorm:"column:name;type:text;size:65535;" json:"name"`
 	Confirmation string `gorm:"column:confirmation;type:enum('true', 'false');default:'false';" json:"confirmation"`
 }
