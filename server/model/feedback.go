@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/guregu/null"
 	"time"
+
+	"github.com/guregu/null"
 )
 
 type Feedback struct {
