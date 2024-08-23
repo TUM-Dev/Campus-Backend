@@ -17,7 +17,7 @@ var (
 
 // NewsAlert struct is a row record of the news_alert table in the tca database
 type NewsAlert struct {
-	NewsAlert int64       `gorm:"primary_key;AUTO_INCREMENT;column:news_alert;type:int;" json:"news_alert"`
+	NewsAlert int64       `gorm:"primary_key;autoIncrement;column:news_alert;type:int;" json:"news_alert"`
 	FileID    int64       `gorm:"column:file;not null"`
 	File      File        `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name      null.String `gorm:"column:name;type:varchar(100);" json:"name"`

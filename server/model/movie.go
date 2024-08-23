@@ -8,7 +8,7 @@ import (
 
 // Movie stores all movies
 type Movie struct {
-	Id          int64       `gorm:"primary_key;AUTO_INCREMENT;column:kino;type:int;not null;"`
+	Id          int64       `gorm:"primary_key;autoIncrement;column:kino;type:int;not null;"`
 	Date        time.Time   `gorm:"column:date;type:datetime;not null;"`
 	Created     time.Time   `gorm:"column:created;type:timestamp;not null;default:current_timestamp()"`
 	Title       string      `gorm:"column:title;type:text;not null;"`

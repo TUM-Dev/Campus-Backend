@@ -10,7 +10,7 @@ import (
 
 // InitialCafeteria stores all Available cafeterias in the format of the eat-api
 type InitialCafeteria struct {
-	Cafeteria int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteria;type:int;not null;" json:"canteen" `
+	Cafeteria int64   `gorm:"primary_key;autoIncrement;column:cafeteria;type:int;not null;" json:"canteen" `
 	Name      string  `gorm:"column:name;type:text;not null;" json:"name" `
 	Address   string  `gorm:"column:address;type:text;not null;" json:"address" `
 	Latitude  float64 `gorm:"column:latitude;type:double;not null;" json:"latitude" `
@@ -24,7 +24,7 @@ func (n *InitialCafeteria) TableName() string {
 
 // InitialCafeteriaRating stores all Available cafeterias in the format of the eat-api
 type InitialCafeteriaRating struct {
-	CafeteriaRating int64     `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRating;type:int;not null;" json:"canteenrating"`
+	CafeteriaRating int64     `gorm:"primary_key;autoIncrement;column:cafeteriaRating;type:int;not null;" json:"canteenrating"`
 	Points          int32     `gorm:"column:points;type:int;not null;" json:"points"`
 	Comment         string    `gorm:"column:comment;type:text;" json:"comment" `
 	CafeteriaID     int64     `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
@@ -39,7 +39,7 @@ func (n *InitialCafeteriaRating) TableName() string {
 
 // InitialCafeteriaRatingTag struct is a row record of the either the dish_tag_rating-table or the cafeteria_rating_tags-table in the database
 type InitialCafeteriaRatingTag struct {
-	CafeteriaRatingTag  int64 `gorm:"primary_key;AUTO_INCREMENT;column:CafeteriaRatingTag;type:int;not null;"`
+	CafeteriaRatingTag  int64 `gorm:"primary_key;autoIncrement;column:CafeteriaRatingTag;type:int;not null;"`
 	CorrespondingRating int64 `gorm:"foreignKey:cafeteriaRatingID;column:correspondingRating;type:int;not null;"`
 	Points              int32 `gorm:"column:points;type:int;not null;"`
 	TagID               int64 `gorm:"foreignKey:cafeteriaRatingTagOption;column:tagID;type:int;not null;"`
@@ -52,7 +52,7 @@ func (n *InitialCafeteriaRatingTag) TableName() string {
 
 // InitialCafeteriaRatingTagOption stores all available options for tags which can be used to quickly rate cafeterias
 type InitialCafeteriaRatingTagOption struct {
-	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;"`
+	CafeteriaRatingsTagOption int64  `gorm:"primary_key;autoIncrement;column:cafeteriaRatingTagOption;type:int;not null;"`
 	DE                        string `gorm:"column:DE;text;default:('de');not null;"`
 	EN                        string `gorm:"column:EN;text;default:('en');not null;"`
 }
@@ -64,7 +64,7 @@ func (n *InitialCafeteriaRatingTagOption) TableName() string {
 
 // InitialDish represents one dish fin a specific cafeteria
 type InitialDish struct {
-	Dish        int64  `gorm:"primary_key;AUTO_INCREMENT;column:dish;type:int;not null;" json:"dish"`
+	Dish        int64  `gorm:"primary_key;autoIncrement;column:dish;type:int;not null;" json:"dish"`
 	Name        string `gorm:"column:name;type:text;not null;" json:"name" `
 	Type        string `gorm:"column:type;type:text;not null;" json:"type" `
 	CafeteriaID int64  `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
@@ -76,7 +76,7 @@ func (n *InitialDish) TableName() string {
 }
 
 type InitialDishesOfTheWeek struct {
-	DishesOfTheWeek int64 `gorm:"primary_key;AUTO_INCREMENT;column:dishesOfTheWeek;type:int;not null;" json:"dishesOfTheWeek"`
+	DishesOfTheWeek int64 `gorm:"primary_key;autoIncrement;column:dishesOfTheWeek;type:int;not null;" json:"dishesOfTheWeek"`
 	Year            int32 `gorm:"column:year;type:int;not null;" json:"year"`
 	Week            int32 `gorm:"column:week;type:int;not null;" json:"week"`
 	Day             int32 `gorm:"column:day;type:int;not null;" json:"day"`
@@ -89,7 +89,7 @@ func (n *InitialDishesOfTheWeek) TableName() string {
 }
 
 type InitialDishNameTagOption struct {
-	DishNameTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
+	DishNameTagOption int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOption;type:int;not null;" json:"dishNameTagOption"`
 	DE                string `gorm:"column:DE;type:text;not null;" json:"DE"`
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }
@@ -100,7 +100,7 @@ func (n *InitialDishNameTagOption) TableName() string {
 }
 
 type InitialDishRatingTagOption struct {
-	DishRatingTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
+	DishRatingTagOption int64  `gorm:"primary_key;autoIncrement;column:dishRatingTagOption;type:int;not null;" json:"dishRatingTagOption"`
 	DE                  string `gorm:"column:DE;type:text;default:('de');not null;" json:"DE"`
 	EN                  string `gorm:"column:EN;type:text;default:('en');not null;" json:"EN"`
 }
@@ -111,7 +111,7 @@ func (n *InitialDishRatingTagOption) TableName() string {
 }
 
 type InitialDishNameTag struct {
-	DishNameTag         int64 `gorm:"primary_key;AUTO_INCREMENT;column:DishNameTag;type:int;not null;" json:"DishNameTag"`
+	DishNameTag         int64 `gorm:"primary_key;autoIncrement;column:DishNameTag;type:int;not null;" json:"DishNameTag"`
 	CorrespondingRating int64 `gorm:"foreignKey:dish;column:correspondingRating;type:int;not null;" json:"correspondingRating"`
 	Points              int32 `gorm:"column:points;type:int;not null;" json:"points"`
 	TagNameID           int64 `gorm:"foreignKey:tagRatingID;column:tagNameID;type:int;not null;" json:"tagnameID"`
@@ -123,7 +123,7 @@ func (n *InitialDishNameTag) TableName() string {
 }
 
 type InitialDishNameTagOptionExcluded struct {
-	DishNameTagOptionExcluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
+	DishNameTagOptionExcluded int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOptionExcluded;type:int;not null;" json:"dishNameTagOptionExcluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
@@ -134,7 +134,7 @@ func (n *InitialDishNameTagOptionExcluded) TableName() string {
 }
 
 type InitialDishNameTagOptionIncluded struct {
-	DishNameTagOptionIncluded int64  `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
+	DishNameTagOptionIncluded int64  `gorm:"primary_key;autoIncrement;column:dishNameTagOptionIncluded;type:int;not null;" json:"dishNameTagOptionIncluded"`
 	NameTagID                 int64  `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 	Expression                string `gorm:"column:expression;type:text;" json:"expression"`
 }
@@ -145,7 +145,7 @@ func (n *InitialDishNameTagOptionIncluded) TableName() string {
 }
 
 type InitialDishRating struct {
-	DishRating  int64     `gorm:"primary_key;AUTO_INCREMENT;column:dishRating;type:int;not null;" json:"dishRating"`
+	DishRating  int64     `gorm:"primary_key;autoIncrement;column:dishRating;type:int;not null;" json:"dishRating"`
 	Points      int32     `gorm:"column:points;type:int;not null;" json:"points"`
 	CafeteriaID int64     `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	DishID      int64     `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
@@ -160,7 +160,7 @@ func (n *InitialDishRating) TableName() string {
 }
 
 type InitialDishRatingTag struct {
-	DishRatingTag       int64 `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTag;type:int;not null;" json:"dishRatingTag"`
+	DishRatingTag       int64 `gorm:"primary_key;autoIncrement;column:dishRatingTag;type:int;not null;" json:"dishRatingTag"`
 	CorrespondingRating int64 `gorm:"foreignKey:cafeteriaRating;column:parentRating;type:int;not null;" json:"parentRating"`
 	Points              int32 `gorm:"column:points;type:int;not null;" json:"points"`
 	TagID               int64 `gorm:"foreignKey:dishRatingTagOption;column:tagID;type:int;not null;" json:"tagID"`
@@ -172,7 +172,7 @@ func (n *InitialDishRatingTag) TableName() string {
 }
 
 type InitialDishToDishNameTag struct {
-	DishToDishNameTag int64 `gorm:"primary_key;AUTO_INCREMENT;column:dishToDishNameTag;type:int;not null;" json:"dishToDishNameTag"`
+	DishToDishNameTag int64 `gorm:"primary_key;autoIncrement;column:dishToDishNameTag;type:int;not null;" json:"dishToDishNameTag"`
 	DishID            int64 `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
 	NameTagID         int64 `gorm:"foreignKey:dishNameTagOption;column:nameTagID;type:int;not null;" json:"nameTagID"`
 }
@@ -184,7 +184,7 @@ func (n *InitialDishToDishNameTag) TableName() string {
 
 // InitialCafeteriaRatingAverage stores all precomputed values for the cafeteria ratings
 type InitialCafeteriaRatingAverage struct {
-	CafeteriaRatingAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingAverage;type:int;not null;" json:"canteenRatingAverage" `
+	CafeteriaRatingAverage int64   `gorm:"primary_key;autoIncrement;column:cafeteriaRatingAverage;type:int;not null;" json:"canteenRatingAverage" `
 	CafeteriaID            int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
 	Average                float64 `gorm:"column:average;type:double;not null;" json:"average" `
 	Min                    int32   `gorm:"column:min;type:int;not null;" json:"min"`
@@ -199,7 +199,7 @@ func (n *InitialCafeteriaRatingAverage) TableName() string {
 
 // InitialCafeteriaRatingTagAverage stores all precomputed values for the cafeteria ratings
 type InitialCafeteriaRatingTagAverage struct {
-	CafeteriaRatingTagsAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagsAverage;type:int;not null;" json:"canteenRatingTagsAverage"`
+	CafeteriaRatingTagsAverage int64   `gorm:"primary_key;autoIncrement;column:cafeteriaRatingTagsAverage;type:int;not null;" json:"canteenRatingTagsAverage"`
 	CafeteriaID                int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
 	TagID                      int64   `gorm:"column:tagID;foreignKey:cafeteriaRatingTagOption;type:int;not null;" json:"tagID"`
 	Average                    float64 `gorm:"column:average;type:double;not null;" json:"average"`
@@ -215,7 +215,7 @@ func (n *InitialCafeteriaRatingTagAverage) TableName() string {
 
 // InitialDishNameTagAverage stores all precomputed values for the DishName ratings
 type InitialDishNameTagAverage struct {
-	DishNameTagAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagAverage;type:int;not null;" json:"dishNameTagAverage" `
+	DishNameTagAverage int64   `gorm:"primary_key;autoIncrement;column:dishNameTagAverage;type:int;not null;" json:"dishNameTagAverage" `
 	CafeteriaID        int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	TagID              int64   `gorm:"column:tagID;foreignKey:DishNameTagOption;type:int;not null;" json:"tagID"`
 	Average            float64 `gorm:"column:average;type:double;not null;" json:"average" `
@@ -231,7 +231,7 @@ func (n *InitialDishNameTagAverage) TableName() string {
 
 // InitialDishRatingAverage stores all precomputed values for the cafeteria ratings
 type InitialDishRatingAverage struct {
-	DishRatingAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingAverage;type:int;not null;" json:"dishRatingAverage" `
+	DishRatingAverage int64   `gorm:"primary_key;autoIncrement;column:dishRatingAverage;type:int;not null;" json:"dishRatingAverage" `
 	CafeteriaID       int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	DishID            int64   `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
 	Average           float64 `gorm:"column:average;type:double;not null;" json:"average" `
@@ -247,7 +247,7 @@ func (n *InitialDishRatingAverage) TableName() string {
 
 // InitialDishRatingTagAverage stores all precomputed values for the cafeteria ratings
 type InitialDishRatingTagAverage struct {
-	DishRatingTagsAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingTagsAverage;type:int;not null;" json:"dishRatingTagsAverage" `
+	DishRatingTagsAverage int64   `gorm:"primary_key;autoIncrement;column:dishRatingTagsAverage;type:int;not null;" json:"dishRatingTagsAverage" `
 	CafeteriaID           int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	TagID                 int64   `gorm:"column:tagID;foreignKey:tagID;type:int;not null;" json:"tagID"`
 	DishID                int64   `gorm:"column:dishID;foreignKey:dishID;type:int;not null;" json:"dishID"`

@@ -15,7 +15,7 @@ var (
 
 // News struct is a row record of the news table in the tca database
 type News struct {
-	News         int64       `gorm:"primary_key;AUTO_INCREMENT;column:news;type:int;"`
+	News         int64       `gorm:"primary_key;autoIncrement;column:news;type:int;"`
 	Date         time.Time   `gorm:"column:date;type:datetime;"`
 	Created      time.Time   `gorm:"column:created;type:timestamp;default:current_timestamp();"`
 	Title        string      `gorm:"column:title;type:text;size:255;"`

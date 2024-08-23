@@ -16,7 +16,7 @@ var (
 )
 
 type NewsSource struct {
-	Source int64       `gorm:"primary_key;AUTO_INCREMENT;column:source;type:int;"`
+	Source int64       `gorm:"primary_key;autoIncrement;column:source;type:int;"`
 	Title  string      `gorm:"column:title;type:text;size:16777215;"`
 	URL    null.String `gorm:"column:url;type:text;size:16777215;"`
 	FileID int64       `gorm:"column:icon;not null;type:int;"`
