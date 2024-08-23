@@ -28,7 +28,7 @@ type InitialCafeteriaRating struct {
 	Points          int32     `gorm:"column:points;type:int;not null;" json:"points"`
 	Comment         string    `gorm:"column:comment;type:text;" json:"comment" `
 	CafeteriaID     int64     `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
-	Timestamp       time.Time `gorm:"column:timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP;OnUpdate:CURRENT_TIMESTAMP;" json:"timestamp" `
+	Timestamp       time.Time `gorm:"column:timestamp;type:timestamp;not null;default:current_timestamp();OnUpdate:current_timestamp();" json:"timestamp" `
 	Image           string    `gorm:"column:image;type:text;" json:"image"`
 }
 
@@ -150,7 +150,7 @@ type InitialDishRating struct {
 	CafeteriaID int64     `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	DishID      int64     `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
 	Comment     string    `gorm:"column:comment;type:text;" json:"comment"`
-	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;not null;default:CURRENT_TIMESTAMP;OnUpdate:CURRENT_TIMESTAMP;" json:"timestamp"`
+	Timestamp   time.Time `gorm:"column:timestamp;type:timestamp;not null;default:current_timestamp();OnUpdate:current_timestamp();" json:"timestamp"`
 	Image       string    `gorm:"column:image;type:text;" json:"image"`
 }
 

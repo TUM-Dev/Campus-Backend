@@ -17,7 +17,7 @@ type Feedback struct {
 	OsVersion    null.String `gorm:"column:os_version;type:text;null;"`
 	AppVersion   null.String `gorm:"column:app_version;type:text;null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex,expression:app_version(100)"`
 	Processed    bool        `gorm:"column:processed;type:boolean;default:false;not null;"`
-	Timestamp    null.Time   `gorm:"column:timestamp;type:datetime;default:CURRENT_TIMESTAMP;null;"`
+	Timestamp    null.Time   `gorm:"column:timestamp;type:datetime;default:current_timestamp();null;"`
 }
 
 // TableName sets the insert table name for this struct type

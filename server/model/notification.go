@@ -22,7 +22,7 @@ type Notification struct {
 	Location     null.Int    `gorm:"column:location;type:int;" json:"location"`
 	Title        string      `gorm:"column:title;type:text;size:65535;" json:"title"`
 	Description  string      `gorm:"column:description;type:text;size:65535;" json:"description"`
-	Created      time.Time   `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;" json:"created"`
+	Created      time.Time   `gorm:"column:created;type:timestamp;default:current_timestamp();" json:"created"`
 	Signature    null.String `gorm:"column:signature;type:text;size:65535;" json:"signature"`
 	Silent       int32       `gorm:"column:silent;type:tinyint;default:0;" json:"silent"`
 }

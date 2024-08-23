@@ -17,7 +17,7 @@ var (
 type News struct {
 	News         int64       `gorm:"primary_key;AUTO_INCREMENT;column:news;type:int;"`
 	Date         time.Time   `gorm:"column:date;type:datetime;"`
-	Created      time.Time   `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;"`
+	Created      time.Time   `gorm:"column:created;type:timestamp;default:current_timestamp();"`
 	Title        string      `gorm:"column:title;type:text;size:255;"`
 	Description  string      `gorm:"column:description;type:text;size:65535;"`
 	NewsSourceID int64       `gorm:"column:src;type:int;"`

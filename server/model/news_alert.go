@@ -22,9 +22,9 @@ type NewsAlert struct {
 	File      File        `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name      null.String `gorm:"column:name;type:varchar(100);" json:"name"`
 	Link      null.String `gorm:"column:link;type:text;size:65535;" json:"link"`
-	Created   time.Time   `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;" json:"created"`
-	From      time.Time   `gorm:"column:from;type:datetime;default:CURRENT_TIMESTAMP;" json:"from"`
-	To        time.Time   `gorm:"column:to;type:datetime;default:CURRENT_TIMESTAMP;" json:"to"`
+	Created   time.Time   `gorm:"column:created;type:timestamp;default:current_timestamp();" json:"created"`
+	From      time.Time   `gorm:"column:from;type:datetime;default:current_timestamp();" json:"from"`
+	To        time.Time   `gorm:"column:to;type:datetime;default:current_timestamp();" json:"to"`
 }
 
 // TableName sets the insert table name for this struct type
