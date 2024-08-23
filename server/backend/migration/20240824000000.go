@@ -25,7 +25,7 @@ var wrongTableNames = []wrongTableName{
 	{"dish_name_tag", "dish_name_tags"},
 	{"dish_name_tag_option", "dish_name_tag_options"},
 	{"dish_name_tag_option_excluded", "excluded_dish_name_tag_options"},
-	{"dish_name_tag_option_included", "included_dish_name_tag_option"},
+	{"dish_name_tag_option_included", "included_dish_name_tag_options"},
 	{"dish_to_dish_name_tag", "dish_to_dish_name_tags"},
 	{"dishes_of_the_week", "dishes_of_the_weeks"},
 	{"update_note", "update_notes"},
