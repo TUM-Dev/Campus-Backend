@@ -307,7 +307,7 @@ create table if not exists devices
     osVersion       text                        default ('')                    not null,
     appVersion      text                        default ('')                    not null,
     counter         int                         default 0                     not null,
-    pk              longtext                                                  null,
+    pk              text                                                      null,
     pkActive        enum ('true', 'false')      default 'false'               not null,
     gcmToken        text                                                      null,
     gcmStatus       varchar(200)                                              null,
