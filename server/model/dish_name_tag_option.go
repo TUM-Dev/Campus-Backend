@@ -5,8 +5,3 @@ type DishNameTagOption struct {
 	DE                string `gorm:"column:DE;type:text;not null;" json:"DE"`
 	EN                string `gorm:"column:EN;type:text;not null;" json:"EN"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *DishNameTagOption) TableName() string {
-	return "dish_name_tag_option"
-}

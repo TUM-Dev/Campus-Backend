@@ -26,8 +26,3 @@ type NewsAlert struct {
 	From      time.Time   `gorm:"column:from;type:datetime;default:current_timestamp();" json:"from"`
 	To        time.Time   `gorm:"column:to;type:datetime;default:current_timestamp();" json:"to"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *NewsAlert) TableName() string {
-	return "news_alert"
-}

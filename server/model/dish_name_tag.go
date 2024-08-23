@@ -6,8 +6,3 @@ type DishNameTag struct {
 	Points              int32 `gorm:"column:points;type:int;not null;" json:"points"`
 	TagNameID           int64 `gorm:"foreignKey:tagRatingID;column:tagNameID;type:int;not null;" json:"tagnameID"`
 }
-
-// TableName sets the insert table name for this struct type
-func (n *DishNameTag) TableName() string {
-	return "dish_name_tag"
-}

@@ -32,7 +32,7 @@ func (c *CronService) movieCron() error {
 	}
 	log.Trace("parsing upcoming feed")
 	var allMovieLinks []string
-	if err := c.db.Model(&model.Kino{}).
+	if err := c.db.Model(&model.Movie{}).
 		Distinct().
 		Pluck("Link", &allMovieLinks).Error; err != nil {
 		return err
@@ -70,7 +70,7 @@ func (c *CronService) movieCron() error {
 				log.WithFields(logFields).WithError(err).Error("error while finding imdb id")
 				continue
 			}
-			movie := model.Kino{
+			movie := model.Movie{
 				Date:        date,
 				Title:       item.Title,
 				Location:    null.StringFrom(item.Location),
