@@ -181,7 +181,7 @@ func migrate20240316000000() *gormigrate.Migration {
 					return err
 				}
 				// mysql does not allow primary keys to have anything other than not null
-				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL autoIncrement"); err != nil {
+				if err := migrateField(tx, f.toTable, f.toColumn, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 					return err
 				}
 			}

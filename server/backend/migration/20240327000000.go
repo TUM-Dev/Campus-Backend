@@ -21,14 +21,14 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table news_alert add constraint news_alert_files_file_fk foreign key (file) references files (file) on delete cascade").Error; err != nil {
 				return err
 			}
-			// some tables PK don't have autoIncrement set, despite that they should
+			// some tables PK don't have AUTO_INCREMENT set, despite that they should
 			for _, t := range tablesWithWrongId() {
 				tablesWithCorrectIds := []string{"roomfinder_buildings2maps", "roomfinder_rooms2maps", "question"}
 				if slices.Contains(tablesWithCorrectIds, t.table) {
 					continue
 				}
 				log.WithField("table", t.table).Info("migrated PK-field")
-				if err := migrateField(tx, t.table, t.field, "BIGINT NOT NULL autoIncrement"); err != nil {
+				if err := migrateField(tx, t.table, t.field, "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 					return err
 				}
 			}
@@ -42,7 +42,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table crontab add constraint primary key (cron)").Error; err != nil {
 				return err
 			}
-			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL autoIncrement"); err != nil {
+			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 				return err
 			}
 			// roomfinder_schedules does not have a PK set
@@ -59,7 +59,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table news_alert add constraint news_alert foreign key (news_alert) references files (file) on delete cascade").Error; err != nil {
 				return err
 			}
-			// some tables PK don't have autoIncrement set, despite that they should
+			// some tables PK don't have AUTO_INCREMENT set, despite that they should
 			for _, t := range tablesWithWrongId() {
 				tablesWithCorrectIds := []string{"roomfinder_buildings2maps", "roomfinder_rooms2maps", "question"}
 				if slices.Contains(tablesWithCorrectIds, t.table) {
@@ -80,7 +80,7 @@ func migrate20240327000000() *gormigrate.Migration {
 			if err := tx.Exec("alter table crontab add constraint cron unique (cron)").Error; err != nil {
 				return err
 			}
-			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL autoIncrement"); err != nil {
+			if err := migrateField(tx, "crontab", "cron", "BIGINT NOT NULL AUTO_INCREMENT"); err != nil {
 				return err
 			}
 			// roomfinder_schedules does not have a PK set
