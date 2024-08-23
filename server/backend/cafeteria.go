@@ -412,7 +412,7 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 	}
 
-	assignDishNameTag(rating, dishInCafeteria.Dish, tx)
+	assignDishNameTag(&rating, dishInCafeteria.Dish, tx)
 
 	if err := storeRatingTags(rating.DishRating, input.RatingTags, model.DISH, tx); err != nil {
 		return &pb.CreateDishRatingReply{}, err
@@ -422,7 +422,7 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 
 // assignDishNameTag
 // Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
-func assignDishNameTag(rating model.DishRating, dishID int64, tx *gorm.DB) {
+func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) {
 	var nameTagIDs []int64
 	err := tx.Model(&model.DishToDishNameTag{}).
 		Where("dishID = ? ", dishID).
@@ -474,8 +474,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 	var errorOccurred = ""
 	var warningOccurred = ""
 	if len(tags) > 0 {
-		usedTagIds := make(map[int]int)
-		insertModel := getModelStoreTag(tagType, tx)
+		usedTagIds := make(map[int64]bool)
 		for _, currentTag := range tags {
 			var err error
 			var count int64
@@ -498,17 +497,25 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 				log.WithFields(fields).Info("tag does not exist")
 				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
 			} else {
-				if usedTagIds[int(currentTag.TagId)] == 0 {
-					err := insertModel.
-						Create(&model.DishRatingTag{
-							CorrespondingRating: parentRatingID,
-							Points:              int32(currentTag.Points),
-							TagID:               currentTag.TagId,
-						}).Error
-					if err != nil {
-						log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+				if !usedTagIds[currentTag.TagId] {
+					if tagType == model.DISH {
+						if err := tx.Create(&model.DishRatingTag{
+							RatingID: parentRatingID,
+							Points:   int32(currentTag.Points),
+							TagID:    currentTag.TagId,
+						}).Error; err != nil {
+							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+						}
+					} else {
+						if err := tx.Create(&model.CanteenRatingTag{
+							RatingID: parentRatingID,
+							Points:   int32(currentTag.Points),
+							TagID:    currentTag.TagId,
+						}).Error; err != nil {
+							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
+						}
 					}
-					usedTagIds[int(currentTag.TagId)] = 1
+					usedTagIds[currentTag.TagId] = true
 
 				} else {
 					warningOccurred = fmt.Sprintf("%s, %d", warningOccurred, currentTag.TagId)
@@ -527,15 +534,6 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
 	} else {
 		return nil
-	}
-
-}
-
-func getModelStoreTag(tagType model.ModelType, tx *gorm.DB) *gorm.DB {
-	if tagType == model.DISH {
-		return tx.Model(&model.DishRatingTag{})
-	} else {
-		return tx.Model(&model.CanteenRatingTag{})
 	}
 }
 
