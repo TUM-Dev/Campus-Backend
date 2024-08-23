@@ -11,7 +11,7 @@ type wrongTableName struct {
 }
 
 var wrongTableNames = []wrongTableName{
-	{"crontab", "crontabs"},
+	//{"crontab", "crontabs"}, <- too much work for now
 	{"kino", "movies"},
 	{"cafeteria", "canteens"},
 	{"canteen_head_count", "canteen_head_counts"},

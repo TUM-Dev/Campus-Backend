@@ -12,3 +12,8 @@ type Crontab struct {
 	Type     null.String `gorm:"column:type;type:enum ('news','mensa','ticketsale','alarm','fileDownload','canteenHeadCount','iosNotifications','iosActivityReset','newExamResultsHook','movie','feedbackEmail','dishNameDownload','scrapeStudentClubs');" json:"type"`
 	ID       null.Int    `gorm:"column:id;type:int;" json:"id"`
 }
+
+// TableName sets the insert table name for this struct type
+func (n *Crontab) TableName() string {
+	return "crontab"
+}
