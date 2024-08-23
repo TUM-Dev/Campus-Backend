@@ -121,9 +121,9 @@ create table if not exists feedback
 (
     id          int auto_increment primary key,
     email_id    text charset utf8                                      not null,
-    receiver    text charset utf8                                      null,
+    receiver    text charset utf8                                      not null,
     reply_to    text charset utf8                                      null,
-    feedback    text charset utf8                                      null,
+    feedback    text charset utf8                                      not null,
     image_count int                                                    null,
     latitude    decimal(11, 8)                                         null,
     longitude   decimal(11, 8)                                         null,
