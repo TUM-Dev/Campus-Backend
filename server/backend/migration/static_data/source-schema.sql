@@ -133,8 +133,8 @@ create table if not exists feedback
 create table if not exists files
 (
     file       int auto_increment primary key,
-    name       mediumtext           not null,
-    path       mediumtext           not null,
+    name       text                 not null,
+    path       text                 not null,
     downloads  int        default 0 not null,
     url        varchar(191)         null,
     downloaded tinyint(1) default 1 null
@@ -408,8 +408,8 @@ create table if not exists mensa
 (
     mensa     int auto_increment primary key,
     id        int                           null,
-    name      mediumtext                    not null,
-    address   mediumtext                    not null,
+    name      text                          not null,
+    address   text                          not null,
     latitude  float(10, 6) default 0.000000 not null,
     longitude float(10, 6) default 0.000000 not null,
     constraint id unique (id)
@@ -447,9 +447,9 @@ create table if not exists mensaprices
 (
     price      int auto_increment primary key,
     created    timestamp /* mariadb-5.3 */ default current_timestamp() not null,
-    person     mediumtext                                              not null,
-    type       mediumtext                                              not null,
-    typeLong   mediumtext                                              not null,
+    person     text                                                    not null,
+    type       text                                                    not null,
+    typeLong   text                                                    not null,
     typeNumber int                                                     not null,
     value      decimal                                                 not null
 ) collate = utf8mb4_unicode_ci;
@@ -462,8 +462,8 @@ create table if not exists migrations
 create table if not exists newsSource
 (
     source int auto_increment primary key,
-    title  mediumtext                         not null,
-    url    mediumtext                         null,
+    title  text                               not null,
+    url    text                               null,
     icon   int                                not null,
     hook   enum ('newspread', 'impulsivHook') null,
     constraint newsSource_ibfk_1 foreign key (icon) references files (file) on update cascade on delete cascade
