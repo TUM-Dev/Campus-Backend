@@ -39,10 +39,10 @@ func (n *InitialCafeteriaRating) TableName() string {
 
 // InitialCafeteriaRatingTag struct is a row record of the either the dish_tag_rating-table or the cafeteria_rating_tags-table in the database
 type InitialCafeteriaRatingTag struct {
-	CafeteriaRatingTag  int64 `gorm:"primary_key;AUTO_INCREMENT;column:CafeteriaRatingTag;type:int;not null;" json:"CanteenRatingTag" `
-	CorrespondingRating int64 `gorm:"foreignKey:cafeteriaRatingID;column:correspondingRating;type:int;not null;" json:"correspondingRating"`
-	Points              int32 `gorm:"column:points;type:int;not null;" json:"points"`
-	TagID               int64 `gorm:"foreignKey:cafeteriaRatingTagOption;column:tagID;type:int;not null;" json:"tagID"`
+	CafeteriaRatingTag  int64 `gorm:"primary_key;AUTO_INCREMENT;column:CafeteriaRatingTag;type:int;not null;"`
+	CorrespondingRating int64 `gorm:"foreignKey:cafeteriaRatingID;column:correspondingRating;type:int;not null;"`
+	Points              int32 `gorm:"column:points;type:int;not null;"`
+	TagID               int64 `gorm:"foreignKey:cafeteriaRatingTagOption;column:tagID;type:int;not null;"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -52,9 +52,9 @@ func (n *InitialCafeteriaRatingTag) TableName() string {
 
 // InitialCafeteriaRatingTagOption stores all available options for tags which can be used to quickly rate cafeterias
 type InitialCafeteriaRatingTagOption struct {
-	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;" json:"canteenRatingTagOption"`
-	DE                        string `gorm:"column:DE;text;default:('de');not null;" json:"DE"`
-	EN                        string `gorm:"column:EN;text;default:('en');not null;" json:"EN"`
+	CafeteriaRatingsTagOption int64  `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagOption;type:int;not null;"`
+	DE                        string `gorm:"column:DE;text;default:('de');not null;"`
+	EN                        string `gorm:"column:EN;text;default:('en');not null;"`
 }
 
 // TableName sets the insert table name for this struct type
