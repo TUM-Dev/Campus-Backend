@@ -24,8 +24,8 @@ type CafeteriaWithID struct {
 }
 
 type CanteenLocation struct {
-	Longitude float32 `json:"longitude"`
-	Latitude  float32 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
 	Address   string  `json:"address"`
 }
 

@@ -13,8 +13,8 @@ type InitialCafeteria struct {
 	Cafeteria int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteria;type:int;not null;" json:"canteen" `
 	Name      string  `gorm:"column:name;type:text;not null;" json:"name" `
 	Address   string  `gorm:"column:address;type:text;not null;" json:"address" `
-	Latitude  float32 `gorm:"column:latitude;type:float;not null;" json:"latitude" `
-	Longitude float32 `gorm:"column:longitude;type:float;not null;" json:"longitude"`
+	Latitude  float64 `gorm:"column:latitude;type:double;not null;" json:"latitude" `
+	Longitude float64 `gorm:"column:longitude;type:double;not null;" json:"longitude"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -186,10 +186,10 @@ func (n *InitialDishToDishNameTag) TableName() string {
 type InitialCafeteriaRatingAverage struct {
 	CafeteriaRatingAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingAverage;type:int;not null;" json:"canteenRatingAverage" `
 	CafeteriaID            int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
-	Average                float64 `gorm:"column:average;type:float;not null;" json:"average" `
+	Average                float64 `gorm:"column:average;type:double;not null;" json:"average" `
 	Min                    int32   `gorm:"column:min;type:int;not null;" json:"min"`
 	Max                    int32   `gorm:"column:max;type:int;not null;" json:"max"`
-	Std                    float64 `gorm:"column:std;type:float;not null;" json:"std"`
+	Std                    float64 `gorm:"column:std;type:double;not null;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -202,10 +202,10 @@ type InitialCafeteriaRatingTagAverage struct {
 	CafeteriaRatingTagsAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:cafeteriaRatingTagsAverage;type:int;not null;" json:"canteenRatingTagsAverage"`
 	CafeteriaID                int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"canteenID"`
 	TagID                      int64   `gorm:"column:tagID;foreignKey:cafeteriaRatingTagOption;type:int;not null;" json:"tagID"`
-	Average                    float32 `gorm:"column:average;type:float;not null;" json:"average"`
+	Average                    float64 `gorm:"column:average;type:double;not null;" json:"average"`
 	Min                        int8    `gorm:"column:min;type:int;not null;" json:"min"`
 	Max                        int8    `gorm:"column:max;type:int;not null;" json:"max"`
-	Std                        float32 `gorm:"column:std;type:float;not null;" json:"std"`
+	Std                        float64 `gorm:"column:std;type:double;not null;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -218,10 +218,10 @@ type InitialDishNameTagAverage struct {
 	DishNameTagAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishNameTagAverage;type:int;not null;" json:"dishNameTagAverage" `
 	CafeteriaID        int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	TagID              int64   `gorm:"column:tagID;foreignKey:DishNameTagOption;type:int;not null;" json:"tagID"`
-	Average            float32 `gorm:"column:average;type:float;not null;" json:"average" `
+	Average            float64 `gorm:"column:average;type:double;not null;" json:"average" `
 	Min                int8    `gorm:"column:min;type:int;not null;" json:"min"`
 	Max                int8    `gorm:"column:max;type:int;not null;" json:"max"`
-	Std                float32 `gorm:"column:std;type:float;not null;" json:"std"`
+	Std                float64 `gorm:"column:std;type:double;not null;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -234,10 +234,10 @@ type InitialDishRatingAverage struct {
 	DishRatingAverage int64   `gorm:"primary_key;AUTO_INCREMENT;column:dishRatingAverage;type:int;not null;" json:"dishRatingAverage" `
 	CafeteriaID       int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	DishID            int64   `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
-	Average           float64 `gorm:"column:average;type:float;not null;" json:"average" `
+	Average           float64 `gorm:"column:average;type:double;not null;" json:"average" `
 	Min               int32   `gorm:"column:min;type:int;not null;" json:"min"`
 	Max               int32   `gorm:"column:max;type:int;not null;" json:"max"`
-	Std               float64 `gorm:"column:std;type:float;not null;" json:"std"`
+	Std               float64 `gorm:"column:std;type:double;not null;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -251,10 +251,10 @@ type InitialDishRatingTagAverage struct {
 	CafeteriaID           int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;" json:"cafeteriaID"`
 	TagID                 int64   `gorm:"column:tagID;foreignKey:tagID;type:int;not null;" json:"tagID"`
 	DishID                int64   `gorm:"column:dishID;foreignKey:dishID;type:int;not null;" json:"dishID"`
-	Average               float32 `gorm:"column:average;type:float;not null;" json:"average" `
+	Average               float64 `gorm:"column:average;type:double;not null;" json:"average" `
 	Min                   int8    `gorm:"column:min;type:int;not null;" json:"min"`
 	Max                   int8    `gorm:"column:max;type:int;not null;" json:"max"`
-	Std                   float32 `gorm:"column:std;type:float;not null;" json:"std"`
+	Std                   float64 `gorm:"column:std;type:double;not null;" json:"std"`
 }
 
 // TableName sets the insert table name for this struct type
