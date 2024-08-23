@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/guregu/null"
+	"time"
 )
 
 type Feedback struct {
@@ -17,7 +18,7 @@ type Feedback struct {
 	OsVersion    null.String `gorm:"column:os_version;null;"`
 	AppVersion   null.String `gorm:"column:app_version;null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex,expression:app_version(100)"`
 	Processed    bool        `gorm:"column:processed;default:false;not null;"`
-	Timestamp    null.Time   `gorm:"column:timestamp;type:datetime;default:current_timestamp();null;"`
+	Timestamp    time.Time   `gorm:"column:timestamp;type:datetime;default:current_timestamp();not null;"`
 }
 
 // TableName sets the insert table name for this struct type
