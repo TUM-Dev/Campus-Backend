@@ -433,9 +433,9 @@ func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) {
 	} else {
 		for _, tagID := range nameTagIDs {
 			if err := tx.Create(&model.DishNameTag{
-				CorrespondingRating: rating.DishRating,
-				Points:              rating.Points,
-				TagNameID:           tagID,
+				RatingID:  rating.DishRating,
+				Points:    rating.Points,
+				TagNameID: tagID,
 			}).Error; err != nil {
 				log.WithError(err).Error("while creating a new dish name rating.")
 			}
