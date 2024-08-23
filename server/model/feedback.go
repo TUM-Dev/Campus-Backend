@@ -12,12 +12,12 @@ type Feedback struct {
 	ReplyToEmail null.String `gorm:"column:reply_to_email;type:text;null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex,expression:reply_to_email(100)"`
 	ReplyToName  null.String `gorm:"column:reply_to_name;type:text;null"`
 	Feedback     string      `gorm:"column:feedback;type:text;not null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex,expression:feedback(255)"`
-	Latitude     null.Float  `gorm:"column:latitude;type:float;null;"`
-	Longitude    null.Float  `gorm:"column:longitude;type:float;null;"`
+	Latitude     null.Float  `gorm:"column:latitude;type:double;null;"`
+	Longitude    null.Float  `gorm:"column:longitude;type:double;null;"`
 	OsVersion    null.String `gorm:"column:os_version;type:text;null;"`
 	AppVersion   null.String `gorm:"column:app_version;type:text;null;uniqueIndex:receiver_reply_to_feedback_app_version_uindex,expression:app_version(100)"`
 	Processed    bool        `gorm:"column:processed;type:boolean;default:false;not null;"`
-	Timestamp    null.Time   `gorm:"column:timestamp;type:timestamp;default:CURRENT_TIMESTAMP;null;"`
+	Timestamp    null.Time   `gorm:"column:timestamp;type:datetime;default:current_timestamp();null;"`
 }
 
 // TableName sets the insert table name for this struct type

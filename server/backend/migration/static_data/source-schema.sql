@@ -120,13 +120,13 @@ create table if not exists faculty
 create table if not exists feedback
 (
     id          int auto_increment primary key,
-    email_id    text charset utf8                                      null,
-    receiver    text charset utf8                                      null,
+    email_id    text charset utf8                                      not null,
+    receiver    text charset utf8                                      not null,
     reply_to    text charset utf8                                      null,
-    feedback    text charset utf8                                      null,
+    feedback    text charset utf8                                      not null,
     image_count int                                                    null,
-    latitude    decimal(11, 8)                                         null,
-    longitude   decimal(11, 8)                                         null,
+    latitude    double                                                 null,
+    longitude   double                                                 null,
     timestamp   datetime /* mariadb-5.3 */ default current_timestamp() null
 ) auto_increment = 293;
 
@@ -302,12 +302,12 @@ create table if not exists devices
     uuid            varchar(50)                                               not null,
     created         timestamp /* mariadb-5.3 */                               null,
     lastAccess      timestamp /* mariadb-5.3 */ default current_timestamp() not null on update current_timestamp(),
-    lastApi         mediumtext                  default ('')                    not null,
+    lastApi         text                        default ('')                    not null,
     developer       enum ('true', 'false')      default 'false'               not null,
-    osVersion       mediumtext                  default ('')                    not null,
-    appVersion      mediumtext                  default ('')                    not null,
+    osVersion       text                        default ('')                    not null,
+    appVersion      text                        default ('')                    not null,
     counter         int                         default 0                     not null,
-    pk              longtext                                                  null,
+    pk              text                                                      null,
     pkActive        enum ('true', 'false')      default 'false'               not null,
     gcmToken        text                                                      null,
     gcmStatus       varchar(200)                                              null,
