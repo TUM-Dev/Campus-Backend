@@ -22,7 +22,7 @@ type Kino struct {
 	Trailer     null.String `gorm:"column:trailer"`
 	FileID      int64       `gorm:"column:cover"`
 	File        File        `gorm:"foreignKey:FileID;references:file"`
-	Link        string      `gorm:"column:link;type:varchar(190);not null;unique;uniqueIndex:uni_kino_link"`
+	Link        string      `gorm:"column:link;type:varchar(190);not null;uniqueIndex:uni_kino_link"`
 	Location    null.String `gorm:"column:location;default:null"`
 }
 
