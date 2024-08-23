@@ -13,10 +13,10 @@ type Device struct {
 	UUID            string      `gorm:"column:uuid;type:varchar(50);not null" json:"uuid"`
 	Created         null.Time   `gorm:"column:created;type:timestamp;" json:"created"`
 	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:CURRENT_TIMESTAMP;OnUpdate:CURRENT_TIMESTAMP;not null" json:"last_access"`
-	LastAPI         string      `gorm:"column:lastApi;type:text;size:16777215;not null" json:"last_api"`
+	LastAPI         string      `gorm:"column:lastApi;type:text;not null" json:"last_api"`
 	Developer       string      `gorm:"column:developer;type:enum('true','false');default:'false';not null" json:"developer"`
-	OsVersion       string      `gorm:"column:osVersion;type:text;size:16777215;not null" json:"os_version"`
-	AppVersion      string      `gorm:"column:appVersion;type:text;size:16777215;not null" json:"app_version"`
+	OsVersion       string      `gorm:"column:osVersion;type:text;not null" json:"os_version"`
+	AppVersion      string      `gorm:"column:appVersion;type:text;not null" json:"app_version"`
 	Counter         int32       `gorm:"column:counter;type:int;default:0;not null" json:"counter"`
 	Pk              null.String `gorm:"column:pk;type:text;size:4294967295;" json:"pk"`
 	PkActive        string      `gorm:"column:pkActive;type:enum('true', 'false');default:'false';not null" json:"pk_active"`
