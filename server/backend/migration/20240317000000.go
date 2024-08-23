@@ -68,7 +68,7 @@ func feedbackColumnsWithWrongCOLLATE() []columnsWithWrongCollationOrCharset {
 		{"event", "locality", "varchar(200)", "utf8mb3", "utf8mb3_general_ci"},
 		{"event", "link", "varchar(200)", "utf8mb3", "utf8mb3_general_ci"},
 		{"faculty", "name", "varchar(150)", "utf8mb4", "utf8mb4_general_ci"},
-		{"feedback", "email_id", "text", "utf8mb3", "utf8mb3_general_ci"},
+		{"feedback", "email_id", "text not null", "utf8mb3", "utf8mb3_general_ci"},
 		{"feedback", "receiver", "text", "utf8mb3", "utf8mb3_general_ci"},
 		{"feedback", "reply_to", "text", "utf8mb3", "utf8mb3_general_ci"},
 		{"feedback", "feedback", "text", "utf8mb3", "utf8mb3_general_ci"},
