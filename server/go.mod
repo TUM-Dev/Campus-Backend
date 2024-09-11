@@ -10,7 +10,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/docker/go-connections v0.5.0
 	github.com/gabriel-vasile/mimetype v1.4.5
-	github.com/getsentry/sentry-go v0.28.1
+	github.com/getsentry/sentry-go v0.29.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.2
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
