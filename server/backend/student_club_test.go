@@ -25,7 +25,7 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 	expectedResp := &pb.ListStudentClubReply{
 		Collections: []*pb.StudentClubCollection{
 			{
-				Title:       exampleClubs[0].StudentClubCollection.ID,
+				Title:       exampleClubs[0].StudentClubCollection.Name,
 				Description: exampleClubs[0].StudentClubCollection.Description,
 				Clubs: []*pb.StudentClub{
 					{
@@ -40,7 +40,7 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 				},
 			},
 			{
-				Title:       exampleClubs[2].StudentClubCollection.ID,
+				Title:       exampleClubs[2].StudentClubCollection.Name,
 				Description: exampleClubs[2].StudentClubCollection.Description,
 				Clubs: []*pb.StudentClub{
 					{
@@ -55,13 +55,13 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 
 func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	col1 := model.StudentClubCollection{
-		ID:          "col1",
+		Name:        "col1",
 		Description: "Awesome collection",
 	}
 	err := db.Create(&col1).Error
 	require.NoError(t, err)
 	col2 := model.StudentClubCollection{
-		ID:          "col2",
+		Name:        "col2",
 		Description: "Terrible collection",
 	}
 	err = db.Create(&col2).Error

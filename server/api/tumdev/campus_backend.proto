@@ -592,4 +592,7 @@ message StudentClubCollection {
   string title = 1;
   string description = 2;
   repeated StudentClub clubs = 3;
+  // id of the collection.
+  // Might not be stable over time because of scraping
+  uint64 unstable_collection_id = 4;
 }

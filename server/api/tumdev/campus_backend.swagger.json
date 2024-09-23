@@ -1644,6 +1644,11 @@
             "type": "object",
             "$ref": "#/definitions/apiStudentClub"
           }
+        },
+        "unstableCollectionId": {
+          "type": "string",
+          "format": "uint64",
+          "title": "id of the collection.\nMight not be stable over time because of scraping"
         }
       }
     },

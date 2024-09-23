@@ -22,7 +22,7 @@ const (
 )
 
 func (c *CronService) studentClubCron(language pb.Language) error {
-	body, err := student_club_parsers.DownloadHtml("https://www.sv.tum.de/sv/hochschulgruppen/")
+	body, err := student_club_parsers.DownloadHtml(svUrl(language))
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			log.WithError(err).Error("Error while closing body")
@@ -44,15 +44,17 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 		if err := tx.Where("language = ?", language.String()).Delete(&model.StudentClubCollection{}).Error; err != nil {
 			return err
 		}
+		nameToCollectionID := make(map[string]uint)
 		for _, scrapedCollection := range scrapedCollections {
 			collection := model.StudentClubCollection{
-				ID:          scrapedCollection.Name,
+				Name:        scrapedCollection.Name,
 				Language:    language.String(),
 				Description: scrapedCollection.Description,
 			}
 			if err := tx.Create(&collection).Error; err != nil {
 				return err
 			}
+			nameToCollectionID[collection.Name] = collection.ID
 		}
 		for _, scrapedClub := range scrapedClubs {
 			club := model.StudentClub{
@@ -60,7 +62,7 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 				Name:                    scrapedClub.Name,
 				Description:             scrapedClub.Description,
 				LinkUrl:                 scrapedClub.LinkUrl,
-				StudentClubCollectionID: scrapedClub.Collection,
+				StudentClubCollectionID: nameToCollectionID[scrapedClub.Collection],
 			}
 			if scrapedClub.ImageUrl.Valid {
 				file, err := saveImageTo(tx, scrapedClub.ImageUrl.String, StudentClubImageDirectory)
@@ -80,6 +82,13 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 		log.WithError(err).Error("error while creating movie")
 	}
 	return nil
+}
+
+func svUrl(language pb.Language) string {
+	if language == pb.Language_English {
+		return "https://www.sv.tum.de/en/sv/student-groups/"
+	}
+	return "https://www.sv.tum.de/sv/hochschulgruppen/"
 }
 
 // saveImage saves an image to the database, so it can be downloaded by another cronjob and returns the file

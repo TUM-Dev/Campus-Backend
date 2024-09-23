@@ -1,9 +1,45 @@
 package migration
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
+	"time"
 )
+
+// StudentClub stores a student Club
+type newStudentClub struct {
+	gorm.Model
+	Name                    string
+	Language                string `gorm:"type:enum('German','English');default:'German'"`
+	Description             null.String
+	LinkUrl                 null.String `gorm:"type:varchar(190);unique;"`
+	ImageID                 null.Int
+	Image                   *model.File `gorm:"foreignKey:ImageID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ImageCaption            null.String
+	StudentClubCollectionID string                   `gorm:"type:varchar(100)"`
+	StudentClubCollection   newStudentClubCollection `gorm:"foreignKey:StudentClubCollectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *newStudentClub) TableName() string {
+	return "student_clubs"
+}
+
+type newStudentClubCollection struct {
+	ID          string `gorm:"primaryKey;type:varchar(100)"`
+	Language    string `gorm:"type:enum('German','English');default:'German'"`
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+}
+
+// TableName sets the insert table name for this struct type
+func (n *newStudentClubCollection) TableName() string {
+	return "student_club_collections"
+}
 
 // migrate20241023000000
 // - made sure that student clubs are localised
@@ -11,19 +47,31 @@ func migrate20241023000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20241023000000",
 		Migrate: func(tx *gorm.DB) error {
-			if err := tx.Exec("alter table student_clubs add language enum ('German', 'English') default 'German' not null").Error; err != nil {
+			if err := tx.Migrator().DropTable(newStudentClub{}); err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table student_club_collections add language enum ('German', 'English') default 'German' not null").Error; err != nil {
+			if err := tx.Migrator().DropTable(newStudentClubCollection{}); err != nil {
+				return err
+			}
+			if err := tx.Migrator().AutoMigrate(newStudentClubCollection{}); err != nil {
+				return err
+			}
+			if err := tx.Migrator().AutoMigrate(newStudentClub{}); err != nil {
 				return err
 			}
 			return nil
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := tx.Exec("alter table student_clubs drop column language").Error; err != nil {
+			if err := tx.Migrator().DropTable(newStudentClub{}); err != nil {
 				return err
 			}
-			if err := tx.Exec("alter table student_club_collections drop column language").Error; err != nil {
+			if err := tx.Migrator().DropTable(newStudentClubCollection{}); err != nil {
+				return err
+			}
+			if err := tx.Migrator().AutoMigrate(InitialStudentClubCollection{}); err != nil {
+				return err
+			}
+			if err := tx.Migrator().AutoMigrate(InitialStudentClub{}); err != nil {
 				return err
 			}
 			return nil

@@ -15,6 +15,6 @@ type StudentClub struct {
 	ImageID                 null.Int
 	Image                   *File `gorm:"foreignKey:ImageID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	ImageCaption            null.String
-	StudentClubCollectionID string                `gorm:"type:varchar(100)"`
+	StudentClubCollectionID uint
 	StudentClubCollection   StudentClubCollection `gorm:"foreignKey:StudentClubCollectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
