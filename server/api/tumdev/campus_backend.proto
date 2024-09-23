@@ -564,7 +564,17 @@ message GetCanteenHeadCountReply {
   // A time stamp indicating how up to date the response is. Only valid in case percent != -1.
   google.protobuf.Timestamp timestamp = 4;
 }
-message ListStudentClubRequest {}
+
+enum Language {
+  German = 0;
+  English = 1;
+}
+
+message ListStudentClubRequest {
+  // Language of the student clubs and categories
+  // Defaults to german
+  optional Language language = 1;
+}
 message ListStudentClubReply {
   repeated StudentClubCollection collections = 1;
 }

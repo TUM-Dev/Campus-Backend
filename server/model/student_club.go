@@ -9,6 +9,7 @@ import (
 type StudentClub struct {
 	gorm.Model
 	Name                    string
+	Language                string `gorm:"type:enum('German','English');default:'German'"`
 	Description             null.String
 	LinkUrl                 null.String `gorm:"type:varchar(190);unique;"`
 	ImageID                 null.Int

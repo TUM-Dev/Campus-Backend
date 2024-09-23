@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"io"
 	"strings"
 
@@ -20,7 +21,7 @@ const (
 	StudentClubImageDirectory = "student_club/"
 )
 
-func (c *CronService) studentClubCron() error {
+func (c *CronService) studentClubCron(language pb.Language) error {
 	body, err := student_club_parsers.DownloadHtml("https://www.sv.tum.de/sv/hochschulgruppen/")
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -37,15 +38,16 @@ func (c *CronService) studentClubCron() error {
 
 	// save the result of the previous steps (🎉)
 	if err := c.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("1 = 1").Delete(&model.StudentClub{}).Error; err != nil {
+		if err := tx.Where("language = ?", language.String()).Delete(&model.StudentClub{}).Error; err != nil {
 			return err
 		}
-		if err := tx.Where("1 = 1").Delete(&model.StudentClubCollection{}).Error; err != nil {
+		if err := tx.Where("language = ?", language.String()).Delete(&model.StudentClubCollection{}).Error; err != nil {
 			return err
 		}
 		for _, scrapedCollection := range scrapedCollections {
 			collection := model.StudentClubCollection{
 				ID:          scrapedCollection.Name,
+				Language:    language.String(),
 				Description: scrapedCollection.Description,
 			}
 			if err := tx.Create(&collection).Error; err != nil {
@@ -54,6 +56,7 @@ func (c *CronService) studentClubCron() error {
 		}
 		for _, scrapedClub := range scrapedClubs {
 			club := model.StudentClub{
+				Language:                language.String(),
 				Name:                    scrapedClub.Name,
 				Description:             scrapedClub.Description,
 				LinkUrl:                 scrapedClub.LinkUrl,

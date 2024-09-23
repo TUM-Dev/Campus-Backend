@@ -10,9 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *CampusServer) ListStudentClub(ctx context.Context, _ *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
+func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
 	var dbClubs []model.StudentClub
 	if err := s.db.WithContext(ctx).
+		Where("language = ?", req.GetLanguage().String()).
 		Joins("Image").
 		Joins("StudentClubCollection").
 		Find(&dbClubs).Error; err != nil {
