@@ -1,11 +1,9 @@
 package migration
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"github.com/guregu/null"
 	"gorm.io/gorm"
-	"time"
 )
 
 // StudentClub stores a student Club
@@ -16,9 +14,9 @@ type newStudentClub struct {
 	Description             null.String
 	LinkUrl                 null.String `gorm:"type:varchar(190);unique;"`
 	ImageID                 null.Int
-	Image                   *model.File `gorm:"foreignKey:ImageID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Image                   *File `gorm:"foreignKey:ImageID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	ImageCaption            null.String
-	StudentClubCollectionID string                   `gorm:"type:varchar(100)"`
+	StudentClubCollectionID uint
 	StudentClubCollection   newStudentClubCollection `gorm:"foreignKey:StudentClubCollectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
@@ -28,12 +26,10 @@ func (n *newStudentClub) TableName() string {
 }
 
 type newStudentClubCollection struct {
-	ID          string `gorm:"primaryKey;type:varchar(100)"`
+	gorm.Model
+	Name        string `gorm:"type:varchar(100)"`
 	Language    string `gorm:"type:enum('German','English');default:'German'"`
 	Description string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
 // TableName sets the insert table name for this struct type
@@ -47,10 +43,10 @@ func migrate20241023000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20241023000000",
 		Migrate: func(tx *gorm.DB) error {
-			if err := tx.Migrator().DropTable(newStudentClub{}); err != nil {
+			if err := tx.Migrator().DropTable(InitialStudentClub{}); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable(newStudentClubCollection{}); err != nil {
+			if err := tx.Migrator().DropTable(InitialStudentClubCollection{}); err != nil {
 				return err
 			}
 			if err := tx.Migrator().AutoMigrate(newStudentClubCollection{}); err != nil {
