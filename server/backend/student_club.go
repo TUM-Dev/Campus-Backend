@@ -13,7 +13,8 @@ import (
 func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
 	var dbClubs []model.StudentClub
 	if err := s.db.WithContext(ctx).
-		Where("language = ?", req.GetLanguage().String()).
+		Where(&model.StudentClub{Language: req.GetLanguage().String()}).
+		Where(&model.StudentClubCollection{Language: req.GetLanguage().String()}).
 		Joins("Image").
 		Joins("StudentClubCollection").
 		Find(&dbClubs).Error; err != nil {
