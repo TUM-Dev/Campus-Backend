@@ -10,17 +10,35 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *CampusServer) ListStudentClub(ctx context.Context, _ *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
+func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentClubRequest) (*pb.ListStudentClubReply, error) {
 	var dbClubs []model.StudentClub
 	if err := s.db.WithContext(ctx).
+		Where(&model.StudentClub{Language: req.GetLanguage().String()}).
+		Where(&model.StudentClubCollection{Language: req.GetLanguage().String()}).
 		Joins("Image").
 		Joins("StudentClubCollection").
 		Find(&dbClubs).Error; err != nil {
 		log.WithError(err).Error("Error while querying student clubs")
 		return nil, status.Error(codes.Internal, "could not query the student clubs. Please retry later")
 	}
+
+	var dbClubCollections []model.StudentClubCollection
+	if err := s.db.WithContext(ctx).
+		Where(&model.StudentClubCollection{Language: req.GetLanguage().String()}).
+		Find(&dbClubCollections).Error; err != nil {
+		log.WithError(err).Error("Error while querying student club collections")
+		return nil, status.Error(codes.Internal, "could not query the student club collections. Please retry later")
+	}
 	// map from the db to the response
 	collections := make([]*pb.StudentClubCollection, 0)
+	for _, dbCollection := range dbClubCollections {
+		collections = append(collections, &pb.StudentClubCollection{
+			Title:                dbCollection.Name,
+			Description:          dbCollection.Description,
+			Clubs:                make([]*pb.StudentClub, 0),
+			UnstableCollectionId: uint64(dbCollection.ID),
+		})
+	}
 	for _, dbClub := range dbClubs {
 		resClub := &pb.StudentClub{
 			Name:        dbClub.Name,
@@ -33,21 +51,10 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, _ *pb.ListStudentClu
 		}
 
 		for _, collection := range collections {
-			if collection.Title == dbClub.StudentClubCollectionID {
+			if collection.UnstableCollectionId == uint64(dbClub.StudentClubCollectionID) {
 				collection.Clubs = append(collection.Clubs, resClub)
-				resClub = nil
 				break
 			}
-		}
-		// no collection matched => we need to insert a new collection
-		if resClub != nil {
-			collection := &pb.StudentClubCollection{
-				Title:       dbClub.StudentClubCollection.ID,
-				Description: dbClub.StudentClubCollection.Description,
-				Clubs:       make([]*pb.StudentClub, 1),
-			}
-			collection.Clubs[0] = resClub
-			collections = append(collections, collection)
 		}
 	}
 

@@ -120,21 +120,21 @@ create table if not exists faculty
 create table if not exists feedback
 (
     id          int auto_increment primary key,
-    email_id    text charset utf8                                      null,
-    receiver    text charset utf8                                      null,
+    email_id    text charset utf8                                      not null,
+    receiver    text charset utf8                                      not null,
     reply_to    text charset utf8                                      null,
-    feedback    text charset utf8                                      null,
+    feedback    text charset utf8                                      not null,
     image_count int                                                    null,
-    latitude    decimal(11, 8)                                         null,
-    longitude   decimal(11, 8)                                         null,
+    latitude    double                                                 null,
+    longitude   double                                                 null,
     timestamp   datetime /* mariadb-5.3 */ default current_timestamp() null
 ) auto_increment = 293;
 
 create table if not exists files
 (
     file       int auto_increment primary key,
-    name       mediumtext           not null,
-    path       mediumtext           not null,
+    name       text                 not null,
+    path       text                 not null,
     downloads  int        default 0 not null,
     url        varchar(191)         null,
     downloaded tinyint(1) default 1 null
@@ -302,12 +302,12 @@ create table if not exists devices
     uuid            varchar(50)                                               not null,
     created         timestamp /* mariadb-5.3 */                               null,
     lastAccess      timestamp /* mariadb-5.3 */ default current_timestamp() not null on update current_timestamp(),
-    lastApi         mediumtext                  default ('')                    not null,
+    lastApi         text                        default ('')                    not null,
     developer       enum ('true', 'false')      default 'false'               not null,
-    osVersion       mediumtext                  default ('')                    not null,
-    appVersion      mediumtext                  default ('')                    not null,
+    osVersion       text                        default ('')                    not null,
+    appVersion      text                        default ('')                    not null,
     counter         int                         default 0                     not null,
-    pk              longtext                                                  null,
+    pk              text                                                      null,
     pkActive        enum ('true', 'false')      default 'false'               not null,
     gcmToken        text                                                      null,
     gcmStatus       varchar(200)                                              null,
@@ -408,8 +408,8 @@ create table if not exists mensa
 (
     mensa     int auto_increment primary key,
     id        int                           null,
-    name      mediumtext                    not null,
-    address   mediumtext                    not null,
+    name      text                          not null,
+    address   text                          not null,
     latitude  float(10, 6) default 0.000000 not null,
     longitude float(10, 6) default 0.000000 not null,
     constraint id unique (id)
@@ -447,9 +447,9 @@ create table if not exists mensaprices
 (
     price      int auto_increment primary key,
     created    timestamp /* mariadb-5.3 */ default current_timestamp() not null,
-    person     mediumtext                                              not null,
-    type       mediumtext                                              not null,
-    typeLong   mediumtext                                              not null,
+    person     text                                                    not null,
+    type       text                                                    not null,
+    typeLong   text                                                    not null,
     typeNumber int                                                     not null,
     value      decimal                                                 not null
 ) collate = utf8mb4_unicode_ci;
@@ -462,8 +462,8 @@ create table if not exists migrations
 create table if not exists newsSource
 (
     source int auto_increment primary key,
-    title  mediumtext                         not null,
-    url    mediumtext                         null,
+    title  text                               not null,
+    url    text                               null,
     icon   int                                not null,
     hook   enum ('newspread', 'impulsivHook') null,
     constraint newsSource_ibfk_1 foreign key (icon) references files (file) on update cascade on delete cascade

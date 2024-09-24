@@ -8,7 +8,7 @@ import (
 )
 
 type NewsSourceFile struct {
-	File int64 `gorm:"primary_key;AUTO_INCREMENT;column:file;type:int;"`
+	File int64 `gorm:"primary_key;autoIncrement;column:file;type:int;"`
 }
 
 func (n *NewsSourceFile) TableName() string {
@@ -17,7 +17,7 @@ func (n *NewsSourceFile) TableName() string {
 
 // NewsSource struct is a row record of the newsSource table in the tca database
 type NewsSource struct {
-	Source int64          `gorm:"primary_key;AUTO_INCREMENT;column:source;type:int;"`
+	Source int64          `gorm:"primary_key;autoIncrement;column:source;type:int;"`
 	Title  string         `gorm:"column:title;type:text;size:16777215;"`
 	URL    null.String    `gorm:"column:url;type:text;size:16777215;"`
 	FileID int64          `gorm:"column:icon;not null;type:int;"`
