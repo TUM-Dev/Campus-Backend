@@ -178,11 +178,9 @@ type CreateDeviceRequest struct {
 
 func (x *CreateDeviceRequest) Reset() {
 	*x = CreateDeviceRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateDeviceRequest) String() string {
@@ -193,7 +191,7 @@ func (*CreateDeviceRequest) ProtoMessage() {}
 
 func (x *CreateDeviceRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -239,11 +237,9 @@ type CreateDeviceReply struct {
 
 func (x *CreateDeviceReply) Reset() {
 	*x = CreateDeviceReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateDeviceReply) String() string {
@@ -254,7 +250,7 @@ func (*CreateDeviceReply) ProtoMessage() {}
 
 func (x *CreateDeviceReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -287,11 +283,9 @@ type DeleteDeviceRequest struct {
 
 func (x *DeleteDeviceRequest) Reset() {
 	*x = DeleteDeviceRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *DeleteDeviceRequest) String() string {
@@ -302,7 +296,7 @@ func (*DeleteDeviceRequest) ProtoMessage() {}
 
 func (x *DeleteDeviceRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -341,11 +335,9 @@ type DeleteDeviceReply struct {
 
 func (x *DeleteDeviceReply) Reset() {
 	*x = DeleteDeviceReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *DeleteDeviceReply) String() string {
@@ -356,7 +348,7 @@ func (*DeleteDeviceReply) ProtoMessage() {}
 
 func (x *DeleteDeviceReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -403,11 +395,9 @@ type News struct {
 
 func (x *News) Reset() {
 	*x = News{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *News) String() string {
@@ -418,7 +408,7 @@ func (*News) ProtoMessage() {}
 
 func (x *News) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -513,11 +503,9 @@ type ListNewsReply struct {
 
 func (x *ListNewsReply) Reset() {
 	*x = ListNewsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsReply) String() string {
@@ -528,7 +516,7 @@ func (*ListNewsReply) ProtoMessage() {}
 
 func (x *ListNewsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -565,11 +553,9 @@ type ListNewsRequest struct {
 
 func (x *ListNewsRequest) Reset() {
 	*x = ListNewsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsRequest) String() string {
@@ -580,7 +566,7 @@ func (*ListNewsRequest) ProtoMessage() {}
 
 func (x *ListNewsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -624,11 +610,9 @@ type ListNewsSourcesRequest struct {
 
 func (x *ListNewsSourcesRequest) Reset() {
 	*x = ListNewsSourcesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsSourcesRequest) String() string {
@@ -639,7 +623,7 @@ func (*ListNewsSourcesRequest) ProtoMessage() {}
 
 func (x *ListNewsSourcesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -664,11 +648,9 @@ type ListNewsSourcesReply struct {
 
 func (x *ListNewsSourcesReply) Reset() {
 	*x = ListNewsSourcesReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsSourcesReply) String() string {
@@ -679,7 +661,7 @@ func (*ListNewsSourcesReply) ProtoMessage() {}
 
 func (x *ListNewsSourcesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -714,11 +696,9 @@ type NewsSource struct {
 
 func (x *NewsSource) Reset() {
 	*x = NewsSource{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *NewsSource) String() string {
@@ -729,7 +709,7 @@ func (*NewsSource) ProtoMessage() {}
 
 func (x *NewsSource) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -776,11 +756,9 @@ type ListNewsAlertsRequest struct {
 
 func (x *ListNewsAlertsRequest) Reset() {
 	*x = ListNewsAlertsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[10]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsAlertsRequest) String() string {
@@ -791,7 +769,7 @@ func (*ListNewsAlertsRequest) ProtoMessage() {}
 
 func (x *ListNewsAlertsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[10]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -823,11 +801,9 @@ type ListNewsAlertsReply struct {
 
 func (x *ListNewsAlertsReply) Reset() {
 	*x = ListNewsAlertsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[11]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNewsAlertsReply) String() string {
@@ -838,7 +814,7 @@ func (*ListNewsAlertsReply) ProtoMessage() {}
 
 func (x *ListNewsAlertsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[11]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -874,11 +850,9 @@ type NewsAlert struct {
 
 func (x *NewsAlert) Reset() {
 	*x = NewsAlert{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[12]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *NewsAlert) String() string {
@@ -889,7 +863,7 @@ func (*NewsAlert) ProtoMessage() {}
 
 func (x *NewsAlert) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[12]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -956,11 +930,9 @@ type ListCanteenRatingsRequest struct {
 
 func (x *ListCanteenRatingsRequest) Reset() {
 	*x = ListCanteenRatingsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[13]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListCanteenRatingsRequest) String() string {
@@ -971,7 +943,7 @@ func (*ListCanteenRatingsRequest) ProtoMessage() {}
 
 func (x *ListCanteenRatingsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[13]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1029,11 +1001,9 @@ type ListCanteenRatingsReply struct {
 
 func (x *ListCanteenRatingsReply) Reset() {
 	*x = ListCanteenRatingsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[14]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListCanteenRatingsReply) String() string {
@@ -1044,7 +1014,7 @@ func (*ListCanteenRatingsReply) ProtoMessage() {}
 
 func (x *ListCanteenRatingsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1121,11 +1091,9 @@ type GetDishRatingsRequest struct {
 
 func (x *GetDishRatingsRequest) Reset() {
 	*x = GetDishRatingsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[15]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetDishRatingsRequest) String() string {
@@ -1136,7 +1104,7 @@ func (*GetDishRatingsRequest) ProtoMessage() {}
 
 func (x *GetDishRatingsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1207,11 +1175,9 @@ type GetDishRatingsReply struct {
 
 func (x *GetDishRatingsReply) Reset() {
 	*x = GetDishRatingsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[16]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetDishRatingsReply) String() string {
@@ -1222,7 +1188,7 @@ func (*GetDishRatingsReply) ProtoMessage() {}
 
 func (x *GetDishRatingsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1303,11 +1269,9 @@ type SingleRatingReply struct {
 
 func (x *SingleRatingReply) Reset() {
 	*x = SingleRatingReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[17]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *SingleRatingReply) String() string {
@@ -1318,7 +1282,7 @@ func (*SingleRatingReply) ProtoMessage() {}
 
 func (x *SingleRatingReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1376,11 +1340,9 @@ type CreateCanteenRatingReply struct {
 
 func (x *CreateCanteenRatingReply) Reset() {
 	*x = CreateCanteenRatingReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[18]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateCanteenRatingReply) String() string {
@@ -1391,7 +1353,7 @@ func (*CreateCanteenRatingReply) ProtoMessage() {}
 
 func (x *CreateCanteenRatingReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1423,11 +1385,9 @@ type CreateCanteenRatingRequest struct {
 
 func (x *CreateCanteenRatingRequest) Reset() {
 	*x = CreateCanteenRatingRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[19]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateCanteenRatingRequest) String() string {
@@ -1438,7 +1398,7 @@ func (*CreateCanteenRatingRequest) ProtoMessage() {}
 
 func (x *CreateCanteenRatingRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1496,11 +1456,9 @@ type CreateDishRatingReply struct {
 
 func (x *CreateDishRatingReply) Reset() {
 	*x = CreateDishRatingReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[20]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateDishRatingReply) String() string {
@@ -1511,7 +1469,7 @@ func (*CreateDishRatingReply) ProtoMessage() {}
 
 func (x *CreateDishRatingReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1548,11 +1506,9 @@ type CreateDishRatingRequest struct {
 
 func (x *CreateDishRatingRequest) Reset() {
 	*x = CreateDishRatingRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[21]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateDishRatingRequest) String() string {
@@ -1563,7 +1519,7 @@ func (*CreateDishRatingRequest) ProtoMessage() {}
 
 func (x *CreateDishRatingRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1628,11 +1584,9 @@ type ListAvailableDishTagsRequest struct {
 
 func (x *ListAvailableDishTagsRequest) Reset() {
 	*x = ListAvailableDishTagsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[22]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListAvailableDishTagsRequest) String() string {
@@ -1643,7 +1597,7 @@ func (*ListAvailableDishTagsRequest) ProtoMessage() {}
 
 func (x *ListAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1668,11 +1622,9 @@ type ListAvailableDishTagsReply struct {
 
 func (x *ListAvailableDishTagsReply) Reset() {
 	*x = ListAvailableDishTagsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[23]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListAvailableDishTagsReply) String() string {
@@ -1683,7 +1635,7 @@ func (*ListAvailableDishTagsReply) ProtoMessage() {}
 
 func (x *ListAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1713,11 +1665,9 @@ type ListNameTagsRequest struct {
 
 func (x *ListNameTagsRequest) Reset() {
 	*x = ListNameTagsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[24]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNameTagsRequest) String() string {
@@ -1728,7 +1678,7 @@ func (*ListNameTagsRequest) ProtoMessage() {}
 
 func (x *ListNameTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1753,11 +1703,9 @@ type ListNameTagsReply struct {
 
 func (x *ListNameTagsReply) Reset() {
 	*x = ListNameTagsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[25]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListNameTagsReply) String() string {
@@ -1768,7 +1716,7 @@ func (*ListNameTagsReply) ProtoMessage() {}
 
 func (x *ListNameTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1798,11 +1746,9 @@ type ListAvailableCanteenTagsRequest struct {
 
 func (x *ListAvailableCanteenTagsRequest) Reset() {
 	*x = ListAvailableCanteenTagsRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[26]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListAvailableCanteenTagsRequest) String() string {
@@ -1813,7 +1759,7 @@ func (*ListAvailableCanteenTagsRequest) ProtoMessage() {}
 
 func (x *ListAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1838,11 +1784,9 @@ type ListAvailableCanteenTagsReply struct {
 
 func (x *ListAvailableCanteenTagsReply) Reset() {
 	*x = ListAvailableCanteenTagsReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[27]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListAvailableCanteenTagsReply) String() string {
@@ -1853,7 +1797,7 @@ func (*ListAvailableCanteenTagsReply) ProtoMessage() {}
 
 func (x *ListAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1887,11 +1831,9 @@ type TagsOverview struct {
 
 func (x *TagsOverview) Reset() {
 	*x = TagsOverview{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[28]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *TagsOverview) String() string {
@@ -1902,7 +1844,7 @@ func (*TagsOverview) ProtoMessage() {}
 
 func (x *TagsOverview) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -1949,11 +1891,9 @@ type RatingTag struct {
 
 func (x *RatingTag) Reset() {
 	*x = RatingTag{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[29]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *RatingTag) String() string {
@@ -1964,7 +1904,7 @@ func (*RatingTag) ProtoMessage() {}
 
 func (x *RatingTag) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2004,11 +1944,9 @@ type RatingTagNewRequest struct {
 
 func (x *RatingTagNewRequest) Reset() {
 	*x = RatingTagNewRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[30]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *RatingTagNewRequest) String() string {
@@ -2019,7 +1957,7 @@ func (*RatingTagNewRequest) ProtoMessage() {}
 
 func (x *RatingTagNewRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2062,11 +2000,9 @@ type RatingTagResult struct {
 
 func (x *RatingTagResult) Reset() {
 	*x = RatingTagResult{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[31]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *RatingTagResult) String() string {
@@ -2077,7 +2013,7 @@ func (*RatingTagResult) ProtoMessage() {}
 
 func (x *RatingTagResult) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2135,11 +2071,9 @@ type ListCanteensRequest struct {
 
 func (x *ListCanteensRequest) Reset() {
 	*x = ListCanteensRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[32]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListCanteensRequest) String() string {
@@ -2150,7 +2084,7 @@ func (*ListCanteensRequest) ProtoMessage() {}
 
 func (x *ListCanteensRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2175,11 +2109,9 @@ type ListCanteensReply struct {
 
 func (x *ListCanteensReply) Reset() {
 	*x = ListCanteensReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[33]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListCanteensReply) String() string {
@@ -2190,7 +2122,7 @@ func (*ListCanteensReply) ProtoMessage() {}
 
 func (x *ListCanteensReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2225,11 +2157,9 @@ type Canteen struct {
 
 func (x *Canteen) Reset() {
 	*x = Canteen{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[34]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *Canteen) String() string {
@@ -2240,7 +2170,7 @@ func (*Canteen) ProtoMessage() {}
 
 func (x *Canteen) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2300,11 +2230,9 @@ type ListDishesRequest struct {
 
 func (x *ListDishesRequest) Reset() {
 	*x = ListDishesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[35]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListDishesRequest) String() string {
@@ -2315,7 +2243,7 @@ func (*ListDishesRequest) ProtoMessage() {}
 
 func (x *ListDishesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2368,11 +2296,9 @@ type ListDishesReply struct {
 
 func (x *ListDishesReply) Reset() {
 	*x = ListDishesReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[36]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListDishesReply) String() string {
@@ -2383,7 +2309,7 @@ func (*ListDishesReply) ProtoMessage() {}
 
 func (x *ListDishesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2423,11 +2349,9 @@ type RoomInformationElement struct {
 
 func (x *RoomInformationElement) Reset() {
 	*x = RoomInformationElement{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[37]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *RoomInformationElement) String() string {
@@ -2438,7 +2362,7 @@ func (*RoomInformationElement) ProtoMessage() {}
 
 func (x *RoomInformationElement) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2526,11 +2450,9 @@ type GetUpdateNoteRequest struct {
 
 func (x *GetUpdateNoteRequest) Reset() {
 	*x = GetUpdateNoteRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[38]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetUpdateNoteRequest) String() string {
@@ -2541,7 +2463,7 @@ func (*GetUpdateNoteRequest) ProtoMessage() {}
 
 func (x *GetUpdateNoteRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2574,11 +2496,9 @@ type GetUpdateNoteReply struct {
 
 func (x *GetUpdateNoteReply) Reset() {
 	*x = GetUpdateNoteReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[39]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetUpdateNoteReply) String() string {
@@ -2589,7 +2509,7 @@ func (*GetUpdateNoteReply) ProtoMessage() {}
 
 func (x *GetUpdateNoteReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2631,11 +2551,9 @@ type ListMoviesRequest struct {
 
 func (x *ListMoviesRequest) Reset() {
 	*x = ListMoviesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[40]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListMoviesRequest) String() string {
@@ -2646,7 +2564,7 @@ func (*ListMoviesRequest) ProtoMessage() {}
 
 func (x *ListMoviesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2685,11 +2603,9 @@ type ListMoviesReply struct {
 
 func (x *ListMoviesReply) Reset() {
 	*x = ListMoviesReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[41]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListMoviesReply) String() string {
@@ -2700,7 +2616,7 @@ func (*ListMoviesReply) ProtoMessage() {}
 
 func (x *ListMoviesReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2763,11 +2679,9 @@ type Movie struct {
 
 func (x *Movie) Reset() {
 	*x = Movie{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[42]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *Movie) String() string {
@@ -2778,7 +2692,7 @@ func (*Movie) ProtoMessage() {}
 
 func (x *Movie) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -2932,11 +2846,9 @@ type CreateFeedbackRequest struct {
 
 func (x *CreateFeedbackRequest) Reset() {
 	*x = CreateFeedbackRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[43]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateFeedbackRequest) String() string {
@@ -2947,7 +2859,7 @@ func (*CreateFeedbackRequest) ProtoMessage() {}
 
 func (x *CreateFeedbackRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3029,11 +2941,9 @@ type Coordinate struct {
 
 func (x *Coordinate) Reset() {
 	*x = Coordinate{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[44]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *Coordinate) String() string {
@@ -3044,7 +2954,7 @@ func (*Coordinate) ProtoMessage() {}
 
 func (x *Coordinate) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3081,11 +2991,9 @@ type CreateFeedbackReply struct {
 
 func (x *CreateFeedbackReply) Reset() {
 	*x = CreateFeedbackReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[45]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateFeedbackReply) String() string {
@@ -3096,7 +3004,7 @@ func (*CreateFeedbackReply) ProtoMessage() {}
 
 func (x *CreateFeedbackReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3121,11 +3029,9 @@ type CreateFeedbackImageReply struct {
 
 func (x *CreateFeedbackImageReply) Reset() {
 	*x = CreateFeedbackImageReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[46]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateFeedbackImageReply) String() string {
@@ -3136,7 +3042,7 @@ func (*CreateFeedbackImageReply) ProtoMessage() {}
 
 func (x *CreateFeedbackImageReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3169,11 +3075,9 @@ type CreateFeedbackImageRequest struct {
 
 func (x *CreateFeedbackImageRequest) Reset() {
 	*x = CreateFeedbackImageRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[47]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *CreateFeedbackImageRequest) String() string {
@@ -3184,7 +3088,7 @@ func (*CreateFeedbackImageRequest) ProtoMessage() {}
 
 func (x *CreateFeedbackImageRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3223,11 +3127,9 @@ type GetMemberRequest struct {
 
 func (x *GetMemberRequest) Reset() {
 	*x = GetMemberRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[48]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetMemberRequest) String() string {
@@ -3238,7 +3140,7 @@ func (*GetMemberRequest) ProtoMessage() {}
 
 func (x *GetMemberRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3272,11 +3174,9 @@ type GetMemberReply struct {
 
 func (x *GetMemberReply) Reset() {
 	*x = GetMemberReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[49]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetMemberReply) String() string {
@@ -3287,7 +3187,7 @@ func (*GetMemberReply) ProtoMessage() {}
 
 func (x *GetMemberReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3333,11 +3233,9 @@ type GetUploadStatusRequest struct {
 
 func (x *GetUploadStatusRequest) Reset() {
 	*x = GetUploadStatusRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[50]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetUploadStatusRequest) String() string {
@@ -3348,7 +3246,7 @@ func (*GetUploadStatusRequest) ProtoMessage() {}
 
 func (x *GetUploadStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3384,11 +3282,9 @@ type GetUploadStatusReply struct {
 
 func (x *GetUploadStatusReply) Reset() {
 	*x = GetUploadStatusReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[51]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetUploadStatusReply) String() string {
@@ -3399,7 +3295,7 @@ func (*GetUploadStatusReply) ProtoMessage() {}
 
 func (x *GetUploadStatusReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3459,11 +3355,9 @@ type GetNotificationRequest struct {
 
 func (x *GetNotificationRequest) Reset() {
 	*x = GetNotificationRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[52]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetNotificationRequest) String() string {
@@ -3474,7 +3368,7 @@ func (*GetNotificationRequest) ProtoMessage() {}
 
 func (x *GetNotificationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3510,11 +3404,9 @@ type GetNotificationReply struct {
 
 func (x *GetNotificationReply) Reset() {
 	*x = GetNotificationReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[53]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetNotificationReply) String() string {
@@ -3525,7 +3417,7 @@ func (*GetNotificationReply) ProtoMessage() {}
 
 func (x *GetNotificationReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3585,11 +3477,9 @@ type GetNotificationConfirmRequest struct {
 
 func (x *GetNotificationConfirmRequest) Reset() {
 	*x = GetNotificationConfirmRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[54]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetNotificationConfirmRequest) String() string {
@@ -3600,7 +3490,7 @@ func (*GetNotificationConfirmRequest) ProtoMessage() {}
 
 func (x *GetNotificationConfirmRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3632,11 +3522,9 @@ type GetNotificationConfirmReply struct {
 
 func (x *GetNotificationConfirmReply) Reset() {
 	*x = GetNotificationConfirmReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[55]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetNotificationConfirmReply) String() string {
@@ -3647,7 +3535,7 @@ func (*GetNotificationConfirmReply) ProtoMessage() {}
 
 func (x *GetNotificationConfirmReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3680,11 +3568,9 @@ type GetCanteenHeadCountRequest struct {
 
 func (x *GetCanteenHeadCountRequest) Reset() {
 	*x = GetCanteenHeadCountRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[56]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetCanteenHeadCountRequest) String() string {
@@ -3695,7 +3581,7 @@ func (*GetCanteenHeadCountRequest) ProtoMessage() {}
 
 func (x *GetCanteenHeadCountRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3734,11 +3620,9 @@ type GetCanteenHeadCountReply struct {
 
 func (x *GetCanteenHeadCountReply) Reset() {
 	*x = GetCanteenHeadCountReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[57]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *GetCanteenHeadCountReply) String() string {
@@ -3749,7 +3633,7 @@ func (*GetCanteenHeadCountReply) ProtoMessage() {}
 
 func (x *GetCanteenHeadCountReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3804,11 +3688,9 @@ type ListStudentClubRequest struct {
 
 func (x *ListStudentClubRequest) Reset() {
 	*x = ListStudentClubRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[58]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListStudentClubRequest) String() string {
@@ -3819,7 +3701,7 @@ func (*ListStudentClubRequest) ProtoMessage() {}
 
 func (x *ListStudentClubRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3851,11 +3733,9 @@ type ListStudentClubReply struct {
 
 func (x *ListStudentClubReply) Reset() {
 	*x = ListStudentClubReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[59]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *ListStudentClubReply) String() string {
@@ -3866,7 +3746,7 @@ func (*ListStudentClubReply) ProtoMessage() {}
 
 func (x *ListStudentClubReply) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3905,11 +3785,9 @@ type StudentClub struct {
 
 func (x *StudentClub) Reset() {
 	*x = StudentClub{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[60]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *StudentClub) String() string {
@@ -3920,7 +3798,7 @@ func (*StudentClub) ProtoMessage() {}
 
 func (x *StudentClub) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -3978,11 +3856,9 @@ type StudentClubCollection struct {
 
 func (x *StudentClubCollection) Reset() {
 	*x = StudentClubCollection{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_tumdev_campus_backend_proto_msgTypes[61]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
 func (x *StudentClubCollection) String() string {
@@ -3993,7 +3869,7 @@ func (*StudentClubCollection) ProtoMessage() {}
 
 func (x *StudentClubCollection) ProtoReflect() protoreflect.Message {
 	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
-	if protoimpl.UnsafeEnabled && x != nil {
+	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
 			ms.StoreMessageInfo(mi)
@@ -4832,752 +4708,6 @@ func init() { file_tumdev_campus_backend_proto_init() }
 func file_tumdev_campus_backend_proto_init() {
 	if File_tumdev_campus_backend_proto != nil {
 		return
-	}
-	if !protoimpl.UnsafeEnabled {
-		file_tumdev_campus_backend_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateDeviceRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[1].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateDeviceReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[2].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteDeviceRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[3].Exporter = func(v any, i int) any {
-			switch v := v.(*DeleteDeviceReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[4].Exporter = func(v any, i int) any {
-			switch v := v.(*News); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[5].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[6].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[7].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsSourcesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[8].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsSourcesReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[9].Exporter = func(v any, i int) any {
-			switch v := v.(*NewsSource); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[10].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsAlertsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[11].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNewsAlertsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[12].Exporter = func(v any, i int) any {
-			switch v := v.(*NewsAlert); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[13].Exporter = func(v any, i int) any {
-			switch v := v.(*ListCanteenRatingsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[14].Exporter = func(v any, i int) any {
-			switch v := v.(*ListCanteenRatingsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[15].Exporter = func(v any, i int) any {
-			switch v := v.(*GetDishRatingsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[16].Exporter = func(v any, i int) any {
-			switch v := v.(*GetDishRatingsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[17].Exporter = func(v any, i int) any {
-			switch v := v.(*SingleRatingReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[18].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateCanteenRatingReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[19].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateCanteenRatingRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[20].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateDishRatingReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[21].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateDishRatingRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[22].Exporter = func(v any, i int) any {
-			switch v := v.(*ListAvailableDishTagsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[23].Exporter = func(v any, i int) any {
-			switch v := v.(*ListAvailableDishTagsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[24].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNameTagsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[25].Exporter = func(v any, i int) any {
-			switch v := v.(*ListNameTagsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[26].Exporter = func(v any, i int) any {
-			switch v := v.(*ListAvailableCanteenTagsRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[27].Exporter = func(v any, i int) any {
-			switch v := v.(*ListAvailableCanteenTagsReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[28].Exporter = func(v any, i int) any {
-			switch v := v.(*TagsOverview); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[29].Exporter = func(v any, i int) any {
-			switch v := v.(*RatingTag); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[30].Exporter = func(v any, i int) any {
-			switch v := v.(*RatingTagNewRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[31].Exporter = func(v any, i int) any {
-			switch v := v.(*RatingTagResult); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[32].Exporter = func(v any, i int) any {
-			switch v := v.(*ListCanteensRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[33].Exporter = func(v any, i int) any {
-			switch v := v.(*ListCanteensReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[34].Exporter = func(v any, i int) any {
-			switch v := v.(*Canteen); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[35].Exporter = func(v any, i int) any {
-			switch v := v.(*ListDishesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[36].Exporter = func(v any, i int) any {
-			switch v := v.(*ListDishesReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[37].Exporter = func(v any, i int) any {
-			switch v := v.(*RoomInformationElement); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[38].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUpdateNoteRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[39].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUpdateNoteReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[40].Exporter = func(v any, i int) any {
-			switch v := v.(*ListMoviesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[41].Exporter = func(v any, i int) any {
-			switch v := v.(*ListMoviesReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[42].Exporter = func(v any, i int) any {
-			switch v := v.(*Movie); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[43].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateFeedbackRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[44].Exporter = func(v any, i int) any {
-			switch v := v.(*Coordinate); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[45].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateFeedbackReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[46].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateFeedbackImageReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[47].Exporter = func(v any, i int) any {
-			switch v := v.(*CreateFeedbackImageRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[48].Exporter = func(v any, i int) any {
-			switch v := v.(*GetMemberRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[49].Exporter = func(v any, i int) any {
-			switch v := v.(*GetMemberReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[50].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUploadStatusRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[51].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUploadStatusReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[52].Exporter = func(v any, i int) any {
-			switch v := v.(*GetNotificationRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[53].Exporter = func(v any, i int) any {
-			switch v := v.(*GetNotificationReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[54].Exporter = func(v any, i int) any {
-			switch v := v.(*GetNotificationConfirmRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[55].Exporter = func(v any, i int) any {
-			switch v := v.(*GetNotificationConfirmReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[56].Exporter = func(v any, i int) any {
-			switch v := v.(*GetCanteenHeadCountRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[57].Exporter = func(v any, i int) any {
-			switch v := v.(*GetCanteenHeadCountReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[58].Exporter = func(v any, i int) any {
-			switch v := v.(*ListStudentClubRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[59].Exporter = func(v any, i int) any {
-			switch v := v.(*ListStudentClubReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[60].Exporter = func(v any, i int) any {
-			switch v := v.(*StudentClub); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_tumdev_campus_backend_proto_msgTypes[61].Exporter = func(v any, i int) any {
-			switch v := v.(*StudentClubCollection); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	file_tumdev_campus_backend_proto_msgTypes[58].OneofWrappers = []any{}
 	file_tumdev_campus_backend_proto_msgTypes[60].OneofWrappers = []any{}
