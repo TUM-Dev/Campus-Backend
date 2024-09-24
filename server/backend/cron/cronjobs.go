@@ -1,8 +1,9 @@
 package cron
 
 import (
-	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"time"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"

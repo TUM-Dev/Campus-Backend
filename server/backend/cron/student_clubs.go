@@ -4,9 +4,10 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"io"
 	"strings"
+
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron/student_club_parsers"
 	"gorm.io/gorm"
