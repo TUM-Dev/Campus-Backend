@@ -79,6 +79,7 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240317000000(),
 		migrate20240318000000(),
 		migrate20240319000000(),
+		migrate20240320000000(),
 		migrate20240327000000(),
 		migrate20240402000000(),
 		migrate20240405000000(),
