@@ -805,6 +805,20 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "language",
+            "description": "Language of the student clubs and categories\nDefaults to german",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "German",
+              "English"
+            ],
+            "default": "German"
+          }
+        ],
         "tags": [
           "Campus"
         ]
@@ -1171,6 +1185,14 @@
           "type": "boolean"
         }
       }
+    },
+    "apiLanguage": {
+      "type": "string",
+      "enum": [
+        "German",
+        "English"
+      ],
+      "default": "German"
     },
     "apiListAvailableCanteenTagsReply": {
       "type": "object",
@@ -1622,6 +1644,11 @@
             "type": "object",
             "$ref": "#/definitions/apiStudentClub"
           }
+        },
+        "unstableCollectionId": {
+          "type": "string",
+          "format": "uint64",
+          "title": "id of the collection.\nMight not be stable over time because of scraping"
         }
       }
     },
