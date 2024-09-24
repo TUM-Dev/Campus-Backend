@@ -19,14 +19,16 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 	db := utils.SetupTestContainer(ctx, t)
 	exampleClubs := genExampleClubData(db, t)
 	server := CampusServer{db: db}
-	response, err := server.ListStudentClub(ctx, &pb.ListStudentClubRequest{})
+	language := pb.Language_German
+	response, err := server.ListStudentClub(ctx, &pb.ListStudentClubRequest{Language: &language})
 	require.NoError(t, err)
 	url0 := exampleClubs[0].Image.FullExternalUrl()
 	expectedResp := &pb.ListStudentClubReply{
 		Collections: []*pb.StudentClubCollection{
 			{
-				Title:       exampleClubs[0].StudentClubCollection.Name,
-				Description: exampleClubs[0].StudentClubCollection.Description,
+				UnstableCollectionId: uint64(exampleClubs[0].StudentClubCollection.ID),
+				Title:                exampleClubs[0].StudentClubCollection.Name,
+				Description:          exampleClubs[0].StudentClubCollection.Description,
 				Clubs: []*pb.StudentClub{
 					{
 						Name:        exampleClubs[0].Name,
@@ -40,8 +42,9 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 				},
 			},
 			{
-				Title:       exampleClubs[2].StudentClubCollection.Name,
-				Description: exampleClubs[2].StudentClubCollection.Description,
+				UnstableCollectionId: uint64(exampleClubs[2].StudentClubCollection.ID),
+				Title:                exampleClubs[2].StudentClubCollection.Name,
+				Description:          exampleClubs[2].StudentClubCollection.Description,
 				Clubs: []*pb.StudentClub{
 					{
 						Name: exampleClubs[2].Name,
@@ -56,6 +59,7 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	col1 := model.StudentClubCollection{
 		Name:        "col1",
+		Language:    pb.Language_German.String(),
 		Description: "Awesome collection",
 	}
 	err := db.Create(&col1).Error
@@ -63,6 +67,7 @@ func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	col2 := model.StudentClubCollection{
 		Name:        "col2",
 		Description: "Terrible collection",
+		Language:    pb.Language_German.String(),
 	}
 	err = db.Create(&col2).Error
 	require.NoError(t, err)
@@ -78,6 +83,7 @@ func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	require.NoError(t, err)
 	club1 := &model.StudentClub{
 		Name:                    "Student Club 1",
+		Language:                pb.Language_German.String(),
 		Description:             null.StringFrom("With Description"),
 		LinkUrl:                 null.StringFrom("https://example.com"),
 		ImageID:                 null.IntFrom(file1.File),
@@ -90,6 +96,7 @@ func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	require.NoError(t, err)
 	club2 := &model.StudentClub{
 		Name:                    "Student Club 2",
+		Language:                pb.Language_German.String(),
 		StudentClubCollectionID: col1.ID,
 		StudentClubCollection:   col1,
 	}
@@ -97,6 +104,7 @@ func genExampleClubData(db *gorm.DB, t *testing.T) []*model.StudentClub {
 	require.NoError(t, err)
 	club3 := &model.StudentClub{
 		Name:                    "Student Club 3",
+		Language:                pb.Language_German.String(),
 		StudentClubCollectionID: col2.ID,
 		StudentClubCollection:   col2,
 	}

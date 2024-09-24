@@ -24,7 +24,7 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentC
 
 	var dbClubCollections []model.StudentClubCollection
 	if err := s.db.WithContext(ctx).
-		Where("language = ?", req.GetLanguage().String()).
+		Where(&model.StudentClubCollection{Language: req.GetLanguage().String()}).
 		Find(&dbClubCollections).Error; err != nil {
 		log.WithError(err).Error("Error while querying student club collections")
 		return nil, status.Error(codes.Internal, "could not query the student club collections. Please retry later")
@@ -36,7 +36,7 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentC
 			Title:                dbCollection.Name,
 			Description:          dbCollection.Description,
 			Clubs:                make([]*pb.StudentClub, 0),
-			UnstableCollectionId: 0,
+			UnstableCollectionId: uint64(dbCollection.ID),
 		})
 	}
 	for _, dbClub := range dbClubs {
@@ -53,7 +53,6 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentC
 		for _, collection := range collections {
 			if collection.UnstableCollectionId == uint64(dbClub.StudentClubCollectionID) {
 				collection.Clubs = append(collection.Clubs, resClub)
-				resClub = nil
 				break
 			}
 		}
