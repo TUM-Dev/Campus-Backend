@@ -33,6 +33,10 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 		return err
 	}
 	scrapedClubs, scrapedCollections, err := student_club_parsers.ParseStudentClubs(body)
+	log.WithField("language", language).
+		WithField("scrapedClubsCnt", len(scrapedClubs)).
+		WithField("scrapedCollectionsCnt", len(scrapedCollections)).
+		Info("Scraped student clubs")
 	if err != nil {
 		return err
 	}
