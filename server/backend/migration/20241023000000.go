@@ -43,31 +43,19 @@ func migrate20241023000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20241023000000",
 		Migrate: func(tx *gorm.DB) error {
-			if err := tx.Migrator().DropTable(InitialStudentClub{}); err != nil {
+			if err := tx.Migrator().DropTable(&InitialStudentClub{}, &InitialStudentClubCollection{}); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable(InitialStudentClubCollection{}); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AutoMigrate(newStudentClubCollection{}); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AutoMigrate(newStudentClub{}); err != nil {
+			if err := tx.Migrator().AutoMigrate(&newStudentClubCollection{}, &newStudentClub{}); err != nil {
 				return err
 			}
 			return nil
 		},
 		Rollback: func(tx *gorm.DB) error {
-			if err := tx.Migrator().DropTable(newStudentClub{}); err != nil {
+			if err := tx.Migrator().DropTable(&newStudentClub{}, &newStudentClubCollection{}); err != nil {
 				return err
 			}
-			if err := tx.Migrator().DropTable(newStudentClubCollection{}); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AutoMigrate(InitialStudentClubCollection{}); err != nil {
-				return err
-			}
-			if err := tx.Migrator().AutoMigrate(InitialStudentClub{}); err != nil {
+			if err := tx.Migrator().AutoMigrate(&InitialStudentClubCollection{}, &InitialStudentClub{}); err != nil {
 				return err
 			}
 			return nil
