@@ -4,6 +4,8 @@ BASEDIR=$(dirname "$0")
 echo "making sure that this script is run from $BASEDIR"
 pushd "$BASEDIR" > /dev/null || exit
 
+go work use ./
+
 echo downloading...
 go get github.com/bufbuild/buf/cmd/buf
 go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
