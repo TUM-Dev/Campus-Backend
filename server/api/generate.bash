@@ -7,7 +7,7 @@ pushd $BASEDIR > /dev/null
 
 echo updating the generated files
 export PATH="$PATH:$(go env GOPATH)/bin"
-buf mod update || exit 1
+buf dep update || exit 1
 buf generate || exit 1
 
 echo making sure the openapi document points to the valid api
