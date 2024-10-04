@@ -99,10 +99,6 @@ func TestTemplatingResultsWithFullFeedback(t *testing.T) {
 <blockquote>This is a Test</blockquote>
 <table>
     <tr>
-        <th>Inforation type</th>
-        <th>Details</th>
-    </tr>
-    <tr>
         <th>Nutzer-Standort</th>
         <td>
             <a href="https://www.google.com/maps/search/?api=1&query=0,0">
@@ -147,10 +143,6 @@ func TestTemplatingResultsWithEmptyFeedback(t *testing.T) {
 	assert.Equal(t, `<b>Feedback via the TUM Campus App:</b>
 <i>no feedback provided</i>
 <table>
-    <tr>
-        <th>Inforation type</th>
-        <th>Details</th>
-    </tr>
     <tr>
         <th>OS-Version</th>
         <td>unknown</td>
