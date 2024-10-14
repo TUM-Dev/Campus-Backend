@@ -131,7 +131,7 @@ service Campus {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
 
-  // List all information nessesary for the "Campus" tab
+  // List all information necessary for the "Campus" tab
   rpc ListStudentClub(ListCampusRequest) returns (ListCampusReply) {
     option (google.api.http) = {get: "/student_clubs"};
   }
@@ -561,13 +561,13 @@ message StudentClubCollection {
   uint64 unstable_collection_id = 4;
 }
 message StudentCouncil {
-  // The name of the club
+  // The name of the council
   string name = 1;
-  // How the club describes itsself
+  // How the council describes itsself
   optional string description = 2;
-  // Where the clubs main internet presence is
+  // Where the council main internet presence is
   optional string link_url = 3;
-  // Where to find a image for this club
+  // Where to find a image for this council
   optional string cover_url = 4;
 }
 message StudentCouncilCollection {
