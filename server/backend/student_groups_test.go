@@ -21,11 +21,11 @@ func TestCampusServer_ListStudentGroup(t *testing.T) {
 	exampleCouncils := genExampleCouncilData(db, t)
 	server := CampusServer{db: db}
 	language := pb.Language_German
-	response, err := server.ListStudentGroup(ctx, &pb.ListCampusRequest{Language: &language})
+	response, err := server.ListStudentGroup(ctx, &pb.ListStudentGroupRequest{Language: &language})
 	require.NoError(t, err)
 	urlClub0 := exampleClubs[0].Image.FullExternalUrl()
 	urlCouncil0 := exampleCouncils[0].Image.FullExternalUrl()
-	expectedResp := &pb.ListCampusReply{
+	expectedResp := &pb.ListStudentGroupReply{
 		StudentCouncils: []*pb.StudentCouncilCollection{
 			{
 				UnstableCollectionId: uint64(exampleCouncils[0].StudentCouncilCollection.ID),
