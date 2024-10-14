@@ -667,13 +667,50 @@
     },
     "/student_clubs": {
       "get": {
-        "summary": "List all information nessesary for the \"Campus\" tab",
+        "summary": "List all information necessary for the \"Campus\" tab",
         "operationId": "Campus_ListStudentClub",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiListCampusReply"
+              "$ref": "#/definitions/apiListStudentGroupReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "language",
+            "description": "Language of the student clubs and categories\nDefaults to german",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "German",
+              "English"
+            ],
+            "default": "German"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/student_groups": {
+      "get": {
+        "summary": "List all student groups information",
+        "operationId": "Campus_ListStudentGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListStudentGroupReply"
             }
           },
           "default": {
@@ -1031,25 +1068,6 @@
         }
       }
     },
-    "apiListCampusReply": {
-      "type": "object",
-      "properties": {
-        "studentClubs": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiStudentClubCollection"
-          }
-        },
-        "studentCouncils": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiStudentCouncilCollection"
-          }
-        }
-      }
-    },
     "apiListCanteenRatingsReply": {
       "type": "object",
       "properties": {
@@ -1188,6 +1206,25 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiNewsSource"
+          }
+        }
+      }
+    },
+    "apiListStudentGroupReply": {
+      "type": "object",
+      "properties": {
+        "studentClubs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentClubCollection"
+          }
+        },
+        "studentCouncils": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentCouncilCollection"
           }
         }
       }
@@ -1477,19 +1514,19 @@
       "properties": {
         "name": {
           "type": "string",
-          "title": "The name of the club"
+          "title": "The name of the council"
         },
         "description": {
           "type": "string",
-          "title": "How the club describes itsself"
+          "title": "How the council describes itsself"
         },
         "linkUrl": {
           "type": "string",
-          "title": "Where the clubs main internet presence is"
+          "title": "Where the council main internet presence is"
         },
         "coverUrl": {
           "type": "string",
-          "title": "Where to find a image for this club"
+          "title": "Where to find a image for this council"
         }
       }
     },

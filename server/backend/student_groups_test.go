@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestCampusServer_ListStudentClub(t *testing.T) {
+func TestCampusServer_ListStudentGroup(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
@@ -21,7 +21,7 @@ func TestCampusServer_ListStudentClub(t *testing.T) {
 	exampleCouncils := genExampleCouncilData(db, t)
 	server := CampusServer{db: db}
 	language := pb.Language_German
-	response, err := server.ListStudentClub(ctx, &pb.ListCampusRequest{Language: &language})
+	response, err := server.ListStudentGroup(ctx, &pb.ListCampusRequest{Language: &language})
 	require.NoError(t, err)
 	urlClub0 := exampleClubs[0].Image.FullExternalUrl()
 	urlCouncil0 := exampleCouncils[0].Image.FullExternalUrl()

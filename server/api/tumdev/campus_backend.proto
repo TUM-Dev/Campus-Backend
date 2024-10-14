@@ -132,8 +132,14 @@ service Campus {
   }
 
   // List all information necessary for the "Campus" tab
-  rpc ListStudentClub(ListCampusRequest) returns (ListCampusReply) {
+  rpc ListStudentClub(ListStudentGroupRequest) returns (ListStudentGroupReply) {
     option (google.api.http) = {get: "/student_clubs"};
+    option deprecated = true;
+  }
+
+  // List all student groups information
+  rpc ListStudentGroup(ListStudentGroupRequest) returns (ListStudentGroupReply) {
+    option (google.api.http) = {get: "/student_groups"};
   }
 }
 
@@ -532,12 +538,12 @@ enum Language {
   English = 1;
 }
 
-message ListCampusRequest {
+message ListStudentGroupRequest {
   // Language of the student clubs and categories
   // Defaults to german
   optional Language language = 1;
 }
-message ListCampusReply {
+message ListStudentGroupReply {
   repeated StudentClubCollection student_clubs = 1;
   repeated StudentCouncilCollection student_councils = 2;
 }

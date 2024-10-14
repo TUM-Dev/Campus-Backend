@@ -10,7 +10,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListCampusRequest) (*pb.ListCampusReply, error) {
+// ListStudentClub is deprecated, use ListStudentGroup instead
+func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentGroupRequest) (*pb.ListStudentGroupReply, error) {
+	return s.ListStudentGroup(ctx, req)
+}
+
+func (s *CampusServer) ListStudentGroup(ctx context.Context, req *pb.ListStudentGroupRequest) (*pb.ListStudentGroupReply, error) {
 	studentClubs, err := s.getAllStudentClubs(ctx, req.GetLanguage())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "could not query the student clubs. Please retry later")
@@ -20,7 +25,7 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListCampusRe
 		return nil, status.Error(codes.Internal, "could not query the student clubs. Please retry later")
 	}
 
-	return &pb.ListCampusReply{StudentClubs: studentClubs, StudentCouncils: studentCouncils}, nil
+	return &pb.ListStudentGroupReply{StudentClubs: studentClubs, StudentCouncils: studentCouncils}, nil
 }
 
 func (s *CampusServer) getAllStudentClubs(ctx context.Context, lang pb.Language) ([]*pb.StudentClubCollection, error) {
