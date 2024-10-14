@@ -39,7 +39,7 @@ const (
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 	Campus_ListStudentClub_FullMethodName          = "/api.Campus/ListStudentClub"
-	Campus_ListStudentGroup_FullMethodName        = "/api.Campus/ListStudentGroup"
+	Campus_ListStudentGroup_FullMethodName         = "/api.Campus/ListStudentGroup"
 )
 
 // CampusClient is the client API for Campus service.
