@@ -2,14 +2,21 @@ package migration
 
 import (
 	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/guregu/null"
 	"gorm.io/gorm"
 )
 
 type newStudentCouncil struct {
 	gorm.Model
-	Name        string `gorm:"type:varchar(100)"`
-	Language    string `gorm:"type:enum('German','English');default:'German'"`
-	Description string
+	Name                       string
+	Language                   string `gorm:"type:enum('German','English');default:'German'"`
+	Description                null.String
+	LinkUrl                    null.String `gorm:"type:varchar(190);unique;"`
+	ImageID                    null.Int
+	Image                      *File `gorm:"foreignKey:ImageID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ImageCaption               null.String
+	StudentCouncilCollectionID uint
+	StudentCouncilCollection   newStudentCouncilCollection `gorm:"foreignKey:StudentCouncilCollectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName sets the insert table name for this struct type
