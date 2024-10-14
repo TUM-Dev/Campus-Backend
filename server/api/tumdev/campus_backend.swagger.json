@@ -198,36 +198,6 @@
         ]
       }
     },
-    "/device/uploaded/{lrzId}": {
-      "get": {
-        "operationId": "Campus_GetUploadStatus",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetUploadStatusReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lrzId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/device/{deviceId}": {
       "delete": {
         "summary": "Delete a device from push notifications",
@@ -541,36 +511,6 @@
         ]
       }
     },
-    "/members/{lrzId}": {
-      "get": {
-        "operationId": "Campus_GetMember",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetMemberReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lrzId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
     "/movies/{lastId}": {
       "get": {
         "operationId": "Campus_ListMovies",
@@ -720,68 +660,6 @@
             }
           }
         },
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/notifications/confirm/{notificationId}": {
-      "get": {
-        "operationId": "Campus_GetNotificationConfirm",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetNotificationConfirmReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "notificationId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "Campus"
-        ]
-      }
-    },
-    "/notifications/{notificationId}": {
-      "get": {
-        "operationId": "Campus_GetNotification",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiGetNotificationReply"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "notificationId",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
         "tags": [
           "Campus"
         ]
@@ -1110,51 +988,6 @@
         }
       }
     },
-    "apiGetMemberReply": {
-      "type": "object",
-      "properties": {
-        "lrzId": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "memberId": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "apiGetNotificationConfirmReply": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "string"
-        }
-      }
-    },
-    "apiGetNotificationReply": {
-      "type": "object",
-      "properties": {
-        "notificationId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "type": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "signature": {
-          "type": "string"
-        }
-      }
-    },
     "apiGetUpdateNoteReply": {
       "type": "object",
       "properties": {
@@ -1163,26 +996,6 @@
         },
         "versionName": {
           "type": "string"
-        }
-      }
-    },
-    "apiGetUploadStatusReply": {
-      "type": "object",
-      "properties": {
-        "fcmToken": {
-          "type": "string"
-        },
-        "publicKey": {
-          "type": "string"
-        },
-        "studentId": {
-          "type": "boolean"
-        },
-        "employeeId": {
-          "type": "boolean"
-        },
-        "externalId": {
-          "type": "boolean"
         }
       }
     },

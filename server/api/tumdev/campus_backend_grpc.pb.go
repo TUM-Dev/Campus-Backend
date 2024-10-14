@@ -35,10 +35,6 @@ const (
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
 	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
-	Campus_GetUploadStatus_FullMethodName          = "/api.Campus/GetUploadStatus"
-	Campus_GetNotification_FullMethodName          = "/api.Campus/GetNotification"
-	Campus_GetNotificationConfirm_FullMethodName   = "/api.Campus/GetNotificationConfirm"
-	Campus_GetMember_FullMethodName                = "/api.Campus/GetMember"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
@@ -67,10 +63,6 @@ type CampusClient interface {
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateFeedbackRequest, CreateFeedbackReply], error)
-	GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error)
-	GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error)
-	GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error)
-	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
@@ -241,46 +233,6 @@ func (c *campusClient) CreateFeedback(ctx context.Context, opts ...grpc.CallOpti
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Campus_CreateFeedbackClient = grpc.ClientStreamingClient[CreateFeedbackRequest, CreateFeedbackReply]
 
-func (c *campusClient) GetUploadStatus(ctx context.Context, in *GetUploadStatusRequest, opts ...grpc.CallOption) (*GetUploadStatusReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUploadStatusReply)
-	err := c.cc.Invoke(ctx, Campus_GetUploadStatus_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetNotification(ctx context.Context, in *GetNotificationRequest, opts ...grpc.CallOption) (*GetNotificationReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetNotificationReply)
-	err := c.cc.Invoke(ctx, Campus_GetNotification_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetNotificationConfirm(ctx context.Context, in *GetNotificationConfirmRequest, opts ...grpc.CallOption) (*GetNotificationConfirmReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetNotificationConfirmReply)
-	err := c.cc.Invoke(ctx, Campus_GetNotificationConfirm_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *campusClient) GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMemberReply)
-	err := c.cc.Invoke(ctx, Campus_GetMember_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetCanteenHeadCountReply)
@@ -343,10 +295,6 @@ type CampusServer interface {
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(grpc.ClientStreamingServer[CreateFeedbackRequest, CreateFeedbackReply]) error
-	GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error)
-	GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error)
-	GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error)
-	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
@@ -408,18 +356,6 @@ func (UnimplementedCampusServer) ListMovies(context.Context, *ListMoviesRequest)
 }
 func (UnimplementedCampusServer) CreateFeedback(grpc.ClientStreamingServer[CreateFeedbackRequest, CreateFeedbackReply]) error {
 	return status.Errorf(codes.Unimplemented, "method CreateFeedback not implemented")
-}
-func (UnimplementedCampusServer) GetUploadStatus(context.Context, *GetUploadStatusRequest) (*GetUploadStatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUploadStatus not implemented")
-}
-func (UnimplementedCampusServer) GetNotification(context.Context, *GetNotificationRequest) (*GetNotificationReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNotification not implemented")
-}
-func (UnimplementedCampusServer) GetNotificationConfirm(context.Context, *GetNotificationConfirmRequest) (*GetNotificationConfirmReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNotificationConfirm not implemented")
-}
-func (UnimplementedCampusServer) GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMember not implemented")
 }
 func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
@@ -713,78 +649,6 @@ func _Campus_CreateFeedback_Handler(srv interface{}, stream grpc.ServerStream) e
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Campus_CreateFeedbackServer = grpc.ClientStreamingServer[CreateFeedbackRequest, CreateFeedbackReply]
 
-func _Campus_GetUploadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUploadStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetUploadStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetUploadStatus_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetUploadStatus(ctx, req.(*GetUploadStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNotificationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetNotification(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetNotification_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotification(ctx, req.(*GetNotificationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetNotificationConfirm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNotificationConfirmRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetNotificationConfirm(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetNotificationConfirm_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetNotificationConfirm(ctx, req.(*GetNotificationConfirmRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Campus_GetMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMemberRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CampusServer).GetMember(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Campus_GetMember_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).GetMember(ctx, req.(*GetMemberRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCanteenHeadCountRequest)
 	if err := dec(in); err != nil {
@@ -919,22 +783,6 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMovies",
 			Handler:    _Campus_ListMovies_Handler,
-		},
-		{
-			MethodName: "GetUploadStatus",
-			Handler:    _Campus_GetUploadStatus_Handler,
-		},
-		{
-			MethodName: "GetNotification",
-			Handler:    _Campus_GetNotification_Handler,
-		},
-		{
-			MethodName: "GetNotificationConfirm",
-			Handler:    _Campus_GetNotificationConfirm_Handler,
-		},
-		{
-			MethodName: "GetMember",
-			Handler:    _Campus_GetMember_Handler,
 		},
 		{
 			MethodName: "GetCanteenHeadCount",
