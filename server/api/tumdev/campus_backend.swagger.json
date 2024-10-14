@@ -666,14 +666,14 @@
       }
     },
     "/student_clubs": {
-      "delete": {
-        "summary": "Delete a device from push notifications",
+      "get": {
+        "summary": "List all information nessesary for the \"Campus\" tab",
         "operationId": "Campus_ListStudentClub",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiListStudentClubReply"
+              "$ref": "#/definitions/apiListCampusReply"
             }
           },
           "default": {
@@ -1031,6 +1031,25 @@
         }
       }
     },
+    "apiListCampusReply": {
+      "type": "object",
+      "properties": {
+        "studentClubs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentClubCollection"
+          }
+        },
+        "studentCouncils": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentCouncilCollection"
+          }
+        }
+      }
+    },
     "apiListCanteenRatingsReply": {
       "type": "object",
       "properties": {
@@ -1169,18 +1188,6 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiNewsSource"
-          }
-        }
-      }
-    },
-    "apiListStudentClubReply": {
-      "type": "object",
-      "properties": {
-        "collections": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/apiStudentClubCollection"
           }
         }
       }
@@ -1461,7 +1468,51 @@
         "unstableCollectionId": {
           "type": "string",
           "format": "uint64",
-          "title": "id of the collection.\nMight not be stable over time because of scraping"
+          "title": "ID of the collection.\nMight not be stable over time because of scraping\nMay not be disjunct not unique in relation to student councils"
+        }
+      }
+    },
+    "apiStudentCouncil": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "The name of the club"
+        },
+        "description": {
+          "type": "string",
+          "title": "How the club describes itsself"
+        },
+        "linkUrl": {
+          "type": "string",
+          "title": "Where the clubs main internet presence is"
+        },
+        "coverUrl": {
+          "type": "string",
+          "title": "Where to find a image for this club"
+        }
+      }
+    },
+    "apiStudentCouncilCollection": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "councils": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentCouncil"
+          }
+        },
+        "unstableCollectionId": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ID of the collection.\nMight not be stable over time because of scraping\nMay not be disjunct not unique in relation to student clubs"
         }
       }
     },

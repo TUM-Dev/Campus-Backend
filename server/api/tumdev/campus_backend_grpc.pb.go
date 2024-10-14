@@ -68,8 +68,8 @@ type CampusClient interface {
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
-	// Delete a device from push notifications
-	ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error)
+	// List all information nessesary for the "Campus" tab
+	ListStudentClub(ctx context.Context, in *ListCampusRequest, opts ...grpc.CallOption) (*ListCampusReply, error)
 }
 
 type campusClient struct {
@@ -263,9 +263,9 @@ func (c *campusClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest
 	return out, nil
 }
 
-func (c *campusClient) ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error) {
+func (c *campusClient) ListStudentClub(ctx context.Context, in *ListCampusRequest, opts ...grpc.CallOption) (*ListCampusReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListStudentClubReply)
+	out := new(ListCampusReply)
 	err := c.cc.Invoke(ctx, Campus_ListStudentClub_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -300,8 +300,8 @@ type CampusServer interface {
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error)
-	// Delete a device from push notifications
-	ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error)
+	// List all information nessesary for the "Campus" tab
+	ListStudentClub(context.Context, *ListCampusRequest) (*ListCampusReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -366,7 +366,7 @@ func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequ
 func (UnimplementedCampusServer) DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDevice not implemented")
 }
-func (UnimplementedCampusServer) ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error) {
+func (UnimplementedCampusServer) ListStudentClub(context.Context, *ListCampusRequest) (*ListCampusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListStudentClub not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
@@ -704,7 +704,7 @@ func _Campus_DeleteDevice_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _Campus_ListStudentClub_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStudentClubRequest)
+	in := new(ListCampusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -716,7 +716,7 @@ func _Campus_ListStudentClub_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: Campus_ListStudentClub_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CampusServer).ListStudentClub(ctx, req.(*ListStudentClubRequest))
+		return srv.(CampusServer).ListStudentClub(ctx, req.(*ListCampusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
