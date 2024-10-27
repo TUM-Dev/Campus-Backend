@@ -68,7 +68,7 @@ type CampusClient interface {
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
-	// Delete a device from push notifications
+	// List all avaliable student clubs
 	ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error)
 }
 
@@ -300,7 +300,7 @@ type CampusServer interface {
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error)
-	// Delete a device from push notifications
+	// List all avaliable student clubs
 	ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error)
 	mustEmbedUnimplementedCampusServer()
 }

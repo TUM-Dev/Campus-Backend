@@ -666,8 +666,8 @@
       }
     },
     "/student_clubs": {
-      "delete": {
-        "summary": "Delete a device from push notifications",
+      "get": {
+        "summary": "List all avaliable student clubs",
         "operationId": "Campus_ListStudentClub",
         "responses": {
           "200": {
