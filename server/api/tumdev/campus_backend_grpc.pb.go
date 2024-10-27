@@ -70,7 +70,7 @@ type CampusClient interface {
 	// Delete a device from push notifications
 	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
 	// Deprecated: Do not use.
-	// List all information necessary for the "Campus" tab
+	// List all avaliable student clubs
 	ListStudentClub(ctx context.Context, in *ListStudentGroupRequest, opts ...grpc.CallOption) (*ListStudentGroupReply, error)
 	// List all student groups information
 	ListStudentGroup(ctx context.Context, in *ListStudentGroupRequest, opts ...grpc.CallOption) (*ListStudentGroupReply, error)

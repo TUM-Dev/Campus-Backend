@@ -131,13 +131,13 @@ service Campus {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
 
-  // List all information necessary for the "Campus" tab
+  // List all avaliable student clubs
   rpc ListStudentClub(ListStudentGroupRequest) returns (ListStudentGroupReply) {
     option (google.api.http) = {get: "/student_clubs"};
     option deprecated = true;
   }
 
-  // List all student groups information
+  // List student groups information necessary for the "Campus" tab
   rpc ListStudentGroup(ListStudentGroupRequest) returns (ListStudentGroupReply) {
     option (google.api.http) = {get: "/student_groups"};
   }

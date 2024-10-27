@@ -667,7 +667,7 @@
     },
     "/student_clubs": {
       "get": {
-        "summary": "List all information necessary for the \"Campus\" tab",
+        "summary": "List all avaliable student clubs",
         "operationId": "Campus_ListStudentClub",
         "responses": {
           "200": {
