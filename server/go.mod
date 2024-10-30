@@ -15,6 +15,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
 	github.com/guregu/null v4.0.0+incompatible
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/makasim/sentryhook v0.5.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mmcdole/gofeed v1.3.0

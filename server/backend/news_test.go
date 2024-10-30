@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"regexp"
 	"testing"
 	"time"
@@ -95,7 +96,7 @@ func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 			AddRow(s2.Source, s2.Title, s2.URL, s2.FileID, s2.Hook, s2.File.File, s2.File.Name, s2.File.Path, s2.File.Downloads, s2.File.URL, s2.File.Downloaded))
 
 	meta := metadata.MD{}
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsSourcesReply{
@@ -132,7 +133,7 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
 	meta := metadata.MD{}
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsSources(metadata.NewIncomingContext(context.Background(), meta), nil)
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsSourcesReply{
@@ -149,7 +150,7 @@ func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNews(meta, &pb.ListNewsRequest{NewsSource: 1, LastNewsId: 2})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListNewsReply{News: nil}, response)
@@ -159,7 +160,7 @@ func (s *NewsSuite) Test_ListNewsNone() {
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListNewsReply{News: nil}, response)
@@ -173,7 +174,7 @@ func (s *NewsSuite) Test_ListNewsMultiple() {
 			AddRow(n2.News, n2.Date, n2.Created, n2.Title, n2.Description, n2.NewsSourceID, n2.Link, n2.Image, nil, nil, nil, nil, nil, nil, nil))
 
 	meta := metadata.NewIncomingContext(context.Background(), metadata.MD{})
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNews(meta, &pb.ListNewsRequest{})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsReply{
@@ -227,7 +228,7 @@ func (s *NewsSuite) Test_ListNewsAlertsError() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrInvalidDB)
 
 	meta := metadata.MD{}
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), meta), &pb.ListNewsAlertsRequest{})
 	require.Equal(s.T(), status.Error(codes.Internal, "could not ListNewsAlerts"), err)
 	require.Nil(s.T(), response)
@@ -235,7 +236,7 @@ func (s *NewsSuite) Test_ListNewsAlertsError() {
 func (s *NewsSuite) Test_ListNewsAlertsNone_noFilter() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery)).WillReturnError(gorm.ErrRecordNotFound)
 
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{})
 	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
 	require.Nil(s.T(), response)
@@ -243,7 +244,7 @@ func (s *NewsSuite) Test_ListNewsAlertsNone_noFilter() {
 func (s *NewsSuite) Test_ListNewsAlertsNone_Filter() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsAlertsQuery + " AND news_alerts.news_alert > ?")).WithArgs(42).WillReturnError(gorm.ErrRecordNotFound)
 
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{LastNewsAlertId: 42})
 	require.Equal(s.T(), status.Error(codes.NotFound, "no news alerts"), err)
 	require.Nil(s.T(), response)
@@ -255,7 +256,7 @@ func (s *NewsSuite) Test_ListNewsAlertsMultiple() {
 			AddRow(a1.NewsAlert, a1.FileID, a1.Name, a1.Link, a1.Created, a1.From, a1.To, a1.File.File, a1.File.Name, a1.File.Path, a1.File.Downloads, a1.File.URL, a1.File.Downloaded).
 			AddRow(a2.NewsAlert, a2.FileID, a2.Name, a2.Link, a2.Created, a2.From, a2.To, a2.File.File, a2.File.Name, a2.File.Path, a2.File.Downloads, a2.File.URL, a2.File.Downloaded))
 
-	server := CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
+	server := s.getCampusTestServer()
 	response, err := server.ListNewsAlerts(metadata.NewIncomingContext(context.Background(), metadata.MD{}), &pb.ListNewsAlertsRequest{})
 	require.NoError(s.T(), err)
 	expectedResp := &pb.ListNewsAlertsReply{
@@ -274,4 +275,13 @@ func (s *NewsSuite) AfterTest(_, _ string) {
 // a normal test function and pass our suite to suite.Run
 func TestNewsSuite(t *testing.T) {
 	suite.Run(t, new(NewsSuite))
+}
+
+func (s *NewsSuite) getCampusTestServer() *CampusServer {
+	return &CampusServer{
+		db:              s.DB,
+		deviceBuf:       s.deviceBuf,
+		newsSourceCache: expirable.NewLRU[string, []model.NewsSource](1, nil, time.Hour*6),
+		newsCache:       expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30),
+	}
 }
