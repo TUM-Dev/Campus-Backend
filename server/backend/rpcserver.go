@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"sync"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
@@ -14,7 +13,6 @@ type CampusServer struct {
 	feedbackEmailLastReuestAt *sync.Map
 	db                        *gorm.DB
 	deviceBuf                 *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
-	cache                     *utils.Cache
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
@@ -26,6 +24,5 @@ func New(db *gorm.DB) *CampusServer {
 		db:                        db,
 		deviceBuf:                 newDeviceBuffer(),
 		feedbackEmailLastReuestAt: &sync.Map{},
-		cache:                     utils.NewCache(),
 	}
 }
