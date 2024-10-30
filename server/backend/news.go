@@ -4,35 +4,37 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"time"
 
 	"gorm.io/gorm"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+const (
+	NewsSourceCacheDuration = time.Hour * 6
+	CacheKeyAllNewsSources  = "all_news_sources"
+	NewsCacheDuration       = time.Minute * 30
+	CacheKeyNews            = "news"
+)
+
+var newsSourceCache = expirable.NewLRU[string, []model.NewsSource](512, nil, NewsSourceCacheDuration)
+var newsCache = expirable.NewLRU[string, []model.News](512, nil, NewsCacheDuration)
 
 func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSourcesRequest) (*pb.ListNewsSourcesReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
 
-	var sources []model.NewsSource
-	if s.cache.Exists(utils.CacheKeyAllNewsSources, "") {
-		sources = s.cache.Get(utils.CacheKeyAllNewsSources, "").([]model.NewsSource)
-	} else if err := s.db.WithContext(ctx).
-		Joins("File").
-		Find(&sources).Error; err != nil {
-		log.WithError(err).Error("could not find news_sources")
+	sources, err := s.getNewsSources(ctx)
+	if err != nil {
 		return nil, status.Error(codes.Internal, "could not ListNewsSources")
-	} else {
-		s.cache.Set(utils.CacheKeyAllNewsSources, "", sources, 30*time.Minute)
 	}
 
 	var resp []*pb.NewsSource
@@ -46,34 +48,26 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 	return &pb.ListNewsSourcesReply{Sources: resp}, nil
 }
 
+func (s *CampusServer) getNewsSources(ctx context.Context) ([]model.NewsSource, error) {
+	if newsSources, ok := newsSourceCache.Get(CacheKeyAllNewsSources); ok {
+		return newsSources, nil
+	}
+	var sources []model.NewsSource
+	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
+		return nil, err
+	}
+	newsSourceCache.Add(CacheKeyAllNewsSources, sources)
+	return sources, nil
+}
+
 func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*pb.ListNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
 
-	var newsEntries []model.News
-	paramsForCache := fmt.Sprintf("%d_%d_%d", req.NewsSource, req.OldestDateAt.GetSeconds(), req.LastNewsId)
-	if s.cache.Exists(utils.CacheKeyNews, paramsForCache) {
-		newsEntries = s.cache.Get(utils.CacheKeyNews, paramsForCache).([]model.News)
-	} else {
-		tx := s.db.WithContext(ctx).
-			Joins("File").
-			Joins("NewsSource").
-			Joins("NewsSource.File")
-		if req.NewsSource != 0 {
-			tx = tx.Where("src = ?", req.NewsSource)
-		}
-		if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-			tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
-		}
-		if req.LastNewsId != 0 {
-			tx = tx.Where("news > ?", req.LastNewsId)
-		}
-		if err := tx.Find(&newsEntries).Error; err != nil {
-			log.WithError(err).Error("could not find news item")
-			return nil, status.Error(codes.Internal, "could not ListNews")
-		}
-		s.cache.Set(utils.CacheKeyNews, paramsForCache, newsEntries, 10*time.Minute)
+	var newsEntries, err = s.getNews(ctx, req.NewsSource, req.LastNewsId, req.OldestDateAt.AsTime())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "could not ListNews")
 	}
 
 	var resp []*pb.News
@@ -96,6 +90,34 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 		})
 	}
 	return &pb.ListNewsReply{News: resp}, nil
+}
+
+func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID int32, oldestDateAt time.Time) ([]model.News, error) {
+	cacheKey := fmt.Sprintf("%s_%d_%d_%d", CacheKeyNews, sourceID, oldestDateAt.Second(), lastNewsID)
+
+	if news, ok := newsCache.Get(cacheKey); ok {
+		return news, nil
+	}
+
+	var news []model.News
+	tx := s.db.WithContext(ctx).
+		Joins("File").
+		Joins("NewsSource").
+		Joins("NewsSource.File")
+	if sourceID != 0 {
+		tx = tx.Where("src = ?", sourceID)
+	}
+	if oldestDateAt.Second() != 0 || oldestDateAt.Nanosecond() != 0 {
+		tx = tx.Where("date > ?", oldestDateAt)
+	}
+	if lastNewsID != 0 {
+		tx = tx.Where("news > ?", lastNewsID)
+	}
+	if err := tx.Find(&news).Error; err != nil {
+		return nil, err
+	}
+	newsCache.Add(CacheKeyNews, news)
+	return news, nil
 }
 
 func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlertsRequest) (*pb.ListNewsAlertsReply, error) {
