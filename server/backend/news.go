@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/TUM-Dev/Campus-Backend/server/utils"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -22,11 +24,15 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 	}
 
 	var sources []model.NewsSource
-	if err := s.db.WithContext(ctx).
+	if s.cache.Exists(utils.CacheKeyAllNewsSources, "") {
+		sources = s.cache.Get(utils.CacheKeyAllNewsSources, "").([]model.NewsSource)
+	} else if err := s.db.WithContext(ctx).
 		Joins("File").
 		Find(&sources).Error; err != nil {
 		log.WithError(err).Error("could not find news_sources")
 		return nil, status.Error(codes.Internal, "could not ListNewsSources")
+	} else {
+		s.cache.Set(utils.CacheKeyAllNewsSources, "", sources, 30*time.Minute)
 	}
 
 	var resp []*pb.NewsSource
@@ -46,22 +52,28 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	}
 
 	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).
-		Joins("File").
-		Joins("NewsSource").
-		Joins("NewsSource.File")
-	if req.NewsSource != 0 {
-		tx = tx.Where("src = ?", req.NewsSource)
-	}
-	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
-	}
-	if req.LastNewsId != 0 {
-		tx = tx.Where("news > ?", req.LastNewsId)
-	}
-	if err := tx.Find(&newsEntries).Error; err != nil {
-		log.WithError(err).Error("could not find news item")
-		return nil, status.Error(codes.Internal, "could not ListNews")
+	paramsForCache := fmt.Sprintf("%d_%d_%d", req.NewsSource, req.OldestDateAt.GetSeconds(), req.LastNewsId)
+	if s.cache.Exists(utils.CacheKeyNews, paramsForCache) {
+		newsEntries = s.cache.Get(utils.CacheKeyNews, paramsForCache).([]model.News)
+	} else {
+		tx := s.db.WithContext(ctx).
+			Joins("File").
+			Joins("NewsSource").
+			Joins("NewsSource.File")
+		if req.NewsSource != 0 {
+			tx = tx.Where("src = ?", req.NewsSource)
+		}
+		if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
+			tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
+		}
+		if req.LastNewsId != 0 {
+			tx = tx.Where("news > ?", req.LastNewsId)
+		}
+		if err := tx.Find(&newsEntries).Error; err != nil {
+			log.WithError(err).Error("could not find news item")
+			return nil, status.Error(codes.Internal, "could not ListNews")
+		}
+		s.cache.Set(utils.CacheKeyNews, paramsForCache, newsEntries, 10*time.Minute)
 	}
 
 	var resp []*pb.News
