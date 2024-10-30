@@ -1,12 +1,12 @@
 package backend
 
 import (
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/hashicorp/golang-lru/v2/expirable"
 	"sync"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )

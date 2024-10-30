@@ -4,23 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/hashicorp/golang-lru/v2/expirable"
 	"regexp"
 	"testing"
 	"time"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
