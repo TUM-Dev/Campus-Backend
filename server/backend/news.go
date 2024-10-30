@@ -8,16 +8,12 @@ import (
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/hashicorp/golang-lru/v2/expirable"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
-
-var newsSourceCache = expirable.NewLRU[string, []model.NewsSource](1, nil, time.Hour*6)
-var newsCache = expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30)
 
 func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSourcesRequest) (*pb.ListNewsSourcesReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
@@ -43,14 +39,14 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 const CacheKeyAllNewsSources = "all_news_sources"
 
 func (s *CampusServer) getNewsSources(ctx context.Context) ([]model.NewsSource, error) {
-	if newsSources, ok := newsSourceCache.Get(CacheKeyAllNewsSources); ok {
+	if newsSources, ok := s.newsSourceCache.Get(CacheKeyAllNewsSources); ok {
 		return newsSources, nil
 	}
 	var sources []model.NewsSource
 	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
 		return nil, err
 	}
-	newsSourceCache.Add(CacheKeyAllNewsSources, sources)
+	s.newsSourceCache.Add(CacheKeyAllNewsSources, sources)
 	return sources, nil
 }
 
@@ -89,7 +85,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID int32, oldestDateAt time.Time) ([]model.News, error) {
 	cacheKey := fmt.Sprintf("%d_%d_%d", sourceID, oldestDateAt.Second(), lastNewsID)
 
-	if news, ok := newsCache.Get(cacheKey); ok {
+	if news, ok := s.newsCache.Get(cacheKey); ok {
 		return news, nil
 	}
 
@@ -110,7 +106,7 @@ func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID i
 	if err := tx.Find(&news).Error; err != nil {
 		return nil, err
 	}
-	newsCache.Add(cacheKey, news)
+	s.newsCache.Add(cacheKey, news)
 	return news, nil
 }
 
