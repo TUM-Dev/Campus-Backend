@@ -36,22 +36,22 @@ func NewCache() *Cache {
 func (c *Cache) Set(key CacheKey, params string, value any, expire time.Duration) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.cache[c.combine(key, params)] = value
-	c.deleteJobs[c.combine(key, params)] = time.Now().Add(expire)
+	c.cache[c.makeFullCacheKey(key, params)] = value
+	c.deleteJobs[c.makeFullCacheKey(key, params)] = time.Now().Add(expire)
 }
 
 // Get returns an entry from the cache
 func (c *Cache) Get(key CacheKey, params string) any {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	return c.cache[c.combine(key, params)]
+	return c.cache[c.makeFullCacheKey(key, params)]
 }
 
 // Exists checks if an entry exists in the cache
 func (c *Cache) Exists(key CacheKey, params string) bool {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	_, ok := c.cache[c.combine(key, params)]
+	_, ok := c.cache[c.makeFullCacheKey(key, params)]
 	return ok
 }
 
@@ -75,6 +75,6 @@ func (c *Cache) deleteLoop() {
 	}
 }
 
-func (c *Cache) combine(key CacheKey, params string) string {
+func (c *Cache) makeFullCacheKey(key CacheKey, params string) string {
 	return string(key) + params
 }
