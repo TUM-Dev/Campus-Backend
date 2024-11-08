@@ -9,6 +9,8 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -81,7 +83,7 @@ var (
 const ListMoviesQuery = "SELECT `movies`.`kino`,`movies`.`date`,`movies`.`created`,`movies`.`title`,`movies`.`year`,`movies`.`runtime`,`movies`.`genre`,`movies`.`director`,`movies`.`actors`,`movies`.`rating`,`movies`.`description`,`movies`.`trailer`,`movies`.`cover`,`movies`.`link`,`movies`.`location`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `movies` LEFT JOIN `files` `File` ON `movies`.`cover` = `File`.`file` WHERE kino > ? ORDER BY date ASC"
 
 func (s *MovieSuite) Test_ListMoviesAll() {
-	server := CampusServer{db: s.DB}
+	server := s.getCampusTestServer()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
 		WithArgs(-1).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
@@ -93,7 +95,7 @@ func (s *MovieSuite) Test_ListMoviesAll() {
 }
 
 func (s *MovieSuite) Test_ListMoviesOne() {
-	server := CampusServer{db: s.DB}
+	server := s.getCampusTestServer()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
@@ -104,7 +106,7 @@ func (s *MovieSuite) Test_ListMoviesOne() {
 }
 
 func (s *MovieSuite) Test_ListMoviesNone() {
-	server := CampusServer{db: s.DB}
+	server := s.getCampusTestServer()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
 		WithArgs(42).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
@@ -121,4 +123,11 @@ func (s *MovieSuite) AfterTest(_, _ string) {
 // a normal test function and pass our suite to suite.Run
 func TestMovieSuite(t *testing.T) {
 	suite.Run(t, new(MovieSuite))
+}
+
+func (s *MovieSuite) getCampusTestServer() *CampusServer {
+	return &CampusServer{
+		db:          s.DB,
+		moviesCache: expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
+	}
 }
