@@ -2,6 +2,8 @@ package backend
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -12,16 +14,9 @@ import (
 )
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
-	var movies []model.Movie
-	tx := s.db.WithContext(ctx).
-		Joins("File").
-		Order("date ASC")
-	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
-	}
-	if err := tx.Find(&movies, "kino > ?", req.LastId).Error; err != nil {
-		log.WithError(err).Error("Error while fetching movies from database")
-		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
+	movies, err := s.getMovies(ctx, req.LastId, req.OldestDateAt.AsTime())
+	if err != nil {
+		return nil, err
 	}
 	var movieResponse []*pb.Movie
 	for _, movie := range movies {
@@ -46,4 +41,23 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 	return &pb.ListMoviesReply{
 		Movies: movieResponse,
 	}, nil
+}
+
+func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time) ([]model.Movie, error) {
+	if movies, ok := s.moviesCache.Get(fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second())); ok {
+		return movies, nil
+	}
+	var movies []model.Movie
+	tx := s.db.WithContext(ctx).
+		Joins("File").
+		Order("date ASC")
+	if oldestDateAt.Second() != 0 || oldestDateAt.Nanosecond() != 0 {
+		tx = tx.Where("date > ?", oldestDateAt)
+	}
+	if err := tx.Find(&movies, "kino > ?", lastID).Error; err != nil {
+		log.WithError(err).Error("Error while fetching movies from database")
+		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
+	}
+	s.moviesCache.Add(fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second()), movies)
+	return movies, nil
 }
