@@ -44,7 +44,8 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 }
 
 func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time) ([]model.Movie, error) {
-	if movies, ok := s.moviesCache.Get(fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second())); ok {
+	cacheKey := fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second())
+	if movies, ok := s.moviesCache.Get(cacheKey); ok {
 		return movies, nil
 	}
 	var movies []model.Movie
@@ -58,6 +59,6 @@ func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt
 		log.WithError(err).Error("Error while fetching movies from database")
 		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
 	}
-	s.moviesCache.Add(fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second()), movies)
+	s.moviesCache.Add(cacheKey, movies)
 	return movies, nil
 }
