@@ -3,14 +3,14 @@ package backend
 import (
 	"context"
 	"database/sql"
-	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/hashicorp/golang-lru/v2/expirable"
 	"regexp"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/timestamppb"
