@@ -32,5 +32,6 @@ func New(db *gorm.DB) *CampusServer {
 		feedbackEmailLastReuestAt: &sync.Map{},
 		newsSourceCache:           expirable.NewLRU[string, []model.NewsSource](1, nil, time.Hour*6),
 		newsCache:                 expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30),
+		moviesCache:               expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
 	}
 }
