@@ -97,7 +97,7 @@ func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID i
 	if sourceID != 0 {
 		tx = tx.Where("src = ?", sourceID)
 	}
-	if !oldestDateAt.IsZero() {
+	if oldestDateAt.Unix() != 0 {
 		tx = tx.Where("date > ?", oldestDateAt)
 	}
 	if lastNewsID != 0 {
