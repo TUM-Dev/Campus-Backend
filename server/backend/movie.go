@@ -52,7 +52,7 @@ func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt
 	tx := s.db.WithContext(ctx).
 		Joins("File").
 		Order("date ASC")
-	if oldestDateAt.Second() != 0 || oldestDateAt.Nanosecond() != 0 {
+	if !oldestDateAt.IsZero() {
 		tx = tx.Where("date > ?", oldestDateAt)
 	}
 	if err := tx.Find(&movies, "kino > ?", lastID).Error; err != nil {
