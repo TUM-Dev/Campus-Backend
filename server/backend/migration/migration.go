@@ -42,6 +42,8 @@ func autoMigrate(db *gorm.DB) error {
 		&model.UpdateNote{},
 		&model.StudentClub{},
 		&model.StudentClubCollection{},
+		&model.StudentCouncil{},
+		&model.StudentCouncilCollection{},
 	)
 	return err
 }
@@ -89,6 +91,7 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240706000000(),
 		migrate20240824000000(),
 		migrate20241023000000(),
+		migrate20241024000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
