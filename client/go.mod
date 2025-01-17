@@ -2,12 +2,12 @@ module github.com/TUM-Dev/Campus-Backend/client
 
 go 1.22.7
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 require (
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20231009133538-1a7f37e5f27c
 	github.com/sirupsen/logrus v1.9.3
-	google.golang.org/grpc v1.69.2
+	google.golang.org/grpc v1.69.4
 )
 
 require (
