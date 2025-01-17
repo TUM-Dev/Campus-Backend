@@ -2,7 +2,7 @@ module github.com/TUM-Dev/Campus-Backend/server
 
 go 1.23
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -27,7 +27,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.35.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/grpc v1.69.2
+	google.golang.org/grpc v1.69.4
 	google.golang.org/protobuf v1.36.3
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/driver/mysql v1.5.7
