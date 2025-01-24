@@ -26,7 +26,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.35.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250122153221-138b5a5a4fd4
+	google.golang.org/genproto/googleapis/api v0.0.0-20250124145028-65684f501c47
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5-0.20250124130824-89b5638ae946
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
