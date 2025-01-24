@@ -4172,14 +4172,14 @@ var file_tumdev_campus_backend_proto_rawDesc = string([]byte{
 
 var (
 	file_tumdev_campus_backend_proto_rawDescOnce sync.Once
-	file_tumdev_campus_backend_proto_rawDescData = file_tumdev_campus_backend_proto_rawDesc
+	file_tumdev_campus_backend_proto_rawDescData []byte
 )
 
 func file_tumdev_campus_backend_proto_rawDescGZIP() []byte {
 	file_tumdev_campus_backend_proto_rawDescOnce.Do(func() {
-		file_tumdev_campus_backend_proto_rawDescData = string(protoimpl.X.CompressGZIP([]byte(file_tumdev_campus_backend_proto_rawDescData)))
+		file_tumdev_campus_backend_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_tumdev_campus_backend_proto_rawDesc), len(file_tumdev_campus_backend_proto_rawDesc)))
 	})
-	return []byte(file_tumdev_campus_backend_proto_rawDescData)
+	return file_tumdev_campus_backend_proto_rawDescData
 }
 
 var file_tumdev_campus_backend_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
