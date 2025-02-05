@@ -28,7 +28,7 @@ require (
 	golang.org/x/sync v0.11.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.5-0.20250127125439-e677ef98d5d8
+	google.golang.org/protobuf v1.36.5-0.20250203131338-ab9efaa3f72a
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
