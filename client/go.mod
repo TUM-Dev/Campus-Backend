@@ -2,7 +2,7 @@ module github.com/TUM-Dev/Campus-Backend/client
 
 go 1.22.7
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20231009133538-1a7f37e5f27c
