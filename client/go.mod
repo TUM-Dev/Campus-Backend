@@ -1,6 +1,6 @@
 module github.com/TUM-Dev/Campus-Backend/client
 
-go 1.22.7
+go 1.24.1
 
 toolchain go1.24.1
 
