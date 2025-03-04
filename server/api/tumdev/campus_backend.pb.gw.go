@@ -42,6 +42,7 @@ func request_Campus_ListNewsAlerts_0(ctx context.Context, marshaler runtime.Mars
 		protoReq ListNewsAlertsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -72,6 +73,7 @@ func request_Campus_ListNewsSources_0(ctx context.Context, marshaler runtime.Mar
 		protoReq ListNewsSourcesRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.ListNewsSources(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -92,6 +94,7 @@ func request_Campus_ListNews_0(ctx context.Context, marshaler runtime.Marshaler,
 		protoReq ListNewsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -218,6 +221,7 @@ func request_Campus_ListAvailableDishTags_0(ctx context.Context, marshaler runti
 		protoReq ListAvailableDishTagsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.ListAvailableDishTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -236,6 +240,7 @@ func request_Campus_ListNameTags_0(ctx context.Context, marshaler runtime.Marsha
 		protoReq ListNameTagsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.ListNameTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -254,6 +259,7 @@ func request_Campus_ListAvailableCanteenTags_0(ctx context.Context, marshaler ru
 		protoReq ListAvailableCanteenTagsRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.ListAvailableCanteenTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -272,6 +278,7 @@ func request_Campus_ListCanteens_0(ctx context.Context, marshaler runtime.Marsha
 		protoReq ListCanteensRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	msg, err := client.ListCanteens(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -292,6 +299,7 @@ func request_Campus_ListDishes_0(ctx context.Context, marshaler runtime.Marshale
 		protoReq ListDishesRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -323,6 +331,7 @@ func request_Campus_GetUpdateNote_0(ctx context.Context, marshaler runtime.Marsh
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	io.Copy(io.Discard, req.Body)
 	val, ok := pathParams["version"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "version")
@@ -361,6 +370,7 @@ func request_Campus_ListMovies_0(ctx context.Context, marshaler runtime.Marshale
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	io.Copy(io.Discard, req.Body)
 	val, ok := pathParams["last_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "last_id")
@@ -450,6 +460,7 @@ func request_Campus_GetCanteenHeadCount_0(ctx context.Context, marshaler runtime
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	io.Copy(io.Discard, req.Body)
 	val, ok := pathParams["canteen_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "canteen_id")
@@ -512,6 +523,7 @@ func request_Campus_DeleteDevice_0(ctx context.Context, marshaler runtime.Marsha
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	io.Copy(io.Discard, req.Body)
 	val, ok := pathParams["device_id"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
@@ -561,6 +573,7 @@ func request_Campus_ListStudentClub_0(ctx context.Context, marshaler runtime.Mar
 		protoReq ListStudentClubRequest
 		metadata runtime.ServerMetadata
 	)
+	io.Copy(io.Discard, req.Body)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
