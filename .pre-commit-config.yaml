@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -22,14 +22,14 @@ repos:
         entry: bash server/api/generate.bash
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
       - id: go-mod-tidy-server
         name: Check if go.mod and go.sum are up to date for server
         files: server/
         entry: sh -c "(cd server && go mod tidy)"
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
       #- id: go-mod-tidy-client
       #  name: Check if go.mod and go.sum are up to date for client
       #  files: server/
