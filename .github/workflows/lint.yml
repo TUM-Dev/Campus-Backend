@@ -25,7 +25,7 @@ jobs:
       - name: golangci-lint-client
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.64
+          version: v2.0
           working-directory: client
           args: --timeout=30m
         continue-on-error: ${{ github.ref == 'refs/heads/main' }}
