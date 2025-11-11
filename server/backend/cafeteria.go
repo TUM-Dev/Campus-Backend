@@ -332,10 +332,11 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 }
 
 func imageWrapper(image []byte, path string, id int64) string {
+
 	if len(image) == 0 {
 		return ""
 	}
-	path = fmt.Sprintf("/Storage/rating/%s/%d/", path, id)
+	path := fmt.Sprintf("%s%s%s%d%s", StorageDir, path, "/", id, "/")
 	resPath, err := storeImage(path, image)
 	if err != nil {
 		log.WithError(err).Error("Error occurred while storing the image.")
