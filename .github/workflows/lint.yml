@@ -16,14 +16,14 @@ jobs:
           go-version: '1.24'
           cache: false
       - name: golangci-lint-server
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v1.64
           working-directory: server
           args: --timeout=30m
         continue-on-error: ${{ github.ref == 'refs/heads/main' }}
       - name: golangci-lint-client
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v1.64
           working-directory: client
