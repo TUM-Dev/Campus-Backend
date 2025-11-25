@@ -24,7 +24,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: '1.24'

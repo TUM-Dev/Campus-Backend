@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Fetch Changes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Checkout everything to get access to the tags
           ref: main
