@@ -38,7 +38,7 @@ jobs:
         with:
           config: .ls-lint.yaml
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         if: github.ref == 'refs/heads/main'
         with:
           commit-message: fixed formatting mistakes have sneaked into prod
