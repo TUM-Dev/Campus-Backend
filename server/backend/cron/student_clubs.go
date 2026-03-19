@@ -43,10 +43,10 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 
 	// save the result of the previous steps (🎉)
 	if err := c.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Unscoped().Where("language = ?", language.String()).Delete(&model.StudentClub{}).Error; err != nil {
+		if err := tx.Where("language = ?", language.String()).Delete(&model.StudentClub{}).Error; err != nil {
 			return err
 		}
-		if err := tx.Unscoped().Where("language = ?", language.String()).Delete(&model.StudentClubCollection{}).Error; err != nil {
+		if err := tx.Where("language = ?", language.String()).Delete(&model.StudentClubCollection{}).Error; err != nil {
 			return err
 		}
 		nameToCollectionID := make(map[string]uint)
