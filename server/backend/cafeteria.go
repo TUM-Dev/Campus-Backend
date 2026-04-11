@@ -233,21 +233,22 @@ type queryRatingTag struct {
 func queryTags(cafeteriaID int32, dishID int32, ratingType model.ModelType, tx *gorm.DB) []*pb.RatingTagResult {
 	var results []queryRatingTag
 	var err error
-	if ratingType == model.DISH {
+	switch ratingType {
+	case model.DISH:
 		err = tx.Table("dish_rating_tag_options options").
 			Joins("JOIN dish_rating_tag_statistics results ON options.dishRatingTagOption = results.tagID").
 			Select("options.dishRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
-	} else if ratingType == model.CAFETERIA {
+	case model.CAFETERIA:
 		err = tx.Table("cafeteria_rating_tag_options options").
 			Joins("JOIN cafeteria_rating_tag_statistics results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
 			Where("results.cafeteriaID = ?", cafeteriaID).
 			Scan(&results).Error
-	} else { //Query for name tags
+	default: //Query for name tags
 		err = tx.Table("dish_to_dish_name_tags mapping").
 			Where("mapping.dishID = ?", dishID).
 			Select("mapping.nameTagID as tag").
