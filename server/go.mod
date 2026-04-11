@@ -2,8 +2,6 @@ module github.com/TUM-Dev/Campus-Backend/server
 
 go 1.25.0
 
-toolchain go1.25.0
-
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/PuerkitoBio/goquery v1.10.2
