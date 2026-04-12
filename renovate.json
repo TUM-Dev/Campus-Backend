@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     "group:recommended",
     "group:allNonMajor"
   ],
@@ -14,14 +14,18 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": [".*Campus-Backend/.*"],
       "groupName": "server",
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/.*Campus-Backend/.*/"
+      ]
     },
     {
-      "matchPackagePatterns": ["google.golang.org/genproto/googleapis/api"],
       "groupName": "googleapis",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "/google.golang.org/genproto/googleapis/api/"
+      ]
     }
   ]
 }
