@@ -196,11 +196,11 @@ func (c *CronService) cleanOldNewsForSource(source int64) error {
 
 // newspreadHook extracts image urls from the body if the feed because such entries are a bit weird
 func (c *CronService) newspreadHook(item *gofeed.Item) {
-	re := regexp.MustCompile(`https://storage.googleapis.com/tum-newspread-de/assets/[a-z\-0-9]+\.jpeg`)
-	extractedImageSlice := re.FindAllString(item.Content, 1)
+	re := regexp.MustCompile(`(?:^|[\s"'(])` + `(https://storage\.googleapis\.com/tum-newspread-de/assets/[a-z\-0-9]+\.jpeg)` + `(?:$|[\s"')])`)
+	extractedImageSlice := re.FindAllStringSubmatch(item.Content, 1)
 	extractedImageURL := ""
-	if len(extractedImageSlice) != 0 {
-		extractedImageURL = extractedImageSlice[0]
+	if len(extractedImageSlice) != 0 && len(extractedImageSlice[0]) > 1 {
+		extractedImageURL = extractedImageSlice[0][1]
 	}
 	item.Enclosures = []*gofeed.Enclosure{{URL: extractedImageURL}}
 	item.Description = ""
