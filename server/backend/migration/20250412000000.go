@@ -6,9 +6,9 @@ import (
 )
 
 // migrate20250412000000
-// - changes the unique index on student_clubs.link_url from a single-column
-//   index to a composite index on (link_url, language) so that the same URL
-//   can appear in both German and English rows
+//   - changes the unique index on student_clubs.link_url from a single-column
+//     index to a composite index on (link_url, language) so that the same URL
+//     can appear in both German and English rows
 func migrate20250412000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
 		ID: "20250412000000",
