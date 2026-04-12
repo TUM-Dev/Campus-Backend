@@ -17,6 +17,7 @@ func (s *CampusServer) ListStudentClub(ctx context.Context, req *pb.ListStudentC
 		Where(&model.StudentClubCollection{Language: req.GetLanguage().String()}).
 		Joins("Image").
 		Joins("StudentClubCollection").
+		Order("student_clubs.id ASC").
 		Find(&dbClubs).Error; err != nil {
 		log.WithError(err).Error("Error while querying student clubs")
 		return nil, status.Error(codes.Internal, "could not query the student clubs. Please retry later")
