@@ -8,8 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/go-connections/nat"
-
+	"github.com/moby/moby/api/types/network"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -75,8 +74,8 @@ func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {
 // connectToDbAndMigrate connects ot the database and exectes the migrations
 //
 // The option to allow for the auto-migrations is because they are WAY faster and this is an option for testing reasons
-func connectToDbAndMigrate(mappedPort nat.Port, t *testing.T, shouldAutoMigrate bool) *gorm.DB {
-	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Int())
+func connectToDbAndMigrate(mappedPort network.Port, t *testing.T, shouldAutoMigrate bool) *gorm.DB {
+	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Num())
 	t.Log("connecting to " + dsn)
 	db, err := gorm.Open(mysql.Open(dsn))
 	require.NoError(t, err)
