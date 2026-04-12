@@ -16,6 +16,11 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -u root --password=super_secret_passw0rd"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
       manual_mysql:
         image: mysql:9
         ports:
@@ -23,6 +28,11 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -u root --password=super_secret_passw0rd"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
