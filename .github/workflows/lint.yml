@@ -13,19 +13,19 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.26'
+          go-version: '1.27'
           cache: false
       - name: golangci-lint-server
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.11.4
+          version: v2.15.0
           working-directory: server
           args: --timeout=30m
         continue-on-error: ${{ github.ref == 'refs/heads/main' }}
       - name: golangci-lint-client
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.11.4
+          version: v2.15.0
           working-directory: client
           args: --timeout=30m
         continue-on-error: ${{ github.ref == 'refs/heads/main' }}
@@ -34,7 +34,7 @@ jobs:
       - name: pre-commit
         uses: pre-commit/action@v3.0.1
         continue-on-error: ${{ github.ref == 'refs/heads/main' }}
-      - uses: ls-lint/action@v2.3.1
+      - uses: ls-lint/action@v2.3.2
         with:
           config: .ls-lint.yaml
       - name: Create Pull Request
