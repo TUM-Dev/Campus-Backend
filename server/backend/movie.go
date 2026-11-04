@@ -44,7 +44,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 }
 
 func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time) ([]model.Movie, error) {
-	cacheKey := fmt.Sprintf("%d-%d", lastID, oldestDateAt.Second())
+	cacheKey := fmt.Sprintf("%d-%d", lastID, oldestDateAt.UnixNano())
 	if movies, ok := s.moviesCache.Get(cacheKey); ok {
 		return movies, nil
 	}

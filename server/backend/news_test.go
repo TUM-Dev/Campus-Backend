@@ -283,3 +283,17 @@ func (s *NewsSuite) getCampusTestServer() *CampusServer {
 		newsCache:       expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30),
 	}
 }
+
+func (s *NewsSuite) TestDateFiltersDoNotShareCacheEntries() {
+	server := s.getCampusTestServer()
+	first := time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC)
+	second := first.AddDate(0, 0, 1)
+	for _, date := range []time.Time{first, second} {
+
+		s.mock.ExpectQuery("SELECT .* FROM `news`").WithArgs(date).WillReturnRows(sqlmock.NewRows([]string{"news"}))
+		_, err := server.getNews(context.Background(), 0, 0, date)
+
+		require.NoError(s.T(), err)
+	}
+	require.NoError(s.T(), s.mock.ExpectationsWereMet())
+}
