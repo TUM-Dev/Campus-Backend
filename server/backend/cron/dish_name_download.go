@@ -1,13 +1,12 @@
 package cron
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -34,6 +33,7 @@ type CanteenDays struct {
 }
 
 type CanteenDate struct {
+	Date  string        `json:"date"`
 	Dates []CanteenDish `json:"dishes"`
 }
 
@@ -42,126 +42,103 @@ type CanteenDish struct {
 	DishType string `json:"dish_type"`
 }
 
-// fileDownloadCron
-// Downloads all files that are not marked as finished in the database.
+// dishNameDownloadCron refreshes metadata and dish names independently, so a
+// directory outage does not prevent updates for cafeterias already in the DB.
 func (c *CronService) dishNameDownloadCron() error {
-	downloadCanteenNames(c)
-	downloadDailyDishes(c)
-	return nil
+	namesErr := downloadCanteenNames(c)
+	dishesErr := downloadDailyDishes(c)
+	return errors.Join(namesErr, dishesErr)
 }
 
-func downloadDailyDishes(c *CronService) {
-	var results []model.Canteen
-	if err := c.db.Find(&results).Error; err != nil {
-		log.WithError(err).Error("Error while querying all cafeteria names from the database.")
-		return
+func downloadDailyDishes(c *CronService) error {
+	var canteens []model.Canteen
+	if err := c.db.Find(&canteens).Error; err != nil {
+		return err
 	}
-
-	year, week := time.Now().UTC().ISOWeek()
-	var weekliesWereAdded int64
-
-	if err := c.db.Model(&model.DishesOfTheWeek{}).
-		Where("year = ? AND week = ?", year, week).
-		Count(&weekliesWereAdded).Error; err != nil {
-		log.WithError(err).Error("Error while checking whether the meals of the current week have already been added to the weekly table.")
-		return
-	}
-
-	for _, v := range results {
-		cafeteriaName := strings.Replace(strings.ToLower(v.Name), "_", "-", 10)
-
-		req := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", cafeteriaName, year, week)
-		log.WithField("req", req).Debug("Fetching menu")
-		var resp, err = http.Get(req)
-		if err != nil {
-			log.WithError(err).Error("Error fetching menu.")
-			continue
-		}
-		if resp.StatusCode != 200 {
-			fields := log.Fields{
-				"Name":       v.Name,
-				"StatusCode": resp.StatusCode,
-			}
-			// sometimes the eat-api does not have the required data.
-			// This might be because of a lot of factors, but most commonly no menu was posted for a certain week at the time of scraping
-			log.WithError(err).WithFields(fields).Info("Menu does not exist")
-			continue
-		}
-		var dishes CanteenDays
-		if err := json.NewDecoder(resp.Body).Decode(&dishes); err != nil {
-			log.WithError(err).Error("Error in Parsing")
-			return
-		}
-
-		for weekDayIndex, day := range dishes.Days {
-			for _, date := range day.Dates {
-				dish := model.Dish{
-					Name:        date.Name,
-					Type:        date.DishType,
-					CafeteriaID: v.Cafeteria,
-				}
-
-				var dbDish model.Dish
-				if err := c.db.First(&dbDish, "name = ? AND cafeteriaID = ?", dish.Name, dish.CafeteriaID).Error; err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-					if err := c.db.Create(&dish).Error; err != nil {
-						log.WithError(err).WithField("name", dish.Name).Error("Error while creating new CanteenDish entry. CanteenDish won't be saved")
-					}
-					addDishTagsToMapping(dish.Dish, dish.Name, c.db)
-					dbDish = dish
-				} else if err != nil {
-					log.WithError(err).Error("Error while checking whether the dish is already in database")
-				}
-
-				if dbDish.Type != dish.Type {
-					if err := c.db.Where("dish = ?", dbDish.Dish).Updates(&dish).Error; err != nil {
-						log.WithError(err).WithField("from", dish.Type).WithField("to", dish.Type).Error("Error while updating dish to new type")
-					}
-				}
-
-				if weekliesWereAdded == 0 {
-					errCreate := c.db.Create(&model.DishesOfTheWeek{
-						DishID: dbDish.Dish,
-						Year:   int32(year),
-						Week:   int32(week),
-						Day:    int32(weekDayIndex),
-					}).Error
-					if errCreate != nil {
-						log.WithError(errCreate).Error("Error while inserting CanteenDish for this weeks weekly dishes", dish.Name)
-					}
-				}
-			}
-		}
-	}
-}
-
-func downloadCanteenNames(c *CronService) {
-	var resp, err = http.Get("https://tum-dev.github.io/eat-api/enums/canteens.json")
+	berlin, err := time.LoadLocation("Europe/Berlin")
 	if err != nil {
-		log.WithError(err).Error("Error fetching cafeteria list from eat-api.")
+		return err
 	}
-	var cafeteriaNames []CafeteriaName
-	if err := json.NewDecoder(resp.Body).Decode(&cafeteriaNames); err != nil {
-		log.WithError(err).Error("Error while unmarshalling json data.")
+	year, week := time.Now().In(berlin).ISOWeek()
+	var failures []error
+	for _, canteen := range canteens {
+		name := strings.ReplaceAll(strings.ToLower(canteen.Name), "_", "-")
+		address := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", name, year, week)
+		var menu CanteenDays
+		if err := webfetch.JSON(address, &menu); err != nil {
+			failures = append(failures, fmt.Errorf("menu %s: %w", name, err))
+			continue
+		}
+		if err := storeCanteenMenu(c.db, canteen.Cafeteria, menu, year, week); err != nil {
+			failures = append(failures, fmt.Errorf("storing menu %s: %w", name, err))
+		}
 	}
+	return errors.Join(failures...)
+}
 
-	for _, cafeteriaName := range cafeteriaNames {
-		mensa := model.Canteen{
-			Name:      cafeteriaName.Name,
-			Address:   cafeteriaName.Location.Address,
-			Latitude:  cafeteriaName.Location.Latitude,
-			Longitude: cafeteriaName.Location.Longitude,
-		}
-		var cafeteriaResult model.Canteen
-		if err := c.db.First(&cafeteriaResult, "name = ?", cafeteriaName.Name).Error; err != nil {
-			if err := c.db.Create(&mensa).Error; err != nil {
-				log.WithError(err).Error("Error while creating the db entry for the cafeteria ", cafeteriaName.Name)
+func storeCanteenMenu(db *gorm.DB, cafeteriaID int64, menu CanteenDays, year, week int) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		for _, day := range menu.Days {
+			date, err := time.Parse("2006-01-02", day.Date)
+			if err != nil {
+				return fmt.Errorf("invalid menu date %q: %w", day.Date, err)
 			}
+			dateYear, dateWeek := date.ISOWeek()
+			if dateYear != year || dateWeek != week {
+				return fmt.Errorf("menu date %s is outside requested week", day.Date)
+			}
+			// Menus can omit closed days. Array indices are not weekday numbers.
+			weekday := int32((int(date.Weekday()) + 6) % 7)
+			for _, entry := range day.Dates {
+				var dish model.Dish
+				err := tx.First(&dish, "name = ? AND cafeteriaID = ?", entry.Name, cafeteriaID).Error
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					dish = model.Dish{Name: entry.Name, Type: entry.DishType, CafeteriaID: cafeteriaID}
+					if err := tx.Create(&dish).Error; err != nil {
+						return err
+					}
+					addDishTagsToMapping(dish.Dish, dish.Name, tx)
+				} else if err != nil {
+					return err
+				} else if dish.Type != entry.DishType {
+					if err := tx.Model(&dish).Update("type", entry.DishType).Error; err != nil {
+						return err
+					}
+				}
+				// Retry partial imports and pick up menus published later in the week.
+				// Include zero-valued Monday explicitly in the lookup.
+				key := map[string]any{"dishID": dish.Dish, "year": year, "week": week, "day": weekday}
+				weekly := model.DishesOfTheWeek{DishID: dish.Dish, Year: int32(year), Week: int32(week), Day: weekday}
+				if err := tx.Where(key).FirstOrCreate(&weekly).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
+
+func downloadCanteenNames(c *CronService) error {
+	var names []CafeteriaName
+	if err := webfetch.JSON("https://tum-dev.github.io/eat-api/enums/canteens.json", &names); err != nil {
+		return fmt.Errorf("fetching cafeteria directory: %w", err)
+	}
+	for _, name := range names {
+		canteen := model.Canteen{Name: name.Name, Address: name.Location.Address, Latitude: name.Location.Latitude, Longitude: name.Location.Longitude}
+		var existing model.Canteen
+		if err := c.db.First(&existing, "name = ?", name.Name).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+			if err := c.db.Create(&canteen).Error; err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
 		} else {
-			if err := c.db.Where("name = ?", cafeteriaName.Name).Updates(&mensa).Error; err != nil {
-				log.WithError(err).Error("Error while updating the db entry for the cafeteria {}.", cafeteriaName.Name)
+			if err := c.db.Model(&existing).Updates(&canteen).Error; err != nil {
+				return err
 			}
 		}
 	}
+	return nil
 }
 
 // addDishTagsToMapping
