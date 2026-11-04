@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       auto_mysql:
-        image: mysql:9
+        image: mysql:26
         ports:
           - 3306:3306
         env:
@@ -22,7 +22,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       manual_mysql:
-        image: mysql:9
+        image: mysql:26
         ports:
           - 3300:3306
         env:
@@ -34,8 +34,8 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.26'
           cache-dependency-path: |
