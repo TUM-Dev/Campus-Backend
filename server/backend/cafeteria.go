@@ -224,7 +224,7 @@ func getImageToBytes(path string) []byte {
 
 type queryRatingTag struct {
 	TagId   int32   `gorm:"column:tagId;type:int32;" json:"tagId"`
-	Average float64 `json:"avg"`
+	Average float64 `gorm:"column:avg" json:"avg"`
 	Std     float64 `json:"std"`
 	Min     int32   `json:"min"`
 	Max     int32   `json:"max"`
@@ -245,7 +245,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType model.ModelType, tx *
 			Where("results.cafeteriaID = ? AND results.dishID = ?", cafeteriaID, dishID).
 			Scan(&results).Error
 	case model.CAFETERIA:
-		err = tx.Table("cafeteria_rating_tag_options options").
+		err = tx.Table("canteen_rating_tag_options options").
 			Joins("JOIN cafeteria_rating_tag_statistics results ON options.cafeteriaRatingTagOption = results.tagID").
 			Select("options.cafeteriaRatingTagOption as tagId, results.average as avg, "+
 				"results.min as min, results.max as max, results.std as std").
@@ -253,7 +253,7 @@ func queryTags(cafeteriaID int32, dishID int32, ratingType model.ModelType, tx *
 			Scan(&results).Error
 	default: //Query for name tags
 		err = tx.Table("dish_to_dish_name_tags mapping").
-			Where("mapping.dishID = ?", dishID).
+			Where("mapping.dishID = ? AND results.cafeteriaID = ?", dishID, cafeteriaID).
 			Select("mapping.nameTagID as tag").
 			Joins("JOIN dish_name_tag_statistics results ON mapping.nameTagID = results.tagID").
 			Joins("JOIN dish_name_tag_options options ON mapping.nameTagID = options.dishNameTagOption").
@@ -292,8 +292,8 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, 
 			Select("dishRatingTagOption as tagId, points, parentRating").
 			Find(&results, "parentRating = ?", dishID).Error
 	} else {
-		err = tx.Table("cafeteria_rating_tag_options options").
-			Joins("JOIN cafeteria_rating_tags rating ON options.cafeteriaRatingTagOption = rating.tagID").
+		err = tx.Table("canteen_rating_tag_options options").
+			Joins("JOIN canteen_rating_tags rating ON options.cafeteriaRatingTagOption = rating.tagID").
 			Select("cafeteriaRatingTagOption as tagId, points, correspondingRating").
 			Find(&results, "correspondingRating = ?", dishID).Error
 	}
@@ -544,7 +544,7 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 func getIDForCafeteriaName(name string, tx *gorm.DB) int32 {
 	var result int32 = -1
 	err := tx.Model(&model.Canteen{}).
-		Where("name LIKE ?", name).
+		Where("name = ?", strings.ReplaceAll(strings.ToUpper(name), "-", "_")).
 		Select("cafeteria").
 		Scan(&result).Error
 	if err != nil {
@@ -606,14 +606,14 @@ func (s *CampusServer) ListNameTags(ctx context.Context, _ *pb.ListNameTagsReque
 	}, requestStatus
 }
 
-// GetAvailableCafeteriaTags  RPC Endpoint
+// ListAvailableCanteenTags RPC Endpoint
 // Returns all valid Tags to quickly rate dishes in english and german
-func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.ListAvailableCanteenTagsRequest) (*pb.ListAvailableCanteenTagsReply, error) {
+func (s *CampusServer) ListAvailableCanteenTags(ctx context.Context, _ *pb.ListAvailableCanteenTagsRequest) (*pb.ListAvailableCanteenTagsReply, error) {
 	var result []*pb.TagsOverview
 	var requestStatus error = nil
 	err := s.db.WithContext(ctx).
 		Model(&model.CanteenRatingTagOption{}).
-		Select("DE as de, EN as en, cafeteriaRatingsTagOption as TagId").
+		Select("DE as de, EN as en, cafeteriaRatingTagOption as TagId").
 		Find(&result).Error
 	if err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
@@ -625,14 +625,14 @@ func (s *CampusServer) GetAvailableCafeteriaTags(ctx context.Context, _ *pb.List
 	}, requestStatus
 }
 
-// GetCafeterias RPC endpoint
+// ListCanteens RPC endpoint
 // Returns all cafeterias with meta information which are available in the eat-api
-func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequest) (*pb.ListCanteensReply, error) {
+func (s *CampusServer) ListCanteens(ctx context.Context, _ *pb.ListCanteensRequest) (*pb.ListCanteensReply, error) {
 	var result []*pb.Canteen
 	var requestStatus error = nil
 	if err := s.db.WithContext(ctx).
 		Model(&model.Canteen{}).
-		Select("cafeteria as id,address,latitude,longitude").
+		Select("name as id,address,latitude,longitude").
 		Scan(&result).Error; err != nil {
 		log.WithError(err).Error("while loading Cafeterias from database.")
 		requestStatus = status.Error(codes.Internal, "Cafeterias could not be loaded from the database.")
@@ -645,13 +645,13 @@ func (s *CampusServer) GetCafeterias(ctx context.Context, _ *pb.ListCanteensRequ
 
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	if req.Year < 2022 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 52 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
+	if req.Week < 1 || req.Week > 53 {
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Weeks must be in the range 1 - 53")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
@@ -663,8 +663,8 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 		Table("dishes_of_the_weeks weekly").
 		Where("weekly.day = ? AND weekly.week = ? and weekly.year = ?", req.Day, req.Week, req.Year).
 		Select("weekly.dishID").
-		Joins("JOIN dish d ON d.dish = weekly.dishID").
-		Joins("JOIN cafeteria c ON c.cafeteria = d.cafeteriaID").
+		Joins("JOIN dishes d ON d.dish = weekly.dishID").
+		Joins("JOIN canteens c ON c.cafeteria = d.cafeteriaID").
 		Where("c.name LIKE ?", cafeteriaName).
 		Select("d.name").
 		Find(&results).Error
