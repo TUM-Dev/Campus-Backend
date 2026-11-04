@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -206,7 +206,7 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 func (canteen CanteenApInformation) requestApData() []AccessPoint {
 	// Perform web request
 	url := fmt.Sprintf(BaseUrl, canteen.Target)
-	resp, err := http.Get(url)
+	resp, err := webfetch.Get(url)
 	if err != nil {
 		log.WithError(err).WithField("CanteenId", canteen.CanteenId).Error("Canteen HeadCount web request failed")
 		return []AccessPoint{}

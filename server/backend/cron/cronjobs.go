@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
@@ -36,10 +37,9 @@ const (
 )
 
 func New(db *gorm.DB) *CronService {
-	return &CronService{
-		db: db,
-		gf: gofeed.NewParser(),
-	}
+	parser := gofeed.NewParser()
+	parser.Client = webfetch.Client
+	return &CronService{db: db, gf: parser}
 }
 
 func (c *CronService) Run() error {
@@ -48,7 +48,7 @@ func (c *CronService) Run() error {
 		log.Trace("Cron: checking for pending")
 		var res []model.Crontab
 
-		c.db.Model(&model.Crontab{}).
+		if err := c.db.Model(&model.Crontab{}).
 			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
@@ -58,7 +58,11 @@ func (c *CronService) Run() error {
 				MovieType,
 				FeedbackEmail,
 				StudentClubType,
-			)
+			).Error; err != nil {
+			log.WithError(err).Error("Could not load pending cron jobs")
+			time.Sleep(30 * time.Second)
+			continue
+		}
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
@@ -66,37 +70,50 @@ func (c *CronService) Run() error {
 			log.WithFields(cronFields).Trace("Running cronjob")
 
 			cronjob.LastRun = int32(time.Now().Unix())
-			c.db.Save(&cronjob)
+			if err := c.db.Save(&cronjob).Error; err != nil {
+				log.WithFields(cronFields).WithError(err).Error("Could not persist cron run")
+				continue
+			}
 
-			// Run each job in a separate goroutine, so we can parallelize them
+			// Log every failure with its job, since errgroup only returns the first.
+			run := func(job func() error) {
+				g.Go(func() error {
+					err := job()
+					if err != nil {
+						log.WithFields(cronFields).WithError(err).Error("Cron job failed")
+					}
+					return err
+				})
+			}
+			// Run each job in a separate goroutine.
 			switch cronjob.Type.String {
 			case StudentClubType:
-				g.Go(func() error { return c.studentClubCron(pb.Language_German) })
-				g.Go(func() error { return c.studentClubCron(pb.Language_English) })
+				run(func() error { return c.studentClubCron(pb.Language_German) })
+				run(func() error { return c.studentClubCron(pb.Language_English) })
 			case NewsType:
 				// if this is not copied here, this may not be threads save due to go's guarantees
 				// loop variable cronjob captured by func literal (govet)
 				copyCronjob := cronjob
-				g.Go(func() error { return c.newsCron(&copyCronjob) })
+				run(func() error { return c.newsCron(&copyCronjob) })
 			case FileDownloadType:
-				g.Go(func() error { return c.fileDownloadCron() })
+				run(func() error { return c.fileDownloadCron() })
 			case DishNameDownload:
-				g.Go(func() error { return c.dishNameDownloadCron() })
+				run(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
-				g.Go(func() error { return c.movieCron() })
+				run(func() error { return c.movieCron() })
 				/*
 					TODO: Implement handlers for other cronjobs
 					case MensaType:
-						g.Go(func() error { return c.mensaCron() })
+						run(func() error { return c.mensaCron() })
 					case KinoType:
-						g.Go(func() error { return c.kinoCron() })
+						run(func() error { return c.kinoCron() })
 					case AlarmType:
-						g.Go(func() error { return c.alarmCron() })
+						run(func() error { return c.alarmCron() })
 				*/
 			case CanteenHeadcount:
-				g.Go(func() error { return c.canteenHeadCountCron() })
+				run(func() error { return c.canteenHeadCountCron() })
 			case FeedbackEmail:
-				g.Go(func() error { return c.feedbackEmailCron() })
+				run(func() error { return c.feedbackEmailCron() })
 			}
 		}
 

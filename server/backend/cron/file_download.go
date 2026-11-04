@@ -3,11 +3,11 @@ package cron
 import (
 	"errors"
 	"io"
-	"net/http"
 	"os"
 	"path"
 	"strings"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/guregu/null"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -91,7 +91,7 @@ func resizeImage(dstPath string) error {
 // downloadFile Downloads a file from the given url and saves it to the given path
 func downloadFile(url string, dstPath string) error {
 	fields := log.Fields{"url": url, "dstPath": dstPath}
-	resp, err := http.Get(url)
+	resp, err := webfetch.Get(url)
 	if err != nil {
 		return err
 	}
@@ -100,9 +100,6 @@ func downloadFile(url string, dstPath string) error {
 			log.WithError(err).WithFields(fields).Error("Error while closing body")
 		}
 	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return err
-	}
 
 	// save the file to disk
 	out, err := os.Create(dstPath)

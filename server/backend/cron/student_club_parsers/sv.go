@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
 	log "github.com/sirupsen/logrus"
@@ -29,7 +29,7 @@ type SVStudentClubCollection struct {
 }
 
 func DownloadHtml(url string) (io.ReadCloser, error) {
-	resp, err := http.Get(url)
+	resp, err := webfetch.Get(url)
 	if err != nil {
 		return nil, errors.New("error while getting response for request")
 	}

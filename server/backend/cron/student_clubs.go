@@ -24,14 +24,14 @@ const (
 
 func (c *CronService) studentClubCron(language pb.Language) error {
 	body, err := student_club_parsers.DownloadHtml(svUrl(language))
+	if err != nil {
+		return err
+	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			log.WithError(err).Error("Error while closing body")
 		}
 	}(body)
-	if err != nil {
-		return err
-	}
 	scrapedClubs, scrapedCollections, err := student_club_parsers.ParseStudentClubs(body)
 	log.WithField("language", language).
 		WithField("scrapedClubsCnt", len(scrapedClubs)).
