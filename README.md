@@ -12,7 +12,7 @@ The API is publicly available for anyone, but most notably, it's the main backen
 
 ### Installing Requirements
 
-The backend uses MySQL as its backend for storing data.
+Use Go 1.26, matching CI and the Docker build. The backend uses MySQL for storing data.
 While it is possible to install [mysql](https://mysql.com/) natively (instructions are on their website), we recommend the following:
 
 ```bash
