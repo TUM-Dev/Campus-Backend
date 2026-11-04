@@ -46,7 +46,7 @@ func (s *UpdateNoteSuite) SetupSuite() {
 	s.deviceBuf = newDeviceBuffer()
 }
 
-const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_note` WHERE `update_note`.`version_code` = ? ORDER BY `update_note`.`version_code` LIMIT ?"
+const ExpectedGetUpdateNoteQuery = "SELECT * FROM `update_notes` WHERE `update_notes`.`version_code` = ? ORDER BY `update_notes`.`version_code` LIMIT ?"
 
 func (s *UpdateNoteSuite) Test_GetUpdateNoteOne() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedGetUpdateNoteQuery)).

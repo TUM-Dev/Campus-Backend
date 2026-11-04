@@ -7,11 +7,19 @@ pushd $BASEDIR > /dev/null
 
 echo updating the generated files
 export PATH="$PATH:$(go env GOPATH)/bin"
-buf mod update || exit 1
+buf dep update || exit 1
 buf generate || exit 1
 
 echo making sure the openapi document points to the valid api
-grep -q '"basePath": "/v1"' ./tumdev/campus_backend.swagger.json || sed -i '1 a "basePath": "/v1",' ./tumdev/campus_backend.swagger.json
+if ! grep -q '"basePath": "/v1"' ./tumdev/campus_backend.swagger.json; then
+	if sed --version >/dev/null 2>&1; then
+		sed -i '1 a "basePath": "/v1",' ./tumdev/campus_backend.swagger.json
+	else
+		sed -i '' '1 a\
+"basePath": "/v1",
+' ./tumdev/campus_backend.swagger.json
+	fi
+fi
 
 echo making sure that all artifacts we don\'t need are cleaned up
 rm -f google/api/*.go

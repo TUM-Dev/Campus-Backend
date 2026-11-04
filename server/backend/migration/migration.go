@@ -12,18 +12,18 @@ import (
 
 func autoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&model.Cafeteria{},
-		&model.CafeteriaRating{},
-		&model.CafeteriaRatingTag{},
-		&model.CafeteriaRatingTagOption{},
+		&model.Canteen{},
+		&model.CanteenRating{},
+		&model.CanteenRatingTag{},
+		&model.CanteenRatingTagOption{},
 		&model.CanteenHeadCount{},
 		&model.Crontab{},
 		&model.Device{},
 		&model.Dish{},
 		&model.DishNameTag{},
 		&model.DishNameTagOption{},
-		&model.DishNameTagOptionExcluded{},
-		&model.DishNameTagOptionIncluded{},
+		&model.ExcludedDishNameTagOption{},
+		&model.IncludedDishNameTagOption{},
 		&model.DishRating{},
 		&model.DishRatingTag{},
 		&model.DishRatingTagOption{},
@@ -31,7 +31,7 @@ func autoMigrate(db *gorm.DB) error {
 		&model.DishesOfTheWeek{},
 		&model.Feedback{},
 		&model.File{},
-		&model.Kino{},
+		&model.Movie{},
 		&model.NewExamResultsSubscriber{},
 		&model.News{},
 		&model.NewsAlert{},
@@ -79,6 +79,7 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240317000000(),
 		migrate20240318000000(),
 		migrate20240319000000(),
+		migrate20240320000000(),
 		migrate20240327000000(),
 		migrate20240402000000(),
 		migrate20240405000000(),
@@ -86,6 +87,9 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240511000000(),
 		migrate20240512000000(),
 		migrate20240706000000(),
+		migrate20240824000000(),
+		migrate20241023000000(),
+		migrate20250412000000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }

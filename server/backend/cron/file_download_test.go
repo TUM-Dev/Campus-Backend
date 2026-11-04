@@ -13,7 +13,11 @@ func TestMaybeResizeImage(t *testing.T) {
 	t.Run("Resize Image", func(t *testing.T) {
 		dstPath := "test_image.jpg"
 		require.NoError(t, createDummyImage(dstPath, 2000, 1000))
-		defer os.Remove(dstPath)
+		t.Cleanup(func() {
+			if err := os.Remove(dstPath); err != nil && !os.IsNotExist(err) {
+				require.NoError(t, err)
+			}
+		})
 		require.NoError(t, resizeImage(dstPath))
 		img, err := imaging.Open(dstPath)
 		require.NoError(t, err)
@@ -23,7 +27,11 @@ func TestMaybeResizeImage(t *testing.T) {
 	t.Run("Do not Resize smaller Image", func(t *testing.T) {
 		dstPath := "test_image.jpg"
 		require.NoError(t, createDummyImage(dstPath, 1000, 2000))
-		defer os.Remove(dstPath)
+		t.Cleanup(func() {
+			if err := os.Remove(dstPath); err != nil && !os.IsNotExist(err) {
+				require.NoError(t, err)
+			}
+		})
 		require.NoError(t, resizeImage(dstPath))
 		img, err := imaging.Open(dstPath)
 		require.NoError(t, err)

@@ -33,7 +33,7 @@ func fullFeedback() *model.Feedback {
 		Longitude:    null.FloatFrom(0),
 		AppVersion:   null.StringFrom("TCA 10.2"),
 		OsVersion:    null.StringFrom("Android 10.0"),
-		Timestamp:    null.TimeFrom(time.Now()),
+		Timestamp:    time.Now(),
 	}
 }
 
@@ -49,7 +49,7 @@ func emptyFeedback() *model.Feedback {
 		Longitude:    null.Float{},
 		AppVersion:   null.String{},
 		OsVersion:    null.String{},
-		Timestamp:    null.Time{},
+		Timestamp:    time.Now(),
 	}
 }
 
@@ -61,7 +61,7 @@ func TestHeaderInstantiationWithFullFeedback(t *testing.T) {
 	assert.Equal(t, []string{`"TUM Campus App" <from@example.de>`}, m.GetHeader("From"))
 	assert.Equal(t, []string{fb.Recipient}, m.GetHeader("To"))
 	assert.Equal(t, []string{"\"Erika Mustermann\" <test@example.de>"}, m.GetHeader("Reply-To"))
-	assert.Equal(t, []string{fb.Timestamp.Time.Format(time.RFC1123Z)}, m.GetHeader("Date"))
+	assert.Equal(t, []string{fb.Timestamp.Format(time.RFC1123Z)}, m.GetHeader("Date"))
 	assert.Equal(t, []string{"Feedback via the TUM Campus App"}, m.GetHeader("Subject"))
 }
 
@@ -98,10 +98,6 @@ func TestTemplatingResultsWithFullFeedback(t *testing.T) {
 	assert.Equal(t, `<b>Feedback via the TUM Campus App:</b>
 <blockquote>This is a Test</blockquote>
 <table>
-    <tr>
-        <th>Inforation type</th>
-        <th>Details</th>
-    </tr>
     <tr>
         <th>Nutzer-Standort</th>
         <td>
@@ -147,10 +143,6 @@ func TestTemplatingResultsWithEmptyFeedback(t *testing.T) {
 	assert.Equal(t, `<b>Feedback via the TUM Campus App:</b>
 <i>no feedback provided</i>
 <table>
-    <tr>
-        <th>Inforation type</th>
-        <th>Details</th>
-    </tr>
     <tr>
         <th>OS-Version</th>
         <td>unknown</td>

@@ -71,11 +71,7 @@ func messageWithHeaders(feedback *model.Feedback) *gomail.Message {
 		m.SetHeader("Reply-To", feedback.ReplyToEmail.String)
 	}
 	// Timestamp
-	if feedback.Timestamp.Valid {
-		m.SetDateHeader("Date", feedback.Timestamp.Time)
-	} else {
-		m.SetDateHeader("Date", time.Now())
-	}
+	m.SetDateHeader("Date", feedback.Timestamp)
 	// Subject
 	if feedback.Recipient == "app@tum.de" {
 		versionString := "TCA"

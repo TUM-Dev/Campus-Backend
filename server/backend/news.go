@@ -4,16 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"gorm.io/gorm"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/gorm"
 )
 
 func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSourcesRequest) (*pb.ListNewsSourcesReply, error) {
@@ -21,11 +20,8 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 		return nil, err
 	}
 
-	var sources []model.NewsSource
-	if err := s.db.WithContext(ctx).
-		Joins("File").
-		Find(&sources).Error; err != nil {
-		log.WithError(err).Error("could not find newsSources")
+	sources, err := s.getNewsSources(ctx)
+	if err != nil {
 		return nil, status.Error(codes.Internal, "could not ListNewsSources")
 	}
 
@@ -40,27 +36,27 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 	return &pb.ListNewsSourcesReply{Sources: resp}, nil
 }
 
+const CacheKeyAllNewsSources = "all_news_sources"
+
+func (s *CampusServer) getNewsSources(ctx context.Context) ([]model.NewsSource, error) {
+	if newsSources, ok := s.newsSourceCache.Get(CacheKeyAllNewsSources); ok {
+		return newsSources, nil
+	}
+	var sources []model.NewsSource
+	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
+		return nil, err
+	}
+	s.newsSourceCache.Add(CacheKeyAllNewsSources, sources)
+	return sources, nil
+}
+
 func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*pb.ListNewsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
 
-	var newsEntries []model.News
-	tx := s.db.WithContext(ctx).
-		Joins("File").
-		Joins("NewsSource").
-		Joins("NewsSource.File")
-	if req.NewsSource != 0 {
-		tx = tx.Where("src = ?", req.NewsSource)
-	}
-	if req.OldestDateAt.GetSeconds() != 0 || req.OldestDateAt.GetNanos() != 0 {
-		tx = tx.Where("date > ?", req.OldestDateAt.AsTime())
-	}
-	if req.LastNewsId != 0 {
-		tx = tx.Where("news > ?", req.LastNewsId)
-	}
-	if err := tx.Find(&newsEntries).Error; err != nil {
-		log.WithError(err).Error("could not find news item")
+	var newsEntries, err = s.getNews(ctx, req.NewsSource, req.LastNewsId, req.OldestDateAt.AsTime())
+	if err != nil {
 		return nil, status.Error(codes.Internal, "could not ListNews")
 	}
 
@@ -86,6 +82,34 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 	return &pb.ListNewsReply{News: resp}, nil
 }
 
+func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID int32, oldestDateAt time.Time) ([]model.News, error) {
+	cacheKey := fmt.Sprintf("%d_%d_%d", sourceID, oldestDateAt.Second(), lastNewsID)
+
+	if news, ok := s.newsCache.Get(cacheKey); ok {
+		return news, nil
+	}
+
+	var news []model.News
+	tx := s.db.WithContext(ctx).
+		Joins("File").
+		Joins("NewsSource").
+		Joins("NewsSource.File")
+	if sourceID != 0 {
+		tx = tx.Where("src = ?", sourceID)
+	}
+	if oldestDateAt.Unix() != 0 {
+		tx = tx.Where("date > ?", oldestDateAt)
+	}
+	if lastNewsID != 0 {
+		tx = tx.Where("news > ?", lastNewsID)
+	}
+	if err := tx.Find(&news).Error; err != nil {
+		return nil, err
+	}
+	s.newsCache.Add(cacheKey, news)
+	return news, nil
+}
+
 func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlertsRequest) (*pb.ListNewsAlertsReply, error) {
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
@@ -94,9 +118,9 @@ func (s *CampusServer) ListNewsAlerts(ctx context.Context, req *pb.ListNewsAlert
 	var res []*model.NewsAlert
 	tx := s.db.WithContext(ctx).
 		Joins("File").
-		Where("news_alert.to >= NOW()")
+		Where("news_alerts.to >= NOW()")
 	if req.LastNewsAlertId != 0 {
-		tx = tx.Where("news_alert.news_alert > ?", req.LastNewsAlertId)
+		tx = tx.Where("news_alerts.news_alert > ?", req.LastNewsAlertId)
 	}
 	if err := tx.Find(&res).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "no news alerts")

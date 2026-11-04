@@ -3,6 +3,8 @@ package cron
 import (
 	"time"
 
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
@@ -69,7 +71,8 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine, so we can parallelize them
 			switch cronjob.Type.String {
 			case StudentClubType:
-				g.Go(func() error { return c.studentClubCron() })
+				g.Go(func() error { return c.studentClubCron(pb.Language_German) })
+				g.Go(func() error { return c.studentClubCron(pb.Language_English) })
 			case NewsType:
 				// if this is not copied here, this may not be threads save due to go's guarantees
 				// loop variable cronjob captured by func literal (govet)

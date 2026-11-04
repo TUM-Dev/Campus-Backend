@@ -20,7 +20,7 @@ type NotificationConfirmation struct {
 	Notification int64     `gorm:"primary_key;column:notification;type:int;" json:"notification"`
 	Device       int64     `gorm:"primary_key;column:device;type:int;" json:"device"`
 	Sent         int32     `gorm:"column:sent;type:tinyint;default:0;" json:"sent"`
-	Created      time.Time `gorm:"column:created;type:timestamp;default:CURRENT_TIMESTAMP;" json:"created"`
+	Created      time.Time `gorm:"column:created;type:timestamp;default:current_timestamp();" json:"created"`
 	Received     null.Time `gorm:"column:received;type:timestamp;" json:"received"`
 }
 
