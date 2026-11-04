@@ -182,7 +182,8 @@ func updateDb(canteen *CanteenApInformation, count uint32, db *gorm.DB) error {
 		Timestamp: time.Now(),
 	}
 
-	res := db.Model(&model.CanteenHeadCount{}).Where(model.CanteenHeadCount{CanteenId: canteen.CanteenId}).Updates(&entry)
+	res := db.Model(&model.CanteenHeadCount{}).Where(model.CanteenHeadCount{CanteenId: canteen.CanteenId}).
+		Select("Count", "MaxCount", "Percent", "Timestamp").Updates(&entry)
 	if res.Error != nil {
 		log.WithError(res.Error).WithField("CanteenId", canteen.CanteenId).Error("could not update all instances of headcount")
 		return res.Error
