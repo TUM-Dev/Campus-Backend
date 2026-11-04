@@ -25,3 +25,4 @@ __debug_bin
 .env.local
 
 venv
+.DS_Store
