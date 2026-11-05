@@ -3,12 +3,10 @@ package movie_parsers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"net/http"
+	"net/url"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 )
 
 type OmdbResults struct {
@@ -19,42 +17,24 @@ type OmdbResults struct {
 	Actors      string
 	Plot        string
 	ImdbRating  string `json:"imdbRating"`
+	Response    string
+	Error       string
 }
 
 func GetOmdbMovie(id string) (*OmdbResults, error) {
-	url := fmt.Sprintf("https://www.omdbapi.com/?r=json&v=1&i=%s&apikey=%s", id, os.Getenv("OMDB_API_KEY"))
-	resp, err := http.Get(url)
+	params := url.Values{"r": {"json"}, "v": {"1"}, "i": {id}, "apikey": {os.Getenv("OMDB_API_KEY")}}
+	resp, err := webfetch.Get("https://www.omdbapi.com/?" + params.Encode())
 	if err != nil {
-		log.WithField("url", url).WithError(err).Error("Error while getting response for request")
+		// Transport errors can contain the URL, including the API key.
+		return nil, errors.New("OMDb request failed")
+	}
+	defer func() { _ = resp.Body.Close() }()
+	var result OmdbResults
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
-	// check if the api key is valid
-	if resp.StatusCode == http.StatusUnauthorized {
-		return nil, errors.New("missing or invalid api key for omdb (environment variable OMDB_API_KEY)")
+	if result.Response == "False" {
+		return nil, errors.New("OMDb could not return movie information")
 	}
-	// other errors
-	if resp.StatusCode != http.StatusOK {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.WithError(err).Warn("Unable to read http body")
-			return nil, err
-		} else {
-			log.WithField("status", resp.StatusCode).WithField("status", resp.Status).WithField("body", string(body)).Error("error while getting omdb movie")
-			return nil, errors.New("error while getting omdb movie")
-		}
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.WithField("url", url).WithError(err).Error("Error while closing body")
-		}
-	}(resp.Body)
-	// parse the response body
-	var res OmdbResults
-	err = json.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
-		log.WithField("url", url).WithError(err).Error("Error while unmarshalling omdbResults")
-		return nil, err
-	}
-	return &res, nil
+	return &result, nil
 }

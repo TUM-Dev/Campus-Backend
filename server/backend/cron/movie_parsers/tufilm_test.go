@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/guregu/null"
 
@@ -92,4 +93,57 @@ func TestNoExtration(t *testing.T) {
 	info, err := parseWebsiteInformation(doc)
 	require.NoError(t, err)
 	require.Equal(t, &expected, info)
+}
+
+//go:embed test_data/current_movie.html
+var currentMovie string
+
+//go:embed test_data/current_program.html
+var currentProgram string
+
+func TestCurrentWebsite(t *testing.T) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(currentMovie))
+	require.NoError(t, err)
+	info, err := parseWebsiteInformation(doc)
+	require.NoError(t, err)
+	require.Equal(t, "2026-11-03T20:00:00+01:00", info.ScreeningDate.Format(time.RFC3339))
+	require.Equal(t, "Hörsaal 1200, Stammgelände", info.Location)
+	require.Equal(t, "tt32565993", info.ImdbID.String)
+	require.Equal(t, "2026", info.ReleaseYear.String)
+	require.Equal(t, "109 min", info.Runtime.String)
+	require.Equal(t, "Kyle Balda", info.Director.String)
+	require.Contains(t, info.Actors.String, "Hugh Jackman")
+	require.Contains(t, info.ShortenedDescription, "George Hardy is a shepherd")
+	require.Equal(t, "https://www.tu-film.de/film/1306/poster_hu_b39278f027348b04.jpg", info.ImageUrl)
+}
+
+func TestCurrentProgram(t *testing.T) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(currentProgram))
+	require.NoError(t, err)
+	channels, err := parseProgram(doc)
+	require.NoError(t, err)
+	require.Len(t, channels, 1)
+	require.Len(t, channels[0].Items, 3)
+	require.Equal(t, "Drachenzähmen leicht gemacht 1 (OV)", channels[0].Items[1].Title)
+	require.Equal(t, "Steckerlfischfiasko", channels[0].Items[0].Title)
+	require.Equal(t, "https://www.tu-film.de/program/ws2026/1500/", channels[0].Items[0].Link)
+}
+
+func TestScreeningSummerTimeAndInvalidMarkup(t *testing.T) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(`<p class="event">Di, 7. Juli 2026<br>um 18:30 Uhr<br><a>Garching</a></p>`))
+	require.NoError(t, err)
+	date, location, err := parseScreening(doc)
+	require.NoError(t, err)
+	require.Equal(t, "2026-07-07T18:30:00+02:00", date.Format(time.RFC3339))
+	require.Equal(t, "Garching", location)
+	for _, markup := range []string{`<p class="event">To be announced</p>`, `<article class="programentry"></article>`} {
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(markup))
+		require.NoError(t, err)
+		_, err = parseWebsiteInformation(doc)
+		require.Error(t, err)
+	}
+	doc, err = goquery.NewDocumentFromReader(strings.NewReader(`<html><h1>Not Found</h1></html>`))
+	require.NoError(t, err)
+	_, err = parseProgram(doc)
+	require.Error(t, err)
 }
