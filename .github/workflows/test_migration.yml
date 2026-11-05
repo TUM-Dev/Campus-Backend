@@ -36,8 +36,10 @@ jobs:
             server/go.sum
             server/tools/atlasloader/go.sum
       - uses: ariga/setup-atlas@v0
+      # same default collation as campus_db after migration 20240317000000, otherwise
+      # `atlas schema diff` sees a database-level change it cannot express
       - name: create atlas dev database
-        run: mysql -h 127.0.0.1 -u root --password=super_secret_passw0rd -e "CREATE DATABASE dev"
+        run: mysql -h 127.0.0.1 -u root --password=super_secret_passw0rd -e "CREATE DATABASE dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
       - name: run migrations like in production
         run: go run . 2>&1 | grep -v "level=debug"
