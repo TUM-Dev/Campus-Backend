@@ -2,21 +2,21 @@ package cron
 
 import (
 	"errors"
+	"net/http"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
 type CronService struct {
-	db *gorm.DB
-	gf *gofeed.Parser
+	db     *gorm.DB
+	client *http.Client
 }
 
 // StorageDir is the directory where files are stored
@@ -38,9 +38,10 @@ const (
 )
 
 func New(db *gorm.DB) *CronService {
-	parser := gofeed.NewParser()
-	parser.Client = webfetch.Client
-	return &CronService{db: db, gf: parser}
+	return &CronService{
+		db:     db,
+		client: webfetch.Client,
+	}
 }
 
 func (c *CronService) Run() error {
