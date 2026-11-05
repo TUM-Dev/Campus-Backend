@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"errors"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
@@ -88,8 +89,10 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine.
 			switch cronjob.Type.String {
 			case StudentClubType:
-				run(func() error { return c.studentClubCron(pb.Language_German) })
-				run(func() error { return c.studentClubCron(pb.Language_English) })
+				// sequential, since both languages share the same images and would otherwise race on creating the file rows
+				run(func() error {
+					return errors.Join(c.studentClubCron(pb.Language_German), c.studentClubCron(pb.Language_English))
+				})
 			case NewsType:
 				// if this is not copied here, this may not be threads save due to go's guarantees
 				// loop variable cronjob captured by func literal (govet)

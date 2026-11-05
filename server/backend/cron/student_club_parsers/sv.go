@@ -89,8 +89,14 @@ func parseImages(s *goquery.Selection) (null.String, null.String) {
 }
 
 func parseLink(s *goquery.Selection) null.String {
-	href, exists := s.Find("a").First().Attr("href")
-	if !exists {
+	// cards can start with an empty jump anchor (<a id="c123" class="d-inline"></a>), so only consider anchors with a href.
+	// The link in the title is the club's website, fall back to the first link elsewhere in the card.
+	link := s.Find("h6 a[href]").First()
+	if link.Length() == 0 {
+		link = s.Find("a[href]").First()
+	}
+	href, exists := link.Attr("href")
+	if !exists || strings.TrimSpace(href) == "" {
 		return null.String{}
 	}
 	sanitisedHref := bluemonday.StrictPolicy().Sanitize(href)
