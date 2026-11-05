@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/makasim/sentryhook"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,7 +29,7 @@ func SetupTelemetry(Version string) {
 		}); err != nil {
 			log.WithError(err).Error("Sentry initialization failed")
 		}
-		log.AddHook(sentryhook.New([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel, log.WarnLevel}))
+		log.AddHook(newSentryHook([]log.Level{log.PanicLevel, log.FatalLevel, log.ErrorLevel, log.WarnLevel}))
 	} else {
 		log.Info("continuing without sentry")
 	}
