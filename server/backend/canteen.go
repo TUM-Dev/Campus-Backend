@@ -224,7 +224,7 @@ func getImageToBytes(path string) []byte {
 
 type queryRatingTag struct {
 	TagId   int32   `gorm:"column:tagId;type:int32;" json:"tagId"`
-	Average float64 `json:"avg"`
+	Average float64 `gorm:"column:avg" json:"avg"`
 	Std     float64 `json:"std"`
 	Min     int32   `json:"min"`
 	Max     int32   `json:"max"`
@@ -253,7 +253,7 @@ func queryTags(canteenID int32, dishID int32, ratingType model.ModelType, tx *go
 			Scan(&results).Error
 	default: //Query for name tags
 		err = tx.Table("dish_to_dish_name_tags mapping").
-			Where("mapping.dishID = ?", dishID).
+			Where("mapping.dishID = ? AND results.cafeteriaID = ?", dishID, canteenID).
 			Select("mapping.nameTagID as tag").
 			Joins("JOIN dish_name_tag_statistics results ON mapping.nameTagID = results.tagID").
 			Joins("JOIN dish_name_tag_options options ON mapping.nameTagID = options.dishNameTagOption").
@@ -650,13 +650,13 @@ func (s *CampusServer) ListCanteens(ctx context.Context, _ *pb.ListCanteensReque
 
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	if req.Year < 2022 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 52 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
+	if req.Week < 1 || req.Week > 53 {
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Weeks must be in the range 1 - 53")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
