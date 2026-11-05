@@ -1,23 +1,24 @@
 package migration
 
 import (
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
 )
 
 // migrate20261105000000
-//   - recreates the rating statistic views. They were created in 20231015000000 against the old table names
-//     (cafeteria_rating, dish, ...). 20240824000000 renamed those tables, and MySQL does not update views
-//     on RENAME TABLE, so every query against these views failed with
-//     "Error 1356: View ... references invalid table(s)".
+// Removes the never-implemented alarm cronjob
 func migrate20261105000000() *gormigrate.Migration {
 	return &gormigrate.Migration{
-		ID:      "20261105000000",
-		Migrate: createRatingStatisticViews,
+		ID: "20261105000000",
+		Migrate: func(tx *gorm.DB) error {
+			if err := tx.Delete(&model.Crontab{}, "type = 'alarm'").Error; err != nil {
+				return err
+			}
+			return SafeEnumRemove(tx, &model.Crontab{}, "type", "alarm")
+		},
 		Rollback: func(tx *gorm.DB) error {
-			// The previous view definitions referenced tables that no longer exist and could not be queried.
-			// Restoring them would only break the views again, so the rollback keeps the working views.
-			return nil
+			return SafeEnumAdd(tx, &model.Crontab{}, "type", "alarm")
 		},
 	}
 }
