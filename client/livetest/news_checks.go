@@ -176,8 +176,10 @@ func checkNewsFilters(ctx context.Context, e *env, t *T) {
 
 	// news_source filter
 	src := all[len(all)-1].GetSourceId()
-	srcID, _ := strconv.Atoi(src)
-	if r, err := e.c.ListNews(ctx, &pb.ListNewsRequest{NewsSource: int32(srcID)}); err != nil {
+	srcID, err := strconv.ParseInt(src, 10, 32)
+	if err != nil {
+		t.Failf("news source id %q is not an int32: %v", src, err)
+	} else if r, err := e.c.ListNews(ctx, &pb.ListNewsRequest{NewsSource: int32(srcID)}); err != nil {
 		t.Failf("ListNews(news_source=%s): %v", src, err)
 	} else if len(r.GetNews()) == 0 {
 		t.Failf("ListNews(news_source=%s) returned nothing although that source has news", src)
