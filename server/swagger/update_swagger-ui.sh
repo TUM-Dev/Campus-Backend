@@ -4,19 +4,15 @@
 set -eu
 
 cd "$(dirname "$0")"
-version="${1:-$(npm view swagger-ui-dist version)}"
+version="${1:-$(pnpm view swagger-ui-dist version)}"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
 echo "updating swagger-ui to ${version}"
-npm pack --silent --pack-destination "$tmp" "swagger-ui-dist@${version}" >/dev/null
-tar -xzf "$tmp"/swagger-ui-dist-*.tgz -C "$tmp"
+pnpm --dir "$tmp" add --silent "swagger-ui-dist@${version}"
 
 for f in oauth2-redirect.html oauth2-redirect.js \
 	swagger-ui-bundle.js swagger-ui-bundle.js.map \
 	swagger-ui.css swagger-ui.css.map; do
-	cp "$tmp/package/$f" .
+	cp "$tmp/node_modules/swagger-ui-dist/$f" .
 done
-
-echo "updating the favicon"
-curl -fsSL https://www.tum.app/assets/img/fav.png --output fav.png
