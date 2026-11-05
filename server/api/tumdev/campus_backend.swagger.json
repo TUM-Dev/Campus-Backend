@@ -742,7 +742,7 @@
         "TUM_CONTACT"
       ],
       "default": "TUM_DEV",
-      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+      "description": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
     },
     "apiCanteen": {
       "type": "object",
@@ -1487,7 +1487,7 @@
           "type": "string"
         }
       },
-      "additionalProperties": {}
+      "additionalProperties": true
     },
     "rpcStatus": {
       "type": "object",
