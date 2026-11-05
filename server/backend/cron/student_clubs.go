@@ -84,7 +84,7 @@ func (c *CronService) studentClubCron(language pb.Language) error {
 		}
 		return nil
 	}); err != nil {
-		log.WithError(err).Error("error while creating movie")
+		log.WithError(err).WithField("language", language).Error("error while saving student clubs")
 	}
 	return nil
 }
