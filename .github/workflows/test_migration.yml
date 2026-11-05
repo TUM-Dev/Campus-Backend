@@ -17,10 +17,11 @@ jobs:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
         options: >-
+          --tmpfs /var/lib/mysql
           --health-cmd "mysqladmin ping -h localhost -u root --password=super_secret_passw0rd"
-          --health-interval 5s
+          --health-interval 2s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 30
       manual_mysql:
         image: mysql:26
         ports:
@@ -29,38 +30,37 @@ jobs:
           MYSQL_ROOT_PASSWORD: super_secret_passw0rd
           MYSQL_DATABASE: campus_db
         options: >-
+          --tmpfs /var/lib/mysql
           --health-cmd "mysqladmin ping -h localhost -u root --password=super_secret_passw0rd"
-          --health-interval 5s
+          --health-interval 2s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 30
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version: '1.26'
+          go-version: '1.27'
           cache-dependency-path: |
             server/go.sum
       - name: build server
         run: go build -o /tmp/campus-backend .
         working-directory: ./server
-      - name: run manual migrations
-        run: /tmp/campus-backend
+      - name: run manual and auto migrations
         working-directory: ./server
         env:
           CI_EXIT_AFTER_MIGRATION: "true"
-          CI_AUTO_MIGRATION: "false"
           DB_NAME: campus_db
-          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
-      - name: run auto migrations
-        run: /tmp/campus-backend
-        working-directory: ./server
-        env:
-          CI_EXIT_AFTER_MIGRATION: "true"
-          CI_AUTO_MIGRATION: "true"
-          DB_NAME: campus_db
-          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
-          ENVIRONMENT: dev
+        run: |
+          # both target separate databases, so they can run concurrently
+          CI_AUTO_MIGRATION=false DB_DSN="root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" /tmp/campus-backend > manual.log 2>&1 & manual=$!
+          CI_AUTO_MIGRATION=true DB_DSN="root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" /tmp/campus-backend > auto.log 2>&1 & auto=$!
+          status=0
+          wait $manual || { echo "::error::manual migration failed"; status=1; }
+          wait $auto || { echo "::error::auto migration failed"; status=1; }
+          echo "::group::manual migration log"; cat manual.log; echo "::endgroup::"
+          echo "::group::auto migration log"; cat auto.log; echo "::endgroup::"
+          exit $status
       - uses: ariga/setup-atlas@master
       - name: export diff the migrations
         id: diff_migrations
