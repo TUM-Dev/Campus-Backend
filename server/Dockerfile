@@ -1,4 +1,4 @@
-FROM golang:1.26-alpine3.22 AS builder
+FROM golang:1.27-alpine3.24 AS builder
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy go mod and sum files and download dependencies
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
 # Copy source code
 COPY api/tumdev/campus_backend.swagger.json ./swagger/swagger.json
@@ -19,8 +19,13 @@ COPY . .
 
 # bundle version into binary if specified in build-args, dev otherwise.
 ARG version=dev
-# Compile statically
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
+# set by buildx, so local builds (e.g. on arm64 Macs) are native instead of emulated
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+# Compile statically. The cache mounts keep rebuilds fast, e.g. for `docker compose up --watch`
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
 RUN chmod +x /backend
 
 FROM alpine:latest
