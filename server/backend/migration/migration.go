@@ -45,7 +45,10 @@ func autoMigrate(db *gorm.DB) error {
 		&model.StudentCouncil{},
 		&model.StudentCouncilCollection{},
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return createRatingStatisticViews(db)
 }
 
 func manualMigrate(db *gorm.DB) error {
@@ -93,6 +96,8 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20241023000000(),
 		migrate20250412000000(),
 		migrate20261105000000(),
+		migrate20261105010000(),
+		migrate20261105020000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }

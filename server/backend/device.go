@@ -9,6 +9,7 @@ import (
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -40,7 +41,6 @@ func (s *CampusServer) RunDeviceFlusher() error {
 	}
 }
 
-// s.deviceBuf.add(md["x-device-id"][0], method[0], osVersion, appVersion)
 func (b *deviceBuffer) add(deviceID string, method string, osVersion string, appVersion string) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -90,37 +90,36 @@ func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	return nil
 }
 
-// checkDevice checks if the device is approved (TODO: implement)
+// checkDevice records the calling device (x-device-id, x-os-version and
+// x-app-version metadata) together with the called method in the device
+// buffer, which is periodically flushed to the devices table.
+// It does not authenticate or reject devices.
 func (s *CampusServer) checkDevice(ctx context.Context) error {
-	var deviceID, method string
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return status.Error(codes.Internal, "can't extract metadata from request")
 	}
-	if len(md["x-device-id"]) == 0 {
-		deviceID = "unknown"
-		md["x-device-id"] = []string{deviceID}
-	}
 
-	// check method header added by middleware. This should always exist.
-	if len(md["x-campus-method"]) == 0 {
-		log.Info("no method header found for request")
+	method, ok := grpc.Method(ctx)
+	if !ok {
 		method = "unknown"
-		md["x-campus-method"] = []string{method}
 	}
 
-	osVersion := "unknown"
-	if len(md["x-os-version"]) > 0 {
-		osVersion = md["x-os-version"][0]
-	}
-	appVersion := "unknown"
-	if len(md["x-app-version"]) > 0 {
-		appVersion = md["x-app-version"][0]
-	}
-
-	// log device to db
-	s.deviceBuf.add(deviceID, method, osVersion, appVersion)
+	s.deviceBuf.add(
+		firstOrUnknown(md, "x-device-id"),
+		method,
+		firstOrUnknown(md, "x-os-version"),
+		firstOrUnknown(md, "x-app-version"),
+	)
 	return nil
+}
+
+// firstOrUnknown returns the first value of the metadata key, or "unknown" if it is missing or empty.
+func firstOrUnknown(md metadata.MD, key string) string {
+	if v := md.Get(key); len(v) > 0 && v[0] != "" {
+		return v[0]
+	}
+	return "unknown"
 }
 
 func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
