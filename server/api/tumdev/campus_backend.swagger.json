@@ -702,6 +702,43 @@
         ]
       }
     },
+    "/student_groups": {
+      "get": {
+        "summary": "List student clubs and student councils, as shown on the \"Campus\" tab",
+        "operationId": "Campus_ListStudentGroup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListStudentGroupReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "language",
+            "description": "Language of the student groups and categories\nDefaults to german",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "German",
+              "English"
+            ],
+            "default": "German"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/updatenote/{version}": {
       "get": {
         "operationId": "Campus_GetUpdateNote",
@@ -1185,6 +1222,25 @@
         }
       }
     },
+    "apiListStudentGroupReply": {
+      "type": "object",
+      "properties": {
+        "studentClubs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentClubCollection"
+          }
+        },
+        "studentCouncils": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentCouncilCollection"
+          }
+        }
+      }
+    },
     "apiMovie": {
       "type": "object",
       "properties": {
@@ -1462,6 +1518,50 @@
           "type": "string",
           "format": "uint64",
           "title": "id of the collection.\nMight not be stable over time because of scraping"
+        }
+      }
+    },
+    "apiStudentCouncil": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "The name of the council"
+        },
+        "description": {
+          "type": "string",
+          "title": "How the council describes itself"
+        },
+        "linkUrl": {
+          "type": "string",
+          "title": "Where the council's main internet presence is"
+        },
+        "coverUrl": {
+          "type": "string",
+          "title": "Where to find an image for this council"
+        }
+      }
+    },
+    "apiStudentCouncilCollection": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "councils": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiStudentCouncil"
+          }
+        },
+        "unstableCollectionId": {
+          "type": "string",
+          "format": "uint64",
+          "description": "id of the collection.\nMight not be stable over time.\nNot unique across student club and student council collections."
         }
       }
     },
