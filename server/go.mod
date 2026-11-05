@@ -9,7 +9,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.7
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
 	github.com/guregu/null v4.0.0+incompatible
@@ -33,7 +33,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	filippo.io/edwards25519 v1.1.1 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/andybalholm/cascadia v1.3.4 // indirect
