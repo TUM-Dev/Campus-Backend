@@ -67,7 +67,7 @@ func main() {
 	httpMux.Handle("/metrics", promhttp.Handler())
 
 	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
-	httpMux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("/Storage"))))
+	httpMux.Handle("/files/", http.StripPrefix("/files/", utils.PublicFileServer("/Storage")))
 	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server
