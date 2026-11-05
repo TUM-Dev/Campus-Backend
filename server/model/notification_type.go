@@ -19,7 +19,7 @@ var (
 type NotificationType struct {
 	Type         int64  `gorm:"primary_key;autoIncrement;column:type;type:int;" json:"type"`
 	Name         string `gorm:"column:name;type:text;size:65535;" json:"name"`
-	Confirmation string `gorm:"column:confirmation;type:enum('true', 'false');default:'false';" json:"confirmation"`
+	Confirmation string `gorm:"column:confirmation;type:enum('true', 'false');" json:"confirmation"`
 }
 
 // TableName sets the insert table name for this struct type

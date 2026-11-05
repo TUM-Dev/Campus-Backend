@@ -17,9 +17,9 @@ var (
 
 type NewsSource struct {
 	Source int64       `gorm:"primary_key;autoIncrement;column:source;type:int;"`
-	Title  string      `gorm:"column:title;type:text;size:16777215;"`
+	Title  string      `gorm:"column:title;type:text;not null;"`
 	URL    null.String `gorm:"column:url;type:text;size:16777215;"`
-	FileID int64       `gorm:"column:icon;not null;type:int;"`
-	File   File        `gorm:"foreignKey:FileID;references:file;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Hook   null.String `gorm:"column:hook;type:char;size:12;"`
+	FileID int64       `gorm:"column:icon;not null;type:int;index:icon;"`
+	File   File        `gorm:"foreignKey:FileID;references:file;constraint:-;"`
+	Hook   null.String `gorm:"column:hook;type:enum('newspread','impulsivHook');"`
 }

@@ -2,6 +2,7 @@
 package migration
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -10,8 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func autoMigrate(db *gorm.DB) error {
-	err := db.AutoMigrate(
+// Models returns all models whose schema is managed by migrations.
+// It is shared by AutoMigrate and the Atlas schema loader (tools/atlasloader).
+func Models() []any {
+	return []any{
 		&model.Canteen{},
 		&model.CanteenRating{},
 		&model.CanteenRatingTag{},
@@ -42,19 +45,13 @@ func autoMigrate(db *gorm.DB) error {
 		&model.UpdateNote{},
 		&model.StudentClub{},
 		&model.StudentClubCollection{},
-	)
-	return err
+	}
 }
 
-func manualMigrate(db *gorm.DB) error {
-	gormigrateOptions := &gormigrate.Options{
-		TableName:                 gormigrate.DefaultOptions.TableName,
-		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
-		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
-		UseTransaction:            true,
-		ValidateUnknownMigrations: true,
-	}
-	migrations := []*gormigrate.Migration{
+// legacyMigrations are the hand-written migrations from before the switch to Atlas.
+// They are frozen: new schema changes are generated with Atlas into sql/ (see README).
+func legacyMigrations() []*gormigrate.Migration {
+	return []*gormigrate.Migration{
 		migrate20200000000000(),
 		migrate20210709193000(),
 		migrate20220126230000(),
@@ -91,22 +88,49 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20241023000000(),
 		migrate20250412000000(),
 	}
-	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }
 
-// Migrate starts the migration either by using AutoMigrate in development environments or manually in prod
-func Migrate(db *gorm.DB, shouldAutoMigrate bool) error {
-	// without this set, the `COLLATE` will not be set correctly
-	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci")
+// TableOptions are the options every table is created with.
+// Without them, the `COLLATE` will not be set correctly.
+const TableOptions = "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
 
-	log.WithField("shouldAutoMigrate", shouldAutoMigrate).Info("starting migration")
-	start := time.Now()
-	var err error
-	if shouldAutoMigrate {
-		err = autoMigrate(db)
-	} else {
-		err = manualMigrate(db)
+// Migrate brings the database to the latest schema by running the legacy migrations
+// followed by the Atlas-generated SQL migrations. Applied migrations are tracked in the
+// `migrations` table.
+func Migrate(db *gorm.DB) error {
+	sqlMigrations, err := sqlMigrations()
+	if err != nil {
+		return err
 	}
+	db = db.Set("gorm:table_options", TableOptions)
+	log.Info("starting migration")
+	start := time.Now()
+	err = gormigrate.New(db, &gormigrate.Options{
+		TableName:                 gormigrate.DefaultOptions.TableName,
+		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
+		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
+		UseTransaction:            true,
+		ValidateUnknownMigrations: true,
+	}, append(legacyMigrations(), sqlMigrations...)).Migrate()
 	log.WithField("elapsed", time.Since(start)).Info("migration done")
 	return err
+}
+
+// MigrateFromBaseline creates the latest schema on an empty database from the Atlas
+// baseline snapshot plus the SQL migrations after it.
+//
+// It produces the same schema as Migrate, but skips the legacy migrations (and the seed
+// data they insert) and does not record anything in the `migrations` table.
+// It is much faster than Migrate and meant for tests.
+func MigrateFromBaseline(db *gorm.DB) error {
+	files, err := sqlMigrationFiles()
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		if err := f.apply(db); err != nil {
+			return fmt.Errorf("applying %s: %w", f.name, err)
+		}
+	}
+	return nil
 }

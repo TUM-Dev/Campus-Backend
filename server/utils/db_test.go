@@ -3,17 +3,20 @@ package utils
 import (
 	"testing"
 
+	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
 	"github.com/stretchr/testify/require"
 )
 
-func TestAutoMigration(t *testing.T) {
+func TestMigrateFromBaseline(t *testing.T) {
 	t.Parallel()
-	auto := newTestDatabase(t, true)
-	require.NoError(t, auto.Exec("SELECT VERSION()").Error)
+	db := newTestDatabase(t, migration.MigrateFromBaseline)
+	require.NoError(t, db.Exec("SELECT VERSION()").Error)
 }
 
-func TestManualMigration(t *testing.T) {
+func TestMigrate(t *testing.T) {
 	t.Parallel()
-	manual := newTestDatabase(t, false)
-	require.NoError(t, manual.Exec("SELECT VERSION()").Error)
+	db := newTestDatabase(t, migration.Migrate)
+	require.NoError(t, db.Exec("SELECT VERSION()").Error)
+	// running it again must be a no-op
+	require.NoError(t, migration.Migrate(db))
 }
