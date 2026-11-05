@@ -16,16 +16,17 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
+      # Keep metrics internal: scrapers use backend:50051 directly, not these public routers.
       # HTTP/1 router + service
       - "traefik.http.routers.backend.entrypoints=webs"
       - "traefik.http.routers.backend.tls.certresolver=leacme"
-      - "traefik.http.routers.backend.rule=Host(`api.tum.app`)"
+      - "traefik.http.routers.backend.rule=Host(`api.tum.app`) && !PathPrefix(`/metrics`)"
       - "traefik.http.routers.backend.service=backend"
       - "traefik.http.services.backend.loadbalancer.server.port=50051"
       # gRPC (h2c) router + service
       - "traefik.http.routers.backend_h2.entrypoints=webs"
       - "traefik.http.routers.backend_h2.tls.certresolver=leacme"
-      - "traefik.http.routers.backend_h2.rule=Host(`api.tum.app`) && Header(`Content-Type`, `application/grpc`)"
+      - "traefik.http.routers.backend_h2.rule=Host(`api.tum.app`) && !PathPrefix(`/metrics`) && Header(`Content-Type`, `application/grpc`)"
       - "traefik.http.routers.backend_h2.service=backend_h2"
       - "traefik.http.services.backend_h2.loadbalancer.server.scheme=h2c"
       - "traefik.http.services.backend_h2.loadbalancer.server.port=50051"
@@ -33,7 +34,7 @@ services:
       - "traefik.http.middlewares.grpcweb.grpcweb.allowOrigins=*"
       - "traefik.http.routers.backend_grpcweb.entrypoints=webs"
       - "traefik.http.routers.backend_grpcweb.tls.certresolver=leacme"
-      - "traefik.http.routers.backend_grpcweb.rule=Host(`api.tum.app`) && HeaderRegexp(`Content-Type`, `^application/grpc-web.*`)"
+      - "traefik.http.routers.backend_grpcweb.rule=Host(`api.tum.app`) && !PathPrefix(`/metrics`) && HeaderRegexp(`Content-Type`, `^application/grpc-web.*`)"
       - "traefik.http.routers.backend_grpcweb.middlewares=grpcweb"
       - "traefik.http.routers.backend_grpcweb.service=backend_h2"
     networks:
