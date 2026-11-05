@@ -36,10 +36,16 @@ import (
 // The optional parameters from and to can define an interval in which the queried ratings have been stored.
 // If these aren't specified, the newest ratings will be returned as the default
 func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
+	if input.GetCanteenId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Canteen Id is required.")
+	}
 	var statsForCanteen model.CanteenRatingStatistic
 	tx := s.db.WithContext(ctx)
-	canteenId := getIDForCanteenName(input.CanteenId, tx)
-	err := tx.First(&statsForCanteen, "cafeteriaId = ?", canteenId).Error
+	canteenId, err := getIDForCanteenName(input.CanteenId, tx)
+	if err != nil {
+		return nil, err
+	}
+	err = tx.First(&statsForCanteen, "cafeteriaId = ?", canteenId).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "No canteen with this Id found.")
 	}
@@ -115,19 +121,28 @@ func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cante
 }
 
 func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRatingsRequest) (*pb.GetDishRatingsReply, error) {
+	if input.GetCanteenId() == "" || input.GetDish() == "" {
+		return nil, status.Error(codes.NotFound, "No ratings found for this dish.")
+	}
 	tx := s.db.WithContext(ctx)
-	canteenID := getIDForCanteenName(input.CanteenId, tx)
-	dishID := getIDForDishName(input.Dish, canteenID, tx)
+	canteenID, err := getIDForCanteenName(input.CanteenId, tx)
+	if err != nil {
+		return nil, err
+	}
+	dishID, err := getIDForDishName(input.Dish, canteenID, tx)
+	if err != nil {
+		return nil, err
+	}
 
 	var statsForDish model.DishRatingStatistic
-	err := tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
+	err = tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, status.Error(codes.NotFound, "No canteen with this Id found.")
+		return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
 	}
 	if err != nil {
 		fields := log.Fields{"dishID": dishID, "cafeteriaID": canteenID}
 		log.WithError(err).WithFields(fields).Error("Error while querying the average ratings")
-		return nil, status.Error(codes.Internal, "This dish has not yet been rated.")
+		return nil, status.Error(codes.Internal, "Could not query dish ratings.")
 	}
 
 	return &pb.GetDishRatingsReply{
@@ -450,7 +465,7 @@ func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) {
 // inputSanitizationForNewRatingElements Checks parameters of the new rating for all canteen and dish ratings.
 // Additionally, queries the canteen ID, since it checks whether the canteen actually exists.
 func inputSanitizationForNewRatingElements(rating int32, comment string, canteenName string, tx *gorm.DB) (int64, error) {
-	if rating > 5 || rating < 0 {
+	if rating > 5 || rating < 1 {
 		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 5. Rating has not been saved.")
 	}
 
@@ -542,31 +557,37 @@ func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.M
 	}
 }
 
-func getIDForCanteenName(name string, tx *gorm.DB) int32 {
+func getIDForCanteenName(name string, tx *gorm.DB) (int32, error) {
 	var result int32 = -1
-	err := tx.Model(&model.Canteen{}).
+	res := tx.Model(&model.Canteen{}).
 		Where("name LIKE ?", model.CanteenEnumName(name)).
 		Select("cafeteria").
-		Scan(&result).Error
-	if err != nil {
-		log.WithError(err).Error("while querying the canteen name.")
-		result = -1
+		Scan(&result)
+	if res.Error != nil {
+		log.WithError(res.Error).Error("while querying the canteen name.")
+		return -1, status.Error(codes.Internal, "Could not query the canteen.")
 	}
-	return result
+	if res.RowsAffected == 0 {
+		return -1, status.Error(codes.NotFound, "No canteen with this Id found.")
+	}
+	return result, nil
 }
 
-func getIDForDishName(name string, canteenID int32, tx *gorm.DB) int32 {
+func getIDForDishName(name string, canteenID int32, tx *gorm.DB) (int32, error) {
 	var result int32 = -1
-	err := tx.Model(&model.Dish{}).
+	res := tx.Model(&model.Dish{}).
 		Where("name LIKE ? AND cafeteriaID = ?", name, canteenID).
 		Select("dish").
-		Scan(&result).Error
-	if err != nil {
-		log.WithError(err).Error("while querying the dish name.")
-		result = -1
+		Scan(&result)
+	if res.Error != nil {
+		log.WithError(res.Error).Error("while querying the dish name.")
+		return -1, status.Error(codes.Internal, "Could not query the dish.")
+	}
+	if res.RowsAffected == 0 {
+		return -1, status.Error(codes.NotFound, "No dish with this name found.")
 	}
 
-	return result
+	return result, nil
 }
 
 // ListAvailableDishTags RPC Endpoint
@@ -650,13 +671,13 @@ func (s *CampusServer) ListCanteens(ctx context.Context, _ *pb.ListCanteensReque
 
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	if req.Year < 2022 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
 	if req.Week < 1 || req.Week > 52 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Weeks must be in the range 1 - 52")
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Weeks must be in the range 1 - 52")
 	}
 	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.Internal, "Days must be in the range 0 (Monday) - 4 (Friday)")
+		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Days must be in the range 0 (Monday) - 4 (Friday)")
 	}
 
 	var requestStatus error = nil
