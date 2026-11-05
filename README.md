@@ -69,6 +69,15 @@ The following environment variables need to be set for the server to work proper
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 * [OPTIONAL] `OMDB_API_KEY`: The key to get more information for tu-film movies from [omdbapi](https://omdbapi.com/). See [omdbapi](https://omdbapi.com/apikey.aspx) for a key.
 
+## Running Tests
+
+```bash
+cd server && go test ./...
+```
+
+Tests that need a database start a single MySQL container via [testcontainers](https://golang.testcontainers.org/) per test binary (Docker required) and give every test its own freshly migrated database.
+To reuse an already running MySQL server instead, set `TEST_MYSQL_DSN`, e.g. `TEST_MYSQL_DSN='root:password@tcp(localhost:3306)/'`.
+
 ## Metrics
 Our service uses prometheus to collect metrics to display in grafana.
 To see the metrics we aggregate, head over to `http://localhost:50051/metrics`
