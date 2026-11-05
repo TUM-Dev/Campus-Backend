@@ -135,7 +135,7 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		Std:        statsForDish.Std,
 		Min:        statsForDish.Min,
 		Max:        statsForDish.Max,
-		Rating:     queryLastDishRatingsWithLimit(input, canteenID, dishID, tx),
+		Rating:     queryLastDishRatingsWithLimit(input, dishID, tx),
 		RatingTags: queryTags(canteenID, dishID, model.DISH, tx),
 		NameTags:   queryTags(canteenID, dishID, model.NAME, tx),
 	}, nil
@@ -143,7 +143,7 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 
 // queryLastDishRatingsWithLimit
 // Queries the actual ratings for a dish in a canteen and attaches the tag ratings which belong to the ratings
-func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, canteenID int32, dishID int32, tx *gorm.DB) []*pb.SingleRatingReply {
+func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32, tx *gorm.DB) []*pb.SingleRatingReply {
 	var ratings []model.DishRating
 	var err error
 	var limit = int(input.Limit)
@@ -168,11 +168,11 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, canteenID in
 
 			err = tx.Order("timestamp desc, dishRating desc").
 				Limit(limit).
-				Find(&ratings, "cafeteriaID = ? AND dishID = ? AND timestamp < ? AND timestamp > ?", canteenID, dishID, to, from).Error
+				Find(&ratings, "dishID = ? AND timestamp < ? AND timestamp > ?", dishID, to, from).Error
 		} else {
 			err = tx.Order("timestamp desc, dishRating desc").
 				Limit(limit).
-				Find(&ratings, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
+				Find(&ratings, "dishID = ?", dishID).Error
 		}
 
 		if err != nil {
