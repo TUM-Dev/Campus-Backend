@@ -36,9 +36,7 @@ func SetupDB() *gorm.DB {
 		log.WithError(err).Fatal("failed to connect database")
 	}
 
-	// Migrate the schema
-	// currently not activated as
-	if err := migration.Migrate(db, os.Getenv("CI_AUTO_MIGRATION") == "true"); err != nil {
+	if err := migration.Migrate(db); err != nil {
 		log.WithError(err).Fatal("Failed to migrate database")
 	}
 
@@ -119,15 +117,14 @@ func startMySQLTestContainer(ctx context.Context) (*gomysql.Config, error) {
 	return cfg, nil
 }
 
-// SetupTestContainer returns a connection to a fresh, auto-migrated database on the shared test MySQL server
+// SetupTestContainer returns a connection to a fresh database with the latest schema on the shared test MySQL server.
+// The schema is created from the migration baseline, which is much faster than running all migrations.
 func SetupTestContainer(_ context.Context, t *testing.T) *gorm.DB {
-	return newTestDatabase(t, true)
+	return newTestDatabase(t, migration.MigrateFromBaseline)
 }
 
-// newTestDatabase creates an isolated database for this test and migrates it
-//
-// The option to allow for the auto-migrations is because they are WAY faster and this is an option for testing reasons
-func newTestDatabase(t *testing.T, shouldAutoMigrate bool) *gorm.DB {
+// newTestDatabase creates an isolated database for this test and migrates it with the given function
+func newTestDatabase(t *testing.T, migrate func(*gorm.DB) error) *gorm.DB {
 	cfg := testServerConfig(t)
 	admin, err := gorm.Open(mysql.Open(cfg.FormatDSN()), &gorm.Config{Logger: logger.Discard})
 	require.NoError(t, err)
@@ -147,6 +144,6 @@ func newTestDatabase(t *testing.T, shouldAutoMigrate bool) *gorm.DB {
 			_ = sqlDB.Close()
 		}
 	})
-	require.NoError(t, migration.Migrate(db, shouldAutoMigrate))
+	require.NoError(t, migrate(db))
 	return db
 }

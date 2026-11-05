@@ -43,33 +43,32 @@ Notes:
 - Pushing a proto change to `main` triggers `client_update.yml`, which opens a PR in `TUM-Dev/Campus-Flutter`. Keep changes backward compatible: never renumber or reuse field numbers, because released apps depend on them.
 
 ### Changing the database schema
-- There are two migration paths, and both must produce the same schema:
-  - Production uses `manualMigrate`. It runs the hand-written gormigrate migrations in `server/backend/migration/<YYYYMMDDhhmmss>.go`, tracked in the `migrations` table.
-  - Tests use `autoMigrate`, which runs GORM `AutoMigrate` over the model list. CI turns it on with `CI_AUTO_MIGRATION=true`.
-  - Both are dispatched from `migration.Migrate` in `migration.go`.
+- `migration.Migrate` runs at startup and records applied migrations in the `migrations` table:
+  1. The legacy gormigrate migrations in `server/backend/migration/<YYYYMMDDhhmmss>.go`. These are frozen, so don't add new ones.
+  2. The SQL migrations in `server/backend/migration/sql/`, which [Atlas](https://atlasgo.io) generates from the models.
+- The desired schema is the GORM models (`migration.Models()`) plus `server/tools/atlasloader/legacy.sql`. `legacy.sql` declares the production tables that have no model, and the foreign keys whose production names GORM can't generate.
 - To change the schema:
-  1. Edit the model.
-  2. If you added a new model, add it to the `autoMigrate` list.
-  3. Add a new `migrateYYYYMMDDhhmmss()` file with `Migrate` and `Rollback` steps (see `20250412000000.go`).
-  4. Append that migration to the list in `manualMigrate`.
-- For enum changes, use `SafeEnumAdd` / `SafeEnumRemove` (`safe_enum_migrate.go`).
-- `test_migration.yml` runs both paths against separate MySQL instances, diffs the resulting schemas, and comments any difference on the PR.
+  1. Edit the model. If you added a new model, add it to `migration.Models()`.
+  2. In `server/`, run `atlas migrate diff --env gorm <short_name>` (needs Docker). It writes `sql/<version>_<short_name>.sql` and updates `atlas.sum`.
+  3. Review the generated SQL and commit it together with `atlas.sum`.
+- For data changes, or anything Atlas doesn't manage (views, triggers), edit the generated file or create one with `atlas migrate new --env gorm <short_name>`, then run `atlas migrate hash --env gorm`.
+- `test_migration.yml` runs the migrations like production and checks that the result matches the models. If the models changed without a migration, it fails and comments the missing SQL on the PR.
 - Model conventions:
   - Use explicit `gorm:"column:…;type:…"` tags.
-  - Foreign keys are declared on the relation field, e.g. `constraint:OnUpdate:CASCADE,OnDelete:CASCADE`.
+  - Foreign keys are declared on the relation field, e.g. `constraint:OnUpdate:CASCADE,OnDelete:CASCADE`. Relations tagged `constraint:-` have their foreign key in `legacy.sql` instead.
   - Use `guregu/null` types for nullable columns.
-  - Tables are created with `ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`, set in `migration.Migrate`.
+  - Tables are created with `ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`, set in `migration.TableOptions`.
 
 ### Adding a cron job
 1. Add a type constant in `backend/cron/cronjobs.go`.
 2. Add it to the `IN (...)` query and to the `switch`.
 3. Add the value to the `type` enum in `model/crontab.go`.
-4. Add a migration that alters the enum (`SafeEnumAdd`) and inserts the `crontab` row.
+4. Generate the migration with `atlas migrate diff --env gorm <short_name>`, append the `INSERT` for the `crontab` row to the generated file, then run `atlas migrate hash --env gorm`.
 
 ## Testing conventions
 - Tests use `testify` (`require`, `suite`).
 - Unit tests in `backend/` mostly use `go-sqlmock` with a GORM mysql dialector, and match queries with `regexp.QuoteMeta`. Copy the setup from an existing `*_test.go` (e.g. `news_test.go`).
-- Tests that need a real DB call `utils.SetupTestContainer(ctx, t)`. Each test gets its own fresh, auto-migrated database.
+- Tests that need a real DB call `utils.SetupTestContainer(ctx, t)`. Each test gets its own database, created from the migration baseline (`migration.MigrateFromBaseline`), so it has the production schema.
 - Cron jobs write to `cron.StorageDir`, which defaults to `/Storage/`. Override it in tests.
 
 ## Lint / CI
@@ -89,7 +88,6 @@ Notes:
   - `OMDB_API_KEY` (movie metadata)
   - `SMTP_URL`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` (feedback emails)
   - `CI_EXIT_AFTER_MIGRATION=true` (exit after migrating, used by CI)
-  - `CI_AUTO_MIGRATION=true` (use GORM AutoMigrate instead of the manual migrations)
 - The root `.env` is committed and holds only local dev defaults. Never put real secrets in it. Use `.env.local`, which is gitignored.
 
 ## Gotchas

@@ -19,9 +19,9 @@ type Movie struct {
 	Actors      null.String `gorm:"column:actors;type:text"`
 	ImdbRating  null.String `gorm:"column:rating;type:varchar(4)"`
 	Description string      `gorm:"column:description;type:text;not null;"`
-	Trailer     null.String `gorm:"column:trailer"`
-	FileID      int64       `gorm:"column:cover"`
-	File        File        `gorm:"foreignKey:FileID;references:file"`
-	Link        string      `gorm:"column:link;type:varchar(190);not null;uniqueIndex:uni_kino_link"`
+	Trailer     null.String `gorm:"column:trailer;type:text"`
+	FileID      int64       `gorm:"column:cover;index:cover"`
+	File        File        `gorm:"foreignKey:FileID;references:file;constraint:-"`
+	Link        string      `gorm:"column:link;type:varchar(190);not null;uniqueIndex:link"`
 	Location    null.String `gorm:"column:location;default:null"`
 }

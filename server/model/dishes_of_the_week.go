@@ -5,5 +5,5 @@ type DishesOfTheWeek struct {
 	Year            int32 `gorm:"column:year;type:int;not null;" json:"year"`
 	Week            int32 `gorm:"column:week;type:int;not null;" json:"week"`
 	Day             int32 `gorm:"column:day;type:int;not null;" json:"day"`
-	DishID          int64 `gorm:"column:dishID;foreignKey:dish;type:int;not null;" json:"dishID"`
+	DishID          int64 `gorm:"column:dishID;foreignKey:dish;type:int;not null;index:dishes_of_the_week_dish_dish_fk;" json:"dishID"`
 }

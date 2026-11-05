@@ -106,7 +106,7 @@ go test ./...            # spins up a MySQL testcontainer, so Docker is required
 bash api/generate.bash   # regenerate gRPC, gateway and Swagger code from the proto
 ```
 
-Tests that need a database start one MySQL container per test binary via [testcontainers](https://golang.testcontainers.org/) and give each test its own freshly migrated database. To reuse a MySQL server that's already running:
+Tests that need a database start one MySQL container per test binary via [testcontainers](https://golang.testcontainers.org/) and give each test its own database with the production schema. To reuse a MySQL server that's already running:
 
 ```bash
 TEST_MYSQL_DSN='root:secret_root_password@tcp(localhost:3306)/' go test ./...
@@ -122,7 +122,7 @@ server/
 ├── api/tumdev/                   # campus_backend.proto + generated code
 ├── backend/                      # one file per domain: cafeteria.go, news.go, movie.go, …
 │   ├── cron/                     # scheduled scrapers and downloaders
-│   └── migration/                # versioned schema migrations
+│   └── migration/                # schema migrations (legacy Go + Atlas-generated sql/)
 ├── model/                        # GORM models, one per table
 └── utils/                        # DB setup, test containers, telemetry, error mapping
 client/                           # example gRPC clients (separate Go module)
@@ -144,11 +144,15 @@ client/                           # example gRPC clients (separate Go module)
 <details>
 <summary><b>🗄️ Change the database schema</b></summary>
 
-1. Edit the model in `server/model/`. If it's a new model, add it to the `autoMigrate` list.
-2. Add a `server/backend/migration/<YYYYMMDDhhmmss>.go` migration with `Migrate` and `Rollback` steps, and append it to `manualMigrate`.
-3. For enum changes, use `SafeEnumAdd` / `SafeEnumRemove`.
+Migrations are generated with [Atlas](https://atlasgo.io) from the GORM models and applied by the server on startup.
 
-CI runs both migration paths and comments on your PR if the resulting schemas differ.
+1. Edit the model in `server/model/`. If it's a new model, add it to `migration.Models()`.
+2. In `server/`, run `atlas migrate diff --env gorm <short_name>` ([install Atlas](https://atlasgo.io/getting-started#installation); Docker is required). It writes `backend/migration/sql/<version>_<short_name>.sql` and updates `atlas.sum`.
+3. Review the generated SQL and commit it together with `atlas.sum`.
+
+For data changes, or for views and triggers (which Atlas' free edition doesn't manage), edit the generated file or create one with `atlas migrate new --env gorm <short_name>`, then run `atlas migrate hash --env gorm`.
+
+The desired schema is the models plus [`legacy.sql`](server/tools/atlasloader/legacy.sql), which declares production tables without a model. The Go migrations in `backend/migration/` are frozen. CI fails, and comments the missing SQL on your PR, if the models change without a migration.
 
 </details>
 
@@ -157,7 +161,7 @@ CI runs both migration paths and comments on your PR if the resulting schemas di
 
 1. Add a type constant in `backend/cron/cronjobs.go` and wire it into the query and the `switch`.
 2. Add the value to the `type` enum in `model/crontab.go`.
-3. Add a migration that extends the enum and inserts the `crontab` row.
+3. Generate the migration with `atlas migrate diff --env gorm <short_name>`, append the `INSERT` for the `crontab` row, then run `atlas migrate hash --env gorm`.
 
 </details>
 
@@ -182,7 +186,7 @@ Contributions are very welcome, whether that's a bug fix, a new scraper or a who
    pip install pre-commit && pre-commit install
    pre-commit run -a   # optional: check every file once
    ```
-2. Make your change, add tests, and open a PR. CI runs the tests, golangci-lint and the migration schema diff.
+2. Make your change, add tests, and open a PR. CI runs the tests, golangci-lint and the migration checks.
 
 Working with an AI coding agent? [`AGENTS.md`](AGENTS.md) has the full conventions.
 

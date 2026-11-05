@@ -5,11 +5,13 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
+env:
+  MYSQL_URL: mysql://root:super_secret_passw0rd@localhost:3306
 jobs:
   test_migrations:
     runs-on: ubuntu-latest
     services:
-      auto_mysql:
+      mysql:
         image: mysql:26
         ports:
           - 3306:3306
@@ -22,19 +24,9 @@ jobs:
           --health-interval 2s
           --health-timeout 5s
           --health-retries 30
-      manual_mysql:
-        image: mysql:26
-        ports:
-          - 3300:3306
-        env:
-          MYSQL_ROOT_PASSWORD: super_secret_passw0rd
-          MYSQL_DATABASE: campus_db
-        options: >-
-          --tmpfs /var/lib/mysql
-          --health-cmd "mysqladmin ping -h localhost -u root --password=super_secret_passw0rd"
-          --health-interval 2s
-          --health-timeout 5s
-          --health-retries 30
+    defaults:
+      run:
+        working-directory: ./server
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -42,65 +34,73 @@ jobs:
           go-version: '1.27'
           cache-dependency-path: |
             server/go.sum
-      - name: build server
-        run: go build -o /tmp/campus-backend .
-        working-directory: ./server
-      - name: run manual and auto migrations
-        working-directory: ./server
+            server/tools/atlasloader/go.sum
+      - uses: ariga/setup-atlas@v0
+      # same default collation as campus_db after migration 20240317000000, otherwise
+      # `atlas schema diff` sees a database-level change it cannot express
+      - name: create atlas dev database
+        run: mysql -h 127.0.0.1 -u root --password=super_secret_passw0rd -e "CREATE DATABASE dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+      - name: run migrations like in production
+        run: go run . 2>&1 | grep -v "level=debug"
         env:
           CI_EXIT_AFTER_MIGRATION: "true"
-          DB_NAME: campus_db
+          DB_DSN: root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local
           ENVIRONMENT: dev
+
+      - name: validate migration directory integrity (atlas.sum)
+        run: atlas migrate validate --env gorm --var dev_url="$MYSQL_URL/dev"
+
+      - name: check that the migrated database matches the models
         run: |
-          # both target separate databases, so they can run concurrently
-          CI_AUTO_MIGRATION=false DB_DSN="root:super_secret_passw0rd@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" /tmp/campus-backend > manual.log 2>&1 & manual=$!
-          CI_AUTO_MIGRATION=true DB_DSN="root:super_secret_passw0rd@tcp(localhost:3300)/campus_db?charset=utf8mb4&parseTime=True&loc=Local" /tmp/campus-backend > auto.log 2>&1 & auto=$!
-          status=0
-          wait $manual || { echo "::error::manual migration failed"; status=1; }
-          wait $auto || { echo "::error::auto migration failed"; status=1; }
-          echo "::group::manual migration log"; cat manual.log; echo "::endgroup::"
-          echo "::group::auto migration log"; cat auto.log; echo "::endgroup::"
-          exit $status
-      - uses: ariga/setup-atlas@master
-      - name: export diff the migrations
-        id: diff_migrations
+          atlas schema diff --env gorm --var dev_url="$MYSQL_URL/dev" \
+            --from "$MYSQL_URL/campus_db" --to env://src --exclude migrations | tee schema_diff.txt
+          grep -q "Schemas are synced" schema_diff.txt
+
+      - name: check that the models do not need a new migration
+        id: migrate_diff
         run: |
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64) &&
-          echo "local_to_auto<<$EOF" >> $GITHUB_OUTPUT &&
-          atlas schema diff --from "mysql://root:super_secret_passw0rd@localhost:3300/?charset=utf8mb4&parseTime=True&loc=Local" --to "mysql://root:super_secret_passw0rd@localhost:3306/?charset=utf8mb4&parseTime=True&loc=Local" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
-          echo "$EOF" >> $GITHUB_OUTPUT
-          echo "auto_to_local<<$EOF" >> $GITHUB_OUTPUT &&
-          atlas schema diff --from "mysql://root:super_secret_passw0rd@localhost:3306/?charset=utf8mb4&parseTime=True&loc=Local" --to "mysql://root:super_secret_passw0rd@localhost:3300/?charset=utf8mb4&parseTime=True&loc=Local" --format '{{ sql . "  " }}' >> $GITHUB_OUTPUT &&
-          echo "$EOF" >> $GITHUB_OUTPUT
+          atlas migrate diff --env gorm --var dev_url="$MYSQL_URL/dev" ci_check
+          {
+            EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "missing<<$EOF"
+            cat backend/migration/sql/*_ci_check.sql 2>/dev/null || true
+            echo "$EOF"
+          } >> "$GITHUB_OUTPUT"
+          if ls backend/migration/sql/*_ci_check.sql >/dev/null 2>&1; then
+            echo "::error::The GORM models changed without a migration. Generate one with: atlas migrate diff --env gorm <name>"
+            exit 1
+          fi
+
       - name: Find Comment
+        if: always() && steps.migrate_diff.conclusion != 'skipped'
         uses: peter-evans/find-comment@v4
         id: fc
         with:
           issue-number: "${{ github.event.number }}"
-          body-includes: Found the following differences in the sql schema
+          body-includes: "<!-- atlas-migrate-diff -->"
           comment-author: github-actions[bot]
-      - name: Create comment
+      - name: Comment missing migration
+        if: always() && steps.migrate_diff.outputs.missing != ''
         uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: "${{ github.event.number }}"
           comment-id: "${{ steps.fc.outputs.comment-id }}"
-          body: |
-            :eyes: Found the following differences in the sql schema:
-
-            <details>
-            <summary>Needed get from <b>local</b> to <b>auto</b> migration state</summary>
-
-            ```sql
-            ${{ steps.diff_migrations.outputs.local_to_auto }}
-            ```
-
-            </details>
-            <details>
-            <summary>Needed from <b>auto</b> to <b>local</b> migration state</summary>
-
-            ```sql
-            ${{ steps.diff_migrations.outputs.auto_to_local }}
-            ```
-
-            </details>
           edit-mode: replace
+          body: |
+            <!-- atlas-migrate-diff -->
+            :warning: The GORM models changed, but there is no migration for it.
+            Generate one in `server/` with `atlas migrate diff --env gorm <name>` and commit it. It would currently contain:
+
+            ```sql
+            ${{ steps.migrate_diff.outputs.missing }}
+            ```
+      - name: Mark comment as resolved
+        if: always() && steps.migrate_diff.outcome == 'success' && steps.fc.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          comment-id: "${{ steps.fc.outputs.comment-id }}"
+          edit-mode: replace
+          body: |
+            <!-- atlas-migrate-diff -->
+            :white_check_mark: The migrations are in sync with the GORM models.

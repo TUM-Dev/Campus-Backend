@@ -18,9 +18,9 @@ var (
 // NotificationConfirmation struct is a row record of the notification_confirmation table in the tca database
 type NotificationConfirmation struct {
 	Notification int64     `gorm:"primary_key;column:notification;type:int;" json:"notification"`
-	Device       int64     `gorm:"primary_key;column:device;type:int;" json:"device"`
-	Sent         int32     `gorm:"column:sent;type:tinyint;default:0;" json:"sent"`
-	Created      time.Time `gorm:"column:created;type:timestamp;default:current_timestamp();" json:"created"`
+	Device       int64     `gorm:"primary_key;column:device;type:int;index:device;" json:"device"`
+	Sent         int32     `gorm:"column:sent;type:bool;not null;default:0;" json:"sent"`
+	Created      time.Time `gorm:"column:created;type:timestamp;not null;default:current_timestamp();" json:"created"`
 	Received     null.Time `gorm:"column:received;type:timestamp;" json:"received"`
 }
 

@@ -9,10 +9,10 @@ import (
 // Device struct is a row record of the devices table in the tca database
 type Device struct {
 	Device          int64       `gorm:"primary_key;autoIncrement;column:device;type:int;" json:"device"`
-	Member          null.Int    `gorm:"column:member;type:int;" json:"member"`
-	UUID            string      `gorm:"column:uuid;type:varchar(50);not null" json:"uuid"`
+	Member          null.Int    `gorm:"column:member;type:int;index:member;" json:"member"`
+	UUID            string      `gorm:"column:uuid;type:varchar(50);not null;uniqueIndex:uuid" json:"uuid"`
 	Created         null.Time   `gorm:"column:created;type:timestamp;" json:"created"`
-	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:current_timestamp();OnUpdate:current_timestamp();not null" json:"last_access"`
+	LastAccess      time.Time   `gorm:"column:lastAccess;type:timestamp;default:current_timestamp() ON UPDATE current_timestamp();not null" json:"last_access"`
 	LastAPI         string      `gorm:"column:lastApi;type:text;not null;default:('')" json:"last_api"`
 	Developer       string      `gorm:"column:developer;type:enum('true','false');default:'false';not null" json:"developer"`
 	OsVersion       string      `gorm:"column:osVersion;type:text;not null;default:('')" json:"os_version"`
