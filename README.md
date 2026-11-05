@@ -8,57 +8,19 @@ This repository holds the following components:
 
 The API is publicly available for anyone, but most notably, it's the main backend system for the TUM Campus Apps (Android, iOS, and Windows).
 
-## Running the Server (without Docker)
-
-### Installing Requirements
-
-Use Go 1.26, matching CI and the Docker build. The backend uses MySQL for storing data.
-While it is possible to install [mysql](https://mysql.com/) natively (instructions are on their website), we recommend the following:
-
-```bash
-docker run
-```
-
-### Setting up the DB
-
-To setup the DB, connect to your DB server or use `mysql` to connect to it locally.
-
-```sql
-DROP DATABASE campus_backend; -- Drop an eventually existing old DB
-CREATE DATABASE campus_backend; -- Create a new DB for the backend
-
-CREATE USER 'gorm'@'localhost' IDENTIFIED BY 'gorm'; -- Create a new user called `gorm`.
-GRANT ALL PRIVILEGES ON campus_backend.* TO 'gorm'@'localhost'; -- Garant our `gorm` user access to the `campus_backend` DB.
-ALTER USER 'gorm'@'localhost' IDENTIFIED BY 'GORM_USER_PASSWORD'; -- Set a password for the `gorm` user.
-FLUSH PRIVILEGES;
-```
-
-### Starting
-
-To start the server there are environment variables, as well as command line options available for configuring the server behavior.
-
-```bash
-cd  server
-export DB_DSN="Your gorm DB connection string for example: gorm:GORM_USER_PASSWORD@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local"
-export DB_NAME="The DB-name from above string for example: campus_backend"
-go run ./main.go
-```
-
-#### Environment Variables
-
-There are a few environment variables available:
-
-* [REQUIRED] `DB_DSN`: The [GORM](https://gorm.io/) [DB connection string](https://gorm.io/docs/connecting_to_the_database.html#MySQL) for connecting to the MySQL DB. Example: `gorm@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local`
-* [REQUIRED] `DB_NAME`: The name of the database from above connection string. Example: `campus_backend`
-* [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
-
-## Running the Server (Docker)
+## Running the Server
 ```bash
 docker compose -f docker-compose.local.yml up -d
 ```
 The docker compose will start the server and a mysql instance (=> without routing/certificates to worry about)
 The server will be available at `localhost:50051` and the mysql instance at `localhost:3306`.
-Additionally, docker creates the volume `campus-db-data` to persist the data of the mysql instances.
+Additionally, docker creates the volume `mysql-data` to persist the data of the mysql instance.
+
+To rebuild and restart the server automatically whenever you change code in `server/`, run it with [watch](https://docs.docker.com/compose/how-tos/file-watch/) instead:
+```bash
+docker compose -f docker-compose.local.yml up --watch
+```
+Changes to tests, test data and markdown files are ignored.
 
 ### Environment Variables
 The following environment variables need to be set for the server to work properly:

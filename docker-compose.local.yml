@@ -43,6 +43,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    develop:
+      # `docker compose -f docker-compose.local.yml up --watch` rebuilds and restarts the backend on code changes
+      watch:
+        - action: rebuild
+          path: server/
+          ignore:
+            - "**/*_test.go"
+            - "**/*.md"
+            - "**/test_data/"
 
 volumes:
   mysql-data:

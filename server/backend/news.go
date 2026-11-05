@@ -83,7 +83,7 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 }
 
 func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID int32, oldestDateAt time.Time) ([]model.News, error) {
-	cacheKey := fmt.Sprintf("%d_%d_%d", sourceID, oldestDateAt.Second(), lastNewsID)
+	cacheKey := fmt.Sprintf("%d_%d_%d", sourceID, oldestDateAt.UnixNano(), lastNewsID)
 
 	if news, ok := s.newsCache.Get(cacheKey); ok {
 		return news, nil

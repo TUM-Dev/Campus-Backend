@@ -1,0 +1,6 @@
+# keep the build context small and avoid needless cache busting (also for `docker compose up --watch`)
+**/*_test.go
+**/test_data/
+**/*.md
+Dockerfile
+.dockerignore
