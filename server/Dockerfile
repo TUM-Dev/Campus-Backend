@@ -20,7 +20,8 @@ COPY . .
 # bundle version into binary if specified in build-args, dev otherwise.
 ARG version=dev
 # Compile statically
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-w -extldflags '-static' -X main.Version=${version}" -o /backend main.go
 RUN chmod +x /backend
 
 FROM alpine:latest
