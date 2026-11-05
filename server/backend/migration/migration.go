@@ -46,7 +46,7 @@ func autoMigrate(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	return refreshRatingViews(db)
+	return createRatingStatisticViews(db)
 }
 
 func manualMigrate(db *gorm.DB) error {
@@ -93,8 +93,8 @@ func manualMigrate(db *gorm.DB) error {
 		migrate20240824000000(),
 		migrate20241023000000(),
 		migrate20250412000000(),
-		migrate20261104000000(),
 		migrate20261105000000(),
+		migrate20261105010000(),
 	}
 	return gormigrate.New(db, gormigrateOptions, migrations).Migrate()
 }

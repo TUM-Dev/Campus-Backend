@@ -4,8 +4,9 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
-	"regexp"
+	"path"
 	"slices"
 	"strings"
 	"time"
@@ -25,11 +26,7 @@ const (
 )
 
 func (c *CronService) movieCron() error {
-	_, omdbKeyExists := os.LookupEnv("OMDB_API_KEY")
-	if !omdbKeyExists {
-		log.Info("Skipping movieCron as no OMDB_API_KEY was set")
-		return nil
-	}
+	omdbKeyExists := strings.TrimSpace(os.Getenv("OMDB_API_KEY")) != ""
 	log.Trace("parsing upcoming feed")
 	var allMovieLinks []string
 	if err := c.db.Model(&model.Movie{}).
@@ -42,6 +39,7 @@ func (c *CronService) movieCron() error {
 	if err != nil {
 		return err
 	}
+	var importErrors []error
 	for _, channel := range channels {
 		for _, item := range channel.Items {
 			logFields := log.Fields{"link": item.Link, "title": item.Title, "date": item.PubDate, "location": item.Location, "url": item.Enclosure.Url}
@@ -50,25 +48,23 @@ func (c *CronService) movieCron() error {
 				continue
 			}
 
-			// data cleanup
-			date, err := time.Parse(time.RFC1123Z, item.PubDate)
-			if err != nil {
-				log.WithError(err).WithFields(logFields).Error("Couldn't check if movie already exists")
-				continue
-			}
-			re := regexp.MustCompile(`(?P<date>[\d. ]+): (?P<title>.+)$`)
-			matches := re.FindStringSubmatch(item.Title)
-			if len(matches) < re.NumSubexp() {
-				log.WithFields(logFields).Error("Couldn't parse movie title")
-				continue
-			}
-			item.Title = matches[re.SubexpIndex("title")]
-
 			// populate extra data from tu-film website
 			movieInformation, err := movie_parsers.GetTuFilmWebsiteInformation(item.Link)
 			if err != nil {
-				log.WithFields(logFields).WithError(err).Error("error while finding imdb id")
+				log.WithFields(logFields).WithError(err).Error("error while reading movie page")
+				importErrors = append(importErrors, fmt.Errorf("movie %s: %w", item.Link, err))
 				continue
+			}
+			date := movieInformation.ScreeningDate
+			if date.IsZero() {
+				date, err = time.Parse(time.RFC1123Z, item.PubDate)
+				if err != nil {
+					importErrors = append(importErrors, fmt.Errorf("invalid screening date for %s: %w", item.Link, err))
+					continue
+				}
+			}
+			if movieInformation.Location != "" {
+				item.Location = movieInformation.Location
 			}
 			movie := model.Movie{
 				Date:        date,
@@ -82,20 +78,13 @@ func (c *CronService) movieCron() error {
 				Trailer:     movieInformation.TrailerUrl,
 				Link:        item.Link,
 			}
-			if movieInformation.ImdbID.ValueOrZero() != "" {
+			if omdbKeyExists && movieInformation.ImdbID.ValueOrZero() != "" {
 				omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
 				if err != nil {
-					log.WithFields(logFields).WithError(err).Error("error while getting omdb movie")
-					continue
+					log.WithFields(logFields).WithError(err).Warn("OMDb enrichment failed; using tu-film data")
+				} else {
+					enrichMovie(&movie, omdbMovie)
 				}
-				// enrich the movie with data from omdb if present
-				movie.Year = null.StringFrom(omdbMovie.ReleaseYear)
-				movie.Runtime = null.StringFrom(omdbMovie.Runtime)
-				movie.Genre = null.StringFrom(omdbMovie.Genre)
-				movie.Director = null.StringFrom(omdbMovie.Director)
-				movie.Actors = null.StringFrom(omdbMovie.Actors)
-				movie.ImdbRating = null.StringFrom(omdbMovie.ImdbRating)
-				movie.Description = omdbMovie.Plot // tu-fim does truncate their plot
 			}
 
 			// save the result of the previous steps (🎉)
@@ -107,20 +96,19 @@ func (c *CronService) movieCron() error {
 				// assign the file_id to make sure the id is assigned
 				movie.File = *file
 				movie.FileID = file.File
-				return tx.Create(&movie).Error
+				return tx.Omit("File").Create(&movie).Error
 			}); err != nil {
 				log.WithFields(logFields).WithError(err).Error("error while creating movie")
+				importErrors = append(importErrors, err)
 			}
 		}
 	}
-	return nil
+	return errors.Join(importErrors...)
 }
 
 // saveImage saves an image to the database, so it can be downloaded by another cronjob and returns the file
 func saveImage(tx *gorm.DB, url string) (*model.File, error) {
-	seps := strings.SplitAfter(url, ".")
-	fileExtension := seps[len(seps)-1]
-	targetFileName := fmt.Sprintf("%x.%s", md5.Sum([]byte(url)), fileExtension)
+	targetFileName := movieImageName(url)
 	var file model.File
 	// path intentionally omitted in query to allow for deduplication
 	if err := tx.First(&file, "name = ?", targetFileName).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -142,4 +130,35 @@ func saveImage(tx *gorm.DB, url string) (*model.File, error) {
 		return nil, err
 	}
 	return &file, nil
+}
+
+func movieImageName(address string) string {
+	parsed, err := url.Parse(address)
+	extension := ".jpg"
+	if err == nil {
+		if ext := path.Ext(parsed.Path); ext != "" {
+			extension = ext
+		}
+	}
+	return fmt.Sprintf("%x%s", md5.Sum([]byte(address)), extension)
+}
+
+// Optional enrichment must not replace useful source data with empty or N/A fields.
+func enrichMovie(movie *model.Movie, data *movie_parsers.OmdbResults) {
+	fields := []struct {
+		target *null.String
+		value  string
+	}{
+		{&movie.Year, data.ReleaseYear}, {&movie.Runtime, data.Runtime},
+		{&movie.Genre, data.Genre}, {&movie.Director, data.Director},
+		{&movie.Actors, data.Actors}, {&movie.ImdbRating, data.ImdbRating},
+	}
+	for _, field := range fields {
+		if value := strings.TrimSpace(field.value); value != "" && value != "N/A" {
+			*field.target = null.StringFrom(value)
+		}
+	}
+	if plot := strings.TrimSpace(data.Plot); plot != "" && plot != "N/A" {
+		movie.Description = plot
+	}
 }
