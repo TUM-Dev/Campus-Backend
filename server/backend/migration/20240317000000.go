@@ -2,7 +2,6 @@ package migration
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/go-gormigrate/gormigrate/v2"
 	"gorm.io/gorm"
@@ -134,7 +133,7 @@ func migrate20240317000000() *gormigrate.Migration {
 				return err
 			}
 			// first migrate the db
-			if err := tx.Exec(fmt.Sprintf("ALTER DATABASE `%s` CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci", os.Getenv("DB_NAME"))).Error; err != nil {
+			if err := tx.Exec("ALTER DATABASE CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci").Error; err != nil {
 				return err
 			}
 			// then set the tables
@@ -153,7 +152,7 @@ func migrate20240317000000() *gormigrate.Migration {
 		},
 		Rollback: func(tx *gorm.DB) error {
 			// first migrate the db
-			if err := tx.Exec(fmt.Sprintf("ALTER DATABASE `%s` CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci", os.Getenv("DB_NAME"))).Error; err != nil {
+			if err := tx.Exec("ALTER DATABASE CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci").Error; err != nil {
 				return err
 			}
 			// revert changes to tables
