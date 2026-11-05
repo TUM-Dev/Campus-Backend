@@ -1,7 +1,7 @@
 # Campus-Backend
 
 This repository holds the following components:
-* `api` - the proto API definition in the `CampusService.proto`.
+* `server/api` - the proto API definition in [`tumdev/campus_backend.proto`](server/api/tumdev/campus_backend.proto).
 * `client` - example client for how to connect to the backend.
 * `server` - the actual server implementation serving both REST at [api.tum.app](https://api.tum.app)
   and gRPC endpoints at [api-grpc.tum.app](https://api-grpc.tum.app).
