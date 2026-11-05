@@ -2,8 +2,10 @@
 // See the "Database Migrations" section in the README.
 
 // The desired schema: GORM models + tools/atlasloader/legacy.sql
+// The loader imports the server module via a replace directive; -mod=mod lets it follow
+// server dependency updates without a separate `go mod tidy` in tools/atlasloader.
 data "external_schema" "gorm" {
-  program = ["go", "run", "-C", "tools/atlasloader", "."]
+  program = ["go", "run", "-C", "tools/atlasloader", "-mod=mod", "."]
 }
 
 // Dev database Atlas uses to compute diffs. Override with --var dev_url=... to use an existing server.
