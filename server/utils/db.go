@@ -2,13 +2,15 @@ package utils
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/moby/moby/api/types/network"
+	gomysql "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -18,6 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // SetupDB connects to the database and migrates it if necessary
@@ -46,73 +49,104 @@ func SetupDB() *gorm.DB {
 	return db
 }
 
-type testContainerLogger struct {
-	t *testing.T
+// TestMySQLDSNEnv names an optional environment variable pointing tests at an existing MySQL server
+// (e.g. a CI service container), formatted like "root:password@tcp(localhost:3306)/".
+// When unset, a single MySQL testcontainer is started lazily per test binary and shared by all tests.
+const TestMySQLDSNEnv = "TEST_MYSQL_DSN"
+
+var (
+	testServerOnce sync.Once
+	testServerCfg  *gomysql.Config
+	testServerErr  error
+)
+
+// testServerConfig returns the connection config of the shared MySQL server (without a database selected)
+func testServerConfig(t *testing.T) *gomysql.Config {
+	testServerOnce.Do(func() {
+		if dsn := os.Getenv(TestMySQLDSNEnv); dsn != "" {
+			testServerCfg, testServerErr = gomysql.ParseDSN(dsn)
+			return
+		}
+		// not tied to a test context: the container outlives individual tests and is removed by ryuk once the test binary exits
+		testServerCfg, testServerErr = startMySQLTestContainer(context.Background())
+	})
+	require.NoError(t, testServerErr)
+	cfg := testServerCfg.Clone()
+	cfg.DBName = ""
+	cfg.ParseTime = true
+	cfg.Loc = time.Local
+	cfg.Params = map[string]string{"charset": "utf8mb4"}
+	return cfg
 }
 
-func (tcl testContainerLogger) Printf(format string, v ...interface{}) {
-	line := strings.TrimSpace(fmt.Sprintf(format, v...))
-	tcl.t.Log(line)
-}
-
-func (tcl testContainerLogger) Accept(log testcontainers.Log) {
-	line := strings.TrimSpace(string(log.Content))
-	if len(line) == 0 {
-		return // empty lines are just junk..
+func startMySQLTestContainer(ctx context.Context) (*gomysql.Config, error) {
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image:        "mysql:9.0.0",
+			ExposedPorts: []string{"3306/tcp"},
+			Env:          map[string]string{"MYSQL_ROOT_PASSWORD": "super_secret_passw0rd"},
+			// durability is irrelevant for throwaway test data
+			Tmpfs: map[string]string{"/var/lib/mysql": "rw"},
+			Cmd: []string{
+				"--skip-log-bin",
+				"--innodb-flush-log-at-trx-commit=0",
+				"--performance-schema=OFF",
+			},
+			WaitingFor: wait.ForAll(
+				// the entrypoint first starts a temporary server for initialisation
+				wait.ForLog("mysqld: ready for connections").WithOccurrence(2).WithPollInterval(100*time.Millisecond),
+				wait.ForListeningPort("3306/tcp"),
+			),
+		},
+		Started: true,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("starting mysql testcontainer: %w", err)
 	}
-	tcl.t.Logf("[%s,testcontainer] %s", log.LogType, line)
+	host, err := container.Host(ctx)
+	if err != nil {
+		return nil, err
+	}
+	port, err := container.MappedPort(ctx, "3306/tcp")
+	if err != nil {
+		return nil, err
+	}
+	cfg := gomysql.NewConfig()
+	cfg.User = "root"
+	cfg.Passwd = "super_secret_passw0rd"
+	cfg.Net = "tcp"
+	cfg.Addr = fmt.Sprintf("%s:%d", host, port.Num())
+	return cfg, nil
 }
 
-func SetupTestContainer(ctx context.Context, t *testing.T) *gorm.DB {
-	container := setupMySQLTestContainer(ctx, t)
-	// connect to gorm instance
-	mappedPort, err := container.MappedPort(ctx, "3306/tcp")
-	require.NoError(t, err)
-	return connectToDbAndMigrate(mappedPort, t, true)
+// SetupTestContainer returns a connection to a fresh, auto-migrated database on the shared test MySQL server
+func SetupTestContainer(_ context.Context, t *testing.T) *gorm.DB {
+	return newTestDatabase(t, true)
 }
 
-// connectToDbAndMigrate connects ot the database and exectes the migrations
+// newTestDatabase creates an isolated database for this test and migrates it
 //
 // The option to allow for the auto-migrations is because they are WAY faster and this is an option for testing reasons
-func connectToDbAndMigrate(mappedPort network.Port, t *testing.T, shouldAutoMigrate bool) *gorm.DB {
-	dsn := fmt.Sprintf("root:super_secret_passw0rd@tcp(localhost:%d)/campus_db?charset=utf8mb4&parseTime=True&loc=Local", mappedPort.Num())
-	t.Log("connecting to " + dsn)
-	db, err := gorm.Open(mysql.Open(dsn))
+func newTestDatabase(t *testing.T, shouldAutoMigrate bool) *gorm.DB {
+	cfg := testServerConfig(t)
+	admin, err := gorm.Open(mysql.Open(cfg.FormatDSN()), &gorm.Config{Logger: logger.Discard})
 	require.NoError(t, err)
+
+	name := "test_" + strings.ReplaceAll(rand.Text(), "-", "")[:16]
+	require.NoError(t, admin.Exec(fmt.Sprintf("CREATE DATABASE `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", name)).Error)
+
+	cfg.DBName = name
+	db, err := gorm.Open(mysql.Open(cfg.FormatDSN()))
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		if sqlDB, err := db.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+		require.NoError(t, admin.Exec(fmt.Sprintf("DROP DATABASE `%s`", name)).Error)
+		if sqlDB, err := admin.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	})
 	require.NoError(t, migration.Migrate(db, shouldAutoMigrate))
 	return db
-}
-
-func setupMySQLTestContainer(ctx context.Context, t *testing.T) testcontainers.Container {
-	logger := testContainerLogger{t}
-	// create a container
-	err := os.Setenv("DB_NAME", "campus_db")
-	require.NoError(t, err)
-	req := testcontainers.ContainerRequest{
-		Image: "mysql:9.0.0",
-		Env: map[string]string{
-			"MYSQL_ROOT_PASSWORD": "super_secret_passw0rd",
-			"MYSQL_DATABASE":      "campus_db",
-		},
-		LogConsumerCfg: &testcontainers.LogConsumerConfig{
-			Consumers: []testcontainers.LogConsumer{logger},
-		},
-		WaitingFor: &wait.LogStrategy{
-			Log:          "mysqld: ready for connections",
-			IsRegexp:     false,
-			Occurrence:   2, // why does it do a dance with a temporary server???
-			PollInterval: 100 * time.Millisecond,
-		},
-	}
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-		Logger:           logger,
-	})
-	require.NoError(t, err)
-	require.True(t, container.IsRunning())
-	t.Cleanup(func() {
-		require.NoError(t, container.Terminate(ctx))
-	})
-	return container
 }

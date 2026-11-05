@@ -1,6 +1,6 @@
 # Updating Protocol Buffers
 
-To update or extend the API `Protocol Buffers`, edit the `CampusService.proto` file.
+To update or extend the API `Protocol Buffers`, edit the [`tumdev/campus_backend.proto`](tumdev/campus_backend.proto) file.
 
 ## Adding a new Endpoint
 Add a `rpc` call inside the `service Campus{...}` namespace to add a new endpoint.
@@ -29,7 +29,7 @@ message GetTopNewsReply {
 
 # Generating Protocol Buffers
 
-Once the `CampusService.proto` is up-to-date, you must generate the up-to-date proto files.
+Once `tumdev/campus_backend.proto` is up-to-date, you must generate the up-to-date proto files.
 
 ## System Requirements
 

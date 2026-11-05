@@ -1,7 +1,7 @@
 # Campus-Backend
 
 This repository holds the following components:
-* `api` - the proto API definition in the `CampusService.proto`.
+* `server/api` - the proto API definition in [`tumdev/campus_backend.proto`](server/api/tumdev/campus_backend.proto).
 * `client` - example client for how to connect to the backend.
 * `server` - the actual server implementation serving both REST at [api.tum.app](https://api.tum.app)
   and gRPC endpoints at [api-grpc.tum.app](https://api-grpc.tum.app).
@@ -68,6 +68,15 @@ The following environment variables need to be set for the server to work proper
 * [OPTIONAL] `DB_PORT`: The port of the database server. Defaults to `3306`.
 * [OPTIONAL] `SENTRY_DSN`: The Sentry [Data Source Name](https://sentry-docs-git-patch-1.sentry.dev/product/sentry-basics/dsn-explainer/) for reporting issues and crashes.
 * [OPTIONAL] `OMDB_API_KEY`: The key to get more information for tu-film movies from [omdbapi](https://omdbapi.com/). See [omdbapi](https://omdbapi.com/apikey.aspx) for a key.
+
+## Running Tests
+
+```bash
+cd server && go test ./...
+```
+
+Tests that need a database start a single MySQL container via [testcontainers](https://golang.testcontainers.org/) per test binary (Docker required) and give every test its own freshly migrated database.
+To reuse an already running MySQL server instead, set `TEST_MYSQL_DSN`, e.g. `TEST_MYSQL_DSN='root:password@tcp(localhost:3306)/'`.
 
 ## Metrics
 Our service uses prometheus to collect metrics to display in grafana.

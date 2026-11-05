@@ -11,10 +11,13 @@ import (
 	"image/jpeg"
 	"math"
 	"os"
+	"path"
+	"strconv"
 	"strings"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
@@ -332,12 +335,12 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 	return &pb.CreateCanteenRatingReply{}, nil
 }
 
-func imageWrapper(image []byte, path string, id int64) string {
+func imageWrapper(image []byte, subDir string, id int64) string {
 	if len(image) == 0 {
 		return ""
 	}
-	path = fmt.Sprintf("/Storage/rating/%s/%d/", path, id)
-	resPath, err := storeImage(path, image)
+	dir := path.Join(cron.StorageDir, "rating", subDir, strconv.FormatInt(id, 10)) + "/"
+	resPath, err := storeImage(dir, image)
 	if err != nil {
 		log.WithError(err).Error("Error occurred while storing the image.")
 	}
