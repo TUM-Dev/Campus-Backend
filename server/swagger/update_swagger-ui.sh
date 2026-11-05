@@ -1,17 +1,22 @@
-#!/usr/bin/sh
+#!/usr/bin/env sh
+# Updates the vendored Swagger UI assets from the swagger-ui-dist npm package.
+# Usage: ./update_swagger-ui.sh [version]   (defaults to the latest release)
+set -eu
 
-echo updating the swagger-ui
-pnpm i swagger-ui
+cd "$(dirname "$0")"
+version="${1:-$(npm view swagger-ui-dist version)}"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
 
-rsync node_modules/swagger-ui/dist/oauth2-redirect.html .
-rsync node_modules/swagger-ui/dist/swagger-ui-bundle.js .
-rsync node_modules/swagger-ui/dist/swagger-ui-bundle.js.map .
-rsync node_modules/swagger-ui/dist/swagger-ui.css .
-rsync node_modules/swagger-ui/dist/swagger-ui.css.map .
+echo "updating swagger-ui to ${version}"
+npm pack --silent --pack-destination "$tmp" "swagger-ui-dist@${version}" >/dev/null
+tar -xzf "$tmp"/swagger-ui-dist-*.tgz -C "$tmp"
 
-echo cleaning up temporary files
-rm -fr node_modules
-rm -fr package*.json
+for f in oauth2-redirect.html oauth2-redirect.js \
+	swagger-ui-bundle.js swagger-ui-bundle.js.map \
+	swagger-ui.css swagger-ui.css.map; do
+	cp "$tmp/package/$f" .
+done
 
-echo updating the favicon
-curl https://www.tum.app/assets/img/fav.png --output fav.png
+echo "updating the favicon"
+curl -fsSL https://www.tum.app/assets/img/fav.png --output fav.png
