@@ -147,3 +147,42 @@ func TestParseStudentClubs(t *testing.T) {
 	require.Equal(t, expectedCollections, collections)
 	require.Equal(t, expectedClubs, clubs)
 }
+
+//go:embed sv_studentclubs_en_11-26.html
+var htmlStudentClubsEnglish string
+
+func TestParseStudentClubsEnglish(t *testing.T) {
+	clubs, collections, err := ParseStudentClubs(strings.NewReader(htmlStudentClubsEnglish))
+	require.NoError(t, err)
+	require.Len(t, collections, 12)
+	require.Len(t, clubs, 153)
+
+	withImage, withLink := 0, 0
+	byName := make(map[string]SVStudentClub, len(clubs))
+	for _, club := range clubs {
+		if club.ImageUrl.Valid {
+			withImage++
+		}
+		if club.LinkUrl.Valid {
+			withLink++
+		}
+		byName[club.Name] = club
+	}
+	// every card has an image (or the placeholder), 80 of them link to a website
+	require.Equal(t, 153, withImage)
+	require.Equal(t, 80, withLink)
+
+	// english cards start with an empty jump anchor (<a id="c…" class="d-inline"></a>), which must not hide the link
+	require.Equal(t, SVStudentClub{
+		Name:         "AG JLC",
+		Collection:   collections[0].Name,
+		Description:  byName["AG JLC"].Description,
+		ImageUrl:     null.StringFrom("https://sv.tum.de/fileadmin/_processed_/f/7/csm_AG_JLC_dd7207007b.webp"),
+		ImageCaption: byName["AG JLC"].ImageCaption,
+		LinkUrl:      null.StringFrom("https://www.ag-jlc.de/en"),
+	}, byName["AG JLC"])
+	require.Equal(t, null.StringFrom("https://www.debattierclub-muenchen.de/"), byName["Munich Debate Club"].LinkUrl)
+	// clubs without a website stay without a link
+	require.False(t, byName["h4tum"].LinkUrl.Valid)
+	require.True(t, byName["h4tum"].ImageUrl.Valid)
+}
