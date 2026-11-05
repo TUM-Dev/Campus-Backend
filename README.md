@@ -57,10 +57,6 @@ In production, REST is served at [api.tum.app](https://api.tum.app) and gRPC at 
 - **Built-in cron.** Scrapers and downloaders run inside the same binary, scheduled from the `crontab` table.
 - **Observability.** Prometheus metrics, Sentry error reporting and structured logs via logrus.
 
-Production Traefik routers exclude `/metrics`. Prometheus must scrape
-`http://backend:50051/metrics` directly from the `traefik_traefik` Docker network;
-metrics remain available at `localhost:50051/metrics` in local development.
-
 ## 🚀 Quick start
 
 You need [Docker](https://docs.docker.com/get-docker/). That's it.
