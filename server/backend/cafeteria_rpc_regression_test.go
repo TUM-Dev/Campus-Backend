@@ -42,15 +42,15 @@ func TestCanteenRPCsDispatchToImplementations(t *testing.T) {
 	client := pb.NewCampusClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	mock.ExpectQuery("SELECT name as id,address,latitude,longitude FROM `canteens`").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "address", "latitude", "longitude"}).AddRow("MENSA_GARCHING", "Garching", 48.2, 11.6))
+	mock.ExpectQuery("SELECT \\* FROM `canteens` ORDER BY name").
+		WillReturnRows(sqlmock.NewRows([]string{"cafeteria", "name", "address", "latitude", "longitude"}).AddRow(1, "MENSA_GARCHING", "Garching", 48.2, 11.6))
 	canteens, err := client.ListCanteens(ctx, &pb.ListCanteensRequest{})
 	require.NoError(t, err)
 	require.Len(t, canteens.Canteen, 1)
 	require.Equal(t, "Garching", canteens.Canteen[0].Address)
-	require.Equal(t, "MENSA_GARCHING", canteens.Canteen[0].Id)
+	require.Equal(t, "mensa-garching", canteens.Canteen[0].Id)
 	mock.ExpectQuery("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID").
-		WithArgs(int32(2), int32(45), int32(2026), canteens.Canteen[0].Id).
+		WithArgs(int32(2), int32(45), int32(2026), "MENSA_GARCHING").
 		WillReturnRows(sqlmock.NewRows([]string{"name"}).AddRow("Pasta"))
 	dishes, err := client.ListDishes(ctx, &pb.ListDishesRequest{CanteenId: canteens.Canteen[0].Id, Year: 2026, Week: 45, Day: 2})
 	require.NoError(t, err)
@@ -83,12 +83,12 @@ func TestCanteenRatingTagsUseCurrentTablesAndMapAverage(t *testing.T) {
 	db, mock := cafeteriaTestDB(t)
 	mock.ExpectQuery("FROM canteen_rating_tag_options options JOIN cafeteria_rating_tag_statistics").
 		WithArgs(int32(7)).WillReturnRows(sqlmock.NewRows([]string{"tagId", "avg", "std", "min", "max"}).AddRow(1, 4.25, 0.5, 3, 5))
-	tags := queryTags(7, -1, model.CAFETERIA, db)
+	tags := queryTags(7, -1, model.CANTEEN, db)
 	require.Len(t, tags, 1)
 	require.Equal(t, 4.25, tags[0].Avg)
 	mock.ExpectQuery("FROM canteen_rating_tag_options options JOIN canteen_rating_tags rating").
 		WithArgs(int64(12)).WillReturnRows(sqlmock.NewRows([]string{"tagId", "points"}).AddRow(1, 4))
-	ratings := queryTagRatingsOverviewForRating(12, model.CAFETERIA, db)
+	ratings := queryTagRatingsOverviewForRating(12, model.CANTEEN, db)
 	require.Len(t, ratings, 1)
 	require.Equal(t, int32(4), ratings[0].Points)
 }
@@ -96,5 +96,5 @@ func TestCanteenRatingTagsUseCurrentTablesAndMapAverage(t *testing.T) {
 func TestCanteenNameAcceptsEatAPIIdentifiers(t *testing.T) {
 	db, mock := cafeteriaTestDB(t)
 	mock.ExpectQuery("SELECT `cafeteria` FROM `canteens`").WithArgs("MENSA_GARCHING").WillReturnRows(sqlmock.NewRows([]string{"cafeteria"}).AddRow(7))
-	require.Equal(t, int32(7), getIDForCafeteriaName("mensa-garching", db))
+	require.Equal(t, int32(7), getIDForCanteenName("mensa-garching", db))
 }

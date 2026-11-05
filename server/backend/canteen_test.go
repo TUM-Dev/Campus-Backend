@@ -14,6 +14,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/codes"
@@ -26,7 +27,7 @@ import (
 
 const testImage = "./test_data/sampleimage.jpeg"
 
-type CafeteriaSuite struct {
+type CanteenSuite struct {
 	suite.Suite
 	DB             *gorm.DB
 	mock           sqlmock.Sqlmock
@@ -36,7 +37,7 @@ type CafeteriaSuite struct {
 
 // SetupTest creates a fresh mock per test so that expectations of one test cannot leak into another
 // and redirects image storage into a temporary directory.
-func (s *CafeteriaSuite) SetupTest() {
+func (s *CanteenSuite) SetupTest() {
 	var (
 		db  *sql.DB
 		err error
@@ -60,15 +61,15 @@ func (s *CafeteriaSuite) SetupTest() {
 	cron.StorageDir = s.T().TempDir()
 }
 
-func (s *CafeteriaSuite) TearDownTest() {
+func (s *CanteenSuite) TearDownTest() {
 	cron.StorageDir = s.prevStorageDir
 }
 
-func (s *CafeteriaSuite) AfterTest(_, _ string) {
+func (s *CanteenSuite) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.mock.ExpectationsWereMet())
 }
 
-func (s *CafeteriaSuite) server() CampusServer {
+func (s *CanteenSuite) server() CampusServer {
 	return CampusServer{db: s.DB, deviceBuf: s.deviceBuf}
 }
 
@@ -101,14 +102,14 @@ const (
 	expectedInsertDishTag     = "INSERT INTO `dish_rating_tags` (`parentRating`,`tagID`,`points`) VALUES (?,?,?)"
 )
 
-func (s *CafeteriaSuite) expectCanteenLookup(name string, id int64) {
+func (s *CanteenSuite) expectCanteenLookup(name string, id int64) {
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenByName)).
-		WithArgs(name, 1).
+		WithArgs(model.CanteenEnumName(name), 1).
 		WillReturnRows(sqlmock.NewRows([]string{"cafeteria", "name", "address", "latitude", "longitude"}).
-			AddRow(id, name, "Boltzmannstraße 19, 85748 Garching", 48.2681, 11.6723))
+			AddRow(id, model.CanteenEnumName(name), "Boltzmannstraße 19, 85748 Garching", 48.2681, 11.6723))
 }
 
-func (s *CafeteriaSuite) Test_GetCanteenHeadCount() {
+func (s *CanteenSuite) Test_GetCanteenHeadCount() {
 	ts := time.Date(2023, 10, 9, 11, 45, 22, 0, time.UTC)
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedHeadCountQuery)).
 		WithArgs("mensa-garching", 1).
@@ -126,7 +127,72 @@ func (s *CafeteriaSuite) Test_GetCanteenHeadCount() {
 	}, response)
 }
 
-func (s *CafeteriaSuite) Test_GetCanteenHeadCountNotFound() {
+// Test_GetCanteenHeadCountEnumName checks that the eat-api enum_name form is accepted as well.
+func (s *CanteenSuite) Test_GetCanteenHeadCountEnumName() {
+	s.mock.ExpectQuery(regexp.QuoteMeta(expectedHeadCountQuery)).
+		WithArgs("mensa-garching", 1).
+		WillReturnRows(sqlmock.NewRows([]string{"canteen_id", "count", "max_count", "percent", "timestamp"}).
+			AddRow("mensa-garching", 250, 1000, 25, time.Now()))
+
+	server := s.server()
+	response, err := server.GetCanteenHeadCount(testCtx(), &pb.GetCanteenHeadCountRequest{CanteenId: "MENSA_GARCHING"})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), uint32(250), response.Count)
+}
+
+func (s *CanteenSuite) Test_ListCanteens() {
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `canteens` ORDER BY name")).
+		WillReturnRows(sqlmock.NewRows([]string{"cafeteria", "name", "address", "latitude", "longitude"}).
+			AddRow(2, "MENSA_GARCHING", "Boltzmannstraße 19, Garching", 48.268132, 11.672263).
+			AddRow(7, "STUCAFE_BOLTZMANNSTR", "Boltzmannstraße 15, Garching", 48.26554, 11.66862))
+
+	server := s.server()
+	response, err := server.ListCanteens(testCtx(), &pb.ListCanteensRequest{})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListCanteensReply{Canteen: []*pb.Canteen{
+		{Id: "mensa-garching", Address: "Boltzmannstraße 19, Garching", Latitude: 48.268132, Longitude: 11.672263},
+		{Id: "stucafe-boltzmannstr", Address: "Boltzmannstraße 15, Garching", Latitude: 48.26554, Longitude: 11.66862},
+	}}, response)
+}
+
+func (s *CanteenSuite) Test_ListCanteensDBError() {
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `canteens` ORDER BY name")).
+		WillReturnError(fmt.Errorf("connection refused"))
+
+	server := s.server()
+	response, err := server.ListCanteens(testCtx(), &pb.ListCanteensRequest{})
+	require.Nil(s.T(), response)
+	require.Equal(s.T(), codes.Internal, status.Code(err))
+	require.NotContains(s.T(), err.Error(), "connection refused")
+}
+
+func (s *CanteenSuite) Test_ListAvailableCanteenTags() {
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT DE as de, EN as en, cafeteriaRatingTagOption as TagId FROM `canteen_rating_tag_options`")).
+		WillReturnRows(sqlmock.NewRows([]string{"de", "en", "TagId"}).
+			AddRow("Sauberkeit", "Cleanliness", 1).
+			AddRow("Wartezeit", "Waiting time", 2))
+
+	server := s.server()
+	response, err := server.ListAvailableCanteenTags(testCtx(), &pb.ListAvailableCanteenTagsRequest{})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListAvailableCanteenTagsReply{RatingTags: []*pb.TagsOverview{
+		{De: "Sauberkeit", En: "Cleanliness", TagId: 1},
+		{De: "Wartezeit", En: "Waiting time", TagId: 2},
+	}}, response)
+}
+
+func (s *CanteenSuite) Test_ListDishes() {
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID WHERE (weekly.day = ? AND weekly.week = ? and weekly.year = ?) AND c.name LIKE ?")).
+		WithArgs(int32(1), int32(45), int32(2026), "MENSA_GARCHING").
+		WillReturnRows(sqlmock.NewRows([]string{"name"}).AddRow("Pasta").AddRow("Curry"))
+
+	server := s.server()
+	response, err := server.ListDishes(testCtx(), &pb.ListDishesRequest{CanteenId: "mensa-garching", Year: 2026, Week: 45, Day: 1})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), []string{"Pasta", "Curry"}, response.Dish)
+}
+
+func (s *CanteenSuite) Test_GetCanteenHeadCountNotFound() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedHeadCountQuery)).
 		WithArgs("mensa-unknown", 1).
 		WillReturnRows(sqlmock.NewRows([]string{"canteen_id", "count", "max_count", "percent", "timestamp"}))
@@ -139,21 +205,21 @@ func (s *CafeteriaSuite) Test_GetCanteenHeadCountNotFound() {
 	require.Equal(s.T(), float32(-1), response.Percent)
 }
 
-func (s *CafeteriaSuite) Test_CreateCanteenRating() {
+func (s *CanteenSuite) Test_CreateCanteenRating() {
 	const (
 		canteenName = "mensa-garching"
 		comment     = "Everything perfect, 2 Stars"
-		cafeteriaID = int64(2)
+		canteenID   = int64(2)
 		ratingID    = int64(42)
 		points      = int32(2)
 	)
 	img := readTestImage(s.T())
-	imgPath := expectedImagePath(img, "cafeterias", cafeteriaID)
+	imgPath := expectedImagePath(img, "cafeterias", canteenID)
 
-	s.expectCanteenLookup(canteenName, cafeteriaID)
+	s.expectCanteenLookup(canteenName, canteenID)
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertRating)).
-		WithArgs(points, comment, cafeteriaID, imgPath, sqlmock.AnyArg()).
+		WithArgs(points, comment, canteenID, imgPath, sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
 	s.mock.ExpectCommit()
 	for _, tag := range []struct{ id, points int64 }{{5, 1}, {7, 3}} {
@@ -183,16 +249,16 @@ func (s *CafeteriaSuite) Test_CreateCanteenRating() {
 	require.FileExists(s.T(), imgPath)
 }
 
-func (s *CafeteriaSuite) Test_CreateCanteenRatingUnknownTag() {
+func (s *CanteenSuite) Test_CreateCanteenRatingUnknownTag() {
 	const (
 		canteenName = "mensa-garching"
-		cafeteriaID = int64(2)
+		canteenID   = int64(2)
 		ratingID    = int64(42)
 	)
-	s.expectCanteenLookup(canteenName, cafeteriaID)
+	s.expectCanteenLookup(canteenName, canteenID)
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertRating)).
-		WithArgs(int32(4), "", cafeteriaID, "", sqlmock.AnyArg()).
+		WithArgs(int32(4), "", canteenID, "", sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
 	s.mock.ExpectCommit()
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenTagExists)).
@@ -208,7 +274,7 @@ func (s *CafeteriaSuite) Test_CreateCanteenRatingUnknownTag() {
 	require.Equal(s.T(), codes.InvalidArgument, status.Code(err))
 }
 
-func (s *CafeteriaSuite) Test_CreateCanteenRatingInvalidInput() {
+func (s *CanteenSuite) Test_CreateCanteenRatingInvalidInput() {
 	tests := []struct {
 		name string
 		req  *pb.CreateCanteenRatingRequest
@@ -228,9 +294,9 @@ func (s *CafeteriaSuite) Test_CreateCanteenRatingInvalidInput() {
 	}
 }
 
-func (s *CafeteriaSuite) Test_CreateCanteenRatingUnknownCanteen() {
+func (s *CanteenSuite) Test_CreateCanteenRatingUnknownCanteen() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenByName)).
-		WithArgs("mensa-unknown", 1).
+		WithArgs("MENSA_UNKNOWN", 1).
 		WillReturnRows(sqlmock.NewRows([]string{"cafeteria", "name", "address", "latitude", "longitude"}))
 
 	server := s.server()
@@ -239,12 +305,12 @@ func (s *CafeteriaSuite) Test_CreateCanteenRatingUnknownCanteen() {
 	require.Equal(s.T(), status.Error(codes.InvalidArgument, "Canteen does not exist. Rating has not been saved."), err)
 }
 
-func (s *CafeteriaSuite) Test_CreateDishRating() {
+func (s *CanteenSuite) Test_CreateDishRating() {
 	const (
 		canteenName = "MENSA_GARCHING"
 		dishName    = "Vegane rote Grütze mit Soja-Vanillesauce"
 		comment     = "Very tasty"
-		cafeteriaID = int64(2)
+		canteenID   = int64(2)
 		dishID      = int64(13)
 		ratingID    = int64(42)
 		nameTagID   = int64(3)
@@ -253,11 +319,11 @@ func (s *CafeteriaSuite) Test_CreateDishRating() {
 	img := readTestImage(s.T())
 	imgPath := expectedImagePath(img, "dishes", dishID)
 
-	s.expectCanteenLookup(canteenName, cafeteriaID)
+	s.expectCanteenLookup(canteenName, canteenID)
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishByName)).
-		WithArgs(dishName, cafeteriaID, 1).
+		WithArgs(dishName, canteenID, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).
-			AddRow(dishID, dishName, "Dessert", cafeteriaID))
+			AddRow(dishID, dishName, "Dessert", canteenID))
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertDishRating)).
 		WithArgs(points, dishID, comment, imgPath, sqlmock.AnyArg()).
@@ -294,11 +360,11 @@ func (s *CafeteriaSuite) Test_CreateDishRating() {
 	require.FileExists(s.T(), imgPath)
 }
 
-func (s *CafeteriaSuite) Test_CreateDishRatingUnknownDish() {
-	const cafeteriaID = int64(2)
-	s.expectCanteenLookup("MENSA_GARCHING", cafeteriaID)
+func (s *CanteenSuite) Test_CreateDishRatingUnknownDish() {
+	const canteenID = int64(2)
+	s.expectCanteenLookup("MENSA_GARCHING", canteenID)
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishByName)).
-		WithArgs("Unknown dish", cafeteriaID, 1).
+		WithArgs("Unknown dish", canteenID, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}))
 
 	server := s.server()
@@ -313,6 +379,6 @@ func (s *CafeteriaSuite) Test_CreateDishRatingUnknownDish() {
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
-func TestCafeteriaSuite(t *testing.T) {
-	suite.Run(t, new(CafeteriaSuite))
+func TestCanteenSuite(t *testing.T) {
+	suite.Run(t, new(CanteenSuite))
 }

@@ -25,7 +25,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 )
 
 const httpPort = ":50051"
@@ -80,7 +79,8 @@ func main() {
 	grpcGatewayMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(
 		func(key string) (string, bool) {
 			key = textproto.CanonicalMIMEHeaderKey(key)
-			if key == "X-Device-Id" {
+			switch key {
+			case "X-Device-Id", "X-Os-Version", "X-App-Version":
 				return key, true
 			}
 			// don't filter headers (pass all to gRPC handlers)
@@ -91,7 +91,6 @@ func main() {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUserAgent("internal"),
-		grpc.WithUnaryInterceptor(addMethodNameInterceptor),
 	}
 	if err := pb.RegisterCampusHandlerFromEndpoint(context.Background(), grpcGatewayMux, httpPort, opts); err != nil {
 		log.WithError(err).Fatal("could not RegisterCampusHandlerFromEndpoint")
@@ -133,12 +132,6 @@ func StreamRequestLogger(srv any, stream grpc.ServerStream, info *grpc.StreamSer
 		log.WithFields(fields).WithError(err).Warn("request")
 	}
 	return err
-}
-
-// addMethodNameInterceptor adds the method name (e.g. "ListNewsSources") to the metadata as x-campus-method for later use (currently logging the devices api usage)
-func addMethodNameInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	ctx = metadata.AppendToOutgoingContext(ctx, "x-campus-method", method)
-	return invoker(ctx, method, req, reply, cc, opts...)
 }
 
 // errorHandler translates gRPC raised by the backend into HTTP errors.

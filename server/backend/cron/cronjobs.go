@@ -1,21 +1,22 @@
 package cron
 
 import (
+	"errors"
+	"net/http"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
-	"github.com/mmcdole/gofeed"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
 type CronService struct {
-	db *gorm.DB
-	gf *gofeed.Parser
+	db     *gorm.DB
+	client *http.Client
 }
 
 // StorageDir is the directory where files are stored
@@ -31,15 +32,13 @@ const (
 	MovieType        = "movie"
 	FeedbackEmail    = "feedbackEmail"
 	StudentClubType  = "scrapeStudentClubs"
-
-	/* MensaType      = "mensa"
-	AlarmType      = "alarm" */
 )
 
 func New(db *gorm.DB) *CronService {
-	parser := gofeed.NewParser()
-	parser.Client = webfetch.Client
-	return &CronService{db: db, gf: parser}
+	return &CronService{
+		db:     db,
+		client: webfetch.Client,
+	}
 }
 
 func (c *CronService) Run() error {
@@ -88,8 +87,10 @@ func (c *CronService) Run() error {
 			// Run each job in a separate goroutine.
 			switch cronjob.Type.String {
 			case StudentClubType:
-				run(func() error { return c.studentClubCron(pb.Language_German) })
-				run(func() error { return c.studentClubCron(pb.Language_English) })
+				// sequential, since both languages share the same images and would otherwise race on creating the file rows
+				run(func() error {
+					return errors.Join(c.studentClubCron(pb.Language_German), c.studentClubCron(pb.Language_English))
+				})
 			case NewsType:
 				// if this is not copied here, this may not be threads save due to go's guarantees
 				// loop variable cronjob captured by func literal (govet)
@@ -101,15 +102,6 @@ func (c *CronService) Run() error {
 				run(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
 				run(func() error { return c.movieCron() })
-				/*
-					TODO: Implement handlers for other cronjobs
-					case MensaType:
-						run(func() error { return c.mensaCron() })
-					case KinoType:
-						run(func() error { return c.kinoCron() })
-					case AlarmType:
-						run(func() error { return c.alarmCron() })
-				*/
 			case CanteenHeadcount:
 				run(func() error { return c.canteenHeadCountCron() })
 			case FeedbackEmail:
