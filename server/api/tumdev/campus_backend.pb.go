@@ -2189,9 +2189,9 @@ func (x *Canteen) GetLatitude() float64 {
 type ListDishesRequest struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	CanteenId string                 `protobuf:"bytes,1,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
-	// >=2022 until the current year
+	// ISO week-numbering year, >=2022
 	Year int32 `protobuf:"varint,2,opt,name=year,proto3" json:"year,omitempty"`
-	// Must be in the range 1 - 53
+	// ISO week, in the range 1 - 52 or 1 - 53 depending on the ISO year
 	Week int32 `protobuf:"varint,3,opt,name=week,proto3" json:"week,omitempty"`
 	// Day of the week
 	// Days must be in the range 0 (Monday) - 4 (Friday)

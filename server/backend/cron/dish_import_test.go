@@ -57,6 +57,35 @@ func TestInvalidMenuDoesNotWriteDishes(t *testing.T) {
 	}
 }
 
+func TestMenuImportISOYearBoundaries(t *testing.T) {
+	for _, tt := range []struct {
+		date            string
+		year, week, day int
+	}{
+		{"2025-12-28", 2025, 52, 6},
+		{"2025-12-29", 2026, 1, 0},
+		{"2026-12-28", 2026, 53, 0},
+		{"2027-01-01", 2026, 53, 4},
+		{"2027-01-04", 2027, 1, 0},
+	} {
+		t.Run(tt.date, func(t *testing.T) {
+			db, mock := dishImportTestDB(t)
+			menu := CanteenDays{Days: []CanteenDate{{Date: tt.date, Dates: []CanteenDish{{Name: "Pasta", DishType: "Pasta"}}}}}
+			mock.ExpectBegin()
+			mock.ExpectQuery("SELECT .* FROM `dishes`").WithArgs("Pasta", int64(7), 1).
+				WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).AddRow(42, "Pasta", "Pasta", 7))
+			mock.ExpectQuery("SELECT .* FROM `dishes_of_the_weeks`").
+				WithArgs(tt.day, int64(42), tt.week, tt.year, 1).
+				WillReturnRows(sqlmock.NewRows([]string{"dishesOfTheWeek", "dishID", "year", "week", "day"}))
+			mock.ExpectExec("INSERT INTO `dishes_of_the_weeks`").
+				WithArgs(tt.year, tt.week, tt.day, int64(42)).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectCommit()
+			require.NoError(t, storeCanteenMenu(db, 7, menu, tt.year, tt.week))
+		})
+	}
+}
+
 func TestCanteenDirectoryNetworkFailure(t *testing.T) {
 	old := webfetch.Client
 	t.Cleanup(func() { webfetch.Client = old })

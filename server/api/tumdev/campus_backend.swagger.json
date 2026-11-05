@@ -388,7 +388,7 @@
           },
           {
             "name": "year",
-            "description": "\u003e=2022 until the current year",
+            "description": "ISO week-numbering year, \u003e=2022",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -396,7 +396,7 @@
           },
           {
             "name": "week",
-            "description": "Must be in the range 1 - 53",
+            "description": "ISO week, in the range 1 - 52 or 1 - 53 depending on the ISO year",
             "in": "query",
             "required": false,
             "type": "integer",

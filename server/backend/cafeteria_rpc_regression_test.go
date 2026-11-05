@@ -79,6 +79,31 @@ func TestListDishesUsesRenamedTablesAndSupportsWeek53(t *testing.T) {
 	}
 }
 
+func TestListDishesISOWeeks(t *testing.T) {
+	for _, tt := range []struct {
+		name            string
+		year, week, day int32
+	}{
+		{"last Monday of 2026", 2026, 53, 0},
+		{"January 1 belongs to ISO year 2026", 2026, 53, 4},
+		{"last week of 2025", 2025, 52, 0},
+		{"first week of 2027", 2027, 1, 0},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock := cafeteriaTestDB(t)
+			server := &CampusServer{db: db}
+			mock.ExpectQuery("SELECT d.name FROM dishes_of_the_weeks weekly").
+				WithArgs(tt.day, tt.week, tt.year, "MENSA_GARCHING").
+				WillReturnRows(sqlmock.NewRows([]string{"name"}).AddRow("Pasta"))
+			reply, err := server.ListDishes(context.Background(), &pb.ListDishesRequest{
+				CanteenId: "mensa-garching", Year: tt.year, Week: tt.week, Day: tt.day,
+			})
+			require.NoError(t, err)
+			require.Equal(t, []string{"Pasta"}, reply.Dish)
+		})
+	}
+}
+
 func TestCanteenRatingTagsUseCurrentTablesAndMapAverage(t *testing.T) {
 	db, mock := cafeteriaTestDB(t)
 	mock.ExpectQuery("FROM canteen_rating_tag_options options JOIN cafeteria_rating_tag_statistics").
