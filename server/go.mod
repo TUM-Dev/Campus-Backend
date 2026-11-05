@@ -7,7 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.13.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/gabriel-vasile/mimetype v1.4.16
-	github.com/getsentry/sentry-go v0.50.0
+	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-gormigrate/gormigrate/v2 v2.1.7
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
