@@ -101,7 +101,7 @@ func migrate20231003000000() *gormigrate.Migration {
 			}
 
 			setTagTable("static_data/dishRatingTags.json", tx, model.DISH)
-			setTagTable("static_data/cafeteriaRatingTags.json", tx, model.CAFETERIA)
+			setTagTable("static_data/cafeteriaRatingTags.json", tx, model.CANTEEN)
 			setNameTagOptions(tx)
 			if err := SafeEnumAdd(tx, &model.Crontab{}, "type", "averageRatingComputation", "dishNameDownload"); err != nil {
 				return err
@@ -204,7 +204,7 @@ func setTagTable(path string, db *gorm.DB, tagType model.ModelType) {
 	for _, v := range tagsDish.MultiLanguageTags {
 		fields := log.Fields{"de": v.TagNameGerman, "en": v.TagNameEnglish}
 		var err error
-		if tagType == model.CAFETERIA {
+		if tagType == model.CANTEEN {
 			element := ToFillCafeteriaRatingTagOption{
 				DE: v.TagNameGerman,
 				EN: v.TagNameEnglish,
