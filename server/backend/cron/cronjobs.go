@@ -32,9 +32,6 @@ const (
 	MovieType        = "movie"
 	FeedbackEmail    = "feedbackEmail"
 	StudentClubType  = "scrapeStudentClubs"
-
-	/* MensaType      = "mensa"
-	AlarmType      = "alarm" */
 )
 
 func New(db *gorm.DB) *CronService {
@@ -105,15 +102,6 @@ func (c *CronService) Run() error {
 				run(func() error { return c.dishNameDownloadCron() })
 			case MovieType:
 				run(func() error { return c.movieCron() })
-				/*
-					TODO: Implement handlers for other cronjobs
-					case MensaType:
-						run(func() error { return c.mensaCron() })
-					case KinoType:
-						run(func() error { return c.kinoCron() })
-					case AlarmType:
-						run(func() error { return c.alarmCron() })
-				*/
 			case CanteenHeadcount:
 				run(func() error { return c.canteenHeadCountCron() })
 			case FeedbackEmail:
