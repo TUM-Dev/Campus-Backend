@@ -12,14 +12,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type CafeteriaName struct {
-	Name     string          `json:"enum_name"`
-	Location CanteenLocation `json:"location"`
-}
-
-type CafeteriaWithID struct {
-	Name      string `json:"name"`
-	Cafeteria int64  `json:"cafeteria"`
+// eatAPICanteen is one entry of the eat-api canteen directory (enums/canteens.json).
+// The eat-api names every canteen twice: EnumName ("MENSA_GARCHING") and CanteenID ("mensa-garching").
+// The canteens table stores the EnumName; use model.CanteenEnumName / model.CanteenEatAPIID to convert.
+type eatAPICanteen struct {
+	EnumName  string          `json:"enum_name"`
+	CanteenID string          `json:"canteen_id"`
+	Location  CanteenLocation `json:"location"`
 }
 
 type CanteenLocation struct {
@@ -43,7 +42,7 @@ type CanteenDish struct {
 }
 
 // dishNameDownloadCron refreshes metadata and dish names independently, so a
-// directory outage does not prevent updates for cafeterias already in the DB.
+// directory outage does not prevent updates for canteens already in the DB.
 func (c *CronService) dishNameDownloadCron() error {
 	namesErr := downloadCanteenNames(c)
 	dishesErr := downloadDailyDishes(c)
@@ -62,21 +61,21 @@ func downloadDailyDishes(c *CronService) error {
 	year, week := time.Now().In(berlin).ISOWeek()
 	var failures []error
 	for _, canteen := range canteens {
-		name := strings.ReplaceAll(strings.ToLower(canteen.Name), "_", "-")
+		name := model.CanteenEatAPIID(canteen.Name)
 		address := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", name, year, week)
 		var menu CanteenDays
 		if err := webfetch.JSON(address, &menu); err != nil {
 			failures = append(failures, fmt.Errorf("menu %s: %w", name, err))
 			continue
 		}
-		if err := storeCanteenMenu(c.db, canteen.Cafeteria, menu, year, week); err != nil {
+		if err := storeCanteenMenu(c.db, canteen.CanteenID, menu, year, week); err != nil {
 			failures = append(failures, fmt.Errorf("storing menu %s: %w", name, err))
 		}
 	}
 	return errors.Join(failures...)
 }
 
-func storeCanteenMenu(db *gorm.DB, cafeteriaID int64, menu CanteenDays, year, week int) error {
+func storeCanteenMenu(db *gorm.DB, canteenID int64, menu CanteenDays, year, week int) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		for _, day := range menu.Days {
 			date, err := time.Parse("2006-01-02", day.Date)
@@ -91,9 +90,9 @@ func storeCanteenMenu(db *gorm.DB, cafeteriaID int64, menu CanteenDays, year, we
 			weekday := int32((int(date.Weekday()) + 6) % 7)
 			for _, entry := range day.Dates {
 				var dish model.Dish
-				err := tx.First(&dish, "name = ? AND cafeteriaID = ?", entry.Name, cafeteriaID).Error
+				err := tx.First(&dish, "name = ? AND cafeteriaID = ?", entry.Name, canteenID).Error
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					dish = model.Dish{Name: entry.Name, Type: entry.DishType, CafeteriaID: cafeteriaID}
+					dish = model.Dish{Name: entry.Name, Type: entry.DishType, CanteenID: canteenID}
 					if err := tx.Create(&dish).Error; err != nil {
 						return err
 					}
@@ -119,14 +118,18 @@ func storeCanteenMenu(db *gorm.DB, cafeteriaID int64, menu CanteenDays, year, we
 }
 
 func downloadCanteenNames(c *CronService) error {
-	var names []CafeteriaName
-	if err := webfetch.JSON("https://tum-dev.github.io/eat-api/enums/canteens.json", &names); err != nil {
-		return fmt.Errorf("fetching cafeteria directory: %w", err)
+	var entries []eatAPICanteen
+	if err := webfetch.JSON("https://tum-dev.github.io/eat-api/enums/canteens.json", &entries); err != nil {
+		return fmt.Errorf("fetching canteen directory: %w", err)
 	}
-	for _, name := range names {
-		canteen := model.Canteen{Name: name.Name, Address: name.Location.Address, Latitude: name.Location.Latitude, Longitude: name.Location.Longitude}
+	for _, entry := range entries {
+		name := entry.EnumName
+		if name == "" {
+			name = model.CanteenEnumName(entry.CanteenID)
+		}
+		canteen := model.Canteen{Name: name, Address: entry.Location.Address, Latitude: entry.Location.Latitude, Longitude: entry.Location.Longitude}
 		var existing model.Canteen
-		if err := c.db.First(&existing, "name = ?", name.Name).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := c.db.First(&existing, "name = ?", name).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := c.db.Create(&canteen).Error; err != nil {
 				return err
 			}

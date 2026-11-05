@@ -45,6 +45,8 @@ func Models() []any {
 		&model.UpdateNote{},
 		&model.StudentClub{},
 		&model.StudentClubCollection{},
+		&model.StudentCouncil{},
+		&model.StudentCouncilCollection{},
 	}
 }
 
@@ -90,6 +92,14 @@ func legacyMigrations() []*gormigrate.Migration {
 	}
 }
 
+func postBaselineMigrations() []*gormigrate.Migration {
+	return []*gormigrate.Migration{
+		migrate20261105000000(),
+		migrate20261105010000(),
+		migrate20261105020000(),
+	}
+}
+
 // TableOptions are the options every table is created with.
 // Without them, the `COLLATE` will not be set correctly.
 const TableOptions = "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
@@ -105,13 +115,15 @@ func Migrate(db *gorm.DB) error {
 	db = db.Set("gorm:table_options", TableOptions)
 	log.Info("starting migration")
 	start := time.Now()
+	migrations := append(legacyMigrations(), sqlMigrations...)
+	migrations = append(migrations, postBaselineMigrations()...)
 	err = gormigrate.New(db, &gormigrate.Options{
 		TableName:                 gormigrate.DefaultOptions.TableName,
 		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
 		IDColumnSize:              gormigrate.DefaultOptions.IDColumnSize,
 		UseTransaction:            true,
 		ValidateUnknownMigrations: true,
-	}, append(legacyMigrations(), sqlMigrations...)).Migrate()
+	}, migrations).Migrate()
 	log.WithField("elapsed", time.Since(start)).Info("migration done")
 	return err
 }
@@ -130,6 +142,11 @@ func MigrateFromBaseline(db *gorm.DB) error {
 	for _, f := range files {
 		if err := f.apply(db); err != nil {
 			return fmt.Errorf("applying %s: %w", f.name, err)
+		}
+	}
+	for _, migration := range postBaselineMigrations() {
+		if err := migration.Migrate(db); err != nil {
+			return fmt.Errorf("applying %s: %w", migration.ID, err)
 		}
 	}
 	return nil

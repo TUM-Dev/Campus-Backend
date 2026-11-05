@@ -2,10 +2,10 @@ package model
 
 // DishRatingStatistic is a view for statistics of dish ratings
 type DishRatingStatistic struct {
-	CafeteriaID int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;"`
-	DishID      int64   `gorm:"column:dishID;foreignKey:dish;type:int;not null;"`
-	Average     float64 `gorm:"column:average;type:double;not null;"`
-	Min         int32   `gorm:"column:min;type:int;not null;"`
-	Max         int32   `gorm:"column:max;type:int;not null;"`
-	Std         float64 `gorm:"column:std;type:double;not null;"`
+	CanteenID int64   `gorm:"column:cafeteriaID;foreignKey:cafeteria;type:int;not null;"`
+	DishID    int64   `gorm:"column:dishID;foreignKey:dish;type:int;not null;"`
+	Average   float64 `gorm:"column:average;type:double;not null;"`
+	Min       int32   `gorm:"column:min;type:int;not null;"`
+	Max       int32   `gorm:"column:max;type:int;not null;"`
+	Std       float64 `gorm:"column:std;type:double;not null;"`
 }

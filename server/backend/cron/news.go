@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/guregu/null"
 	"github.com/microcosm-cc/bluemonday"
@@ -41,22 +42,14 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 	}
 	// get news source for cronjob
 	var source model.NewsSource
-	err := c.db.Find(&source, cronjob.ID.Int64).Error
+	err := c.db.First(&source, cronjob.ID.Int64).Error
 	if err != nil {
 		log.WithError(err).Error("getting news source from database")
 		return err
 	}
 	// skip sources with null url
 	if source.URL.Valid {
-		// clean up news older than one year
-		err := c.cleanOldNewsForSource(source.Source)
-		if err != nil {
-			return err
-		}
-		err = c.parseNewsFeed(source)
-		if err != nil {
-			return err
-		}
+		return c.parseNewsFeed(source)
 	}
 	return nil
 }
@@ -64,7 +57,14 @@ func (c *CronService) newsCron(cronjob *model.Crontab) error {
 // parseNewsFeed processes a single news feed, extracts titles, content etc and saves it to the database
 func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	log.WithField("url", source.URL.String).Trace("processing newsfeed")
-	feed, err := c.gf.ParseURL(source.URL.String)
+	// gofeed initializes translators lazily and is not safe to share between
+	// concurrent jobs. Each source gets a parser; connections share one client.
+	parser := gofeed.NewParser()
+	parser.Client = c.client
+	if parser.Client == nil {
+		parser.Client = webfetch.Client
+	}
+	feed, err := parser.ParseURL(source.URL.String)
 	if err != nil {
 		log.WithError(err).Error("parsing rss")
 		return err
@@ -78,7 +78,11 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		return err
 	}
 	var newNews []model.News
+	activeLinks := make([]string, 0, len(feed.Items))
 	for _, item := range feed.Items {
+		if item.Link != "" {
+			activeLinks = append(activeLinks, item.Link)
+		}
 		// execute special actions for some sources:
 		if source.Hook.Valid {
 			switch source.Hook.String {
@@ -118,7 +122,7 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		}
 
 		newsItem := model.News{
-			Date:         *item.PublishedParsed,
+			Date:         newsDate(item),
 			Created:      time.Now(),
 			Title:        item.Title,
 			Description:  bluemonday.StrictPolicy().Sanitize(item.Description),
@@ -132,15 +136,17 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 		newNews = append(newNews, newsItem)
 	}
 	if ammountOfNewNews := len(newNews); ammountOfNewNews != 0 {
-		err = c.db.Save(&newNews).Error
+		err = c.db.Omit("NewsSource").Create(&newNews).Error
 		if err != nil {
 			log.WithField("ammountOfNewNews", ammountOfNewNews).Error("Inserting new news failed")
 		} else {
 			log.WithField("ammountOfNewNews", ammountOfNewNews).Trace("Inserting new news")
 		}
-		return err
+		if err != nil {
+			return err
+		}
 	}
-	return nil
+	return c.cleanOldNewsForSource(source.Source, activeLinks)
 }
 
 // saveImage saves an image to the database, so it can be downloaded by another cronjob and returns its id
@@ -182,10 +188,14 @@ func skipNews(existingLinks []string, link string) bool {
 	return false
 }
 
-func (c *CronService) cleanOldNewsForSource(source int64) error {
+func (c *CronService) cleanOldNewsForSource(source int64, activeLinks []string) error {
 	log.WithField("source", source).Trace("Truncating old entries")
 	oneYearAgo := time.Now().Add(time.Hour * 24 * 365 * -1)
-	if res := c.db.Delete(&model.News{}, "`src` = ? AND `created` < ?", source, oneYearAgo); res.Error == nil {
+	query := c.db.Where("`src` = ? AND `created` < ?", source, oneYearAgo)
+	if len(activeLinks) > 0 {
+		query = query.Where("`link` NOT IN ?", activeLinks)
+	}
+	if res := query.Delete(&model.News{}); res.Error == nil {
 		log.WithField("RowsAffected", res.RowsAffected).Info("cleaned up old news")
 	} else {
 		log.WithError(res.Error).Error("failed to clean up old news")
@@ -217,4 +227,15 @@ func (c *CronService) impulsivHook(item *gofeed.Item) {
 		// convert titles such as "Lösungen zur Ausgabe 137" to "Impulsiv - Lösungen zur Ausgabe 137"
 		item.Title = fmt.Sprintf("Impulsiv - %s", item.Title)
 	}
+}
+
+// Atom feeds may only specify updated; some RSS sources omit dates entirely.
+func newsDate(item *gofeed.Item) time.Time {
+	if item.PublishedParsed != nil && !item.PublishedParsed.IsZero() {
+		return *item.PublishedParsed
+	}
+	if item.UpdatedParsed != nil && !item.UpdatedParsed.IsZero() {
+		return *item.UpdatedParsed
+	}
+	return time.Now()
 }
