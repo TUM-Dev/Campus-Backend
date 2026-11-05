@@ -9,6 +9,7 @@ import (
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // canteens checked for dishes and ratings, in the eat-api id scheme.
@@ -245,6 +246,11 @@ func checkDishRatings(ctx context.Context, e *env, t *T) {
 				return
 			})
 			checked++
+			if status.Code(err) == codes.NotFound {
+				// Unrated dishes are answered with NotFound ("This dish has not yet been rated.").
+				t.Infof("GetDishRatings(%s, %q): not rated yet", c, dish)
+				continue
+			}
 			if err != nil {
 				t.Failf("GetDishRatings(%s, %q): %v", c, dish, err)
 				continue
