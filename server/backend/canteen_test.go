@@ -208,6 +208,7 @@ func (s *CanteenSuite) Test_ListDishesInvalidInput() {
 		{"year too low", 2021, 1, 0},
 		{"week too low", 2026, 0, 0},
 		{"week too high", 2026, 54, 0},
+		{"week 53 in a 52-week ISO year", 2025, 53, 0},
 		{"day too low", 2026, 1, -1},
 		{"day too high", 2026, 1, 5},
 	}

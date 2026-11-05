@@ -673,8 +673,9 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
-	if req.Week < 1 || req.Week > 53 {
-		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Weeks must be in the range 1 - 53")
+	_, lastWeek := time.Date(int(req.Year), time.December, 28, 0, 0, 0, 0, time.UTC).ISOWeek()
+	if req.Week < 1 || req.Week > int32(lastWeek) {
+		return &pb.ListDishesReply{}, status.Errorf(codes.InvalidArgument, "Weeks must be in the range 1 - %d for ISO year %d", lastWeek, req.Year)
 	}
 	if req.Day < 0 || req.Day > 4 {
 		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Days must be in the range 0 (Monday) - 4 (Friday)")
