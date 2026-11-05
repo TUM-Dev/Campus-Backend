@@ -2,13 +2,13 @@ package cron
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
-	"github.com/guregu/null"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
@@ -17,56 +17,54 @@ import (
 	"gorm.io/gorm"
 )
 
-// fileDownloadCron downloads all files that are not marked as finished in the database
+// Bound each pass so a backlog cannot monopolize the cron scheduler. Prioritize
+// files with fewer attempts so broken upstream URLs do not starve new images.
+const fileDownloadBatchSize = 20
+
 func (c *CronService) fileDownloadCron() error {
-	return c.db.Transaction(func(tx *gorm.DB) error {
-		var files []model.File
-		err := tx.Find(&files, "downloaded = 0 AND url IS NOT NULL").Error
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			log.WithError(err).Error("Could not get files from database")
+	var files []model.File
+	if err := c.db.Where("downloaded = 0 AND url IS NOT NULL").
+		Order("downloads ASC").Order("file ASC").Limit(fileDownloadBatchSize).
+		Find(&files).Error; err != nil {
+		return err
+	}
+
+	var downloadErrors []error
+	for _, file := range files {
+		if err := c.downloadPendingFile(file); err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"file": file.File, "url": file.URL.String,
+				"dstPath": path.Join(StorageDir, file.Path, file.Name),
+			}).Warn("Could not download pending file")
+			downloadErrors = append(downloadErrors, fmt.Errorf("file %d: %w", file.File, err))
+		}
+	}
+	return errors.Join(downloadErrors...)
+}
+
+func (c *CronService) downloadPendingFile(file model.File) error {
+	// Persist progress independently of other files; never hold a database
+	// transaction open while waiting for upstream HTTP requests.
+	if err := c.db.Model(&file).UpdateColumn("downloads", gorm.Expr("downloads + 1")).Error; err != nil {
+		return err
+	}
+	dstPath := path.Join(StorageDir, file.Path, file.Name)
+	if err := ensureFileDoesNotExist(dstPath); err != nil {
+		return err
+	}
+	if err := downloadFile(file.URL.String, dstPath); err != nil {
+		return err
+	}
+	mime, err := mimetype.DetectFile(dstPath)
+	if err != nil {
+		return err
+	}
+	if !mime.Is("image/svg+xml") && strings.HasPrefix(mime.String(), "image/") {
+		if err := resizeImage(dstPath); err != nil {
 			return err
 		}
-		for _, file := range files {
-			// in our case resolves to /Storage/news/newspread/1234abc.jpg
-			dstPath := path.Join(StorageDir, file.Path, file.Name)
-			fields := log.Fields{"url": file.URL.String, "dstPath": dstPath}
-			log.WithFields(fields).Info("downloading file")
-
-			file.Downloads = file.Downloads + 1
-			if err = tx.Save(&file).Error; err != nil {
-				log.WithError(err).WithFields(fields).Error("Could not set update the download-count")
-				continue
-			}
-
-			if err := ensureFileDoesNotExist(dstPath); err != nil {
-				log.WithError(err).WithFields(fields).Warn("Could not ensure file does not exist")
-				continue
-			}
-			if err := downloadFile(file.URL.String, dstPath); err != nil {
-				log.WithError(err).WithFields(fields).Warn("Could not download file")
-				continue
-			}
-			var mime *mimetype.MIME
-			if mime, err = mimetype.DetectFile(dstPath); err != nil {
-				log.WithError(err).WithFields(fields).Warn("cannot detect mime type")
-				continue
-			}
-			if !mime.Is("image/svg+xml") &&
-				strings.HasPrefix(mime.String(), "image/") {
-				if err := resizeImage(dstPath); err != nil {
-					log.WithError(err).WithFields(fields).Warn("Could not resize image")
-					continue
-				}
-			}
-			// everything went well => we can mark the file as downloaded
-			file.Downloaded = null.BoolFrom(true)
-			if err = tx.Save(&file).Error; err != nil {
-				log.WithError(err).WithFields(fields).Error("Could not set image to downloaded.")
-				continue
-			}
-		}
-		return nil
-	})
+	}
+	return c.db.Model(&file).UpdateColumn("downloaded", true).Error
 }
 
 // ensureFileDoesNotExist makes sure that the file does not exist, but the directory in which it should be does
