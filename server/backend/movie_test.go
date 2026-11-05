@@ -131,3 +131,17 @@ func (s *MovieSuite) getCampusTestServer() *CampusServer {
 		moviesCache: expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
 	}
 }
+
+func (s *MovieSuite) TestDateFiltersDoNotShareCacheEntries() {
+	server := s.getCampusTestServer()
+	first := time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC)
+	second := first.AddDate(0, 0, 1)
+	for _, date := range []time.Time{first, second} {
+
+		s.mock.ExpectQuery("SELECT .* FROM `movies`").WithArgs(date, int32(0)).WillReturnRows(sqlmock.NewRows([]string{"kino"}))
+		_, err := server.getMovies(context.Background(), 0, date)
+
+		require.NoError(s.T(), err)
+	}
+	require.NoError(s.T(), s.mock.ExpectationsWereMet())
+}
