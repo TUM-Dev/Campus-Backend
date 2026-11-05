@@ -96,5 +96,7 @@ func TestCanteenRatingTagsUseCurrentTablesAndMapAverage(t *testing.T) {
 func TestCanteenNameAcceptsEatAPIIdentifiers(t *testing.T) {
 	db, mock := cafeteriaTestDB(t)
 	mock.ExpectQuery("SELECT `cafeteria` FROM `canteens`").WithArgs("MENSA_GARCHING").WillReturnRows(sqlmock.NewRows([]string{"cafeteria"}).AddRow(7))
-	require.Equal(t, int32(7), getIDForCanteenName("mensa-garching", db))
+	id, err := getIDForCanteenName("mensa-garching", db)
+	require.NoError(t, err)
+	require.Equal(t, int32(7), id)
 }
