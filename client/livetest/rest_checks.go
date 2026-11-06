@@ -151,7 +151,7 @@ func checkBurst(ctx context.Context, e *env, t *T) {
 			return err
 		},
 		"ListStudentClub": func(ctx context.Context) error {
-			_, err := e.c.ListStudentClub(ctx, &pb.ListStudentClubRequest{})
+			_, err := e.c.ListStudentGroup(ctx, &pb.ListStudentGroupRequest{})
 			return err
 		},
 		"GetCanteenHeadCount": func(ctx context.Context) error {

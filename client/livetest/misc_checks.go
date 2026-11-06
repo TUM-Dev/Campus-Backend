@@ -112,8 +112,8 @@ func checkMoviesPagination(ctx context.Context, e *env, t *T) {
 
 func (e *env) studentClubs(lang pb.Language) ([]*pb.StudentClubCollection, error) {
 	return memo(e, "clubs-"+lang.String(), func(ctx context.Context) ([]*pb.StudentClubCollection, error) {
-		r, err := e.c.ListStudentClub(ctx, &pb.ListStudentClubRequest{Language: &lang})
-		return r.GetCollections(), err
+		r, err := e.c.ListStudentGroup(ctx, &pb.ListStudentGroupRequest{Language: &lang})
+		return r.GetStudentClubs(), err
 	})
 }
 
