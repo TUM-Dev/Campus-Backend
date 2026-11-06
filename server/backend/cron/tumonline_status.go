@@ -165,7 +165,7 @@ func (c *CronService) tumonlineStatusCron() error {
 	}
 	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/firebase.remoteconfig")
 	if err != nil {
-		return fmt.Errorf("Firebase credentials: %w", err)
+		return fmt.Errorf("remote config credentials: %w", err)
 	}
 	client.Timeout = 30 * time.Second
 	endpoint := "https://firebaseremoteconfig.googleapis.com/v1/projects/" + url.PathEscape(project) + "/remoteConfig"

@@ -119,7 +119,7 @@ func publishTUMOnlineStatus(ctx context.Context, client *http.Client, endpoint s
 		}
 		etag := resp.Header.Get("ETag")
 		if etag == "" || etag == "*" {
-			return fmt.Errorf("Firebase returned no usable ETag")
+			return fmt.Errorf("remote config returned no usable ETag")
 		}
 		delete(template, "version") // Read-only server metadata.
 		body, err := json.Marshal(template)
@@ -141,16 +141,16 @@ func publishTUMOnlineStatus(ctx context.Context, client *http.Client, endpoint s
 			continue // Re-read and merge against the latest template.
 		}
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("Firebase publish returned HTTP %d", resp.StatusCode)
+			return fmt.Errorf("remote config publish returned HTTP %d", resp.StatusCode)
 		}
 		return nil
 	}
-	return fmt.Errorf("Firebase template changed during all three publish attempts")
+	return fmt.Errorf("remote config template changed during all three publish attempts")
 }
 
 func readConfigTemplate(resp *http.Response) (configObject, error) {
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Firebase fetch returned HTTP %d", resp.StatusCode)
+		return nil, fmt.Errorf("remote config fetch returned HTTP %d", resp.StatusCode)
 	}
 	var reader io.Reader = resp.Body
 	if resp.Header.Get("Content-Encoding") == "gzip" {
@@ -166,7 +166,7 @@ func readConfigTemplate(resp *http.Response) (configObject, error) {
 		return nil, err
 	}
 	if len(body) > 8<<20 {
-		return nil, fmt.Errorf("Firebase template exceeds size limit")
+		return nil, fmt.Errorf("remote config template exceeds size limit")
 	}
 	var template configObject
 	if err := json.Unmarshal(body, &template); err != nil {
