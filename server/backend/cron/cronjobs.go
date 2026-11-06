@@ -25,13 +25,14 @@ var StorageDir = "/Storage/" // target location of files
 
 // names for cron jobs as specified in database
 const (
-	NewsType         = "news"
-	FileDownloadType = "fileDownload"
-	DishNameDownload = "dishNameDownload"
-	CanteenHeadcount = "canteenHeadCount"
-	MovieType        = "movie"
-	FeedbackEmail    = "feedbackEmail"
-	StudentClubType  = "scrapeStudentClubs"
+	NewsType            = "news"
+	FileDownloadType    = "fileDownload"
+	DishNameDownload    = "dishNameDownload"
+	CanteenHeadcount    = "canteenHeadCount"
+	MovieType           = "movie"
+	FeedbackEmail       = "feedbackEmail"
+	StudentClubType     = "scrapeStudentClubs"
+	TUMOnlineStatusType = "tumonlineStatus"
 )
 
 func New(db *gorm.DB) *CronService {
@@ -48,7 +49,7 @@ func (c *CronService) Run() error {
 		var res []model.Crontab
 
 		if err := c.db.Model(&model.Crontab{}).
-			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?)",
+			Find(&res, "`interval` > 0 AND (lastRun+`interval`) < ? AND type IN (?, ?, ?, ?, ?, ?, ?, ?)",
 				time.Now().Unix(),
 				NewsType,
 				FileDownloadType,
@@ -57,6 +58,7 @@ func (c *CronService) Run() error {
 				MovieType,
 				FeedbackEmail,
 				StudentClubType,
+				TUMOnlineStatusType,
 			).Error; err != nil {
 			log.WithError(err).Error("Could not load pending cron jobs")
 			time.Sleep(30 * time.Second)
@@ -86,6 +88,8 @@ func (c *CronService) Run() error {
 			}
 			// Run each job in a separate goroutine.
 			switch cronjob.Type.String {
+			case TUMOnlineStatusType:
+				run(func() error { return c.tumonlineStatusCron() })
 			case StudentClubType:
 				// sequential, since both languages share the same images and would otherwise race on creating the file rows
 				run(func() error {
