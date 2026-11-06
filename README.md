@@ -98,6 +98,9 @@ DB_DSN='root:secret_root_password@tcp(localhost:3306)/campus_db?charset=utf8mb4&
 
 ### TUMonline status → Firebase Remote Config
 
+For production setup, including Google Cloud permissions, credential mounts, and
+what to configure in GitHub, see the [admin guide](docs/tumonline_remote_config_admin.md).
+
 The optional `tumonlineStatus` cron job checks [TUM's public status page](https://status.it.tum.de/)
 every five minutes. It uses the current notifications section of the same service that
 publishes the maintenance calendar. Future and ended notices are ignored. A current
