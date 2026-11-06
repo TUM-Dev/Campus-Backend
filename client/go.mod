@@ -3,7 +3,7 @@ module github.com/TUM-Dev/Campus-Backend/client
 go 1.27.0
 
 require (
-	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105004940-165665d9bf67
+	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105170125-67ece3144523
 	github.com/sirupsen/logrus v1.10.2
 	google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
 	google.golang.org/grpc v1.85.0

@@ -1,5 +1,5 @@
-github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105004940-165665d9bf67 h1:mEBYc/TAkReQV/8JND30ThIy9nTFisZXw3ByWfDVzDQ=
-github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105004940-165665d9bf67/go.mod h1:xzPNdYDcc6d/Wq+2rkoPjz0XAvsrmlw+iLSshG/Jjdg=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105170125-67ece3144523 h1:Cxvusv3Do1cEl/Cbvkc/WmHVZps4UlZB3AeY3FDmwrg=
+github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105170125-67ece3144523/go.mod h1:xzPNdYDcc6d/Wq+2rkoPjz0XAvsrmlw+iLSshG/Jjdg=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
