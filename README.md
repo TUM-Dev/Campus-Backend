@@ -96,6 +96,66 @@ cd server
 DB_DSN='root:secret_root_password@tcp(localhost:3306)/campus_db?charset=utf8mb4&parseTime=True&loc=Local' go run .
 ```
 
+### TUMonline status → Firebase Remote Config
+
+The optional `tumonlineStatus` cron job checks [TUM's public status page](https://status.it.tum.de/)
+every five minutes. It uses the current notifications section of the same service that
+publishes the maintenance calendar. Future and ended notices are ignored. A current
+notice whose affected service names TUMonline or campus.tum.de enables one of these
+case-sensitive parameters:
+
+| Parameter | Enabled for |
+|---|---|
+| `isTUMOnlineMaintenanceMode` | Titles containing “Wartung…” or “maintenance” |
+| `isTUMOnlineDegraded` | Other current TUMonline notices, including outages |
+| `tumOnlineStatusMessage_de` | German status summary (String) |
+| `tumOnlineStatusMessage_en` | English status summary (String) |
+
+Maintenance takes priority; the job sets degraded to false while maintenance is active.
+Both flags are false when no matching current notice exists. This reflects published
+notices, not a live availability probe. The job follows TUM's current section rather
+than assuming recovery when an estimated end time passes. Notice classification uses
+title wording because the page does not expose a structured severity field.
+
+Custom messages are populated only when the source provides a valid future estimated
+end date and time, displayed in Europe/Berlin (CET/CEST). They use localized templates
+for the active status, not translations of the full notice text. For multiple notices
+of that status, the latest estimated end is used only if all have a readable, future
+estimate. Otherwise, both messages are set to empty strings so the app shows its
+translated default for the active Boolean flag. This also clears any previous custom
+message when its estimate expires, without clearing the warning. When no matching
+notice is active, both flags are false and both messages are empty. All four fields
+are published together, keeping the status and messages consistent.
+
+To enable publishing:
+
+1. Enable the Firebase Remote Config API in the Firebase project. Give the runtime
+   identity [Firebase Remote Config Admin (`roles/cloudconfig.admin`)](https://firebase.google.com/docs/projects/iam/roles-predefined-product#remote-config)
+   on that project (or equivalent permissions).
+2. Supply Google Application Default Credentials, preferably through the deployment's
+   workload identity. For a mounted service-account file, set
+   `GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json`. Keep credentials out of Git.
+3. Set `FIREBASE_PROJECT_ID` and `TUMONLINE_STATUS_SYNC_ENABLED=true` on the backend.
+   Compose passes both variables through (sync defaults to disabled). If using a
+   credential file, mount it read-only and set `GOOGLE_APPLICATION_CREDENTIALS` to
+   its path inside the container using a local Compose override.
+4. Run the normal startup migrations. SQL migration `20261106000000_tumonline_status.sql`
+   adds the enum value and schedules the job with `interval=300`.
+
+The job preserves unrelated parameters, groups, and conditions, and updates only when
+the managed values change. Existing managed keys can be inside parameter groups.
+Conditional values on any managed key cause an error: remove them before enabling
+sync. Fetch, parse, authentication, and publish failures leave the previous Firebase
+values intact and are logged by the cron runner. The parser validates the expected
+page structure and rejects unfamiliar markup rather than publishing an all-clear.
+
+The four keys are owned by the sync while enabled. For a manual override, set
+`TUMONLINE_STATUS_SYNC_ENABLED=false` and restart the backend before editing them in
+Firebase. Re-enabling sync restores the source's values on the next scheduled run.
+The app should fetch and activate config on startup and listen for real-time updates;
+the default Remote Config minimum fetch interval is 12 hours. Debug builds of the app
+disable Remote Config messages, so verify banners in a build where it is enabled.
+
 ## 🛠️ Development
 
 All Go commands run from `server/`.
