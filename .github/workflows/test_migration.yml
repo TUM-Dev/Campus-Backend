@@ -42,6 +42,7 @@ jobs:
         run: mysql -h 127.0.0.1 -u root --password=super_secret_passw0rd -e "CREATE DATABASE dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
       - name: run migrations like in production
+        shell: bash
         run: go run . 2>&1 | grep -v "level=debug"
         env:
           CI_EXIT_AFTER_MIGRATION: "true"

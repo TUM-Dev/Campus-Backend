@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/migration"
+	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 var ratingStatisticViews = []string{
@@ -27,6 +29,39 @@ func TestMigrate(t *testing.T) {
 	require.NoError(t, db.Exec("SELECT VERSION()").Error)
 	// running it again must be a no-op
 	require.NoError(t, migration.Migrate(db))
+}
+
+func TestStudentCouncilMigration(t *testing.T) {
+	t.Parallel()
+	for name, migrate := range map[string]func(*gorm.DB) error{
+		"baseline": migration.MigrateFromBaseline, "production": migration.Migrate,
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			db := newTestDatabase(t, migrate)
+			require.True(t, db.Migrator().HasTable(&model.StudentCouncilCollection{}))
+			require.True(t, db.Migrator().HasTable(&model.StudentCouncil{}))
+
+			// Go migrations must not undo enum values added by later SQL migrations.
+			var column struct{ Type string }
+			require.NoError(t, db.Raw("SHOW COLUMNS FROM crontab LIKE 'type'").Scan(&column).Error)
+			require.Contains(t, column.Type, "'tumonlineStatus'")
+
+			if name == "production" {
+				require.NoError(t, db.Exec("INSERT INTO student_council_collections (name) VALUES ('preserved')").Error)
+				// Reproduce a deployment where SQL succeeded but the obsolete Go migration failed.
+				require.NoError(t, db.Exec("DELETE FROM migrations WHERE id = '20261105020000'").Error)
+				require.NoError(t, migration.Migrate(db))
+				// MySQL DDL can survive an interrupted migration without its ID being recorded.
+				require.NoError(t, db.Exec("DELETE FROM migrations WHERE id >= '20261105185936'").Error)
+				require.NoError(t, db.Exec("DELETE FROM crontab WHERE type = 'tumonlineStatus'").Error)
+				require.NoError(t, migration.Migrate(db))
+				var count int64
+				require.NoError(t, db.Table("student_council_collections").Where("name = ?", "preserved").Count(&count).Error)
+				require.EqualValues(t, 1, count)
+			}
+		})
+	}
 }
 
 // TestRatingStatisticViewsQueryable makes sure that the rating statistic views reference existing tables.
