@@ -89,7 +89,7 @@ func testOIDC(t *testing.T) (Config, *http.Client) {
 	idp := httptest.NewTLSServer(mux)
 	t.Cleanup(idp.Close)
 	return Config{
-		Enabled: true, BaseURL: "https://admin.example", ClientID: "test-client", ClientSecret: "test-secret",
+		BaseURL: "https://admin.example", ClientID: "test-client", ClientSecret: "test-secret",
 		Issuer: "https://issuer.example/shibboleth", AuthorizationURL: idp.URL + "/authorize",
 		TokenURL: idp.URL + "/token", JWKSURL: idp.URL + "/keys", AllowedSubjects: []string{"approved-subject"},
 	}, idp.Client()
@@ -415,7 +415,7 @@ func TestAdminDisabledAndConfiguration(t *testing.T) {
 	for _, path := range []string{"/admin", "/admin/", "/admin/login", "/admin/feeds", "/admin/style.css"} {
 		require.Equal(t, http.StatusNotFound, adminRequest(handler, http.MethodGet, path, nil, nil).Code)
 	}
-	_, err = New(nil, nil, "", Config{Enabled: true})
+	_, err = New(nil, nil, "", Config{ClientID: "test-client"})
 	require.Error(t, err)
 	cfg, _ := testOIDC(t)
 	require.NoError(t, cfg.validate())
@@ -423,4 +423,49 @@ func TestAdminDisabledAndConfiguration(t *testing.T) {
 	require.Error(t, cfg.validate())
 	cfg.BaseURL = "https://admin.example/"
 	require.Error(t, cfg.validate())
+}
+
+func TestAdminConfigurationFromEnv(t *testing.T) {
+	settings := map[string]string{
+		"ADMIN_BASE_URL":           "https://admin.example",
+		"ADMIN_OIDC_CLIENT_ID":     "test-client",
+		"ADMIN_OIDC_CLIENT_SECRET": "test-secret",
+		"ADMIN_ALLOWED_SUBJECTS":   "approved-subject",
+	}
+	for key := range settings {
+		t.Setenv(key, "")
+	}
+	for _, key := range []string{"ADMIN_OIDC_ISSUER", "ADMIN_OIDC_AUTH_URL", "ADMIN_OIDC_TOKEN_URL", "ADMIN_OIDC_JWKS_URL"} {
+		t.Setenv(key, "")
+	}
+	t.Run("unconfigured", func(t *testing.T) {
+		cfg, err := ConfigFromEnv()
+		require.NoError(t, err)
+		handler, err := New(nil, nil, "", cfg)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNotFound, adminRequest(handler, http.MethodGet, "/admin/login", nil, nil).Code)
+	})
+	for _, missing := range []string{"", "ADMIN_BASE_URL", "ADMIN_OIDC_CLIENT_ID", "ADMIN_OIDC_CLIENT_SECRET", "ADMIN_ALLOWED_SUBJECTS"} {
+		name := "configured"
+		if missing != "" {
+			name = "missing_" + missing
+		}
+		t.Run(name, func(t *testing.T) {
+			for key, value := range settings {
+				if key == missing {
+					value = ""
+				}
+				t.Setenv(key, value)
+			}
+			cfg, err := ConfigFromEnv()
+			if missing != "" {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			handler, err := New(nil, nil, "", cfg)
+			require.NoError(t, err)
+			require.Equal(t, http.StatusSeeOther, adminRequest(handler, http.MethodGet, "/admin/login", nil, nil).Code)
+		})
+	}
 }

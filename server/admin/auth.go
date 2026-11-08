@@ -52,12 +52,12 @@ type server struct {
 	logins    map[string]loginFlow
 }
 
-// New returns the complete admin handler. Disabled configurations serve only 404s.
+// New returns the admin handler, or 404s when all required settings are unset.
 func New(db *gorm.DB, jobs *cron.CronService, version string, cfg Config) (http.Handler, error) {
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
-	if !cfg.Enabled {
+	if !cfg.configured() {
 		return http.NotFoundHandler(), nil
 	}
 	return newHandler(db, jobs, version, cfg, &http.Client{Timeout: 10 * time.Second})

@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 )
 
 type Config struct {
-	Enabled          bool
 	BaseURL          string
 	ClientID         string
 	ClientSecret     string
@@ -30,13 +28,6 @@ func ConfigFromEnv() (Config, error) {
 		TokenURL:         envOr("ADMIN_OIDC_TOKEN_URL", "https://login.tum.de/idp/profile/oidc/token"),
 		JWKSURL:          envOr("ADMIN_OIDC_JWKS_URL", "https://login.tum.de/idp/profile/oidc/keyset"),
 	}
-	if value := os.Getenv("ADMIN_ENABLED"); value != "" {
-		enabled, err := strconv.ParseBool(value)
-		if err != nil {
-			return Config{}, fmt.Errorf("invalid ADMIN_ENABLED: %w", err)
-		}
-		cfg.Enabled = enabled
-	}
 	for subject := range strings.SplitSeq(os.Getenv("ADMIN_ALLOWED_SUBJECTS"), ",") {
 		if subject = strings.TrimSpace(subject); subject != "" {
 			cfg.AllowedSubjects = append(cfg.AllowedSubjects, subject)
@@ -52,8 +43,12 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
+func (c Config) configured() bool {
+	return c.BaseURL != "" || c.ClientID != "" || c.ClientSecret != "" || len(c.AllowedSubjects) > 0
+}
+
 func (c Config) validate() error {
-	if !c.Enabled {
+	if !c.configured() {
 		return nil
 	}
 	if c.ClientID == "" || c.ClientSecret == "" || len(c.AllowedSubjects) == 0 {
