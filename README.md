@@ -92,9 +92,13 @@ Confirm the issuer and endpoints with TUM support: discovery metadata can be ina
 
 HTTPS is required. Allowlisted subjects are exact, case-sensitive `sub` claims, not email addresses.
 Sessions expire within one hour; changes require CSRF tokens and are audited transactionally.
-Logout ends only the admin session. Multiple replicas need sticky routing for login/callback requests.
+Logout ends only the admin session. Login state is encrypted in a short-lived browser cookie; replicas with
+identical admin configuration do not need sticky routing. Rotating the OIDC client secret invalidates pending logins.
+Feed saves advance a shared database cache version in the same transaction, so every replica refreshes public
+news-source and article metadata on its next request. News API requests perform a version lookup even on cache hits.
 
 News feeds require HTTPS and reject non-public download destinations. Pausing a feed does not stop an active import.
+Feed icons can be reused from existing sources or from downloaded files in `news/sources/`.
 Cron outcomes cover only the current process lifetime; `lastRun` records a start, not success.
 
 ## Configuration

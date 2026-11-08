@@ -40,6 +40,7 @@ func Models() []any {
 		&model.NewExamResultsSubscriber{},
 		&model.News{},
 		&model.NewsAlert{},
+		&model.NewsCacheVersion{},
 		&model.NewsSource{},
 		&model.Notification{},
 		&model.NotificationConfirmation{},

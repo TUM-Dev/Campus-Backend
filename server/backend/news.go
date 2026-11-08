@@ -39,15 +39,29 @@ func (s *CampusServer) ListNewsSources(ctx context.Context, _ *pb.ListNewsSource
 const CacheKeyAllNewsSources = "all_news_sources"
 
 func (s *CampusServer) getNewsSources(ctx context.Context) ([]model.NewsSource, error) {
-	if newsSources, ok := s.newsSourceCache.Get(CacheKeyAllNewsSources); ok {
+	version, err := s.newsCacheVersion(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cacheKey := fmt.Sprintf("%d_%s", version, CacheKeyAllNewsSources)
+	if newsSources, ok := s.newsSourceCache.Get(cacheKey); ok {
 		return newsSources, nil
 	}
 	var sources []model.NewsSource
 	if err := s.db.WithContext(ctx).Joins("File").Find(&sources).Error; err != nil {
 		return nil, err
 	}
-	s.newsSourceCache.Add(CacheKeyAllNewsSources, sources)
+	s.newsSourceCache.Add(cacheKey, sources)
 	return sources, nil
+}
+
+func (s *CampusServer) newsCacheVersion(ctx context.Context) (uint64, error) {
+	var version model.NewsCacheVersion
+	if err := s.db.WithContext(ctx).Select("version").Where("id = ?", 1).Take(&version).Error; err != nil {
+		log.WithError(err).Error("could not load news cache version")
+		return 0, err
+	}
+	return version.Version, nil
 }
 
 func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*pb.ListNewsReply, error) {
@@ -83,7 +97,11 @@ func (s *CampusServer) ListNews(ctx context.Context, req *pb.ListNewsRequest) (*
 }
 
 func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID int32, oldestDateAt time.Time) ([]model.News, error) {
-	cacheKey := fmt.Sprintf("%d_%d_%d", sourceID, oldestDateAt.UnixNano(), lastNewsID)
+	version, err := s.newsCacheVersion(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cacheKey := fmt.Sprintf("%d_%d_%d_%d", version, sourceID, oldestDateAt.UnixNano(), lastNewsID)
 
 	if news, ok := s.newsCache.Get(cacheKey); ok {
 		return news, nil

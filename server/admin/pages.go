@@ -171,7 +171,11 @@ func (s *server) feeds(w http.ResponseWriter, r *http.Request, session model.Adm
 		sources = sources[:pageSize]
 	}
 	var icons []model.NewsSource
-	if err := db.Select("source", "title", "icon").Order("source").Limit(501).Find(&icons).Error; err != nil {
+	if err := db.Table("files").
+		Select("files.file AS icon, COALESCE(MIN(news_sources.title), files.name) AS title").
+		Joins("LEFT JOIN news_sources ON news_sources.icon = files.file").
+		Where("news_sources.source IS NOT NULL OR (files.path = ? AND files.downloaded = ?)", "news/sources/", true).
+		Group("files.file, files.name").Order("files.file").Limit(501).Scan(&icons).Error; err != nil {
 		s.internalError(w, err)
 		return
 	}
@@ -179,14 +183,7 @@ func (s *server) feeds(w http.ResponseWriter, r *http.Request, session model.Adm
 		http.Error(w, "Too many icons for the feed editor.", http.StatusConflict)
 		return
 	}
-	data := feedsPage{page: basePage("News feeds", "feeds", session), pagination: paging}
-	seenIcons := make(map[int64]bool)
-	for _, icon := range icons {
-		if !seenIcons[icon.FileID] {
-			data.Icons = append(data.Icons, icon)
-			seenIcons[icon.FileID] = true
-		}
-	}
+	data := feedsPage{page: basePage("News feeds", "feeds", session), pagination: paging, Icons: icons}
 	ids := make([]int64, 0, len(sources))
 	for _, source := range sources {
 		ids = append(ids, source.Source)
@@ -349,9 +346,19 @@ func (s *server) saveFeed(w http.ResponseWriter, r *http.Request, session model.
 		if err != nil {
 			return err
 		}
-		return tx.Create(&model.AdminAudit{
+		if err := tx.Create(&model.AdminAudit{
 			Subject: session.Subject, Action: action, SourceID: source.Source, Details: string(details),
-		}).Error
+		}).Error; err != nil {
+			return err
+		}
+		version := tx.Model(&model.NewsCacheVersion{}).Where("id = ?", 1).UpdateColumn("version", gorm.Expr("version + 1"))
+		if version.Error != nil {
+			return version.Error
+		}
+		if version.RowsAffected != 1 {
+			return errors.New("news cache version is missing")
+		}
+		return nil
 	})
 	if errors.Is(err, errMultipleSchedules) {
 		http.Error(w, err.Error(), http.StatusConflict)

@@ -2,16 +2,19 @@ package admin
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"embed"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
@@ -26,30 +29,30 @@ import (
 var assets embed.FS
 
 const (
-	sessionCookie    = "__Host-campus-admin"
-	loginCookie      = "__Host-campus-admin-login"
-	loginLifetime    = 10 * time.Minute
-	sessionLifetime  = time.Hour
-	maxPendingLogins = 1024
+	sessionCookie   = "__Host-campus-admin"
+	loginCookie     = "__Host-campus-admin-login"
+	loginLifetime   = 10 * time.Minute
+	sessionLifetime = time.Hour
 )
 
 type loginFlow struct {
-	nonce, verifier string
-	expires         time.Time
+	State    string    `json:"state"`
+	Nonce    string    `json:"nonce"`
+	Verifier string    `json:"verifier"`
+	Expires  time.Time `json:"expires"`
 }
 
 type server struct {
-	db        *gorm.DB
-	cfg       Config
-	cron      *cron.CronService
-	version   string
-	started   time.Time
-	oauth     oauth2.Config
-	verifier  *oidc.IDTokenVerifier
-	client    *http.Client
-	templates *template.Template
-	mu        sync.Mutex
-	logins    map[string]loginFlow
+	db          *gorm.DB
+	cfg         Config
+	cron        *cron.CronService
+	version     string
+	started     time.Time
+	oauth       oauth2.Config
+	verifier    *oidc.IDTokenVerifier
+	client      *http.Client
+	templates   *template.Template
+	loginCipher cipher.AEAD
 }
 
 // New returns the admin handler, or 404s when all required settings are unset.
@@ -68,10 +71,14 @@ func newHandler(db *gorm.DB, jobs *cron.CronService, version string, cfg Config,
 	if err != nil {
 		return nil, fmt.Errorf("parse admin templates: %w", err)
 	}
+	loginCipher, err := newLoginCipher(cfg)
+	if err != nil {
+		return nil, err
+	}
 	keyContext := context.WithValue(context.Background(), oauth2.HTTPClient, client)
 	s := &server{
 		db: db, cfg: cfg, cron: jobs, version: version, started: time.Now(),
-		client: client, templates: templates, logins: make(map[string]loginFlow),
+		client: client, templates: templates, loginCipher: loginCipher,
 		oauth: oauth2.Config{
 			ClientID: cfg.ClientID, ClientSecret: cfg.ClientSecret,
 			RedirectURL: cfg.BaseURL + "/admin/callback", Scopes: []string{oidc.ScopeOpenID},
@@ -149,55 +156,85 @@ func clearCookie(w http.ResponseWriter, name string) {
 	})
 }
 
-func (s *server) discardExpiredLogins(now time.Time) {
-	for state, flow := range s.logins {
-		if !now.Before(flow.expires) {
-			delete(s.logins, state)
-		}
+func newLoginCipher(cfg Config) (cipher.AEAD, error) {
+	// Domain separation and configuration binding keep sealed flows specific
+	// to this admin deployment, with the same key on every replica.
+	key := sha256.Sum256([]byte("campus-admin-login-state\x00" + cfg.ClientSecret + "\x00" + cfg.ClientID + "\x00" + cfg.Issuer + "\x00" + cfg.BaseURL))
+	block, err := aes.NewCipher(key[:])
+	if err != nil {
+		return nil, fmt.Errorf("create admin login cipher: %w", err)
 	}
+	aead, err := cipher.NewGCMWithRandomNonce(block)
+	if err != nil {
+		return nil, fmt.Errorf("create admin login cipher: %w", err)
+	}
+	return aead, nil
+}
+
+func (s *server) sealLoginFlow(flow loginFlow) (string, error) {
+	data, err := json.Marshal(flow)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(s.loginCipher.Seal(nil, nil, data, nil)), nil
+}
+
+func (s *server) openLoginFlow(value string) (loginFlow, error) {
+	if len(value) > 1024 {
+		return loginFlow{}, errors.New("login cookie too long")
+	}
+	data, err := base64.RawURLEncoding.DecodeString(value)
+	if err != nil {
+		return loginFlow{}, err
+	}
+	data, err = s.loginCipher.Open(nil, nil, data, nil)
+	if err != nil {
+		return loginFlow{}, err
+	}
+	var flow loginFlow
+	if err := json.Unmarshal(data, &flow); err != nil {
+		return loginFlow{}, err
+	}
+	return flow, nil
 }
 
 func (s *server) login(w http.ResponseWriter, r *http.Request) {
-	state := secret()
-	flow := loginFlow{nonce: secret(), verifier: oauth2.GenerateVerifier(), expires: time.Now().Add(loginLifetime)}
-	s.mu.Lock()
-	s.discardExpiredLogins(time.Now())
-	if old, err := r.Cookie(loginCookie); err == nil {
-		delete(s.logins, old.Value)
-	}
-	if len(s.logins) >= maxPendingLogins {
-		s.mu.Unlock()
-		log.Warn("admin pending login limit reached")
-		http.Error(w, "Too many pending logins; try again later.", http.StatusTooManyRequests)
+	flow := loginFlow{State: secret(), Nonce: secret(), Verifier: oauth2.GenerateVerifier(), Expires: time.Now().Add(loginLifetime)}
+	cookie, err := s.sealLoginFlow(flow)
+	if err != nil {
+		s.internalError(w, err)
 		return
 	}
-	s.logins[state] = flow
-	s.mu.Unlock()
-	setCookie(w, loginCookie, state, loginLifetime)
-	http.Redirect(w, r, s.oauth.AuthCodeURL(state, oidc.Nonce(flow.nonce), oauth2.S256ChallengeOption(flow.verifier)), http.StatusSeeOther)
+	setCookie(w, loginCookie, cookie, loginLifetime)
+	http.Redirect(w, r, s.oauth.AuthCodeURL(flow.State, oidc.Nonce(flow.Nonce), oauth2.S256ChallengeOption(flow.Verifier)), http.StatusSeeOther)
 }
 
 func (s *server) callback(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(loginCookie)
 	state := r.URL.Query().Get("state")
-	if err != nil || len(state) != 64 || subtle.ConstantTimeCompare([]byte(cookie.Value), []byte(state)) != 1 {
+	if err != nil {
 		http.Error(w, "Invalid login state.", http.StatusBadRequest)
 		return
 	}
-	s.mu.Lock()
-	flow, ok := s.logins[state]
-	delete(s.logins, state)
-	s.discardExpiredLogins(time.Now())
-	s.mu.Unlock()
+	flow, err := s.openLoginFlow(cookie.Value)
+	if err != nil || len(state) != 64 || subtle.ConstantTimeCompare([]byte(flow.State), []byte(state)) != 1 {
+		http.Error(w, "Invalid login state.", http.StatusBadRequest)
+		return
+	}
 	clearCookie(w, loginCookie)
-	if !ok || !time.Now().Before(flow.expires) || r.URL.Query().Get("error") != "" || r.URL.Query().Get("code") == "" {
+	if !time.Now().Before(flow.Expires) || r.URL.Query().Get("error") != "" || r.URL.Query().Get("code") == "" {
 		http.Error(w, "Login expired or was declined. Start a new login.", http.StatusBadRequest)
 		return
 	}
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, s.client)
-	token, err := s.oauth.Exchange(ctx, r.URL.Query().Get("code"), oauth2.VerifierOption(flow.verifier))
+	token, err := s.oauth.Exchange(ctx, r.URL.Query().Get("code"), oauth2.VerifierOption(flow.Verifier))
 	if err != nil {
 		log.Warn("admin OIDC code exchange failed")
+		var retrieveError *oauth2.RetrieveError
+		if errors.As(err, &retrieveError) && retrieveError.ErrorCode == "invalid_grant" {
+			http.Error(w, "Login expired or was declined. Start a new login.", http.StatusBadRequest)
+			return
+		}
 		http.Error(w, "SSO login failed.", http.StatusBadGateway)
 		return
 	}
@@ -208,7 +245,7 @@ func (s *server) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	idToken, err := s.verifier.Verify(ctx, rawIDToken)
-	if err != nil || subtle.ConstantTimeCompare([]byte(idToken.Nonce), []byte(flow.nonce)) != 1 {
+	if err != nil || subtle.ConstantTimeCompare([]byte(idToken.Nonce), []byte(flow.Nonce)) != 1 {
 		log.Warn("admin OIDC ID token validation failed")
 		http.Error(w, "SSO login failed.", http.StatusUnauthorized)
 		return

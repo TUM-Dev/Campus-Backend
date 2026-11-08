@@ -15,14 +15,19 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"github.com/guregu/null"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +35,7 @@ func testOIDC(t *testing.T) (Config, *http.Client) {
 	t.Helper()
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
+	var usedCodes sync.Map
 	mux := http.NewServeMux()
 	mux.HandleFunc("/keys", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -54,6 +60,12 @@ func testOIDC(t *testing.T) (Config, *http.Client) {
 		challenge := sha256.Sum256([]byte(r.PostForm.Get("code_verifier")))
 		if claims["_challenge"] != base64.RawURLEncoding.EncodeToString(challenge[:]) {
 			http.Error(w, "invalid PKCE verifier", http.StatusBadRequest)
+			return
+		}
+		if _, used := usedCodes.LoadOrStore(r.PostForm.Get("code"), true); used {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "invalid_grant"})
 			return
 		}
 		delete(claims, "_challenge")
@@ -373,6 +385,8 @@ func TestAdminAuthenticationAndManagement(t *testing.T) {
 	t.Run("audit failure rolls back the source and schedule", func(t *testing.T) {
 		var schedulesBefore int64
 		require.NoError(t, db.Model(&model.Crontab{}).Count(&schedulesBefore).Error)
+		var versionBefore model.NewsCacheVersion
+		require.NoError(t, db.First(&versionBefore, 1).Error)
 		require.NoError(t, db.Exec("CREATE TRIGGER reject_admin_audit BEFORE INSERT ON admin_audits FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'audit unavailable'").Error)
 		t.Cleanup(func() { require.NoError(t, db.Exec("DROP TRIGGER reject_admin_audit").Error) })
 		form.Set("title", "Must roll back")
@@ -384,6 +398,21 @@ func TestAdminAuthenticationAndManagement(t *testing.T) {
 		require.Zero(t, count)
 		require.NoError(t, db.Model(&model.Crontab{}).Count(&count).Error)
 		require.Equal(t, schedulesBefore, count)
+		var versionAfter model.NewsCacheVersion
+		require.NoError(t, db.First(&versionAfter, 1).Error)
+		require.Equal(t, versionBefore.Version, versionAfter.Version)
+	})
+	t.Run("missing cache version rolls back feed changes", func(t *testing.T) {
+		var version model.NewsCacheVersion
+		require.NoError(t, db.First(&version, 1).Error)
+		require.NoError(t, db.Delete(&version).Error)
+		t.Cleanup(func() { require.NoError(t, db.Create(&version).Error) })
+		form.Set("title", "Missing version must roll back")
+		response := adminRequest(handler, http.MethodPost, "/admin/feeds", form, cookie)
+		require.Equal(t, http.StatusInternalServerError, response.Code)
+		var count int64
+		require.NoError(t, db.Model(&model.NewsSource{}).Where("title = ?", "Missing version must roll back").Count(&count).Error)
+		require.Zero(t, count)
 	})
 	t.Run("revoked and expired sessions cannot view admin data", func(t *testing.T) {
 		revoked := cfg
@@ -407,6 +436,193 @@ func TestAdminAuthenticationAndManagement(t *testing.T) {
 		require.ErrorIs(t, db.First(&model.AdminSession{}, "token_hash = ?", session.TokenHash).Error, gorm.ErrRecordNotFound)
 		require.Equal(t, http.StatusSeeOther, adminRequest(handler, http.MethodGet, "/admin/feeds", nil, cookie).Code)
 	})
+}
+
+func TestAdminLoginFloodDoesNotBlockOtherClients(t *testing.T) {
+	cfg, client := testOIDC(t)
+	handler, err := newHandler(nil, nil, "test", cfg, client)
+	require.NoError(t, err)
+	for range 1024 {
+		adminRequest(handler, http.MethodGet, "/admin/login", nil, nil)
+	}
+	request := httptest.NewRequest(http.MethodGet, "https://admin.example/admin/login", nil)
+	request.RemoteAddr = "192.0.2.2:5678"
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	require.Equal(t, http.StatusSeeOther, response.Code, response.Body.String())
+}
+
+func TestAdminLoginFlowRejectsTamperingAndExpiry(t *testing.T) {
+	cfg, client := testOIDC(t)
+	handler, err := newHandler(nil, nil, "test", cfg, client)
+	require.NoError(t, err)
+	start := adminRequest(handler, http.MethodGet, "/admin/login", nil, nil)
+	cookie := findCookie(t, start, loginCookie)
+	authURL, err := url.Parse(start.Header().Get("Location"))
+	require.NoError(t, err)
+	state := authURL.Query().Get("state")
+	loginCipher, err := newLoginCipher(cfg)
+	require.NoError(t, err)
+	s := &server{loginCipher: loginCipher}
+	flow, err := s.openLoginFlow(cookie.Value)
+	require.NoError(t, err)
+	flow.Expires = time.Now().Add(-time.Minute)
+	expired, err := s.sealLoginFlow(flow)
+	require.NoError(t, err)
+	tampered, err := base64.RawURLEncoding.DecodeString(cookie.Value)
+	require.NoError(t, err)
+	tampered[len(tampered)-1] ^= 1
+	for _, test := range []struct {
+		name, value, state string
+		alter              func(*Config)
+	}{
+		{name: "tampered", value: base64.RawURLEncoding.EncodeToString(tampered), state: state},
+		{name: "expired", value: expired, state: state},
+		{name: "mismatched state", value: cookie.Value, state: secret()},
+		{name: "different client", value: cookie.Value, state: state, alter: func(c *Config) { c.ClientID = "another-client" }},
+		{name: "different origin", value: cookie.Value, state: state, alter: func(c *Config) { c.BaseURL = "https://another.example" }},
+		{name: "different issuer", value: cookie.Value, state: state, alter: func(c *Config) { c.Issuer = "https://another-issuer.example" }},
+		{name: "rotated secret", value: cookie.Value, state: state, alter: func(c *Config) { c.ClientSecret = "rotated-test-secret" }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			otherConfig := cfg
+			if test.alter != nil {
+				test.alter(&otherConfig)
+			}
+			other, err := newHandler(nil, nil, "test", otherConfig, client)
+			require.NoError(t, err)
+			callback := "/admin/callback?" + url.Values{"state": {test.state}, "code": {"unused"}}.Encode()
+			response := adminRequest(other, http.MethodGet, callback, nil, &http.Cookie{Name: loginCookie, Value: test.value})
+			require.Equal(t, http.StatusBadRequest, response.Code)
+			for _, cookie := range response.Result().Cookies() {
+				require.NotEqual(t, sessionCookie, cookie.Name)
+			}
+		})
+	}
+}
+
+func TestAdminLoginFlowsWorkAcrossReplicas(t *testing.T) {
+	db := utils.SetupTestContainer(context.Background(), t)
+	cfg, client := testOIDC(t)
+	first, err := newHandler(db, cron.New(db), "test", cfg, client)
+	require.NoError(t, err)
+	second, err := newHandler(db, cron.New(db), "test", cfg, client)
+	require.NoError(t, err)
+	split := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/admin/login" {
+			first.ServeHTTP(w, r)
+		} else {
+			second.ServeHTTP(w, r)
+		}
+	})
+	response, callback, flowCookie := loginRequest(t, split, cfg, nil)
+	require.Equal(t, http.StatusSeeOther, response.Code, response.Body.String())
+	cookie := findCookie(t, response, sessionCookie)
+	require.Equal(t, http.StatusOK, adminRequest(first, http.MethodGet, "/admin/feeds", nil, cookie).Code)
+	require.Equal(t, http.StatusBadRequest, adminRequest(first, http.MethodGet, callback, nil, flowCookie).Code)
+	var sessions int64
+	require.NoError(t, db.Model(&model.AdminSession{}).Count(&sessions).Error)
+	require.EqualValues(t, 1, sessions)
+}
+
+func TestAdminFeedEditorReviewRegressions(t *testing.T) {
+	cfg, client := testOIDC(t)
+	for _, scenario := range []string{"first feed", "shared icon"} {
+		t.Run(scenario, func(t *testing.T) {
+			db := utils.SetupTestContainer(context.Background(), t)
+			handler, err := newHandler(db, cron.New(db), "test", cfg, client)
+			require.NoError(t, err)
+			icon := model.File{Name: "bootstrap.png", Path: "news/sources/", Downloaded: null.BoolFrom(true)}
+			require.NoError(t, db.Create(&icon).Error)
+			if scenario == "shared icon" {
+				sources := make([]model.NewsSource, 501)
+				for i := range sources {
+					sources[i] = model.NewsSource{Title: fmt.Sprintf("Source %03d", i), FileID: icon.File}
+				}
+				require.NoError(t, db.Omit("File").Create(&sources).Error)
+			} else {
+				require.NoError(t, db.Create(&[]model.File{
+					{Name: "private.png", Path: "feedback/", Downloaded: null.BoolFrom(true)},
+					{Name: "pending.png", Path: "news/sources/", Downloaded: null.BoolFrom(false)},
+				}).Error)
+			}
+			login, _, _ := loginRequest(t, handler, cfg, nil)
+			require.Equal(t, http.StatusSeeOther, login.Code, login.Body.String())
+			cookie := findCookie(t, login, sessionCookie)
+			response := adminRequest(handler, http.MethodGet, "/admin/feeds", nil, cookie)
+			require.Equal(t, http.StatusOK, response.Code, response.Body.String())
+			require.True(t, strings.Contains(response.Body.String(), fmt.Sprintf(`<option value="%d">`, icon.File)), "bootstrap icon missing from the feed form")
+			if scenario == "first feed" {
+				require.Contains(t, response.Body.String(), "bootstrap.png")
+				require.NotContains(t, response.Body.String(), "private.png")
+				require.NotContains(t, response.Body.String(), "pending.png")
+				var session model.AdminSession
+				require.NoError(t, db.First(&session, "token_hash = ?", digest(cookie.Value)).Error)
+				form := url.Values{
+					"id": {"0"}, "title": {"First feed"}, "url": {"https://example.com/rss"},
+					"icon": {strconv.FormatInt(icon.File, 10)}, "interval": {"7200"}, "csrf": {session.CSRFToken},
+				}
+				save := adminRequest(handler, http.MethodPost, "/admin/feeds", form, cookie)
+				require.Equal(t, http.StatusSeeOther, save.Code, save.Body.String())
+				var source model.NewsSource
+				require.NoError(t, db.First(&source).Error)
+				require.Equal(t, icon.File, source.FileID)
+			}
+		})
+	}
+}
+
+func TestAdminFeedSaveRefreshesPublicNewsCaches(t *testing.T) {
+	db := utils.SetupTestContainer(context.Background(), t)
+	cfg, client := testOIDC(t)
+	handler, err := newHandler(db, cron.New(db), "test", cfg, client)
+	require.NoError(t, err)
+	oldIcon := model.File{Name: "old.png", Path: "news/sources/", Downloaded: null.BoolFrom(true)}
+	newIcon := model.File{Name: "new.png", Path: "news/sources/", Downloaded: null.BoolFrom(true)}
+	require.NoError(t, db.Create(&oldIcon).Error)
+	require.NoError(t, db.Create(&newIcon).Error)
+	source := model.NewsSource{Title: "Old title", FileID: oldIcon.File}
+	require.NoError(t, db.Omit("File").Create(&source).Error)
+	article := model.News{Title: "Article", NewsSourceID: source.Source, Link: "https://example.com/article", Date: time.Now(), Created: time.Now()}
+	require.NoError(t, db.Omit("File", "NewsSource").Create(&article).Error)
+	login, _, _ := loginRequest(t, handler, cfg, nil)
+	require.Equal(t, http.StatusSeeOther, login.Code, login.Body.String())
+	cookie := findCookie(t, login, sessionCookie)
+	var session model.AdminSession
+	require.NoError(t, db.First(&session, "token_hash = ?", digest(cookie.Value)).Error)
+
+	replicas := []*backend.CampusServer{backend.New(db), backend.New(db)}
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{})
+	assertPublicView := func(title, iconURL string, count int) {
+		t.Helper()
+		for _, replica := range replicas {
+			sources, err := replica.ListNewsSources(ctx, &pb.ListNewsSourcesRequest{})
+			require.NoError(t, err)
+			assert.Len(t, sources.Sources, count)
+			assert.Contains(t, sources.Sources, &pb.NewsSource{
+				Source: strconv.FormatInt(source.Source, 10), Title: title, IconUrl: iconURL,
+			})
+			news, err := replica.ListNews(ctx, &pb.ListNewsRequest{})
+			require.NoError(t, err)
+			require.Len(t, news.News, 1)
+			assert.Equal(t, title, news.News[0].SourceTitle)
+			assert.Equal(t, iconURL, news.News[0].SourceIconUrl)
+		}
+	}
+	assertPublicView("Old title", oldIcon.FullExternalUrl(), 1)
+	form := url.Values{
+		"id": {strconv.FormatInt(source.Source, 10)}, "title": {"New title"},
+		"url": {"https://example.com/rss"}, "icon": {strconv.FormatInt(newIcon.File, 10)},
+		"interval": {"7200"}, "csrf": {session.CSRFToken},
+	}
+	save := adminRequest(handler, http.MethodPost, "/admin/feeds", form, cookie)
+	require.Equal(t, http.StatusSeeOther, save.Code, save.Body.String())
+	assertPublicView("New title", newIcon.FullExternalUrl(), 1)
+	form.Set("id", "0")
+	form.Set("title", "Added feed")
+	save = adminRequest(handler, http.MethodPost, "/admin/feeds", form, cookie)
+	require.Equal(t, http.StatusSeeOther, save.Code, save.Body.String())
+	assertPublicView("New title", newIcon.FullExternalUrl(), 2)
 }
 
 func TestAdminDisabledAndConfiguration(t *testing.T) {
