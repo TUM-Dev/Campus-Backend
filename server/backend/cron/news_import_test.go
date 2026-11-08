@@ -59,7 +59,7 @@ func TestNewsCronKeepsExistingItemsWhenFeedFails(t *testing.T) {
 	db, mock := newsTestDB(t)
 	requested := false
 	service := New(db)
-	service.client = &http.Client{Transport: newsTestTransport(func(*http.Request) (*http.Response, error) {
+	service.newsClient = &http.Client{Transport: newsTestTransport(func(*http.Request) (*http.Response, error) {
 		requested = true
 		return nil, errors.New("upstream offline")
 	})}
@@ -74,7 +74,7 @@ func TestNewsCleanupPreservesLinksStillInFeed(t *testing.T) {
 	db, mock := newsTestDB(t)
 	service := New(db)
 	link := "https://example.com/still-active"
-	service.client = &http.Client{Transport: newsTestTransport(func(*http.Request) (*http.Response, error) {
+	service.newsClient = &http.Client{Transport: newsTestTransport(func(*http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`<rss version="2.0"><channel><title>News</title><item><title>Old but active</title><link>` + link + `</link></item></channel></rss>`)), Header: make(http.Header)}, nil
 	})}
 	// A link can have been created over a year ago and still be in the feed.

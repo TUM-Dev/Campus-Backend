@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/admin"
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"google.golang.org/grpc/reflection"
 
@@ -69,6 +70,17 @@ func main() {
 	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
 	httpMux.Handle("/files/", http.StripPrefix("/files/", utils.PublicFileServer("/Storage")))
 	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
+
+	adminConfig, err := admin.ConfigFromEnv()
+	if err != nil {
+		log.WithError(err).Fatal("invalid admin configuration")
+	}
+	adminHandler, err := admin.New(db, cronService, Version, adminConfig)
+	if err != nil {
+		log.WithError(err).Fatal("could not initialize admin")
+	}
+	httpMux.Handle("/admin", adminHandler)
+	httpMux.Handle("/admin/", adminHandler)
 
 	// Main GRPC Server
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(UnaryRequestLogger), grpc.StreamInterceptor(StreamRequestLogger))

@@ -1,0 +1,19 @@
+{{define "dashboard"}}{{template "header" .}}
+<section><h2>Backend process</h2>
+<dl><dt>Build</dt><dd>{{.Version}}</dd><dt>Uptime</dt><dd>{{.Uptime}}</dd>
+<dt>Goroutines</dt><dd>{{.Goroutines}}</dd><dt>Go heap</dt><dd>{{.HeapMiB}} MiB</dd>
+<dt>Database</dt><dd>Connected; {{.DBOpen}} open connections, {{.DBInUse}} in use</dd>
+{{range $name, $count := .Counts}}<dt>{{$name}}</dt><dd>{{$count}}</dd>{{end}}</dl>
+</section>
+<section><h2>Import scheduler</h2>
+{{if .PollTime.IsZero}}<p>No scheduler poll observed since startup.</p>{{else}}<p>Last poll: {{.PollTime.UTC.Format "2006-01-02 15:04:05 UTC"}}.
+{{if .PollOK}}Database query succeeded.{{else}}Database query failed; see server logs.{{end}}</p>{{end}}
+<p>Database start times are not proof of success. Results and last successes below are observations since this process started. A disabled schedule may still have an already-running import.</p>
+<div class="table"><table><thead><tr><th>Job</th><th>Type / source</th><th>Schedule</th><th>Last database start (UTC)</th><th>Observed result</th><th>Last success (UTC)</th></tr></thead><tbody>
+{{range .Jobs}}<tr><td>{{.ID}}</td><td>{{.Type}}{{if .SourceID.Valid}} / {{.SourceID.Int64}}{{end}}</td>
+<td>{{if gt .Interval 0}}Every {{.Interval}} seconds{{else}}Disabled{{end}}</td>
+<td>{{if not .LastStarted.IsZero}}{{.LastStarted.Format "2006-01-02 15:04:05"}}{{else}}Never{{end}}</td>
+<td>{{if .Observation.State}}{{.Observation.State}}{{if not .Observation.FinishedAt.IsZero}} at {{.Observation.FinishedAt.UTC.Format "15:04:05 UTC"}}{{end}}{{else}}Not observed{{end}}</td>
+<td>{{if not .Observation.LastSuccess.IsZero}}{{.Observation.LastSuccess.UTC.Format "2006-01-02 15:04:05"}}{{else}}Not observed{{end}}</td></tr>
+{{else}}<tr><td colspan="6">No cron jobs.</td></tr>{{end}}</tbody></table></div>
+</section>{{template "footer"}}{{end}}

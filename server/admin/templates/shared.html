@@ -1,0 +1,34 @@
+{{define "header"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} | Campus admin</title>
+<link rel="stylesheet" href="/admin/style.css">
+</head>
+<body>
+<header class="app-header"><div class="app-header-inner">
+<a class="brand" href="/admin/"><span class="brand-mark">C</span><span>Campus Backend<small>Admin workspace</small></span></a>
+<div class="account"><div class="account-identity"><small>Signed in</small><span title="{{.Subject}}">{{.Subject}}</span></div>
+<form method="post" action="/admin/logout"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="button button-quiet">Sign out</button></form></div>
+</div>
+</header>
+<div class="app-nav"><nav aria-label="Admin navigation">
+<a href="/admin/" {{if eq .Nav "status"}}aria-current="page"{{end}}>{{template "icon-status"}}System status</a>
+<a href="/admin/feeds" {{if eq .Nav "feeds"}}aria-current="page"{{end}}>{{template "icon-feeds"}}News feeds</a>
+<a href="/admin/groups" {{if eq .Nav "groups"}}aria-current="page"{{end}}>{{template "icon-groups"}}Student groups</a>
+<a href="/admin/ratings" {{if eq .Nav "ratings"}}aria-current="page"{{end}}>{{template "icon-star"}}Cafeteria ratings</a>
+<a href="/admin/audit" {{if eq .Nav "audit"}}aria-current="page"{{end}}>{{template "icon-history"}}Change history</a>
+</nav></div>
+<main aria-label="{{.Title}}"><h1 class="sr-only">{{.Title}}</h1>{{end}}
+{{define "footer"}}</main></body></html>{{end}}
+{{define "pagination"}}<nav class="pagination" aria-label="Pagination">
+{{if gt .Previous 0}}<a class="button button-secondary" href="{{.PreviousURL}}">Previous</a>{{end}}
+<span class="muted">Page {{.Number}}</span>
+{{if .HasNext}}<a class="button button-secondary" href="{{.NextURL}}">Next</a>{{end}}
+</nav>{{end}}
+{{define "icon-status"}}<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>{{end}}
+{{define "icon-feeds"}}<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h3M8 18h8"/><rect x="14" y="14" width="3" height="3" rx=".5"/></svg>{{end}}
+{{define "icon-groups"}}<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5v1"/></svg>{{end}}
+{{define "icon-star"}}<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg>{{end}}
+{{define "icon-history"}}<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 2.7 7M3 4v7h7M12 7v5l3 2"/></svg>{{end}}

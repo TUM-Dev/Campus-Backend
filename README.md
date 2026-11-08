@@ -128,6 +128,67 @@ server/
 client/                           # example gRPC clients (separate Go module)
 ```
 
+### Admin dashboard
+
+The optional `/admin/` dashboard is served by the Go binary, separately from the public API.
+It provides process/database status, scheduler observations, news feed creation/editing and
+enable/disable controls, a transactional feed change history, and read-only student clubs
+and councils, including downloaded images and image captions.
+The cafeteria ratings view shows scores, comments and category ratings, with cafeteria
+filtering and a summary across all matching ratings. Change history presents field-by-field
+configuration changes rather than raw records.
+Feed deletion, uploads, manual job execution and student group editing are not available.
+
+Authentication uses **TUM Login's native OIDC support**, even though the identity provider
+runs Shibboleth. This is not the legacy TUMonline OAuth integration. Register an OIDC client
+with TUM support before enabling the dashboard. Request:
+
+- Authorization code flow with **PKCE S256**, query-mode callbacks and `client_secret_basic`.
+- Redirect URI `https://api.tum.app/admin/callback` (or the corresponding HTTPS deployment origin).
+- The `openid` scope, **RS256-signed ID tokens**, and stable `sub` values for the approved administrators.
+- Confirmation of issuer, authorization/token endpoints and JWKS URL. TUM warns that its
+  discovery document can be inaccurate; these endpoints are configured explicitly, not discovered.
+
+Configure the deployment securely; never commit the client secret:
+
+```dotenv
+ADMIN_ENABLED=true
+ADMIN_BASE_URL=https://api.tum.app
+ADMIN_OIDC_CLIENT_ID=<registered-client-id>
+ADMIN_OIDC_CLIENT_SECRET=<registered-client-secret>
+ADMIN_ALLOWED_SUBJECTS=<exact-subject-1>,<exact-subject-2>
+```
+
+The default issuer is `https://tumidp.lrz.de/idp/shibboleth`, **not** `https://login.tum.de`.
+The default authorization, token and JWKS endpoints are respectively
+`https://login.tum.de/idp/profile/oidc/authorize`,
+`https://login.tum.de/idp/profile/oidc/token`, and
+`https://login.tum.de/idp/profile/oidc/keyset`.
+Override them using `ADMIN_OIDC_ISSUER`, `ADMIN_OIDC_AUTH_URL`, `ADMIN_OIDC_TOKEN_URL`
+and `ADMIN_OIDC_JWKS_URL` when agreed with TUM support.
+The production Compose file forwards these variables; if using an ignored `.env.local`,
+load it explicitly with `docker compose --env-file .env.local -f docker-compose.yml up -d`.
+
+Access is denied unless the verified subject exactly matches the configured allowlist.
+Email domains, device IDs and incoming identity headers never grant admin access.
+Sessions are stored as token hashes in MySQL, expire within one hour (or earlier with the
+ID token), and are revoked by signing out. Sign-out does not end the university SSO session
+or automatically sign the user back in. Changing the allowlist/issuer and restarting
+immediately prevents sessions for removed identities from accessing the dashboard.
+Login state is short-lived and process-local: multiple replicas require sticky routing
+for login/callback requests. A restart during login requires starting a new login.
+HTTPS is required, including local testing, because session cookies are Secure.
+
+All mutations require POST and a session-bound CSRF token. Feed changes and audit records
+commit together; internal errors and OIDC tokens are not exposed in responses.
+New/edited feeds require HTTPS URLs; news imports and news image downloads reject
+non-public network destinations, including DNS resolution and redirects.
+Imports already in progress may finish after their schedule is disabled.
+The database `lastRun` is a **start time**, not evidence of success; the dashboard's
+observed outcomes and last successes cover only the current process lifetime.
+The dashboard does not display environment variables, credentials or raw log files.
+The admin routes return 404 while disabled; enabled but incomplete configurations fail startup.
+
 ### Recipes
 
 <details>

@@ -1,0 +1,15 @@
+{{define "groups"}}{{template "header" .}}
+<nav class="directory-navigation" aria-label="Student directory">
+<a href="/admin/groups" {{if not .Councils}}aria-current="page"{{end}}>Student clubs</a>
+<a href="/admin/councils" {{if .Councils}}aria-current="page"{{end}}>Student councils</a>
+</nav>
+<div class="directory-list">{{range .Entries}}<article class="directory-card">
+{{if .ImageURL}}<figure class="directory-image">
+<img src="{{.ImageURL}}" alt="{{.Name}}" loading="lazy" decoding="async">
+{{if .ImageCaption.Valid}}<figcaption>{{.ImageCaption.String}}</figcaption>{{end}}
+</figure>{{else}}<div class="directory-image-placeholder">No image</div>{{end}}
+<div><h2>{{.Name}}</h2><p>{{.Language}} / {{.Collection}}</p>
+{{if .Description.Valid}}<p>{{.Description.String}}</p>{{end}}
+{{if .LinkURL.Valid}}<a class="text-link" href="{{.LinkURL.String}}" rel="noopener noreferrer">Visit website</a>{{end}}</div></article>
+{{else}}<div class="empty-state">{{template "icon-groups"}}<h2>{{if .Councils}}No student councils on this page{{else}}No student clubs on this page{{end}}</h2><p>Directory entries will appear here when available.</p></div>{{end}}</div>
+{{template "pagination" .}}{{template "footer"}}{{end}}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -52,8 +53,14 @@ func (c *CronService) downloadPendingFile(file model.File) error {
 	if err := ensureFileDoesNotExist(dstPath); err != nil {
 		return err
 	}
-	if err := downloadFile(file.URL.String, dstPath); err != nil {
-		return err
+	var downloadErr error
+	if strings.HasPrefix(file.Path, "news/") {
+		downloadErr = downloadFileWithClient(file.URL.String, dstPath, webfetch.PublicClient)
+	} else {
+		downloadErr = downloadFile(file.URL.String, dstPath)
+	}
+	if downloadErr != nil {
+		return downloadErr
 	}
 	mime, err := mimetype.DetectFile(dstPath)
 	if err != nil {
@@ -88,10 +95,18 @@ func resizeImage(dstPath string) error {
 
 // downloadFile Downloads a file from the given url and saves it to the given path
 func downloadFile(url string, dstPath string) error {
+	return downloadFileWithClient(url, dstPath, webfetch.Client)
+}
+
+func downloadFileWithClient(url string, dstPath string, client *http.Client) error {
 	fields := log.Fields{"url": url, "dstPath": dstPath}
-	resp, err := webfetch.Get(url)
+	resp, err := client.Get(url)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		_ = resp.Body.Close()
+		return fmt.Errorf("upstream returned %s", resp.Status)
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {

@@ -60,9 +60,12 @@ func (c *CronService) parseNewsFeed(source model.NewsSource) error {
 	// gofeed initializes translators lazily and is not safe to share between
 	// concurrent jobs. Each source gets a parser; connections share one client.
 	parser := gofeed.NewParser()
-	parser.Client = c.client
+	parser.Client = c.newsClient
 	if parser.Client == nil {
-		parser.Client = webfetch.Client
+		parser.Client = c.client
+	}
+	if parser.Client == nil {
+		parser.Client = webfetch.PublicClient
 	}
 	feed, err := parser.ParseURL(source.URL.String)
 	if err != nil {

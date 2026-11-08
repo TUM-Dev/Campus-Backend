@@ -3,6 +3,7 @@ package cron
 import (
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
@@ -15,8 +16,75 @@ import (
 )
 
 type CronService struct {
-	db     *gorm.DB
-	client *http.Client
+	db         *gorm.DB
+	client     *http.Client
+	newsClient *http.Client
+	mu         sync.Mutex
+	status     Status
+}
+
+type JobStatus struct {
+	StartedAt   time.Time
+	FinishedAt  time.Time
+	LastSuccess time.Time
+	State       string
+}
+
+// Status contains observations since this process started, not historical job results.
+type Status struct {
+	LastPoll time.Time
+	PollOK   bool
+	Jobs     map[int64]JobStatus
+}
+
+func (c *CronService) Status() Status {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	result := Status{LastPoll: c.status.LastPoll, PollOK: c.status.PollOK, Jobs: make(map[int64]JobStatus)}
+	for id, job := range c.status.Jobs {
+		result.Jobs[id] = job
+	}
+	return result
+}
+
+func (c *CronService) recordPoll(ok bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.status.LastPoll, c.status.PollOK = time.Now(), ok
+}
+
+func (c *CronService) recordJob(id int64, finished bool, err error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.status.Jobs == nil {
+		c.status.Jobs = make(map[int64]JobStatus)
+	}
+	job := c.status.Jobs[id]
+	if !finished {
+		job.StartedAt, job.FinishedAt, job.State = time.Now(), time.Time{}, "Running"
+	} else {
+		job.FinishedAt, job.State = time.Now(), "Succeeded"
+		if err != nil {
+			job.State = "Failed"
+		} else {
+			job.LastSuccess = job.FinishedAt
+		}
+	}
+	c.status.Jobs[id] = job
+}
+
+func (c *CronService) claimJob(job *model.Crontab) (bool, error) {
+	started := int32(time.Now().Unix())
+	result := c.db.Model(job).Where("`interval` = ? AND lastRun = ?", job.Interval, job.LastRun).
+		UpdateColumn("lastRun", started)
+	if result.Error != nil {
+		return false, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return false, nil
+	}
+	job.LastRun = started
+	return true, nil
 }
 
 // StorageDir is the directory where files are stored
@@ -37,8 +105,9 @@ const (
 
 func New(db *gorm.DB) *CronService {
 	return &CronService{
-		db:     db,
-		client: webfetch.Client,
+		db:         db,
+		client:     webfetch.Client,
+		newsClient: webfetch.PublicClient,
 	}
 }
 
@@ -60,26 +129,34 @@ func (c *CronService) Run() error {
 				StudentClubType,
 				TUMOnlineStatusType,
 			).Error; err != nil {
+			c.recordPoll(false)
 			log.WithError(err).Error("Could not load pending cron jobs")
 			time.Sleep(30 * time.Second)
 			continue
 		}
+		c.recordPoll(true)
 
 		for _, cronjob := range res {
 			// Persist run to DB right away
 			cronFields := log.Fields{"Cron (id)": cronjob.Cron, "type": cronjob.Type.String, "LastRun": cronjob.LastRun, "interval": cronjob.Interval, "id (not real id)": cronjob.ID.Int64}
 			log.WithFields(cronFields).Trace("Running cronjob")
 
-			cronjob.LastRun = int32(time.Now().Unix())
-			if err := c.db.Save(&cronjob).Error; err != nil {
+			claimed, err := c.claimJob(&cronjob)
+			if err != nil {
 				log.WithFields(cronFields).WithError(err).Error("Could not persist cron run")
+				continue
+			}
+			if !claimed {
+				log.WithFields(cronFields).Trace("Cron job changed or was claimed since polling")
 				continue
 			}
 
 			// Log every failure with its job, since errgroup only returns the first.
 			run := func(job func() error) {
 				g.Go(func() error {
+					c.recordJob(cronjob.Cron, false, nil)
 					err := job()
+					c.recordJob(cronjob.Cron, true, err)
 					if err != nil {
 						log.WithFields(cronFields).WithError(err).Error("Cron job failed")
 					}

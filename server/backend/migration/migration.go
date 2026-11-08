@@ -15,6 +15,8 @@ import (
 // It is shared by AutoMigrate and the Atlas schema loader (tools/atlasloader).
 func Models() []any {
 	return []any{
+		&model.AdminSession{},
+		&model.AdminAudit{},
 		&model.Canteen{},
 		&model.CanteenRating{},
 		&model.CanteenRatingTag{},
