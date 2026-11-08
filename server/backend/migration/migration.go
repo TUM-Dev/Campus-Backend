@@ -92,6 +92,8 @@ func legacyMigrations() []*gormigrate.Migration {
 	}
 }
 
+// postBaselineMigrations is frozen too; these run before the post-baseline SQL files.
+// Keep their IDs for existing databases, but add all new migrations in sql/.
 func postBaselineMigrations() []*gormigrate.Migration {
 	return []*gormigrate.Migration{
 		migrate20261105000000(),
@@ -115,8 +117,8 @@ func Migrate(db *gorm.DB) error {
 	db = db.Set("gorm:table_options", TableOptions)
 	log.Info("starting migration")
 	start := time.Now()
-	migrations := append(legacyMigrations(), sqlMigrations...)
-	migrations = append(migrations, postBaselineMigrations()...)
+	migrations := append(legacyMigrations(), postBaselineMigrations()...)
+	migrations = append(migrations, sqlMigrations...)
 	err = gormigrate.New(db, &gormigrate.Options{
 		TableName:                 gormigrate.DefaultOptions.TableName,
 		IDColumnName:              gormigrate.DefaultOptions.IDColumnName,
@@ -139,14 +141,17 @@ func MigrateFromBaseline(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	for _, f := range files {
-		if err := f.apply(db); err != nil {
-			return fmt.Errorf("applying %s: %w", f.name, err)
-		}
+	if err := files[0].apply(db); err != nil {
+		return fmt.Errorf("applying %s: %w", files[0].name, err)
 	}
 	for _, migration := range postBaselineMigrations() {
 		if err := migration.Migrate(db); err != nil {
 			return fmt.Errorf("applying %s: %w", migration.ID, err)
+		}
+	}
+	for _, f := range files[1:] {
+		if err := f.apply(db); err != nil {
+			return fmt.Errorf("applying %s: %w", f.name, err)
 		}
 	}
 	return nil

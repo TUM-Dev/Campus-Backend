@@ -152,7 +152,7 @@ Migrations are generated with [Atlas](https://atlasgo.io) from the GORM models a
 
 For data changes, or for views and triggers (which Atlas' free edition doesn't manage), edit the generated file or create one with `atlas migrate new --env gorm <short_name>`, then run `atlas migrate hash --env gorm`.
 
-The desired schema is the models plus [`legacy.sql`](server/tools/atlasloader/legacy.sql), which declares production tables without a model. The Go migrations in `backend/migration/` are frozen. CI fails, and comments the missing SQL on your PR, if the models change without a migration.
+The desired schema is the models plus [`legacy.sql`](server/tools/atlasloader/legacy.sql), which declares production tables without a model. The Go migrations in `backend/migration/` are frozen, including the post-baseline registry; a regression test rejects new Go migration IDs. Keep existing IDs for compatibility, but never duplicate an Atlas schema change in Go. CI fails, and comments the missing SQL on your PR, if the models change without a migration.
 
 </details>
 

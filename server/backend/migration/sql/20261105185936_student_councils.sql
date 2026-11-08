@@ -1,7 +1,8 @@
 -- Modify "crontab" table
 ALTER TABLE `crontab` MODIFY COLUMN `type` enum('news','mensa','ticketsale','fileDownload','canteenHeadCount','iosNotifications','iosActivityReset','newExamResultsHook','movie','feedbackEmail','dishNameDownload','scrapeStudentClubs') NULL;
 -- Create "student_council_collections" table
-CREATE TABLE `student_council_collections` (
+-- These tables may already exist from the former Go migration or interrupted MySQL DDL.
+CREATE TABLE IF NOT EXISTS `student_council_collections` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `created_at` datetime(3) NULL,
   `updated_at` datetime(3) NULL,
@@ -13,7 +14,7 @@ CREATE TABLE `student_council_collections` (
   INDEX `idx_student_council_collections_deleted_at` (`deleted_at`)
 ) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- Create "student_councils" table
-CREATE TABLE `student_councils` (
+CREATE TABLE IF NOT EXISTS `student_councils` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `created_at` datetime(3) NULL,
   `updated_at` datetime(3) NULL,
