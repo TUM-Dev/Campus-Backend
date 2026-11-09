@@ -1,0 +1,34 @@
+{{define "feeds"}}{{template "header" .}}
+<div class="feeds-layout"><div class="feed-list">
+{{range .Feeds}}{{$source := .}}<article class="feed-card">
+<div class="feed-card-heading"><span class="source-icon">{{template "icon-feeds"}}</span><div class="feed-identity"><h2>{{.Title}}</h2><p class="source-url" title="{{.URL.String}}">{{if .URL.Valid}}{{.URL.String}}{{else}}No feed URL configured{{end}}</p></div>
+<span class="badge {{if eq .State "active"}}badge-success{{else if eq .State "attention"}}badge-warning{{else}}badge-neutral{{end}}">{{if eq .State "active"}}Active{{else if eq .State "attention"}}Needs attention{{else if eq .State "unscheduled"}}Unscheduled{{else}}Paused{{end}}</span></div>
+<div class="feed-meta"><span>Source #{{.Source}}</span><span>{{.Schedule}}</span>{{if .Hook.Valid}}<span>Hook: <code>{{.Hook.String}}</code></span>{{end}}</div>
+{{if gt (len .Jobs) 1}}<p class="notice notice-warning">Multiple schedules exist for this source. Resolve the conflict before editing.</p>{{else}}
+<details class="feed-editor"><summary><span class="editor-closed">Edit source</span><span class="editor-open">Close editor</span><span aria-hidden="true" class="chevron"></span></summary>
+<form class="source-form" method="post" action="/admin/feeds">
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.Source}}">
+<div class="form-field"><label for="title-{{.Source}}">Title</label><input id="title-{{.Source}}" name="title" required maxlength="255" value="{{.Title}}"></div>
+<div class="form-field"><label for="url-{{.Source}}">Feed URL</label><input id="url-{{.Source}}" name="url" type="url" required maxlength="2048" value="{{.URL.String}}"></div>
+<div class="form-row"><div class="form-field"><label for="icon-{{.Source}}">Icon</label><select id="icon-{{.Source}}" name="icon" required>{{range $.Icons}}<option value="{{.FileID}}" {{if eq .FileID $source.FileID}}selected{{end}}>{{.Title}} (file {{.FileID}})</option>{{end}}</select></div>
+{{if .Jobs}}{{range .Jobs}}
+<div class="form-field"><label for="interval-{{$source.Source}}">Interval in seconds</label><input id="interval-{{$source.Source}}" name="interval" type="number" min="60" max="31536000" required value="{{if gt .Interval 0}}{{.Interval}}{{else}}7200{{end}}"></div></div>
+<label class="checkbox"><input name="enabled" type="checkbox" {{if gt .Interval 0}}checked{{end}}> Enable imports</label>
+{{end}}{{else}}
+<div class="form-field"><label for="interval-{{.Source}}">Interval in seconds</label><input id="interval-{{.Source}}" name="interval" type="number" min="60" max="31536000" required value="7200"></div></div>
+<label class="checkbox"><input name="enabled" type="checkbox"> Enable imports</label>
+{{end}}
+<div class="form-actions"><button class="button button-primary">Save changes</button><span class="muted">Changes are recorded in history.</span></div>
+</form></details>{{end}}</article>
+{{else}}<div class="empty-state">{{template "icon-feeds"}}<h2>No feed sources yet</h2><p>Add a source to start collecting campus news.</p></div>{{end}}
+{{template "pagination" .}}
+</div><aside class="panel source-create" id="add-source"><div class="panel-heading"><h2>Add feed source</h2></div>
+<form class="source-form" method="post" action="/admin/feeds"><input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="id" value="0">
+<div class="form-field"><label for="new-title">Title</label><input id="new-title" name="title" required maxlength="255" placeholder="e.g. Student Council News"></div>
+<div class="form-field"><label for="new-url">HTTPS feed URL</label><input id="new-url" name="url" type="url" required maxlength="2048" placeholder="https://example.org/feed.xml"></div>
+<div class="form-field"><label for="new-icon">Existing icon</label><select id="new-icon" name="icon" required><option value="">Choose a source icon</option>{{range .Icons}}<option value="{{.FileID}}">{{.Title}} (file {{.FileID}})</option>{{end}}</select></div>
+<div class="form-field"><label for="new-interval">Interval in seconds</label><input id="new-interval" name="interval" type="number" min="60" max="31536000" required value="7200"><small class="muted">7200 seconds = 2 hours. Minimum: 60 seconds.</small></div>
+<label class="checkbox"><input name="enabled" type="checkbox"> Enable imports</label>
+<button class="button button-primary button-wide">Add source</button></form>
+<p class="notice">Imports stay paused unless you enable them. Existing hooks are preserved; running imports may finish after pausing.</p>
+</aside></div>{{template "footer"}}{{end}}

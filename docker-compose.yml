@@ -49,6 +49,14 @@ services:
       - OMDB_API_KEY=${OMDB_API_KEY}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-}
       - TUMONLINE_STATUS_SYNC_ENABLED=${TUMONLINE_STATUS_SYNC_ENABLED:-false}
+      - ADMIN_BASE_URL=${ADMIN_BASE_URL:-}
+      - ADMIN_OIDC_CLIENT_ID=${ADMIN_OIDC_CLIENT_ID:-}
+      - ADMIN_OIDC_CLIENT_SECRET=${ADMIN_OIDC_CLIENT_SECRET:-}
+      - ADMIN_ALLOWED_SUBJECTS=${ADMIN_ALLOWED_SUBJECTS:-}
+      - ADMIN_OIDC_ISSUER=${ADMIN_OIDC_ISSUER:-https://tumidp.lrz.de/idp/shibboleth}
+      - ADMIN_OIDC_AUTH_URL=${ADMIN_OIDC_AUTH_URL:-https://login.tum.de/idp/profile/oidc/authorize}
+      - ADMIN_OIDC_TOKEN_URL=${ADMIN_OIDC_TOKEN_URL:-https://login.tum.de/idp/profile/oidc/token}
+      - ADMIN_OIDC_JWKS_URL=${ADMIN_OIDC_JWKS_URL:-https://login.tum.de/idp/profile/oidc/keyset}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_URL=${SMTP_URL:-postout.lrz.de}
       - SMTP_USERNAME=${SMTP_USERNAME:-bot@tum.app}

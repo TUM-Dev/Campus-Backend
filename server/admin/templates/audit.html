@@ -1,0 +1,12 @@
+{{define "audit"}}{{template "header" .}}
+<div class="activity-list">
+{{range .Entries}}<article class="activity-card">
+<div class="activity-heading"><span class="activity-symbol {{if .Created}}activity-created{{end}}">{{template "icon-history"}}</span><div><span class="badge {{if .InvalidDetails}}badge-warning{{else if .Created}}badge-success{{else}}badge-info{{end}}">{{if .InvalidDetails}}Details unavailable{{else}}{{.ActionLabel}}{{end}}</span><h2>{{if .Title}}{{.Title}}{{else}}Source #{{.SourceID}}{{end}}</h2></div><time datetime="{{.CreatedAt.UTC.Format "2006-01-02T15:04:05Z"}}">{{.CreatedAt.UTC.Format "02 Jan 2006"}}<span>{{.CreatedAt.UTC.Format "15:04:05 UTC"}}</span></time></div>
+<div class="activity-meta"><span>Source #{{.SourceID}}</span><span>By <code>{{.Subject}}</code></span><span>Change #{{.ID}}</span></div>
+{{if .InvalidDetails}}<p class="notice notice-warning">This record could not be decoded. See server logs for details.</p>{{else if .Changes}}{{$entry := .}}
+<div class="table"><table class="diff-table"><thead><tr><th>Field</th>{{if not .Created}}<th>Previous value</th>{{end}}<th>{{if .Created}}Value{{else}}New value{{end}}</th></tr></thead><tbody>
+{{range .Changes}}<tr><th scope="row">{{.Field}}</th>{{if not $entry.Created}}<td><span class="diff-old">{{if .Before}}{{.Before}}{{else}}Not set{{end}}</span></td>{{end}}<td><span class="diff-new">{{.After}}</span></td></tr>{{end}}
+</tbody></table></div>{{else}}<p class="notice">Source saved without field changes.</p>{{end}}
+</article>{{else}}<div class="empty-state">{{template "icon-history"}}<h2>No changes yet</h2><p>Changes to feed sources will appear here automatically.</p></div>{{end}}
+</div>
+{{template "pagination" .}}{{template "footer"}}{{end}}

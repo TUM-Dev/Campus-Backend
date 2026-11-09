@@ -18,6 +18,10 @@ var privateStorageDirs = []string{"feedback", "rating", "tmp", "storage", "lost+
 func PublicFileServer(root string) http.Handler {
 	files := http.FileServer(noDirFS{http.Dir(root)})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Downloaded documents share the admin origin; sandbox them without
+		// allowing scripts or same-origin access, while retaining inline SVG styles.
+		w.Header().Set("Content-Security-Policy", "sandbox; default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		if isPrivateStoragePath(r.URL.Path) {
 			http.NotFound(w, r)
 			return

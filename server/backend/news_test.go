@@ -86,8 +86,14 @@ func source2() *model.NewsSource {
 
 const ExpectedListNewsSourcesQuery = "SELECT `news_sources`.`source`,`news_sources`.`title`,`news_sources`.`url`,`news_sources`.`icon`,`news_sources`.`hook`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded` FROM `news_sources` LEFT JOIN `files` `File` ON `news_sources`.`icon` = `File`.`file`"
 
+func (s *NewsSuite) expectNewsCacheVersion() {
+	s.mock.ExpectQuery("SELECT .* FROM `news_cache_versions`").WithArgs(1, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(0))
+}
+
 func (s *NewsSuite) Test_ListNewsSourcesMultiple() {
 	s1, s2 := source1(), source2()
+	s.expectNewsCacheVersion()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(s1.Source, s1.Title, s1.URL, s1.FileID, s1.Hook, s1.File.File, s1.File.Name, s1.File.Path, s1.File.Downloads, s1.File.URL, s1.File.Downloaded).
@@ -127,6 +133,7 @@ func news2() *model.News {
 }
 
 func (s *NewsSuite) Test_ListNewsSourcesNone() {
+	s.expectNewsCacheVersion()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"source", "title", "url", "icon", "hook", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
 
@@ -143,6 +150,7 @@ func (s *NewsSuite) Test_ListNewsSourcesNone() {
 const ExpectedListNewsQuery = "SELECT `news`.`news`,`news`.`date`,`news`.`created`,`news`.`title`,`news`.`description`,`news`.`src`,`news`.`link`,`news`.`image`,`news`.`file`,`File`.`file` AS `File__file`,`File`.`name` AS `File__name`,`File`.`path` AS `File__path`,`File`.`downloads` AS `File__downloads`,`File`.`url` AS `File__url`,`File`.`downloaded` AS `File__downloaded`,`NewsSource`.`source` AS `NewsSource__source`,`NewsSource`.`title` AS `NewsSource__title`,`NewsSource`.`url` AS `NewsSource__url`,`NewsSource`.`icon` AS `NewsSource__icon`,`NewsSource`.`hook` AS `NewsSource__hook`,`NewsSource__File`.`file` AS `NewsSource__File__file`,`NewsSource__File`.`name` AS `NewsSource__File__name`,`NewsSource__File`.`path` AS `NewsSource__File__path`,`NewsSource__File`.`downloads` AS `NewsSource__File__downloads`,`NewsSource__File`.`url` AS `NewsSource__File__url`,`NewsSource__File`.`downloaded` AS `NewsSource__File__downloaded` FROM `news` LEFT JOIN `files` `File` ON `news`.`file` = `File`.`file` LEFT JOIN `news_sources` `NewsSource` ON `news`.`src` = `NewsSource`.`source` LEFT JOIN `files` `NewsSource__File` ON `NewsSource`.`icon` = `NewsSource__File`.`file`"
 
 func (s *NewsSuite) Test_ListNewsNone_withFilters() {
+	s.expectNewsCacheVersion()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery+" WHERE src = ? AND news > ?")).
 		WithArgs(1, 2).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
@@ -154,6 +162,7 @@ func (s *NewsSuite) Test_ListNewsNone_withFilters() {
 	require.Equal(s.T(), &pb.ListNewsReply{News: nil}, response)
 }
 func (s *NewsSuite) Test_ListNewsNone() {
+	s.expectNewsCacheVersion()
 	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded", "source", "NewsSource__source", "NewsSource__title", "NewsSource__url", "NewsSource__icon", "NewsSource__hook", "NewsSource__File__file", "NewsSource__File__name", "NewsSource__File__path", "NewsSource__File__downloads", "NewsSource__File__url", "NewsSource__File__downloaded"}))
 
@@ -166,6 +175,7 @@ func (s *NewsSuite) Test_ListNewsNone() {
 func (s *NewsSuite) Test_ListNewsMultiple() {
 	n1 := news1()
 	n2 := news2()
+	s.expectNewsCacheVersion()
 	s.mock.ExpectQuery(regexp.QuoteMeta(" ")).
 		WillReturnRows(sqlmock.NewRows([]string{"news", "date", "created", "title", "description", "src", "link", "image", "file", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(n1.News, n1.Date, n1.Created, n1.Title, n1.Description, n1.NewsSourceID, n1.Link, n1.Image, n1.FileID, n1.File.File, n1.File.Name, n1.File.Path, n1.File.Downloads, n1.File.URL, n1.File.Downloaded).
@@ -290,10 +300,37 @@ func (s *NewsSuite) TestDateFiltersDoNotShareCacheEntries() {
 	second := first.AddDate(0, 0, 1)
 	for _, date := range []time.Time{first, second} {
 
+		s.expectNewsCacheVersion()
 		s.mock.ExpectQuery("SELECT .* FROM `news`").WithArgs(date).WillReturnRows(sqlmock.NewRows([]string{"news"}))
 		_, err := server.getNews(context.Background(), 0, 0, date)
 
 		require.NoError(s.T(), err)
 	}
 	require.NoError(s.T(), s.mock.ExpectationsWereMet())
+}
+
+func (s *NewsSuite) TestCacheVersionFailureDoesNotServeWarmCaches() {
+	server := s.getCampusTestServer()
+	ctx := context.Background()
+	s.expectNewsCacheVersion()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsSourcesQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"source", "title"}).AddRow(1, "Old title"))
+	sources, err := server.getNewsSources(ctx)
+	require.NoError(s.T(), err)
+	require.Len(s.T(), sources, 1)
+	s.expectNewsCacheVersion()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ExpectedListNewsQuery)).
+		WillReturnRows(sqlmock.NewRows([]string{"news"}).AddRow(1))
+	news, err := server.getNews(ctx, 0, 0, time.Unix(0, 0))
+	require.NoError(s.T(), err)
+	require.Len(s.T(), news, 1)
+
+	s.mock.ExpectQuery("SELECT .* FROM `news_cache_versions`").WithArgs(1, 1).WillReturnError(gorm.ErrInvalidDB)
+	sources, err = server.getNewsSources(ctx)
+	require.ErrorIs(s.T(), err, gorm.ErrInvalidDB)
+	require.Nil(s.T(), sources)
+	s.mock.ExpectQuery("SELECT .* FROM `news_cache_versions`").WithArgs(1, 1).WillReturnError(gorm.ErrInvalidDB)
+	news, err = server.getNews(ctx, 0, 0, time.Unix(0, 0))
+	require.ErrorIs(s.T(), err, gorm.ErrInvalidDB)
+	require.Nil(s.T(), news)
 }

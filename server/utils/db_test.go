@@ -53,7 +53,7 @@ func TestStudentCouncilMigration(t *testing.T) {
 				require.NoError(t, db.Exec("DELETE FROM migrations WHERE id = '20261105020000'").Error)
 				require.NoError(t, migration.Migrate(db))
 				// MySQL DDL can survive an interrupted migration without its ID being recorded.
-				require.NoError(t, db.Exec("DELETE FROM migrations WHERE id >= '20261105185936'").Error)
+				require.NoError(t, db.Exec("DELETE FROM migrations WHERE id IN ('20261105185936', '20261106000000')").Error)
 				require.NoError(t, db.Exec("DELETE FROM crontab WHERE type = 'tumonlineStatus'").Error)
 				require.NoError(t, migration.Migrate(db))
 				var count int64
