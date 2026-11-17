@@ -9,9 +9,9 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.7
-	github.com/go-sql-driver/mysql v1.10.1
+	github.com/go-sql-driver/mysql v1.10.2
 	github.com/gofrs/uuid/v5 v5.5.1
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/microcosm-cc/bluemonday v1.0.27
@@ -95,7 +95,7 @@ require (
 	golang.org/x/image v0.41.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
