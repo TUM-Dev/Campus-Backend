@@ -5,7 +5,7 @@ go 1.27.0
 require (
 	github.com/TUM-Dev/Campus-Backend/server v0.0.0-20261105170125-67ece3144523
 	github.com/sirupsen/logrus v1.10.2
-	google.golang.org/genproto/googleapis/api v0.0.0-20261116203732-fd2c7689a808
+	google.golang.org/genproto/googleapis/api v0.0.0-20261118221215-c8830f628b3f
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 )
