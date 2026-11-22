@@ -106,7 +106,9 @@ func (s *CampusServer) getNews(ctx context.Context, sourceID int32, lastNewsID i
 	if err := tx.Find(&news).Error; err != nil {
 		return nil, err
 	}
-	s.newsCache.Add(cacheKey, news)
+	if len(news) > 0 {
+		s.newsCache.Add(cacheKey, news)
+	}
 	return news, nil
 }
 

@@ -17,7 +17,7 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 	if err := s.checkDevice(ctx); err != nil {
 		return nil, err
 	}
-	movies, err := s.getMovies(ctx, req.LastId, req.OldestDateAt.AsTime())
+	movies, err := s.getMovies(ctx, req.LastId, req.OldestDateAt.AsTime(), req.Cinema)
 	if err != nil {
 		return nil, err
 	}
@@ -59,10 +59,14 @@ func movieCinema(movie model.Movie) pb.Cinema {
 	return pb.Cinema_TU_FILM
 }
 
-func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time) ([]model.Movie, error) {
+func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time, cinema pb.Cinema) ([]model.Movie, error) {
 	cacheKey := fmt.Sprintf("%d-%d", lastID, oldestDateAt.UnixNano())
 	if movies, ok := s.moviesCache.Get(cacheKey); ok {
-		return movies, nil
+		if cinema != pb.Cinema_CINEMA_UNSPECIFIED && !hasMovieForCinema(movies, cinema) {
+			s.moviesCache.Remove(cacheKey)
+		} else {
+			return movies, nil
+		}
 	}
 	var movies []model.Movie
 	tx := s.db.WithContext(ctx).
@@ -75,6 +79,17 @@ func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt
 		log.WithError(err).Error("Error while fetching movies from database")
 		return nil, status.Error(codes.Internal, "Error while fetching movies from database")
 	}
-	s.moviesCache.Add(cacheKey, movies)
+	if len(movies) > 0 && (cinema == pb.Cinema_CINEMA_UNSPECIFIED || hasMovieForCinema(movies, cinema)) {
+		s.moviesCache.Add(cacheKey, movies)
+	}
 	return movies, nil
+}
+
+func hasMovieForCinema(movies []model.Movie, cinema pb.Cinema) bool {
+	for _, m := range movies {
+		if movieCinema(m) == cinema {
+			return true
+		}
+	}
+	return false
 }
