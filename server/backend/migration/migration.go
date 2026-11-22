@@ -32,6 +32,7 @@ func Models() []any {
 		&model.DishRatingReport{},
 		&model.DishRatingTag{},
 		&model.DishRatingTagOption{},
+		&model.DishRatingVote{},
 		&model.DishSoldOutReport{},
 		&model.DishToDishNameTag{},
 		&model.DishesOfTheWeek{},

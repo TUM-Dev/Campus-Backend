@@ -363,7 +363,15 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 		return make([]*pb.SingleRatingReply, 0), totalMatching, totalMatching > int64(input.Offset)
 	}
 
-	q := baseQ.Order(ratingOrderClause(input.SortBy, "dishRating")).Limit(limit)
+	var q *gorm.DB
+	if input.SortBy == pb.RatingSortOrder_RATING_SORT_HELPFUL {
+		q = baseQ.
+			Joins("LEFT JOIN (SELECT rating_id, COUNT(*) AS vote_cnt FROM dish_rating_votes GROUP BY rating_id) v ON v.rating_id = dish_ratings.dishRating").
+			Order("COALESCE(v.vote_cnt, 0) desc, timestamp desc, dishRating desc").
+			Limit(limit)
+	} else {
+		q = baseQ.Order(ratingOrderClause(input.SortBy, "dishRating")).Limit(limit)
+	}
 	if input.Offset > 0 {
 		q = q.Offset(int(input.Offset))
 	}
@@ -377,15 +385,19 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 		ratingIDs[i] = v.DishRating
 	}
 	tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.DISH, tx)
+	votesByRating := batchLoadHelpfulVoteCounts(ratingIDs, tx)
+	userVotedByRating := batchLoadUserVotedRatings(ratingIDs, callerHash, tx)
 	resp := make([]*pb.SingleRatingReply, 0, len(ratings))
 	for _, v := range ratings {
 		entry := &pb.SingleRatingReply{
-			RatingId:    v.DishRating,
-			Points:      v.Points,
-			Comment:     v.Comment,
-			RatingTags:  tagsByRating[v.DishRating],
-			Visited:     timestamppb.New(v.Timestamp),
-			IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+			RatingId:     v.DishRating,
+			Points:       v.Points,
+			Comment:      v.Comment,
+			RatingTags:   tagsByRating[v.DishRating],
+			Visited:      timestamppb.New(v.Timestamp),
+			IsOwnRating:  callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+			HelpfulCount: votesByRating[v.DishRating],
+			UserVoted:    userVotedByRating[v.DishRating],
 		}
 		if v.Image != "" {
 			entry.ImageUrl = dishRatingImageURL(v.DishRating)
