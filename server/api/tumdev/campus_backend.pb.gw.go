@@ -796,6 +796,90 @@ func local_request_Campus_DeleteDevice_0(ctx context.Context, marshaler runtime.
 	return msg, metadata, err
 }
 
+func request_Campus_GetPushPreferences_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetPushPreferencesRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["device_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
+	}
+	protoReq.DeviceId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
+	}
+	msg, err := client.GetPushPreferences(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Campus_GetPushPreferences_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetPushPreferencesRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["device_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
+	}
+	protoReq.DeviceId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
+	}
+	msg, err := server.GetPushPreferences(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Campus_UpdatePushPreferences_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdatePushPreferencesRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["device_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
+	}
+	protoReq.DeviceId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
+	}
+	msg, err := client.UpdatePushPreferences(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Campus_UpdatePushPreferences_0(ctx context.Context, marshaler runtime.Marshaler, server CampusServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdatePushPreferencesRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["device_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
+	}
+	protoReq.DeviceId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
+	}
+	msg, err := server.UpdatePushPreferences(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 var filter_Campus_ListStudentClub_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
 func request_Campus_ListStudentClub_0(ctx context.Context, marshaler runtime.Marshaler, client CampusClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -1319,6 +1403,46 @@ func RegisterCampusHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		}
 		forward_Campus_DeleteDevice_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_Campus_GetPushPreferences_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/GetPushPreferences", runtime.WithHTTPPathPattern("/device/{device_id}/preferences"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Campus_GetPushPreferences_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Campus_GetPushPreferences_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPut, pattern_Campus_UpdatePushPreferences_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.Campus/UpdatePushPreferences", runtime.WithHTTPPathPattern("/device/{device_id}/preferences"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Campus_UpdatePushPreferences_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Campus_UpdatePushPreferences_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_Campus_ListStudentClub_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1790,6 +1914,40 @@ func RegisterCampusHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		}
 		forward_Campus_DeleteDevice_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_Campus_GetPushPreferences_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/GetPushPreferences", runtime.WithHTTPPathPattern("/device/{device_id}/preferences"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Campus_GetPushPreferences_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Campus_GetPushPreferences_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPut, pattern_Campus_UpdatePushPreferences_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.Campus/UpdatePushPreferences", runtime.WithHTTPPathPattern("/device/{device_id}/preferences"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Campus_UpdatePushPreferences_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Campus_UpdatePushPreferences_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_Campus_ListStudentClub_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1923,6 +2081,8 @@ var (
 	pattern_Campus_GetCanteenHeadCount_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"canteen", "headCount", "canteen_id"}, ""))
 	pattern_Campus_CreateDevice_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"device"}, ""))
 	pattern_Campus_DeleteDevice_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"device", "device_id"}, ""))
+	pattern_Campus_GetPushPreferences_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"device", "device_id", "preferences"}, ""))
+	pattern_Campus_UpdatePushPreferences_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"device", "device_id", "preferences"}, ""))
 	pattern_Campus_ListStudentClub_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"student_clubs"}, ""))
 	pattern_Campus_ListStudentGroup_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"student_groups"}, ""))
 )
@@ -1951,6 +2111,8 @@ var (
 	forward_Campus_GetCanteenHeadCount_0      = runtime.ForwardResponseMessage
 	forward_Campus_CreateDevice_0             = runtime.ForwardResponseMessage
 	forward_Campus_DeleteDevice_0             = runtime.ForwardResponseMessage
+	forward_Campus_GetPushPreferences_0       = runtime.ForwardResponseMessage
+	forward_Campus_UpdatePushPreferences_0    = runtime.ForwardResponseMessage
 	forward_Campus_ListStudentClub_0          = runtime.ForwardResponseMessage
 	forward_Campus_ListStudentGroup_0         = runtime.ForwardResponseMessage
 )

@@ -13,6 +13,8 @@ import (
 	_ "time/tzdata" // The runtime image does not include the zoneinfo database.
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/TUM-Dev/Campus-Backend/server/internal/fcm"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2/google"
 )
 
@@ -128,38 +130,68 @@ func (s *tumonlineStatus) setMessagesWithEstimatedEnd(ends []time.Time, now time
 	s.MessageEN += " Estimated end: " + latest.Format("2 Jan 2006, 15:04 MST") + "."
 }
 
-func fetchTUMOnlineStatus(ctx context.Context, client *http.Client) (tumonlineStatus, error) {
+func fetchStatusPageBody(ctx context.Context, client *http.Client) (string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, tumonlineStatusURL, nil)
 	if err != nil {
-		return tumonlineStatus{}, err
+		return "", err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return tumonlineStatus{}, err
+		return "", err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
-		return tumonlineStatus{}, fmt.Errorf("TUM status returned HTTP %d", resp.StatusCode)
+		return "", fmt.Errorf("TUM status returned HTTP %d", resp.StatusCode)
 	}
 	// Do not parse a truncated document as a valid all-clear.
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20+1))
 	if err != nil {
-		return tumonlineStatus{}, err
+		return "", err
 	}
 	if len(body) > 2<<20 {
-		return tumonlineStatus{}, fmt.Errorf("TUM status page exceeds size limit")
+		return "", fmt.Errorf("TUM status page exceeds size limit")
 	}
-	return parseTUMOnlineStatus(strings.NewReader(string(body)))
+	return string(body), nil
+}
+
+func fetchTUMOnlineStatus(ctx context.Context, client *http.Client) (tumonlineStatus, error) {
+	html, err := fetchStatusPageBody(ctx, client)
+	if err != nil {
+		return tumonlineStatus{}, err
+	}
+	return parseTUMOnlineStatus(strings.NewReader(html))
 }
 
 func (c *CronService) tumonlineStatusCron() error {
 	project := os.Getenv("FIREBASE_PROJECT_ID")
-	if project == "" || os.Getenv("TUMONLINE_STATUS_SYNC_ENABLED") != "true" {
+	syncRemoteConfig := project != "" && os.Getenv("TUMONLINE_STATUS_SYNC_ENABLED") == "true"
+	fcmEnabled := project != "" && os.Getenv("FCM_ENABLED") == "true"
+	if !syncRemoteConfig && !fcmEnabled {
 		return nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
-	state, err := fetchTUMOnlineStatus(ctx, c.client)
+	html, err := fetchStatusPageBody(ctx, c.client)
+	if err != nil {
+		return err
+	}
+
+	if fcmEnabled && c.db != nil {
+		if statuses, parseErr := parseTrackedServiceStatuses(strings.NewReader(html)); parseErr != nil {
+			log.WithError(parseErr).Warn("failed to parse tracked IT service statuses")
+		} else if sender, fcmErr := fcm.NewFromEnv(ctx); fcmErr != nil {
+			log.WithError(fcmErr).Warn("failed to initialize FCM sender for IT status alerts")
+		} else if sender != nil {
+			if notifyErr := syncAndNotifyServiceStatuses(ctx, c.db, sender, statuses); notifyErr != nil {
+				log.WithError(notifyErr).Warn("failed to sync/notify IT service statuses")
+			}
+		}
+	}
+
+	if !syncRemoteConfig {
+		return nil
+	}
+	state, err := parseTUMOnlineStatus(strings.NewReader(html))
 	if err != nil {
 		return err
 	}

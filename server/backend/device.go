@@ -122,36 +122,56 @@ func firstOrUnknown(md metadata.MD, key string) string {
 	return "unknown"
 }
 
-func (s *CampusServer) CreateDevice(_ context.Context, req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
+func deviceTypeString(dt pb.DeviceType) (string, error) {
+	switch dt {
+	case pb.DeviceType_IOS:
+		return "ios", nil
+	case pb.DeviceType_ANDROID:
+		return "android", nil
+	case pb.DeviceType_WINDOWS:
+		return "windows", nil
+	default:
+		return "", status.Error(codes.InvalidArgument, "invalid device type")
+	}
+}
+
+func (s *CampusServer) CreateDevice(ctx context.Context, req *pb.CreateDeviceRequest) (*pb.CreateDeviceReply, error) {
+	s.recordDeviceIfPresent(ctx)
 	if err := ValidateCreateDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	switch req.DeviceType {
-	case pb.DeviceType_ANDROID:
-		return nil, status.Error(codes.Unimplemented, "android device creation not implemented")
-	case pb.DeviceType_IOS:
-		return nil, status.Error(codes.Unimplemented, "ios device creation not implemented")
-	case pb.DeviceType_WINDOWS:
-		return nil, status.Error(codes.Unimplemented, "windows device creation not implemented")
+	dt, err := deviceTypeString(req.DeviceType)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, status.Error(codes.InvalidArgument, "invalid device type")
+	token := req.FcmToken
+	if token == "" {
+		token = req.PublicKey
+	}
+	rec := model.PushDevice{
+		DeviceID:   req.DeviceId,
+		DeviceType: dt,
+		FCMToken:   token,
+		UpdatedAt:  time.Now(),
+	}
+	if err := s.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "device_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"device_type", "fcm_token", "updated_at"}),
+	}).Create(&rec).Error; err != nil {
+		log.WithError(err).Error("failed to register push device")
+		return nil, status.Error(codes.Internal, "could not register device")
+	}
+	return &pb.CreateDeviceReply{DeviceId: req.DeviceId}, nil
 }
 
-func (s *CampusServer) DeleteDevice(_ context.Context, req *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+func (s *CampusServer) DeleteDevice(ctx context.Context, req *pb.DeleteDeviceRequest) (*pb.DeleteDeviceReply, error) {
+	s.recordDeviceIfPresent(ctx)
 	if err := ValidateDeleteDevice(req); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-
-	switch req.DeviceType {
-	case pb.DeviceType_ANDROID:
-		return nil, status.Error(codes.Unimplemented, "android device remove not implemented")
-	case pb.DeviceType_IOS:
-		return nil, status.Error(codes.Unimplemented, "ios device remove not implemented")
-	case pb.DeviceType_WINDOWS:
-		return nil, status.Error(codes.Unimplemented, "windows device remove not implemented")
+	if err := s.db.WithContext(ctx).Where("device_id = ?", req.DeviceId).Delete(&model.PushDevice{}).Error; err != nil {
+		log.WithError(err).Error("failed to delete push device")
+		return nil, status.Error(codes.Internal, "could not delete device")
 	}
-
-	return nil, status.Error(codes.InvalidArgument, "invalid device type")
+	return &pb.DeleteDeviceReply{DeviceId: req.DeviceId}, nil
 }

@@ -165,6 +165,19 @@ service Campus {
     option (google.api.http) = {delete: "/device/{device_id}"};
   }
 
+  // Get a device's push notification preferences (favorite dishes, dietary filters, IT status alerts).
+  rpc GetPushPreferences(GetPushPreferencesRequest) returns (PushPreferences) {
+    option (google.api.http) = {get: "/device/{device_id}/preferences"};
+  }
+
+  // Update a device's push notification preferences.
+  rpc UpdatePushPreferences(UpdatePushPreferencesRequest) returns (PushPreferences) {
+    option (google.api.http) = {
+      put: "/device/{device_id}/preferences"
+      body: "*"
+    };
+  }
+
   // List all avaliable student clubs
   rpc ListStudentClub(ListStudentClubRequest) returns (ListStudentClubReply) {
     option (google.api.http) = {get: "/student_clubs"};
@@ -187,6 +200,8 @@ message CreateDeviceRequest {
   string device_id = 1;
   string public_key = 2;
   DeviceType device_type = 3;
+  // Firebase Cloud Messaging registration token (falls back to public_key if empty).
+  string fcm_token = 4;
 }
 
 message CreateDeviceReply {
@@ -200,6 +215,36 @@ message DeleteDeviceRequest {
 
 message DeleteDeviceReply {
   string device_id = 1;
+}
+
+message GetPushPreferencesRequest {
+  string device_id = 1;
+}
+
+message PushPreferences {
+  string device_id = 1;
+  // eat-api canteen IDs to monitor for dish alerts (empty = all canteens)
+  repeated string canteen_ids = 2;
+  // Substring keywords or dish names to alert on (e.g. "Kaiserschmarrn", "Currywurst")
+  repeated string favorite_dishes = 3;
+  // Required eat-api dietary labels (e.g. "VEGAN", "VEGETARIAN")
+  repeated string dietary_labels = 4;
+  bool notify_favorite_dishes = 5;
+  // Receive outage and recovery alerts for TUMonline, Moodle, and eduroam
+  bool notify_it_status = 6;
+  bool notify_tu_film = 7;
+  Language language = 8;
+}
+
+message UpdatePushPreferencesRequest {
+  string device_id = 1;
+  repeated string canteen_ids = 2;
+  repeated string favorite_dishes = 3;
+  repeated string dietary_labels = 4;
+  bool notify_favorite_dishes = 5;
+  bool notify_it_status = 6;
+  bool notify_tu_film = 7;
+  Language language = 8;
 }
 
 message News {
@@ -504,6 +549,10 @@ message DishRatingSummary {
   repeated RatingTagResult rating_tags = 8;
   repeated RatingTagResult name_tags = 9;
   int64 latest_image_rating_id = 10;
+  // eat-api dietary/allergen labels (e.g. "VEGAN", "VEGETARIAN")
+  repeated string labels = 14;
+  // Student price in Euro cents (0 if unknown)
+  int32 price_student_cents = 15;
 }
 
 message ListDishRatingSummariesReply {
@@ -523,6 +572,10 @@ message ListTopRatedDishesRequest {
   int32 limit = 5;
   // Optional minimum number of visible ratings required (default 1).
   int32 min_ratings = 6;
+  // Optional dietary label filter: every listed label must be present on the dish (e.g. ["VEGAN"]).
+  repeated string required_labels = 7;
+  // Optional student price cap in Euro cents (e.g. 400 for <= 4.00 EUR); 0 disables filter.
+  int32 max_price_student_cents = 8;
 }
 
 message TopRatedDish {
@@ -532,6 +585,8 @@ message TopRatedDish {
   double bayesian_score = 4;
   int64 rating_count = 5;
   int64 latest_image_rating_id = 6;
+  repeated string labels = 9;
+  int32 price_student_cents = 10;
 }
 
 message ListTopRatedDishesReply {

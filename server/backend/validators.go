@@ -11,8 +11,8 @@ func ValidateCreateDevice(req *pb.CreateDeviceRequest) error {
 		return errors.New("deviceId is empty")
 	}
 
-	if req.DeviceType == pb.DeviceType_IOS && req.PublicKey == "" {
-		return errors.New("publicKey is needed for IOS")
+	if req.FcmToken == "" && req.PublicKey == "" {
+		return errors.New("fcm_token or public_key is required")
 	}
 
 	return nil
