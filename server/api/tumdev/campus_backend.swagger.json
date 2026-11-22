@@ -1348,6 +1348,10 @@
           "type": "integer",
           "format": "int32",
           "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
+        },
+        "includeUnratedFallback": {
+          "type": "boolean",
+          "description": "Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet."
         }
       }
     },

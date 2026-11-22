@@ -2,8 +2,11 @@ package cron
 
 import (
 	"errors"
+	"io"
 	"net/http"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
@@ -91,4 +94,126 @@ func TestCanteenDirectoryNetworkFailure(t *testing.T) {
 	t.Cleanup(func() { webfetch.Client = old })
 	webfetch.Client = &http.Client{Transport: dishImportTestTransport(func(*http.Request) (*http.Response, error) { return nil, errors.New("offline") })}
 	require.ErrorContains(t, downloadCanteenNames(&CronService{}), "offline")
+}
+
+func TestDownloadDailyDishesFetchesCurrentAndNextWeek(t *testing.T) {
+	old := webfetch.Client
+	t.Cleanup(func() { webfetch.Client = old })
+
+	var requestedURLs []string
+	webfetch.Client = &http.Client{Transport: dishImportTestTransport(func(r *http.Request) (*http.Response, error) {
+		requestedURLs = append(requestedURLs, r.URL.String())
+		if strings.HasSuffix(r.URL.Path, "/2026/45.json") {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Body:       io.NopCloser(strings.NewReader(`{"days":[{"date":"2026-11-04","dishes":[{"name":"Pasta","dish_type":"Pasta"}]}]}`)),
+			}, nil
+		}
+		// Next week (46) not published yet -> 404 must be tolerated gracefully.
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Status:     "404 Not Found",
+			Body:       io.NopCloser(strings.NewReader("not found")),
+		}, nil
+	})}
+
+	db, mock := dishImportTestDB(t)
+	mock.ExpectQuery("SELECT \\* FROM `canteens`").WillReturnRows(
+		sqlmock.NewRows([]string{"cafeteria", "name"}).AddRow(7, "MENSA_GARCHING"),
+	)
+	mock.ExpectBegin()
+	mock.ExpectQuery("SELECT .* FROM `dishes`").WithArgs("Pasta", int64(7), 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).AddRow(42, "Pasta", "Pasta", 7))
+	mock.ExpectQuery("SELECT .* FROM `dishes_of_the_weeks`").WithArgs(2, int64(42), 45, 2026, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dishesOfTheWeek", "dishID", "year", "week", "day"}).AddRow(1, 42, 2026, 45, 2))
+	mock.ExpectCommit()
+
+	now := time.Date(2026, time.November, 4, 12, 0, 0, 0, time.UTC)
+	require.NoError(t, downloadDailyDishesAt(&CronService{db: db}, now))
+	require.Equal(t, []string{
+		"https://tum-dev.github.io/eat-api/mensa-garching/2026/45.json",
+		"https://tum-dev.github.io/eat-api/mensa-garching/2026/46.json",
+	}, requestedURLs)
+}
+
+func TestAddDishTagsToMappingDeduplicatesAndExcludes(t *testing.T) {
+	db, mock := dishImportTestDB(t)
+	// Tag 10 matched twice via two expressions; tag 20 matched and excluded.
+	mock.ExpectQuery("SELECT `nameTagID` FROM `included_dish_name_tag_options`").
+		WithArgs("currywurst mit chicken hähnchen").
+		WillReturnRows(sqlmock.NewRows([]string{"nameTagID"}).AddRow(10).AddRow(10).AddRow(20))
+	mock.ExpectQuery("SELECT `nameTagID` FROM `excluded_dish_name_tag_options`").
+		WithArgs("currywurst mit chicken hähnchen").
+		WillReturnRows(sqlmock.NewRows([]string{"nameTagID"}).AddRow(20))
+	// Only tag 10 should be inserted once via FirstOrCreate.
+	mock.ExpectQuery("SELECT .* FROM `dish_to_dish_name_tags`").
+		WithArgs(int64(99), int64(10), 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dishToDishNameTag", "dishID", "nameTagID"}))
+	mock.ExpectBegin()
+	mock.ExpectExec("INSERT INTO `dish_to_dish_name_tags`").
+		WithArgs(int64(99), int64(10)).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	addDishTagsToMapping(99, "Currywurst mit Chicken Hähnchen", db)
+}
+
+func TestDownloadDailyDishesCrossesISOYearBoundary(t *testing.T) {
+	old := webfetch.Client
+	t.Cleanup(func() { webfetch.Client = old })
+
+	var requestedURLs []string
+	webfetch.Client = &http.Client{Transport: dishImportTestTransport(func(r *http.Request) (*http.Response, error) {
+		requestedURLs = append(requestedURLs, r.URL.String())
+		if strings.HasSuffix(r.URL.Path, "/2026/53.json") {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Body:       io.NopCloser(strings.NewReader(`{"days":[{"date":"2026-12-28","dishes":[{"name":"Pasta","dish_type":"Pasta"}]}]}`)),
+			}, nil
+		}
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Status:     "404 Not Found",
+			Body:       io.NopCloser(strings.NewReader("not found")),
+		}, nil
+	})}
+
+	db, mock := dishImportTestDB(t)
+	mock.ExpectQuery("SELECT \\* FROM `canteens`").WillReturnRows(
+		sqlmock.NewRows([]string{"cafeteria", "name"}).AddRow(7, "MENSA_GARCHING"),
+	)
+	mock.ExpectBegin()
+	mock.ExpectQuery("SELECT .* FROM `dishes`").WithArgs("Pasta", int64(7), 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).AddRow(42, "Pasta", "Pasta", 7))
+	mock.ExpectQuery("SELECT .* FROM `dishes_of_the_weeks`").WithArgs(0, int64(42), 53, 2026, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dishesOfTheWeek", "dishID", "year", "week", "day"}).AddRow(1, 42, 2026, 53, 0))
+	mock.ExpectCommit()
+
+	// 2026-12-28 is Monday of ISO week 2026-W53; +7 days is ISO week 2027-W01.
+	now := time.Date(2026, time.December, 28, 12, 0, 0, 0, time.UTC)
+	require.NoError(t, downloadDailyDishesAt(&CronService{db: db}, now))
+	require.Equal(t, []string{
+		"https://tum-dev.github.io/eat-api/mensa-garching/2026/53.json",
+		"https://tum-dev.github.io/eat-api/mensa-garching/2027/01.json",
+	}, requestedURLs)
+}
+
+func TestBackfillMissingDishNameTags(t *testing.T) {
+	db, mock := dishImportTestDB(t)
+	mock.ExpectQuery("SELECT dish, name FROM `dishes`").WillReturnRows(
+		sqlmock.NewRows([]string{"dish", "name"}).AddRow(5, "Kürbis Suppe"),
+	)
+	mock.ExpectQuery("SELECT `nameTagID` FROM `included_dish_name_tag_options`").
+		WithArgs("kürbis suppe").
+		WillReturnRows(sqlmock.NewRows([]string{"nameTagID"}).AddRow(3))
+	mock.ExpectQuery("SELECT `nameTagID` FROM `excluded_dish_name_tag_options`").
+		WithArgs("kürbis suppe").
+		WillReturnRows(sqlmock.NewRows([]string{"nameTagID"}))
+	mock.ExpectQuery("SELECT .* FROM `dish_to_dish_name_tags`").
+		WithArgs(int64(5), int64(3), 1).
+		WillReturnRows(sqlmock.NewRows([]string{"dishToDishNameTag", "dishID", "nameTagID"}).AddRow(1, 5, 3))
+
+	require.NoError(t, BackfillMissingDishNameTags(db))
 }

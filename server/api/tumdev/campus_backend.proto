@@ -306,6 +306,8 @@ message GetDishRatingsRequest {
   google.protobuf.Timestamp to = 4;
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 5;
+  // Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet.
+  bool include_unrated_fallback = 11;
 }
 
 message GetDishRatingsReply {

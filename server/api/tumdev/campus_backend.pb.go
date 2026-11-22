@@ -1162,9 +1162,11 @@ type GetDishRatingsRequest struct {
 	// Optional Parameter to define an interval for the ratings (Upper bound)
 	To *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=to,proto3" json:"to,omitempty"`
 	// Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
-	Limit         int32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Limit int32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet.
+	IncludeUnratedFallback bool `protobuf:"varint,11,opt,name=include_unrated_fallback,json=includeUnratedFallback,proto3" json:"include_unrated_fallback,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GetDishRatingsRequest) Reset() {
@@ -1230,6 +1232,13 @@ func (x *GetDishRatingsRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *GetDishRatingsRequest) GetIncludeUnratedFallback() bool {
+	if x != nil {
+		return x.IncludeUnratedFallback
+	}
+	return false
 }
 
 type GetDishRatingsReply struct {
@@ -4862,14 +4871,15 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\vrating_tags\x18\x06 \x03(\v2\x14.api.RatingTagResultR\n" +
 	"ratingTags\x12!\n" +
 	"\frating_count\x18\a \x01(\x03R\vratingCount\x12;\n" +
-	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xbc\x01\n" +
+	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xf6\x01\n" +
 	"\x15GetDishRatingsRequest\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
 	"\x04dish\x18\x02 \x01(\tR\x04dish\x12.\n" +
 	"\x04from\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
 	"\x02to\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x14\n" +
-	"\x05limit\x18\x05 \x01(\x05R\x05limit\"\xd7\x02\n" +
+	"\x05limit\x18\x05 \x01(\x05R\x05limit\x128\n" +
+	"\x18include_unrated_fallback\x18\v \x01(\bR\x16includeUnratedFallback\"\xd7\x02\n" +
 	"\x13GetDishRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
