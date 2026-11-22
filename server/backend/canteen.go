@@ -247,9 +247,12 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		}
 		if row.RatingCount == 0 {
 			if input.IncludeUnratedFallback {
+				soldOutCount := batchLoadTodaySoldOutCounts([]int64{int64(dishID)}, time.Now(), tx)[int64(dishID)]
 				return &pb.GetDishRatingsReply{
-					Distribution: buildRatingDistribution(0, 0, 0, 0, 0),
-					NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+					Distribution:       buildRatingDistribution(0, 0, 0, 0, 0),
+					NameTags:           queryTags(canteenID, dishID, model.NAME, tx),
+					SoldOut:            soldOutCount >= soldOutConfirmThreshold,
+					SoldOutReportCount: soldOutCount,
 				}, nil
 			}
 			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
@@ -262,9 +265,12 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		err = tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if input.IncludeUnratedFallback {
+				soldOutCount := batchLoadTodaySoldOutCounts([]int64{int64(dishID)}, time.Now(), tx)[int64(dishID)]
 				return &pb.GetDishRatingsReply{
-					Distribution: buildRatingDistribution(0, 0, 0, 0, 0),
-					NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+					Distribution:       buildRatingDistribution(0, 0, 0, 0, 0),
+					NameTags:           queryTags(canteenID, dishID, model.NAME, tx),
+					SoldOut:            soldOutCount >= soldOutConfirmThreshold,
+					SoldOutReportCount: soldOutCount,
 				}, nil
 			}
 			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
@@ -280,16 +286,19 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 	}
 
 	callerHash := callerDeviceHash(ctx)
+	soldOutCount := batchLoadTodaySoldOutCounts([]int64{int64(dishID)}, time.Now(), tx)[int64(dishID)]
 	return &pb.GetDishRatingsReply{
-		Avg:          avg,
-		Std:          std,
-		Min:          minPts,
-		Max:          maxPts,
-		RatingCount:  count,
-		Distribution: dist,
-		Rating:       queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
-		RatingTags:   ratingTags,
-		NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+		Avg:                avg,
+		Std:                std,
+		Min:                minPts,
+		Max:                maxPts,
+		RatingCount:        count,
+		Distribution:       dist,
+		Rating:             queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
+		RatingTags:         ratingTags,
+		NameTags:           queryTags(canteenID, dishID, model.NAME, tx),
+		SoldOut:            soldOutCount >= soldOutConfirmThreshold,
+		SoldOutReportCount: soldOutCount,
 	}, nil
 }
 
