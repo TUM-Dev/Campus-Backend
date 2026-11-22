@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -55,4 +57,28 @@ func TestCheckDeviceMissingMetadataFallsBackToUnknown(t *testing.T) {
 func TestCheckDeviceWithoutMetadataFails(t *testing.T) {
 	s := CampusServer{deviceBuf: newDeviceBuffer()}
 	require.Error(t, s.checkDevice(context.Background()))
+}
+
+func TestDeviceBufferFlushDoesNotDoubleCount(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	buf := newDeviceBuffer()
+
+	buf.add("dev-uuid-1", "/api.Campus/ListNews", "iOS 26", "5.0.0")
+	require.NoError(t, buf.flush(db))
+
+	var d model.Device
+	require.NoError(t, db.Where("uuid = ?", "dev-uuid-1").First(&d).Error)
+	require.Equal(t, int32(1), d.Counter)
+	require.Equal(t, "/api.Campus/ListNews", d.LastAPI)
+	require.Equal(t, "5.0.0", d.AppVersion)
+
+	buf.add("dev-uuid-1", "/api.Campus/ListMovies", "iOS 26", "5.1.0")
+	buf.add("dev-uuid-1", "/api.Campus/GetDishRatings", "iOS 26", "5.1.0")
+	require.NoError(t, buf.flush(db))
+
+	require.NoError(t, db.Where("uuid = ?", "dev-uuid-1").First(&d).Error)
+	require.Equal(t, int32(3), d.Counter)
+	require.Equal(t, "/api.Campus/GetDishRatings", d.LastAPI)
+	require.Equal(t, "5.1.0", d.AppVersion)
 }
