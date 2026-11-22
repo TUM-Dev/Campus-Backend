@@ -799,6 +799,77 @@
         ]
       }
     },
+    "/libraries": {
+      "get": {
+        "summary": "List TUM libraries with their latest live occupancy estimates.",
+        "operationId": "Campus_ListLibraries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListLibrariesReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "campus",
+            "description": "Optional campus filter (e.g. \"garching\", \"stammgelaende\", \"weihenstephan\")",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/libraries/{libraryId}/busyness": {
+      "get": {
+        "summary": "Returns live library occupancy alongside typical 15-minute weekday busyness curves.",
+        "operationId": "Campus_GetLibraryBusyness",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetLibraryBusynessReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "weekday",
+            "description": "Optional weekday: 0 (Monday) - 6 (Sunday). Defaults to today in Europe/Berlin.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/movies/{lastId}": {
       "get": {
         "operationId": "Campus_ListMovies",
@@ -1509,6 +1580,36 @@
         }
       }
     },
+    "apiGetLibraryBusynessReply": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "$ref": "#/definitions/apiLibraryOccupancy"
+        },
+        "weekday": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "typicalSlots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiBusynessSlot"
+          }
+        },
+        "vsTypicalPercent": {
+          "type": "number",
+          "format": "double"
+        },
+        "hasTypicalComparison": {
+          "type": "boolean"
+        },
+        "bestUpcomingSlot": {
+          "$ref": "#/definitions/apiBusynessSlot",
+          "title": "Quietest upcoming 15-minute study slot (08:00-21:00 Berlin) with historical data, if any"
+        }
+      }
+    },
     "apiGetUpdateNoteReply": {
       "type": "object",
       "properties": {
@@ -1527,6 +1628,37 @@
         "English"
       ],
       "default": "German"
+    },
+    "apiLibraryOccupancy": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "campus": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "maxCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "percent": {
+          "type": "number",
+          "format": "float",
+          "description": "Current capacity utilization clamped to 0..100, or -1 if unavailable."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "apiListAvailableCanteenTagsReply": {
       "type": "object",
@@ -1687,6 +1819,18 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "apiListLibrariesReply": {
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiLibraryOccupancy"
           }
         }
       }

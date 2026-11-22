@@ -1,4 +1,4 @@
-h1:ipH6+sXdliXX4vmHDfz36am3B6MHP3k0w1gYwYpE1IE=
+h1:XuK2BcZCcL0dzdaoLNiXzD3Q4NqkVINpOujstORXaKo=
 20250412000000_baseline.sql h1:QwCRxB5k5Ax/C4fvAhUMvwoWuqW6DHs9aPpQi/ecKd4=
 20261105185936_student_councils.sql h1:nSG/ObKYmV67DlkOxG5DWJKc5fwaaYHWYPJ71oRGZJU=
 20261106000000_tumonline_status.sql h1:GGiRe3bfnRb60HC+19IIEe05Fevt90SGi4rpXpoCB+Q=
@@ -7,3 +7,4 @@ h1:ipH6+sXdliXX4vmHDfz36am3B6MHP3k0w1gYwYpE1IE=
 20261122055500_seed_canteen_rating_tags.sql h1:9uaViarwecPptOlnNUBB8REZZolZts0Lp/yyOF/1LTw=
 20261122060500_fix_dish_name_tag_typos.sql h1:bqcSrwRGR6YU6BmhdWKmrOgzANu5/X3ve+v5CuEUtWI=
 20261122060600_dish_sold_out_reports.sql h1:1lotGbX2qorn+jpEgCTKQo85r/3oGdJHo6E70a2CTyM=
+20261122061500_library_occupancy.sql h1:YFbkh4r92oBgjJ5SL9F+b2IISOFpGrXcloKiOUVnIcM=

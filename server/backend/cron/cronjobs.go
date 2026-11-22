@@ -221,7 +221,7 @@ func (c *CronService) dispatchJob(cronjob model.Crontab) error {
 	case MovieType:
 		return c.movieCron()
 	case CanteenHeadcount:
-		return c.canteenHeadCountCron()
+		return errors.Join(c.canteenHeadCountCron(), c.libraryOccupancyCron())
 	case FeedbackEmail:
 		return c.feedbackEmailCron()
 	default:
