@@ -36,6 +36,8 @@ func Models() []any {
 		&model.DishesOfTheWeek{},
 		&model.Feedback{},
 		&model.File{},
+		&model.LibraryOccupancy{},
+		&model.LibraryOccupancyHistory{},
 		&model.Movie{},
 		&model.NewExamResultsSubscriber{},
 		&model.News{},

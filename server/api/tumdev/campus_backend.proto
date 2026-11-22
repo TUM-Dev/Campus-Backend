@@ -180,6 +180,16 @@ service Campus {
   rpc ListStudentGroup(ListStudentGroupRequest) returns (ListStudentGroupReply) {
     option (google.api.http) = {get: "/student_groups"};
   }
+
+  // List TUM libraries with their latest live occupancy estimates.
+  rpc ListLibraries(ListLibrariesRequest) returns (ListLibrariesReply) {
+    option (google.api.http) = {get: "/libraries"};
+  }
+
+  // Returns live library occupancy alongside typical 15-minute weekday busyness curves.
+  rpc GetLibraryBusyness(GetLibraryBusynessRequest) returns (GetLibraryBusynessReply) {
+    option (google.api.http) = {get: "/libraries/{library_id}/busyness"};
+  }
 }
 
 enum DeviceType {
@@ -785,4 +795,40 @@ message StudentCouncilCollection {
   // Might not be stable over time.
   // Not unique across student club and student council collections.
   uint64 unstable_collection_id = 4;
+}
+
+message ListLibrariesRequest {
+  // Optional campus filter (e.g. "garching", "stammgelaende", "weihenstephan")
+  string campus = 1;
+}
+
+message LibraryOccupancy {
+  string library_id = 1;
+  string name = 2;
+  string campus = 3;
+  uint32 count = 4;
+  uint32 max_count = 5;
+  // Current capacity utilization clamped to 0..100, or -1 if unavailable.
+  float percent = 6;
+  google.protobuf.Timestamp timestamp = 7;
+}
+
+message ListLibrariesReply {
+  repeated LibraryOccupancy libraries = 1;
+}
+
+message GetLibraryBusynessRequest {
+  string library_id = 1;
+  // Optional weekday: 0 (Monday) - 6 (Sunday). Defaults to today in Europe/Berlin.
+  optional int32 weekday = 2;
+}
+
+message GetLibraryBusynessReply {
+  LibraryOccupancy current = 1;
+  int32 weekday = 2;
+  repeated BusynessSlot typical_slots = 3;
+  double vs_typical_percent = 4;
+  bool has_typical_comparison = 5;
+  // Quietest upcoming 15-minute study slot (08:00-21:00 Berlin) with historical data, if any
+  BusynessSlot best_upcoming_slot = 6;
 }
