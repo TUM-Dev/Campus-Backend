@@ -246,6 +246,12 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 			return nil, status.Error(codes.Internal, "Could not query dish ratings.")
 		}
 		if row.RatingCount == 0 {
+			if input.IncludeUnratedFallback {
+				return &pb.GetDishRatingsReply{
+					Distribution: buildRatingDistribution(0, 0, 0, 0, 0),
+					NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+				}, nil
+			}
 			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
 		}
 		avg, std, minPts, maxPts, count = row.Average, row.Std, row.Min, row.Max, row.RatingCount
@@ -255,6 +261,12 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		var statsForDish model.DishRatingStatistic
 		err = tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if input.IncludeUnratedFallback {
+				return &pb.GetDishRatingsReply{
+					Distribution: buildRatingDistribution(0, 0, 0, 0, 0),
+					NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+				}, nil
+			}
 			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
 		}
 		if err != nil {

@@ -10,6 +10,16 @@ import (
 
 var Client = &http.Client{Timeout: 30 * time.Second}
 
+// StatusError is returned when an upstream HTTP endpoint responds with a non-200 status.
+type StatusError struct {
+	StatusCode int
+	Status     string
+}
+
+func (e *StatusError) Error() string {
+	return fmt.Sprintf("upstream returned %s", e.Status)
+}
+
 // Get returns an OK response. The caller must close its body.
 func Get(url string) (*http.Response, error) {
 	resp, err := Client.Get(url)
@@ -18,7 +28,7 @@ func Get(url string) (*http.Response, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		_ = resp.Body.Close()
-		return nil, fmt.Errorf("upstream returned %s", resp.Status)
+		return nil, &StatusError{StatusCode: resp.StatusCode, Status: resp.Status}
 	}
 	return resp, nil
 }
