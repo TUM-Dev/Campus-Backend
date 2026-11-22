@@ -1,10 +1,15 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	"database/sql"
 	"fmt"
+	"image"
+	"image/color"
+	"image/jpeg"
+	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -94,18 +99,19 @@ func readTestImage(t *testing.T) []byte {
 
 const (
 	expectedHeadCountQuery    = "SELECT * FROM `canteen_head_counts` WHERE `canteen_head_counts`.`canteen_id` = ? ORDER BY `canteen_head_counts`.`canteen_id` LIMIT ?"
-	expectedCanteenByName     = "SELECT * FROM `canteens` WHERE name LIKE ? ORDER BY `canteens`.`cafeteria` LIMIT ?"
+	expectedCanteenByName     = "SELECT * FROM `canteens` WHERE name = ? ORDER BY `canteens`.`cafeteria` LIMIT ?"
 	expectedInsertRating      = "INSERT INTO `canteen_ratings` (`points`,`comment`,`cafeteriaID`,`image`,`timestamp`) VALUES (?,?,?,?,?)"
-	expectedCanteenTagExists  = "SELECT count(*) FROM `canteen_rating_tag_options` WHERE cafeteriaRatingTagOption LIKE ?"
+	expectedCanteenTagsIn     = "SELECT `cafeteriaRatingTagOption` FROM `canteen_rating_tag_options` WHERE cafeteriaRatingTagOption IN (?,?)"
+	expectedCanteenTagSingle  = "SELECT `cafeteriaRatingTagOption` FROM `canteen_rating_tag_options` WHERE cafeteriaRatingTagOption IN (?)"
 	expectedInsertCanteenTag  = "INSERT INTO `canteen_rating_tags` (`correspondingRating`,`tagID`,`points`) VALUES (?,?,?)"
-	expectedDishByName        = "SELECT * FROM `dishes` WHERE name LIKE ? AND cafeteriaID = ? ORDER BY `dishes`.`dish` LIMIT ?"
+	expectedDishByName        = "SELECT * FROM `dishes` WHERE name = ? AND cafeteriaID = ? ORDER BY `dishes`.`dish` LIMIT ?"
 	expectedInsertDishRating  = "INSERT INTO `dish_ratings` (`points`,`dishID`,`comment`,`image`,`timestamp`) VALUES (?,?,?,?,?)"
 	expectedDishNameTagIDs    = "SELECT `nameTagID` FROM `dish_to_dish_name_tags` WHERE dishID = ?"
 	expectedInsertDishNameTag = "INSERT INTO `dish_name_tags` (`correspondingRating`,`tagNameID`,`points`) VALUES (?,?,?)"
-	expectedDishTagExists     = "SELECT count(*) FROM `dish_rating_tag_options` WHERE dishRatingTagOption LIKE ?"
+	expectedDishTagSingle     = "SELECT `dishRatingTagOption` FROM `dish_rating_tag_options` WHERE dishRatingTagOption IN (?)"
 	expectedInsertDishTag     = "INSERT INTO `dish_rating_tags` (`parentRating`,`tagID`,`points`) VALUES (?,?,?)"
-	expectedCanteenIDQuery    = "SELECT `cafeteria` FROM `canteens` WHERE name LIKE ?"
-	expectedDishIDQuery       = "SELECT `dish` FROM `dishes` WHERE name LIKE ? AND cafeteriaID = ?"
+	expectedCanteenIDQuery    = "SELECT `cafeteria` FROM `canteens` WHERE name = ?"
+	expectedDishIDQuery       = "SELECT `dish` FROM `dishes` WHERE name = ? AND cafeteriaID = ?"
 	expectedCanteenStatsQuery = "SELECT * FROM `cafeteria_rating_statistics` WHERE cafeteriaId = ? ORDER BY `cafeteria_rating_statistics`.`cafeteriaID` LIMIT ?"
 	expectedDishStatsQuery    = "SELECT * FROM `dish_rating_statistics` WHERE cafeteriaID = ? AND dishID = ? ORDER BY `dish_rating_statistics`.`cafeteriaID` LIMIT ?"
 )
@@ -190,7 +196,7 @@ func (s *CanteenSuite) Test_ListAvailableCanteenTags() {
 }
 
 func (s *CanteenSuite) Test_ListDishes() {
-	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID WHERE (weekly.day = ? AND weekly.week = ? and weekly.year = ?) AND c.name LIKE ?")).
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID WHERE (weekly.day = ? AND weekly.week = ? and weekly.year = ?) AND c.name = ?")).
 		WithArgs(int32(1), int32(45), int32(2026), "MENSA_GARCHING").
 		WillReturnRows(sqlmock.NewRows([]string{"name"}).AddRow("Pasta").AddRow("Curry"))
 
@@ -226,7 +232,7 @@ func (s *CanteenSuite) Test_ListDishesInvalidInput() {
 func (s *CanteenSuite) Test_ListDishesEmptyAndDBError() {
 	server := s.server()
 	for _, dbError := range []bool{false, true} {
-		query := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID WHERE (weekly.day = ? AND weekly.week = ? and weekly.year = ?) AND c.name LIKE ?")).
+		query := s.mock.ExpectQuery(regexp.QuoteMeta("SELECT d.name FROM dishes_of_the_weeks weekly JOIN dishes d ON d.dish = weekly.dishID JOIN canteens c ON c.cafeteria = d.cafeteriaID WHERE (weekly.day = ? AND weekly.week = ? and weekly.year = ?) AND c.name = ?")).
 			WithArgs(int32(4), int32(52), int32(2022), "DOES_NOT_EXIST")
 		if dbError {
 			query.WillReturnError(fmt.Errorf("connection refused"))
@@ -387,21 +393,19 @@ func (s *CanteenSuite) Test_CreateCanteenRating() {
 	imgPath := expectedImagePath(img, "cafeterias", canteenID)
 
 	s.expectCanteenLookup(canteenName, canteenID)
+	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenTagsIn)).
+		WithArgs(int64(5), int64(7)).
+		WillReturnRows(sqlmock.NewRows([]string{"cafeteriaRatingTagOption"}).AddRow(5).AddRow(7))
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertRating)).
 		WithArgs(points, comment, canteenID, imgPath, sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
-	s.mock.ExpectCommit()
 	for _, tag := range []struct{ id, points int64 }{{5, 1}, {7, 3}} {
-		s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenTagExists)).
-			WithArgs(tag.id).
-			WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).AddRow(1))
-		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertCanteenTag)).
 			WithArgs(ratingID, tag.id, tag.points).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		s.mock.ExpectCommit()
 	}
+	s.mock.ExpectCommit()
 
 	server := s.server()
 	response, err := server.CreateCanteenRating(testCtx(), &pb.CreateCanteenRatingRequest{
@@ -423,17 +427,11 @@ func (s *CanteenSuite) Test_CreateCanteenRatingUnknownTag() {
 	const (
 		canteenName = "mensa-garching"
 		canteenID   = int64(2)
-		ratingID    = int64(42)
 	)
 	s.expectCanteenLookup(canteenName, canteenID)
-	s.mock.ExpectBegin()
-	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertRating)).
-		WithArgs(int32(4), "", canteenID, "", sqlmock.AnyArg()).
-		WillReturnResult(sqlmock.NewResult(ratingID, 1))
-	s.mock.ExpectCommit()
-	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenTagExists)).
+	s.mock.ExpectQuery(regexp.QuoteMeta(expectedCanteenTagSingle)).
 		WithArgs(int64(99)).
-		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).AddRow(0))
+		WillReturnRows(sqlmock.NewRows([]string{"cafeteriaRatingTagOption"}))
 
 	server := s.server()
 	_, err := server.CreateCanteenRating(testCtx(), &pb.CreateCanteenRatingRequest{
@@ -495,23 +493,19 @@ func (s *CanteenSuite) Test_CreateDishRating() {
 		WithArgs(dishName, canteenID, 1).
 		WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).
 			AddRow(dishID, dishName, "Dessert", canteenID))
+	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishTagSingle)).
+		WithArgs(int64(1)).
+		WillReturnRows(sqlmock.NewRows([]string{"dishRatingTagOption"}).AddRow(1))
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertDishRating)).
 		WithArgs(points, dishID, comment, imgPath, sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
-	s.mock.ExpectCommit()
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishNameTagIDs)).
 		WithArgs(dishID).
 		WillReturnRows(sqlmock.NewRows([]string{"nameTagID"}).AddRow(nameTagID))
-	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertDishNameTag)).
 		WithArgs(ratingID, nameTagID, points).
 		WillReturnResult(sqlmock.NewResult(1, 1))
-	s.mock.ExpectCommit()
-	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishTagExists)).
-		WithArgs(int64(1)).
-		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).AddRow(1))
-	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertDishTag)).
 		WithArgs(ratingID, int64(1), int32(4)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
@@ -529,6 +523,54 @@ func (s *CanteenSuite) Test_CreateDishRating() {
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.CreateDishRatingReply{}, response)
 	require.FileExists(s.T(), imgPath)
+}
+
+func (s *CanteenSuite) Test_CreateDishRatingInvalidImageAndTagValidation() {
+	server := s.server()
+
+	tcases := []struct {
+		name string
+		tags []*pb.RatingTag
+	}{
+		{"tag points too low", []*pb.RatingTag{{TagId: 1, Points: 0}}},
+		{"tag points too high", []*pb.RatingTag{{TagId: 1, Points: 6}}},
+		{"duplicate tag id", []*pb.RatingTag{{TagId: 1, Points: 3}, {TagId: 1, Points: 4}}},
+	}
+	for _, tc := range tcases {
+		s.Run(tc.name, func() {
+			_, err := server.CreateDishRating(testCtx(), &pb.CreateDishRatingRequest{
+				Points:     4,
+				CanteenId:  "mensa-garching",
+				Dish:       "Pasta",
+				RatingTags: tc.tags,
+			})
+			require.Equal(s.T(), codes.InvalidArgument, status.Code(err))
+		})
+	}
+
+	s.Run("corrupt image returns InvalidArgument without panic", func() {
+		s.expectCanteenLookup("mensa-garching", 2)
+		s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishByName)).
+			WithArgs("Pasta", int64(2), 1).
+			WillReturnRows(sqlmock.NewRows([]string{"dish", "name", "type", "cafeteriaID"}).AddRow(13, "Pasta", "Pasta", 2))
+		_, err := server.CreateDishRating(testCtx(), &pb.CreateDishRatingRequest{
+			Points:    4,
+			CanteenId: "mensa-garching",
+			Dish:      "Pasta",
+			Image:     []byte("not a valid image"),
+		})
+		require.Equal(s.T(), codes.InvalidArgument, status.Code(err))
+	})
+
+	s.Run("256 UTF-8 umlaut runes accepted while 257 rejected", func() {
+		s.expectCanteenLookup("mensa-garching", 2)
+		id, err := inputSanitizationForNewRatingElements(5, strings.Repeat("ü", 256), "mensa-garching", s.DB)
+		require.NoError(s.T(), err)
+		require.Equal(s.T(), int64(2), id)
+
+		_, err = inputSanitizationForNewRatingElements(5, strings.Repeat("ü", 257), "mensa-garching", s.DB)
+		require.Equal(s.T(), codes.InvalidArgument, status.Code(err))
+	})
 }
 
 func (s *CanteenSuite) Test_CreateDishRatingUnknownDish() {
@@ -572,4 +614,59 @@ func (s *CanteenSuite) Test_RatingPointsBoundaries() {
 // a normal test function and pass our suite to suite.Run
 func TestCanteenSuite(t *testing.T) {
 	suite.Run(t, new(CanteenSuite))
+}
+
+func TestStoreImageSupportsPNGAndScalesLargeImagesCleanly(t *testing.T) {
+	t.Run("PNG upload decodes and stores valid JPEG", func(t *testing.T) {
+		img := image.NewRGBA(image.Rect(0, 0, 64, 48))
+		for y := 0; y < 48; y++ {
+			for x := 0; x < 64; x++ {
+				img.Set(x, y, color.RGBA{R: uint8(x * 4), G: uint8(y * 5), B: 128, A: 255})
+			}
+		}
+		var buf bytes.Buffer
+		require.NoError(t, png.Encode(&buf, img))
+
+		dir := t.TempDir()
+		storedPath, err := storeImage(dir, buf.Bytes())
+		require.NoError(t, err)
+		require.FileExists(t, storedPath)
+
+		storedBytes, err := os.ReadFile(storedPath)
+		require.NoError(t, err)
+		decoded, err := jpeg.Decode(bytes.NewReader(storedBytes))
+		require.NoError(t, err)
+		require.Equal(t, 64, decoded.Bounds().Dx())
+		require.Equal(t, 48, decoded.Bounds().Dy())
+	})
+
+	t.Run("large image over 512KiB resizes and compresses with clamped quality", func(t *testing.T) {
+		// Uncompressed 1600x400 PNG exceeds targetMaxImageBytes (~2.5 MiB) and triggers both width resize and quality clamping.
+		img := image.NewRGBA(image.Rect(0, 0, 1600, 400))
+		for y := 0; y < 400; y++ {
+			for x := 0; x < 1600; x++ {
+				img.Set(x, y, color.RGBA{
+					R: uint8((x*37 + y*17) & 0xff),
+					G: uint8((x*13 ^ y*29) & 0xff),
+					B: uint8((x*7 + y*41) & 0xff),
+					A: 255,
+				})
+			}
+		}
+		var buf bytes.Buffer
+		enc := png.Encoder{CompressionLevel: png.NoCompression}
+		require.NoError(t, enc.Encode(&buf, img))
+		require.Greater(t, buf.Len(), targetMaxImageBytes)
+
+		dir := t.TempDir()
+		storedPath, err := storeImage(dir, buf.Bytes())
+		require.NoError(t, err)
+
+		storedBytes, err := os.ReadFile(storedPath)
+		require.NoError(t, err)
+		decoded, err := jpeg.Decode(bytes.NewReader(storedBytes))
+		require.NoError(t, err)
+		require.Equal(t, maxRatingImageWidth, decoded.Bounds().Dx(), "wide image should be resized to maxRatingImageWidth")
+		require.Greater(t, len(storedBytes), 20*1024, "compressed JPEG must not collapse to quality=1 artifact")
+	})
 }
