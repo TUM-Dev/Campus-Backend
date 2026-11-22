@@ -36,6 +36,7 @@ const (
 	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
 	Campus_GetCanteenHeadCount_FullMethodName      = "/api.Campus/GetCanteenHeadCount"
+	Campus_GetCanteenBusyness_FullMethodName       = "/api.Campus/GetCanteenBusyness"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 	Campus_ListStudentClub_FullMethodName          = "/api.Campus/ListStudentClub"
@@ -65,6 +66,8 @@ type CampusClient interface {
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateFeedbackRequest, CreateFeedbackReply], error)
 	GetCanteenHeadCount(ctx context.Context, in *GetCanteenHeadCountRequest, opts ...grpc.CallOption) (*GetCanteenHeadCountReply, error)
+	// Returns live canteen occupancy alongside typical 15-minute weekday busyness curves and quieter-slot hints.
+	GetCanteenBusyness(ctx context.Context, in *GetCanteenBusynessRequest, opts ...grpc.CallOption) (*GetCanteenBusynessReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -247,6 +250,16 @@ func (c *campusClient) GetCanteenHeadCount(ctx context.Context, in *GetCanteenHe
 	return out, nil
 }
 
+func (c *campusClient) GetCanteenBusyness(ctx context.Context, in *GetCanteenBusynessRequest, opts ...grpc.CallOption) (*GetCanteenBusynessReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCanteenBusynessReply)
+	err := c.cc.Invoke(ctx, Campus_GetCanteenBusyness_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *campusClient) CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateDeviceReply)
@@ -311,6 +324,8 @@ type CampusServer interface {
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(grpc.ClientStreamingServer[CreateFeedbackRequest, CreateFeedbackReply]) error
 	GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error)
+	// Returns live canteen occupancy alongside typical 15-minute weekday busyness curves and quieter-slot hints.
+	GetCanteenBusyness(context.Context, *GetCanteenBusynessRequest) (*GetCanteenBusynessReply, error)
 	// Create an device (Android/iOS/Windows) for push notifications
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
@@ -377,6 +392,9 @@ func (UnimplementedCampusServer) CreateFeedback(grpc.ClientStreamingServer[Creat
 }
 func (UnimplementedCampusServer) GetCanteenHeadCount(context.Context, *GetCanteenHeadCountRequest) (*GetCanteenHeadCountReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCanteenHeadCount not implemented")
+}
+func (UnimplementedCampusServer) GetCanteenBusyness(context.Context, *GetCanteenBusynessRequest) (*GetCanteenBusynessReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCanteenBusyness not implemented")
 }
 func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateDevice not implemented")
@@ -688,6 +706,24 @@ func _Campus_GetCanteenHeadCount_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetCanteenBusyness_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCanteenBusynessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetCanteenBusyness(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetCanteenBusyness_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetCanteenBusyness(ctx, req.(*GetCanteenBusynessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Campus_CreateDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDeviceRequest)
 	if err := dec(in); err != nil {
@@ -826,6 +862,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCanteenHeadCount",
 			Handler:    _Campus_GetCanteenHeadCount_Handler,
+		},
+		{
+			MethodName: "GetCanteenBusyness",
+			Handler:    _Campus_GetCanteenBusyness_Handler,
 		},
 		{
 			MethodName: "CreateDevice",

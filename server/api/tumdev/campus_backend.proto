@@ -118,6 +118,11 @@ service Campus {
     option (google.api.http) = {get: "/canteen/headCount/{canteen_id}"};
   }
 
+  // Returns live canteen occupancy alongside typical 15-minute weekday busyness curves and quieter-slot hints.
+  rpc GetCanteenBusyness(GetCanteenBusynessRequest) returns (GetCanteenBusynessReply) {
+    option (google.api.http) = {get: "/canteen/busyness/{canteen_id}"};
+  }
+
   // Create an device (Android/iOS/Windows) for push notifications
   rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceReply) {
     option (google.api.http) = {
@@ -531,6 +536,41 @@ message GetCanteenHeadCountReply {
   float percent = 3;
   // A time stamp indicating how up to date the response is. Only valid in case percent != -1.
   google.protobuf.Timestamp timestamp = 4;
+}
+
+message GetCanteenBusynessRequest {
+  // Canteen ID (eat-api id or enum name, e.g. "mensa-garching").
+  string canteen_id = 1;
+  // Optional weekday: 0 (Monday) - 6 (Sunday). Defaults to today in Europe/Berlin when omitted.
+  optional int32 weekday = 2;
+}
+
+message BusynessSlot {
+  // Hour in Europe/Berlin (0-23)
+  int32 hour = 1;
+  // Minute in Europe/Berlin (0, 15, 30, 45)
+  int32 minute = 2;
+  // Typical utilization percentage (0-100) averaged across recent weeks
+  double typical_percent = 3;
+  // Typical head count averaged across recent weeks
+  double typical_count = 4;
+  // Number of distinct days contributing to this slot
+  int32 sample_days = 5;
+}
+
+message GetCanteenBusynessReply {
+  // Current live head count (same shape as GetCanteenHeadCountReply; percent == -1 if unavailable)
+  GetCanteenHeadCountReply current = 1;
+  // Weekday (0=Monday .. 6=Sunday) that the curve represents
+  int32 weekday = 2;
+  // Typical 15-minute occupancy curve for the requested weekday
+  repeated BusynessSlot typical_slots = 3;
+  // Difference between current percent and typical percent for the current 15-min slot (0 if unavailable)
+  double vs_typical_percent = 4;
+  // True when vs_typical_percent is computed from both live data and historical data
+  bool has_typical_comparison = 5;
+  // Quietest upcoming 15-minute lunch slot (11:00-14:30 Berlin) with historical data, if any
+  BusynessSlot best_upcoming_slot = 6;
 }
 
 enum Language {
