@@ -73,6 +73,55 @@ func (DeviceType) EnumDescriptor() ([]byte, []int) {
 	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{0}
 }
 
+type RatingSortOrder int32
+
+const (
+	RatingSortOrder_RATING_SORT_NEWEST  RatingSortOrder = 0
+	RatingSortOrder_RATING_SORT_HIGHEST RatingSortOrder = 1
+	RatingSortOrder_RATING_SORT_LOWEST  RatingSortOrder = 2
+)
+
+// Enum value maps for RatingSortOrder.
+var (
+	RatingSortOrder_name = map[int32]string{
+		0: "RATING_SORT_NEWEST",
+		1: "RATING_SORT_HIGHEST",
+		2: "RATING_SORT_LOWEST",
+	}
+	RatingSortOrder_value = map[string]int32{
+		"RATING_SORT_NEWEST":  0,
+		"RATING_SORT_HIGHEST": 1,
+		"RATING_SORT_LOWEST":  2,
+	}
+)
+
+func (x RatingSortOrder) Enum() *RatingSortOrder {
+	p := new(RatingSortOrder)
+	*p = x
+	return p
+}
+
+func (x RatingSortOrder) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RatingSortOrder) Descriptor() protoreflect.EnumDescriptor {
+	return file_tumdev_campus_backend_proto_enumTypes[1].Descriptor()
+}
+
+func (RatingSortOrder) Type() protoreflect.EnumType {
+	return &file_tumdev_campus_backend_proto_enumTypes[1]
+}
+
+func (x RatingSortOrder) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RatingSortOrder.Descriptor instead.
+func (RatingSortOrder) EnumDescriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{1}
+}
+
 type Language int32
 
 const (
@@ -103,11 +152,11 @@ func (x Language) String() string {
 }
 
 func (Language) Descriptor() protoreflect.EnumDescriptor {
-	return file_tumdev_campus_backend_proto_enumTypes[1].Descriptor()
+	return file_tumdev_campus_backend_proto_enumTypes[2].Descriptor()
 }
 
 func (Language) Type() protoreflect.EnumType {
-	return &file_tumdev_campus_backend_proto_enumTypes[1]
+	return &file_tumdev_campus_backend_proto_enumTypes[2]
 }
 
 func (x Language) Number() protoreflect.EnumNumber {
@@ -116,7 +165,7 @@ func (x Language) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Language.Descriptor instead.
 func (Language) EnumDescriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{1}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{2}
 }
 
 type CreateFeedbackRequest_Recipient int32
@@ -151,11 +200,11 @@ func (x CreateFeedbackRequest_Recipient) String() string {
 }
 
 func (CreateFeedbackRequest_Recipient) Descriptor() protoreflect.EnumDescriptor {
-	return file_tumdev_campus_backend_proto_enumTypes[2].Descriptor()
+	return file_tumdev_campus_backend_proto_enumTypes[3].Descriptor()
 }
 
 func (CreateFeedbackRequest_Recipient) Type() protoreflect.EnumType {
-	return &file_tumdev_campus_backend_proto_enumTypes[2]
+	return &file_tumdev_campus_backend_proto_enumTypes[3]
 }
 
 func (x CreateFeedbackRequest_Recipient) Number() protoreflect.EnumNumber {
@@ -911,9 +960,19 @@ type ListCanteenRatingsRequest struct {
 	// Optional Parameter to define an interval for the ratings (Upper bound)
 	To *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=to,proto3" json:"to,omitempty"`
 	// Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
-	Limit         int32 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Limit int32 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Optional pagination offset (0-based)
+	Offset int32 `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	// Optional sort order for returned ratings (default: newest first)
+	SortBy RatingSortOrder `protobuf:"varint,6,opt,name=sort_by,json=sortBy,proto3,enum=api.RatingSortOrder" json:"sort_by,omitempty"`
+	// Optional filter: return only ratings with an attached photo
+	OnlyWithImages bool `protobuf:"varint,7,opt,name=only_with_images,json=onlyWithImages,proto3" json:"only_with_images,omitempty"`
+	// Optional filter: return only ratings with a non-empty comment
+	OnlyWithComments bool `protobuf:"varint,8,opt,name=only_with_comments,json=onlyWithComments,proto3" json:"only_with_comments,omitempty"`
+	// Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
+	OmitInlineImages bool `protobuf:"varint,9,opt,name=omit_inline_images,json=omitInlineImages,proto3" json:"omit_inline_images,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ListCanteenRatingsRequest) Reset() {
@@ -972,6 +1031,41 @@ func (x *ListCanteenRatingsRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *ListCanteenRatingsRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *ListCanteenRatingsRequest) GetSortBy() RatingSortOrder {
+	if x != nil {
+		return x.SortBy
+	}
+	return RatingSortOrder_RATING_SORT_NEWEST
+}
+
+func (x *ListCanteenRatingsRequest) GetOnlyWithImages() bool {
+	if x != nil {
+		return x.OnlyWithImages
+	}
+	return false
+}
+
+func (x *ListCanteenRatingsRequest) GetOnlyWithComments() bool {
+	if x != nil {
+		return x.OnlyWithComments
+	}
+	return false
+}
+
+func (x *ListCanteenRatingsRequest) GetOmitInlineImages() bool {
+	if x != nil {
+		return x.OmitInlineImages
+	}
+	return false
 }
 
 type RatingDistribution struct {
@@ -1051,15 +1145,19 @@ func (x *RatingDistribution) GetStars_5() int64 {
 }
 
 type ListCanteenRatingsReply struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Rating        []*SingleRatingReply   `protobuf:"bytes,1,rep,name=rating,proto3" json:"rating,omitempty"`
-	Avg           float64                `protobuf:"fixed64,2,opt,name=avg,proto3" json:"avg,omitempty"`
-	Std           float64                `protobuf:"fixed64,3,opt,name=std,proto3" json:"std,omitempty"`
-	Min           int32                  `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
-	Max           int32                  `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
-	RatingTags    []*RatingTagResult     `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
-	RatingCount   int64                  `protobuf:"varint,7,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
-	Distribution  *RatingDistribution    `protobuf:"bytes,8,opt,name=distribution,proto3" json:"distribution,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Rating       []*SingleRatingReply   `protobuf:"bytes,1,rep,name=rating,proto3" json:"rating,omitempty"`
+	Avg          float64                `protobuf:"fixed64,2,opt,name=avg,proto3" json:"avg,omitempty"`
+	Std          float64                `protobuf:"fixed64,3,opt,name=std,proto3" json:"std,omitempty"`
+	Min          int32                  `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
+	Max          int32                  `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
+	RatingTags   []*RatingTagResult     `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	RatingCount  int64                  `protobuf:"varint,7,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	Distribution *RatingDistribution    `protobuf:"bytes,8,opt,name=distribution,proto3" json:"distribution,omitempty"`
+	// Total ratings matching the active filters (from/to, only_with_images, only_with_comments)
+	TotalMatching int64 `protobuf:"varint,9,opt,name=total_matching,json=totalMatching,proto3" json:"total_matching,omitempty"`
+	// True if additional ratings exist beyond offset + len(rating)
+	HasMore       bool `protobuf:"varint,10,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1150,6 +1248,20 @@ func (x *ListCanteenRatingsReply) GetDistribution() *RatingDistribution {
 	return nil
 }
 
+func (x *ListCanteenRatingsReply) GetTotalMatching() int64 {
+	if x != nil {
+		return x.TotalMatching
+	}
+	return 0
+}
+
+func (x *ListCanteenRatingsReply) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
 type GetDishRatingsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
@@ -1162,9 +1274,19 @@ type GetDishRatingsRequest struct {
 	// Optional Parameter to define an interval for the ratings (Upper bound)
 	To *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=to,proto3" json:"to,omitempty"`
 	// Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
-	Limit         int32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Limit int32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Optional pagination offset (0-based)
+	Offset int32 `protobuf:"varint,6,opt,name=offset,proto3" json:"offset,omitempty"`
+	// Optional sort order for returned ratings (default: newest first)
+	SortBy RatingSortOrder `protobuf:"varint,7,opt,name=sort_by,json=sortBy,proto3,enum=api.RatingSortOrder" json:"sort_by,omitempty"`
+	// Optional filter: return only ratings with an attached photo
+	OnlyWithImages bool `protobuf:"varint,8,opt,name=only_with_images,json=onlyWithImages,proto3" json:"only_with_images,omitempty"`
+	// Optional filter: return only ratings with a non-empty comment
+	OnlyWithComments bool `protobuf:"varint,9,opt,name=only_with_comments,json=onlyWithComments,proto3" json:"only_with_comments,omitempty"`
+	// Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
+	OmitInlineImages bool `protobuf:"varint,10,opt,name=omit_inline_images,json=omitInlineImages,proto3" json:"omit_inline_images,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetDishRatingsRequest) Reset() {
@@ -1232,6 +1354,41 @@ func (x *GetDishRatingsRequest) GetLimit() int32 {
 	return 0
 }
 
+func (x *GetDishRatingsRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *GetDishRatingsRequest) GetSortBy() RatingSortOrder {
+	if x != nil {
+		return x.SortBy
+	}
+	return RatingSortOrder_RATING_SORT_NEWEST
+}
+
+func (x *GetDishRatingsRequest) GetOnlyWithImages() bool {
+	if x != nil {
+		return x.OnlyWithImages
+	}
+	return false
+}
+
+func (x *GetDishRatingsRequest) GetOnlyWithComments() bool {
+	if x != nil {
+		return x.OnlyWithComments
+	}
+	return false
+}
+
+func (x *GetDishRatingsRequest) GetOmitInlineImages() bool {
+	if x != nil {
+		return x.OmitInlineImages
+	}
+	return false
+}
+
 type GetDishRatingsReply struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// a number of actual ratings
@@ -1243,11 +1400,15 @@ type GetDishRatingsReply struct {
 	// minimum of all dish rating tags which were used to rate this dish in this cafeteria
 	Min int32 `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
 	// maximum of all dish rating tags which were used to rate this dish in this cafeteria
-	Max           int32               `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
-	RatingTags    []*RatingTagResult  `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
-	NameTags      []*RatingTagResult  `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
-	RatingCount   int64               `protobuf:"varint,8,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
-	Distribution  *RatingDistribution `protobuf:"bytes,9,opt,name=distribution,proto3" json:"distribution,omitempty"`
+	Max          int32               `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
+	RatingTags   []*RatingTagResult  `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	NameTags     []*RatingTagResult  `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
+	RatingCount  int64               `protobuf:"varint,8,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	Distribution *RatingDistribution `protobuf:"bytes,9,opt,name=distribution,proto3" json:"distribution,omitempty"`
+	// Total ratings matching the active filters (from/to, only_with_images, only_with_comments)
+	TotalMatching int64 `protobuf:"varint,10,opt,name=total_matching,json=totalMatching,proto3" json:"total_matching,omitempty"`
+	// True if additional ratings exist beyond offset + len(rating)
+	HasMore       bool `protobuf:"varint,11,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1345,11 +1506,25 @@ func (x *GetDishRatingsReply) GetDistribution() *RatingDistribution {
 	return nil
 }
 
+func (x *GetDishRatingsReply) GetTotalMatching() int64 {
+	if x != nil {
+		return x.TotalMatching
+	}
+	return 0
+}
+
+func (x *GetDishRatingsReply) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
 type SingleRatingReply struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// number in the range 1-5
 	Points int32 `protobuf:"varint,1,opt,name=points,proto3" json:"points,omitempty"`
-	// Optional JPEG image in Base64
+	// Optional JPEG image in Base64 (omitted when omit_inline_images is true)
 	Image []byte `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
 	// Optional comment (max 256 chars)
 	Comment    string                 `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
@@ -1357,6 +1532,8 @@ type SingleRatingReply struct {
 	Visited    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=visited,proto3" json:"visited,omitempty"`
 	// Unique identifier of the rating
 	RatingId int64 `protobuf:"varint,6,opt,name=rating_id,json=ratingId,proto3" json:"rating_id,omitempty"`
+	// URL to fetch the rating photo over HTTP with caching; empty if no photo attached
+	ImageUrl string `protobuf:"bytes,7,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	// True if the rating was submitted by the calling device (x-device-id)
 	IsOwnRating bool `protobuf:"varint,8,opt,name=is_own_rating,json=isOwnRating,proto3" json:"is_own_rating,omitempty"`
 	// Present if the rating was edited after creation
@@ -1435,6 +1612,13 @@ func (x *SingleRatingReply) GetRatingId() int64 {
 		return x.RatingId
 	}
 	return 0
+}
+
+func (x *SingleRatingReply) GetImageUrl() string {
+	if x != nil {
+		return x.ImageUrl
+	}
+	return ""
 }
 
 func (x *SingleRatingReply) GetIsOwnRating() bool {
@@ -2872,6 +3056,7 @@ type DishRatingSummary struct {
 	RatingTags          []*RatingTagResult     `protobuf:"bytes,8,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
 	NameTags            []*RatingTagResult     `protobuf:"bytes,9,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
 	LatestImageRatingId int64                  `protobuf:"varint,10,opt,name=latest_image_rating_id,json=latestImageRatingId,proto3" json:"latest_image_rating_id,omitempty"`
+	LatestImageUrl      string                 `protobuf:"bytes,11,opt,name=latest_image_url,json=latestImageUrl,proto3" json:"latest_image_url,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -2974,6 +3159,13 @@ func (x *DishRatingSummary) GetLatestImageRatingId() int64 {
 		return x.LatestImageRatingId
 	}
 	return 0
+}
+
+func (x *DishRatingSummary) GetLatestImageUrl() string {
+	if x != nil {
+		return x.LatestImageUrl
+	}
+	return ""
 }
 
 type ListDishRatingSummariesReply struct {
@@ -3118,6 +3310,7 @@ type TopRatedDish struct {
 	BayesianScore       float64                `protobuf:"fixed64,4,opt,name=bayesian_score,json=bayesianScore,proto3" json:"bayesian_score,omitempty"`
 	RatingCount         int64                  `protobuf:"varint,5,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
 	LatestImageRatingId int64                  `protobuf:"varint,6,opt,name=latest_image_rating_id,json=latestImageRatingId,proto3" json:"latest_image_rating_id,omitempty"`
+	LatestImageUrl      string                 `protobuf:"bytes,7,opt,name=latest_image_url,json=latestImageUrl,proto3" json:"latest_image_url,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -3192,6 +3385,13 @@ func (x *TopRatedDish) GetLatestImageRatingId() int64 {
 		return x.LatestImageRatingId
 	}
 	return 0
+}
+
+func (x *TopRatedDish) GetLatestImageUrl() string {
+	if x != nil {
+		return x.LatestImageUrl
+	}
+	return ""
 }
 
 type ListTopRatedDishesReply struct {
@@ -4840,19 +5040,24 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x04link\x18\x02 \x01(\tR\x04link\x124\n" +
 	"\acreated\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\acreated\x12.\n" +
 	"\x04from\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
-	"\x02to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\xac\x01\n" +
+	"\x02to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\xf9\x02\n" +
 	"\x19ListCanteenRatingsRequest\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12.\n" +
 	"\x04from\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
 	"\x02to\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x14\n" +
-	"\x05limit\x18\x04 \x01(\x05R\x05limit\"\x91\x01\n" +
+	"\x05limit\x18\x04 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x05 \x01(\x05R\x06offset\x12-\n" +
+	"\asort_by\x18\x06 \x01(\x0e2\x14.api.RatingSortOrderR\x06sortBy\x12(\n" +
+	"\x10only_with_images\x18\a \x01(\bR\x0eonlyWithImages\x12,\n" +
+	"\x12only_with_comments\x18\b \x01(\bR\x10onlyWithComments\x12,\n" +
+	"\x12omit_inline_images\x18\t \x01(\bR\x10omitInlineImages\"\x91\x01\n" +
 	"\x12RatingDistribution\x12\x17\n" +
 	"\astars_1\x18\x01 \x01(\x03R\x06stars1\x12\x17\n" +
 	"\astars_2\x18\x02 \x01(\x03R\x06stars2\x12\x17\n" +
 	"\astars_3\x18\x03 \x01(\x03R\x06stars3\x12\x17\n" +
 	"\astars_4\x18\x04 \x01(\x03R\x06stars4\x12\x17\n" +
-	"\astars_5\x18\x05 \x01(\x03R\x06stars5\"\xa8\x02\n" +
+	"\astars_5\x18\x05 \x01(\x03R\x06stars5\"\xea\x02\n" +
 	"\x17ListCanteenRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
@@ -4862,14 +5067,23 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\vrating_tags\x18\x06 \x03(\v2\x14.api.RatingTagResultR\n" +
 	"ratingTags\x12!\n" +
 	"\frating_count\x18\a \x01(\x03R\vratingCount\x12;\n" +
-	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xbc\x01\n" +
+	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\x12%\n" +
+	"\x0etotal_matching\x18\t \x01(\x03R\rtotalMatching\x12\x19\n" +
+	"\bhas_more\x18\n" +
+	" \x01(\bR\ahasMore\"\x89\x03\n" +
 	"\x15GetDishRatingsRequest\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
 	"\x04dish\x18\x02 \x01(\tR\x04dish\x12.\n" +
 	"\x04from\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
 	"\x02to\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x14\n" +
-	"\x05limit\x18\x05 \x01(\x05R\x05limit\"\xd7\x02\n" +
+	"\x05limit\x18\x05 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x06 \x01(\x05R\x06offset\x12-\n" +
+	"\asort_by\x18\a \x01(\x0e2\x14.api.RatingSortOrderR\x06sortBy\x12(\n" +
+	"\x10only_with_images\x18\b \x01(\bR\x0eonlyWithImages\x12,\n" +
+	"\x12only_with_comments\x18\t \x01(\bR\x10onlyWithComments\x12,\n" +
+	"\x12omit_inline_images\x18\n" +
+	" \x01(\bR\x10omitInlineImages\"\x99\x03\n" +
 	"\x13GetDishRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
@@ -4880,7 +5094,10 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"ratingTags\x121\n" +
 	"\tname_tags\x18\a \x03(\v2\x14.api.RatingTagResultR\bnameTags\x12!\n" +
 	"\frating_count\x18\b \x01(\x03R\vratingCount\x12;\n" +
-	"\fdistribution\x18\t \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xc8\x02\n" +
+	"\fdistribution\x18\t \x01(\v2\x17.api.RatingDistributionR\fdistribution\x12%\n" +
+	"\x0etotal_matching\x18\n" +
+	" \x01(\x03R\rtotalMatching\x12\x19\n" +
+	"\bhas_more\x18\v \x01(\bR\ahasMore\"\xe5\x02\n" +
 	"\x11SingleRatingReply\x12\x16\n" +
 	"\x06points\x18\x01 \x01(\x05R\x06points\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\fR\x05image\x12\x18\n" +
@@ -4888,7 +5105,8 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\vrating_tags\x18\x04 \x03(\v2\x18.api.RatingTagNewRequestR\n" +
 	"ratingTags\x124\n" +
 	"\avisited\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\avisited\x12\x1b\n" +
-	"\trating_id\x18\x06 \x01(\x03R\bratingId\x12\"\n" +
+	"\trating_id\x18\x06 \x01(\x03R\bratingId\x12\x1b\n" +
+	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\"\n" +
 	"\ris_own_rating\x18\b \x01(\bR\visOwnRating\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"7\n" +
@@ -4983,7 +5201,7 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x03day\x18\x04 \x01(\x05R\x03day\x12\x16\n" +
 	"\x06dishes\x18\x05 \x03(\tR\x06dishes\x12.\n" +
 	"\x04from\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
-	"\x02to\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\xee\x02\n" +
+	"\x02to\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\x98\x03\n" +
 	"\x11DishRatingSummary\x12\x12\n" +
 	"\x04dish\x18\x01 \x01(\tR\x04dish\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
@@ -4996,7 +5214,8 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"ratingTags\x121\n" +
 	"\tname_tags\x18\t \x03(\v2\x14.api.RatingTagResultR\bnameTags\x123\n" +
 	"\x16latest_image_rating_id\x18\n" +
-	" \x01(\x03R\x13latestImageRatingId\"T\n" +
+	" \x01(\x03R\x13latestImageRatingId\x12(\n" +
+	"\x10latest_image_url\x18\v \x01(\tR\x0elatestImageUrl\"T\n" +
 	"\x1cListDishRatingSummariesReply\x124\n" +
 	"\tsummaries\x18\x01 \x03(\v2\x16.api.DishRatingSummaryR\tsummaries\"\xab\x01\n" +
 	"\x19ListTopRatedDishesRequest\x12\x12\n" +
@@ -5007,7 +5226,7 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"canteen_id\x18\x04 \x01(\tR\tcanteenId\x12\x14\n" +
 	"\x05limit\x18\x05 \x01(\x05R\x05limit\x12\x1f\n" +
 	"\vmin_ratings\x18\x06 \x01(\x05R\n" +
-	"minRatings\"\xd2\x01\n" +
+	"minRatings\"\xfc\x01\n" +
 	"\fTopRatedDish\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
@@ -5015,7 +5234,8 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x03avg\x18\x03 \x01(\x01R\x03avg\x12%\n" +
 	"\x0ebayesian_score\x18\x04 \x01(\x01R\rbayesianScore\x12!\n" +
 	"\frating_count\x18\x05 \x01(\x03R\vratingCount\x123\n" +
-	"\x16latest_image_rating_id\x18\x06 \x01(\x03R\x13latestImageRatingId\"D\n" +
+	"\x16latest_image_rating_id\x18\x06 \x01(\x03R\x13latestImageRatingId\x12(\n" +
+	"\x10latest_image_url\x18\a \x01(\tR\x0elatestImageUrl\"D\n" +
 	"\x17ListTopRatedDishesReply\x12)\n" +
 	"\x06dishes\x18\x01 \x03(\v2\x11.api.TopRatedDishR\x06dishes\"\xfc\x01\n" +
 	"\x16RoomInformationElement\x12\x17\n" +
@@ -5154,7 +5374,11 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"DeviceType\x12\a\n" +
 	"\x03IOS\x10\x00\x12\v\n" +
 	"\aANDROID\x10\x01\x12\v\n" +
-	"\aWINDOWS\x10\x02*#\n" +
+	"\aWINDOWS\x10\x02*Z\n" +
+	"\x0fRatingSortOrder\x12\x16\n" +
+	"\x12RATING_SORT_NEWEST\x10\x00\x12\x17\n" +
+	"\x13RATING_SORT_HIGHEST\x10\x01\x12\x16\n" +
+	"\x12RATING_SORT_LOWEST\x10\x02*#\n" +
 	"\bLanguage\x12\n" +
 	"\n" +
 	"\x06German\x10\x00\x12\v\n" +
@@ -5202,197 +5426,200 @@ func file_tumdev_campus_backend_proto_rawDescGZIP() []byte {
 	return file_tumdev_campus_backend_proto_rawDescData
 }
 
-var file_tumdev_campus_backend_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_tumdev_campus_backend_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_tumdev_campus_backend_proto_msgTypes = make([]protoimpl.MessageInfo, 74)
 var file_tumdev_campus_backend_proto_goTypes = []any{
 	(DeviceType)(0),                         // 0: api.DeviceType
-	(Language)(0),                           // 1: api.Language
-	(CreateFeedbackRequest_Recipient)(0),    // 2: api.CreateFeedbackRequest.Recipient
-	(*CreateDeviceRequest)(nil),             // 3: api.CreateDeviceRequest
-	(*CreateDeviceReply)(nil),               // 4: api.CreateDeviceReply
-	(*DeleteDeviceRequest)(nil),             // 5: api.DeleteDeviceRequest
-	(*DeleteDeviceReply)(nil),               // 6: api.DeleteDeviceReply
-	(*News)(nil),                            // 7: api.News
-	(*ListNewsReply)(nil),                   // 8: api.ListNewsReply
-	(*ListNewsRequest)(nil),                 // 9: api.ListNewsRequest
-	(*ListNewsSourcesRequest)(nil),          // 10: api.ListNewsSourcesRequest
-	(*ListNewsSourcesReply)(nil),            // 11: api.ListNewsSourcesReply
-	(*NewsSource)(nil),                      // 12: api.NewsSource
-	(*ListNewsAlertsRequest)(nil),           // 13: api.ListNewsAlertsRequest
-	(*ListNewsAlertsReply)(nil),             // 14: api.ListNewsAlertsReply
-	(*NewsAlert)(nil),                       // 15: api.NewsAlert
-	(*ListCanteenRatingsRequest)(nil),       // 16: api.ListCanteenRatingsRequest
-	(*RatingDistribution)(nil),              // 17: api.RatingDistribution
-	(*ListCanteenRatingsReply)(nil),         // 18: api.ListCanteenRatingsReply
-	(*GetDishRatingsRequest)(nil),           // 19: api.GetDishRatingsRequest
-	(*GetDishRatingsReply)(nil),             // 20: api.GetDishRatingsReply
-	(*SingleRatingReply)(nil),               // 21: api.SingleRatingReply
-	(*CreateCanteenRatingReply)(nil),        // 22: api.CreateCanteenRatingReply
-	(*CreateCanteenRatingRequest)(nil),      // 23: api.CreateCanteenRatingRequest
-	(*CreateDishRatingReply)(nil),           // 24: api.CreateDishRatingReply
-	(*CreateDishRatingRequest)(nil),         // 25: api.CreateDishRatingRequest
-	(*UpdateDishRatingRequest)(nil),         // 26: api.UpdateDishRatingRequest
-	(*UpdateDishRatingReply)(nil),           // 27: api.UpdateDishRatingReply
-	(*DeleteDishRatingRequest)(nil),         // 28: api.DeleteDishRatingRequest
-	(*DeleteDishRatingReply)(nil),           // 29: api.DeleteDishRatingReply
-	(*ReportDishRatingRequest)(nil),         // 30: api.ReportDishRatingRequest
-	(*ReportDishRatingReply)(nil),           // 31: api.ReportDishRatingReply
-	(*ListAvailableDishTagsRequest)(nil),    // 32: api.ListAvailableDishTagsRequest
-	(*ListAvailableDishTagsReply)(nil),      // 33: api.ListAvailableDishTagsReply
-	(*ListNameTagsRequest)(nil),             // 34: api.ListNameTagsRequest
-	(*ListNameTagsReply)(nil),               // 35: api.ListNameTagsReply
-	(*ListAvailableCanteenTagsRequest)(nil), // 36: api.ListAvailableCanteenTagsRequest
-	(*ListAvailableCanteenTagsReply)(nil),   // 37: api.ListAvailableCanteenTagsReply
-	(*TagsOverview)(nil),                    // 38: api.TagsOverview
-	(*RatingTag)(nil),                       // 39: api.RatingTag
-	(*RatingTagNewRequest)(nil),             // 40: api.RatingTagNewRequest
-	(*RatingTagResult)(nil),                 // 41: api.RatingTagResult
-	(*ListCanteensRequest)(nil),             // 42: api.ListCanteensRequest
-	(*ListCanteensReply)(nil),               // 43: api.ListCanteensReply
-	(*Canteen)(nil),                         // 44: api.Canteen
-	(*ListDishesRequest)(nil),               // 45: api.ListDishesRequest
-	(*ListDishesReply)(nil),                 // 46: api.ListDishesReply
-	(*ListDishRatingSummariesRequest)(nil),  // 47: api.ListDishRatingSummariesRequest
-	(*DishRatingSummary)(nil),               // 48: api.DishRatingSummary
-	(*ListDishRatingSummariesReply)(nil),    // 49: api.ListDishRatingSummariesReply
-	(*ListTopRatedDishesRequest)(nil),       // 50: api.ListTopRatedDishesRequest
-	(*TopRatedDish)(nil),                    // 51: api.TopRatedDish
-	(*ListTopRatedDishesReply)(nil),         // 52: api.ListTopRatedDishesReply
-	(*RoomInformationElement)(nil),          // 53: api.RoomInformationElement
-	(*GetUpdateNoteRequest)(nil),            // 54: api.GetUpdateNoteRequest
-	(*GetUpdateNoteReply)(nil),              // 55: api.GetUpdateNoteReply
-	(*ListMoviesRequest)(nil),               // 56: api.ListMoviesRequest
-	(*ListMoviesReply)(nil),                 // 57: api.ListMoviesReply
-	(*Movie)(nil),                           // 58: api.Movie
-	(*CreateFeedbackRequest)(nil),           // 59: api.CreateFeedbackRequest
-	(*Coordinate)(nil),                      // 60: api.Coordinate
-	(*CreateFeedbackReply)(nil),             // 61: api.CreateFeedbackReply
-	(*CreateFeedbackImageReply)(nil),        // 62: api.CreateFeedbackImageReply
-	(*CreateFeedbackImageRequest)(nil),      // 63: api.CreateFeedbackImageRequest
-	(*GetMemberRequest)(nil),                // 64: api.GetMemberRequest
-	(*GetMemberReply)(nil),                  // 65: api.GetMemberReply
-	(*GetUploadStatusReply)(nil),            // 66: api.GetUploadStatusReply
-	(*GetCanteenHeadCountRequest)(nil),      // 67: api.GetCanteenHeadCountRequest
-	(*GetCanteenHeadCountReply)(nil),        // 68: api.GetCanteenHeadCountReply
-	(*ListStudentClubRequest)(nil),          // 69: api.ListStudentClubRequest
-	(*ListStudentClubReply)(nil),            // 70: api.ListStudentClubReply
-	(*StudentClub)(nil),                     // 71: api.StudentClub
-	(*StudentClubCollection)(nil),           // 72: api.StudentClubCollection
-	(*ListStudentGroupRequest)(nil),         // 73: api.ListStudentGroupRequest
-	(*ListStudentGroupReply)(nil),           // 74: api.ListStudentGroupReply
-	(*StudentCouncil)(nil),                  // 75: api.StudentCouncil
-	(*StudentCouncilCollection)(nil),        // 76: api.StudentCouncilCollection
-	(*timestamppb.Timestamp)(nil),           // 77: google.protobuf.Timestamp
+	(RatingSortOrder)(0),                    // 1: api.RatingSortOrder
+	(Language)(0),                           // 2: api.Language
+	(CreateFeedbackRequest_Recipient)(0),    // 3: api.CreateFeedbackRequest.Recipient
+	(*CreateDeviceRequest)(nil),             // 4: api.CreateDeviceRequest
+	(*CreateDeviceReply)(nil),               // 5: api.CreateDeviceReply
+	(*DeleteDeviceRequest)(nil),             // 6: api.DeleteDeviceRequest
+	(*DeleteDeviceReply)(nil),               // 7: api.DeleteDeviceReply
+	(*News)(nil),                            // 8: api.News
+	(*ListNewsReply)(nil),                   // 9: api.ListNewsReply
+	(*ListNewsRequest)(nil),                 // 10: api.ListNewsRequest
+	(*ListNewsSourcesRequest)(nil),          // 11: api.ListNewsSourcesRequest
+	(*ListNewsSourcesReply)(nil),            // 12: api.ListNewsSourcesReply
+	(*NewsSource)(nil),                      // 13: api.NewsSource
+	(*ListNewsAlertsRequest)(nil),           // 14: api.ListNewsAlertsRequest
+	(*ListNewsAlertsReply)(nil),             // 15: api.ListNewsAlertsReply
+	(*NewsAlert)(nil),                       // 16: api.NewsAlert
+	(*ListCanteenRatingsRequest)(nil),       // 17: api.ListCanteenRatingsRequest
+	(*RatingDistribution)(nil),              // 18: api.RatingDistribution
+	(*ListCanteenRatingsReply)(nil),         // 19: api.ListCanteenRatingsReply
+	(*GetDishRatingsRequest)(nil),           // 20: api.GetDishRatingsRequest
+	(*GetDishRatingsReply)(nil),             // 21: api.GetDishRatingsReply
+	(*SingleRatingReply)(nil),               // 22: api.SingleRatingReply
+	(*CreateCanteenRatingReply)(nil),        // 23: api.CreateCanteenRatingReply
+	(*CreateCanteenRatingRequest)(nil),      // 24: api.CreateCanteenRatingRequest
+	(*CreateDishRatingReply)(nil),           // 25: api.CreateDishRatingReply
+	(*CreateDishRatingRequest)(nil),         // 26: api.CreateDishRatingRequest
+	(*UpdateDishRatingRequest)(nil),         // 27: api.UpdateDishRatingRequest
+	(*UpdateDishRatingReply)(nil),           // 28: api.UpdateDishRatingReply
+	(*DeleteDishRatingRequest)(nil),         // 29: api.DeleteDishRatingRequest
+	(*DeleteDishRatingReply)(nil),           // 30: api.DeleteDishRatingReply
+	(*ReportDishRatingRequest)(nil),         // 31: api.ReportDishRatingRequest
+	(*ReportDishRatingReply)(nil),           // 32: api.ReportDishRatingReply
+	(*ListAvailableDishTagsRequest)(nil),    // 33: api.ListAvailableDishTagsRequest
+	(*ListAvailableDishTagsReply)(nil),      // 34: api.ListAvailableDishTagsReply
+	(*ListNameTagsRequest)(nil),             // 35: api.ListNameTagsRequest
+	(*ListNameTagsReply)(nil),               // 36: api.ListNameTagsReply
+	(*ListAvailableCanteenTagsRequest)(nil), // 37: api.ListAvailableCanteenTagsRequest
+	(*ListAvailableCanteenTagsReply)(nil),   // 38: api.ListAvailableCanteenTagsReply
+	(*TagsOverview)(nil),                    // 39: api.TagsOverview
+	(*RatingTag)(nil),                       // 40: api.RatingTag
+	(*RatingTagNewRequest)(nil),             // 41: api.RatingTagNewRequest
+	(*RatingTagResult)(nil),                 // 42: api.RatingTagResult
+	(*ListCanteensRequest)(nil),             // 43: api.ListCanteensRequest
+	(*ListCanteensReply)(nil),               // 44: api.ListCanteensReply
+	(*Canteen)(nil),                         // 45: api.Canteen
+	(*ListDishesRequest)(nil),               // 46: api.ListDishesRequest
+	(*ListDishesReply)(nil),                 // 47: api.ListDishesReply
+	(*ListDishRatingSummariesRequest)(nil),  // 48: api.ListDishRatingSummariesRequest
+	(*DishRatingSummary)(nil),               // 49: api.DishRatingSummary
+	(*ListDishRatingSummariesReply)(nil),    // 50: api.ListDishRatingSummariesReply
+	(*ListTopRatedDishesRequest)(nil),       // 51: api.ListTopRatedDishesRequest
+	(*TopRatedDish)(nil),                    // 52: api.TopRatedDish
+	(*ListTopRatedDishesReply)(nil),         // 53: api.ListTopRatedDishesReply
+	(*RoomInformationElement)(nil),          // 54: api.RoomInformationElement
+	(*GetUpdateNoteRequest)(nil),            // 55: api.GetUpdateNoteRequest
+	(*GetUpdateNoteReply)(nil),              // 56: api.GetUpdateNoteReply
+	(*ListMoviesRequest)(nil),               // 57: api.ListMoviesRequest
+	(*ListMoviesReply)(nil),                 // 58: api.ListMoviesReply
+	(*Movie)(nil),                           // 59: api.Movie
+	(*CreateFeedbackRequest)(nil),           // 60: api.CreateFeedbackRequest
+	(*Coordinate)(nil),                      // 61: api.Coordinate
+	(*CreateFeedbackReply)(nil),             // 62: api.CreateFeedbackReply
+	(*CreateFeedbackImageReply)(nil),        // 63: api.CreateFeedbackImageReply
+	(*CreateFeedbackImageRequest)(nil),      // 64: api.CreateFeedbackImageRequest
+	(*GetMemberRequest)(nil),                // 65: api.GetMemberRequest
+	(*GetMemberReply)(nil),                  // 66: api.GetMemberReply
+	(*GetUploadStatusReply)(nil),            // 67: api.GetUploadStatusReply
+	(*GetCanteenHeadCountRequest)(nil),      // 68: api.GetCanteenHeadCountRequest
+	(*GetCanteenHeadCountReply)(nil),        // 69: api.GetCanteenHeadCountReply
+	(*ListStudentClubRequest)(nil),          // 70: api.ListStudentClubRequest
+	(*ListStudentClubReply)(nil),            // 71: api.ListStudentClubReply
+	(*StudentClub)(nil),                     // 72: api.StudentClub
+	(*StudentClubCollection)(nil),           // 73: api.StudentClubCollection
+	(*ListStudentGroupRequest)(nil),         // 74: api.ListStudentGroupRequest
+	(*ListStudentGroupReply)(nil),           // 75: api.ListStudentGroupReply
+	(*StudentCouncil)(nil),                  // 76: api.StudentCouncil
+	(*StudentCouncilCollection)(nil),        // 77: api.StudentCouncilCollection
+	(*timestamppb.Timestamp)(nil),           // 78: google.protobuf.Timestamp
 }
 var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	0,  // 0: api.CreateDeviceRequest.device_type:type_name -> api.DeviceType
 	0,  // 1: api.DeleteDeviceRequest.device_type:type_name -> api.DeviceType
-	77, // 2: api.News.created:type_name -> google.protobuf.Timestamp
-	77, // 3: api.News.date:type_name -> google.protobuf.Timestamp
-	7,  // 4: api.ListNewsReply.news:type_name -> api.News
-	77, // 5: api.ListNewsRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
-	12, // 6: api.ListNewsSourcesReply.sources:type_name -> api.NewsSource
-	15, // 7: api.ListNewsAlertsReply.alerts:type_name -> api.NewsAlert
-	77, // 8: api.NewsAlert.created:type_name -> google.protobuf.Timestamp
-	77, // 9: api.NewsAlert.from:type_name -> google.protobuf.Timestamp
-	77, // 10: api.NewsAlert.to:type_name -> google.protobuf.Timestamp
-	77, // 11: api.ListCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
-	77, // 12: api.ListCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
-	21, // 13: api.ListCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
-	41, // 14: api.ListCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
-	17, // 15: api.ListCanteenRatingsReply.distribution:type_name -> api.RatingDistribution
-	77, // 16: api.GetDishRatingsRequest.from:type_name -> google.protobuf.Timestamp
-	77, // 17: api.GetDishRatingsRequest.to:type_name -> google.protobuf.Timestamp
-	21, // 18: api.GetDishRatingsReply.rating:type_name -> api.SingleRatingReply
-	41, // 19: api.GetDishRatingsReply.rating_tags:type_name -> api.RatingTagResult
-	41, // 20: api.GetDishRatingsReply.name_tags:type_name -> api.RatingTagResult
-	17, // 21: api.GetDishRatingsReply.distribution:type_name -> api.RatingDistribution
-	40, // 22: api.SingleRatingReply.rating_tags:type_name -> api.RatingTagNewRequest
-	77, // 23: api.SingleRatingReply.visited:type_name -> google.protobuf.Timestamp
-	77, // 24: api.SingleRatingReply.updated_at:type_name -> google.protobuf.Timestamp
-	39, // 25: api.CreateCanteenRatingRequest.rating_tags:type_name -> api.RatingTag
-	39, // 26: api.CreateDishRatingRequest.rating_tags:type_name -> api.RatingTag
-	39, // 27: api.UpdateDishRatingRequest.rating_tags:type_name -> api.RatingTag
-	38, // 28: api.ListAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
-	38, // 29: api.ListNameTagsReply.rating_tags:type_name -> api.TagsOverview
-	38, // 30: api.ListAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
-	44, // 31: api.ListCanteensReply.canteen:type_name -> api.Canteen
-	77, // 32: api.ListDishRatingSummariesRequest.from:type_name -> google.protobuf.Timestamp
-	77, // 33: api.ListDishRatingSummariesRequest.to:type_name -> google.protobuf.Timestamp
-	17, // 34: api.DishRatingSummary.distribution:type_name -> api.RatingDistribution
-	41, // 35: api.DishRatingSummary.rating_tags:type_name -> api.RatingTagResult
-	41, // 36: api.DishRatingSummary.name_tags:type_name -> api.RatingTagResult
-	48, // 37: api.ListDishRatingSummariesReply.summaries:type_name -> api.DishRatingSummary
-	51, // 38: api.ListTopRatedDishesReply.dishes:type_name -> api.TopRatedDish
-	77, // 39: api.ListMoviesRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
-	58, // 40: api.ListMoviesReply.movies:type_name -> api.Movie
-	77, // 41: api.Movie.date:type_name -> google.protobuf.Timestamp
-	77, // 42: api.Movie.created:type_name -> google.protobuf.Timestamp
-	2,  // 43: api.CreateFeedbackRequest.recipient:type_name -> api.CreateFeedbackRequest.Recipient
-	60, // 44: api.CreateFeedbackRequest.location:type_name -> api.Coordinate
-	77, // 45: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
-	1,  // 46: api.ListStudentClubRequest.language:type_name -> api.Language
-	72, // 47: api.ListStudentClubReply.collections:type_name -> api.StudentClubCollection
-	71, // 48: api.StudentClubCollection.clubs:type_name -> api.StudentClub
-	1,  // 49: api.ListStudentGroupRequest.language:type_name -> api.Language
-	72, // 50: api.ListStudentGroupReply.student_clubs:type_name -> api.StudentClubCollection
-	76, // 51: api.ListStudentGroupReply.student_councils:type_name -> api.StudentCouncilCollection
-	75, // 52: api.StudentCouncilCollection.councils:type_name -> api.StudentCouncil
-	13, // 53: api.Campus.ListNewsAlerts:input_type -> api.ListNewsAlertsRequest
-	10, // 54: api.Campus.ListNewsSources:input_type -> api.ListNewsSourcesRequest
-	9,  // 55: api.Campus.ListNews:input_type -> api.ListNewsRequest
-	16, // 56: api.Campus.ListCanteenRatings:input_type -> api.ListCanteenRatingsRequest
-	19, // 57: api.Campus.GetDishRatings:input_type -> api.GetDishRatingsRequest
-	23, // 58: api.Campus.CreateCanteenRating:input_type -> api.CreateCanteenRatingRequest
-	25, // 59: api.Campus.CreateDishRating:input_type -> api.CreateDishRatingRequest
-	26, // 60: api.Campus.UpdateDishRating:input_type -> api.UpdateDishRatingRequest
-	28, // 61: api.Campus.DeleteDishRating:input_type -> api.DeleteDishRatingRequest
-	30, // 62: api.Campus.ReportDishRating:input_type -> api.ReportDishRatingRequest
-	32, // 63: api.Campus.ListAvailableDishTags:input_type -> api.ListAvailableDishTagsRequest
-	34, // 64: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
-	36, // 65: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
-	42, // 66: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
-	45, // 67: api.Campus.ListDishes:input_type -> api.ListDishesRequest
-	47, // 68: api.Campus.ListDishRatingSummaries:input_type -> api.ListDishRatingSummariesRequest
-	50, // 69: api.Campus.ListTopRatedDishes:input_type -> api.ListTopRatedDishesRequest
-	54, // 70: api.Campus.GetUpdateNote:input_type -> api.GetUpdateNoteRequest
-	56, // 71: api.Campus.ListMovies:input_type -> api.ListMoviesRequest
-	59, // 72: api.Campus.CreateFeedback:input_type -> api.CreateFeedbackRequest
-	67, // 73: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
-	3,  // 74: api.Campus.CreateDevice:input_type -> api.CreateDeviceRequest
-	5,  // 75: api.Campus.DeleteDevice:input_type -> api.DeleteDeviceRequest
-	69, // 76: api.Campus.ListStudentClub:input_type -> api.ListStudentClubRequest
-	73, // 77: api.Campus.ListStudentGroup:input_type -> api.ListStudentGroupRequest
-	14, // 78: api.Campus.ListNewsAlerts:output_type -> api.ListNewsAlertsReply
-	11, // 79: api.Campus.ListNewsSources:output_type -> api.ListNewsSourcesReply
-	8,  // 80: api.Campus.ListNews:output_type -> api.ListNewsReply
-	18, // 81: api.Campus.ListCanteenRatings:output_type -> api.ListCanteenRatingsReply
-	20, // 82: api.Campus.GetDishRatings:output_type -> api.GetDishRatingsReply
-	22, // 83: api.Campus.CreateCanteenRating:output_type -> api.CreateCanteenRatingReply
-	24, // 84: api.Campus.CreateDishRating:output_type -> api.CreateDishRatingReply
-	27, // 85: api.Campus.UpdateDishRating:output_type -> api.UpdateDishRatingReply
-	29, // 86: api.Campus.DeleteDishRating:output_type -> api.DeleteDishRatingReply
-	31, // 87: api.Campus.ReportDishRating:output_type -> api.ReportDishRatingReply
-	33, // 88: api.Campus.ListAvailableDishTags:output_type -> api.ListAvailableDishTagsReply
-	35, // 89: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
-	37, // 90: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
-	43, // 91: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
-	46, // 92: api.Campus.ListDishes:output_type -> api.ListDishesReply
-	49, // 93: api.Campus.ListDishRatingSummaries:output_type -> api.ListDishRatingSummariesReply
-	52, // 94: api.Campus.ListTopRatedDishes:output_type -> api.ListTopRatedDishesReply
-	55, // 95: api.Campus.GetUpdateNote:output_type -> api.GetUpdateNoteReply
-	57, // 96: api.Campus.ListMovies:output_type -> api.ListMoviesReply
-	61, // 97: api.Campus.CreateFeedback:output_type -> api.CreateFeedbackReply
-	68, // 98: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
-	4,  // 99: api.Campus.CreateDevice:output_type -> api.CreateDeviceReply
-	6,  // 100: api.Campus.DeleteDevice:output_type -> api.DeleteDeviceReply
-	70, // 101: api.Campus.ListStudentClub:output_type -> api.ListStudentClubReply
-	74, // 102: api.Campus.ListStudentGroup:output_type -> api.ListStudentGroupReply
-	78, // [78:103] is the sub-list for method output_type
-	53, // [53:78] is the sub-list for method input_type
-	53, // [53:53] is the sub-list for extension type_name
-	53, // [53:53] is the sub-list for extension extendee
-	0,  // [0:53] is the sub-list for field type_name
+	78, // 2: api.News.created:type_name -> google.protobuf.Timestamp
+	78, // 3: api.News.date:type_name -> google.protobuf.Timestamp
+	8,  // 4: api.ListNewsReply.news:type_name -> api.News
+	78, // 5: api.ListNewsRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
+	13, // 6: api.ListNewsSourcesReply.sources:type_name -> api.NewsSource
+	16, // 7: api.ListNewsAlertsReply.alerts:type_name -> api.NewsAlert
+	78, // 8: api.NewsAlert.created:type_name -> google.protobuf.Timestamp
+	78, // 9: api.NewsAlert.from:type_name -> google.protobuf.Timestamp
+	78, // 10: api.NewsAlert.to:type_name -> google.protobuf.Timestamp
+	78, // 11: api.ListCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
+	78, // 12: api.ListCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
+	1,  // 13: api.ListCanteenRatingsRequest.sort_by:type_name -> api.RatingSortOrder
+	22, // 14: api.ListCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
+	42, // 15: api.ListCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
+	18, // 16: api.ListCanteenRatingsReply.distribution:type_name -> api.RatingDistribution
+	78, // 17: api.GetDishRatingsRequest.from:type_name -> google.protobuf.Timestamp
+	78, // 18: api.GetDishRatingsRequest.to:type_name -> google.protobuf.Timestamp
+	1,  // 19: api.GetDishRatingsRequest.sort_by:type_name -> api.RatingSortOrder
+	22, // 20: api.GetDishRatingsReply.rating:type_name -> api.SingleRatingReply
+	42, // 21: api.GetDishRatingsReply.rating_tags:type_name -> api.RatingTagResult
+	42, // 22: api.GetDishRatingsReply.name_tags:type_name -> api.RatingTagResult
+	18, // 23: api.GetDishRatingsReply.distribution:type_name -> api.RatingDistribution
+	41, // 24: api.SingleRatingReply.rating_tags:type_name -> api.RatingTagNewRequest
+	78, // 25: api.SingleRatingReply.visited:type_name -> google.protobuf.Timestamp
+	78, // 26: api.SingleRatingReply.updated_at:type_name -> google.protobuf.Timestamp
+	40, // 27: api.CreateCanteenRatingRequest.rating_tags:type_name -> api.RatingTag
+	40, // 28: api.CreateDishRatingRequest.rating_tags:type_name -> api.RatingTag
+	40, // 29: api.UpdateDishRatingRequest.rating_tags:type_name -> api.RatingTag
+	39, // 30: api.ListAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
+	39, // 31: api.ListNameTagsReply.rating_tags:type_name -> api.TagsOverview
+	39, // 32: api.ListAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
+	45, // 33: api.ListCanteensReply.canteen:type_name -> api.Canteen
+	78, // 34: api.ListDishRatingSummariesRequest.from:type_name -> google.protobuf.Timestamp
+	78, // 35: api.ListDishRatingSummariesRequest.to:type_name -> google.protobuf.Timestamp
+	18, // 36: api.DishRatingSummary.distribution:type_name -> api.RatingDistribution
+	42, // 37: api.DishRatingSummary.rating_tags:type_name -> api.RatingTagResult
+	42, // 38: api.DishRatingSummary.name_tags:type_name -> api.RatingTagResult
+	49, // 39: api.ListDishRatingSummariesReply.summaries:type_name -> api.DishRatingSummary
+	52, // 40: api.ListTopRatedDishesReply.dishes:type_name -> api.TopRatedDish
+	78, // 41: api.ListMoviesRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
+	59, // 42: api.ListMoviesReply.movies:type_name -> api.Movie
+	78, // 43: api.Movie.date:type_name -> google.protobuf.Timestamp
+	78, // 44: api.Movie.created:type_name -> google.protobuf.Timestamp
+	3,  // 45: api.CreateFeedbackRequest.recipient:type_name -> api.CreateFeedbackRequest.Recipient
+	61, // 46: api.CreateFeedbackRequest.location:type_name -> api.Coordinate
+	78, // 47: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
+	2,  // 48: api.ListStudentClubRequest.language:type_name -> api.Language
+	73, // 49: api.ListStudentClubReply.collections:type_name -> api.StudentClubCollection
+	72, // 50: api.StudentClubCollection.clubs:type_name -> api.StudentClub
+	2,  // 51: api.ListStudentGroupRequest.language:type_name -> api.Language
+	73, // 52: api.ListStudentGroupReply.student_clubs:type_name -> api.StudentClubCollection
+	77, // 53: api.ListStudentGroupReply.student_councils:type_name -> api.StudentCouncilCollection
+	76, // 54: api.StudentCouncilCollection.councils:type_name -> api.StudentCouncil
+	14, // 55: api.Campus.ListNewsAlerts:input_type -> api.ListNewsAlertsRequest
+	11, // 56: api.Campus.ListNewsSources:input_type -> api.ListNewsSourcesRequest
+	10, // 57: api.Campus.ListNews:input_type -> api.ListNewsRequest
+	17, // 58: api.Campus.ListCanteenRatings:input_type -> api.ListCanteenRatingsRequest
+	20, // 59: api.Campus.GetDishRatings:input_type -> api.GetDishRatingsRequest
+	24, // 60: api.Campus.CreateCanteenRating:input_type -> api.CreateCanteenRatingRequest
+	26, // 61: api.Campus.CreateDishRating:input_type -> api.CreateDishRatingRequest
+	27, // 62: api.Campus.UpdateDishRating:input_type -> api.UpdateDishRatingRequest
+	29, // 63: api.Campus.DeleteDishRating:input_type -> api.DeleteDishRatingRequest
+	31, // 64: api.Campus.ReportDishRating:input_type -> api.ReportDishRatingRequest
+	33, // 65: api.Campus.ListAvailableDishTags:input_type -> api.ListAvailableDishTagsRequest
+	35, // 66: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
+	37, // 67: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
+	43, // 68: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
+	46, // 69: api.Campus.ListDishes:input_type -> api.ListDishesRequest
+	48, // 70: api.Campus.ListDishRatingSummaries:input_type -> api.ListDishRatingSummariesRequest
+	51, // 71: api.Campus.ListTopRatedDishes:input_type -> api.ListTopRatedDishesRequest
+	55, // 72: api.Campus.GetUpdateNote:input_type -> api.GetUpdateNoteRequest
+	57, // 73: api.Campus.ListMovies:input_type -> api.ListMoviesRequest
+	60, // 74: api.Campus.CreateFeedback:input_type -> api.CreateFeedbackRequest
+	68, // 75: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
+	4,  // 76: api.Campus.CreateDevice:input_type -> api.CreateDeviceRequest
+	6,  // 77: api.Campus.DeleteDevice:input_type -> api.DeleteDeviceRequest
+	70, // 78: api.Campus.ListStudentClub:input_type -> api.ListStudentClubRequest
+	74, // 79: api.Campus.ListStudentGroup:input_type -> api.ListStudentGroupRequest
+	15, // 80: api.Campus.ListNewsAlerts:output_type -> api.ListNewsAlertsReply
+	12, // 81: api.Campus.ListNewsSources:output_type -> api.ListNewsSourcesReply
+	9,  // 82: api.Campus.ListNews:output_type -> api.ListNewsReply
+	19, // 83: api.Campus.ListCanteenRatings:output_type -> api.ListCanteenRatingsReply
+	21, // 84: api.Campus.GetDishRatings:output_type -> api.GetDishRatingsReply
+	23, // 85: api.Campus.CreateCanteenRating:output_type -> api.CreateCanteenRatingReply
+	25, // 86: api.Campus.CreateDishRating:output_type -> api.CreateDishRatingReply
+	28, // 87: api.Campus.UpdateDishRating:output_type -> api.UpdateDishRatingReply
+	30, // 88: api.Campus.DeleteDishRating:output_type -> api.DeleteDishRatingReply
+	32, // 89: api.Campus.ReportDishRating:output_type -> api.ReportDishRatingReply
+	34, // 90: api.Campus.ListAvailableDishTags:output_type -> api.ListAvailableDishTagsReply
+	36, // 91: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
+	38, // 92: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
+	44, // 93: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
+	47, // 94: api.Campus.ListDishes:output_type -> api.ListDishesReply
+	50, // 95: api.Campus.ListDishRatingSummaries:output_type -> api.ListDishRatingSummariesReply
+	53, // 96: api.Campus.ListTopRatedDishes:output_type -> api.ListTopRatedDishesReply
+	56, // 97: api.Campus.GetUpdateNote:output_type -> api.GetUpdateNoteReply
+	58, // 98: api.Campus.ListMovies:output_type -> api.ListMoviesReply
+	62, // 99: api.Campus.CreateFeedback:output_type -> api.CreateFeedbackReply
+	69, // 100: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
+	5,  // 101: api.Campus.CreateDevice:output_type -> api.CreateDeviceReply
+	7,  // 102: api.Campus.DeleteDevice:output_type -> api.DeleteDeviceReply
+	71, // 103: api.Campus.ListStudentClub:output_type -> api.ListStudentClubReply
+	75, // 104: api.Campus.ListStudentGroup:output_type -> api.ListStudentGroupReply
+	80, // [80:105] is the sub-list for method output_type
+	55, // [55:80] is the sub-list for method input_type
+	55, // [55:55] is the sub-list for extension type_name
+	55, // [55:55] is the sub-list for extension extendee
+	0,  // [0:55] is the sub-list for field type_name
 }
 
 func init() { file_tumdev_campus_backend_proto_init() }
@@ -5409,7 +5636,7 @@ func file_tumdev_campus_backend_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tumdev_campus_backend_proto_rawDesc), len(file_tumdev_campus_backend_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      4,
 			NumMessages:   74,
 			NumExtensions: 0,
 			NumServices:   1,
