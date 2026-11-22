@@ -3,10 +3,12 @@ package backend
 import (
 	"context"
 	"sort"
+	"strings"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -148,6 +150,37 @@ func queryWindowedTags(canteenID, dishID int32, ratingType model.ModelType, from
 	return resp
 }
 
+func parseDishLabels(raw null.String) []string {
+	if !raw.Valid || strings.TrimSpace(raw.String) == "" {
+		return nil
+	}
+	parts := strings.Split(raw.String, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if t := strings.TrimSpace(p); t != "" {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+func dishHasAllLabels(dishLabels []string, required []string) bool {
+	if len(required) == 0 {
+		return true
+	}
+	have := make(map[string]bool, len(dishLabels))
+	for _, l := range dishLabels {
+		have[strings.ToUpper(l)] = true
+	}
+	for _, req := range required {
+		r := strings.ToUpper(strings.TrimSpace(req))
+		if r != "" && !have[r] {
+			return false
+		}
+	}
+	return true
+}
+
 // ListDishRatingSummaries batch-loads rating statistics, tag averages, name-tag fallbacks,
 // and latest photo rating IDs for an entire day's menu or an explicit list of dish names.
 func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.ListDishRatingSummariesRequest) (*pb.ListDishRatingSummariesReply, error) {
@@ -181,7 +214,7 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 		err = tx.Table("dishes_of_the_weeks weekly").
 			Joins("JOIN dishes d ON d.dish = weekly.dishID").
 			Where("weekly.day = ? AND weekly.week = ? AND weekly.year = ? AND d.cafeteriaID = ?", req.Day, req.Week, req.Year, canteenID).
-			Select("DISTINCT d.dish, d.name, d.type, d.cafeteriaID").
+			Select("DISTINCT d.dish, d.name, d.type, d.cafeteriaID, d.labels, d.price_student_cents").
 			Order("d.name ASC").
 			Find(&dishes).Error
 		if err != nil {
@@ -250,6 +283,10 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 		}
 		st := statsByDish[d.Dish]
 		soldOutCnt := soldOutByDish[d.Dish]
+		var priceCents int32
+		if d.PriceStudentCents.Valid {
+			priceCents = int32(d.PriceStudentCents.Int64)
+		}
 		summaries = append(summaries, &pb.DishRatingSummary{
 			Dish:                d.Name,
 			Avg:                 st.Average,
@@ -263,6 +300,8 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 			LatestImageRatingId: latestImgByDish[d.Dish],
 			SoldOut:             soldOutCnt >= soldOutConfirmThreshold,
 			SoldOutReportCount:  soldOutCnt,
+			Labels:              parseDishLabels(d.Labels),
+			PriceStudentCents:   priceCents,
 		})
 	}
 	return &pb.ListDishRatingSummariesReply{Summaries: summaries}, nil
@@ -388,11 +427,13 @@ func batchLoadLatestImageRatingIDs(dishIDs []int64, tx *gorm.DB) map[int64]int64
 }
 
 type topRatedDishRow struct {
-	DishID      int64   `gorm:"column:dishID"`
-	CanteenName string  `gorm:"column:canteenName"`
-	DishName    string  `gorm:"column:dishName"`
-	Average     float64 `gorm:"column:average"`
-	RatingCount int64   `gorm:"column:rating_count"`
+	DishID            int64       `gorm:"column:dishID"`
+	CanteenName       string      `gorm:"column:canteenName"`
+	DishName          string      `gorm:"column:dishName"`
+	Labels            null.String `gorm:"column:labels"`
+	PriceStudentCents null.Int    `gorm:"column:price_student_cents"`
+	Average           float64     `gorm:"column:average"`
+	RatingCount       int64       `gorm:"column:rating_count"`
 }
 
 // ListTopRatedDishes returns the highest-rated dishes served on a given ISO date,
@@ -435,11 +476,14 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 		Joins("JOIN dishes d ON d.dish = weekly.dishID").
 		Joins("JOIN canteens c ON c.cafeteria = d.cafeteriaID").
 		Joins("JOIN dish_rating_statistics s ON s.dishID = d.dish AND s.cafeteriaID = d.cafeteriaID").
-		Select("DISTINCT d.dish AS dishID, c.name AS canteenName, d.name AS dishName, s.average AS average, s.rating_count AS rating_count").
+		Select("DISTINCT d.dish AS dishID, c.name AS canteenName, d.name AS dishName, d.labels AS labels, d.price_student_cents AS price_student_cents, s.average AS average, s.rating_count AS rating_count").
 		Where("weekly.year = ? AND weekly.week = ? AND weekly.day = ? AND s.rating_count >= ?", req.Year, req.Week, req.Day, minRatings)
 
 	if req.GetCanteenId() != "" {
 		q = q.Where("c.name = ?", model.CanteenEnumName(req.CanteenId))
+	}
+	if req.MaxPriceStudentCents > 0 {
+		q = q.Where("d.price_student_cents IS NOT NULL AND d.price_student_cents <= ?", req.MaxPriceStudentCents)
 	}
 
 	var rows []topRatedDishRow
@@ -452,14 +496,22 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 	}
 
 	type scoredDish struct {
-		row   topRatedDishRow
-		score float64
+		row    topRatedDishRow
+		labels []string
+		score  float64
 	}
 	scored := make([]scoredDish, 0, len(rows))
 	for _, r := range rows {
+		labels := parseDishLabels(r.Labels)
+		if !dishHasAllLabels(labels, req.RequiredLabels) {
+			continue
+		}
 		v := float64(r.RatingCount)
 		score := (v*r.Average + bayesianPriorWeight*priorMean) / (v + bayesianPriorWeight)
-		scored = append(scored, scoredDish{row: r, score: score})
+		scored = append(scored, scoredDish{row: r, labels: labels, score: score})
+	}
+	if len(scored) == 0 {
+		return &pb.ListTopRatedDishesReply{Dishes: []*pb.TopRatedDish{}}, nil
 	}
 	sort.Slice(scored, func(i, j int) bool {
 		if scored[i].score != scored[j].score {
@@ -483,6 +535,10 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 
 	result := make([]*pb.TopRatedDish, 0, len(scored))
 	for _, item := range scored {
+		var priceCents int32
+		if item.row.PriceStudentCents.Valid {
+			priceCents = int32(item.row.PriceStudentCents.Int64)
+		}
 		result = append(result, &pb.TopRatedDish{
 			CanteenId:           model.CanteenEatAPIID(item.row.CanteenName),
 			Dish:                item.row.DishName,
@@ -491,6 +547,8 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 			RatingCount:         item.row.RatingCount,
 			LatestImageRatingId: latestImgByDish[item.row.DishID],
 			SoldOut:             soldOutByDish[item.row.DishID] >= soldOutConfirmThreshold,
+			Labels:              item.labels,
+			PriceStudentCents:   priceCents,
 		})
 	}
 	return &pb.ListTopRatedDishesReply{Dishes: result}, nil

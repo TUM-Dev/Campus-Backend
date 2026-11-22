@@ -281,6 +281,74 @@
         ]
       }
     },
+    "/device/{deviceId}/preferences": {
+      "get": {
+        "summary": "Get a device's push notification preferences (favorite dishes, dietary filters, IT status alerts).",
+        "operationId": "Campus_GetPushPreferences",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiPushPreferences"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      },
+      "put": {
+        "summary": "Update a device's push notification preferences.",
+        "operationId": "Campus_UpdatePushPreferences",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiPushPreferences"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CampusUpdatePushPreferencesBody"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/dish/rating/allDishTags": {
       "get": {
         "operationId": "Campus_ListNameTags",
@@ -693,6 +761,25 @@
           {
             "name": "minRatings",
             "description": "Optional minimum number of visible ratings required (default 1).",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "requiredLabels",
+            "description": "Optional dietary label filter: every listed label must be present on the dish (e.g. [\"VEGAN\"]).",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "maxPriceStudentCents",
+            "description": "Optional student price cap in Euro cents (e.g. 400 for \u003c= 4.00 EUR); 0 disables filter.",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -1171,6 +1258,41 @@
         }
       }
     },
+    "CampusUpdatePushPreferencesBody": {
+      "type": "object",
+      "properties": {
+        "canteenIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "favoriteDishes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dietaryLabels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notifyFavoriteDishes": {
+          "type": "boolean"
+        },
+        "notifyItStatus": {
+          "type": "boolean"
+        },
+        "notifyTuFilm": {
+          "type": "boolean"
+        },
+        "language": {
+          "$ref": "#/definitions/apiLanguage"
+        }
+      }
+    },
     "CreateFeedbackRequestRecipient": {
       "type": "string",
       "enum": [
@@ -1299,6 +1421,10 @@
         },
         "deviceType": {
           "$ref": "#/definitions/apiDeviceType"
+        },
+        "fcmToken": {
+          "type": "string",
+          "description": "Firebase Cloud Messaging registration token (falls back to public_key if empty)."
         }
       }
     },
@@ -1422,6 +1548,18 @@
         "soldOutReportCount": {
           "type": "integer",
           "format": "int32"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "eat-api dietary/allergen labels (e.g. \"VEGAN\", \"VEGETARIAN\")"
+        },
+        "priceStudentCents": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Student price in Euro cents (0 if unknown)"
         }
       }
     },
@@ -2093,6 +2231,48 @@
         }
       }
     },
+    "apiPushPreferences": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "canteenIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "eat-api canteen IDs to monitor for dish alerts (empty = all canteens)"
+        },
+        "favoriteDishes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Substring keywords or dish names to alert on (e.g. \"Kaiserschmarrn\", \"Currywurst\")"
+        },
+        "dietaryLabels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required eat-api dietary labels (e.g. \"VEGAN\", \"VEGETARIAN\")"
+        },
+        "notifyFavoriteDishes": {
+          "type": "boolean"
+        },
+        "notifyItStatus": {
+          "type": "boolean",
+          "title": "Receive outage and recovery alerts for TUMonline, Moodle, and eduroam"
+        },
+        "notifyTuFilm": {
+          "type": "boolean"
+        },
+        "language": {
+          "$ref": "#/definitions/apiLanguage"
+        }
+      }
+    },
     "apiRatingDistribution": {
       "type": "object",
       "properties": {
@@ -2378,6 +2558,16 @@
         },
         "soldOut": {
           "type": "boolean"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "priceStudentCents": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
