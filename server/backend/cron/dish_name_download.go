@@ -1,14 +1,18 @@
 package cron
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/TUM-Dev/Campus-Backend/server/internal/fcm"
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -37,9 +41,50 @@ type CanteenDate struct {
 	Dates []CanteenDish `json:"dishes"`
 }
 
+type CanteenDishPrices struct {
+	Students *CanteenDishPrice `json:"students,omitempty"`
+}
+
+type CanteenDishPrice struct {
+	BasePrice *float64 `json:"base_price,omitempty"`
+}
+
 type CanteenDish struct {
-	Name     string `json:"name"`
-	DishType string `json:"dish_type"`
+	Name     string             `json:"name"`
+	DishType string             `json:"dish_type"`
+	Labels   []string           `json:"labels,omitempty"`
+	Prices   *CanteenDishPrices `json:"prices,omitempty"`
+}
+
+func (d CanteenDish) encodedLabels() null.String {
+	if len(d.Labels) == 0 {
+		return null.String{}
+	}
+	cleaned := make([]string, 0, len(d.Labels))
+	for _, l := range d.Labels {
+		if t := strings.ToUpper(strings.TrimSpace(l)); t != "" {
+			cleaned = append(cleaned, t)
+		}
+	}
+	if len(cleaned) == 0 {
+		return null.String{}
+	}
+	joined := strings.Join(cleaned, ",")
+	if len(joined) > 255 {
+		joined = joined[:255]
+	}
+	return null.StringFrom(joined)
+}
+
+func (d CanteenDish) studentPriceCents() null.Int {
+	if d.Prices == nil || d.Prices.Students == nil || d.Prices.Students.BasePrice == nil {
+		return null.Int{}
+	}
+	price := *d.Prices.Students.BasePrice
+	if price < 0 || math.IsNaN(price) || math.IsInf(price, 0) {
+		return null.Int{}
+	}
+	return null.IntFrom(int64(math.Round(price * 100)))
 }
 
 // dishNameDownloadCron refreshes metadata and dish names independently, so a
@@ -95,6 +140,15 @@ func downloadDailyDishesAt(c *CronService, now time.Time) error {
 			}
 		}
 	}
+	if sender, err := fcm.NewFromEnv(context.Background()); err != nil {
+		log.WithError(err).Warn("FCM client unavailable for favorite dish alerts")
+	} else if sender != nil {
+		for _, target := range targets {
+			if err := notifyFavoriteDishAlerts(context.Background(), c.db, sender, target.year, target.week); err != nil {
+				log.WithError(err).Warn("failed to dispatch favorite dish push alerts")
+			}
+		}
+	}
 	return errors.Join(failures...)
 }
 
@@ -112,19 +166,39 @@ func storeCanteenMenu(db *gorm.DB, canteenID int64, menu CanteenDays, year, week
 			// Menus can omit closed days. Array indices are not weekday numbers.
 			weekday := int32((int(date.Weekday()) + 6) % 7)
 			for _, entry := range day.Dates {
+				labels := entry.encodedLabels()
+				priceCents := entry.studentPriceCents()
 				var dish model.Dish
 				err := tx.First(&dish, "name = ? AND cafeteriaID = ?", entry.Name, canteenID).Error
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					dish = model.Dish{Name: entry.Name, Type: entry.DishType, CanteenID: canteenID}
+					dish = model.Dish{
+						Name:              entry.Name,
+						Type:              entry.DishType,
+						CanteenID:         canteenID,
+						Labels:            labels,
+						PriceStudentCents: priceCents,
+					}
 					if err := tx.Create(&dish).Error; err != nil {
 						return err
 					}
 					addDishTagsToMapping(dish.Dish, dish.Name, tx)
 				} else if err != nil {
 					return err
-				} else if dish.Type != entry.DishType {
-					if err := tx.Model(&dish).Update("type", entry.DishType).Error; err != nil {
-						return err
+				} else {
+					updates := map[string]any{}
+					if dish.Type != entry.DishType {
+						updates["type"] = entry.DishType
+					}
+					if labels.Valid && dish.Labels != labels {
+						updates["labels"] = labels
+					}
+					if priceCents.Valid && dish.PriceStudentCents != priceCents {
+						updates["price_student_cents"] = priceCents
+					}
+					if len(updates) > 0 {
+						if err := tx.Model(&dish).Updates(updates).Error; err != nil {
+							return err
+						}
 					}
 				}
 				// Retry partial imports and pick up menus published later in the week.

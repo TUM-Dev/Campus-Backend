@@ -45,6 +45,8 @@ const (
 	Campus_GetCanteenBusyness_FullMethodName       = "/api.Campus/GetCanteenBusyness"
 	Campus_CreateDevice_FullMethodName             = "/api.Campus/CreateDevice"
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
+	Campus_GetPushPreferences_FullMethodName       = "/api.Campus/GetPushPreferences"
+	Campus_UpdatePushPreferences_FullMethodName    = "/api.Campus/UpdatePushPreferences"
 	Campus_ListStudentClub_FullMethodName          = "/api.Campus/ListStudentClub"
 	Campus_ListStudentGroup_FullMethodName         = "/api.Campus/ListStudentGroup"
 	Campus_ListLibraries_FullMethodName            = "/api.Campus/ListLibraries"
@@ -92,6 +94,10 @@ type CampusClient interface {
 	CreateDevice(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*DeleteDeviceReply, error)
+	// Get a device's push notification preferences (favorite dishes, dietary filters, IT status alerts).
+	GetPushPreferences(ctx context.Context, in *GetPushPreferencesRequest, opts ...grpc.CallOption) (*PushPreferences, error)
+	// Update a device's push notification preferences.
+	UpdatePushPreferences(ctx context.Context, in *UpdatePushPreferencesRequest, opts ...grpc.CallOption) (*PushPreferences, error)
 	// Deprecated: Do not use.
 	// List all avaliable student clubs
 	ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error)
@@ -364,6 +370,26 @@ func (c *campusClient) DeleteDevice(ctx context.Context, in *DeleteDeviceRequest
 	return out, nil
 }
 
+func (c *campusClient) GetPushPreferences(ctx context.Context, in *GetPushPreferencesRequest, opts ...grpc.CallOption) (*PushPreferences, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PushPreferences)
+	err := c.cc.Invoke(ctx, Campus_GetPushPreferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) UpdatePushPreferences(ctx context.Context, in *UpdatePushPreferencesRequest, opts ...grpc.CallOption) (*PushPreferences, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PushPreferences)
+	err := c.cc.Invoke(ctx, Campus_UpdatePushPreferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Deprecated: Do not use.
 func (c *campusClient) ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -446,6 +472,10 @@ type CampusServer interface {
 	CreateDevice(context.Context, *CreateDeviceRequest) (*CreateDeviceReply, error)
 	// Delete a device from push notifications
 	DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error)
+	// Get a device's push notification preferences (favorite dishes, dietary filters, IT status alerts).
+	GetPushPreferences(context.Context, *GetPushPreferencesRequest) (*PushPreferences, error)
+	// Update a device's push notification preferences.
+	UpdatePushPreferences(context.Context, *UpdatePushPreferencesRequest) (*PushPreferences, error)
 	// Deprecated: Do not use.
 	// List all avaliable student clubs
 	ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error)
@@ -539,6 +569,12 @@ func (UnimplementedCampusServer) CreateDevice(context.Context, *CreateDeviceRequ
 }
 func (UnimplementedCampusServer) DeleteDevice(context.Context, *DeleteDeviceRequest) (*DeleteDeviceReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDevice not implemented")
+}
+func (UnimplementedCampusServer) GetPushPreferences(context.Context, *GetPushPreferencesRequest) (*PushPreferences, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPushPreferences not implemented")
+}
+func (UnimplementedCampusServer) UpdatePushPreferences(context.Context, *UpdatePushPreferencesRequest) (*PushPreferences, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePushPreferences not implemented")
 }
 func (UnimplementedCampusServer) ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListStudentClub not implemented")
@@ -1012,6 +1048,42 @@ func _Campus_DeleteDevice_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_GetPushPreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPushPreferencesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetPushPreferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetPushPreferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetPushPreferences(ctx, req.(*GetPushPreferencesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_UpdatePushPreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePushPreferencesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).UpdatePushPreferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_UpdatePushPreferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).UpdatePushPreferences(ctx, req.(*UpdatePushPreferencesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Campus_ListStudentClub_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListStudentClubRequest)
 	if err := dec(in); err != nil {
@@ -1186,6 +1258,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDevice",
 			Handler:    _Campus_DeleteDevice_Handler,
+		},
+		{
+			MethodName: "GetPushPreferences",
+			Handler:    _Campus_GetPushPreferences_Handler,
+		},
+		{
+			MethodName: "UpdatePushPreferences",
+			Handler:    _Campus_UpdatePushPreferences_Handler,
 		},
 		{
 			MethodName: "ListStudentClub",
