@@ -2,14 +2,18 @@ package backend
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
+	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/TUM-Dev/Campus-Backend/server/utils"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -143,4 +147,166 @@ func TestCreateDishRatingAtomicityAndWildcardSafety(t *testing.T) {
 	var ratingCount int64
 	require.NoError(t, db.Model(&model.DishRating{}).Count(&ratingCount).Error)
 	require.Zero(t, ratingCount)
+}
+
+func deviceCtx(deviceID string) context.Context {
+	return metadata.NewIncomingContext(context.Background(), metadata.Pairs("x-device-id", deviceID))
+}
+
+func TestDishRatingOwnershipDeduplicationAndModeration(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	prevStorage := cron.StorageDir
+	cron.StorageDir = t.TempDir()
+	t.Cleanup(func() { cron.StorageDir = prevStorage })
+
+	server := CampusServer{db: db}
+
+	canteen := model.Canteen{Name: "MENSA_GARCHING"}
+	require.NoError(t, db.Create(&canteen).Error)
+	dish := model.Dish{Name: "Schnitzel", Type: "Fleisch", CanteenID: canteen.CanteenID}
+	require.NoError(t, db.Create(&dish).Error)
+	tag1 := model.DishRatingTagOption{DE: "Salz", EN: "Saltiness"}
+	tag2 := model.DishRatingTagOption{DE: "Portionsgröße", EN: "Portion Size"}
+	require.NoError(t, db.Create(&tag1).Error)
+	require.NoError(t, db.Create(&tag2).Error)
+	nameTag := model.DishNameTagOption{DE: "Schnitzel", EN: "Schnitzel"}
+	require.NoError(t, db.Create(&nameTag).Error)
+	require.NoError(t, db.Create(&model.DishToDishNameTag{DishID: dish.Dish, NameTagID: nameTag.DishNameTagOption}).Error)
+
+	img := readTestImage(t)
+	aliceCtx := deviceCtx("alice-device")
+	bobCtx := deviceCtx("bob-device")
+
+	// Alice submits a rating with image and tag1.
+	created, err := server.CreateDishRating(aliceCtx, &pb.CreateDishRatingRequest{
+		Points:     4,
+		CanteenId:  "mensa-garching",
+		Dish:       "Schnitzel",
+		Comment:    "Pretty good",
+		Image:      img,
+		RatingTags: []*pb.RatingTag{{TagId: tag1.DishRatingTagOption, Points: 3}},
+	})
+	require.NoError(t, err)
+	require.Greater(t, created.RatingId, int64(0))
+
+	// Alice cannot submit a second rating for the same dish on the same day.
+	_, err = server.CreateDishRating(aliceCtx, &pb.CreateDishRatingRequest{
+		Points:    5,
+		CanteenId: "mensa-garching",
+		Dish:      "Schnitzel",
+	})
+	require.Equal(t, codes.AlreadyExists, status.Code(err))
+
+	// Bob CAN submit a rating on the same day.
+	bobCreated, err := server.CreateDishRating(bobCtx, &pb.CreateDishRatingRequest{
+		Points:    2,
+		CanteenId: "mensa-garching",
+		Dish:      "Schnitzel",
+		Comment:   "Too dry",
+	})
+	require.NoError(t, err)
+
+	// GetDishRatings marks is_own_rating accurately per caller.
+	aliceView, err := server.GetDishRatings(aliceCtx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching", Dish: "Schnitzel", Limit: 10,
+	})
+	require.NoError(t, err)
+	require.Len(t, aliceView.Rating, 2)
+	ownCount := 0
+	for _, r := range aliceView.Rating {
+		if r.RatingId == created.RatingId {
+			require.True(t, r.IsOwnRating)
+			ownCount++
+		} else {
+			require.False(t, r.IsOwnRating)
+		}
+	}
+	require.Equal(t, 1, ownCount)
+
+	// Bob cannot update or delete Alice's rating.
+	_, err = server.UpdateDishRating(bobCtx, &pb.UpdateDishRatingRequest{
+		RatingId: created.RatingId, Points: 1, Comment: "Hacked",
+	})
+	require.Equal(t, codes.PermissionDenied, status.Code(err))
+	_, err = server.DeleteDishRating(bobCtx, &pb.DeleteDishRatingRequest{RatingId: created.RatingId})
+	require.Equal(t, codes.PermissionDenied, status.Code(err))
+
+	// Alice updates her rating (changes points, removes image, switches tag).
+	var before model.DishRating
+	require.NoError(t, db.First(&before, created.RatingId).Error)
+	require.FileExists(t, before.Image)
+
+	_, err = server.UpdateDishRating(aliceCtx, &pb.UpdateDishRatingRequest{
+		RatingId:    created.RatingId,
+		Points:      5,
+		Comment:     "Actually amazing",
+		RemoveImage: true,
+		RatingTags:  []*pb.RatingTag{{TagId: tag2.DishRatingTagOption, Points: 5}},
+	})
+	require.NoError(t, err)
+
+	var after model.DishRating
+	require.NoError(t, db.First(&after, created.RatingId).Error)
+	require.Equal(t, int32(5), after.Points)
+	require.Equal(t, "Actually amazing", after.Comment)
+	require.Empty(t, after.Image)
+	require.True(t, after.UpdatedAt.Valid)
+	require.Equal(t, before.Timestamp.Unix(), after.Timestamp.Unix(), "visited timestamp must be preserved on edit")
+	_, statErr := os.Stat(before.Image)
+	require.True(t, os.IsNotExist(statErr), "removed image file should be cleaned up")
+
+	// Reporting Bob's rating: duplicate report from same device rejected, 5 distinct reports auto-hide it.
+	for i := 1; i <= ratingAutoHideReportThreshold; i++ {
+		reporterCtx := deviceCtx(fmt.Sprintf("reporter-%d", i))
+		rep, err := server.ReportDishRating(reporterCtx, &pb.ReportDishRatingRequest{
+			RatingId: bobCreated.RatingId,
+			Reason:   "spam",
+		})
+		require.NoError(t, err)
+		if i < ratingAutoHideReportThreshold {
+			require.False(t, rep.Hidden)
+		} else {
+			require.True(t, rep.Hidden)
+		}
+		if i == 1 {
+			_, dupErr := server.ReportDishRating(reporterCtx, &pb.ReportDishRatingRequest{
+				RatingId: bobCreated.RatingId, Reason: "spam again",
+			})
+			require.Equal(t, codes.AlreadyExists, status.Code(dupErr))
+		}
+	}
+
+	// Hidden rating must be excluded from both rating list AND dish_rating_statistics view.
+	afterHide, err := server.GetDishRatings(aliceCtx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching", Dish: "Schnitzel", Limit: 10,
+	})
+	require.NoError(t, err)
+	require.Len(t, afterHide.Rating, 1)
+	require.Equal(t, created.RatingId, afterHide.Rating[0].RatingId)
+	require.Equal(t, float64(5), afterHide.Avg)
+
+	// Alice deletes her own rating; dish now has no visible ratings.
+	_, err = server.DeleteDishRating(aliceCtx, &pb.DeleteDishRatingRequest{RatingId: created.RatingId})
+	require.NoError(t, err)
+	_, err = server.GetDishRatings(aliceCtx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching", Dish: "Schnitzel", Limit: 10,
+	})
+	require.Equal(t, codes.NotFound, status.Code(err))
+
+	// Canteen ratings also enforce same-day per-device deduplication.
+	canteenRating1, err := server.CreateCanteenRating(aliceCtx, &pb.CreateCanteenRatingRequest{
+		Points: 4, CanteenId: "mensa-garching", Comment: "Clean",
+	})
+	require.NoError(t, err)
+	require.Greater(t, canteenRating1.RatingId, int64(0))
+	_, err = server.CreateCanteenRating(aliceCtx, &pb.CreateCanteenRatingRequest{
+		Points: 5, CanteenId: "mensa-garching", Comment: "Second rating same day",
+	})
+	require.Equal(t, codes.AlreadyExists, status.Code(err))
+	canteenRating2, err := server.CreateCanteenRating(bobCtx, &pb.CreateCanteenRatingRequest{
+		Points: 3, CanteenId: "mensa-garching", Comment: "Busy",
+	})
+	require.NoError(t, err)
+	require.Greater(t, canteenRating2.RatingId, canteenRating1.RatingId)
 }

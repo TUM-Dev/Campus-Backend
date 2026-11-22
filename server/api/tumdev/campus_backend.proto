@@ -63,6 +63,27 @@ service Campus {
     };
   }
 
+  // Update a dish rating previously created by the calling device.
+  rpc UpdateDishRating(UpdateDishRatingRequest) returns (UpdateDishRatingReply) {
+    option (google.api.http) = {
+      put: "/dish/rating/{rating_id}"
+      body: "*"
+    };
+  }
+
+  // Delete a dish rating previously created by the calling device.
+  rpc DeleteDishRating(DeleteDishRatingRequest) returns (DeleteDishRatingReply) {
+    option (google.api.http) = {delete: "/dish/rating/{rating_id}"};
+  }
+
+  // Report an abusive or invalid dish rating for moderation.
+  rpc ReportDishRating(ReportDishRatingRequest) returns (ReportDishRatingReply) {
+    option (google.api.http) = {
+      post: "/dish/rating/{rating_id}/report"
+      body: "*"
+    };
+  }
+
   rpc ListAvailableDishTags(ListAvailableDishTagsRequest) returns (ListAvailableDishTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allRatingTags"
@@ -288,9 +309,17 @@ message SingleRatingReply {
   string comment = 3;
   repeated RatingTagNewRequest rating_tags = 4;
   google.protobuf.Timestamp visited = 5;
+  // Unique identifier of the rating
+  int64 rating_id = 6;
+  // True if the rating was submitted by the calling device (x-device-id)
+  bool is_own_rating = 8;
+  // Present if the rating was edited after creation
+  google.protobuf.Timestamp updated_at = 9;
 }
 
-message CreateCanteenRatingReply {}
+message CreateCanteenRatingReply {
+  int64 rating_id = 1;
+}
 
 message CreateCanteenRatingRequest {
   // number in the range 1-5
@@ -303,7 +332,9 @@ message CreateCanteenRatingRequest {
   string comment = 6;
 }
 
-message CreateDishRatingReply {}
+message CreateDishRatingReply {
+  int64 rating_id = 1;
+}
 message CreateDishRatingRequest {
   // number in the range 1-5
   int32 points = 1;
@@ -318,6 +349,41 @@ message CreateDishRatingRequest {
   repeated RatingTag rating_tags = 5;
   // Optional comment (max 256 chars)
   string comment = 7;
+}
+
+message UpdateDishRatingRequest {
+  int64 rating_id = 1;
+  // number in the range 1-5
+  int32 points = 2;
+  // Optional comment (max 256 chars)
+  string comment = 3;
+  // Replaces the tag ratings for this rating
+  repeated RatingTag rating_tags = 4;
+  // Optional replacement JPEG/PNG image
+  bytes image = 5;
+  // If true, removes any existing image from the rating
+  bool remove_image = 6;
+}
+
+message UpdateDishRatingReply {
+  int64 rating_id = 1;
+}
+
+message DeleteDishRatingRequest {
+  int64 rating_id = 1;
+}
+
+message DeleteDishRatingReply {}
+
+message ReportDishRatingRequest {
+  int64 rating_id = 1;
+  // Optional reason for reporting (max 256 chars)
+  string reason = 2;
+}
+
+message ReportDishRatingReply {
+  // True if the rating has been hidden after reaching the report threshold
+  bool hidden = 1;
 }
 
 message ListAvailableDishTagsRequest {}

@@ -358,6 +358,116 @@
         ]
       }
     },
+    "/dish/rating/{ratingId}": {
+      "delete": {
+        "summary": "Delete a dish rating previously created by the calling device.",
+        "operationId": "Campus_DeleteDishRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiDeleteDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ratingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      },
+      "put": {
+        "summary": "Update a dish rating previously created by the calling device.",
+        "operationId": "Campus_UpdateDishRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiUpdateDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ratingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CampusUpdateDishRatingBody"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/dish/rating/{ratingId}/report": {
+      "post": {
+        "summary": "Report an abusive or invalid dish rating for moderation.",
+        "operationId": "Campus_ReportDishRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiReportDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ratingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CampusReportDishRatingBody"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/dishes": {
       "get": {
         "summary": "Returns all dishes for a specific cafeteria, year, week and day",
@@ -772,6 +882,46 @@
     }
   },
   "definitions": {
+    "CampusReportDishRatingBody": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "title": "Optional reason for reporting (max 256 chars)"
+        }
+      }
+    },
+    "CampusUpdateDishRatingBody": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "format": "int32",
+          "title": "number in the range 1-5"
+        },
+        "comment": {
+          "type": "string",
+          "title": "Optional comment (max 256 chars)"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTag"
+          },
+          "title": "Replaces the tag ratings for this rating"
+        },
+        "image": {
+          "type": "string",
+          "format": "byte",
+          "title": "Optional replacement JPEG/PNG image"
+        },
+        "removeImage": {
+          "type": "boolean",
+          "title": "If true, removes any existing image from the rating"
+        }
+      }
+    },
     "CreateFeedbackRequestRecipient": {
       "type": "string",
       "enum": [
@@ -779,7 +929,7 @@
         "TUM_CONTACT"
       ],
       "default": "TUM_DEV",
-      "description": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
     },
     "apiCanteen": {
       "type": "object",
@@ -814,7 +964,13 @@
       }
     },
     "apiCreateCanteenRatingReply": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "ratingId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "apiCreateCanteenRatingRequest": {
       "type": "object",
@@ -868,7 +1024,13 @@
       }
     },
     "apiCreateDishRatingReply": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "ratingId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "apiCreateDishRatingRequest": {
       "type": "object",
@@ -915,6 +1077,9 @@
           "type": "string"
         }
       }
+    },
+    "apiDeleteDishRatingReply": {
+      "type": "object"
     },
     "apiDeviceType": {
       "type": "string",
@@ -1447,6 +1612,15 @@
         }
       }
     },
+    "apiReportDishRatingReply": {
+      "type": "object",
+      "properties": {
+        "hidden": {
+          "type": "boolean",
+          "title": "True if the rating has been hidden after reaching the report threshold"
+        }
+      }
+    },
     "apiSingleRatingReply": {
       "type": "object",
       "properties": {
@@ -1474,6 +1648,20 @@
         "visited": {
           "type": "string",
           "format": "date-time"
+        },
+        "ratingId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Unique identifier of the rating"
+        },
+        "isOwnRating": {
+          "type": "boolean",
+          "title": "True if the rating was submitted by the calling device (x-device-id)"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Present if the rating was edited after creation"
         }
       }
     },
@@ -1580,6 +1768,15 @@
         }
       }
     },
+    "apiUpdateDishRatingReply": {
+      "type": "object",
+      "properties": {
+        "ratingId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -1587,7 +1784,7 @@
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": {}
     },
     "rpcStatus": {
       "type": "object",
