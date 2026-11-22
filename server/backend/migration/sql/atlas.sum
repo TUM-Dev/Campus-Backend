@@ -1,6 +1,7 @@
-h1:Pji6rDu2JlCTZ/lxNx5VqN3Rhj1FgjxP3jmDdeQexCo=
+h1:g8/I+SuFkpoMin/t7WvyJIHwKDtDGP5PHYzfZsc6pCw=
 20250412000000_baseline.sql h1:QwCRxB5k5Ax/C4fvAhUMvwoWuqW6DHs9aPpQi/ecKd4=
 20261105185936_student_councils.sql h1:nSG/ObKYmV67DlkOxG5DWJKc5fwaaYHWYPJ71oRGZJU=
 20261106000000_tumonline_status.sql h1:GGiRe3bfnRb60HC+19IIEe05Fevt90SGi4rpXpoCB+Q=
 20261122032045_canteen_head_count_history.sql h1:ZBuMEmXRORBihHpv35AKVTyfvMe4wmQOxh10rsYyMmo=
 20261122055000_dish_rating_moderation.sql h1:0qa+pWleG7NNeM91zzoDbYMd4ksVmROZQxG15RJQI24=
+20261122055500_seed_canteen_rating_tags.sql h1:9uaViarwecPptOlnNUBB8REZZolZts0Lp/yyOF/1LTw=
