@@ -96,29 +96,56 @@ func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCan
 	if input.GetCanteenId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Canteen Id is required.")
 	}
-	var statsForCanteen model.CanteenRatingStatistic
 	tx := s.db.WithContext(ctx)
 	canteenId, err := getIDForCanteenName(input.CanteenId, tx)
 	if err != nil {
 		return nil, err
 	}
-	err = tx.First(&statsForCanteen, "cafeteriaId = ?", canteenId).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, status.Error(codes.NotFound, "No canteen with this Id found.")
-	}
-	if err != nil {
-		log.WithError(err).Error("Error while querying the canteen with Id ", canteenId)
-		return nil, status.Error(codes.Internal, "could not query the canteen with the given Id")
+
+	from, to, windowed := resolveTimeWindow(input.From, input.To)
+	var avg, std float64
+	var minPts, maxPts int32
+	var count int64
+	var dist *pb.RatingDistribution
+	var ratingTags []*pb.RatingTagResult
+
+	if windowed {
+		row, err := queryWindowedCanteenStats(canteenId, from, to, tx)
+		if err != nil {
+			log.WithError(err).Error("Error while querying windowed canteen ratings for Id ", canteenId)
+			return nil, status.Error(codes.Internal, "could not query the canteen with the given Id")
+		}
+		if row.RatingCount == 0 {
+			return nil, status.Error(codes.NotFound, "No canteen with this Id found.")
+		}
+		avg, std, minPts, maxPts, count = row.Average, row.Std, row.Min, row.Max, row.RatingCount
+		dist = buildRatingDistribution(row.Stars1, row.Stars2, row.Stars3, row.Stars4, row.Stars5)
+		ratingTags = queryWindowedTags(canteenId, -1, model.CANTEEN, from, to, tx)
+	} else {
+		var statsForCanteen model.CanteenRatingStatistic
+		err = tx.First(&statsForCanteen, "cafeteriaId = ?", canteenId).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "No canteen with this Id found.")
+		}
+		if err != nil {
+			log.WithError(err).Error("Error while querying the canteen with Id ", canteenId)
+			return nil, status.Error(codes.Internal, "could not query the canteen with the given Id")
+		}
+		avg, std, minPts, maxPts, count = statsForCanteen.Average, statsForCanteen.Std, statsForCanteen.Min, statsForCanteen.Max, statsForCanteen.RatingCount
+		dist = buildRatingDistribution(statsForCanteen.Stars1, statsForCanteen.Stars2, statsForCanteen.Stars3, statsForCanteen.Stars4, statsForCanteen.Stars5)
+		ratingTags = queryTags(canteenId, -1, model.CANTEEN, tx)
 	}
 
 	callerHash := callerDeviceHash(ctx)
 	return &pb.ListCanteenRatingsReply{
-		Avg:        statsForCanteen.Average,
-		Std:        statsForCanteen.Std,
-		Min:        statsForCanteen.Min,
-		Max:        statsForCanteen.Max,
-		Rating:     queryLastCanteenRatingsWithLimit(input, canteenId, callerHash, tx),
-		RatingTags: queryTags(canteenId, -1, model.CANTEEN, tx),
+		Avg:          avg,
+		Std:          std,
+		Min:          minPts,
+		Max:          maxPts,
+		RatingCount:  count,
+		Distribution: dist,
+		Rating:       queryLastCanteenRatingsWithLimit(input, canteenId, callerHash, tx),
+		RatingTags:   ratingTags,
 	}, nil
 }
 
@@ -204,26 +231,53 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		return nil, err
 	}
 
-	var statsForDish model.DishRatingStatistic
-	err = tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
-	}
-	if err != nil {
-		fields := log.Fields{"dishID": dishID, "cafeteriaID": canteenID}
-		log.WithError(err).WithFields(fields).Error("Error while querying the average ratings")
-		return nil, status.Error(codes.Internal, "Could not query dish ratings.")
+	from, to, windowed := resolveTimeWindow(input.From, input.To)
+	var avg, std float64
+	var minPts, maxPts int32
+	var count int64
+	var dist *pb.RatingDistribution
+	var ratingTags []*pb.RatingTagResult
+
+	if windowed {
+		row, err := queryWindowedDishStats(dishID, from, to, tx)
+		if err != nil {
+			fields := log.Fields{"dishID": dishID, "cafeteriaID": canteenID}
+			log.WithError(err).WithFields(fields).Error("Error while querying windowed dish ratings")
+			return nil, status.Error(codes.Internal, "Could not query dish ratings.")
+		}
+		if row.RatingCount == 0 {
+			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
+		}
+		avg, std, minPts, maxPts, count = row.Average, row.Std, row.Min, row.Max, row.RatingCount
+		dist = buildRatingDistribution(row.Stars1, row.Stars2, row.Stars3, row.Stars4, row.Stars5)
+		ratingTags = queryWindowedTags(canteenID, dishID, model.DISH, from, to, tx)
+	} else {
+		var statsForDish model.DishRatingStatistic
+		err = tx.First(&statsForDish, "cafeteriaID = ? AND dishID = ?", canteenID, dishID).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "This dish has not yet been rated.")
+		}
+		if err != nil {
+			fields := log.Fields{"dishID": dishID, "cafeteriaID": canteenID}
+			log.WithError(err).WithFields(fields).Error("Error while querying the average ratings")
+			return nil, status.Error(codes.Internal, "Could not query dish ratings.")
+		}
+		avg, std, minPts, maxPts, count = statsForDish.Average, statsForDish.Std, statsForDish.Min, statsForDish.Max, statsForDish.RatingCount
+		dist = buildRatingDistribution(statsForDish.Stars1, statsForDish.Stars2, statsForDish.Stars3, statsForDish.Stars4, statsForDish.Stars5)
+		ratingTags = queryTags(canteenID, dishID, model.DISH, tx)
 	}
 
 	callerHash := callerDeviceHash(ctx)
 	return &pb.GetDishRatingsReply{
-		Avg:        statsForDish.Average,
-		Std:        statsForDish.Std,
-		Min:        statsForDish.Min,
-		Max:        statsForDish.Max,
-		Rating:     queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
-		RatingTags: queryTags(canteenID, dishID, model.DISH, tx),
-		NameTags:   queryTags(canteenID, dishID, model.NAME, tx),
+		Avg:          avg,
+		Std:          std,
+		Min:          minPts,
+		Max:          maxPts,
+		RatingCount:  count,
+		Distribution: dist,
+		Rating:       queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
+		RatingTags:   ratingTags,
+		NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
 	}, nil
 }
 
@@ -1160,15 +1214,8 @@ func (s *CampusServer) ListCanteens(ctx context.Context, _ *pb.ListCanteensReque
 
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
 	s.recordDeviceIfPresent(ctx)
-	if req.Year < 2022 {
-		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
-	}
-	_, lastWeek := time.Date(int(req.Year), time.December, 28, 0, 0, 0, 0, time.UTC).ISOWeek()
-	if req.Week < 1 || req.Week > int32(lastWeek) {
-		return &pb.ListDishesReply{}, status.Errorf(codes.InvalidArgument, "Weeks must be in the range 1 - %d for ISO year %d", lastWeek, req.Year)
-	}
-	if req.Day < 0 || req.Day > 4 {
-		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Days must be in the range 0 (Monday) - 4 (Friday)")
+	if err := validateISODateSelector(req.Year, req.Week, req.Day); err != nil {
+		return &pb.ListDishesReply{}, err
 	}
 
 	var requestStatus error = nil
