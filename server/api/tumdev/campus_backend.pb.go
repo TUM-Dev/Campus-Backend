@@ -1285,8 +1285,10 @@ type GetDishRatingsRequest struct {
 	OnlyWithComments bool `protobuf:"varint,9,opt,name=only_with_comments,json=onlyWithComments,proto3" json:"only_with_comments,omitempty"`
 	// Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
 	OmitInlineImages bool `protobuf:"varint,10,opt,name=omit_inline_images,json=omitInlineImages,proto3" json:"omit_inline_images,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet.
+	IncludeUnratedFallback bool `protobuf:"varint,11,opt,name=include_unrated_fallback,json=includeUnratedFallback,proto3" json:"include_unrated_fallback,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GetDishRatingsRequest) Reset() {
@@ -1385,6 +1387,13 @@ func (x *GetDishRatingsRequest) GetOnlyWithComments() bool {
 func (x *GetDishRatingsRequest) GetOmitInlineImages() bool {
 	if x != nil {
 		return x.OmitInlineImages
+	}
+	return false
+}
+
+func (x *GetDishRatingsRequest) GetIncludeUnratedFallback() bool {
+	if x != nil {
+		return x.IncludeUnratedFallback
 	}
 	return false
 }
@@ -5295,7 +5304,7 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\x12%\n" +
 	"\x0etotal_matching\x18\t \x01(\x03R\rtotalMatching\x12\x19\n" +
 	"\bhas_more\x18\n" +
-	" \x01(\bR\ahasMore\"\x89\x03\n" +
+	" \x01(\bR\ahasMore\"\xc3\x03\n" +
 	"\x15GetDishRatingsRequest\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
@@ -5308,7 +5317,8 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x10only_with_images\x18\b \x01(\bR\x0eonlyWithImages\x12,\n" +
 	"\x12only_with_comments\x18\t \x01(\bR\x10onlyWithComments\x12,\n" +
 	"\x12omit_inline_images\x18\n" +
-	" \x01(\bR\x10omitInlineImages\"\x99\x03\n" +
+	" \x01(\bR\x10omitInlineImages\x128\n" +
+	"\x18include_unrated_fallback\x18\v \x01(\bR\x16includeUnratedFallback\"\x99\x03\n" +
 	"\x13GetDishRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +

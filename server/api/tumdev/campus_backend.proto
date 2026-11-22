@@ -342,6 +342,8 @@ message GetDishRatingsRequest {
   bool only_with_comments = 9;
   // Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
   bool omit_inline_images = 10;
+  // Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet.
+  bool include_unrated_fallback = 11;
 }
 
 message GetDishRatingsReply {

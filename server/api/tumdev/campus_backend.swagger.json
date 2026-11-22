@@ -1486,6 +1486,10 @@
         "omitInlineImages": {
           "type": "boolean",
           "title": "Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)"
+        },
+        "includeUnratedFallback": {
+          "type": "boolean",
+          "description": "Optional: when true, returns rating_count=0 with name_tags fallback instead of NotFound if a dish has no direct ratings yet."
         }
       }
     },
