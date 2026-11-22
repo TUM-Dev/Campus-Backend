@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
+	_ "golang.org/x/image/webp"
 
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
