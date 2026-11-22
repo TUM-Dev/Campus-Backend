@@ -120,6 +120,19 @@ service Campus {
     };
   }
 
+  // Batch-fetches rating summaries (average, count, histogram, tags) for a daily menu or list of dishes.
+  rpc ListDishRatingSummaries(ListDishRatingSummariesRequest) returns (ListDishRatingSummariesReply) {
+    option (google.api.http) = {
+      post: "/dish/rating/summaries"
+      body: "*"
+    };
+  }
+
+  // Returns the highest-rated dishes served on a given day, ranked by Bayesian weighted average.
+  rpc ListTopRatedDishes(ListTopRatedDishesRequest) returns (ListTopRatedDishesReply) {
+    option (google.api.http) = {get: "/dishes/top"};
+  }
+
   rpc GetUpdateNote(GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
     option (google.api.http) = {get: "/updatenote/{version}"};
   }
@@ -262,6 +275,14 @@ message ListCanteenRatingsRequest {
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
 }
+message RatingDistribution {
+  int64 stars_1 = 1;
+  int64 stars_2 = 2;
+  int64 stars_3 = 3;
+  int64 stars_4 = 4;
+  int64 stars_5 = 5;
+}
+
 message ListCanteenRatingsReply {
   repeated SingleRatingReply rating = 1;
   double avg = 2;
@@ -269,6 +290,8 @@ message ListCanteenRatingsReply {
   int32 min = 4;
   int32 max = 5;
   repeated RatingTagResult rating_tags = 6;
+  int64 rating_count = 7;
+  RatingDistribution distribution = 8;
 }
 
 message GetDishRatingsRequest {
@@ -298,6 +321,8 @@ message GetDishRatingsReply {
   int32 max = 5;
   repeated RatingTagResult rating_tags = 6;
   repeated RatingTagResult name_tags = 7;
+  int64 rating_count = 8;
+  RatingDistribution distribution = 9;
 }
 
 message SingleRatingReply {
@@ -450,6 +475,65 @@ message ListDishesRequest {
 
 message ListDishesReply {
   repeated string dish = 1;
+}
+
+message ListDishRatingSummariesRequest {
+  // Mandatory canteen identifier (eat-api id or enum name)
+  string canteen_id = 1;
+  // Optional ISO date selector: when year > 0, summarizes all dishes on that day's menu.
+  int32 year = 2;
+  int32 week = 3;
+  int32 day = 4;
+  // Optional explicit list of dish names (used when year == 0).
+  repeated string dishes = 5;
+  // Optional lower/upper timestamp bounds for windowed statistics.
+  google.protobuf.Timestamp from = 6;
+  google.protobuf.Timestamp to = 7;
+}
+
+message DishRatingSummary {
+  string dish = 1;
+  double avg = 2;
+  double std = 3;
+  int32 min = 4;
+  int32 max = 5;
+  int64 rating_count = 6;
+  RatingDistribution distribution = 7;
+  repeated RatingTagResult rating_tags = 8;
+  repeated RatingTagResult name_tags = 9;
+  int64 latest_image_rating_id = 10;
+}
+
+message ListDishRatingSummariesReply {
+  repeated DishRatingSummary summaries = 1;
+}
+
+message ListTopRatedDishesRequest {
+  // ISO week-numbering year, >=2022
+  int32 year = 1;
+  // ISO week (1..52 or 1..53)
+  int32 week = 2;
+  // Day of the week: 0 (Monday) - 4 (Friday)
+  int32 day = 3;
+  // Optional canteen filter; omit to rank across all canteens.
+  string canteen_id = 4;
+  // Optional max number of dishes returned (default 10, max 50).
+  int32 limit = 5;
+  // Optional minimum number of visible ratings required (default 1).
+  int32 min_ratings = 6;
+}
+
+message TopRatedDish {
+  string canteen_id = 1;
+  string dish = 2;
+  double avg = 3;
+  double bayesian_score = 4;
+  int64 rating_count = 5;
+  int64 latest_image_rating_id = 6;
+}
+
+message ListTopRatedDishesReply {
+  repeated TopRatedDish dishes = 1;
 }
 
 message RoomInformationElement {

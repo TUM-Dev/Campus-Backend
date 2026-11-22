@@ -310,3 +310,166 @@ func TestDishRatingOwnershipDeduplicationAndModeration(t *testing.T) {
 	require.NoError(t, err)
 	require.Greater(t, canteenRating2.RatingId, canteenRating1.RatingId)
 }
+
+func TestDishRatingSummariesHistogramsWindowingAndTopDishes(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	server := CampusServer{db: db}
+
+	canteen := model.Canteen{Name: "MENSA_GARCHING"}
+	require.NoError(t, db.Create(&canteen).Error)
+	otherCanteen := model.Canteen{Name: "MENSA_ARCISSTR"}
+	require.NoError(t, db.Create(&otherCanteen).Error)
+
+	// Dishes offered on 2026-W45-Day 1 (Tuesday).
+	curry := model.Dish{Name: "Thai Curry", Type: "Vegan", CanteenID: canteen.CanteenID}
+	newCurry := model.Dish{Name: "Red Curry", Type: "Vegan", CanteenID: canteen.CanteenID}
+	oneVoteDish := model.Dish{Name: "Mystery Soup", Type: "Suppe", CanteenID: canteen.CanteenID}
+	arcisDish := model.Dish{Name: "Lasagne", Type: "Pasta", CanteenID: otherCanteen.CanteenID}
+	for _, d := range []*model.Dish{&curry, &newCurry, &oneVoteDish, &arcisDish} {
+		require.NoError(t, db.Create(d).Error)
+		require.NoError(t, db.Create(&model.DishesOfTheWeek{
+			DishID: d.Dish, Year: 2026, Week: 45, Day: 1,
+		}).Error)
+	}
+
+	curryNameTag := model.DishNameTagOption{DE: "Curry", EN: "Curry"}
+	require.NoError(t, db.Create(&curryNameTag).Error)
+	require.NoError(t, db.Create(&model.DishToDishNameTag{DishID: curry.Dish, NameTagID: curryNameTag.DishNameTagOption}).Error)
+	require.NoError(t, db.Create(&model.DishToDishNameTag{DishID: newCurry.Dish, NameTagID: curryNameTag.DishNameTagOption}).Error)
+
+	oldTime := time.Date(2025, time.October, 1, 12, 0, 0, 0, time.UTC)
+	recentTime := time.Date(2026, time.November, 3, 12, 0, 0, 0, time.UTC)
+
+	// Thai Curry: 1 old rating (1 star) + 6 recent ratings (five 5-star, one 4-star) -> all-time avg ~4.29, recent avg ~4.83.
+	ratingsToInsert := []struct {
+		dishID int64
+		points int32
+		ts     time.Time
+		img    string
+	}{
+		{curry.Dish, 1, oldTime, ""},
+		{curry.Dish, 5, recentTime, ""},
+		{curry.Dish, 5, recentTime.Add(time.Minute), ""},
+		{curry.Dish, 5, recentTime.Add(2 * time.Minute), ""},
+		{curry.Dish, 5, recentTime.Add(3 * time.Minute), ""},
+		{curry.Dish, 5, recentTime.Add(4 * time.Minute), "/tmp/photo.jpeg"},
+		{curry.Dish, 4, recentTime.Add(5 * time.Minute), ""},
+		// Mystery Soup: only 1 rating of 5 stars (Bayesian score should rank below Thai Curry).
+		{oneVoteDish.Dish, 5, recentTime, ""},
+		// Lasagne at Arcisstr: 3 ratings of 2 stars.
+		{arcisDish.Dish, 2, recentTime, ""},
+		{arcisDish.Dish, 2, recentTime.Add(time.Minute), ""},
+		{arcisDish.Dish, 2, recentTime.Add(2 * time.Minute), ""},
+	}
+	var latestCurryPhotoID int64
+	for _, r := range ratingsToInsert {
+		rec := model.DishRating{
+			DishID:    r.dishID,
+			Points:    r.points,
+			Timestamp: r.ts,
+			Image:     r.img,
+			Status:    model.RatingStatusVisible,
+		}
+		require.NoError(t, db.Create(&rec).Error)
+		if r.dishID == curry.Dish {
+			require.NoError(t, db.Create(&model.DishNameTag{
+				RatingID: rec.DishRating, TagNameID: curryNameTag.DishNameTagOption, Points: r.points,
+			}).Error)
+		}
+		if r.img != "" {
+			latestCurryPhotoID = rec.DishRating
+		}
+	}
+
+	// 1. All-time GetDishRatings returns count and star histogram.
+	allTime, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching", Dish: "Thai Curry", Limit: 10,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(7), allTime.RatingCount)
+	require.Equal(t, int64(1), allTime.Distribution.Stars_1)
+	require.Equal(t, int64(1), allTime.Distribution.Stars_4)
+	require.Equal(t, int64(5), allTime.Distribution.Stars_5)
+
+	// 2. Time-windowed GetDishRatings computes stats strictly inside [from, to].
+	recentOnly, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching",
+		Dish:      "Thai Curry",
+		From:      timestamppb.New(time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)),
+		Limit:     10,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(6), recentOnly.RatingCount)
+	require.Equal(t, int32(4), recentOnly.Min)
+	require.Equal(t, int64(0), recentOnly.Distribution.Stars_1)
+	require.Equal(t, int64(5), recentOnly.Distribution.Stars_5)
+
+	// 3. Batch ListDishRatingSummaries for the day returns all 3 Garching dishes in one call,
+	//    including unrated "Red Curry" with its Curry name-tag fallback stats!
+	batch, err := server.ListDishRatingSummaries(ctx, &pb.ListDishRatingSummariesRequest{
+		CanteenId: "mensa-garching", Year: 2026, Week: 45, Day: 1,
+	})
+	require.NoError(t, err)
+	require.Len(t, batch.Summaries, 3)
+
+	byDish := map[string]*pb.DishRatingSummary{}
+	for _, s := range batch.Summaries {
+		byDish[s.Dish] = s
+	}
+	require.Equal(t, int64(7), byDish["Thai Curry"].RatingCount)
+	require.Equal(t, latestCurryPhotoID, byDish["Thai Curry"].LatestImageRatingId)
+	require.Equal(t, int64(0), byDish["Red Curry"].RatingCount)
+	require.Len(t, byDish["Red Curry"].NameTags, 1, "unrated dish should still surface name-tag fallback stats")
+	require.Equal(t, int32(curryNameTag.DishNameTagOption), byDish["Red Curry"].NameTags[0].TagId)
+
+	// 4. ListTopRatedDishes ranks 7-vote Thai Curry (avg 4.29) above 1-vote Mystery Soup (avg 5.0) via Bayesian weighting.
+	top, err := server.ListTopRatedDishes(ctx, &pb.ListTopRatedDishesRequest{
+		Year: 2026, Week: 45, Day: 1, Limit: 5,
+	})
+	require.NoError(t, err)
+	require.Len(t, top.Dishes, 3)
+	require.Equal(t, "Thai Curry", top.Dishes[0].Dish)
+	require.Equal(t, "mensa-garching", top.Dishes[0].CanteenId)
+	require.Equal(t, latestCurryPhotoID, top.Dishes[0].LatestImageRatingId)
+	require.Greater(t, top.Dishes[0].BayesianScore, top.Dishes[1].BayesianScore)
+	require.Equal(t, "Lasagne", top.Dishes[2].Dish)
+	require.Equal(t, "mensa-arcisstr", top.Dishes[2].CanteenId)
+
+	// 5. ListTopRatedDishes supports canteen_id and min_ratings filters.
+	filteredTop, err := server.ListTopRatedDishes(ctx, &pb.ListTopRatedDishesRequest{
+		Year: 2026, Week: 45, Day: 1, CanteenId: "mensa-garching", MinRatings: 2,
+	})
+	require.NoError(t, err)
+	require.Len(t, filteredTop.Dishes, 1)
+	require.Equal(t, "Thai Curry", filteredTop.Dishes[0].Dish)
+
+	// 6. ListDishRatingSummaries works with explicit dish names + time window + enforces batch cap.
+	explicitBatch, err := server.ListDishRatingSummaries(ctx, &pb.ListDishRatingSummariesRequest{
+		CanteenId: "mensa-garching",
+		Dishes:    []string{"Thai Curry", "Nonexistent Dish"},
+		From:      timestamppb.New(time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)),
+	})
+	require.NoError(t, err)
+	require.Len(t, explicitBatch.Summaries, 2)
+	require.Equal(t, int64(6), explicitBatch.Summaries[0].RatingCount)
+	require.Equal(t, "Nonexistent Dish", explicitBatch.Summaries[1].Dish)
+	require.Equal(t, int64(0), explicitBatch.Summaries[1].RatingCount)
+
+	tooManyDishes := make([]string, maxSummaryDishesBatch+1)
+	for i := range tooManyDishes {
+		tooManyDishes[i] = fmt.Sprintf("Dish %d", i)
+	}
+	_, err = server.ListDishRatingSummaries(ctx, &pb.ListDishRatingSummariesRequest{
+		CanteenId: "mensa-garching", Dishes: tooManyDishes,
+	})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+
+	// Duplicate dishes_of_the_weeks rows must not yield duplicate menu summaries.
+	require.NoError(t, db.Create(&model.DishesOfTheWeek{DishID: curry.Dish, Year: 2026, Week: 45, Day: 1}).Error)
+	dedupBatch, err := server.ListDishRatingSummaries(ctx, &pb.ListDishRatingSummariesRequest{
+		CanteenId: "mensa-garching", Year: 2026, Week: 45, Day: 1,
+	})
+	require.NoError(t, err)
+	require.Len(t, dedupBatch.Summaries, 3)
+}

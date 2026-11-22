@@ -164,7 +164,7 @@ func (x CreateFeedbackRequest_Recipient) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CreateFeedbackRequest_Recipient.Descriptor instead.
 func (CreateFeedbackRequest_Recipient) EnumDescriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{49, 0}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{56, 0}
 }
 
 type CreateDeviceRequest struct {
@@ -974,6 +974,82 @@ func (x *ListCanteenRatingsRequest) GetLimit() int32 {
 	return 0
 }
 
+type RatingDistribution struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Stars_1       int64                  `protobuf:"varint,1,opt,name=stars_1,json=stars1,proto3" json:"stars_1,omitempty"`
+	Stars_2       int64                  `protobuf:"varint,2,opt,name=stars_2,json=stars2,proto3" json:"stars_2,omitempty"`
+	Stars_3       int64                  `protobuf:"varint,3,opt,name=stars_3,json=stars3,proto3" json:"stars_3,omitempty"`
+	Stars_4       int64                  `protobuf:"varint,4,opt,name=stars_4,json=stars4,proto3" json:"stars_4,omitempty"`
+	Stars_5       int64                  `protobuf:"varint,5,opt,name=stars_5,json=stars5,proto3" json:"stars_5,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RatingDistribution) Reset() {
+	*x = RatingDistribution{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RatingDistribution) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RatingDistribution) ProtoMessage() {}
+
+func (x *RatingDistribution) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RatingDistribution.ProtoReflect.Descriptor instead.
+func (*RatingDistribution) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RatingDistribution) GetStars_1() int64 {
+	if x != nil {
+		return x.Stars_1
+	}
+	return 0
+}
+
+func (x *RatingDistribution) GetStars_2() int64 {
+	if x != nil {
+		return x.Stars_2
+	}
+	return 0
+}
+
+func (x *RatingDistribution) GetStars_3() int64 {
+	if x != nil {
+		return x.Stars_3
+	}
+	return 0
+}
+
+func (x *RatingDistribution) GetStars_4() int64 {
+	if x != nil {
+		return x.Stars_4
+	}
+	return 0
+}
+
+func (x *RatingDistribution) GetStars_5() int64 {
+	if x != nil {
+		return x.Stars_5
+	}
+	return 0
+}
+
 type ListCanteenRatingsReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Rating        []*SingleRatingReply   `protobuf:"bytes,1,rep,name=rating,proto3" json:"rating,omitempty"`
@@ -982,13 +1058,15 @@ type ListCanteenRatingsReply struct {
 	Min           int32                  `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
 	Max           int32                  `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
 	RatingTags    []*RatingTagResult     `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	RatingCount   int64                  `protobuf:"varint,7,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	Distribution  *RatingDistribution    `protobuf:"bytes,8,opt,name=distribution,proto3" json:"distribution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCanteenRatingsReply) Reset() {
 	*x = ListCanteenRatingsReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1000,7 +1078,7 @@ func (x *ListCanteenRatingsReply) String() string {
 func (*ListCanteenRatingsReply) ProtoMessage() {}
 
 func (x *ListCanteenRatingsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[14]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1013,7 +1091,7 @@ func (x *ListCanteenRatingsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCanteenRatingsReply.ProtoReflect.Descriptor instead.
 func (*ListCanteenRatingsReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{14}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListCanteenRatingsReply) GetRating() []*SingleRatingReply {
@@ -1058,6 +1136,20 @@ func (x *ListCanteenRatingsReply) GetRatingTags() []*RatingTagResult {
 	return nil
 }
 
+func (x *ListCanteenRatingsReply) GetRatingCount() int64 {
+	if x != nil {
+		return x.RatingCount
+	}
+	return 0
+}
+
+func (x *ListCanteenRatingsReply) GetDistribution() *RatingDistribution {
+	if x != nil {
+		return x.Distribution
+	}
+	return nil
+}
+
 type GetDishRatingsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
@@ -1077,7 +1169,7 @@ type GetDishRatingsRequest struct {
 
 func (x *GetDishRatingsRequest) Reset() {
 	*x = GetDishRatingsRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1089,7 +1181,7 @@ func (x *GetDishRatingsRequest) String() string {
 func (*GetDishRatingsRequest) ProtoMessage() {}
 
 func (x *GetDishRatingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[15]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1102,7 +1194,7 @@ func (x *GetDishRatingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDishRatingsRequest.ProtoReflect.Descriptor instead.
 func (*GetDishRatingsRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{15}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetDishRatingsRequest) GetCanteenId() string {
@@ -1151,16 +1243,18 @@ type GetDishRatingsReply struct {
 	// minimum of all dish rating tags which were used to rate this dish in this cafeteria
 	Min int32 `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
 	// maximum of all dish rating tags which were used to rate this dish in this cafeteria
-	Max           int32              `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
-	RatingTags    []*RatingTagResult `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
-	NameTags      []*RatingTagResult `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
+	Max           int32               `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
+	RatingTags    []*RatingTagResult  `protobuf:"bytes,6,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	NameTags      []*RatingTagResult  `protobuf:"bytes,7,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
+	RatingCount   int64               `protobuf:"varint,8,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	Distribution  *RatingDistribution `protobuf:"bytes,9,opt,name=distribution,proto3" json:"distribution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetDishRatingsReply) Reset() {
 	*x = GetDishRatingsReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +1266,7 @@ func (x *GetDishRatingsReply) String() string {
 func (*GetDishRatingsReply) ProtoMessage() {}
 
 func (x *GetDishRatingsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[16]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +1279,7 @@ func (x *GetDishRatingsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDishRatingsReply.ProtoReflect.Descriptor instead.
 func (*GetDishRatingsReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{16}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetDishRatingsReply) GetRating() []*SingleRatingReply {
@@ -1237,6 +1331,20 @@ func (x *GetDishRatingsReply) GetNameTags() []*RatingTagResult {
 	return nil
 }
 
+func (x *GetDishRatingsReply) GetRatingCount() int64 {
+	if x != nil {
+		return x.RatingCount
+	}
+	return 0
+}
+
+func (x *GetDishRatingsReply) GetDistribution() *RatingDistribution {
+	if x != nil {
+		return x.Distribution
+	}
+	return nil
+}
+
 type SingleRatingReply struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// number in the range 1-5
@@ -1259,7 +1367,7 @@ type SingleRatingReply struct {
 
 func (x *SingleRatingReply) Reset() {
 	*x = SingleRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1271,7 +1379,7 @@ func (x *SingleRatingReply) String() string {
 func (*SingleRatingReply) ProtoMessage() {}
 
 func (x *SingleRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[17]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1284,7 +1392,7 @@ func (x *SingleRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SingleRatingReply.ProtoReflect.Descriptor instead.
 func (*SingleRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{17}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SingleRatingReply) GetPoints() int32 {
@@ -1352,7 +1460,7 @@ type CreateCanteenRatingReply struct {
 
 func (x *CreateCanteenRatingReply) Reset() {
 	*x = CreateCanteenRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1364,7 +1472,7 @@ func (x *CreateCanteenRatingReply) String() string {
 func (*CreateCanteenRatingReply) ProtoMessage() {}
 
 func (x *CreateCanteenRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[18]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1377,7 +1485,7 @@ func (x *CreateCanteenRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCanteenRatingReply.ProtoReflect.Descriptor instead.
 func (*CreateCanteenRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{18}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateCanteenRatingReply) GetRatingId() int64 {
@@ -1403,7 +1511,7 @@ type CreateCanteenRatingRequest struct {
 
 func (x *CreateCanteenRatingRequest) Reset() {
 	*x = CreateCanteenRatingRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1415,7 +1523,7 @@ func (x *CreateCanteenRatingRequest) String() string {
 func (*CreateCanteenRatingRequest) ProtoMessage() {}
 
 func (x *CreateCanteenRatingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[19]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1428,7 +1536,7 @@ func (x *CreateCanteenRatingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCanteenRatingRequest.ProtoReflect.Descriptor instead.
 func (*CreateCanteenRatingRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{19}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CreateCanteenRatingRequest) GetPoints() int32 {
@@ -1475,7 +1583,7 @@ type CreateDishRatingReply struct {
 
 func (x *CreateDishRatingReply) Reset() {
 	*x = CreateDishRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1487,7 +1595,7 @@ func (x *CreateDishRatingReply) String() string {
 func (*CreateDishRatingReply) ProtoMessage() {}
 
 func (x *CreateDishRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[20]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1500,7 +1608,7 @@ func (x *CreateDishRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDishRatingReply.ProtoReflect.Descriptor instead.
 func (*CreateDishRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{20}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CreateDishRatingReply) GetRatingId() int64 {
@@ -1531,7 +1639,7 @@ type CreateDishRatingRequest struct {
 
 func (x *CreateDishRatingRequest) Reset() {
 	*x = CreateDishRatingRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1543,7 +1651,7 @@ func (x *CreateDishRatingRequest) String() string {
 func (*CreateDishRatingRequest) ProtoMessage() {}
 
 func (x *CreateDishRatingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[21]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1556,7 +1664,7 @@ func (x *CreateDishRatingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDishRatingRequest.ProtoReflect.Descriptor instead.
 func (*CreateDishRatingRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{21}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateDishRatingRequest) GetPoints() int32 {
@@ -1620,7 +1728,7 @@ type UpdateDishRatingRequest struct {
 
 func (x *UpdateDishRatingRequest) Reset() {
 	*x = UpdateDishRatingRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1632,7 +1740,7 @@ func (x *UpdateDishRatingRequest) String() string {
 func (*UpdateDishRatingRequest) ProtoMessage() {}
 
 func (x *UpdateDishRatingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[22]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1645,7 +1753,7 @@ func (x *UpdateDishRatingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDishRatingRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDishRatingRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{22}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *UpdateDishRatingRequest) GetRatingId() int64 {
@@ -1699,7 +1807,7 @@ type UpdateDishRatingReply struct {
 
 func (x *UpdateDishRatingReply) Reset() {
 	*x = UpdateDishRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1711,7 +1819,7 @@ func (x *UpdateDishRatingReply) String() string {
 func (*UpdateDishRatingReply) ProtoMessage() {}
 
 func (x *UpdateDishRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[23]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1724,7 +1832,7 @@ func (x *UpdateDishRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDishRatingReply.ProtoReflect.Descriptor instead.
 func (*UpdateDishRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{23}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *UpdateDishRatingReply) GetRatingId() int64 {
@@ -1743,7 +1851,7 @@ type DeleteDishRatingRequest struct {
 
 func (x *DeleteDishRatingRequest) Reset() {
 	*x = DeleteDishRatingRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1755,7 +1863,7 @@ func (x *DeleteDishRatingRequest) String() string {
 func (*DeleteDishRatingRequest) ProtoMessage() {}
 
 func (x *DeleteDishRatingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[24]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1768,7 +1876,7 @@ func (x *DeleteDishRatingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDishRatingRequest.ProtoReflect.Descriptor instead.
 func (*DeleteDishRatingRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{24}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *DeleteDishRatingRequest) GetRatingId() int64 {
@@ -1786,7 +1894,7 @@ type DeleteDishRatingReply struct {
 
 func (x *DeleteDishRatingReply) Reset() {
 	*x = DeleteDishRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1798,7 +1906,7 @@ func (x *DeleteDishRatingReply) String() string {
 func (*DeleteDishRatingReply) ProtoMessage() {}
 
 func (x *DeleteDishRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[25]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1811,7 +1919,7 @@ func (x *DeleteDishRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDishRatingReply.ProtoReflect.Descriptor instead.
 func (*DeleteDishRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{25}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{26}
 }
 
 type ReportDishRatingRequest struct {
@@ -1825,7 +1933,7 @@ type ReportDishRatingRequest struct {
 
 func (x *ReportDishRatingRequest) Reset() {
 	*x = ReportDishRatingRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1837,7 +1945,7 @@ func (x *ReportDishRatingRequest) String() string {
 func (*ReportDishRatingRequest) ProtoMessage() {}
 
 func (x *ReportDishRatingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[26]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1850,7 +1958,7 @@ func (x *ReportDishRatingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportDishRatingRequest.ProtoReflect.Descriptor instead.
 func (*ReportDishRatingRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{26}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ReportDishRatingRequest) GetRatingId() int64 {
@@ -1877,7 +1985,7 @@ type ReportDishRatingReply struct {
 
 func (x *ReportDishRatingReply) Reset() {
 	*x = ReportDishRatingReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1889,7 +1997,7 @@ func (x *ReportDishRatingReply) String() string {
 func (*ReportDishRatingReply) ProtoMessage() {}
 
 func (x *ReportDishRatingReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[27]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1902,7 +2010,7 @@ func (x *ReportDishRatingReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportDishRatingReply.ProtoReflect.Descriptor instead.
 func (*ReportDishRatingReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{27}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ReportDishRatingReply) GetHidden() bool {
@@ -1920,7 +2028,7 @@ type ListAvailableDishTagsRequest struct {
 
 func (x *ListAvailableDishTagsRequest) Reset() {
 	*x = ListAvailableDishTagsRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1932,7 +2040,7 @@ func (x *ListAvailableDishTagsRequest) String() string {
 func (*ListAvailableDishTagsRequest) ProtoMessage() {}
 
 func (x *ListAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[28]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1945,7 +2053,7 @@ func (x *ListAvailableDishTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAvailableDishTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListAvailableDishTagsRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{28}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{29}
 }
 
 type ListAvailableDishTagsReply struct {
@@ -1957,7 +2065,7 @@ type ListAvailableDishTagsReply struct {
 
 func (x *ListAvailableDishTagsReply) Reset() {
 	*x = ListAvailableDishTagsReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1969,7 +2077,7 @@ func (x *ListAvailableDishTagsReply) String() string {
 func (*ListAvailableDishTagsReply) ProtoMessage() {}
 
 func (x *ListAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[29]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1982,7 +2090,7 @@ func (x *ListAvailableDishTagsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAvailableDishTagsReply.ProtoReflect.Descriptor instead.
 func (*ListAvailableDishTagsReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{29}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListAvailableDishTagsReply) GetRatingTags() []*TagsOverview {
@@ -2000,7 +2108,7 @@ type ListNameTagsRequest struct {
 
 func (x *ListNameTagsRequest) Reset() {
 	*x = ListNameTagsRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2012,7 +2120,7 @@ func (x *ListNameTagsRequest) String() string {
 func (*ListNameTagsRequest) ProtoMessage() {}
 
 func (x *ListNameTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[30]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2025,7 +2133,7 @@ func (x *ListNameTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNameTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListNameTagsRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{30}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{31}
 }
 
 type ListNameTagsReply struct {
@@ -2037,7 +2145,7 @@ type ListNameTagsReply struct {
 
 func (x *ListNameTagsReply) Reset() {
 	*x = ListNameTagsReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2049,7 +2157,7 @@ func (x *ListNameTagsReply) String() string {
 func (*ListNameTagsReply) ProtoMessage() {}
 
 func (x *ListNameTagsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[31]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2062,7 +2170,7 @@ func (x *ListNameTagsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNameTagsReply.ProtoReflect.Descriptor instead.
 func (*ListNameTagsReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{31}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListNameTagsReply) GetRatingTags() []*TagsOverview {
@@ -2080,7 +2188,7 @@ type ListAvailableCanteenTagsRequest struct {
 
 func (x *ListAvailableCanteenTagsRequest) Reset() {
 	*x = ListAvailableCanteenTagsRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2092,7 +2200,7 @@ func (x *ListAvailableCanteenTagsRequest) String() string {
 func (*ListAvailableCanteenTagsRequest) ProtoMessage() {}
 
 func (x *ListAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[32]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2105,7 +2213,7 @@ func (x *ListAvailableCanteenTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAvailableCanteenTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListAvailableCanteenTagsRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{32}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{33}
 }
 
 type ListAvailableCanteenTagsReply struct {
@@ -2117,7 +2225,7 @@ type ListAvailableCanteenTagsReply struct {
 
 func (x *ListAvailableCanteenTagsReply) Reset() {
 	*x = ListAvailableCanteenTagsReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2129,7 +2237,7 @@ func (x *ListAvailableCanteenTagsReply) String() string {
 func (*ListAvailableCanteenTagsReply) ProtoMessage() {}
 
 func (x *ListAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[33]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2142,7 +2250,7 @@ func (x *ListAvailableCanteenTagsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAvailableCanteenTagsReply.ProtoReflect.Descriptor instead.
 func (*ListAvailableCanteenTagsReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{33}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListAvailableCanteenTagsReply) GetRatingTags() []*TagsOverview {
@@ -2163,7 +2271,7 @@ type TagsOverview struct {
 
 func (x *TagsOverview) Reset() {
 	*x = TagsOverview{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2175,7 +2283,7 @@ func (x *TagsOverview) String() string {
 func (*TagsOverview) ProtoMessage() {}
 
 func (x *TagsOverview) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[34]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2188,7 +2296,7 @@ func (x *TagsOverview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagsOverview.ProtoReflect.Descriptor instead.
 func (*TagsOverview) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{34}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *TagsOverview) GetTagId() int32 {
@@ -2222,7 +2330,7 @@ type RatingTag struct {
 
 func (x *RatingTag) Reset() {
 	*x = RatingTag{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2234,7 +2342,7 @@ func (x *RatingTag) String() string {
 func (*RatingTag) ProtoMessage() {}
 
 func (x *RatingTag) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[35]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2247,7 +2355,7 @@ func (x *RatingTag) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RatingTag.ProtoReflect.Descriptor instead.
 func (*RatingTag) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{35}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *RatingTag) GetTagId() int64 {
@@ -2274,7 +2382,7 @@ type RatingTagNewRequest struct {
 
 func (x *RatingTagNewRequest) Reset() {
 	*x = RatingTagNewRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2286,7 +2394,7 @@ func (x *RatingTagNewRequest) String() string {
 func (*RatingTagNewRequest) ProtoMessage() {}
 
 func (x *RatingTagNewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[36]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2299,7 +2407,7 @@ func (x *RatingTagNewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RatingTagNewRequest.ProtoReflect.Descriptor instead.
 func (*RatingTagNewRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{36}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *RatingTagNewRequest) GetTagId() int32 {
@@ -2329,7 +2437,7 @@ type RatingTagResult struct {
 
 func (x *RatingTagResult) Reset() {
 	*x = RatingTagResult{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2341,7 +2449,7 @@ func (x *RatingTagResult) String() string {
 func (*RatingTagResult) ProtoMessage() {}
 
 func (x *RatingTagResult) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[37]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2354,7 +2462,7 @@ func (x *RatingTagResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RatingTagResult.ProtoReflect.Descriptor instead.
 func (*RatingTagResult) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{37}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *RatingTagResult) GetTagId() int32 {
@@ -2400,7 +2508,7 @@ type ListCanteensRequest struct {
 
 func (x *ListCanteensRequest) Reset() {
 	*x = ListCanteensRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2412,7 +2520,7 @@ func (x *ListCanteensRequest) String() string {
 func (*ListCanteensRequest) ProtoMessage() {}
 
 func (x *ListCanteensRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[38]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2425,7 +2533,7 @@ func (x *ListCanteensRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCanteensRequest.ProtoReflect.Descriptor instead.
 func (*ListCanteensRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{38}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{39}
 }
 
 type ListCanteensReply struct {
@@ -2437,7 +2545,7 @@ type ListCanteensReply struct {
 
 func (x *ListCanteensReply) Reset() {
 	*x = ListCanteensReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2449,7 +2557,7 @@ func (x *ListCanteensReply) String() string {
 func (*ListCanteensReply) ProtoMessage() {}
 
 func (x *ListCanteensReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[39]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2462,7 +2570,7 @@ func (x *ListCanteensReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCanteensReply.ProtoReflect.Descriptor instead.
 func (*ListCanteensReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{39}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ListCanteensReply) GetCanteen() []*Canteen {
@@ -2484,7 +2592,7 @@ type Canteen struct {
 
 func (x *Canteen) Reset() {
 	*x = Canteen{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2496,7 +2604,7 @@ func (x *Canteen) String() string {
 func (*Canteen) ProtoMessage() {}
 
 func (x *Canteen) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[40]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2509,7 +2617,7 @@ func (x *Canteen) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Canteen.ProtoReflect.Descriptor instead.
 func (*Canteen) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{40}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *Canteen) GetId() string {
@@ -2556,7 +2664,7 @@ type ListDishesRequest struct {
 
 func (x *ListDishesRequest) Reset() {
 	*x = ListDishesRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2568,7 +2676,7 @@ func (x *ListDishesRequest) String() string {
 func (*ListDishesRequest) ProtoMessage() {}
 
 func (x *ListDishesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[41]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2581,7 +2689,7 @@ func (x *ListDishesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDishesRequest.ProtoReflect.Descriptor instead.
 func (*ListDishesRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{41}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ListDishesRequest) GetCanteenId() string {
@@ -2621,7 +2729,7 @@ type ListDishesReply struct {
 
 func (x *ListDishesReply) Reset() {
 	*x = ListDishesReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2633,7 +2741,7 @@ func (x *ListDishesReply) String() string {
 func (*ListDishesReply) ProtoMessage() {}
 
 func (x *ListDishesReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[42]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2646,12 +2754,486 @@ func (x *ListDishesReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDishesReply.ProtoReflect.Descriptor instead.
 func (*ListDishesReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{42}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ListDishesReply) GetDish() []string {
 	if x != nil {
 		return x.Dish
+	}
+	return nil
+}
+
+type ListDishRatingSummariesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Mandatory canteen identifier (eat-api id or enum name)
+	CanteenId string `protobuf:"bytes,1,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
+	// Optional ISO date selector: when year > 0, summarizes all dishes on that day's menu.
+	Year int32 `protobuf:"varint,2,opt,name=year,proto3" json:"year,omitempty"`
+	Week int32 `protobuf:"varint,3,opt,name=week,proto3" json:"week,omitempty"`
+	Day  int32 `protobuf:"varint,4,opt,name=day,proto3" json:"day,omitempty"`
+	// Optional explicit list of dish names (used when year == 0).
+	Dishes []string `protobuf:"bytes,5,rep,name=dishes,proto3" json:"dishes,omitempty"`
+	// Optional lower/upper timestamp bounds for windowed statistics.
+	From          *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=from,proto3" json:"from,omitempty"`
+	To            *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=to,proto3" json:"to,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDishRatingSummariesRequest) Reset() {
+	*x = ListDishRatingSummariesRequest{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDishRatingSummariesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDishRatingSummariesRequest) ProtoMessage() {}
+
+func (x *ListDishRatingSummariesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDishRatingSummariesRequest.ProtoReflect.Descriptor instead.
+func (*ListDishRatingSummariesRequest) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *ListDishRatingSummariesRequest) GetCanteenId() string {
+	if x != nil {
+		return x.CanteenId
+	}
+	return ""
+}
+
+func (x *ListDishRatingSummariesRequest) GetYear() int32 {
+	if x != nil {
+		return x.Year
+	}
+	return 0
+}
+
+func (x *ListDishRatingSummariesRequest) GetWeek() int32 {
+	if x != nil {
+		return x.Week
+	}
+	return 0
+}
+
+func (x *ListDishRatingSummariesRequest) GetDay() int32 {
+	if x != nil {
+		return x.Day
+	}
+	return 0
+}
+
+func (x *ListDishRatingSummariesRequest) GetDishes() []string {
+	if x != nil {
+		return x.Dishes
+	}
+	return nil
+}
+
+func (x *ListDishRatingSummariesRequest) GetFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.From
+	}
+	return nil
+}
+
+func (x *ListDishRatingSummariesRequest) GetTo() *timestamppb.Timestamp {
+	if x != nil {
+		return x.To
+	}
+	return nil
+}
+
+type DishRatingSummary struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Dish                string                 `protobuf:"bytes,1,opt,name=dish,proto3" json:"dish,omitempty"`
+	Avg                 float64                `protobuf:"fixed64,2,opt,name=avg,proto3" json:"avg,omitempty"`
+	Std                 float64                `protobuf:"fixed64,3,opt,name=std,proto3" json:"std,omitempty"`
+	Min                 int32                  `protobuf:"varint,4,opt,name=min,proto3" json:"min,omitempty"`
+	Max                 int32                  `protobuf:"varint,5,opt,name=max,proto3" json:"max,omitempty"`
+	RatingCount         int64                  `protobuf:"varint,6,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	Distribution        *RatingDistribution    `protobuf:"bytes,7,opt,name=distribution,proto3" json:"distribution,omitempty"`
+	RatingTags          []*RatingTagResult     `protobuf:"bytes,8,rep,name=rating_tags,json=ratingTags,proto3" json:"rating_tags,omitempty"`
+	NameTags            []*RatingTagResult     `protobuf:"bytes,9,rep,name=name_tags,json=nameTags,proto3" json:"name_tags,omitempty"`
+	LatestImageRatingId int64                  `protobuf:"varint,10,opt,name=latest_image_rating_id,json=latestImageRatingId,proto3" json:"latest_image_rating_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *DishRatingSummary) Reset() {
+	*x = DishRatingSummary{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DishRatingSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DishRatingSummary) ProtoMessage() {}
+
+func (x *DishRatingSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DishRatingSummary.ProtoReflect.Descriptor instead.
+func (*DishRatingSummary) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *DishRatingSummary) GetDish() string {
+	if x != nil {
+		return x.Dish
+	}
+	return ""
+}
+
+func (x *DishRatingSummary) GetAvg() float64 {
+	if x != nil {
+		return x.Avg
+	}
+	return 0
+}
+
+func (x *DishRatingSummary) GetStd() float64 {
+	if x != nil {
+		return x.Std
+	}
+	return 0
+}
+
+func (x *DishRatingSummary) GetMin() int32 {
+	if x != nil {
+		return x.Min
+	}
+	return 0
+}
+
+func (x *DishRatingSummary) GetMax() int32 {
+	if x != nil {
+		return x.Max
+	}
+	return 0
+}
+
+func (x *DishRatingSummary) GetRatingCount() int64 {
+	if x != nil {
+		return x.RatingCount
+	}
+	return 0
+}
+
+func (x *DishRatingSummary) GetDistribution() *RatingDistribution {
+	if x != nil {
+		return x.Distribution
+	}
+	return nil
+}
+
+func (x *DishRatingSummary) GetRatingTags() []*RatingTagResult {
+	if x != nil {
+		return x.RatingTags
+	}
+	return nil
+}
+
+func (x *DishRatingSummary) GetNameTags() []*RatingTagResult {
+	if x != nil {
+		return x.NameTags
+	}
+	return nil
+}
+
+func (x *DishRatingSummary) GetLatestImageRatingId() int64 {
+	if x != nil {
+		return x.LatestImageRatingId
+	}
+	return 0
+}
+
+type ListDishRatingSummariesReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Summaries     []*DishRatingSummary   `protobuf:"bytes,1,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDishRatingSummariesReply) Reset() {
+	*x = ListDishRatingSummariesReply{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDishRatingSummariesReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDishRatingSummariesReply) ProtoMessage() {}
+
+func (x *ListDishRatingSummariesReply) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDishRatingSummariesReply.ProtoReflect.Descriptor instead.
+func (*ListDishRatingSummariesReply) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *ListDishRatingSummariesReply) GetSummaries() []*DishRatingSummary {
+	if x != nil {
+		return x.Summaries
+	}
+	return nil
+}
+
+type ListTopRatedDishesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ISO week-numbering year, >=2022
+	Year int32 `protobuf:"varint,1,opt,name=year,proto3" json:"year,omitempty"`
+	// ISO week (1..52 or 1..53)
+	Week int32 `protobuf:"varint,2,opt,name=week,proto3" json:"week,omitempty"`
+	// Day of the week: 0 (Monday) - 4 (Friday)
+	Day int32 `protobuf:"varint,3,opt,name=day,proto3" json:"day,omitempty"`
+	// Optional canteen filter; omit to rank across all canteens.
+	CanteenId string `protobuf:"bytes,4,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
+	// Optional max number of dishes returned (default 10, max 50).
+	Limit int32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Optional minimum number of visible ratings required (default 1).
+	MinRatings    int32 `protobuf:"varint,6,opt,name=min_ratings,json=minRatings,proto3" json:"min_ratings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTopRatedDishesRequest) Reset() {
+	*x = ListTopRatedDishesRequest{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTopRatedDishesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTopRatedDishesRequest) ProtoMessage() {}
+
+func (x *ListTopRatedDishesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTopRatedDishesRequest.ProtoReflect.Descriptor instead.
+func (*ListTopRatedDishesRequest) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *ListTopRatedDishesRequest) GetYear() int32 {
+	if x != nil {
+		return x.Year
+	}
+	return 0
+}
+
+func (x *ListTopRatedDishesRequest) GetWeek() int32 {
+	if x != nil {
+		return x.Week
+	}
+	return 0
+}
+
+func (x *ListTopRatedDishesRequest) GetDay() int32 {
+	if x != nil {
+		return x.Day
+	}
+	return 0
+}
+
+func (x *ListTopRatedDishesRequest) GetCanteenId() string {
+	if x != nil {
+		return x.CanteenId
+	}
+	return ""
+}
+
+func (x *ListTopRatedDishesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListTopRatedDishesRequest) GetMinRatings() int32 {
+	if x != nil {
+		return x.MinRatings
+	}
+	return 0
+}
+
+type TopRatedDish struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	CanteenId           string                 `protobuf:"bytes,1,opt,name=canteen_id,json=canteenId,proto3" json:"canteen_id,omitempty"`
+	Dish                string                 `protobuf:"bytes,2,opt,name=dish,proto3" json:"dish,omitempty"`
+	Avg                 float64                `protobuf:"fixed64,3,opt,name=avg,proto3" json:"avg,omitempty"`
+	BayesianScore       float64                `protobuf:"fixed64,4,opt,name=bayesian_score,json=bayesianScore,proto3" json:"bayesian_score,omitempty"`
+	RatingCount         int64                  `protobuf:"varint,5,opt,name=rating_count,json=ratingCount,proto3" json:"rating_count,omitempty"`
+	LatestImageRatingId int64                  `protobuf:"varint,6,opt,name=latest_image_rating_id,json=latestImageRatingId,proto3" json:"latest_image_rating_id,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *TopRatedDish) Reset() {
+	*x = TopRatedDish{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopRatedDish) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopRatedDish) ProtoMessage() {}
+
+func (x *TopRatedDish) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopRatedDish.ProtoReflect.Descriptor instead.
+func (*TopRatedDish) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *TopRatedDish) GetCanteenId() string {
+	if x != nil {
+		return x.CanteenId
+	}
+	return ""
+}
+
+func (x *TopRatedDish) GetDish() string {
+	if x != nil {
+		return x.Dish
+	}
+	return ""
+}
+
+func (x *TopRatedDish) GetAvg() float64 {
+	if x != nil {
+		return x.Avg
+	}
+	return 0
+}
+
+func (x *TopRatedDish) GetBayesianScore() float64 {
+	if x != nil {
+		return x.BayesianScore
+	}
+	return 0
+}
+
+func (x *TopRatedDish) GetRatingCount() int64 {
+	if x != nil {
+		return x.RatingCount
+	}
+	return 0
+}
+
+func (x *TopRatedDish) GetLatestImageRatingId() int64 {
+	if x != nil {
+		return x.LatestImageRatingId
+	}
+	return 0
+}
+
+type ListTopRatedDishesReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Dishes        []*TopRatedDish        `protobuf:"bytes,1,rep,name=dishes,proto3" json:"dishes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTopRatedDishesReply) Reset() {
+	*x = ListTopRatedDishesReply{}
+	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTopRatedDishesReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTopRatedDishesReply) ProtoMessage() {}
+
+func (x *ListTopRatedDishesReply) ProtoReflect() protoreflect.Message {
+	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTopRatedDishesReply.ProtoReflect.Descriptor instead.
+func (*ListTopRatedDishesReply) Descriptor() ([]byte, []int) {
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *ListTopRatedDishesReply) GetDishes() []*TopRatedDish {
+	if x != nil {
+		return x.Dishes
 	}
 	return nil
 }
@@ -2673,7 +3255,7 @@ type RoomInformationElement struct {
 
 func (x *RoomInformationElement) Reset() {
 	*x = RoomInformationElement{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2685,7 +3267,7 @@ func (x *RoomInformationElement) String() string {
 func (*RoomInformationElement) ProtoMessage() {}
 
 func (x *RoomInformationElement) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[43]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2698,7 +3280,7 @@ func (x *RoomInformationElement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomInformationElement.ProtoReflect.Descriptor instead.
 func (*RoomInformationElement) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{43}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *RoomInformationElement) GetRoomId() int32 {
@@ -2773,7 +3355,7 @@ type GetUpdateNoteRequest struct {
 
 func (x *GetUpdateNoteRequest) Reset() {
 	*x = GetUpdateNoteRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2785,7 +3367,7 @@ func (x *GetUpdateNoteRequest) String() string {
 func (*GetUpdateNoteRequest) ProtoMessage() {}
 
 func (x *GetUpdateNoteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[44]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2798,7 +3380,7 @@ func (x *GetUpdateNoteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUpdateNoteRequest.ProtoReflect.Descriptor instead.
 func (*GetUpdateNoteRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{44}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *GetUpdateNoteRequest) GetVersion() int64 {
@@ -2818,7 +3400,7 @@ type GetUpdateNoteReply struct {
 
 func (x *GetUpdateNoteReply) Reset() {
 	*x = GetUpdateNoteReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2830,7 +3412,7 @@ func (x *GetUpdateNoteReply) String() string {
 func (*GetUpdateNoteReply) ProtoMessage() {}
 
 func (x *GetUpdateNoteReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[45]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2843,7 +3425,7 @@ func (x *GetUpdateNoteReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUpdateNoteReply.ProtoReflect.Descriptor instead.
 func (*GetUpdateNoteReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{45}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *GetUpdateNoteReply) GetMessage() string {
@@ -2872,7 +3454,7 @@ type ListMoviesRequest struct {
 
 func (x *ListMoviesRequest) Reset() {
 	*x = ListMoviesRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2884,7 +3466,7 @@ func (x *ListMoviesRequest) String() string {
 func (*ListMoviesRequest) ProtoMessage() {}
 
 func (x *ListMoviesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[46]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2897,7 +3479,7 @@ func (x *ListMoviesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMoviesRequest.ProtoReflect.Descriptor instead.
 func (*ListMoviesRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{46}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ListMoviesRequest) GetLastId() int32 {
@@ -2923,7 +3505,7 @@ type ListMoviesReply struct {
 
 func (x *ListMoviesReply) Reset() {
 	*x = ListMoviesReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2935,7 +3517,7 @@ func (x *ListMoviesReply) String() string {
 func (*ListMoviesReply) ProtoMessage() {}
 
 func (x *ListMoviesReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[47]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2948,7 +3530,7 @@ func (x *ListMoviesReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMoviesReply.ProtoReflect.Descriptor instead.
 func (*ListMoviesReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{47}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *ListMoviesReply) GetMovies() []*Movie {
@@ -2998,7 +3580,7 @@ type Movie struct {
 
 func (x *Movie) Reset() {
 	*x = Movie{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3010,7 +3592,7 @@ func (x *Movie) String() string {
 func (*Movie) ProtoMessage() {}
 
 func (x *Movie) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[48]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3023,7 +3605,7 @@ func (x *Movie) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Movie.ProtoReflect.Descriptor instead.
 func (*Movie) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{48}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *Movie) GetMovieId() int64 {
@@ -3164,7 +3746,7 @@ type CreateFeedbackRequest struct {
 
 func (x *CreateFeedbackRequest) Reset() {
 	*x = CreateFeedbackRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3176,7 +3758,7 @@ func (x *CreateFeedbackRequest) String() string {
 func (*CreateFeedbackRequest) ProtoMessage() {}
 
 func (x *CreateFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[49]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3189,7 +3771,7 @@ func (x *CreateFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*CreateFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{49}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *CreateFeedbackRequest) GetRecipient() CreateFeedbackRequest_Recipient {
@@ -3258,7 +3840,7 @@ type Coordinate struct {
 
 func (x *Coordinate) Reset() {
 	*x = Coordinate{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3270,7 +3852,7 @@ func (x *Coordinate) String() string {
 func (*Coordinate) ProtoMessage() {}
 
 func (x *Coordinate) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[50]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3283,7 +3865,7 @@ func (x *Coordinate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Coordinate.ProtoReflect.Descriptor instead.
 func (*Coordinate) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{50}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *Coordinate) GetLatitude() float64 {
@@ -3308,7 +3890,7 @@ type CreateFeedbackReply struct {
 
 func (x *CreateFeedbackReply) Reset() {
 	*x = CreateFeedbackReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3320,7 +3902,7 @@ func (x *CreateFeedbackReply) String() string {
 func (*CreateFeedbackReply) ProtoMessage() {}
 
 func (x *CreateFeedbackReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[51]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3333,7 +3915,7 @@ func (x *CreateFeedbackReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFeedbackReply.ProtoReflect.Descriptor instead.
 func (*CreateFeedbackReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{51}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{58}
 }
 
 type CreateFeedbackImageReply struct {
@@ -3345,7 +3927,7 @@ type CreateFeedbackImageReply struct {
 
 func (x *CreateFeedbackImageReply) Reset() {
 	*x = CreateFeedbackImageReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3357,7 +3939,7 @@ func (x *CreateFeedbackImageReply) String() string {
 func (*CreateFeedbackImageReply) ProtoMessage() {}
 
 func (x *CreateFeedbackImageReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[52]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3370,7 +3952,7 @@ func (x *CreateFeedbackImageReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFeedbackImageReply.ProtoReflect.Descriptor instead.
 func (*CreateFeedbackImageReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{52}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *CreateFeedbackImageReply) GetStatus() string {
@@ -3390,7 +3972,7 @@ type CreateFeedbackImageRequest struct {
 
 func (x *CreateFeedbackImageRequest) Reset() {
 	*x = CreateFeedbackImageRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3402,7 +3984,7 @@ func (x *CreateFeedbackImageRequest) String() string {
 func (*CreateFeedbackImageRequest) ProtoMessage() {}
 
 func (x *CreateFeedbackImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[53]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3415,7 +3997,7 @@ func (x *CreateFeedbackImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFeedbackImageRequest.ProtoReflect.Descriptor instead.
 func (*CreateFeedbackImageRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{53}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *CreateFeedbackImageRequest) GetId() int32 {
@@ -3441,7 +4023,7 @@ type GetMemberRequest struct {
 
 func (x *GetMemberRequest) Reset() {
 	*x = GetMemberRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3453,7 +4035,7 @@ func (x *GetMemberRequest) String() string {
 func (*GetMemberRequest) ProtoMessage() {}
 
 func (x *GetMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[54]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3466,7 +4048,7 @@ func (x *GetMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMemberRequest.ProtoReflect.Descriptor instead.
 func (*GetMemberRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{54}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *GetMemberRequest) GetLrzId() string {
@@ -3487,7 +4069,7 @@ type GetMemberReply struct {
 
 func (x *GetMemberReply) Reset() {
 	*x = GetMemberReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3499,7 +4081,7 @@ func (x *GetMemberReply) String() string {
 func (*GetMemberReply) ProtoMessage() {}
 
 func (x *GetMemberReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[55]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3512,7 +4094,7 @@ func (x *GetMemberReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMemberReply.ProtoReflect.Descriptor instead.
 func (*GetMemberReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{55}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *GetMemberReply) GetLrzId() string {
@@ -3549,7 +4131,7 @@ type GetUploadStatusReply struct {
 
 func (x *GetUploadStatusReply) Reset() {
 	*x = GetUploadStatusReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3561,7 +4143,7 @@ func (x *GetUploadStatusReply) String() string {
 func (*GetUploadStatusReply) ProtoMessage() {}
 
 func (x *GetUploadStatusReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[56]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3574,7 +4156,7 @@ func (x *GetUploadStatusReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUploadStatusReply.ProtoReflect.Descriptor instead.
 func (*GetUploadStatusReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{56}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *GetUploadStatusReply) GetFcmToken() string {
@@ -3622,7 +4204,7 @@ type GetCanteenHeadCountRequest struct {
 
 func (x *GetCanteenHeadCountRequest) Reset() {
 	*x = GetCanteenHeadCountRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3634,7 +4216,7 @@ func (x *GetCanteenHeadCountRequest) String() string {
 func (*GetCanteenHeadCountRequest) ProtoMessage() {}
 
 func (x *GetCanteenHeadCountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[57]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3647,7 +4229,7 @@ func (x *GetCanteenHeadCountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCanteenHeadCountRequest.ProtoReflect.Descriptor instead.
 func (*GetCanteenHeadCountRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{57}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *GetCanteenHeadCountRequest) GetCanteenId() string {
@@ -3673,7 +4255,7 @@ type GetCanteenHeadCountReply struct {
 
 func (x *GetCanteenHeadCountReply) Reset() {
 	*x = GetCanteenHeadCountReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3685,7 +4267,7 @@ func (x *GetCanteenHeadCountReply) String() string {
 func (*GetCanteenHeadCountReply) ProtoMessage() {}
 
 func (x *GetCanteenHeadCountReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[58]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3698,7 +4280,7 @@ func (x *GetCanteenHeadCountReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCanteenHeadCountReply.ProtoReflect.Descriptor instead.
 func (*GetCanteenHeadCountReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{58}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *GetCanteenHeadCountReply) GetCount() uint32 {
@@ -3740,7 +4322,7 @@ type ListStudentClubRequest struct {
 
 func (x *ListStudentClubRequest) Reset() {
 	*x = ListStudentClubRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3752,7 +4334,7 @@ func (x *ListStudentClubRequest) String() string {
 func (*ListStudentClubRequest) ProtoMessage() {}
 
 func (x *ListStudentClubRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[59]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3765,7 +4347,7 @@ func (x *ListStudentClubRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStudentClubRequest.ProtoReflect.Descriptor instead.
 func (*ListStudentClubRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{59}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *ListStudentClubRequest) GetLanguage() Language {
@@ -3784,7 +4366,7 @@ type ListStudentClubReply struct {
 
 func (x *ListStudentClubReply) Reset() {
 	*x = ListStudentClubReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3796,7 +4378,7 @@ func (x *ListStudentClubReply) String() string {
 func (*ListStudentClubReply) ProtoMessage() {}
 
 func (x *ListStudentClubReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[60]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3809,7 +4391,7 @@ func (x *ListStudentClubReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStudentClubReply.ProtoReflect.Descriptor instead.
 func (*ListStudentClubReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{60}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ListStudentClubReply) GetCollections() []*StudentClubCollection {
@@ -3835,7 +4417,7 @@ type StudentClub struct {
 
 func (x *StudentClub) Reset() {
 	*x = StudentClub{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3847,7 +4429,7 @@ func (x *StudentClub) String() string {
 func (*StudentClub) ProtoMessage() {}
 
 func (x *StudentClub) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[61]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3860,7 +4442,7 @@ func (x *StudentClub) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentClub.ProtoReflect.Descriptor instead.
 func (*StudentClub) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{61}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *StudentClub) GetName() string {
@@ -3905,7 +4487,7 @@ type StudentClubCollection struct {
 
 func (x *StudentClubCollection) Reset() {
 	*x = StudentClubCollection{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[62]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3917,7 +4499,7 @@ func (x *StudentClubCollection) String() string {
 func (*StudentClubCollection) ProtoMessage() {}
 
 func (x *StudentClubCollection) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[62]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3930,7 +4512,7 @@ func (x *StudentClubCollection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentClubCollection.ProtoReflect.Descriptor instead.
 func (*StudentClubCollection) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{62}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *StudentClubCollection) GetTitle() string {
@@ -3972,7 +4554,7 @@ type ListStudentGroupRequest struct {
 
 func (x *ListStudentGroupRequest) Reset() {
 	*x = ListStudentGroupRequest{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[63]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3984,7 +4566,7 @@ func (x *ListStudentGroupRequest) String() string {
 func (*ListStudentGroupRequest) ProtoMessage() {}
 
 func (x *ListStudentGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[63]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3997,7 +4579,7 @@ func (x *ListStudentGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStudentGroupRequest.ProtoReflect.Descriptor instead.
 func (*ListStudentGroupRequest) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{63}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *ListStudentGroupRequest) GetLanguage() Language {
@@ -4017,7 +4599,7 @@ type ListStudentGroupReply struct {
 
 func (x *ListStudentGroupReply) Reset() {
 	*x = ListStudentGroupReply{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[64]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4029,7 +4611,7 @@ func (x *ListStudentGroupReply) String() string {
 func (*ListStudentGroupReply) ProtoMessage() {}
 
 func (x *ListStudentGroupReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[64]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4042,7 +4624,7 @@ func (x *ListStudentGroupReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStudentGroupReply.ProtoReflect.Descriptor instead.
 func (*ListStudentGroupReply) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{64}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *ListStudentGroupReply) GetStudentClubs() []*StudentClubCollection {
@@ -4075,7 +4657,7 @@ type StudentCouncil struct {
 
 func (x *StudentCouncil) Reset() {
 	*x = StudentCouncil{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[65]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4087,7 +4669,7 @@ func (x *StudentCouncil) String() string {
 func (*StudentCouncil) ProtoMessage() {}
 
 func (x *StudentCouncil) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[65]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4100,7 +4682,7 @@ func (x *StudentCouncil) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentCouncil.ProtoReflect.Descriptor instead.
 func (*StudentCouncil) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{65}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *StudentCouncil) GetName() string {
@@ -4146,7 +4728,7 @@ type StudentCouncilCollection struct {
 
 func (x *StudentCouncilCollection) Reset() {
 	*x = StudentCouncilCollection{}
-	mi := &file_tumdev_campus_backend_proto_msgTypes[66]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4158,7 +4740,7 @@ func (x *StudentCouncilCollection) String() string {
 func (*StudentCouncilCollection) ProtoMessage() {}
 
 func (x *StudentCouncilCollection) ProtoReflect() protoreflect.Message {
-	mi := &file_tumdev_campus_backend_proto_msgTypes[66]
+	mi := &file_tumdev_campus_backend_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4171,7 +4753,7 @@ func (x *StudentCouncilCollection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentCouncilCollection.ProtoReflect.Descriptor instead.
 func (*StudentCouncilCollection) Descriptor() ([]byte, []int) {
-	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{66}
+	return file_tumdev_campus_backend_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *StudentCouncilCollection) GetTitle() string {
@@ -4264,7 +4846,13 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12.\n" +
 	"\x04from\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
 	"\x02to\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x14\n" +
-	"\x05limit\x18\x04 \x01(\x05R\x05limit\"\xc8\x01\n" +
+	"\x05limit\x18\x04 \x01(\x05R\x05limit\"\x91\x01\n" +
+	"\x12RatingDistribution\x12\x17\n" +
+	"\astars_1\x18\x01 \x01(\x03R\x06stars1\x12\x17\n" +
+	"\astars_2\x18\x02 \x01(\x03R\x06stars2\x12\x17\n" +
+	"\astars_3\x18\x03 \x01(\x03R\x06stars3\x12\x17\n" +
+	"\astars_4\x18\x04 \x01(\x03R\x06stars4\x12\x17\n" +
+	"\astars_5\x18\x05 \x01(\x03R\x06stars5\"\xa8\x02\n" +
 	"\x17ListCanteenRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
@@ -4272,14 +4860,16 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x03min\x18\x04 \x01(\x05R\x03min\x12\x10\n" +
 	"\x03max\x18\x05 \x01(\x05R\x03max\x125\n" +
 	"\vrating_tags\x18\x06 \x03(\v2\x14.api.RatingTagResultR\n" +
-	"ratingTags\"\xbc\x01\n" +
+	"ratingTags\x12!\n" +
+	"\frating_count\x18\a \x01(\x03R\vratingCount\x12;\n" +
+	"\fdistribution\x18\b \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xbc\x01\n" +
 	"\x15GetDishRatingsRequest\x12\x1d\n" +
 	"\n" +
 	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
 	"\x04dish\x18\x02 \x01(\tR\x04dish\x12.\n" +
 	"\x04from\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
 	"\x02to\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x14\n" +
-	"\x05limit\x18\x05 \x01(\x05R\x05limit\"\xf7\x01\n" +
+	"\x05limit\x18\x05 \x01(\x05R\x05limit\"\xd7\x02\n" +
 	"\x13GetDishRatingsReply\x12.\n" +
 	"\x06rating\x18\x01 \x03(\v2\x16.api.SingleRatingReplyR\x06rating\x12\x10\n" +
 	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
@@ -4288,7 +4878,9 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x03max\x18\x05 \x01(\x05R\x03max\x125\n" +
 	"\vrating_tags\x18\x06 \x03(\v2\x14.api.RatingTagResultR\n" +
 	"ratingTags\x121\n" +
-	"\tname_tags\x18\a \x03(\v2\x14.api.RatingTagResultR\bnameTags\"\xc8\x02\n" +
+	"\tname_tags\x18\a \x03(\v2\x14.api.RatingTagResultR\bnameTags\x12!\n" +
+	"\frating_count\x18\b \x01(\x03R\vratingCount\x12;\n" +
+	"\fdistribution\x18\t \x01(\v2\x17.api.RatingDistributionR\fdistribution\"\xc8\x02\n" +
 	"\x11SingleRatingReply\x12\x16\n" +
 	"\x06points\x18\x01 \x01(\x05R\x06points\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\fR\x05image\x12\x18\n" +
@@ -4382,7 +4974,50 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x04week\x18\x03 \x01(\x05R\x04week\x12\x10\n" +
 	"\x03day\x18\x04 \x01(\x05R\x03day\"%\n" +
 	"\x0fListDishesReply\x12\x12\n" +
-	"\x04dish\x18\x01 \x03(\tR\x04dish\"\xfc\x01\n" +
+	"\x04dish\x18\x01 \x03(\tR\x04dish\"\xed\x01\n" +
+	"\x1eListDishRatingSummariesRequest\x12\x1d\n" +
+	"\n" +
+	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
+	"\x04year\x18\x02 \x01(\x05R\x04year\x12\x12\n" +
+	"\x04week\x18\x03 \x01(\x05R\x04week\x12\x10\n" +
+	"\x03day\x18\x04 \x01(\x05R\x03day\x12\x16\n" +
+	"\x06dishes\x18\x05 \x03(\tR\x06dishes\x12.\n" +
+	"\x04from\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
+	"\x02to\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\xee\x02\n" +
+	"\x11DishRatingSummary\x12\x12\n" +
+	"\x04dish\x18\x01 \x01(\tR\x04dish\x12\x10\n" +
+	"\x03avg\x18\x02 \x01(\x01R\x03avg\x12\x10\n" +
+	"\x03std\x18\x03 \x01(\x01R\x03std\x12\x10\n" +
+	"\x03min\x18\x04 \x01(\x05R\x03min\x12\x10\n" +
+	"\x03max\x18\x05 \x01(\x05R\x03max\x12!\n" +
+	"\frating_count\x18\x06 \x01(\x03R\vratingCount\x12;\n" +
+	"\fdistribution\x18\a \x01(\v2\x17.api.RatingDistributionR\fdistribution\x125\n" +
+	"\vrating_tags\x18\b \x03(\v2\x14.api.RatingTagResultR\n" +
+	"ratingTags\x121\n" +
+	"\tname_tags\x18\t \x03(\v2\x14.api.RatingTagResultR\bnameTags\x123\n" +
+	"\x16latest_image_rating_id\x18\n" +
+	" \x01(\x03R\x13latestImageRatingId\"T\n" +
+	"\x1cListDishRatingSummariesReply\x124\n" +
+	"\tsummaries\x18\x01 \x03(\v2\x16.api.DishRatingSummaryR\tsummaries\"\xab\x01\n" +
+	"\x19ListTopRatedDishesRequest\x12\x12\n" +
+	"\x04year\x18\x01 \x01(\x05R\x04year\x12\x12\n" +
+	"\x04week\x18\x02 \x01(\x05R\x04week\x12\x10\n" +
+	"\x03day\x18\x03 \x01(\x05R\x03day\x12\x1d\n" +
+	"\n" +
+	"canteen_id\x18\x04 \x01(\tR\tcanteenId\x12\x14\n" +
+	"\x05limit\x18\x05 \x01(\x05R\x05limit\x12\x1f\n" +
+	"\vmin_ratings\x18\x06 \x01(\x05R\n" +
+	"minRatings\"\xd2\x01\n" +
+	"\fTopRatedDish\x12\x1d\n" +
+	"\n" +
+	"canteen_id\x18\x01 \x01(\tR\tcanteenId\x12\x12\n" +
+	"\x04dish\x18\x02 \x01(\tR\x04dish\x12\x10\n" +
+	"\x03avg\x18\x03 \x01(\x01R\x03avg\x12%\n" +
+	"\x0ebayesian_score\x18\x04 \x01(\x01R\rbayesianScore\x12!\n" +
+	"\frating_count\x18\x05 \x01(\x03R\vratingCount\x123\n" +
+	"\x16latest_image_rating_id\x18\x06 \x01(\x03R\x13latestImageRatingId\"D\n" +
+	"\x17ListTopRatedDishesReply\x12)\n" +
+	"\x06dishes\x18\x01 \x03(\v2\x11.api.TopRatedDishR\x06dishes\"\xfc\x01\n" +
 	"\x16RoomInformationElement\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\x05R\x06roomId\x12\x1b\n" +
 	"\troom_code\x18\x02 \x01(\tR\broomCode\x12\x1f\n" +
@@ -4523,7 +5158,7 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\bLanguage\x12\n" +
 	"\n" +
 	"\x06German\x10\x00\x12\v\n" +
-	"\aEnglish\x10\x012\xb9\x13\n" +
+	"\aEnglish\x10\x012\xa9\x15\n" +
 	"\x06Campus\x12d\n" +
 	"\x0eListNewsAlerts\x12\x1a.api.ListNewsAlertsRequest\x1a\x18.api.ListNewsAlertsReply\"\x1c\x82\xd3\xe4\x93\x02\x16b\x06alerts\x12\f/news/alerts\x12i\n" +
 	"\x0fListNewsSources\x12\x1b.api.ListNewsSourcesRequest\x1a\x19.api.ListNewsSourcesReply\"\x1e\x82\xd3\xe4\x93\x02\x18b\asources\x12\r/news/sources\x12I\n" +
@@ -4540,7 +5175,9 @@ const file_tumdev_campus_backend_proto_rawDesc = "" +
 	"\x18ListAvailableCanteenTags\x12$.api.ListAvailableCanteenTagsRequest\x1a\".api.ListAvailableCanteenTagsReply\"2\x82\xd3\xe4\x93\x02,b\vrating_tags\x12\x1d/canteen/rating/allRatingTags\x12g\n" +
 	"\fListCanteens\x12\x18.api.ListCanteensRequest\x1a\x16.api.ListCanteensReply\"%\x82\xd3\xe4\x93\x02\x1fb\acanteen\x12\x14/canteen/allCanteens\x12Q\n" +
 	"\n" +
-	"ListDishes\x12\x16.api.ListDishesRequest\x1a\x14.api.ListDishesReply\"\x15\x82\xd3\xe4\x93\x02\x0fb\x04dish\x12\a/dishes\x12b\n" +
+	"ListDishes\x12\x16.api.ListDishesRequest\x1a\x14.api.ListDishesReply\"\x15\x82\xd3\xe4\x93\x02\x0fb\x04dish\x12\a/dishes\x12\x84\x01\n" +
+	"\x17ListDishRatingSummaries\x12#.api.ListDishRatingSummariesRequest\x1a!.api.ListDishRatingSummariesReply\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/dish/rating/summaries\x12g\n" +
+	"\x12ListTopRatedDishes\x12\x1e.api.ListTopRatedDishesRequest\x1a\x1c.api.ListTopRatedDishesReply\"\x13\x82\xd3\xe4\x93\x02\r\x12\v/dishes/top\x12b\n" +
 	"\rGetUpdateNote\x12\x19.api.GetUpdateNoteRequest\x1a\x17.api.GetUpdateNoteReply\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/updatenote/{version}\x12U\n" +
 	"\n" +
 	"ListMovies\x12\x16.api.ListMoviesRequest\x1a\x14.api.ListMoviesReply\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/movies/{last_id}\x12g\n" +
@@ -4566,7 +5203,7 @@ func file_tumdev_campus_backend_proto_rawDescGZIP() []byte {
 }
 
 var file_tumdev_campus_backend_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_tumdev_campus_backend_proto_msgTypes = make([]protoimpl.MessageInfo, 67)
+var file_tumdev_campus_backend_proto_msgTypes = make([]protoimpl.MessageInfo, 74)
 var file_tumdev_campus_backend_proto_goTypes = []any{
 	(DeviceType)(0),                         // 0: api.DeviceType
 	(Language)(0),                           // 1: api.Language
@@ -4585,157 +5222,177 @@ var file_tumdev_campus_backend_proto_goTypes = []any{
 	(*ListNewsAlertsReply)(nil),             // 14: api.ListNewsAlertsReply
 	(*NewsAlert)(nil),                       // 15: api.NewsAlert
 	(*ListCanteenRatingsRequest)(nil),       // 16: api.ListCanteenRatingsRequest
-	(*ListCanteenRatingsReply)(nil),         // 17: api.ListCanteenRatingsReply
-	(*GetDishRatingsRequest)(nil),           // 18: api.GetDishRatingsRequest
-	(*GetDishRatingsReply)(nil),             // 19: api.GetDishRatingsReply
-	(*SingleRatingReply)(nil),               // 20: api.SingleRatingReply
-	(*CreateCanteenRatingReply)(nil),        // 21: api.CreateCanteenRatingReply
-	(*CreateCanteenRatingRequest)(nil),      // 22: api.CreateCanteenRatingRequest
-	(*CreateDishRatingReply)(nil),           // 23: api.CreateDishRatingReply
-	(*CreateDishRatingRequest)(nil),         // 24: api.CreateDishRatingRequest
-	(*UpdateDishRatingRequest)(nil),         // 25: api.UpdateDishRatingRequest
-	(*UpdateDishRatingReply)(nil),           // 26: api.UpdateDishRatingReply
-	(*DeleteDishRatingRequest)(nil),         // 27: api.DeleteDishRatingRequest
-	(*DeleteDishRatingReply)(nil),           // 28: api.DeleteDishRatingReply
-	(*ReportDishRatingRequest)(nil),         // 29: api.ReportDishRatingRequest
-	(*ReportDishRatingReply)(nil),           // 30: api.ReportDishRatingReply
-	(*ListAvailableDishTagsRequest)(nil),    // 31: api.ListAvailableDishTagsRequest
-	(*ListAvailableDishTagsReply)(nil),      // 32: api.ListAvailableDishTagsReply
-	(*ListNameTagsRequest)(nil),             // 33: api.ListNameTagsRequest
-	(*ListNameTagsReply)(nil),               // 34: api.ListNameTagsReply
-	(*ListAvailableCanteenTagsRequest)(nil), // 35: api.ListAvailableCanteenTagsRequest
-	(*ListAvailableCanteenTagsReply)(nil),   // 36: api.ListAvailableCanteenTagsReply
-	(*TagsOverview)(nil),                    // 37: api.TagsOverview
-	(*RatingTag)(nil),                       // 38: api.RatingTag
-	(*RatingTagNewRequest)(nil),             // 39: api.RatingTagNewRequest
-	(*RatingTagResult)(nil),                 // 40: api.RatingTagResult
-	(*ListCanteensRequest)(nil),             // 41: api.ListCanteensRequest
-	(*ListCanteensReply)(nil),               // 42: api.ListCanteensReply
-	(*Canteen)(nil),                         // 43: api.Canteen
-	(*ListDishesRequest)(nil),               // 44: api.ListDishesRequest
-	(*ListDishesReply)(nil),                 // 45: api.ListDishesReply
-	(*RoomInformationElement)(nil),          // 46: api.RoomInformationElement
-	(*GetUpdateNoteRequest)(nil),            // 47: api.GetUpdateNoteRequest
-	(*GetUpdateNoteReply)(nil),              // 48: api.GetUpdateNoteReply
-	(*ListMoviesRequest)(nil),               // 49: api.ListMoviesRequest
-	(*ListMoviesReply)(nil),                 // 50: api.ListMoviesReply
-	(*Movie)(nil),                           // 51: api.Movie
-	(*CreateFeedbackRequest)(nil),           // 52: api.CreateFeedbackRequest
-	(*Coordinate)(nil),                      // 53: api.Coordinate
-	(*CreateFeedbackReply)(nil),             // 54: api.CreateFeedbackReply
-	(*CreateFeedbackImageReply)(nil),        // 55: api.CreateFeedbackImageReply
-	(*CreateFeedbackImageRequest)(nil),      // 56: api.CreateFeedbackImageRequest
-	(*GetMemberRequest)(nil),                // 57: api.GetMemberRequest
-	(*GetMemberReply)(nil),                  // 58: api.GetMemberReply
-	(*GetUploadStatusReply)(nil),            // 59: api.GetUploadStatusReply
-	(*GetCanteenHeadCountRequest)(nil),      // 60: api.GetCanteenHeadCountRequest
-	(*GetCanteenHeadCountReply)(nil),        // 61: api.GetCanteenHeadCountReply
-	(*ListStudentClubRequest)(nil),          // 62: api.ListStudentClubRequest
-	(*ListStudentClubReply)(nil),            // 63: api.ListStudentClubReply
-	(*StudentClub)(nil),                     // 64: api.StudentClub
-	(*StudentClubCollection)(nil),           // 65: api.StudentClubCollection
-	(*ListStudentGroupRequest)(nil),         // 66: api.ListStudentGroupRequest
-	(*ListStudentGroupReply)(nil),           // 67: api.ListStudentGroupReply
-	(*StudentCouncil)(nil),                  // 68: api.StudentCouncil
-	(*StudentCouncilCollection)(nil),        // 69: api.StudentCouncilCollection
-	(*timestamppb.Timestamp)(nil),           // 70: google.protobuf.Timestamp
+	(*RatingDistribution)(nil),              // 17: api.RatingDistribution
+	(*ListCanteenRatingsReply)(nil),         // 18: api.ListCanteenRatingsReply
+	(*GetDishRatingsRequest)(nil),           // 19: api.GetDishRatingsRequest
+	(*GetDishRatingsReply)(nil),             // 20: api.GetDishRatingsReply
+	(*SingleRatingReply)(nil),               // 21: api.SingleRatingReply
+	(*CreateCanteenRatingReply)(nil),        // 22: api.CreateCanteenRatingReply
+	(*CreateCanteenRatingRequest)(nil),      // 23: api.CreateCanteenRatingRequest
+	(*CreateDishRatingReply)(nil),           // 24: api.CreateDishRatingReply
+	(*CreateDishRatingRequest)(nil),         // 25: api.CreateDishRatingRequest
+	(*UpdateDishRatingRequest)(nil),         // 26: api.UpdateDishRatingRequest
+	(*UpdateDishRatingReply)(nil),           // 27: api.UpdateDishRatingReply
+	(*DeleteDishRatingRequest)(nil),         // 28: api.DeleteDishRatingRequest
+	(*DeleteDishRatingReply)(nil),           // 29: api.DeleteDishRatingReply
+	(*ReportDishRatingRequest)(nil),         // 30: api.ReportDishRatingRequest
+	(*ReportDishRatingReply)(nil),           // 31: api.ReportDishRatingReply
+	(*ListAvailableDishTagsRequest)(nil),    // 32: api.ListAvailableDishTagsRequest
+	(*ListAvailableDishTagsReply)(nil),      // 33: api.ListAvailableDishTagsReply
+	(*ListNameTagsRequest)(nil),             // 34: api.ListNameTagsRequest
+	(*ListNameTagsReply)(nil),               // 35: api.ListNameTagsReply
+	(*ListAvailableCanteenTagsRequest)(nil), // 36: api.ListAvailableCanteenTagsRequest
+	(*ListAvailableCanteenTagsReply)(nil),   // 37: api.ListAvailableCanteenTagsReply
+	(*TagsOverview)(nil),                    // 38: api.TagsOverview
+	(*RatingTag)(nil),                       // 39: api.RatingTag
+	(*RatingTagNewRequest)(nil),             // 40: api.RatingTagNewRequest
+	(*RatingTagResult)(nil),                 // 41: api.RatingTagResult
+	(*ListCanteensRequest)(nil),             // 42: api.ListCanteensRequest
+	(*ListCanteensReply)(nil),               // 43: api.ListCanteensReply
+	(*Canteen)(nil),                         // 44: api.Canteen
+	(*ListDishesRequest)(nil),               // 45: api.ListDishesRequest
+	(*ListDishesReply)(nil),                 // 46: api.ListDishesReply
+	(*ListDishRatingSummariesRequest)(nil),  // 47: api.ListDishRatingSummariesRequest
+	(*DishRatingSummary)(nil),               // 48: api.DishRatingSummary
+	(*ListDishRatingSummariesReply)(nil),    // 49: api.ListDishRatingSummariesReply
+	(*ListTopRatedDishesRequest)(nil),       // 50: api.ListTopRatedDishesRequest
+	(*TopRatedDish)(nil),                    // 51: api.TopRatedDish
+	(*ListTopRatedDishesReply)(nil),         // 52: api.ListTopRatedDishesReply
+	(*RoomInformationElement)(nil),          // 53: api.RoomInformationElement
+	(*GetUpdateNoteRequest)(nil),            // 54: api.GetUpdateNoteRequest
+	(*GetUpdateNoteReply)(nil),              // 55: api.GetUpdateNoteReply
+	(*ListMoviesRequest)(nil),               // 56: api.ListMoviesRequest
+	(*ListMoviesReply)(nil),                 // 57: api.ListMoviesReply
+	(*Movie)(nil),                           // 58: api.Movie
+	(*CreateFeedbackRequest)(nil),           // 59: api.CreateFeedbackRequest
+	(*Coordinate)(nil),                      // 60: api.Coordinate
+	(*CreateFeedbackReply)(nil),             // 61: api.CreateFeedbackReply
+	(*CreateFeedbackImageReply)(nil),        // 62: api.CreateFeedbackImageReply
+	(*CreateFeedbackImageRequest)(nil),      // 63: api.CreateFeedbackImageRequest
+	(*GetMemberRequest)(nil),                // 64: api.GetMemberRequest
+	(*GetMemberReply)(nil),                  // 65: api.GetMemberReply
+	(*GetUploadStatusReply)(nil),            // 66: api.GetUploadStatusReply
+	(*GetCanteenHeadCountRequest)(nil),      // 67: api.GetCanteenHeadCountRequest
+	(*GetCanteenHeadCountReply)(nil),        // 68: api.GetCanteenHeadCountReply
+	(*ListStudentClubRequest)(nil),          // 69: api.ListStudentClubRequest
+	(*ListStudentClubReply)(nil),            // 70: api.ListStudentClubReply
+	(*StudentClub)(nil),                     // 71: api.StudentClub
+	(*StudentClubCollection)(nil),           // 72: api.StudentClubCollection
+	(*ListStudentGroupRequest)(nil),         // 73: api.ListStudentGroupRequest
+	(*ListStudentGroupReply)(nil),           // 74: api.ListStudentGroupReply
+	(*StudentCouncil)(nil),                  // 75: api.StudentCouncil
+	(*StudentCouncilCollection)(nil),        // 76: api.StudentCouncilCollection
+	(*timestamppb.Timestamp)(nil),           // 77: google.protobuf.Timestamp
 }
 var file_tumdev_campus_backend_proto_depIdxs = []int32{
 	0,  // 0: api.CreateDeviceRequest.device_type:type_name -> api.DeviceType
 	0,  // 1: api.DeleteDeviceRequest.device_type:type_name -> api.DeviceType
-	70, // 2: api.News.created:type_name -> google.protobuf.Timestamp
-	70, // 3: api.News.date:type_name -> google.protobuf.Timestamp
+	77, // 2: api.News.created:type_name -> google.protobuf.Timestamp
+	77, // 3: api.News.date:type_name -> google.protobuf.Timestamp
 	7,  // 4: api.ListNewsReply.news:type_name -> api.News
-	70, // 5: api.ListNewsRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
+	77, // 5: api.ListNewsRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
 	12, // 6: api.ListNewsSourcesReply.sources:type_name -> api.NewsSource
 	15, // 7: api.ListNewsAlertsReply.alerts:type_name -> api.NewsAlert
-	70, // 8: api.NewsAlert.created:type_name -> google.protobuf.Timestamp
-	70, // 9: api.NewsAlert.from:type_name -> google.protobuf.Timestamp
-	70, // 10: api.NewsAlert.to:type_name -> google.protobuf.Timestamp
-	70, // 11: api.ListCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
-	70, // 12: api.ListCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
-	20, // 13: api.ListCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
-	40, // 14: api.ListCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
-	70, // 15: api.GetDishRatingsRequest.from:type_name -> google.protobuf.Timestamp
-	70, // 16: api.GetDishRatingsRequest.to:type_name -> google.protobuf.Timestamp
-	20, // 17: api.GetDishRatingsReply.rating:type_name -> api.SingleRatingReply
-	40, // 18: api.GetDishRatingsReply.rating_tags:type_name -> api.RatingTagResult
-	40, // 19: api.GetDishRatingsReply.name_tags:type_name -> api.RatingTagResult
-	39, // 20: api.SingleRatingReply.rating_tags:type_name -> api.RatingTagNewRequest
-	70, // 21: api.SingleRatingReply.visited:type_name -> google.protobuf.Timestamp
-	70, // 22: api.SingleRatingReply.updated_at:type_name -> google.protobuf.Timestamp
-	38, // 23: api.CreateCanteenRatingRequest.rating_tags:type_name -> api.RatingTag
-	38, // 24: api.CreateDishRatingRequest.rating_tags:type_name -> api.RatingTag
-	38, // 25: api.UpdateDishRatingRequest.rating_tags:type_name -> api.RatingTag
-	37, // 26: api.ListAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
-	37, // 27: api.ListNameTagsReply.rating_tags:type_name -> api.TagsOverview
-	37, // 28: api.ListAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
-	43, // 29: api.ListCanteensReply.canteen:type_name -> api.Canteen
-	70, // 30: api.ListMoviesRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
-	51, // 31: api.ListMoviesReply.movies:type_name -> api.Movie
-	70, // 32: api.Movie.date:type_name -> google.protobuf.Timestamp
-	70, // 33: api.Movie.created:type_name -> google.protobuf.Timestamp
-	2,  // 34: api.CreateFeedbackRequest.recipient:type_name -> api.CreateFeedbackRequest.Recipient
-	53, // 35: api.CreateFeedbackRequest.location:type_name -> api.Coordinate
-	70, // 36: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
-	1,  // 37: api.ListStudentClubRequest.language:type_name -> api.Language
-	65, // 38: api.ListStudentClubReply.collections:type_name -> api.StudentClubCollection
-	64, // 39: api.StudentClubCollection.clubs:type_name -> api.StudentClub
-	1,  // 40: api.ListStudentGroupRequest.language:type_name -> api.Language
-	65, // 41: api.ListStudentGroupReply.student_clubs:type_name -> api.StudentClubCollection
-	69, // 42: api.ListStudentGroupReply.student_councils:type_name -> api.StudentCouncilCollection
-	68, // 43: api.StudentCouncilCollection.councils:type_name -> api.StudentCouncil
-	13, // 44: api.Campus.ListNewsAlerts:input_type -> api.ListNewsAlertsRequest
-	10, // 45: api.Campus.ListNewsSources:input_type -> api.ListNewsSourcesRequest
-	9,  // 46: api.Campus.ListNews:input_type -> api.ListNewsRequest
-	16, // 47: api.Campus.ListCanteenRatings:input_type -> api.ListCanteenRatingsRequest
-	18, // 48: api.Campus.GetDishRatings:input_type -> api.GetDishRatingsRequest
-	22, // 49: api.Campus.CreateCanteenRating:input_type -> api.CreateCanteenRatingRequest
-	24, // 50: api.Campus.CreateDishRating:input_type -> api.CreateDishRatingRequest
-	25, // 51: api.Campus.UpdateDishRating:input_type -> api.UpdateDishRatingRequest
-	27, // 52: api.Campus.DeleteDishRating:input_type -> api.DeleteDishRatingRequest
-	29, // 53: api.Campus.ReportDishRating:input_type -> api.ReportDishRatingRequest
-	31, // 54: api.Campus.ListAvailableDishTags:input_type -> api.ListAvailableDishTagsRequest
-	33, // 55: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
-	35, // 56: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
-	41, // 57: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
-	44, // 58: api.Campus.ListDishes:input_type -> api.ListDishesRequest
-	47, // 59: api.Campus.GetUpdateNote:input_type -> api.GetUpdateNoteRequest
-	49, // 60: api.Campus.ListMovies:input_type -> api.ListMoviesRequest
-	52, // 61: api.Campus.CreateFeedback:input_type -> api.CreateFeedbackRequest
-	60, // 62: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
-	3,  // 63: api.Campus.CreateDevice:input_type -> api.CreateDeviceRequest
-	5,  // 64: api.Campus.DeleteDevice:input_type -> api.DeleteDeviceRequest
-	62, // 65: api.Campus.ListStudentClub:input_type -> api.ListStudentClubRequest
-	66, // 66: api.Campus.ListStudentGroup:input_type -> api.ListStudentGroupRequest
-	14, // 67: api.Campus.ListNewsAlerts:output_type -> api.ListNewsAlertsReply
-	11, // 68: api.Campus.ListNewsSources:output_type -> api.ListNewsSourcesReply
-	8,  // 69: api.Campus.ListNews:output_type -> api.ListNewsReply
-	17, // 70: api.Campus.ListCanteenRatings:output_type -> api.ListCanteenRatingsReply
-	19, // 71: api.Campus.GetDishRatings:output_type -> api.GetDishRatingsReply
-	21, // 72: api.Campus.CreateCanteenRating:output_type -> api.CreateCanteenRatingReply
-	23, // 73: api.Campus.CreateDishRating:output_type -> api.CreateDishRatingReply
-	26, // 74: api.Campus.UpdateDishRating:output_type -> api.UpdateDishRatingReply
-	28, // 75: api.Campus.DeleteDishRating:output_type -> api.DeleteDishRatingReply
-	30, // 76: api.Campus.ReportDishRating:output_type -> api.ReportDishRatingReply
-	32, // 77: api.Campus.ListAvailableDishTags:output_type -> api.ListAvailableDishTagsReply
-	34, // 78: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
-	36, // 79: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
-	42, // 80: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
-	45, // 81: api.Campus.ListDishes:output_type -> api.ListDishesReply
-	48, // 82: api.Campus.GetUpdateNote:output_type -> api.GetUpdateNoteReply
-	50, // 83: api.Campus.ListMovies:output_type -> api.ListMoviesReply
-	54, // 84: api.Campus.CreateFeedback:output_type -> api.CreateFeedbackReply
-	61, // 85: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
-	4,  // 86: api.Campus.CreateDevice:output_type -> api.CreateDeviceReply
-	6,  // 87: api.Campus.DeleteDevice:output_type -> api.DeleteDeviceReply
-	63, // 88: api.Campus.ListStudentClub:output_type -> api.ListStudentClubReply
-	67, // 89: api.Campus.ListStudentGroup:output_type -> api.ListStudentGroupReply
-	67, // [67:90] is the sub-list for method output_type
-	44, // [44:67] is the sub-list for method input_type
-	44, // [44:44] is the sub-list for extension type_name
-	44, // [44:44] is the sub-list for extension extendee
-	0,  // [0:44] is the sub-list for field type_name
+	77, // 8: api.NewsAlert.created:type_name -> google.protobuf.Timestamp
+	77, // 9: api.NewsAlert.from:type_name -> google.protobuf.Timestamp
+	77, // 10: api.NewsAlert.to:type_name -> google.protobuf.Timestamp
+	77, // 11: api.ListCanteenRatingsRequest.from:type_name -> google.protobuf.Timestamp
+	77, // 12: api.ListCanteenRatingsRequest.to:type_name -> google.protobuf.Timestamp
+	21, // 13: api.ListCanteenRatingsReply.rating:type_name -> api.SingleRatingReply
+	41, // 14: api.ListCanteenRatingsReply.rating_tags:type_name -> api.RatingTagResult
+	17, // 15: api.ListCanteenRatingsReply.distribution:type_name -> api.RatingDistribution
+	77, // 16: api.GetDishRatingsRequest.from:type_name -> google.protobuf.Timestamp
+	77, // 17: api.GetDishRatingsRequest.to:type_name -> google.protobuf.Timestamp
+	21, // 18: api.GetDishRatingsReply.rating:type_name -> api.SingleRatingReply
+	41, // 19: api.GetDishRatingsReply.rating_tags:type_name -> api.RatingTagResult
+	41, // 20: api.GetDishRatingsReply.name_tags:type_name -> api.RatingTagResult
+	17, // 21: api.GetDishRatingsReply.distribution:type_name -> api.RatingDistribution
+	40, // 22: api.SingleRatingReply.rating_tags:type_name -> api.RatingTagNewRequest
+	77, // 23: api.SingleRatingReply.visited:type_name -> google.protobuf.Timestamp
+	77, // 24: api.SingleRatingReply.updated_at:type_name -> google.protobuf.Timestamp
+	39, // 25: api.CreateCanteenRatingRequest.rating_tags:type_name -> api.RatingTag
+	39, // 26: api.CreateDishRatingRequest.rating_tags:type_name -> api.RatingTag
+	39, // 27: api.UpdateDishRatingRequest.rating_tags:type_name -> api.RatingTag
+	38, // 28: api.ListAvailableDishTagsReply.rating_tags:type_name -> api.TagsOverview
+	38, // 29: api.ListNameTagsReply.rating_tags:type_name -> api.TagsOverview
+	38, // 30: api.ListAvailableCanteenTagsReply.rating_tags:type_name -> api.TagsOverview
+	44, // 31: api.ListCanteensReply.canteen:type_name -> api.Canteen
+	77, // 32: api.ListDishRatingSummariesRequest.from:type_name -> google.protobuf.Timestamp
+	77, // 33: api.ListDishRatingSummariesRequest.to:type_name -> google.protobuf.Timestamp
+	17, // 34: api.DishRatingSummary.distribution:type_name -> api.RatingDistribution
+	41, // 35: api.DishRatingSummary.rating_tags:type_name -> api.RatingTagResult
+	41, // 36: api.DishRatingSummary.name_tags:type_name -> api.RatingTagResult
+	48, // 37: api.ListDishRatingSummariesReply.summaries:type_name -> api.DishRatingSummary
+	51, // 38: api.ListTopRatedDishesReply.dishes:type_name -> api.TopRatedDish
+	77, // 39: api.ListMoviesRequest.oldest_date_at:type_name -> google.protobuf.Timestamp
+	58, // 40: api.ListMoviesReply.movies:type_name -> api.Movie
+	77, // 41: api.Movie.date:type_name -> google.protobuf.Timestamp
+	77, // 42: api.Movie.created:type_name -> google.protobuf.Timestamp
+	2,  // 43: api.CreateFeedbackRequest.recipient:type_name -> api.CreateFeedbackRequest.Recipient
+	60, // 44: api.CreateFeedbackRequest.location:type_name -> api.Coordinate
+	77, // 45: api.GetCanteenHeadCountReply.timestamp:type_name -> google.protobuf.Timestamp
+	1,  // 46: api.ListStudentClubRequest.language:type_name -> api.Language
+	72, // 47: api.ListStudentClubReply.collections:type_name -> api.StudentClubCollection
+	71, // 48: api.StudentClubCollection.clubs:type_name -> api.StudentClub
+	1,  // 49: api.ListStudentGroupRequest.language:type_name -> api.Language
+	72, // 50: api.ListStudentGroupReply.student_clubs:type_name -> api.StudentClubCollection
+	76, // 51: api.ListStudentGroupReply.student_councils:type_name -> api.StudentCouncilCollection
+	75, // 52: api.StudentCouncilCollection.councils:type_name -> api.StudentCouncil
+	13, // 53: api.Campus.ListNewsAlerts:input_type -> api.ListNewsAlertsRequest
+	10, // 54: api.Campus.ListNewsSources:input_type -> api.ListNewsSourcesRequest
+	9,  // 55: api.Campus.ListNews:input_type -> api.ListNewsRequest
+	16, // 56: api.Campus.ListCanteenRatings:input_type -> api.ListCanteenRatingsRequest
+	19, // 57: api.Campus.GetDishRatings:input_type -> api.GetDishRatingsRequest
+	23, // 58: api.Campus.CreateCanteenRating:input_type -> api.CreateCanteenRatingRequest
+	25, // 59: api.Campus.CreateDishRating:input_type -> api.CreateDishRatingRequest
+	26, // 60: api.Campus.UpdateDishRating:input_type -> api.UpdateDishRatingRequest
+	28, // 61: api.Campus.DeleteDishRating:input_type -> api.DeleteDishRatingRequest
+	30, // 62: api.Campus.ReportDishRating:input_type -> api.ReportDishRatingRequest
+	32, // 63: api.Campus.ListAvailableDishTags:input_type -> api.ListAvailableDishTagsRequest
+	34, // 64: api.Campus.ListNameTags:input_type -> api.ListNameTagsRequest
+	36, // 65: api.Campus.ListAvailableCanteenTags:input_type -> api.ListAvailableCanteenTagsRequest
+	42, // 66: api.Campus.ListCanteens:input_type -> api.ListCanteensRequest
+	45, // 67: api.Campus.ListDishes:input_type -> api.ListDishesRequest
+	47, // 68: api.Campus.ListDishRatingSummaries:input_type -> api.ListDishRatingSummariesRequest
+	50, // 69: api.Campus.ListTopRatedDishes:input_type -> api.ListTopRatedDishesRequest
+	54, // 70: api.Campus.GetUpdateNote:input_type -> api.GetUpdateNoteRequest
+	56, // 71: api.Campus.ListMovies:input_type -> api.ListMoviesRequest
+	59, // 72: api.Campus.CreateFeedback:input_type -> api.CreateFeedbackRequest
+	67, // 73: api.Campus.GetCanteenHeadCount:input_type -> api.GetCanteenHeadCountRequest
+	3,  // 74: api.Campus.CreateDevice:input_type -> api.CreateDeviceRequest
+	5,  // 75: api.Campus.DeleteDevice:input_type -> api.DeleteDeviceRequest
+	69, // 76: api.Campus.ListStudentClub:input_type -> api.ListStudentClubRequest
+	73, // 77: api.Campus.ListStudentGroup:input_type -> api.ListStudentGroupRequest
+	14, // 78: api.Campus.ListNewsAlerts:output_type -> api.ListNewsAlertsReply
+	11, // 79: api.Campus.ListNewsSources:output_type -> api.ListNewsSourcesReply
+	8,  // 80: api.Campus.ListNews:output_type -> api.ListNewsReply
+	18, // 81: api.Campus.ListCanteenRatings:output_type -> api.ListCanteenRatingsReply
+	20, // 82: api.Campus.GetDishRatings:output_type -> api.GetDishRatingsReply
+	22, // 83: api.Campus.CreateCanteenRating:output_type -> api.CreateCanteenRatingReply
+	24, // 84: api.Campus.CreateDishRating:output_type -> api.CreateDishRatingReply
+	27, // 85: api.Campus.UpdateDishRating:output_type -> api.UpdateDishRatingReply
+	29, // 86: api.Campus.DeleteDishRating:output_type -> api.DeleteDishRatingReply
+	31, // 87: api.Campus.ReportDishRating:output_type -> api.ReportDishRatingReply
+	33, // 88: api.Campus.ListAvailableDishTags:output_type -> api.ListAvailableDishTagsReply
+	35, // 89: api.Campus.ListNameTags:output_type -> api.ListNameTagsReply
+	37, // 90: api.Campus.ListAvailableCanteenTags:output_type -> api.ListAvailableCanteenTagsReply
+	43, // 91: api.Campus.ListCanteens:output_type -> api.ListCanteensReply
+	46, // 92: api.Campus.ListDishes:output_type -> api.ListDishesReply
+	49, // 93: api.Campus.ListDishRatingSummaries:output_type -> api.ListDishRatingSummariesReply
+	52, // 94: api.Campus.ListTopRatedDishes:output_type -> api.ListTopRatedDishesReply
+	55, // 95: api.Campus.GetUpdateNote:output_type -> api.GetUpdateNoteReply
+	57, // 96: api.Campus.ListMovies:output_type -> api.ListMoviesReply
+	61, // 97: api.Campus.CreateFeedback:output_type -> api.CreateFeedbackReply
+	68, // 98: api.Campus.GetCanteenHeadCount:output_type -> api.GetCanteenHeadCountReply
+	4,  // 99: api.Campus.CreateDevice:output_type -> api.CreateDeviceReply
+	6,  // 100: api.Campus.DeleteDevice:output_type -> api.DeleteDeviceReply
+	70, // 101: api.Campus.ListStudentClub:output_type -> api.ListStudentClubReply
+	74, // 102: api.Campus.ListStudentGroup:output_type -> api.ListStudentGroupReply
+	78, // [78:103] is the sub-list for method output_type
+	53, // [53:78] is the sub-list for method input_type
+	53, // [53:53] is the sub-list for extension type_name
+	53, // [53:53] is the sub-list for extension extendee
+	0,  // [0:53] is the sub-list for field type_name
 }
 
 func init() { file_tumdev_campus_backend_proto_init() }
@@ -4743,17 +5400,17 @@ func file_tumdev_campus_backend_proto_init() {
 	if File_tumdev_campus_backend_proto != nil {
 		return
 	}
-	file_tumdev_campus_backend_proto_msgTypes[59].OneofWrappers = []any{}
-	file_tumdev_campus_backend_proto_msgTypes[61].OneofWrappers = []any{}
-	file_tumdev_campus_backend_proto_msgTypes[63].OneofWrappers = []any{}
-	file_tumdev_campus_backend_proto_msgTypes[65].OneofWrappers = []any{}
+	file_tumdev_campus_backend_proto_msgTypes[66].OneofWrappers = []any{}
+	file_tumdev_campus_backend_proto_msgTypes[68].OneofWrappers = []any{}
+	file_tumdev_campus_backend_proto_msgTypes[70].OneofWrappers = []any{}
+	file_tumdev_campus_backend_proto_msgTypes[72].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tumdev_campus_backend_proto_rawDesc), len(file_tumdev_campus_backend_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   67,
+			NumMessages:   74,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
