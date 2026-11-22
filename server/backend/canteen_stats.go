@@ -248,6 +248,7 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 			continue
 		}
 		st := statsByDish[d.Dish]
+		imgRatingID := latestImgByDish[d.Dish]
 		summaries = append(summaries, &pb.DishRatingSummary{
 			Dish:                d.Name,
 			Avg:                 st.Average,
@@ -258,7 +259,8 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 			Distribution:        buildRatingDistribution(st.Stars1, st.Stars2, st.Stars3, st.Stars4, st.Stars5),
 			RatingTags:          ratingTagsByDish[d.Dish],
 			NameTags:            nameTagsByDish[d.Dish],
-			LatestImageRatingId: latestImgByDish[d.Dish],
+			LatestImageRatingId: imgRatingID,
+			LatestImageUrl:      dishRatingImageURL(imgRatingID),
 		})
 	}
 	return &pb.ListDishRatingSummariesReply{Summaries: summaries}, nil
@@ -478,13 +480,15 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 
 	result := make([]*pb.TopRatedDish, 0, len(scored))
 	for _, item := range scored {
+		imgRatingID := latestImgByDish[item.row.DishID]
 		result = append(result, &pb.TopRatedDish{
 			CanteenId:           model.CanteenEatAPIID(item.row.CanteenName),
 			Dish:                item.row.DishName,
 			Avg:                 item.row.Average,
 			BayesianScore:       item.score,
 			RatingCount:         item.row.RatingCount,
-			LatestImageRatingId: latestImgByDish[item.row.DishID],
+			LatestImageRatingId: imgRatingID,
+			LatestImageUrl:      dishRatingImageURL(imgRatingID),
 		})
 	}
 	return &pb.ListTopRatedDishesReply{Dishes: result}, nil

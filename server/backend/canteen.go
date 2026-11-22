@@ -91,10 +91,24 @@ func berlinDayBounds(now time.Time) (time.Time, time.Time) {
 // The parameter limit defines how many actual ratings should be returned.
 // The optional parameters from and to can define an interval in which the queried ratings have been stored.
 // If these aren't specified, the newest ratings will be returned as the default
+func ratingOrderClause(sortBy pb.RatingSortOrder, pkColumn string) string {
+	switch sortBy {
+	case pb.RatingSortOrder_RATING_SORT_HIGHEST:
+		return fmt.Sprintf("points desc, timestamp desc, %s desc", pkColumn)
+	case pb.RatingSortOrder_RATING_SORT_LOWEST:
+		return fmt.Sprintf("points asc, timestamp desc, %s desc", pkColumn)
+	default:
+		return fmt.Sprintf("timestamp desc, %s desc", pkColumn)
+	}
+}
+
 func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
 	s.recordDeviceIfPresent(ctx)
 	if input.GetCanteenId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Canteen Id is required.")
+	}
+	if input.Offset < 0 {
+		return nil, status.Error(codes.InvalidArgument, "Offset must be non-negative.")
 	}
 	tx := s.db.WithContext(ctx)
 	canteenId, err := getIDForCanteenName(input.CanteenId, tx)
@@ -137,89 +151,100 @@ func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCan
 	}
 
 	callerHash := callerDeviceHash(ctx)
+	ratings, totalMatching, hasMore := queryLastCanteenRatingsWithLimit(input, canteenId, count, callerHash, tx)
 	return &pb.ListCanteenRatingsReply{
-		Avg:          avg,
-		Std:          std,
-		Min:          minPts,
-		Max:          maxPts,
-		RatingCount:  count,
-		Distribution: dist,
-		Rating:       queryLastCanteenRatingsWithLimit(input, canteenId, callerHash, tx),
-		RatingTags:   ratingTags,
+		Avg:           avg,
+		Std:           std,
+		Min:           minPts,
+		Max:           maxPts,
+		RatingCount:   count,
+		Distribution:  dist,
+		Rating:        ratings,
+		RatingTags:    ratingTags,
+		TotalMatching: totalMatching,
+		HasMore:       hasMore,
 	}, nil
 }
 
 // queryLastCanteenRatingsWithLimit
 // Queries the actual ratings for a canteen and attaches the tag ratings which belong to the ratings
-func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, canteenID int32, callerHash null.String, tx *gorm.DB) []*pb.SingleRatingReply {
+func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, canteenID int32, baseCount int64, callerHash null.String, tx *gorm.DB) ([]*pb.SingleRatingReply, int64, bool) {
 	var ratings []model.CanteenRating
-	var err error
 
-	var limit = int(input.Limit)
+	limit := int(input.Limit)
 	if limit == -1 {
 		limit = math.MaxInt32
 	}
-	if limit > 0 {
-		if input.From != nil || input.To != nil {
 
-			var from time.Time
-			var to time.Time
-			if input.From == nil {
-				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
-			} else {
-				from = input.From.AsTime()
-			}
-
-			if input.To == nil {
-				to = time.Now()
-			} else {
-				to = input.To.AsTime()
-			}
-			err = tx.
-				Order("timestamp desc, cafeteriaRating desc").
-				Limit(limit).
-				Find(&ratings, "cafeteriaID = ? AND status = ? AND timestamp < ? AND timestamp > ?", canteenID, model.RatingStatusVisible, to, from).Error
-		} else {
-			err = tx.Order("timestamp desc, cafeteriaRating desc").
-				Limit(limit).
-				Find(&ratings, "cafeteriaID = ? AND status = ?", canteenID, model.RatingStatusVisible).Error
-		}
-
-		if err != nil {
-			log.WithError(err).Error("while querying last canteen ratings.")
-			return make([]*pb.SingleRatingReply, 0)
-		}
-		ratingIDs := make([]int64, len(ratings))
-		for i, v := range ratings {
-			ratingIDs[i] = v.CanteenRating
-		}
-		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.CANTEEN, tx)
-		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
-		for _, v := range ratings {
-			entry := &pb.SingleRatingReply{
-				RatingId:    v.CanteenRating,
-				Points:      v.Points,
-				Comment:     v.Comment,
-				Image:       getImageToBytes(v.Image),
-				Visited:     timestamppb.New(v.Timestamp),
-				RatingTags:  tagsByRating[v.CanteenRating],
-				IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
-			}
-			if v.UpdatedAt.Valid {
-				entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
-			}
-			resp = append(resp, entry)
-		}
-		return resp
-	} else {
-		return make([]*pb.SingleRatingReply, 0)
+	baseQ := tx.Model(&model.CanteenRating{}).Where("cafeteriaID = ? AND status = ?", canteenID, model.RatingStatusVisible)
+	if from, to, windowed := resolveTimeWindow(input.From, input.To); windowed {
+		baseQ = baseQ.Where("timestamp < ? AND timestamp > ?", to, from)
 	}
+	if input.OnlyWithImages {
+		baseQ = baseQ.Where("image <> ''")
+	}
+	if input.OnlyWithComments {
+		baseQ = baseQ.Where("comment <> ''")
+	}
+
+	totalMatching := baseCount
+	if input.OnlyWithImages || input.OnlyWithComments {
+		if err := baseQ.Session(&gorm.Session{}).Count(&totalMatching).Error; err != nil {
+			log.WithError(err).Error("while counting matching canteen ratings.")
+			totalMatching = 0
+		}
+	}
+
+	if limit <= 0 {
+		return make([]*pb.SingleRatingReply, 0), totalMatching, totalMatching > int64(input.Offset)
+	}
+
+	q := baseQ.Order(ratingOrderClause(input.SortBy, "cafeteriaRating")).Limit(limit)
+	if input.Offset > 0 {
+		q = q.Offset(int(input.Offset))
+	}
+	if err := q.Find(&ratings).Error; err != nil {
+		log.WithError(err).Error("while querying last canteen ratings.")
+		return make([]*pb.SingleRatingReply, 0), totalMatching, false
+	}
+
+	ratingIDs := make([]int64, len(ratings))
+	for i, v := range ratings {
+		ratingIDs[i] = v.CanteenRating
+	}
+	tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.CANTEEN, tx)
+	resp := make([]*pb.SingleRatingReply, 0, len(ratings))
+	for _, v := range ratings {
+		entry := &pb.SingleRatingReply{
+			RatingId:    v.CanteenRating,
+			Points:      v.Points,
+			Comment:     v.Comment,
+			Visited:     timestamppb.New(v.Timestamp),
+			RatingTags:  tagsByRating[v.CanteenRating],
+			IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+		}
+		if v.Image != "" {
+			entry.ImageUrl = canteenRatingImageURL(v.CanteenRating)
+		}
+		if !input.OmitInlineImages {
+			entry.Image = getImageToBytes(v.Image)
+		}
+		if v.UpdatedAt.Valid {
+			entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
+		}
+		resp = append(resp, entry)
+	}
+	hasMore := int64(input.Offset)+int64(len(resp)) < totalMatching
+	return resp, totalMatching, hasMore
 }
 
 func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRatingsRequest) (*pb.GetDishRatingsReply, error) {
 	s.recordDeviceIfPresent(ctx)
 	if input.GetCanteenId() == "" || input.GetDish() == "" {
 		return nil, status.Error(codes.NotFound, "No ratings found for this dish.")
+	}
+	if input.Offset < 0 {
+		return nil, status.Error(codes.InvalidArgument, "Offset must be non-negative.")
 	}
 	tx := s.db.WithContext(ctx)
 	canteenID, err := getIDForCanteenName(input.CanteenId, tx)
@@ -268,82 +293,92 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 	}
 
 	callerHash := callerDeviceHash(ctx)
+	ratings, totalMatching, hasMore := queryLastDishRatingsWithLimit(input, dishID, count, callerHash, tx)
 	return &pb.GetDishRatingsReply{
-		Avg:          avg,
-		Std:          std,
-		Min:          minPts,
-		Max:          maxPts,
-		RatingCount:  count,
-		Distribution: dist,
-		Rating:       queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
-		RatingTags:   ratingTags,
-		NameTags:     queryTags(canteenID, dishID, model.NAME, tx),
+		Avg:           avg,
+		Std:           std,
+		Min:           minPts,
+		Max:           maxPts,
+		RatingCount:   count,
+		Distribution:  dist,
+		Rating:        ratings,
+		RatingTags:    ratingTags,
+		NameTags:      queryTags(canteenID, dishID, model.NAME, tx),
+		TotalMatching: totalMatching,
+		HasMore:       hasMore,
 	}, nil
 }
 
 // queryLastDishRatingsWithLimit
 // Queries the actual ratings for a dish in a canteen and attaches the tag ratings which belong to the ratings
-func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32, callerHash null.String, tx *gorm.DB) []*pb.SingleRatingReply {
+func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32, baseCount int64, callerHash null.String, tx *gorm.DB) ([]*pb.SingleRatingReply, int64, bool) {
 	var ratings []model.DishRating
-	var err error
-	var limit = int(input.Limit)
+
+	limit := int(input.Limit)
 	if limit == -1 {
 		limit = math.MaxInt32
 	}
-	if limit > 0 {
-		if input.From != nil || input.To != nil {
-			var from time.Time
-			var to time.Time
-			if input.From == nil {
-				from = time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)
-			} else {
-				from = input.From.AsTime()
-			}
 
-			if input.To == nil {
-				to = time.Now()
-			} else {
-				to = input.To.AsTime()
-			}
-
-			err = tx.Order("timestamp desc, dishRating desc").
-				Limit(limit).
-				Find(&ratings, "dishID = ? AND status = ? AND timestamp < ? AND timestamp > ?", dishID, model.RatingStatusVisible, to, from).Error
-		} else {
-			err = tx.Order("timestamp desc, dishRating desc").
-				Limit(limit).
-				Find(&ratings, "dishID = ? AND status = ?", dishID, model.RatingStatusVisible).Error
-		}
-
-		if err != nil {
-			log.WithError(err).Error("while querying last dish ratings from Database.")
-			return make([]*pb.SingleRatingReply, 0)
-		}
-		ratingIDs := make([]int64, len(ratings))
-		for i, v := range ratings {
-			ratingIDs[i] = v.DishRating
-		}
-		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.DISH, tx)
-		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
-		for _, v := range ratings {
-			entry := &pb.SingleRatingReply{
-				RatingId:    v.DishRating,
-				Points:      v.Points,
-				Comment:     v.Comment,
-				RatingTags:  tagsByRating[v.DishRating],
-				Image:       getImageToBytes(v.Image),
-				Visited:     timestamppb.New(v.Timestamp),
-				IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
-			}
-			if v.UpdatedAt.Valid {
-				entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
-			}
-			resp = append(resp, entry)
-		}
-		return resp
-	} else {
-		return make([]*pb.SingleRatingReply, 0)
+	baseQ := tx.Model(&model.DishRating{}).Where("dishID = ? AND status = ?", dishID, model.RatingStatusVisible)
+	if from, to, windowed := resolveTimeWindow(input.From, input.To); windowed {
+		baseQ = baseQ.Where("timestamp < ? AND timestamp > ?", to, from)
 	}
+	if input.OnlyWithImages {
+		baseQ = baseQ.Where("image <> ''")
+	}
+	if input.OnlyWithComments {
+		baseQ = baseQ.Where("comment <> ''")
+	}
+
+	totalMatching := baseCount
+	if input.OnlyWithImages || input.OnlyWithComments {
+		if err := baseQ.Session(&gorm.Session{}).Count(&totalMatching).Error; err != nil {
+			log.WithError(err).Error("while counting matching dish ratings.")
+			totalMatching = 0
+		}
+	}
+
+	if limit <= 0 {
+		return make([]*pb.SingleRatingReply, 0), totalMatching, totalMatching > int64(input.Offset)
+	}
+
+	q := baseQ.Order(ratingOrderClause(input.SortBy, "dishRating")).Limit(limit)
+	if input.Offset > 0 {
+		q = q.Offset(int(input.Offset))
+	}
+	if err := q.Find(&ratings).Error; err != nil {
+		log.WithError(err).Error("while querying last dish ratings from Database.")
+		return make([]*pb.SingleRatingReply, 0), totalMatching, false
+	}
+
+	ratingIDs := make([]int64, len(ratings))
+	for i, v := range ratings {
+		ratingIDs[i] = v.DishRating
+	}
+	tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.DISH, tx)
+	resp := make([]*pb.SingleRatingReply, 0, len(ratings))
+	for _, v := range ratings {
+		entry := &pb.SingleRatingReply{
+			RatingId:    v.DishRating,
+			Points:      v.Points,
+			Comment:     v.Comment,
+			RatingTags:  tagsByRating[v.DishRating],
+			Visited:     timestamppb.New(v.Timestamp),
+			IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+		}
+		if v.Image != "" {
+			entry.ImageUrl = dishRatingImageURL(v.DishRating)
+		}
+		if !input.OmitInlineImages {
+			entry.Image = getImageToBytes(v.Image)
+		}
+		if v.UpdatedAt.Valid {
+			entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
+		}
+		resp = append(resp, entry)
+	}
+	hasMore := int64(input.Offset)+int64(len(resp)) < totalMatching
+	return resp, totalMatching, hasMore
 }
 
 func getImageToBytes(imagePath string) []byte {

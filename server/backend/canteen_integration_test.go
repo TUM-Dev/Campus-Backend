@@ -3,6 +3,8 @@ package backend
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -569,4 +571,173 @@ func TestListAvailableCanteenTagsSeeded(t *testing.T) {
 		require.NotEmpty(t, tag.De)
 		require.NotEmpty(t, tag.En)
 	}
+}
+
+func TestRatingImageHandlerPaginationAndFiltering(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	prevStorage := cron.StorageDir
+	cron.StorageDir = t.TempDir()
+	t.Cleanup(func() { cron.StorageDir = prevStorage })
+
+	server := CampusServer{db: db}
+	canteen := model.Canteen{Name: "MENSA_GARCHING"}
+	require.NoError(t, db.Create(&canteen).Error)
+	dish := model.Dish{Name: "Kaiserschmarrn", Type: "Dessert", CanteenID: canteen.CanteenID}
+	require.NoError(t, db.Create(&dish).Error)
+
+	img := readTestImage(t)
+	r1, err := server.CreateDishRating(deviceCtx("dev-1"), &pb.CreateDishRatingRequest{
+		Points: 2, CanteenId: "mensa-garching", Dish: "Kaiserschmarrn", Comment: "Cold",
+	})
+	require.NoError(t, err)
+	r2, err := server.CreateDishRating(deviceCtx("dev-2"), &pb.CreateDishRatingRequest{
+		Points: 5, CanteenId: "mensa-garching", Dish: "Kaiserschmarrn", Comment: "Delicious", Image: img,
+	})
+	require.NoError(t, err)
+	r3, err := server.CreateDishRating(deviceCtx("dev-3"), &pb.CreateDishRatingRequest{
+		Points: 4, CanteenId: "mensa-garching", Dish: "Kaiserschmarrn",
+	})
+	require.NoError(t, err)
+
+	// 1. Pagination & sort_by HIGHEST with omit_inline_images=true.
+	page1, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId:        "mensa-garching",
+		Dish:             "Kaiserschmarrn",
+		Limit:            2,
+		Offset:           0,
+		SortBy:           pb.RatingSortOrder_RATING_SORT_HIGHEST,
+		OmitInlineImages: true,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(3), page1.TotalMatching)
+	require.True(t, page1.HasMore)
+	require.Len(t, page1.Rating, 2)
+	require.Equal(t, r2.RatingId, page1.Rating[0].RatingId)
+	require.Empty(t, page1.Rating[0].Image, "inline bytes must be omitted when omit_inline_images is true")
+	require.Equal(t, dishRatingImageURL(r2.RatingId), page1.Rating[0].ImageUrl)
+	require.Equal(t, r3.RatingId, page1.Rating[1].RatingId)
+
+	page2, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId: "mensa-garching",
+		Dish:      "Kaiserschmarrn",
+		Limit:     2,
+		Offset:    2,
+		SortBy:    pb.RatingSortOrder_RATING_SORT_HIGHEST,
+	})
+	require.NoError(t, err)
+	require.False(t, page2.HasMore)
+	require.Len(t, page2.Rating, 1)
+	require.Equal(t, r1.RatingId, page2.Rating[0].RatingId)
+
+	// 2. Filters: only_with_images and only_with_comments.
+	photosOnly, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId:      "mensa-garching",
+		Dish:           "Kaiserschmarrn",
+		Limit:          10,
+		OnlyWithImages: true,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(1), photosOnly.TotalMatching)
+	require.Len(t, photosOnly.Rating, 1)
+	require.Equal(t, r2.RatingId, photosOnly.Rating[0].RatingId)
+	require.NotEmpty(t, photosOnly.Rating[0].Image, "legacy default still returns inline image bytes")
+
+	commentsOnly, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId:        "mensa-garching",
+		Dish:             "Kaiserschmarrn",
+		Limit:            10,
+		OnlyWithComments: true,
+		SortBy:           pb.RatingSortOrder_RATING_SORT_LOWEST,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(2), commentsOnly.TotalMatching)
+	require.Equal(t, r1.RatingId, commentsOnly.Rating[0].RatingId)
+	require.Equal(t, r2.RatingId, commentsOnly.Rating[1].RatingId)
+
+	// 3. Dedicated HTTP RatingImageHandler: serves visible image with ETag + 304, returns 404 when hidden.
+	imgHandler := http.StripPrefix("/rating-images/", server.RatingImageHandler())
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/dish/%d", r2.RatingId), nil)
+	rec := httptest.NewRecorder()
+	imgHandler.ServeHTTP(rec, req)
+	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, "image/jpeg", rec.Header().Get("Content-Type"))
+	require.NotEmpty(t, rec.Header().Get("ETag"))
+	require.NotEmpty(t, rec.Body.Bytes())
+
+	// Conditional GET with matching ETag returns 304 Not Modified.
+	req304 := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/dish/%d", r2.RatingId), nil)
+	req304.Header.Set("If-None-Match", rec.Header().Get("ETag"))
+	rec304 := httptest.NewRecorder()
+	imgHandler.ServeHTTP(rec304, req304)
+	require.Equal(t, http.StatusNotModified, rec304.Code)
+
+	// Rating without image returns 404.
+	recNoImg := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recNoImg, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/dish/%d", r1.RatingId), nil))
+	require.Equal(t, http.StatusNotFound, recNoImg.Code)
+
+	// Hiding the rating immediately causes RatingImageHandler to return 404.
+	require.NoError(t, db.Model(&model.DishRating{}).Where("dishRating = ?", r2.RatingId).Update("status", model.RatingStatusHidden).Error)
+	recHidden := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recHidden, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/dish/%d", r2.RatingId), nil))
+	require.Equal(t, http.StatusNotFound, recHidden.Code)
+
+	// Non-GET/HEAD method returns 405.
+	recPost := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recPost, httptest.NewRequest(http.MethodPost, fmt.Sprintf("/rating-images/dish/%d", r2.RatingId), nil))
+	require.Equal(t, http.StatusMethodNotAllowed, recPost.Code)
+
+	// 4. Canteen ratings: pagination, filtering, omit_inline_images, and /rating-images/canteen/{id} (+ HEAD).
+	cr1, err := server.CreateCanteenRating(deviceCtx("c-dev-1"), &pb.CreateCanteenRatingRequest{
+		Points: 2, CanteenId: "mensa-garching", Comment: "Long queue",
+	})
+	require.NoError(t, err)
+	cr2, err := server.CreateCanteenRating(deviceCtx("c-dev-2"), &pb.CreateCanteenRatingRequest{
+		Points: 5, CanteenId: "mensa-garching", Comment: "Great vibe", Image: img,
+	})
+	require.NoError(t, err)
+
+	canteenPage, err := server.ListCanteenRatings(ctx, &pb.ListCanteenRatingsRequest{
+		CanteenId:        "mensa-garching",
+		Limit:            1,
+		Offset:           0,
+		SortBy:           pb.RatingSortOrder_RATING_SORT_HIGHEST,
+		OmitInlineImages: true,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(2), canteenPage.TotalMatching)
+	require.True(t, canteenPage.HasMore)
+	require.Len(t, canteenPage.Rating, 1)
+	require.Equal(t, cr2.RatingId, canteenPage.Rating[0].RatingId)
+	require.Empty(t, canteenPage.Rating[0].Image)
+	require.Equal(t, canteenRatingImageURL(cr2.RatingId), canteenPage.Rating[0].ImageUrl)
+
+	canteenPhotos, err := server.ListCanteenRatings(ctx, &pb.ListCanteenRatingsRequest{
+		CanteenId:      "mensa-garching",
+		Limit:          10,
+		OnlyWithImages: true,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(1), canteenPhotos.TotalMatching)
+	require.Equal(t, cr2.RatingId, canteenPhotos.Rating[0].RatingId)
+	require.NotEqual(t, cr1.RatingId, canteenPhotos.Rating[0].RatingId)
+
+	// HEAD /rating-images/canteen/{id} returns 200 with Content-Length and empty body.
+	recHead := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recHead, httptest.NewRequest(http.MethodHead, fmt.Sprintf("/rating-images/canteen/%d", cr2.RatingId), nil))
+	require.Equal(t, http.StatusOK, recHead.Code)
+	require.Equal(t, "image/jpeg", recHead.Header().Get("Content-Type"))
+	require.Empty(t, recHead.Body.Bytes())
+
+	// GET /rating-images/canteen/{id} returns bytes while visible and 404 once hidden.
+	recCanteenImg := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recCanteenImg, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/canteen/%d", cr2.RatingId), nil))
+	require.Equal(t, http.StatusOK, recCanteenImg.Code)
+	require.NotEmpty(t, recCanteenImg.Body.Bytes())
+
+	require.NoError(t, db.Model(&model.CanteenRating{}).Where("cafeteriaRating = ?", cr2.RatingId).Update("status", model.RatingStatusHidden).Error)
+	recCanteenHidden := httptest.NewRecorder()
+	imgHandler.ServeHTTP(recCanteenHidden, httptest.NewRequest(http.MethodGet, fmt.Sprintf("/rating-images/canteen/%d", cr2.RatingId), nil))
+	require.Equal(t, http.StatusNotFound, recCanteenHidden.Code)
 }

@@ -269,6 +269,12 @@ message NewsAlert {
   google.protobuf.Timestamp to = 5;
 }
 
+enum RatingSortOrder {
+  RATING_SORT_NEWEST = 0;
+  RATING_SORT_HIGHEST = 1;
+  RATING_SORT_LOWEST = 2;
+}
+
 message ListCanteenRatingsRequest {
   // canteenId Mandatory Name of the canteen (EAT-API naming scheme "MENSA_GARCHING")
   string canteen_id = 1;
@@ -279,7 +285,18 @@ message ListCanteenRatingsRequest {
 
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 4;
+  // Optional pagination offset (0-based)
+  int32 offset = 5;
+  // Optional sort order for returned ratings (default: newest first)
+  RatingSortOrder sort_by = 6;
+  // Optional filter: return only ratings with an attached photo
+  bool only_with_images = 7;
+  // Optional filter: return only ratings with a non-empty comment
+  bool only_with_comments = 8;
+  // Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
+  bool omit_inline_images = 9;
 }
+
 message RatingDistribution {
   int64 stars_1 = 1;
   int64 stars_2 = 2;
@@ -297,6 +314,10 @@ message ListCanteenRatingsReply {
   repeated RatingTagResult rating_tags = 6;
   int64 rating_count = 7;
   RatingDistribution distribution = 8;
+  // Total ratings matching the active filters (from/to, only_with_images, only_with_comments)
+  int64 total_matching = 9;
+  // True if additional ratings exist beyond offset + len(rating)
+  bool has_more = 10;
 }
 
 message GetDishRatingsRequest {
@@ -311,6 +332,16 @@ message GetDishRatingsRequest {
   google.protobuf.Timestamp to = 4;
   // Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter "-1"
   int32 limit = 5;
+  // Optional pagination offset (0-based)
+  int32 offset = 6;
+  // Optional sort order for returned ratings (default: newest first)
+  RatingSortOrder sort_by = 7;
+  // Optional filter: return only ratings with an attached photo
+  bool only_with_images = 8;
+  // Optional filter: return only ratings with a non-empty comment
+  bool only_with_comments = 9;
+  // Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)
+  bool omit_inline_images = 10;
 }
 
 message GetDishRatingsReply {
@@ -328,12 +359,16 @@ message GetDishRatingsReply {
   repeated RatingTagResult name_tags = 7;
   int64 rating_count = 8;
   RatingDistribution distribution = 9;
+  // Total ratings matching the active filters (from/to, only_with_images, only_with_comments)
+  int64 total_matching = 10;
+  // True if additional ratings exist beyond offset + len(rating)
+  bool has_more = 11;
 }
 
 message SingleRatingReply {
   // number in the range 1-5
   int32 points = 1;
-  // Optional JPEG image in Base64
+  // Optional JPEG image in Base64 (omitted when omit_inline_images is true)
   bytes image = 2;
   // Optional comment (max 256 chars)
   string comment = 3;
@@ -341,7 +376,8 @@ message SingleRatingReply {
   google.protobuf.Timestamp visited = 5;
   // Unique identifier of the rating
   int64 rating_id = 6;
-  // Field 7 is reserved for image_url.
+  // URL to fetch the rating photo over HTTP with caching; empty if no photo attached
+  string image_url = 7;
   // True if the rating was submitted by the calling device (x-device-id)
   bool is_own_rating = 8;
   // Present if the rating was edited after creation
@@ -508,6 +544,7 @@ message DishRatingSummary {
   repeated RatingTagResult rating_tags = 8;
   repeated RatingTagResult name_tags = 9;
   int64 latest_image_rating_id = 10;
+  string latest_image_url = 11;
 }
 
 message ListDishRatingSummariesReply {
@@ -536,6 +573,7 @@ message TopRatedDish {
   double bayesian_score = 4;
   int64 rating_count = 5;
   int64 latest_image_rating_id = 6;
+  string latest_image_url = 7;
 }
 
 message ListTopRatedDishesReply {
