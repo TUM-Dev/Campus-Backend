@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"crypto/md5"
@@ -9,24 +8,44 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	_ "image/png"
 	"math"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
-
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
+
+const (
+	maxRatingCommentRunes = 256
+	maxRatingImageWidth   = 1280
+	targetMaxImageBytes   = 524288 // 512 KiB
+	defaultJPEGQuality    = 95
+	minJPEGQuality        = 40
+)
+
+func (s *CampusServer) recordDeviceIfPresent(ctx context.Context) {
+	if s.deviceBuf == nil {
+		return
+	}
+	if _, ok := metadata.FromIncomingContext(ctx); !ok {
+		return
+	}
+	_ = s.checkDevice(ctx)
+}
 
 // ListCanteenRatings RPC Endpoint
 // Allows to query ratings for a specific canteen.
@@ -36,6 +55,7 @@ import (
 // The optional parameters from and to can define an interval in which the queried ratings have been stored.
 // If these aren't specified, the newest ratings will be returned as the default
 func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCanteenRatingsRequest) (*pb.ListCanteenRatingsReply, error) {
+	s.recordDeviceIfPresent(ctx)
 	if input.GetCanteenId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Canteen Id is required.")
 	}
@@ -104,14 +124,19 @@ func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cante
 			log.WithError(err).Error("while querying last canteen ratings.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
-		var resp []*pb.SingleRatingReply
+		ratingIDs := make([]int64, len(ratings))
+		for i, v := range ratings {
+			ratingIDs[i] = v.CanteenRating
+		}
+		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.CANTEEN, tx)
+		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
 		for _, v := range ratings {
 			resp = append(resp, &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
-				RatingTags: queryTagRatingsOverviewForRating(v.CanteenRating, model.CANTEEN, tx),
+				RatingTags: tagsByRating[v.CanteenRating],
 			})
 		}
 		return resp
@@ -121,6 +146,7 @@ func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cante
 }
 
 func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRatingsRequest) (*pb.GetDishRatingsReply, error) {
+	s.recordDeviceIfPresent(ctx)
 	if input.GetCanteenId() == "" || input.GetDish() == "" {
 		return nil, status.Error(codes.NotFound, "No ratings found for this dish.")
 	}
@@ -194,12 +220,17 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 			log.WithError(err).Error("while querying last dish ratings from Database.")
 			return make([]*pb.SingleRatingReply, 0)
 		}
-		var resp []*pb.SingleRatingReply
+		ratingIDs := make([]int64, len(ratings))
+		for i, v := range ratings {
+			ratingIDs[i] = v.DishRating
+		}
+		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.DISH, tx)
+		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
 		for _, v := range ratings {
 			resp = append(resp, &pb.SingleRatingReply{
 				Points:     v.Points,
 				Comment:    v.Comment,
-				RatingTags: queryTagRatingsOverviewForRating(v.DishRating, model.DISH, tx),
+				RatingTags: tagsByRating[v.DishRating],
 				Image:      getImageToBytes(v.Image),
 				Visited:    timestamppb.New(v.Timestamp),
 			})
@@ -210,28 +241,13 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 	}
 }
 
-func getImageToBytes(path string) []byte {
-	if len(path) == 0 {
+func getImageToBytes(imagePath string) []byte {
+	if len(imagePath) == 0 {
 		return make([]byte, 0)
 	}
-	file, err := os.Open(path)
+	imageAsBytes, err := os.ReadFile(imagePath)
 	if err != nil {
-		log.WithError(err).Error("while opening image file with path: ", path)
-		return nil
-	}
-	defer func(file *os.File) {
-		if err := file.Close(); err != nil {
-			log.WithError(err).Error("Unable to close the file for storing the image.")
-		}
-	}(file)
-
-	fileInfo, _ := file.Stat()
-	var size = fileInfo.Size()
-	imageAsBytes := make([]byte, size)
-
-	buffer := bufio.NewReader(file)
-	if _, err = buffer.Read(imageAsBytes); err != nil {
-		log.WithError(err).Error("while trying to read image as bytes")
+		log.WithError(err).Error("while reading image file with path: ", imagePath)
 		return nil
 	}
 	return imageAsBytes
@@ -296,7 +312,47 @@ func queryTags(canteenID int32, dishID int32, ratingType model.ModelType, tx *go
 	return resp
 }
 
-// queryTagRatingOverviewForRating
+type ratingTagRow struct {
+	ParentID int64 `gorm:"column:parentId"`
+	TagID    int32 `gorm:"column:tagId"`
+	Points   int32 `gorm:"column:points"`
+}
+
+// queryTagRatingsOverviewForRatings batch-loads all rating tags for a set of rating IDs in one query.
+func queryTagRatingsOverviewForRatings(ratingIDs []int64, ratingType model.ModelType, tx *gorm.DB) map[int64][]*pb.RatingTagNewRequest {
+	byRating := make(map[int64][]*pb.RatingTagNewRequest, len(ratingIDs))
+	if len(ratingIDs) == 0 {
+		return byRating
+	}
+	var rows []ratingTagRow
+	var err error
+	if ratingType == model.DISH {
+		err = tx.Table("dish_rating_tag_options options").
+			Joins("JOIN dish_rating_tags rating ON options.dishRatingTagOption = rating.tagID").
+			Select("rating.parentRating as parentId, options.dishRatingTagOption as tagId, rating.points as points").
+			Where("rating.parentRating IN ?", ratingIDs).
+			Scan(&rows).Error
+	} else {
+		err = tx.Table("canteen_rating_tag_options options").
+			Joins("JOIN canteen_rating_tags rating ON options.cafeteriaRatingTagOption = rating.tagID").
+			Select("rating.correspondingRating as parentId, options.cafeteriaRatingTagOption as tagId, rating.points as points").
+			Where("rating.correspondingRating IN ?", ratingIDs).
+			Scan(&rows).Error
+	}
+	if err != nil {
+		log.WithError(err).Error("while batch querying tag rating overviews.")
+		return byRating
+	}
+	for _, r := range rows {
+		byRating[r.ParentID] = append(byRating[r.ParentID], &pb.RatingTagNewRequest{
+			TagId:  r.TagID,
+			Points: r.Points,
+		})
+	}
+	return byRating
+}
+
+// queryTagRatingsOverviewForRating
 // Query all rating tags which belong to a specific rating given with an ID and return it as TagRatingOverviews
 func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, tx *gorm.DB) []*pb.RatingTagNewRequest {
 	var results []*pb.RatingTagNewRequest
@@ -320,146 +376,180 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, 
 }
 
 // CreateCanteenRating RPC Endpoint
-// Allows to store a new canteen Rating.
-// If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
-// All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
-// invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
+// Allows to store a new canteen rating atomically after validating all fields, image bytes, and tags.
 func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.CreateCanteenRatingRequest) (*pb.CreateCanteenRatingReply, error) {
+	s.recordDeviceIfPresent(ctx)
+	if err := validateRatingTagsInput(input.RatingTags); err != nil {
+		return nil, err
+	}
 	tx := s.db.WithContext(ctx)
 	canteenID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
 		return nil, errorRes
 	}
-
-	resPath := imageWrapper(input.Image, "cafeterias", canteenID)
-	rating := model.CanteenRating{
-		Comment:   input.Comment,
-		Points:    input.Points,
-		CanteenID: canteenID,
-		Timestamp: time.Now(),
-		Image:     resPath,
+	if err := verifyRatingTagsExist(input.RatingTags, model.CANTEEN, tx); err != nil {
+		return nil, err
 	}
-	if err := tx.Create(&rating).Error; err != nil {
-		log.WithError(err).Error("Error occurred while creating the new canteen rating.")
-		return nil, status.Error(codes.InvalidArgument, "Error while creating new canteen rating. Rating has not been saved.")
 
+	resPath, err := imageWrapper(input.Image, "cafeterias", canteenID)
+	if err != nil {
+		return nil, err
 	}
-	if err := storeRatingTags(rating.CanteenRating, input.RatingTags, model.CANTEEN, tx); err != nil {
-		return &pb.CreateCanteenRatingReply{}, err
+
+	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		rating := model.CanteenRating{
+			Comment:   input.Comment,
+			Points:    input.Points,
+			CanteenID: canteenID,
+			Timestamp: time.Now(),
+			Image:     resPath,
+		}
+		if err := dbTx.Create(&rating).Error; err != nil {
+			log.WithError(err).Error("Error occurred while creating the new canteen rating.")
+			return status.Error(codes.Internal, "Error while creating new canteen rating. Rating has not been saved.")
+		}
+		return insertRatingTags(rating.CanteenRating, input.RatingTags, model.CANTEEN, dbTx)
+	}); err != nil {
+		cleanupImageFile(resPath)
+		return nil, err
 	}
 	return &pb.CreateCanteenRatingReply{}, nil
 }
 
-func imageWrapper(image []byte, subDir string, id int64) string {
-	if len(image) == 0 {
-		return ""
+func imageWrapper(imageBytes []byte, subDir string, id int64) (string, error) {
+	if len(imageBytes) == 0 {
+		return "", nil
 	}
 	dir := path.Join(cron.StorageDir, "rating", subDir, strconv.FormatInt(id, 10)) + "/"
-	resPath, err := storeImage(dir, image)
-	if err != nil {
-		log.WithError(err).Error("Error occurred while storing the image.")
-	}
-	return resPath
+	return storeImage(dir, imageBytes)
 }
 
-// storeImage
-// stores an image and returns the path to this image.
-// if needed, a new directory will be created and the path is extended until it is unique
-func storeImage(path string, i []byte) (string, error) {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		if err := os.MkdirAll(path, os.ModePerm); err != nil {
-			log.WithError(err).WithField("path", path).Error("Directory could not be created successfully")
-			return "", nil
-		}
+func cleanupImageFile(imagePath string) {
+	if imagePath == "" {
+		return
+	}
+	if err := os.Remove(imagePath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		log.WithError(err).WithField("path", imagePath).Warn("Failed to remove rating image after transaction rollback")
+	}
+}
+
+// storeImage validates, resizes, and encodes an uploaded JPEG/PNG image as JPEG on disk.
+func storeImage(dir string, raw []byte) (string, error) {
+	img, _, err := image.Decode(bytes.NewReader(raw))
+	if err != nil {
+		return "", status.Error(codes.InvalidArgument, "Invalid image format. Only JPEG and PNG images are supported.")
 	}
 
-	img, _, _ := image.Decode(bytes.NewReader(i))
-	resizedImage := imaging.Resize(img, 1280, 0, imaging.Lanczos)
-
-	quality := 100         // if image small enough use it directly
-	maxImageSize := 524288 // 0.55MB
-	if len(i) > maxImageSize {
-		quality = (maxImageSize / len(i)) * 100
+	resizedImage := img
+	if img.Bounds().Dx() > maxRatingImageWidth {
+		resizedImage = imaging.Resize(img, maxRatingImageWidth, 0, imaging.Lanczos)
 	}
 
-	var imgPath = fmt.Sprintf("%s%x.jpeg", path, md5.Sum(i))
+	quality := defaultJPEGQuality
+	if len(raw) > targetMaxImageBytes {
+		scaled := int(math.Round((float64(targetMaxImageBytes) / float64(len(raw))) * 100))
+		quality = max(minJPEGQuality, min(defaultJPEGQuality, scaled))
+	}
 
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		log.WithError(err).WithField("path", dir).Error("Directory could not be created successfully")
+		return "", status.Error(codes.Internal, "Could not store rating image.")
+	}
+
+	imgPath := path.Join(dir, fmt.Sprintf("%x.jpeg", md5.Sum(raw)))
 	out, err := os.Create(imgPath)
 	if err != nil {
-		log.WithError(err).Error("Error while creating a new file on the path: ", path)
-		return imgPath, err
+		log.WithError(err).WithField("path", imgPath).Error("Error while creating rating image file")
+		return "", status.Error(codes.Internal, "Could not store rating image.")
 	}
-	defer func(out *os.File) {
-		if err := out.Close(); err != nil {
-			log.WithError(err).Error("while closing the file.")
-		}
-	}(out)
 
-	return imgPath, jpeg.Encode(out, resizedImage, &jpeg.Options{Quality: quality})
+	encodeErr := jpeg.Encode(out, resizedImage, &jpeg.Options{Quality: quality})
+	closeErr := out.Close()
+	if encodeErr != nil || closeErr != nil {
+		_ = os.Remove(imgPath)
+		log.WithError(errors.Join(encodeErr, closeErr)).WithField("path", imgPath).Error("Error while writing rating image")
+		return "", status.Error(codes.Internal, "Could not store rating image.")
+	}
+	return imgPath, nil
 }
 
 // CreateDishRating RPC Endpoint
-// Allows to store a new dish Rating.
-// If one of the parameters is invalid, an error will be returned. Otherwise, the rating will be saved.
-// The ratingNumber will be saved for each corresponding DishNameTag.
-// All rating tags which were given with the new rating are stored if they are valid tags, if at least one tag was
-// invalid, an error is returned, all valid ratings tags will be stored nevertheless. Either the german or the english name can be returned to successfully store tags
+// Allows to store a new dish rating atomically after validating all fields, image bytes, and tags.
 func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDishRatingRequest) (*pb.CreateDishRatingReply, error) {
+	s.recordDeviceIfPresent(ctx)
+	if err := validateRatingTagsInput(input.RatingTags); err != nil {
+		return nil, err
+	}
 	tx := s.db.WithContext(ctx)
 	canteenID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
 		return nil, errorRes
 	}
 
-	var dishInCanteen *model.Dish
-	if err := tx.First(&dishInCanteen, "name LIKE ? AND cafeteriaID = ?", input.Dish, canteenID).Error; err != nil || dishInCanteen == nil {
-		log.WithError(err).Error("Error while creating a new dish rating.")
-		return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+	var dishInCanteen model.Dish
+	if err := tx.First(&dishInCanteen, "name = ? AND cafeteriaID = ?", input.Dish, canteenID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "Dish is not offered in this week in this canteen. Rating has not been saved.")
+		}
+		log.WithError(err).Error("Error while looking up dish for new rating.")
+		return nil, status.Error(codes.Internal, "Could not look up dish. Rating has not been saved.")
 	}
 
-	resPath := imageWrapper(input.Image, "dishes", dishInCanteen.Dish)
-
-	rating := model.DishRating{
-		Comment:   input.Comment,
-		DishID:    dishInCanteen.Dish,
-		Points:    input.Points,
-		Timestamp: time.Now(),
-		Image:     resPath,
-	}
-	if err := tx.Create(&rating).Error; err != nil {
-		log.WithError(err).Error("while creating a new dish rating.")
-		return nil, status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
+	if err := verifyRatingTagsExist(input.RatingTags, model.DISH, tx); err != nil {
+		return nil, err
 	}
 
-	assignDishNameTag(&rating, dishInCanteen.Dish, tx)
+	resPath, err := imageWrapper(input.Image, "dishes", dishInCanteen.Dish)
+	if err != nil {
+		return nil, err
+	}
 
-	if err := storeRatingTags(rating.DishRating, input.RatingTags, model.DISH, tx); err != nil {
-		return &pb.CreateDishRatingReply{}, err
+	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		rating := model.DishRating{
+			Comment:   input.Comment,
+			DishID:    dishInCanteen.Dish,
+			Points:    input.Points,
+			Timestamp: time.Now(),
+			Image:     resPath,
+		}
+		if err := dbTx.Create(&rating).Error; err != nil {
+			log.WithError(err).Error("while creating a new dish rating.")
+			return status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
+		}
+
+		if err := assignDishNameTag(&rating, dishInCanteen.Dish, dbTx); err != nil {
+			return err
+		}
+		return insertRatingTags(rating.DishRating, input.RatingTags, model.DISH, dbTx)
+	}); err != nil {
+		cleanupImageFile(resPath)
+		return nil, err
 	}
 	return &pb.CreateDishRatingReply{}, nil
 }
 
 // assignDishNameTag
-// Query all name tags for this specific dish and generate the DishNameTag Ratings ffor each name tag
-func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) {
+// Query all name tags for this specific dish and generate the DishNameTag Ratings for each name tag
+func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) error {
 	var nameTagIDs []int64
-	err := tx.Model(&model.DishToDishNameTag{}).
-		Where("dishID = ? ", dishID).
+	if err := tx.Model(&model.DishToDishNameTag{}).
+		Where("dishID = ?", dishID).
 		Select("nameTagID").
-		Scan(&nameTagIDs).Error
-	if err != nil {
-		log.WithError(err).Error("while loading the dishID for the given name.")
-	} else {
-		for _, tagID := range nameTagIDs {
-			if err := tx.Create(&model.DishNameTag{
-				RatingID:  rating.DishRating,
-				Points:    rating.Points,
-				TagNameID: tagID,
-			}).Error; err != nil {
-				log.WithError(err).Error("while creating a new dish name rating.")
-			}
+		Scan(&nameTagIDs).Error; err != nil {
+		log.WithError(err).Error("while loading dish name tags for dish ", dishID)
+		return status.Error(codes.Internal, "Error while saving dish name tags. Rating has not been saved.")
+	}
+	for _, tagID := range nameTagIDs {
+		if err := tx.Create(&model.DishNameTag{
+			RatingID:  rating.DishRating,
+			Points:    rating.Points,
+			TagNameID: tagID,
+		}).Error; err != nil {
+			log.WithError(err).Error("while creating a new dish name rating.")
+			return status.Error(codes.Internal, "Error while saving dish name tags. Rating has not been saved.")
 		}
 	}
+	return nil
 }
 
 // inputSanitizationForNewRatingElements Checks parameters of the new rating for all canteen and dish ratings.
@@ -469,7 +559,7 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, canteen
 		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 5. Rating has not been saved.")
 	}
 
-	if len(comment) > 256 {
+	if utf8.RuneCountInString(comment) > maxRatingCommentRunes {
 		return -1, status.Error(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
 
@@ -478,89 +568,103 @@ func inputSanitizationForNewRatingElements(rating int32, comment string, canteen
 	}
 
 	canteenName = model.CanteenEnumName(canteenName)
-	var result *model.Canteen
-	if res := tx.First(&result, "name LIKE ?", canteenName); errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
+	var result model.Canteen
+	if res := tx.First(&result, "name = ?", canteenName); errors.Is(res.Error, gorm.ErrRecordNotFound) || res.RowsAffected == 0 {
 		log.WithError(res.Error).Error("Error while querying the canteen id by name: ", canteenName)
 		return -1, status.Error(codes.InvalidArgument, "Canteen does not exist. Rating has not been saved.")
+	} else if res.Error != nil {
+		log.WithError(res.Error).Error("Error while querying the canteen id by name: ", canteenName)
+		return -1, status.Error(codes.Internal, "Could not verify canteen. Rating has not been saved.")
 	}
 
 	return result.CanteenID, nil
 }
 
-// storeRatingTags
-// Checks whether the rating-tag name is a valid option and if so,
-// it will be saved with a reference to the rating
-func storeRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.ModelType, tx *gorm.DB) error {
-	var errorOccurred = ""
-	var warningOccurred = ""
-	if len(tags) > 0 {
-		usedTagIds := make(map[int64]bool)
-		for _, currentTag := range tags {
-			var err error
-			var count int64
-
-			if tagType == model.DISH {
-				err = tx.Model(&model.DishRatingTagOption{}).
-					Where("dishRatingTagOption LIKE ?", currentTag.TagId).
-					Count(&count).Error
-			} else {
-				err = tx.Model(&model.CanteenRatingTagOption{}).
-					Where("cafeteriaRatingTagOption LIKE ?", currentTag.TagId).
-					Count(&count).Error
-			}
-
-			if errors.Is(err, gorm.ErrRecordNotFound) || count == 0 {
-				fields := log.Fields{
-					"tagid": currentTag.TagId,
-					"count": count,
-				}
-				log.WithFields(fields).Info("tag does not exist")
-				errorOccurred = fmt.Sprintf("%s, %d", errorOccurred, currentTag.TagId)
-			} else {
-				if !usedTagIds[currentTag.TagId] {
-					if tagType == model.DISH {
-						if err := tx.Create(&model.DishRatingTag{
-							RatingID: parentRatingID,
-							Points:   int32(currentTag.Points),
-							TagID:    currentTag.TagId,
-						}).Error; err != nil {
-							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
-						}
-					} else {
-						if err := tx.Create(&model.CanteenRatingTag{
-							RatingID: parentRatingID,
-							Points:   int32(currentTag.Points),
-							TagID:    currentTag.TagId,
-						}).Error; err != nil {
-							log.WithError(err).Error("while Creating a currentTag rating for a new rating.")
-						}
-					}
-					usedTagIds[currentTag.TagId] = true
-
-				} else {
-					warningOccurred = fmt.Sprintf("%s, %d", warningOccurred, currentTag.TagId)
-					log.Info("Each Rating currentTag must be used at most once in a rating. This currentTag rating was not stored.")
-				}
-			}
-
-		}
-	}
-
-	if len(errorOccurred) > 0 && len(warningOccurred) > 0 {
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag. The tag(s) %s occurred more than once in this rating.", errorOccurred, warningOccurred))
-	} else if len(errorOccurred) > 0 {
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s does not exist. Remaining rating was saved without this rating tag.", errorOccurred))
-	} else if len(warningOccurred) > 0 {
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("The tag(s) %s occurred more than once in this rating.", warningOccurred))
-	} else {
+func validateRatingTagsInput(tags []*pb.RatingTag) error {
+	if len(tags) == 0 {
 		return nil
 	}
+	seen := make(map[int64]bool, len(tags))
+	for _, t := range tags {
+		if math.IsNaN(t.Points) || math.IsInf(t.Points, 0) || t.Points < 1 || t.Points > 5 {
+			return status.Errorf(codes.InvalidArgument, "Tag rating points for tag %d must be between 1 and 5. Rating has not been saved.", t.TagId)
+		}
+		if seen[t.TagId] {
+			return status.Errorf(codes.InvalidArgument, "The tag %d occurred more than once in this rating. Rating has not been saved.", t.TagId)
+		}
+		seen[t.TagId] = true
+	}
+	return nil
+}
+
+func verifyRatingTagsExist(tags []*pb.RatingTag, tagType model.ModelType, tx *gorm.DB) error {
+	if len(tags) == 0 {
+		return nil
+	}
+	tagIDs := make([]int64, len(tags))
+	for i, t := range tags {
+		tagIDs[i] = t.TagId
+	}
+	var existingIDs []int64
+	var err error
+	if tagType == model.DISH {
+		err = tx.Model(&model.DishRatingTagOption{}).
+			Where("dishRatingTagOption IN ?", tagIDs).
+			Pluck("dishRatingTagOption", &existingIDs).Error
+	} else {
+		err = tx.Model(&model.CanteenRatingTagOption{}).
+			Where("cafeteriaRatingTagOption IN ?", tagIDs).
+			Pluck("cafeteriaRatingTagOption", &existingIDs).Error
+	}
+	if err != nil {
+		log.WithError(err).Error("while verifying rating tags exist")
+		return status.Error(codes.Internal, "Could not validate rating tags. Rating has not been saved.")
+	}
+	existingSet := make(map[int64]bool, len(existingIDs))
+	for _, id := range existingIDs {
+		existingSet[id] = true
+	}
+	var missing []string
+	for _, id := range tagIDs {
+		if !existingSet[id] {
+			missing = append(missing, strconv.FormatInt(id, 10))
+		}
+	}
+	if len(missing) > 0 {
+		return status.Errorf(codes.InvalidArgument, "The tag(s) %s do not exist. Rating has not been saved.", strings.Join(missing, ", "))
+	}
+	return nil
+}
+
+func insertRatingTags(parentRatingID int64, tags []*pb.RatingTag, tagType model.ModelType, tx *gorm.DB) error {
+	for _, currentTag := range tags {
+		if tagType == model.DISH {
+			if err := tx.Create(&model.DishRatingTag{
+				RatingID: parentRatingID,
+				Points:   int32(math.Round(currentTag.Points)),
+				TagID:    currentTag.TagId,
+			}).Error; err != nil {
+				log.WithError(err).Error("while creating a dish tag rating")
+				return status.Error(codes.Internal, "Error while saving rating tags. Rating has not been saved.")
+			}
+		} else {
+			if err := tx.Create(&model.CanteenRatingTag{
+				RatingID: parentRatingID,
+				Points:   int32(math.Round(currentTag.Points)),
+				TagID:    currentTag.TagId,
+			}).Error; err != nil {
+				log.WithError(err).Error("while creating a canteen tag rating")
+				return status.Error(codes.Internal, "Error while saving rating tags. Rating has not been saved.")
+			}
+		}
+	}
+	return nil
 }
 
 func getIDForCanteenName(name string, tx *gorm.DB) (int32, error) {
 	var result int32 = -1
 	res := tx.Model(&model.Canteen{}).
-		Where("name LIKE ?", model.CanteenEnumName(name)).
+		Where("name = ?", model.CanteenEnumName(name)).
 		Select("cafeteria").
 		Scan(&result)
 	if res.Error != nil {
@@ -576,7 +680,7 @@ func getIDForCanteenName(name string, tx *gorm.DB) (int32, error) {
 func getIDForDishName(name string, canteenID int32, tx *gorm.DB) (int32, error) {
 	var result int32 = -1
 	res := tx.Model(&model.Dish{}).
-		Where("name LIKE ? AND cafeteriaID = ?", name, canteenID).
+		Where("name = ? AND cafeteriaID = ?", name, canteenID).
 		Select("dish").
 		Scan(&result)
 	if res.Error != nil {
@@ -670,6 +774,7 @@ func (s *CampusServer) ListCanteens(ctx context.Context, _ *pb.ListCanteensReque
 }
 
 func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest) (*pb.ListDishesReply, error) {
+	s.recordDeviceIfPresent(ctx)
 	if req.Year < 2022 {
 		return &pb.ListDishesReply{}, status.Error(codes.InvalidArgument, "Years must be larger or equal to 2022 ") // currently, no previous values have been added
 	}
@@ -691,7 +796,7 @@ func (s *CampusServer) ListDishes(ctx context.Context, req *pb.ListDishesRequest
 		Select("weekly.dishID").
 		Joins("JOIN dishes d ON d.dish = weekly.dishID").
 		Joins("JOIN canteens c ON c.cafeteria = d.cafeteriaID").
-		Where("c.name LIKE ?", canteenName).
+		Where("c.name = ?", canteenName).
 		Select("d.name").
 		Find(&results).Error
 

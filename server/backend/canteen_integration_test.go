@@ -113,3 +113,34 @@ func TestCanteenQueriesWithMySQL(t *testing.T) {
 	_, err = server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{CanteenId: "mensa-garching", Dish: "unknown"})
 	require.Equal(t, codes.NotFound, status.Code(err))
 }
+
+func TestCreateDishRatingAtomicityAndWildcardSafety(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	server := CampusServer{db: db}
+
+	canteen := model.Canteen{Name: "MENSA_GARCHING"}
+	require.NoError(t, db.Create(&canteen).Error)
+	dish := model.Dish{Name: "Pasta", Type: "Pasta", CanteenID: canteen.CanteenID}
+	require.NoError(t, db.Create(&dish).Error)
+	tag := model.DishRatingTagOption{DE: "Salz", EN: "Saltiness"}
+	require.NoError(t, db.Create(&tag).Error)
+
+	// SQL wildcard % must not match "Pasta".
+	_, err := server.CreateDishRating(ctx, &pb.CreateDishRatingRequest{
+		Points: 4, CanteenId: "mensa-garching", Dish: "%",
+	})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+
+	// Invalid tag must not leave a partial dish_ratings row behind.
+	_, err = server.CreateDishRating(ctx, &pb.CreateDishRatingRequest{
+		Points:     5,
+		CanteenId:  "mensa-garching",
+		Dish:       "Pasta",
+		RatingTags: []*pb.RatingTag{{TagId: tag.DishRatingTagOption, Points: 4}, {TagId: 99999, Points: 3}},
+	})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+	var ratingCount int64
+	require.NoError(t, db.Model(&model.DishRating{}).Count(&ratingCount).Error)
+	require.Zero(t, ratingCount)
+}
