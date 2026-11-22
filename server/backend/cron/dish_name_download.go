@@ -3,6 +3,7 @@ package cron
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -49,27 +50,49 @@ func (c *CronService) dishNameDownloadCron() error {
 	return errors.Join(namesErr, dishesErr)
 }
 
+type isoWeekTarget struct {
+	year     int
+	week     int
+	optional bool
+}
+
 func downloadDailyDishes(c *CronService) error {
-	var canteens []model.Canteen
-	if err := c.db.Find(&canteens).Error; err != nil {
-		return err
-	}
 	berlin, err := time.LoadLocation("Europe/Berlin")
 	if err != nil {
 		return err
 	}
-	year, week := time.Now().In(berlin).ISOWeek()
+	return downloadDailyDishesAt(c, time.Now().In(berlin))
+}
+
+func downloadDailyDishesAt(c *CronService, now time.Time) error {
+	var canteens []model.Canteen
+	if err := c.db.Find(&canteens).Error; err != nil {
+		return err
+	}
+	currYear, currWeek := now.ISOWeek()
+	nextYear, nextWeek := now.AddDate(0, 0, 7).ISOWeek()
+	targets := []isoWeekTarget{
+		{year: currYear, week: currWeek, optional: false},
+		{year: nextYear, week: nextWeek, optional: true},
+	}
+
 	var failures []error
 	for _, canteen := range canteens {
 		name := model.CanteenEatAPIID(canteen.Name)
-		address := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", name, year, week)
-		var menu CanteenDays
-		if err := webfetch.JSON(address, &menu); err != nil {
-			failures = append(failures, fmt.Errorf("menu %s: %w", name, err))
-			continue
-		}
-		if err := storeCanteenMenu(c.db, canteen.CanteenID, menu, year, week); err != nil {
-			failures = append(failures, fmt.Errorf("storing menu %s: %w", name, err))
+		for _, target := range targets {
+			address := fmt.Sprintf("https://tum-dev.github.io/eat-api/%s/%d/%02d.json", name, target.year, target.week)
+			var menu CanteenDays
+			if err := webfetch.JSON(address, &menu); err != nil {
+				var statusErr *webfetch.StatusError
+				if target.optional && errors.As(err, &statusErr) && statusErr.StatusCode == http.StatusNotFound {
+					continue
+				}
+				failures = append(failures, fmt.Errorf("menu %s %d-W%02d: %w", name, target.year, target.week, err))
+				continue
+			}
+			if err := storeCanteenMenu(c.db, canteen.CanteenID, menu, target.year, target.week); err != nil {
+				failures = append(failures, fmt.Errorf("storing menu %s %d-W%02d: %w", name, target.year, target.week, err))
+			}
 		}
 	}
 	return errors.Join(failures...)
@@ -145,8 +168,8 @@ func downloadCanteenNames(c *CronService) error {
 }
 
 // addDishTagsToMapping
-// Checks whether the CanteenDish name includes one of the expressions for the excluded tags as well as the included tags.
-// The corresponding tags for all identified DishNames will be saved in the table DishNameTags.
+// Checks whether the dish name includes any included expressions while excluding excluded ones,
+// deduplicates matched tag IDs, and idempotently stores mappings in dish_to_dish_name_tags.
 func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 	lowercaseDish := strings.ToLower(dishName)
 	var includedTags []int64
@@ -155,6 +178,7 @@ func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 		Select("nameTagID").
 		Scan(&includedTags).Error; err != nil {
 		log.WithError(err).Error("Error while querying all included expressions for the CanteenDish: ", lowercaseDish)
+		return
 	}
 
 	var excludedTags []int64
@@ -163,34 +187,37 @@ func addDishTagsToMapping(dishID int64, dishName string, db *gorm.DB) {
 		Select("nameTagID").
 		Scan(&excludedTags).Error; err != nil {
 		log.WithError(err).Error("Error while querying all excluded expressions for the CanteenDish: ", lowercaseDish)
+		return
 	}
 
-	//set all entries in included to -1 if the excluded tag was recognised for this tag rating.
-	if len(excludedTags) > 0 {
-		for _, a := range excludedTags {
-			if i := contains(includedTags, a); i != -1 {
-				includedTags[i] = -1
-			}
-		}
+	excludedSet := make(map[int64]bool, len(excludedTags))
+	for _, id := range excludedTags {
+		excludedSet[id] = true
 	}
 
+	seen := make(map[int64]bool, len(includedTags))
 	for _, nametagID := range includedTags {
-		if nametagID != -1 {
-			if err := db.Create(&model.DishToDishNameTag{
-				DishID:    dishID,
-				NameTagID: nametagID,
-			}).Error; err != nil {
-				fields := log.Fields{"dishID": dishID, "nametagID": nametagID}
-				log.WithError(err).WithFields(fields).Error("creating a new entry")
-			}
+		if excludedSet[nametagID] || seen[nametagID] {
+			continue
+		}
+		seen[nametagID] = true
+		mapping := model.DishToDishNameTag{DishID: dishID, NameTagID: nametagID}
+		if err := db.Where(map[string]any{"dishID": dishID, "nameTagID": nametagID}).FirstOrCreate(&mapping).Error; err != nil {
+			fields := log.Fields{"dishID": dishID, "nametagID": nametagID}
+			log.WithError(err).WithFields(fields).Error("creating dish name tag mapping")
 		}
 	}
 }
-func contains(s []int64, e int64) int64 {
-	for i, a := range s {
-		if a == e {
-			return int64(i)
-		}
+
+// BackfillMissingDishNameTags ensures every dish in the database has all currently matching
+// name-tag mappings without creating duplicates.
+func BackfillMissingDishNameTags(db *gorm.DB) error {
+	var dishes []model.Dish
+	if err := db.Select("dish, name").Find(&dishes).Error; err != nil {
+		return err
 	}
-	return -1
+	for _, d := range dishes {
+		addDishTagsToMapping(d.Dish, d.Name, db)
+	}
+	return nil
 }

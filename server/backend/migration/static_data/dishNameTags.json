@@ -251,7 +251,7 @@
       "notincluded": []
     },
     {
-      "tagNameEnglish": "Calamarie",
+      "tagNameEnglish": "Calamari",
       "tagNameGerman": "Calamari",
       "canbeincluded": [
         "calamari"
@@ -373,7 +373,7 @@
     },
     {
       "tagNameEnglish": "Mushrooms",
-      "tagNameGerman": "pilze",
+      "tagNameGerman": "Pilze",
       "canbeincluded": [
         "pilze",
         "schwammerl"
@@ -421,7 +421,7 @@
       "notincluded": []
     },
     {
-      "tagNameEnglish": "Pumkin",
+      "tagNameEnglish": "Pumpkin",
       "tagNameGerman": "Kürbis",
       "canbeincluded": [
         "kürbis"
@@ -525,7 +525,7 @@
       "notincluded": []
     },
     {
-      "tagNameEnglish": "Humus",
+      "tagNameEnglish": "Hummus",
       "tagNameGerman": "Hummus",
       "canbeincluded": [
         "hummus"

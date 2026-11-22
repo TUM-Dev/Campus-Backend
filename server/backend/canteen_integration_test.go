@@ -505,6 +505,17 @@ func TestDishRatingSummariesHistogramsWindowingAndTopDishes(t *testing.T) {
 	require.Len(t, byDish["Red Curry"].NameTags, 1, "unrated dish should still surface name-tag fallback stats")
 	require.Equal(t, int32(curryNameTag.DishNameTagOption), byDish["Red Curry"].NameTags[0].TagId)
 
+	// 3b. GetDishRatings with include_unrated_fallback=true returns 0 count + name-tag fallback instead of NotFound.
+	unratedFallback, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{
+		CanteenId:              "mensa-garching",
+		Dish:                   "Red Curry",
+		IncludeUnratedFallback: true,
+	})
+	require.NoError(t, err)
+	require.Equal(t, int64(0), unratedFallback.RatingCount)
+	require.Len(t, unratedFallback.NameTags, 1)
+	require.Equal(t, int32(curryNameTag.DishNameTagOption), unratedFallback.NameTags[0].TagId)
+
 	// 4. ListTopRatedDishes ranks 7-vote Thai Curry (avg 4.29) above 1-vote Mystery Soup (avg 5.0) via Bayesian weighting.
 	top, err := server.ListTopRatedDishes(ctx, &pb.ListTopRatedDishesRequest{
 		Year: 2026, Week: 45, Day: 1, Limit: 5,
