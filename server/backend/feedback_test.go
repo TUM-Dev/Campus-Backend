@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"sync"
 	"testing"
 	"time"
 
@@ -78,7 +77,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 	cron.StorageDir = dir
 
-	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
+	server := CampusServer{db: db}
 	returnedTime := time.Now()
 
 	// execute call
@@ -88,7 +87,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	stream := mockedFeedbackStream{
 		T: t,
 		recived: []*pb.CreateFeedbackRequest{
-			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", Message: "Hello with image", Attachment: dummyText},
+			{Recipient: pb.CreateFeedbackRequest_TUM_DEV, FromEmail: "testing@example.com", FromName: "Max Mustermann", Message: "Hello with image", Attachment: dummyText},
 			{Attachment: dummyImage},
 		},
 		reply: &pb.CreateFeedbackReply{},
@@ -107,6 +106,7 @@ func Test_CreateFeedback_TwoFiles(t *testing.T) {
 	actual := feeedbacks[0]
 	require.Equal(t, "app@tum.de", actual.Recipient)
 	require.Equal(t, null.StringFrom("testing@example.com"), actual.ReplyToEmail)
+	require.Equal(t, null.StringFrom("Max Mustermann"), actual.ReplyToName)
 	require.Equal(t, "Hello with image", actual.Feedback)
 
 	// should have created files
@@ -171,7 +171,7 @@ func Test_CreateFeedback_NoImage(t *testing.T) {
 	require.DirExists(t, dir)
 	defer func() { require.NoError(t, os.RemoveAll(dir)) }()
 
-	server := CampusServer{db: db, feedbackEmailLastReuestAt: &sync.Map{}}
+	server := CampusServer{db: db}
 	index = 0
 	stream := mockedFeedbackStream{
 		T: t,
@@ -223,4 +223,17 @@ func extractUploadedFiles(t *testing.T, storageRoot string, expectedFileCnt int,
 	require.NoError(t, err)
 	require.Len(t, dir, expectedFileCnt)
 	return &dir
+}
+
+func TestFeedbackRateLimitRefreshesAfterCooldown(t *testing.T) {
+	server := CampusServer{}
+	t0 := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+
+	require.Equal(t, int64(0), server.checkAndRecordFeedbackRateLimit("user@tum.de", t0))
+	require.Greater(t, server.checkAndRecordFeedbackRateLimit("user@tum.de", t0.Add(time.Minute)), int64(0))
+
+	// After cooldown elapses, a new submission succeeds and refreshes the cooldown window.
+	t1 := t0.Add(feedbackCooldown + time.Second)
+	require.Equal(t, int64(0), server.checkAndRecordFeedbackRateLimit("user@tum.de", t1))
+	require.Greater(t, server.checkAndRecordFeedbackRateLimit("user@tum.de", t1.Add(time.Minute)), int64(0))
 }

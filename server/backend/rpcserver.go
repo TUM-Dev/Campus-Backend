@@ -11,14 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
+const feedbackCooldown = 5 * time.Minute
+
 type CampusServer struct {
 	pb.UnimplementedCampusServer
-	feedbackEmailLastReuestAt *sync.Map
-	db                        *gorm.DB
-	deviceBuf                 *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
-	newsSourceCache           *expirable.LRU[string, []model.NewsSource]
-	newsCache                 *expirable.LRU[string, []model.News]
-	moviesCache               *expirable.LRU[string, []model.Movie]
+	feedbackRateLimitMu        sync.Mutex
+	feedbackEmailLastRequestAt *expirable.LRU[string, time.Time]
+	db                         *gorm.DB
+	deviceBuf                  *deviceBuffer // deviceBuf stores all devices from recent request and flushes them to db
+	newsSourceCache            *expirable.LRU[string, []model.NewsSource]
+	newsCache                  *expirable.LRU[string, []model.News]
+	moviesCache                *expirable.LRU[string, []model.Movie]
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface
@@ -27,11 +30,11 @@ var _ pb.CampusServer = (*CampusServer)(nil)
 func New(db *gorm.DB) *CampusServer {
 	log.Trace("Server starting up")
 	return &CampusServer{
-		db:                        db,
-		deviceBuf:                 newDeviceBuffer(),
-		feedbackEmailLastReuestAt: &sync.Map{},
-		newsSourceCache:           expirable.NewLRU[string, []model.NewsSource](1, nil, time.Hour*6),
-		newsCache:                 expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30),
-		moviesCache:               expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
+		db:                         db,
+		deviceBuf:                  newDeviceBuffer(),
+		feedbackEmailLastRequestAt: expirable.NewLRU[string, time.Time](4096, nil, feedbackCooldown),
+		newsSourceCache:            expirable.NewLRU[string, []model.NewsSource](1, nil, time.Hour*6),
+		newsCache:                  expirable.NewLRU[string, []model.News](1024, nil, time.Minute*30),
+		moviesCache:                expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
 	}
 }
