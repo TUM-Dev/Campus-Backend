@@ -14,6 +14,9 @@ import (
 )
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
 	movies, err := s.getMovies(ctx, req.LastId, req.OldestDateAt.AsTime())
 	if err != nil {
 		return nil, err

@@ -92,13 +92,18 @@ func TestPartialOMDbDataPreservesSourceMetadata(t *testing.T) {
 }
 
 func TestCampuskinoHeilbronnMovieImport(t *testing.T) {
-	t.Setenv("OMDB_API_KEY", "")
+	t.Setenv("OMDB_API_KEY", "test-omdb-key")
 	db, mock := movieTestDB(t)
 	old := webfetch.Client
 	t.Cleanup(func() { webfetch.Client = old })
+	omdbCalled := false
 	webfetch.Client = &http.Client{Transport: movieTestTransport(func(r *http.Request) (*http.Response, error) {
 		body := ""
 		switch {
+		case r.URL.Host == "www.omdbapi.com":
+			omdbCalled = true
+			require.Equal(t, "The Invite", r.URL.Query().Get("t"))
+			body = `{"Response":"True","Year":"2026","Runtime":"107 min","Genre":"Comedy, Drama","Director":"Olivia Wilde","Actors":"Seth Rogen, Penélope Cruz, Edward Norton","imdbRating":"7.5"}`
 		case r.URL.Host == "www.unifilm.de":
 			body = `<div class="anzeigebereich-film">
 				<div class="film-showcase" data-id="5315" data-sid="30797" data-cid="194">
@@ -145,4 +150,5 @@ func TestCampuskinoHeilbronnMovieImport(t *testing.T) {
 	mock.ExpectCommit()
 
 	require.NoError(t, New(db).movieCron())
+	require.True(t, omdbCalled)
 }

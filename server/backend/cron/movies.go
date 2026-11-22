@@ -112,8 +112,16 @@ func (c *CronService) storeParsedMovie(title, link, location string, date time.T
 		Trailer:     movieInformation.TrailerUrl,
 		Link:        link,
 	}
-	if omdbKeyExists && movieInformation.ImdbID.ValueOrZero() != "" {
-		omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
+	if omdbKeyExists {
+		var (
+			omdbMovie *movie_parsers.OmdbResults
+			err       error
+		)
+		if imdbID := movieInformation.ImdbID.ValueOrZero(); imdbID != "" {
+			omdbMovie, err = movie_parsers.GetOmdbMovie(imdbID)
+		} else {
+			omdbMovie, err = movie_parsers.GetOmdbMovieByTitle(title, movieInformation.ReleaseYear.ValueOrZero())
+		}
 		if err != nil {
 			log.WithFields(logFields).WithError(err).Warn("OMDb enrichment failed; using source movie data")
 		} else {

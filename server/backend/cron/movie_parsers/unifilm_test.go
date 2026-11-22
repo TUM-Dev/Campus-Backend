@@ -100,3 +100,9 @@ func TestParseCampuskinoHeilbronnProgram(t *testing.T) {
 	require.Equal(t, "SciFi", second.Info.Genre.String)
 	require.Equal(t, "134 min", second.Info.Runtime.String)
 }
+
+func TestCleanMovieTitleForSearch(t *testing.T) {
+	require.Equal(t, "Ghostbusters", CleanMovieTitleForSearch("Terminverschiebung: Ghostbusters (1984) [OmU] – Die Geisterjäger"))
+	require.Equal(t, "Good Luck, Have Fun, Don't Die", CleanMovieTitleForSearch("Good Luck, Have Fun, Don't Die [OmU]"))
+	require.Equal(t, "The Drama", CleanMovieTitleForSearch("The Drama [OmU] – Noch mal auf Anfang"))
+}
