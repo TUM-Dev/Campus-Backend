@@ -84,6 +84,22 @@ service Campus {
     };
   }
 
+  // Cast or remove a "helpful" vote on a dish rating.
+  rpc VoteDishRating(VoteDishRatingRequest) returns (VoteDishRatingReply) {
+    option (google.api.http) = {
+      post: "/dish/rating/{rating_id}/vote"
+      body: "*"
+    };
+  }
+
+  // Returns a paginated photo strip for a dish, ranked by helpful votes and recency.
+  rpc ListDishPhotos(ListDishPhotosRequest) returns (ListDishPhotosReply) {
+    option (google.api.http) = {
+      post: "/dish/photos"
+      body: "*"
+    };
+  }
+
   rpc ListAvailableDishTags(ListAvailableDishTagsRequest) returns (ListAvailableDishTagsReply) {
     option (google.api.http) = {
       get: "/dish/rating/allRatingTags"
@@ -268,6 +284,7 @@ enum RatingSortOrder {
   RATING_SORT_NEWEST = 0;
   RATING_SORT_HIGHEST = 1;
   RATING_SORT_LOWEST = 2;
+  RATING_SORT_HELPFUL = 3;
 }
 
 message ListCanteenRatingsRequest {
@@ -377,6 +394,10 @@ message SingleRatingReply {
   bool is_own_rating = 8;
   // Present if the rating was edited after creation
   google.protobuf.Timestamp updated_at = 9;
+  // Number of helpful votes on this rating
+  int64 helpful_count = 10;
+  // True if the calling device has voted this rating helpful
+  bool user_voted = 11;
 }
 
 message CreateCanteenRatingReply {
@@ -446,6 +467,41 @@ message ReportDishRatingRequest {
 message ReportDishRatingReply {
   // True if the rating has been hidden after reaching the report threshold
   bool hidden = 1;
+}
+
+message VoteDishRatingRequest {
+  int64 rating_id = 1;
+  // True to cast a helpful vote, false to remove a previously cast vote.
+  bool helpful = 2;
+}
+
+message VoteDishRatingReply {
+  int64 helpful_count = 1;
+  bool user_voted = 2;
+}
+
+message ListDishPhotosRequest {
+  string canteen_id = 1;
+  string dish = 2;
+  // Optional page size (default 12, max 50)
+  int32 limit = 3;
+  // Optional pagination offset (0-based)
+  int32 offset = 4;
+}
+
+message DishPhoto {
+  int64 rating_id = 1;
+  string image_url = 2;
+  int32 points = 3;
+  string comment = 4;
+  int64 helpful_count = 5;
+  google.protobuf.Timestamp visited = 6;
+}
+
+message ListDishPhotosReply {
+  repeated DishPhoto photos = 1;
+  int64 total = 2;
+  bool has_more = 3;
 }
 
 message ListAvailableDishTagsRequest {}

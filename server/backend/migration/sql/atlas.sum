@@ -1,5 +1,6 @@
-h1:YS9gfqyp4kHrNFIqm3mL86BB7uptRviBnpEODGcsMng=
+h1:uoQ8EThnJyHWx5iNL/zCRJbN9a8U9QjRNahjpGvndmM=
 20250412000000_baseline.sql h1:QwCRxB5k5Ax/C4fvAhUMvwoWuqW6DHs9aPpQi/ecKd4=
 20261105185936_student_councils.sql h1:nSG/ObKYmV67DlkOxG5DWJKc5fwaaYHWYPJ71oRGZJU=
 20261106000000_tumonline_status.sql h1:GGiRe3bfnRb60HC+19IIEe05Fevt90SGi4rpXpoCB+Q=
 20261122024519_dish_rating_moderation.sql h1:CnWooltWxLr/i0UpN+bw0h7a6iM5oMyCvHjcUyjLonE=
+20261122032621_dish_rating_votes.sql h1:K2yzQuTLyaV9/ZpEQAvWUgEauo+uQRxjFNaKaiYY2CE=

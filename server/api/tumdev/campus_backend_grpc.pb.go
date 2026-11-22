@@ -30,6 +30,8 @@ const (
 	Campus_UpdateDishRating_FullMethodName         = "/api.Campus/UpdateDishRating"
 	Campus_DeleteDishRating_FullMethodName         = "/api.Campus/DeleteDishRating"
 	Campus_ReportDishRating_FullMethodName         = "/api.Campus/ReportDishRating"
+	Campus_VoteDishRating_FullMethodName           = "/api.Campus/VoteDishRating"
+	Campus_ListDishPhotos_FullMethodName           = "/api.Campus/ListDishPhotos"
 	Campus_ListAvailableDishTags_FullMethodName    = "/api.Campus/ListAvailableDishTags"
 	Campus_ListNameTags_FullMethodName             = "/api.Campus/ListNameTags"
 	Campus_ListAvailableCanteenTags_FullMethodName = "/api.Campus/ListAvailableCanteenTags"
@@ -66,6 +68,10 @@ type CampusClient interface {
 	DeleteDishRating(ctx context.Context, in *DeleteDishRatingRequest, opts ...grpc.CallOption) (*DeleteDishRatingReply, error)
 	// Report an abusive or invalid dish rating for moderation.
 	ReportDishRating(ctx context.Context, in *ReportDishRatingRequest, opts ...grpc.CallOption) (*ReportDishRatingReply, error)
+	// Cast or remove a "helpful" vote on a dish rating.
+	VoteDishRating(ctx context.Context, in *VoteDishRatingRequest, opts ...grpc.CallOption) (*VoteDishRatingReply, error)
+	// Returns a paginated photo strip for a dish, ranked by helpful votes and recency.
+	ListDishPhotos(ctx context.Context, in *ListDishPhotosRequest, opts ...grpc.CallOption) (*ListDishPhotosReply, error)
 	ListAvailableDishTags(ctx context.Context, in *ListAvailableDishTagsRequest, opts ...grpc.CallOption) (*ListAvailableDishTagsReply, error)
 	ListNameTags(ctx context.Context, in *ListNameTagsRequest, opts ...grpc.CallOption) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(ctx context.Context, in *ListAvailableCanteenTagsRequest, opts ...grpc.CallOption) (*ListAvailableCanteenTagsReply, error)
@@ -193,6 +199,26 @@ func (c *campusClient) ReportDishRating(ctx context.Context, in *ReportDishRatin
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ReportDishRatingReply)
 	err := c.cc.Invoke(ctx, Campus_ReportDishRating_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) VoteDishRating(ctx context.Context, in *VoteDishRatingRequest, opts ...grpc.CallOption) (*VoteDishRatingReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VoteDishRatingReply)
+	err := c.cc.Invoke(ctx, Campus_VoteDishRating_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) ListDishPhotos(ctx context.Context, in *ListDishPhotosRequest, opts ...grpc.CallOption) (*ListDishPhotosReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDishPhotosReply)
+	err := c.cc.Invoke(ctx, Campus_ListDishPhotos_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -372,6 +398,10 @@ type CampusServer interface {
 	DeleteDishRating(context.Context, *DeleteDishRatingRequest) (*DeleteDishRatingReply, error)
 	// Report an abusive or invalid dish rating for moderation.
 	ReportDishRating(context.Context, *ReportDishRatingRequest) (*ReportDishRatingReply, error)
+	// Cast or remove a "helpful" vote on a dish rating.
+	VoteDishRating(context.Context, *VoteDishRatingRequest) (*VoteDishRatingReply, error)
+	// Returns a paginated photo strip for a dish, ranked by helpful votes and recency.
+	ListDishPhotos(context.Context, *ListDishPhotosRequest) (*ListDishPhotosReply, error)
 	ListAvailableDishTags(context.Context, *ListAvailableDishTagsRequest) (*ListAvailableDishTagsReply, error)
 	ListNameTags(context.Context, *ListNameTagsRequest) (*ListNameTagsReply, error)
 	ListAvailableCanteenTags(context.Context, *ListAvailableCanteenTagsRequest) (*ListAvailableCanteenTagsReply, error)
@@ -434,6 +464,12 @@ func (UnimplementedCampusServer) DeleteDishRating(context.Context, *DeleteDishRa
 }
 func (UnimplementedCampusServer) ReportDishRating(context.Context, *ReportDishRatingRequest) (*ReportDishRatingReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportDishRating not implemented")
+}
+func (UnimplementedCampusServer) VoteDishRating(context.Context, *VoteDishRatingRequest) (*VoteDishRatingReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method VoteDishRating not implemented")
+}
+func (UnimplementedCampusServer) ListDishPhotos(context.Context, *ListDishPhotosRequest) (*ListDishPhotosReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDishPhotos not implemented")
 }
 func (UnimplementedCampusServer) ListAvailableDishTags(context.Context, *ListAvailableDishTagsRequest) (*ListAvailableDishTagsReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAvailableDishTags not implemented")
@@ -677,6 +713,42 @@ func _Campus_ReportDishRating_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CampusServer).ReportDishRating(ctx, req.(*ReportDishRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_VoteDishRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VoteDishRatingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).VoteDishRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_VoteDishRating_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).VoteDishRating(ctx, req.(*VoteDishRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_ListDishPhotos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDishPhotosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).ListDishPhotos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_ListDishPhotos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).ListDishPhotos(ctx, req.(*ListDishPhotosRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -986,6 +1058,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportDishRating",
 			Handler:    _Campus_ReportDishRating_Handler,
+		},
+		{
+			MethodName: "VoteDishRating",
+			Handler:    _Campus_VoteDishRating_Handler,
+		},
+		{
+			MethodName: "ListDishPhotos",
+			Handler:    _Campus_ListDishPhotos_Handler,
 		},
 		{
 			MethodName: "ListAvailableDishTags",

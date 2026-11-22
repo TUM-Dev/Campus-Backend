@@ -241,6 +241,39 @@
         ]
       }
     },
+    "/dish/photos": {
+      "post": {
+        "summary": "Returns a paginated photo strip for a dish, ranked by helpful votes and recency.",
+        "operationId": "Campus_ListDishPhotos",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListDishPhotosReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiListDishPhotosRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/dish/rating/allDishTags": {
       "get": {
         "operationId": "Campus_ListNameTags",
@@ -493,6 +526,46 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/CampusReportDishRatingBody"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/dish/rating/{ratingId}/vote": {
+      "post": {
+        "summary": "Cast or remove a \"helpful\" vote on a dish rating.",
+        "operationId": "Campus_VoteDishRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiVoteDishRatingReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ratingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CampusVoteDishRatingBody"
             }
           }
         ],
@@ -1027,6 +1100,15 @@
         }
       }
     },
+    "CampusVoteDishRatingBody": {
+      "type": "object",
+      "properties": {
+        "helpful": {
+          "type": "boolean",
+          "description": "True to cast a helpful vote, false to remove a previously cast vote."
+        }
+      }
+    },
     "CreateFeedbackRequestRecipient": {
       "type": "string",
       "enum": [
@@ -1194,6 +1276,33 @@
         "WINDOWS"
       ],
       "default": "IOS"
+    },
+    "apiDishPhoto": {
+      "type": "object",
+      "properties": {
+        "ratingId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "points": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "helpfulCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "visited": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "apiDishRatingSummary": {
       "type": "object",
@@ -1532,6 +1641,46 @@
             "type": "object",
             "$ref": "#/definitions/apiCanteen"
           }
+        }
+      }
+    },
+    "apiListDishPhotosReply": {
+      "type": "object",
+      "properties": {
+        "photos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiDishPhoto"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        },
+        "hasMore": {
+          "type": "boolean"
+        }
+      }
+    },
+    "apiListDishPhotosRequest": {
+      "type": "object",
+      "properties": {
+        "canteenId": {
+          "type": "string"
+        },
+        "dish": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional page size (default 12, max 50)"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional pagination offset (0-based)"
         }
       }
     },
@@ -1884,7 +2033,8 @@
       "enum": [
         "RATING_SORT_NEWEST",
         "RATING_SORT_HIGHEST",
-        "RATING_SORT_LOWEST"
+        "RATING_SORT_LOWEST",
+        "RATING_SORT_HELPFUL"
       ],
       "default": "RATING_SORT_NEWEST"
     },
@@ -1993,6 +2143,15 @@
           "type": "string",
           "format": "date-time",
           "title": "Present if the rating was edited after creation"
+        },
+        "helpfulCount": {
+          "type": "string",
+          "format": "int64",
+          "title": "Number of helpful votes on this rating"
+        },
+        "userVoted": {
+          "type": "boolean",
+          "title": "True if the calling device has voted this rating helpful"
         }
       }
     },
@@ -2135,6 +2294,18 @@
         "ratingId": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "apiVoteDishRatingReply": {
+      "type": "object",
+      "properties": {
+        "helpfulCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userVoted": {
+          "type": "boolean"
         }
       }
     },
