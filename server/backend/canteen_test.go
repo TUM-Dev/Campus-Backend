@@ -100,12 +100,12 @@ func readTestImage(t *testing.T) []byte {
 const (
 	expectedHeadCountQuery    = "SELECT * FROM `canteen_head_counts` WHERE `canteen_head_counts`.`canteen_id` = ? ORDER BY `canteen_head_counts`.`canteen_id` LIMIT ?"
 	expectedCanteenByName     = "SELECT * FROM `canteens` WHERE name = ? ORDER BY `canteens`.`cafeteria` LIMIT ?"
-	expectedInsertRating      = "INSERT INTO `canteen_ratings` (`points`,`comment`,`cafeteriaID`,`image`,`timestamp`) VALUES (?,?,?,?,?)"
+	expectedInsertRating      = "INSERT INTO `canteen_ratings` (`points`,`comment`,`cafeteriaID`,`image`,`device_hash`,`status`,`updated_at`,`timestamp`) VALUES (?,?,?,?,?,?,?,?)"
 	expectedCanteenTagsIn     = "SELECT `cafeteriaRatingTagOption` FROM `canteen_rating_tag_options` WHERE cafeteriaRatingTagOption IN (?,?)"
 	expectedCanteenTagSingle  = "SELECT `cafeteriaRatingTagOption` FROM `canteen_rating_tag_options` WHERE cafeteriaRatingTagOption IN (?)"
 	expectedInsertCanteenTag  = "INSERT INTO `canteen_rating_tags` (`correspondingRating`,`tagID`,`points`) VALUES (?,?,?)"
 	expectedDishByName        = "SELECT * FROM `dishes` WHERE name = ? AND cafeteriaID = ? ORDER BY `dishes`.`dish` LIMIT ?"
-	expectedInsertDishRating  = "INSERT INTO `dish_ratings` (`points`,`dishID`,`comment`,`image`,`timestamp`) VALUES (?,?,?,?,?)"
+	expectedInsertDishRating  = "INSERT INTO `dish_ratings` (`points`,`dishID`,`comment`,`image`,`device_hash`,`status`,`updated_at`,`timestamp`) VALUES (?,?,?,?,?,?,?,?)"
 	expectedDishNameTagIDs    = "SELECT `nameTagID` FROM `dish_to_dish_name_tags` WHERE dishID = ?"
 	expectedInsertDishNameTag = "INSERT INTO `dish_name_tags` (`correspondingRating`,`tagNameID`,`points`) VALUES (?,?,?)"
 	expectedDishTagSingle     = "SELECT `dishRatingTagOption` FROM `dish_rating_tag_options` WHERE dishRatingTagOption IN (?)"
@@ -398,7 +398,7 @@ func (s *CanteenSuite) Test_CreateCanteenRating() {
 		WillReturnRows(sqlmock.NewRows([]string{"cafeteriaRatingTagOption"}).AddRow(5).AddRow(7))
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertRating)).
-		WithArgs(points, comment, canteenID, imgPath, sqlmock.AnyArg()).
+		WithArgs(points, comment, canteenID, imgPath, sqlmock.AnyArg(), model.RatingStatusVisible, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
 	for _, tag := range []struct{ id, points int64 }{{5, 1}, {7, 3}} {
 		s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertCanteenTag)).
@@ -419,7 +419,7 @@ func (s *CanteenSuite) Test_CreateCanteenRating() {
 		},
 	})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), &pb.CreateCanteenRatingReply{}, response)
+	require.Equal(s.T(), &pb.CreateCanteenRatingReply{RatingId: ratingID}, response)
 	require.FileExists(s.T(), imgPath)
 }
 
@@ -498,7 +498,7 @@ func (s *CanteenSuite) Test_CreateDishRating() {
 		WillReturnRows(sqlmock.NewRows([]string{"dishRatingTagOption"}).AddRow(1))
 	s.mock.ExpectBegin()
 	s.mock.ExpectExec(regexp.QuoteMeta(expectedInsertDishRating)).
-		WithArgs(points, dishID, comment, imgPath, sqlmock.AnyArg()).
+		WithArgs(points, dishID, comment, imgPath, sqlmock.AnyArg(), model.RatingStatusVisible, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(ratingID, 1))
 	s.mock.ExpectQuery(regexp.QuoteMeta(expectedDishNameTagIDs)).
 		WithArgs(dishID).
@@ -521,7 +521,7 @@ func (s *CanteenSuite) Test_CreateDishRating() {
 		RatingTags: []*pb.RatingTag{{TagId: 1, Points: 4}},
 	})
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), &pb.CreateDishRatingReply{}, response)
+	require.Equal(s.T(), &pb.CreateDishRatingReply{RatingId: ratingID}, response)
 	require.FileExists(s.T(), imgPath)
 }
 

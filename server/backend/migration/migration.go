@@ -29,6 +29,7 @@ func Models() []any {
 		&model.ExcludedDishNameTagOption{},
 		&model.IncludedDishNameTagOption{},
 		&model.DishRating{},
+		&model.DishRatingReport{},
 		&model.DishRatingTag{},
 		&model.DishRatingTagOption{},
 		&model.DishToDishNameTag{},

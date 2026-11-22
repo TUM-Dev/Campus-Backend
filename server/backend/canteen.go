@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"image"
@@ -15,12 +17,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	_ "time/tzdata"
 	"unicode/utf8"
 
 	pb "github.com/TUM-Dev/Campus-Backend/server/api/tumdev"
 	"github.com/TUM-Dev/Campus-Backend/server/backend/cron"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	"github.com/disintegration/imaging"
+	mysqlDriver "github.com/go-sql-driver/mysql"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -30,11 +35,16 @@ import (
 )
 
 const (
-	maxRatingCommentRunes = 256
-	maxRatingImageWidth   = 1280
-	targetMaxImageBytes   = 524288 // 512 KiB
-	defaultJPEGQuality    = 95
-	minJPEGQuality        = 40
+	maxRatingCommentRunes         = 256
+	maxRatingImageWidth           = 1280
+	targetMaxImageBytes           = 524288 // 512 KiB
+	defaultJPEGQuality            = 95
+	minJPEGQuality                = 40
+	ratingAutoHideReportThreshold = 5
+	dishRatingCooldownDays        = 7
+	canteenRatingCooldownDays     = 7
+	maxDishRatingsPerDeviceDay    = 5
+	maxCanteenRatingsPerDeviceDay = 2
 )
 
 func (s *CampusServer) recordDeviceIfPresent(ctx context.Context) {
@@ -45,6 +55,33 @@ func (s *CampusServer) recordDeviceIfPresent(ctx context.Context) {
 		return
 	}
 	_ = s.checkDevice(ctx)
+}
+
+func callerDeviceHash(ctx context.Context) null.String {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return null.String{}
+	}
+	vals := md.Get("x-device-id")
+	if len(vals) == 0 {
+		return null.String{}
+	}
+	deviceID := strings.TrimSpace(vals[0])
+	if deviceID == "" || strings.EqualFold(deviceID, "unknown") {
+		return null.String{}
+	}
+	sum := sha256.Sum256([]byte("campus-rating:" + deviceID))
+	return null.StringFrom(hex.EncodeToString(sum[:]))
+}
+
+func berlinDayBounds(now time.Time) (time.Time, time.Time) {
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		loc = time.UTC
+	}
+	local := now.In(loc)
+	start := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, loc)
+	return start, start.AddDate(0, 0, 1)
 }
 
 // ListCanteenRatings RPC Endpoint
@@ -74,19 +111,20 @@ func (s *CampusServer) ListCanteenRatings(ctx context.Context, input *pb.ListCan
 		return nil, status.Error(codes.Internal, "could not query the canteen with the given Id")
 	}
 
+	callerHash := callerDeviceHash(ctx)
 	return &pb.ListCanteenRatingsReply{
 		Avg:        statsForCanteen.Average,
 		Std:        statsForCanteen.Std,
 		Min:        statsForCanteen.Min,
 		Max:        statsForCanteen.Max,
-		Rating:     queryLastCanteenRatingsWithLimit(input, canteenId, tx),
+		Rating:     queryLastCanteenRatingsWithLimit(input, canteenId, callerHash, tx),
 		RatingTags: queryTags(canteenId, -1, model.CANTEEN, tx),
 	}, nil
 }
 
 // queryLastCanteenRatingsWithLimit
 // Queries the actual ratings for a canteen and attaches the tag ratings which belong to the ratings
-func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, canteenID int32, tx *gorm.DB) []*pb.SingleRatingReply {
+func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, canteenID int32, callerHash null.String, tx *gorm.DB) []*pb.SingleRatingReply {
 	var ratings []model.CanteenRating
 	var err error
 
@@ -113,11 +151,11 @@ func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cante
 			err = tx.
 				Order("timestamp desc, cafeteriaRating desc").
 				Limit(limit).
-				Find(&ratings, "cafeteriaID = ? AND timestamp < ? AND timestamp > ?", canteenID, to, from).Error
+				Find(&ratings, "cafeteriaID = ? AND status = ? AND timestamp < ? AND timestamp > ?", canteenID, model.RatingStatusVisible, to, from).Error
 		} else {
 			err = tx.Order("timestamp desc, cafeteriaRating desc").
 				Limit(limit).
-				Find(&ratings, "cafeteriaID = ?", canteenID).Error
+				Find(&ratings, "cafeteriaID = ? AND status = ?", canteenID, model.RatingStatusVisible).Error
 		}
 
 		if err != nil {
@@ -131,13 +169,19 @@ func queryLastCanteenRatingsWithLimit(input *pb.ListCanteenRatingsRequest, cante
 		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.CANTEEN, tx)
 		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
 		for _, v := range ratings {
-			resp = append(resp, &pb.SingleRatingReply{
-				Points:     v.Points,
-				Comment:    v.Comment,
-				Image:      getImageToBytes(v.Image),
-				Visited:    timestamppb.New(v.Timestamp),
-				RatingTags: tagsByRating[v.CanteenRating],
-			})
+			entry := &pb.SingleRatingReply{
+				RatingId:    v.CanteenRating,
+				Points:      v.Points,
+				Comment:     v.Comment,
+				Image:       getImageToBytes(v.Image),
+				Visited:     timestamppb.New(v.Timestamp),
+				RatingTags:  tagsByRating[v.CanteenRating],
+				IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+			}
+			if v.UpdatedAt.Valid {
+				entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
+			}
+			resp = append(resp, entry)
 		}
 		return resp
 	} else {
@@ -171,12 +215,13 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 		return nil, status.Error(codes.Internal, "Could not query dish ratings.")
 	}
 
+	callerHash := callerDeviceHash(ctx)
 	return &pb.GetDishRatingsReply{
 		Avg:        statsForDish.Average,
 		Std:        statsForDish.Std,
 		Min:        statsForDish.Min,
 		Max:        statsForDish.Max,
-		Rating:     queryLastDishRatingsWithLimit(input, dishID, tx),
+		Rating:     queryLastDishRatingsWithLimit(input, dishID, callerHash, tx),
 		RatingTags: queryTags(canteenID, dishID, model.DISH, tx),
 		NameTags:   queryTags(canteenID, dishID, model.NAME, tx),
 	}, nil
@@ -184,7 +229,7 @@ func (s *CampusServer) GetDishRatings(ctx context.Context, input *pb.GetDishRati
 
 // queryLastDishRatingsWithLimit
 // Queries the actual ratings for a dish in a canteen and attaches the tag ratings which belong to the ratings
-func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32, tx *gorm.DB) []*pb.SingleRatingReply {
+func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32, callerHash null.String, tx *gorm.DB) []*pb.SingleRatingReply {
 	var ratings []model.DishRating
 	var err error
 	var limit = int(input.Limit)
@@ -209,11 +254,11 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 
 			err = tx.Order("timestamp desc, dishRating desc").
 				Limit(limit).
-				Find(&ratings, "dishID = ? AND timestamp < ? AND timestamp > ?", dishID, to, from).Error
+				Find(&ratings, "dishID = ? AND status = ? AND timestamp < ? AND timestamp > ?", dishID, model.RatingStatusVisible, to, from).Error
 		} else {
 			err = tx.Order("timestamp desc, dishRating desc").
 				Limit(limit).
-				Find(&ratings, "dishID = ?", dishID).Error
+				Find(&ratings, "dishID = ? AND status = ?", dishID, model.RatingStatusVisible).Error
 		}
 
 		if err != nil {
@@ -227,13 +272,19 @@ func queryLastDishRatingsWithLimit(input *pb.GetDishRatingsRequest, dishID int32
 		tagsByRating := queryTagRatingsOverviewForRatings(ratingIDs, model.DISH, tx)
 		resp := make([]*pb.SingleRatingReply, 0, len(ratings))
 		for _, v := range ratings {
-			resp = append(resp, &pb.SingleRatingReply{
-				Points:     v.Points,
-				Comment:    v.Comment,
-				RatingTags: tagsByRating[v.DishRating],
-				Image:      getImageToBytes(v.Image),
-				Visited:    timestamppb.New(v.Timestamp),
-			})
+			entry := &pb.SingleRatingReply{
+				RatingId:    v.DishRating,
+				Points:      v.Points,
+				Comment:     v.Comment,
+				RatingTags:  tagsByRating[v.DishRating],
+				Image:       getImageToBytes(v.Image),
+				Visited:     timestamppb.New(v.Timestamp),
+				IsOwnRating: callerHash.Valid && v.DeviceHash.Valid && callerHash.String == v.DeviceHash.String,
+			}
+			if v.UpdatedAt.Valid {
+				entry.UpdatedAt = timestamppb.New(v.UpdatedAt.Time)
+			}
+			resp = append(resp, entry)
 		}
 		return resp
 	} else {
@@ -391,29 +442,71 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 		return nil, err
 	}
 
+	deviceHash := callerDeviceHash(ctx)
 	resPath, err := imageWrapper(input.Image, "cafeterias", canteenID)
 	if err != nil {
 		return nil, err
 	}
 
+	var ratingID int64
 	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		if deviceHash.Valid {
+			now := time.Now()
+			cooldownCutoff := now.AddDate(0, 0, -canteenRatingCooldownDays)
+			var existing int64
+			if err := dbTx.Model(&model.CanteenRating{}).
+				Where("cafeteriaID = ? AND device_hash = ? AND timestamp >= ?",
+					canteenID, deviceHash.String, cooldownCutoff).
+				Count(&existing).Error; err != nil {
+				log.WithError(err).Error("Error checking duplicate canteen rating.")
+				return status.Error(codes.Internal, "Could not validate rating uniqueness. Rating has not been saved.")
+			}
+			if existing > 0 {
+				return status.Errorf(codes.AlreadyExists, "You have already rated this canteen within the last %d days.", canteenRatingCooldownDays)
+			}
+
+			dayStart, dayEnd := berlinDayBounds(now)
+			var dailyCount int64
+			if err := dbTx.Model(&model.CanteenRating{}).
+				Where("device_hash = ? AND timestamp >= ? AND timestamp < ?",
+					deviceHash.String, dayStart, dayEnd).
+				Count(&dailyCount).Error; err != nil {
+				log.WithError(err).Error("Error checking daily canteen rating limit.")
+				return status.Error(codes.Internal, "Could not validate daily rating limit. Rating has not been saved.")
+			}
+			if dailyCount >= maxCanteenRatingsPerDeviceDay {
+				return status.Errorf(codes.ResourceExhausted, "You have reached the daily limit of %d canteen ratings.", maxCanteenRatingsPerDeviceDay)
+			}
+		}
+
 		rating := model.CanteenRating{
-			Comment:   input.Comment,
-			Points:    input.Points,
-			CanteenID: canteenID,
-			Timestamp: time.Now(),
-			Image:     resPath,
+			Comment:    input.Comment,
+			Points:     input.Points,
+			CanteenID:  canteenID,
+			Timestamp:  time.Now(),
+			Image:      resPath,
+			DeviceHash: deviceHash,
+			Status:     model.RatingStatusVisible,
 		}
 		if err := dbTx.Create(&rating).Error; err != nil {
 			log.WithError(err).Error("Error occurred while creating the new canteen rating.")
 			return status.Error(codes.Internal, "Error while creating new canteen rating. Rating has not been saved.")
 		}
+		ratingID = rating.CanteenRating
 		return insertRatingTags(rating.CanteenRating, input.RatingTags, model.CANTEEN, dbTx)
 	}); err != nil {
-		cleanupImageFile(resPath)
+		cleanupUnusedCanteenRatingImage(tx, resPath)
 		return nil, err
 	}
-	return &pb.CreateCanteenRatingReply{}, nil
+	return &pb.CreateCanteenRatingReply{RatingId: ratingID}, nil
+}
+
+func isDuplicateKeyError(err error) bool {
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		return true
+	}
+	var mysqlErr *mysqlDriver.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
 }
 
 func imageWrapper(imageBytes []byte, subDir string, id int64) (string, error) {
@@ -429,7 +522,35 @@ func cleanupImageFile(imagePath string) {
 		return
 	}
 	if err := os.Remove(imagePath); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.WithError(err).WithField("path", imagePath).Warn("Failed to remove rating image after transaction rollback")
+		log.WithError(err).WithField("path", imagePath).Warn("Failed to remove rating image")
+	}
+}
+
+func cleanupUnusedCanteenRatingImage(db *gorm.DB, imagePath string) {
+	if imagePath == "" {
+		return
+	}
+	var refCount int64
+	if err := db.Model(&model.CanteenRating{}).Where("image = ?", imagePath).Count(&refCount).Error; err != nil {
+		log.WithError(err).WithField("path", imagePath).Warn("Could not verify canteen rating image references before cleanup")
+		return
+	}
+	if refCount == 0 {
+		cleanupImageFile(imagePath)
+	}
+}
+
+func cleanupUnusedDishRatingImage(db *gorm.DB, imagePath string) {
+	if imagePath == "" {
+		return
+	}
+	var refCount int64
+	if err := db.Model(&model.DishRating{}).Where("image = ?", imagePath).Count(&refCount).Error; err != nil {
+		log.WithError(err).WithField("path", imagePath).Warn("Could not verify dish rating image references before cleanup")
+		return
+	}
+	if refCount == 0 {
+		cleanupImageFile(imagePath)
 	}
 }
 
@@ -499,33 +620,290 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, err
 	}
 
+	deviceHash := callerDeviceHash(ctx)
 	resPath, err := imageWrapper(input.Image, "dishes", dishInCanteen.Dish)
 	if err != nil {
 		return nil, err
 	}
 
+	var ratingID int64
 	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		if deviceHash.Valid {
+			now := time.Now()
+			cooldownCutoff := now.AddDate(0, 0, -dishRatingCooldownDays)
+			var existing int64
+			if err := dbTx.Model(&model.DishRating{}).
+				Where("dishID = ? AND device_hash = ? AND timestamp >= ?",
+					dishInCanteen.Dish, deviceHash.String, cooldownCutoff).
+				Count(&existing).Error; err != nil {
+				log.WithError(err).Error("Error checking duplicate dish rating.")
+				return status.Error(codes.Internal, "Could not validate rating uniqueness. Rating has not been saved.")
+			}
+			if existing > 0 {
+				return status.Errorf(codes.AlreadyExists, "You have already rated this dish within the last %d days. You can update your existing rating instead.", dishRatingCooldownDays)
+			}
+
+			dayStart, dayEnd := berlinDayBounds(now)
+			var dailyCount int64
+			if err := dbTx.Model(&model.DishRating{}).
+				Where("device_hash = ? AND timestamp >= ? AND timestamp < ?",
+					deviceHash.String, dayStart, dayEnd).
+				Count(&dailyCount).Error; err != nil {
+				log.WithError(err).Error("Error checking daily dish rating limit.")
+				return status.Error(codes.Internal, "Could not validate daily rating limit. Rating has not been saved.")
+			}
+			if dailyCount >= maxDishRatingsPerDeviceDay {
+				return status.Errorf(codes.ResourceExhausted, "You have reached the daily limit of %d dish ratings.", maxDishRatingsPerDeviceDay)
+			}
+		}
+
 		rating := model.DishRating{
-			Comment:   input.Comment,
-			DishID:    dishInCanteen.Dish,
-			Points:    input.Points,
-			Timestamp: time.Now(),
-			Image:     resPath,
+			Comment:    input.Comment,
+			DishID:     dishInCanteen.Dish,
+			Points:     input.Points,
+			Timestamp:  time.Now(),
+			Image:      resPath,
+			DeviceHash: deviceHash,
+			Status:     model.RatingStatusVisible,
 		}
 		if err := dbTx.Create(&rating).Error; err != nil {
 			log.WithError(err).Error("while creating a new dish rating.")
 			return status.Error(codes.Internal, "Error while creating the new rating in the database. Rating has not been saved.")
 		}
+		ratingID = rating.DishRating
 
 		if err := assignDishNameTag(&rating, dishInCanteen.Dish, dbTx); err != nil {
 			return err
 		}
 		return insertRatingTags(rating.DishRating, input.RatingTags, model.DISH, dbTx)
 	}); err != nil {
-		cleanupImageFile(resPath)
+		cleanupUnusedDishRatingImage(tx, resPath)
 		return nil, err
 	}
-	return &pb.CreateDishRatingReply{}, nil
+	return &pb.CreateDishRatingReply{RatingId: ratingID}, nil
+}
+
+// UpdateDishRating allows the device that created a dish rating to modify its score, comment, tags, or photo.
+func (s *CampusServer) UpdateDishRating(ctx context.Context, input *pb.UpdateDishRatingRequest) (*pb.UpdateDishRatingReply, error) {
+	s.recordDeviceIfPresent(ctx)
+	deviceHash := callerDeviceHash(ctx)
+	if !deviceHash.Valid {
+		return nil, status.Error(codes.Unauthenticated, "Device identification (x-device-id) is required to update a rating.")
+	}
+	if input.RatingId <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "A valid rating_id is required.")
+	}
+	if len(input.Image) > 0 && input.RemoveImage {
+		return nil, status.Error(codes.InvalidArgument, "Cannot provide both image and remove_image.")
+	}
+	if err := validateRatingPointsAndComment(input.Points, input.Comment); err != nil {
+		return nil, err
+	}
+	if err := validateRatingTagsInput(input.RatingTags); err != nil {
+		return nil, err
+	}
+
+	tx := s.db.WithContext(ctx)
+	var existing model.DishRating
+	if err := tx.First(&existing, "dishRating = ? AND status = ?", input.RatingId, model.RatingStatusVisible).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "Rating not found.")
+		}
+		log.WithError(err).Error("while loading dish rating for update")
+		return nil, status.Error(codes.Internal, "Could not load rating.")
+	}
+	if !existing.DeviceHash.Valid || existing.DeviceHash.String != deviceHash.String {
+		return nil, status.Error(codes.PermissionDenied, "You can only update your own ratings.")
+	}
+	if err := verifyRatingTagsExist(input.RatingTags, model.DISH, tx); err != nil {
+		return nil, err
+	}
+
+	newImagePath := existing.Image
+	oldImagePath := existing.Image
+	wroteNewImage := false
+	switch {
+	case len(input.Image) > 0:
+		stored, err := imageWrapper(input.Image, "dishes", existing.DishID)
+		if err != nil {
+			return nil, err
+		}
+		newImagePath = stored
+		wroteNewImage = stored != oldImagePath
+	case input.RemoveImage:
+		newImagePath = ""
+	}
+
+	now := time.Now()
+	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		// Preserve original timestamp explicitly so MySQL ON UPDATE CURRENT_TIMESTAMP doesn't overwrite it.
+		res := dbTx.Model(&model.DishRating{}).
+			Where("dishRating = ? AND status = ?", existing.DishRating, model.RatingStatusVisible).
+			Updates(map[string]any{
+				"points":     input.Points,
+				"comment":    input.Comment,
+				"image":      newImagePath,
+				"updated_at": now,
+				"timestamp":  gorm.Expr("timestamp"),
+			})
+		if res.Error != nil {
+			log.WithError(res.Error).Error("while updating dish rating")
+			return status.Error(codes.Internal, "Could not update rating.")
+		}
+		if res.RowsAffected == 0 {
+			return status.Error(codes.NotFound, "Rating not found.")
+		}
+		if err := dbTx.Where("parentRating = ?", existing.DishRating).Delete(&model.DishRatingTag{}).Error; err != nil {
+			log.WithError(err).Error("while replacing dish rating tags")
+			return status.Error(codes.Internal, "Could not update rating tags.")
+		}
+		if err := insertRatingTags(existing.DishRating, input.RatingTags, model.DISH, dbTx); err != nil {
+			return err
+		}
+		if err := dbTx.Model(&model.DishNameTag{}).
+			Where("correspondingRating = ?", existing.DishRating).
+			Update("points", input.Points).Error; err != nil {
+			log.WithError(err).Error("while updating dish name tag scores")
+			return status.Error(codes.Internal, "Could not update dish name tag scores.")
+		}
+		return nil
+	}); err != nil {
+		if wroteNewImage {
+			cleanupUnusedDishRatingImage(tx, newImagePath)
+		}
+		return nil, err
+	}
+
+	if oldImagePath != "" && oldImagePath != newImagePath {
+		cleanupUnusedDishRatingImage(tx, oldImagePath)
+	}
+	return &pb.UpdateDishRatingReply{RatingId: existing.DishRating}, nil
+}
+
+// DeleteDishRating allows the device that created a visible dish rating to permanently remove it and its disk photo.
+func (s *CampusServer) DeleteDishRating(ctx context.Context, input *pb.DeleteDishRatingRequest) (*pb.DeleteDishRatingReply, error) {
+	s.recordDeviceIfPresent(ctx)
+	deviceHash := callerDeviceHash(ctx)
+	if !deviceHash.Valid {
+		return nil, status.Error(codes.Unauthenticated, "Device identification (x-device-id) is required to delete a rating.")
+	}
+	if input.RatingId <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "A valid rating_id is required.")
+	}
+
+	tx := s.db.WithContext(ctx)
+	var existing model.DishRating
+	if err := tx.First(&existing, "dishRating = ? AND status = ?", input.RatingId, model.RatingStatusVisible).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "Rating not found.")
+		}
+		log.WithError(err).Error("while loading dish rating for deletion")
+		return nil, status.Error(codes.Internal, "Could not load rating.")
+	}
+	if !existing.DeviceHash.Valid || existing.DeviceHash.String != deviceHash.String {
+		return nil, status.Error(codes.PermissionDenied, "You can only delete your own ratings.")
+	}
+
+	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		res := dbTx.Where("dishRating = ? AND status = ?", existing.DishRating, model.RatingStatusVisible).Delete(&model.DishRating{})
+		if res.Error != nil {
+			log.WithError(res.Error).Error("while deleting dish rating")
+			return status.Error(codes.Internal, "Could not delete rating.")
+		}
+		if res.RowsAffected == 0 {
+			return status.Error(codes.NotFound, "Rating not found.")
+		}
+		if err := dbTx.Where("correspondingRating = ?", existing.DishRating).Delete(&model.DishNameTag{}).Error; err != nil {
+			log.WithError(err).Error("while deleting dish rating name tags")
+			return status.Error(codes.Internal, "Could not delete rating name tags.")
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	cleanupUnusedDishRatingImage(tx, existing.Image)
+	return &pb.DeleteDishRatingReply{}, nil
+}
+
+// ReportDishRating lets a device report an abusive dish rating; once enough distinct devices report it, the rating is auto-hidden.
+func (s *CampusServer) ReportDishRating(ctx context.Context, input *pb.ReportDishRatingRequest) (*pb.ReportDishRatingReply, error) {
+	s.recordDeviceIfPresent(ctx)
+	deviceHash := callerDeviceHash(ctx)
+	if !deviceHash.Valid {
+		return nil, status.Error(codes.Unauthenticated, "Device identification (x-device-id) is required to report a rating.")
+	}
+	if input.RatingId <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "A valid rating_id is required.")
+	}
+	reason := strings.TrimSpace(input.Reason)
+	if utf8.RuneCountInString(reason) > maxRatingCommentRunes {
+		return nil, status.Error(codes.InvalidArgument, "Report reason can only contain up to 256 characters.")
+	}
+
+	tx := s.db.WithContext(ctx)
+	var hidden bool
+	if err := tx.Transaction(func(dbTx *gorm.DB) error {
+		var rating model.DishRating
+		if err := dbTx.First(&rating, "dishRating = ? AND status = ?", input.RatingId, model.RatingStatusVisible).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return status.Error(codes.NotFound, "Rating not found.")
+			}
+			log.WithError(err).Error("while loading dish rating for report")
+			return status.Error(codes.Internal, "Could not load rating.")
+		}
+		if rating.DeviceHash.Valid && rating.DeviceHash.String == deviceHash.String {
+			return status.Error(codes.InvalidArgument, "You cannot report your own rating.")
+		}
+		var existingReportCount int64
+		if err := dbTx.Model(&model.DishRatingReport{}).
+			Where("rating_id = ? AND device_hash = ?", rating.DishRating, deviceHash.String).
+			Count(&existingReportCount).Error; err != nil {
+			log.WithError(err).Error("while checking existing dish rating report")
+			return status.Error(codes.Internal, "Could not check existing report.")
+		}
+		if existingReportCount > 0 {
+			return status.Error(codes.AlreadyExists, "You have already reported this rating.")
+		}
+
+		report := model.DishRatingReport{
+			RatingID:   rating.DishRating,
+			DeviceHash: deviceHash.String,
+			Reason:     reason,
+			CreatedAt:  time.Now(),
+		}
+		if err := dbTx.Create(&report).Error; err != nil {
+			if isDuplicateKeyError(err) {
+				return status.Error(codes.AlreadyExists, "You have already reported this rating.")
+			}
+			log.WithError(err).Error("while creating dish rating report")
+			return status.Error(codes.Internal, "Could not submit report.")
+		}
+
+		var totalReports int64
+		if err := dbTx.Model(&model.DishRatingReport{}).
+			Where("rating_id = ?", rating.DishRating).
+			Count(&totalReports).Error; err != nil {
+			log.WithError(err).Error("while counting dish rating reports")
+			return status.Error(codes.Internal, "Could not count reports.")
+		}
+		if totalReports >= ratingAutoHideReportThreshold {
+			if err := dbTx.Model(&model.DishRating{}).
+				Where("dishRating = ?", rating.DishRating).
+				Updates(map[string]any{
+					"status":    model.RatingStatusHidden,
+					"timestamp": gorm.Expr("timestamp"),
+				}).Error; err != nil {
+				log.WithError(err).Error("while auto-hiding reported dish rating")
+				return status.Error(codes.Internal, "Could not update rating moderation status.")
+			}
+			hidden = true
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return &pb.ReportDishRatingReply{Hidden: hidden}, nil
 }
 
 // assignDishNameTag
@@ -552,19 +930,26 @@ func assignDishNameTag(rating *model.DishRating, dishID int64, tx *gorm.DB) erro
 	return nil
 }
 
-// inputSanitizationForNewRatingElements Checks parameters of the new rating for all canteen and dish ratings.
-// Additionally, queries the canteen ID, since it checks whether the canteen actually exists.
-func inputSanitizationForNewRatingElements(rating int32, comment string, canteenName string, tx *gorm.DB) (int64, error) {
+func validateRatingPointsAndComment(rating int32, comment string) error {
 	if rating > 5 || rating < 1 {
-		return -1, status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 5. Rating has not been saved.")
+		return status.Error(codes.InvalidArgument, "Rating must be a positive number not larger than 5. Rating has not been saved.")
 	}
 
 	if utf8.RuneCountInString(comment) > maxRatingCommentRunes {
-		return -1, status.Error(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
+		return status.Error(codes.InvalidArgument, "Ratings can only contain up to 256 characters, this is too long. Rating has not been saved.")
 	}
 
 	if strings.Contains(comment, "@") {
-		return -1, status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+		return status.Error(codes.InvalidArgument, "Comments must not contain @ symbols in order to prevent misuse. Rating has not been saved.")
+	}
+	return nil
+}
+
+// inputSanitizationForNewRatingElements Checks parameters of the new rating for all canteen and dish ratings.
+// Additionally, queries the canteen ID, since it checks whether the canteen actually exists.
+func inputSanitizationForNewRatingElements(rating int32, comment string, canteenName string, tx *gorm.DB) (int64, error) {
+	if err := validateRatingPointsAndComment(rating, comment); err != nil {
+		return -1, err
 	}
 
 	canteenName = model.CanteenEnumName(canteenName)
