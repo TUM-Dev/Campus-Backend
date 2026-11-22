@@ -49,10 +49,11 @@ func TestRecordAndPruneHeadCountHistory(t *testing.T) {
 	require.InDelta(t, 500.0, row.AvgCount, 0.01)
 	require.InDelta(t, 50.0, row.AvgPercent, 0.01)
 
-	// Old record beyond 56 days is pruned while recent record survives.
-	require.NoError(t, recordHeadCountHistory(db, "mensa-garching", 100, 10, t1.AddDate(0, 0, -60)))
+	// Records older than 180 days are pruned while 90-day-old and recent records survive.
+	require.NoError(t, recordHeadCountHistory(db, "mensa-garching", 200, 20, t1.AddDate(0, 0, -90)))
+	require.NoError(t, recordHeadCountHistory(db, "mensa-garching", 100, 10, t1.AddDate(0, 0, -190)))
 	require.NoError(t, pruneOldHeadCountHistory(db, t1))
 	var count int64
 	require.NoError(t, db.Model(&model.CanteenHeadCountHistory{}).Count(&count).Error)
-	require.Equal(t, int64(1), count)
+	require.Equal(t, int64(2), count)
 }

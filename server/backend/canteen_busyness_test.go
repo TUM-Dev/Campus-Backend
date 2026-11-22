@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 
@@ -31,10 +32,13 @@ func TestGetCanteenBusynessWithMySQL(t *testing.T) {
 		Timestamp: now.Add(-2 * time.Minute),
 	}).Error)
 
-	// Two recent Tuesdays + one stale sample older than 56 days (must be excluded).
+	// Two recent Tuesdays (7d and 14d ago), one closed/holiday Tuesday (avg_count=0 all day -> excluded),
+	// today's partial sample (must be excluded), and one stale sample older than 84 days (must be excluded).
 	history := []model.CanteenHeadCountHistory{
 		{CanteenID: "mensa-garching", SampleDate: "2026-11-10", Bucket: 48, Weekday: 1, AvgCount: 600, AvgPercent: 60, SampleCount: 3},
-		{CanteenID: "mensa-garching", SampleDate: "2026-11-03", Bucket: 48, Weekday: 1, AvgCount: 500, AvgPercent: 50, SampleCount: 3},
+		{CanteenID: "mensa-garching", SampleDate: "2026-11-03", Bucket: 48, Weekday: 1, AvgCount: 400, AvgPercent: 40, SampleCount: 3},
+		{CanteenID: "mensa-garching", SampleDate: "2026-10-27", Bucket: 48, Weekday: 1, AvgCount: 0, AvgPercent: 0, SampleCount: 3},
+		{CanteenID: "mensa-garching", SampleDate: "2026-11-17", Bucket: 48, Weekday: 1, AvgCount: 950, AvgPercent: 95, SampleCount: 1},
 		{CanteenID: "mensa-garching", SampleDate: "2026-08-01", Bucket: 48, Weekday: 1, AvgCount: 100, AvgPercent: 10, SampleCount: 3},
 		// Upcoming lunch slots: 12:30 (bucket 50, 80%) and 13:15 (bucket 53, 35% -> best upcoming).
 		{CanteenID: "mensa-garching", SampleDate: "2026-11-10", Bucket: 50, Weekday: 1, AvgCount: 800, AvgPercent: 80, SampleCount: 3},
@@ -50,15 +54,20 @@ func TestGetCanteenBusynessWithMySQL(t *testing.T) {
 	require.Equal(t, float32(75), reply.Current.Percent)
 	require.Len(t, reply.TypicalSlots, 3)
 
-	// Bucket 48 average across the two recent Tuesdays = (60 + 50)/2 = 55% (stale 10% excluded).
+	// Bucket 48 uses 14-day half-life EWMA over 2026-11-10 (60%, 7d ago) and 2026-11-03 (40%, 14d ago),
+	// excluding the closed day (0%), today (95%), and stale sample (10%).
+	w7 := math.Exp(-math.Ln2 * 7.0 / busynessHalfLifeDays)
+	w14 := math.Exp(-math.Ln2 * 14.0 / busynessHalfLifeDays)
+	expectedTypical := (60.0*w7 + 40.0*w14) / (w7 + w14)
 	require.Equal(t, int32(12), reply.TypicalSlots[0].Hour)
 	require.Equal(t, int32(0), reply.TypicalSlots[0].Minute)
-	require.InDelta(t, 55.0, reply.TypicalSlots[0].TypicalPercent, 0.01)
+	require.InDelta(t, expectedTypical, reply.TypicalSlots[0].TypicalPercent, 0.01)
+	require.Greater(t, reply.TypicalSlots[0].TypicalPercent, 50.0, "more recent week should outweigh older week")
 	require.Equal(t, int32(2), reply.TypicalSlots[0].SampleDays)
 
-	// Live 75% vs typical 55% = +20%.
+	// Live 75% vs typical EWMA.
 	require.True(t, reply.HasTypicalComparison)
-	require.InDelta(t, 20.0, reply.VsTypicalPercent, 0.01)
+	require.InDelta(t, 75.0-expectedTypical, reply.VsTypicalPercent, 0.01)
 
 	// Best upcoming lunch slot should be 13:15 (35%).
 	require.NotNil(t, reply.BestUpcomingSlot)

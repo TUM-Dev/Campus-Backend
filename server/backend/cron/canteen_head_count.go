@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/TUM-Dev/Campus-Backend/server/internal/webfetch"
 	"github.com/TUM-Dev/Campus-Backend/server/model"
@@ -129,7 +130,7 @@ CanteenApInformation when performing a request.
 */
 const BaseUrl = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
 
-const headCountHistoryRetentionDays = 56 // 8 weeks
+const headCountHistoryRetentionDays = 180 // ~6 months
 
 func (c *CronService) canteenHeadCountCron() error {
 	log.Debug("Updating canteen head count stats...")
