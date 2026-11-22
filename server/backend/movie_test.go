@@ -60,6 +60,7 @@ var (
 		CoverId:                  1,
 		AdditionalInformationUrl: "https://www.imdb.com/title/tt1229238/",
 		Location:                 "Hörsaal 1200, Stammgelände",
+		Cinema:                   pb.Cinema_TU_FILM,
 	}
 	movie2 = pb.Movie{
 		MovieId:                  2,
@@ -77,6 +78,25 @@ var (
 		CoverId:                  2,
 		AdditionalInformationUrl: "https://www.imdb.com/title/tt2381249/",
 		Location:                 "Hörsaal MW1801, Campus Garching",
+		Cinema:                   pb.Cinema_TU_FILM,
+	}
+	movieHeilbronn = pb.Movie{
+		MovieId:                  3,
+		Date:                     timestamppb.New(time.Now()),
+		Created:                  timestamppb.New(time.Now()),
+		Title:                    "The Invite [OmU]",
+		ReleaseYear:              "",
+		Runtime:                  "107 min",
+		Genre:                    "Drama",
+		Director:                 "Olivia Wilde",
+		Actors:                   "",
+		ImdbRating:               "",
+		Description:              "Das Ehepaar Angela und Joe gerät in eine tiefe Krise.",
+		CoverUrl:                 "https://api.tum.app/files/movie/the_invite.jpg",
+		CoverId:                  3,
+		AdditionalInformationUrl: "https://www.unifilm.de/studentenkinos/Heilbronn#sid=30797",
+		Location:                 "NXTSpace - Bildungscampus, Heilbronn",
+		Cinema:                   pb.Cinema_CAMPUSKINO_HEILBRONN,
 	}
 )
 
@@ -113,6 +133,30 @@ func (s *MovieSuite) Test_ListMoviesNone() {
 	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: 42})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie(nil)}, response)
+}
+
+func (s *MovieSuite) Test_ListMoviesFilterByCinema() {
+	server := s.getCampusTestServer()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
+		WithArgs(-1).
+		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
+			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.AdditionalInformationUrl, movie1.Location, movie1.CoverId, "mission_impossible_4.jpg", "movie/", 1, "", 1).
+			AddRow(movieHeilbronn.MovieId, movieHeilbronn.Date.AsTime(), movieHeilbronn.Created.AsTime(), movieHeilbronn.Title, movieHeilbronn.ReleaseYear, movieHeilbronn.Runtime, movieHeilbronn.Genre, movieHeilbronn.Director, movieHeilbronn.Actors, movieHeilbronn.ImdbRating, movieHeilbronn.Description, nil, movieHeilbronn.CoverId, movieHeilbronn.AdditionalInformationUrl, movieHeilbronn.Location, movieHeilbronn.CoverId, "the_invite.jpg", "movie/", 1, "", 1))
+
+	heilbronnResp, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{
+		LastId: -1,
+		Cinema: pb.Cinema_CAMPUSKINO_HEILBRONN,
+	})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movieHeilbronn}}, heilbronnResp)
+
+	// Cached movies are reused and filtered for TU Film
+	tuFilmResp, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{
+		LastId: -1,
+		Cinema: pb.Cinema_TU_FILM,
+	})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie1}}, tuFilmResp)
 }
 
 func (s *MovieSuite) AfterTest(_, _ string) {

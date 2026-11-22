@@ -695,11 +695,19 @@ message GetUpdateNoteReply {
   string version_name = 2;
 }
 
+enum Cinema {
+  CINEMA_UNSPECIFIED = 0;
+  TU_FILM = 1;
+  CAMPUSKINO_HEILBRONN = 2;
+}
+
 message ListMoviesRequest {
   // the last Id you have requested. Use -1 to get all movies
   int32 last_id = 1;
   // the oldest time you want to be included in the response
   google.protobuf.Timestamp oldest_date_at = 2;
+  // optional cinema filter (CINEMA_UNSPECIFIED returns movies from all cinemas)
+  Cinema cinema = 3;
 }
 
 message ListMoviesReply {
@@ -717,6 +725,8 @@ message Movie {
   string title = 6;
   // Where the movie is shown
   string location = 18;
+  // Which student cinema screens this movie
+  Cinema cinema = 19;
   // release year of the movie if available, empty otherwise
   string release_year = 7;
   // runtime of the movie if available, empty otherwise
