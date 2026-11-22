@@ -23,55 +23,56 @@ type LibraryApInformation struct {
 }
 
 // TrackedLibraries defines the TUM branch libraries monitored for live occupancy and busyness curves.
+// AP targets and MaxCount capacities are derived from https://wlan.lrz.de/apstat/ reading-room APs.
+// Note: Teilbibliothek Mathematik & Informatik (RBG Wi-Fi) and Medizin (MRI) are not reported in LRZ Graphite.
 var TrackedLibraries = []LibraryApInformation{
 	{
+		// Geb. 0501 (Arcisstr. 21): Lesesäle 1136, 1140, 1142A, 1160, Z1136A, 2140, 2148, 2170
 		LibraryID: "tb-stammgelaende",
 		Name:      "Teilbibliothek Stammgelände",
 		Campus:    "stammgelaende",
-		Target:    "ap.ap*-?b1*.ssid.*",
-		MaxCount:  650,
+		Target:    "ap.{apa12-1bb,apa13-1bb,apa14-1bb,apa15-1bb,apa16-1bb,apa26-2bb,apa27-2bb,apa29-2bb,apa32-2bb,apa33-2bb,apa36-2bb,apa37-2bb,apa38-2bb,apa39-2bb,apa40-2bb,apa41-2bb}.ssid.*",
+		MaxCount:  1200,
 	},
 	{
+		// Geb. 5500 (Boltzmannstr. 15): Bauteil 0, 1025H Lesesaal/Monographien
 		LibraryID: "tb-maschinenwesen",
 		Name:      "Teilbibliothek Maschinenwesen",
 		Campus:    "garching",
-		Target:    "ap.ap*-?mw*.ssid.*",
-		MaxCount:  500,
+		Target:    "ap.apa{10,11,12,13}-1w0.ssid.*",
+		MaxCount:  220,
 	},
 	{
-		LibraryID: "tb-mathematik-informatik",
-		Name:      "Teilbibliothek Mathematik & Informatik",
-		Campus:    "garching",
-		Target:    "ap.ap*-?mi*.ssid.*",
-		MaxCount:  450,
-	},
-	{
+		// Geb. 5401 (Lichtenbergstr. 4): 11140, 11150 Lesesaal, 21003 Scannerraum
 		LibraryID: "tb-chemie",
 		Name:      "Teilbibliothek Chemie",
 		Campus:    "garching",
-		Target:    "ap.ap*-?ch*.ssid.*",
+		Target:    "ap.{apa04-1af,apa09-1af,apa10-1af,apa13-2af}.ssid.*",
 		MaxCount:  250,
 	},
 	{
+		// Geb. 5101 (James-Franck-Str. 1): 3235, 4235 Lesesaal
 		LibraryID: "tb-physik",
 		Name:      "Teilbibliothek Physik",
 		Campus:    "garching",
-		Target:    "ap.ap*-?ph*.ssid.*",
-		MaxCount:  200,
+		Target:    "ap.{apa32-1at,apa33-1at,apa34-1at,apa41-2at,apa43-2at}.ssid.*",
+		MaxCount:  160,
 	},
 	{
+		// Geb. 4220 (Maximus-von-Imhof-Forum 3): Lesesaal EG/OG, Scannerraum, Gruppenarbeitsraum
 		LibraryID: "tb-weihenstephan",
 		Name:      "Teilbibliothek Weihenstephan",
 		Campus:    "weihenstephan",
-		Target:    "ap.ap*-?wb*.ssid.*",
-		MaxCount:  300,
+		Target:    "ap.{apa06-0qy,apa07-1qy,apa10-1qy,apa11-0qy,apa13-1qy}.ssid.*",
+		MaxCount:  260,
 	},
 	{
-		LibraryID: "tb-sport-gesundheit",
-		Name:      "Teilbibliothek Sport- und Gesundheitswissenschaften",
-		Campus:    "olympiapark",
-		Target:    "ap.ap*-?sg*.ssid.*",
-		MaxCount:  180,
+		// Geb. 2927 (Petersgasse 18): Bibliothek Lesesaal 1 & 2, Garderobe
+		LibraryID: "tb-straubing",
+		Name:      "Teilbibliothek Straubing",
+		Campus:    "straubing",
+		Target:    "ap.apa{12,13,14}-0uc.ssid.*",
+		MaxCount:  40,
 	},
 }
 
