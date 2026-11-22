@@ -109,7 +109,7 @@ func TestModerationServiceBansStatusAndDiscordWebhook(t *testing.T) {
 	require.Equal(t, codes.NotFound, status.Code(err))
 
 	require.NoError(t, server.SetDishRatingStatus(ctx, created.RatingId, model.RatingStatusVisible))
-	restored, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{CanteenId: "mensa-garching", Dish: "Burger"})
+	restored, err := server.GetDishRatings(ctx, &pb.GetDishRatingsRequest{CanteenId: "mensa-garching", Dish: "Burger", Limit: 10})
 	require.NoError(t, err)
 	require.Len(t, restored.Rating, 1)
 
