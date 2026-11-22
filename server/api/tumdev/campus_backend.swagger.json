@@ -43,6 +43,46 @@
         ]
       }
     },
+    "/canteen/busyness/{canteenId}": {
+      "get": {
+        "summary": "Returns live canteen occupancy alongside typical 15-minute weekday busyness curves and quieter-slot hints.",
+        "operationId": "Campus_GetCanteenBusyness",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetCanteenBusynessReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "canteenId",
+            "description": "Canteen ID (eat-api id or enum name, e.g. \"mensa-garching\").",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "weekday",
+            "description": "Optional weekday: 0 (Monday) - 6 (Sunday). Defaults to today in Europe/Berlin when omitted.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/canteen/headCount/{canteenId}": {
       "get": {
         "operationId": "Campus_GetCanteenHeadCount",
@@ -779,7 +819,37 @@
         "TUM_CONTACT"
       ],
       "default": "TUM_DEV",
-      "description": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+      "title": "- TUM_DEV: Feedback for the TUM Dev Team\n - TUM_CONTACT: Feedback for the general TUM Contact Form"
+    },
+    "apiBusynessSlot": {
+      "type": "object",
+      "properties": {
+        "hour": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Hour in Europe/Berlin (0-23)"
+        },
+        "minute": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Minute in Europe/Berlin (0, 15, 30, 45)"
+        },
+        "typicalPercent": {
+          "type": "number",
+          "format": "double",
+          "title": "Typical utilization percentage (0-100) averaged across recent weeks"
+        },
+        "typicalCount": {
+          "type": "number",
+          "format": "double",
+          "title": "Typical head count averaged across recent weeks"
+        },
+        "sampleDays": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of distinct days contributing to this slot"
+        }
+      }
     },
     "apiCanteen": {
       "type": "object",
@@ -924,6 +994,41 @@
         "WINDOWS"
       ],
       "default": "IOS"
+    },
+    "apiGetCanteenBusynessReply": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "$ref": "#/definitions/apiGetCanteenHeadCountReply",
+          "title": "Current live head count (same shape as GetCanteenHeadCountReply; percent == -1 if unavailable)"
+        },
+        "weekday": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Weekday (0=Monday .. 6=Sunday) that the curve represents"
+        },
+        "typicalSlots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiBusynessSlot"
+          },
+          "title": "Typical 15-minute occupancy curve for the requested weekday"
+        },
+        "vsTypicalPercent": {
+          "type": "number",
+          "format": "double",
+          "title": "Difference between current percent and typical percent for the current 15-min slot (0 if unavailable)"
+        },
+        "hasTypicalComparison": {
+          "type": "boolean",
+          "title": "True when vs_typical_percent is computed from both live data and historical data"
+        },
+        "bestUpcomingSlot": {
+          "$ref": "#/definitions/apiBusynessSlot",
+          "title": "Quietest upcoming 15-minute lunch slot (11:00-14:30 Berlin) with historical data, if any"
+        }
+      }
     },
     "apiGetCanteenHeadCountReply": {
       "type": "object",
@@ -1587,7 +1692,7 @@
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": {}
     },
     "rpcStatus": {
       "type": "object",

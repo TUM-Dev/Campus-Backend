@@ -12,6 +12,7 @@ import (
 	"github.com/TUM-Dev/Campus-Backend/server/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AccessPoint struct {
@@ -128,8 +129,11 @@ CanteenApInformation when performing a request.
 */
 const BaseUrl = "http://graphite-kom.srv.lrz.de/render/?from=-10min&target=%s&format=json"
 
+const headCountHistoryRetentionDays = 56 // 8 weeks
+
 func (c *CronService) canteenHeadCountCron() error {
 	log.Debug("Updating canteen head count stats...")
+	now := time.Now()
 	for _, canteen := range Canteens {
 		if len(canteen.Target) <= 0 {
 			log.WithField("CanteenId", canteen.CanteenId).Debug("Skipping canteen head count stats, since there is no target.")
@@ -147,12 +151,68 @@ func (c *CronService) canteenHeadCountCron() error {
 		fields := log.Fields{"count": count, "CanteenId": canteen.CanteenId}
 		if err := updateDb(&canteen, count, c.db); err != nil {
 			log.WithFields(fields).WithError(err).Error("Failed to update Canteen head count stats")
-		} else {
-			log.WithFields(fields).Debug("Canteen head count stats updated")
+			continue
 		}
+		percent := clampedOccupancyPercent(count, canteen.MaxCount)
+		if err := recordHeadCountHistory(c.db, canteen.CanteenId, count, percent, now); err != nil {
+			log.WithFields(fields).WithError(err).Warn("Failed to record canteen head count history")
+		}
+		log.WithFields(fields).Debug("Canteen head count stats updated")
+	}
+	if err := pruneOldHeadCountHistory(c.db, now); err != nil {
+		log.WithError(err).Warn("Failed to prune old canteen head count history")
 	}
 	log.Debug("Canteen head count stats updated.")
 	return nil
+}
+
+func clampedOccupancyPercent(count, maxCount uint32) float32 {
+	if maxCount == 0 {
+		return 0
+	}
+	percent := (float32(count) / float32(maxCount)) * 100
+	if percent > 100.0 {
+		return 100.0
+	}
+	return percent
+}
+
+func berlinOccupancyBucket(now time.Time) (sampleDate string, weekday int32, bucket int32) {
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		loc = time.UTC
+	}
+	local := now.In(loc)
+	sampleDate = local.Format("2006-01-02")
+	weekday = int32((int(local.Weekday()) + 6) % 7) // 0=Monday .. 6=Sunday
+	bucket = int32(local.Hour()*4 + local.Minute()/15)
+	return sampleDate, weekday, bucket
+}
+
+func recordHeadCountHistory(db *gorm.DB, canteenID string, count uint32, percent float32, now time.Time) error {
+	sampleDate, weekday, bucket := berlinOccupancyBucket(now)
+	row := model.CanteenHeadCountHistory{
+		CanteenID:   canteenID,
+		SampleDate:  sampleDate,
+		Bucket:      bucket,
+		Weekday:     weekday,
+		AvgCount:    float64(count),
+		AvgPercent:  float64(percent),
+		SampleCount: 1,
+	}
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "canteen_id"}, {Name: "sample_date"}, {Name: "bucket"}},
+		DoUpdates: clause.Assignments(map[string]any{
+			"avg_count":    gorm.Expr("(avg_count * sample_count + VALUES(avg_count)) / (sample_count + 1)"),
+			"avg_percent":  gorm.Expr("(avg_percent * sample_count + VALUES(avg_percent)) / (sample_count + 1)"),
+			"sample_count": gorm.Expr("sample_count + 1"),
+		}),
+	}).Create(&row).Error
+}
+
+func pruneOldHeadCountHistory(db *gorm.DB, now time.Time) error {
+	cutoff, _, _ := berlinOccupancyBucket(now.AddDate(0, 0, -headCountHistoryRetentionDays))
+	return db.Where("sample_date < ?", cutoff).Delete(&model.CanteenHeadCountHistory{}).Error
 }
 
 func sumApCounts(aps []AccessPoint) uint32 {

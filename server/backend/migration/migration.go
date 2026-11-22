@@ -20,6 +20,7 @@ func Models() []any {
 		&model.CanteenRatingTag{},
 		&model.CanteenRatingTagOption{},
 		&model.CanteenHeadCount{},
+		&model.CanteenHeadCountHistory{},
 		&model.Crontab{},
 		&model.Device{},
 		&model.Dish{},
