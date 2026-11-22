@@ -14,12 +14,19 @@ import (
 )
 
 func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest) (*pb.ListMoviesReply, error) {
+	if err := s.checkDevice(ctx); err != nil {
+		return nil, err
+	}
 	movies, err := s.getMovies(ctx, req.LastId, req.OldestDateAt.AsTime())
 	if err != nil {
 		return nil, err
 	}
 	var movieResponse []*pb.Movie
 	for _, movie := range movies {
+		cinema := movieCinema(movie)
+		if req.Cinema != pb.Cinema_CINEMA_UNSPECIFIED && cinema != req.Cinema {
+			continue
+		}
 		movieResponse = append(movieResponse, &pb.Movie{
 			MovieId:                  movie.Id,
 			Date:                     timestamppb.New(movie.Date),
@@ -32,15 +39,24 @@ func (s *CampusServer) ListMovies(ctx context.Context, req *pb.ListMoviesRequest
 			Actors:                   movie.Actors.String,
 			ImdbRating:               movie.ImdbRating.String,
 			Description:              movie.Description,
+			TrailerUrl:               movie.Trailer.String,
 			CoverUrl:                 movie.File.FullExternalUrl(),
 			CoverId:                  movie.File.File,
 			AdditionalInformationUrl: movie.Link,
 			Location:                 movie.Location.String,
+			Cinema:                   cinema,
 		})
 	}
 	return &pb.ListMoviesReply{
 		Movies: movieResponse,
 	}, nil
+}
+
+func movieCinema(movie model.Movie) pb.Cinema {
+	if movie.IsCampuskinoHeilbronn() {
+		return pb.Cinema_CAMPUSKINO_HEILBRONN
+	}
+	return pb.Cinema_TU_FILM
 }
 
 func (s *CampusServer) getMovies(ctx context.Context, lastID int32, oldestDateAt time.Time) ([]model.Movie, error) {
