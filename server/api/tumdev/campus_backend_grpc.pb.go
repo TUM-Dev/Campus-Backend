@@ -37,6 +37,7 @@ const (
 	Campus_ListDishes_FullMethodName               = "/api.Campus/ListDishes"
 	Campus_ListDishRatingSummaries_FullMethodName  = "/api.Campus/ListDishRatingSummaries"
 	Campus_ListTopRatedDishes_FullMethodName       = "/api.Campus/ListTopRatedDishes"
+	Campus_ReportDishSoldOut_FullMethodName        = "/api.Campus/ReportDishSoldOut"
 	Campus_GetUpdateNote_FullMethodName            = "/api.Campus/GetUpdateNote"
 	Campus_ListMovies_FullMethodName               = "/api.Campus/ListMovies"
 	Campus_CreateFeedback_FullMethodName           = "/api.Campus/CreateFeedback"
@@ -79,6 +80,8 @@ type CampusClient interface {
 	ListDishRatingSummaries(ctx context.Context, in *ListDishRatingSummariesRequest, opts ...grpc.CallOption) (*ListDishRatingSummariesReply, error)
 	// Returns the highest-rated dishes served on a given day, ranked by Bayesian weighted average.
 	ListTopRatedDishes(ctx context.Context, in *ListTopRatedDishesRequest, opts ...grpc.CallOption) (*ListTopRatedDishesReply, error)
+	// Crowdsourced report that a dish is sold out today (resets automatically at midnight Berlin time).
+	ReportDishSoldOut(ctx context.Context, in *ReportDishSoldOutRequest, opts ...grpc.CallOption) (*ReportDishSoldOutReply, error)
 	GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error)
 	ListMovies(ctx context.Context, in *ListMoviesRequest, opts ...grpc.CallOption) (*ListMoviesReply, error)
 	CreateFeedback(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[CreateFeedbackRequest, CreateFeedbackReply], error)
@@ -278,6 +281,16 @@ func (c *campusClient) ListTopRatedDishes(ctx context.Context, in *ListTopRatedD
 	return out, nil
 }
 
+func (c *campusClient) ReportDishSoldOut(ctx context.Context, in *ReportDishSoldOutRequest, opts ...grpc.CallOption) (*ReportDishSoldOutReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReportDishSoldOutReply)
+	err := c.cc.Invoke(ctx, Campus_ReportDishSoldOut_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *campusClient) GetUpdateNote(ctx context.Context, in *GetUpdateNoteRequest, opts ...grpc.CallOption) (*GetUpdateNoteReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUpdateNoteReply)
@@ -421,6 +434,8 @@ type CampusServer interface {
 	ListDishRatingSummaries(context.Context, *ListDishRatingSummariesRequest) (*ListDishRatingSummariesReply, error)
 	// Returns the highest-rated dishes served on a given day, ranked by Bayesian weighted average.
 	ListTopRatedDishes(context.Context, *ListTopRatedDishesRequest) (*ListTopRatedDishesReply, error)
+	// Crowdsourced report that a dish is sold out today (resets automatically at midnight Berlin time).
+	ReportDishSoldOut(context.Context, *ReportDishSoldOutRequest) (*ReportDishSoldOutReply, error)
 	GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error)
 	ListMovies(context.Context, *ListMoviesRequest) (*ListMoviesReply, error)
 	CreateFeedback(grpc.ClientStreamingServer[CreateFeedbackRequest, CreateFeedbackReply]) error
@@ -500,6 +515,9 @@ func (UnimplementedCampusServer) ListDishRatingSummaries(context.Context, *ListD
 }
 func (UnimplementedCampusServer) ListTopRatedDishes(context.Context, *ListTopRatedDishesRequest) (*ListTopRatedDishesReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTopRatedDishes not implemented")
+}
+func (UnimplementedCampusServer) ReportDishSoldOut(context.Context, *ReportDishSoldOutRequest) (*ReportDishSoldOutReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReportDishSoldOut not implemented")
 }
 func (UnimplementedCampusServer) GetUpdateNote(context.Context, *GetUpdateNoteRequest) (*GetUpdateNoteReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUpdateNote not implemented")
@@ -861,6 +879,24 @@ func _Campus_ListTopRatedDishes_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_ReportDishSoldOut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportDishSoldOutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).ReportDishSoldOut(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_ReportDishSoldOut_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).ReportDishSoldOut(ctx, req.(*ReportDishSoldOutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Campus_GetUpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUpdateNoteRequest)
 	if err := dec(in); err != nil {
@@ -1122,6 +1158,10 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTopRatedDishes",
 			Handler:    _Campus_ListTopRatedDishes_Handler,
+		},
+		{
+			MethodName: "ReportDishSoldOut",
+			Handler:    _Campus_ReportDishSoldOut_Handler,
 		},
 		{
 			MethodName: "GetUpdateNote",

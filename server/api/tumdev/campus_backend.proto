@@ -133,6 +133,14 @@ service Campus {
     option (google.api.http) = {get: "/dishes/top"};
   }
 
+  // Crowdsourced report that a dish is sold out today (resets automatically at midnight Berlin time).
+  rpc ReportDishSoldOut(ReportDishSoldOutRequest) returns (ReportDishSoldOutReply) {
+    option (google.api.http) = {
+      post: "/dish/soldOut"
+      body: "*"
+    };
+  }
+
   rpc GetUpdateNote(GetUpdateNoteRequest) returns (GetUpdateNoteReply) {
     option (google.api.http) = {get: "/updatenote/{version}"};
   }
@@ -340,6 +348,10 @@ message GetDishRatingsReply {
   repeated RatingTagResult name_tags = 7;
   int64 rating_count = 8;
   RatingDistribution distribution = 9;
+  // True if enough distinct devices reported this dish sold out today
+  bool sold_out = 12;
+  // Number of distinct devices that reported this dish sold out today
+  int32 sold_out_report_count = 13;
 }
 
 message SingleRatingReply {
@@ -520,6 +532,8 @@ message DishRatingSummary {
   repeated RatingTagResult rating_tags = 8;
   repeated RatingTagResult name_tags = 9;
   int64 latest_image_rating_id = 10;
+  bool sold_out = 12;
+  int32 sold_out_report_count = 13;
 }
 
 message ListDishRatingSummariesReply {
@@ -548,10 +562,22 @@ message TopRatedDish {
   double bayesian_score = 4;
   int64 rating_count = 5;
   int64 latest_image_rating_id = 6;
+  bool sold_out = 8;
 }
 
 message ListTopRatedDishesReply {
   repeated TopRatedDish dishes = 1;
+}
+
+message ReportDishSoldOutRequest {
+  string canteen_id = 1;
+  string dish = 2;
+}
+
+message ReportDishSoldOutReply {
+  int32 report_count = 1;
+  bool confirmed = 2;
+  bool already_reported = 3;
 }
 
 message RoomInformationElement {
