@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/guregu/null"
@@ -24,4 +25,12 @@ type Movie struct {
 	File        File        `gorm:"foreignKey:FileID;references:file;constraint:-"`
 	Link        string      `gorm:"column:link;type:varchar(190);not null;uniqueIndex:link"`
 	Location    null.String `gorm:"column:location;default:null"`
+}
+
+// IsCampuskinoHeilbronn returns true if the movie screening is from Campuskino Heilbronn.
+func (m Movie) IsCampuskinoHeilbronn() bool {
+	return strings.Contains(m.Link, "unifilm.de") ||
+		strings.Contains(m.Location.String, "Heilbronn") ||
+		strings.Contains(m.Location.String, "Bildungscampus") ||
+		strings.Contains(m.Location.String, "TechCampus")
 }

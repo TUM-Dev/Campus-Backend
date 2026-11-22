@@ -976,6 +976,19 @@
             "required": false,
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "cinema",
+            "description": "optional cinema filter (CINEMA_UNSPECIFIED returns movies from all cinemas)",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "CINEMA_UNSPECIFIED",
+              "TU_FILM",
+              "CAMPUSKINO_HEILBRONN"
+            ],
+            "default": "CINEMA_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -1310,6 +1323,15 @@
           "format": "double"
         }
       }
+    },
+    "apiCinema": {
+      "type": "string",
+      "enum": [
+        "CINEMA_UNSPECIFIED",
+        "TU_FILM",
+        "CAMPUSKINO_HEILBRONN"
+      ],
+      "default": "CINEMA_UNSPECIFIED"
     },
     "apiCoordinate": {
       "type": "object",
@@ -2175,6 +2197,10 @@
         "location": {
           "type": "string",
           "title": "Where the movie is shown"
+        },
+        "cinema": {
+          "$ref": "#/definitions/apiCinema",
+          "title": "Which student cinema screens this movie"
         },
         "releaseYear": {
           "type": "string",

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,8 +21,9 @@ import (
 
 type MovieSuite struct {
 	suite.Suite
-	DB   *gorm.DB
-	mock sqlmock.Sqlmock
+	DB        *gorm.DB
+	mock      sqlmock.Sqlmock
+	deviceBuf *deviceBuffer
 }
 
 func (s *MovieSuite) SetupSuite() {
@@ -41,6 +43,12 @@ func (s *MovieSuite) SetupSuite() {
 		WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.4.0"))
 	s.DB, err = gorm.Open(dialector, &gorm.Config{})
 	require.NoError(s.T(), err)
+
+	s.deviceBuf = newDeviceBuffer()
+}
+
+func movieIncomingCtx() context.Context {
+	return metadata.NewIncomingContext(context.Background(), metadata.MD{})
 }
 
 var (
@@ -60,6 +68,7 @@ var (
 		CoverId:                  1,
 		AdditionalInformationUrl: "https://www.imdb.com/title/tt1229238/",
 		Location:                 "Hörsaal 1200, Stammgelände",
+		Cinema:                   pb.Cinema_TU_FILM,
 	}
 	movie2 = pb.Movie{
 		MovieId:                  2,
@@ -77,6 +86,25 @@ var (
 		CoverId:                  2,
 		AdditionalInformationUrl: "https://www.imdb.com/title/tt2381249/",
 		Location:                 "Hörsaal MW1801, Campus Garching",
+		Cinema:                   pb.Cinema_TU_FILM,
+	}
+	movieHeilbronn = pb.Movie{
+		MovieId:                  3,
+		Date:                     timestamppb.New(time.Now()),
+		Created:                  timestamppb.New(time.Now()),
+		Title:                    "The Invite [OmU]",
+		ReleaseYear:              "",
+		Runtime:                  "107 min",
+		Genre:                    "Drama",
+		Director:                 "Olivia Wilde",
+		Actors:                   "",
+		ImdbRating:               "",
+		Description:              "Das Ehepaar Angela und Joe gerät in eine tiefe Krise.",
+		CoverUrl:                 "https://api.tum.app/files/movie/the_invite.jpg",
+		CoverId:                  3,
+		AdditionalInformationUrl: "https://www.unifilm.de/studentenkinos/Heilbronn#sid=30797",
+		Location:                 "NXTSpace - Bildungscampus, Heilbronn",
+		Cinema:                   pb.Cinema_CAMPUSKINO_HEILBRONN,
 	}
 )
 
@@ -89,7 +117,7 @@ func (s *MovieSuite) Test_ListMoviesAll() {
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(movie2.MovieId, movie2.Date.AsTime(), movie2.Created.AsTime(), movie2.Title, movie2.ReleaseYear, movie2.Runtime, movie2.Genre, movie2.Director, movie2.Actors, movie2.ImdbRating, movie2.Description, nil, movie2.CoverId, movie2.AdditionalInformationUrl, movie2.Location, movie2.CoverId, "mission_impossible_5.jpg", "movie/", 1, "", 1).
 			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.AdditionalInformationUrl, movie1.Location, movie1.CoverId, "mission_impossible_4.jpg", "movie/", 1, "", 1))
-	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: -1})
+	response, err := server.ListMovies(movieIncomingCtx(), &pb.ListMoviesRequest{LastId: -1})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie2, &movie1}}, response)
 }
@@ -100,7 +128,7 @@ func (s *MovieSuite) Test_ListMoviesOne() {
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
 			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.AdditionalInformationUrl, movie1.Location, movie1.CoverId, "mission_impossible_4.jpg", "movie/", 1, "", 1))
-	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: 1})
+	response, err := server.ListMovies(movieIncomingCtx(), &pb.ListMoviesRequest{LastId: 1})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie1}}, response)
 }
@@ -110,9 +138,33 @@ func (s *MovieSuite) Test_ListMoviesNone() {
 	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
 		WithArgs(42).
 		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}))
-	response, err := server.ListMovies(context.Background(), &pb.ListMoviesRequest{LastId: 42})
+	response, err := server.ListMovies(movieIncomingCtx(), &pb.ListMoviesRequest{LastId: 42})
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie(nil)}, response)
+}
+
+func (s *MovieSuite) Test_ListMoviesFilterByCinema() {
+	server := s.getCampusTestServer()
+	s.mock.ExpectQuery(regexp.QuoteMeta(ListMoviesQuery)).
+		WithArgs(-1).
+		WillReturnRows(sqlmock.NewRows([]string{"kino", "date", "created", "title", "year", "runtime", "genre", "director", "actors", "rating", "description", "trailer", "cover", "link", "location", "File__file", "File__name", "File__path", "File__downloads", "File__url", "File__downloaded"}).
+			AddRow(movie1.MovieId, movie1.Date.AsTime(), movie1.Created.AsTime(), movie1.Title, movie1.ReleaseYear, movie1.Runtime, movie1.Genre, movie1.Director, movie1.Actors, movie1.ImdbRating, movie1.Description, nil, movie1.CoverId, movie1.AdditionalInformationUrl, movie1.Location, movie1.CoverId, "mission_impossible_4.jpg", "movie/", 1, "", 1).
+			AddRow(movieHeilbronn.MovieId, movieHeilbronn.Date.AsTime(), movieHeilbronn.Created.AsTime(), movieHeilbronn.Title, movieHeilbronn.ReleaseYear, movieHeilbronn.Runtime, movieHeilbronn.Genre, movieHeilbronn.Director, movieHeilbronn.Actors, movieHeilbronn.ImdbRating, movieHeilbronn.Description, nil, movieHeilbronn.CoverId, movieHeilbronn.AdditionalInformationUrl, movieHeilbronn.Location, movieHeilbronn.CoverId, "the_invite.jpg", "movie/", 1, "", 1))
+
+	heilbronnResp, err := server.ListMovies(movieIncomingCtx(), &pb.ListMoviesRequest{
+		LastId: -1,
+		Cinema: pb.Cinema_CAMPUSKINO_HEILBRONN,
+	})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movieHeilbronn}}, heilbronnResp)
+
+	// Cached movies are reused and filtered for TU Film
+	tuFilmResp, err := server.ListMovies(movieIncomingCtx(), &pb.ListMoviesRequest{
+		LastId: -1,
+		Cinema: pb.Cinema_TU_FILM,
+	})
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), &pb.ListMoviesReply{Movies: []*pb.Movie{&movie1}}, tuFilmResp)
 }
 
 func (s *MovieSuite) AfterTest(_, _ string) {
@@ -128,6 +180,7 @@ func TestMovieSuite(t *testing.T) {
 func (s *MovieSuite) getCampusTestServer() *CampusServer {
 	return &CampusServer{
 		db:          s.DB,
+		deviceBuf:   s.deviceBuf,
 		moviesCache: expirable.NewLRU[string, []model.Movie](1024, nil, time.Minute*30),
 	}
 }
