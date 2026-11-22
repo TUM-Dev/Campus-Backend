@@ -398,6 +398,39 @@
         ]
       }
     },
+    "/dish/rating/summaries": {
+      "post": {
+        "summary": "Batch-fetches rating summaries (average, count, histogram, tags) for a daily menu or list of dishes.",
+        "operationId": "Campus_ListDishRatingSummaries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListDishRatingSummariesReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiListDishRatingSummariesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/dish/rating/{ratingId}": {
       "delete": {
         "summary": "Delete a dish rating previously created by the calling device.",
@@ -555,6 +588,78 @@
           {
             "name": "day",
             "description": "Day of the week\nDays must be in the range 0 (Monday) - 4 (Friday)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
+    "/dishes/top": {
+      "get": {
+        "summary": "Returns the highest-rated dishes served on a given day, ranked by Bayesian weighted average.",
+        "operationId": "Campus_ListTopRatedDishes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListTopRatedDishesReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "year",
+            "description": "ISO week-numbering year, \u003e=2022",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "week",
+            "description": "ISO week (1..52 or 1..53)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "day",
+            "description": "Day of the week: 0 (Monday) - 4 (Friday)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "canteenId",
+            "description": "Optional canteen filter; omit to rank across all canteens.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "Optional max number of dishes returned (default 10, max 50).",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "minRatings",
+            "description": "Optional minimum number of visible ratings required (default 1).",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -1160,6 +1265,55 @@
       ],
       "default": "IOS"
     },
+    "apiDishRatingSummary": {
+      "type": "object",
+      "properties": {
+        "dish": {
+          "type": "string"
+        },
+        "avg": {
+          "type": "number",
+          "format": "double"
+        },
+        "std": {
+          "type": "number",
+          "format": "double"
+        },
+        "min": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "max": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ratingCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "distribution": {
+          "$ref": "#/definitions/apiRatingDistribution"
+        },
+        "ratingTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTagResult"
+          }
+        },
+        "nameTags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiRatingTagResult"
+          }
+        },
+        "latestImageRatingId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "apiGetCanteenBusynessReply": {
       "type": "object",
       "properties": {
@@ -1264,6 +1418,13 @@
             "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
+        },
+        "ratingCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "distribution": {
+          "$ref": "#/definitions/apiRatingDistribution"
         }
       }
     },
@@ -1370,6 +1531,13 @@
             "type": "object",
             "$ref": "#/definitions/apiRatingTagResult"
           }
+        },
+        "ratingCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "distribution": {
+          "$ref": "#/definitions/apiRatingDistribution"
         }
       }
     },
@@ -1406,6 +1574,56 @@
             "type": "object",
             "$ref": "#/definitions/apiCanteen"
           }
+        }
+      }
+    },
+    "apiListDishRatingSummariesReply": {
+      "type": "object",
+      "properties": {
+        "summaries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiDishRatingSummary"
+          }
+        }
+      }
+    },
+    "apiListDishRatingSummariesRequest": {
+      "type": "object",
+      "properties": {
+        "canteenId": {
+          "type": "string",
+          "title": "Mandatory canteen identifier (eat-api id or enum name)"
+        },
+        "year": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Optional ISO date selector: when year \u003e 0, summarizes all dishes on that day's menu."
+        },
+        "week": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "day": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "dishes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional explicit list of dish names (used when year == 0)."
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional lower/upper timestamp bounds for windowed statistics."
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1507,6 +1725,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/apiStudentCouncilCollection"
+          }
+        }
+      }
+    },
+    "apiListTopRatedDishesReply": {
+      "type": "object",
+      "properties": {
+        "dishes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/apiTopRatedDish"
           }
         }
       }
@@ -1663,6 +1893,31 @@
         "iconUrl": {
           "type": "string",
           "title": "where the icon can be found"
+        }
+      }
+    },
+    "apiRatingDistribution": {
+      "type": "object",
+      "properties": {
+        "stars1": {
+          "type": "string",
+          "format": "int64"
+        },
+        "stars2": {
+          "type": "string",
+          "format": "int64"
+        },
+        "stars3": {
+          "type": "string",
+          "format": "int64"
+        },
+        "stars4": {
+          "type": "string",
+          "format": "int64"
+        },
+        "stars5": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1870,6 +2125,33 @@
         },
         "en": {
           "type": "string"
+        }
+      }
+    },
+    "apiTopRatedDish": {
+      "type": "object",
+      "properties": {
+        "canteenId": {
+          "type": "string"
+        },
+        "dish": {
+          "type": "string"
+        },
+        "avg": {
+          "type": "number",
+          "format": "double"
+        },
+        "bayesianScore": {
+          "type": "number",
+          "format": "double"
+        },
+        "ratingCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "latestImageRatingId": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
