@@ -555,3 +555,18 @@ func TestDishRatingSummariesHistogramsWindowingAndTopDishes(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, dedupBatch.Summaries, 3)
 }
+
+func TestListAvailableCanteenTagsSeeded(t *testing.T) {
+	ctx := context.Background()
+	db := utils.SetupTestContainer(ctx, t)
+	server := CampusServer{db: db}
+
+	reply, err := server.ListAvailableCanteenTags(ctx, &pb.ListAvailableCanteenTagsRequest{})
+	require.NoError(t, err)
+	require.Len(t, reply.RatingTags, 9)
+	for _, tag := range reply.RatingTags {
+		require.Greater(t, tag.TagId, int32(0))
+		require.NotEmpty(t, tag.De)
+		require.NotEmpty(t, tag.En)
+	}
+}
