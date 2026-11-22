@@ -35,11 +35,11 @@ func (c *CronService) movieCron() error {
 		return err
 	}
 
+	var importErrors []error
 	channels, err := movie_parsers.GetFeeds()
 	if err != nil {
-		return err
+		importErrors = append(importErrors, err)
 	}
-	var importErrors []error
 	for _, channel := range channels {
 		for _, item := range channel.Items {
 			logFields := log.Fields{"link": item.Link, "title": item.Title, "date": item.PubDate, "location": item.Location, "url": item.Enclosure.Url}
@@ -66,44 +66,70 @@ func (c *CronService) movieCron() error {
 			if movieInformation.Location != "" {
 				item.Location = movieInformation.Location
 			}
-			movie := model.Movie{
-				Date:        date,
-				Title:       item.Title,
-				Location:    null.StringFrom(item.Location),
-				Year:        movieInformation.ReleaseYear,
-				Runtime:     movieInformation.Runtime,
-				Director:    movieInformation.Director,
-				Actors:      movieInformation.Actors,
-				Description: movieInformation.ShortenedDescription,
-				Trailer:     movieInformation.TrailerUrl,
-				Link:        item.Link,
-			}
-			if omdbKeyExists && movieInformation.ImdbID.ValueOrZero() != "" {
-				omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
-				if err != nil {
-					log.WithFields(logFields).WithError(err).Warn("OMDb enrichment failed; using tu-film data")
-				} else {
-					enrichMovie(&movie, omdbMovie)
-				}
-			}
-
-			// save the result of the previous steps (🎉)
-			if err := c.db.Transaction(func(tx *gorm.DB) error {
-				file, err := saveImage(tx, movieInformation.ImageUrl)
-				if err != nil {
-					return err
-				}
-				// assign the file_id to make sure the id is assigned
-				movie.File = *file
-				movie.FileID = file.File
-				return tx.Omit("File").Create(&movie).Error
-			}); err != nil {
+			if err := c.storeParsedMovie(item.Title, item.Link, item.Location, date, movieInformation, omdbKeyExists, logFields); err != nil {
 				log.WithFields(logFields).WithError(err).Error("error while creating movie")
 				importErrors = append(importErrors, err)
+			} else {
+				allMovieLinks = append(allMovieLinks, item.Link)
 			}
 		}
 	}
+
+	campuskinoScreenings, err := movie_parsers.GetCampuskinoHeilbronnScreenings()
+	if err != nil {
+		log.WithError(err).Error("error while fetching campuskino heilbronn screenings")
+		importErrors = append(importErrors, err)
+	}
+	for _, screening := range campuskinoScreenings {
+		logFields := log.Fields{"link": screening.Link, "title": screening.Title, "date": screening.Info.ScreeningDate, "location": screening.Info.Location}
+		if slices.Contains(allMovieLinks, screening.Link) {
+			log.WithFields(logFields).Trace("Movie already exists")
+			continue
+		}
+		info := screening.Info
+		if err := c.storeParsedMovie(screening.Title, screening.Link, info.Location, info.ScreeningDate, &info, omdbKeyExists, logFields); err != nil {
+			log.WithFields(logFields).WithError(err).Error("error while creating campuskino heilbronn movie")
+			importErrors = append(importErrors, err)
+		} else {
+			allMovieLinks = append(allMovieLinks, screening.Link)
+		}
+	}
+
 	return errors.Join(importErrors...)
+}
+
+func (c *CronService) storeParsedMovie(title, link, location string, date time.Time, movieInformation *movie_parsers.TuFilmWebsiteInformation, omdbKeyExists bool, logFields log.Fields) error {
+	movie := model.Movie{
+		Date:        date,
+		Title:       title,
+		Location:    null.StringFrom(location),
+		Year:        movieInformation.ReleaseYear,
+		Runtime:     movieInformation.Runtime,
+		Genre:       movieInformation.Genre,
+		Director:    movieInformation.Director,
+		Actors:      movieInformation.Actors,
+		Description: movieInformation.ShortenedDescription,
+		Trailer:     movieInformation.TrailerUrl,
+		Link:        link,
+	}
+	if omdbKeyExists && movieInformation.ImdbID.ValueOrZero() != "" {
+		omdbMovie, err := movie_parsers.GetOmdbMovie(movieInformation.ImdbID.ValueOrZero())
+		if err != nil {
+			log.WithFields(logFields).WithError(err).Warn("OMDb enrichment failed; using source movie data")
+		} else {
+			enrichMovie(&movie, omdbMovie)
+		}
+	}
+
+	return c.db.Transaction(func(tx *gorm.DB) error {
+		file, err := saveImage(tx, movieInformation.ImageUrl)
+		if err != nil {
+			return err
+		}
+		movie.File = *file
+		movie.FileID = file.File
+		return tx.Omit("File").Create(&movie).Error
+	})
 }
 
 // saveImage saves an image to the database, so it can be downloaded by another cronjob and returns the file

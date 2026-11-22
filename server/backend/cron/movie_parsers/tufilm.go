@@ -27,6 +27,7 @@ type TuFilmWebsiteInformation struct {
 	ReleaseYear          null.String
 	Director             null.String
 	Actors               null.String
+	Genre                null.String
 	Runtime              null.String
 }
 
