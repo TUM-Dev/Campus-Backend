@@ -107,7 +107,7 @@ func (c *CronService) Run() error {
 			case MovieType:
 				run(func() error { return c.movieCron() })
 			case CanteenHeadcount:
-				run(func() error { return c.canteenHeadCountCron() })
+				run(func() error { return errors.Join(c.canteenHeadCountCron(), c.libraryOccupancyCron()) })
 			case FeedbackEmail:
 				run(func() error { return c.feedbackEmailCron() })
 			}

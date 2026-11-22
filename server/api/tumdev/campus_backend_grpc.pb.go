@@ -41,6 +41,8 @@ const (
 	Campus_DeleteDevice_FullMethodName             = "/api.Campus/DeleteDevice"
 	Campus_ListStudentClub_FullMethodName          = "/api.Campus/ListStudentClub"
 	Campus_ListStudentGroup_FullMethodName         = "/api.Campus/ListStudentGroup"
+	Campus_ListLibraries_FullMethodName            = "/api.Campus/ListLibraries"
+	Campus_GetLibraryBusyness_FullMethodName       = "/api.Campus/GetLibraryBusyness"
 )
 
 // CampusClient is the client API for Campus service.
@@ -77,6 +79,10 @@ type CampusClient interface {
 	ListStudentClub(ctx context.Context, in *ListStudentClubRequest, opts ...grpc.CallOption) (*ListStudentClubReply, error)
 	// List student clubs and student councils, as shown on the "Campus" tab
 	ListStudentGroup(ctx context.Context, in *ListStudentGroupRequest, opts ...grpc.CallOption) (*ListStudentGroupReply, error)
+	// List TUM libraries with their latest live occupancy estimates.
+	ListLibraries(ctx context.Context, in *ListLibrariesRequest, opts ...grpc.CallOption) (*ListLibrariesReply, error)
+	// Returns live library occupancy alongside typical 15-minute weekday busyness curves.
+	GetLibraryBusyness(ctx context.Context, in *GetLibraryBusynessRequest, opts ...grpc.CallOption) (*GetLibraryBusynessReply, error)
 }
 
 type campusClient struct {
@@ -301,6 +307,26 @@ func (c *campusClient) ListStudentGroup(ctx context.Context, in *ListStudentGrou
 	return out, nil
 }
 
+func (c *campusClient) ListLibraries(ctx context.Context, in *ListLibrariesRequest, opts ...grpc.CallOption) (*ListLibrariesReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLibrariesReply)
+	err := c.cc.Invoke(ctx, Campus_ListLibraries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *campusClient) GetLibraryBusyness(ctx context.Context, in *GetLibraryBusynessRequest, opts ...grpc.CallOption) (*GetLibraryBusynessReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLibraryBusynessReply)
+	err := c.cc.Invoke(ctx, Campus_GetLibraryBusyness_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CampusServer is the server API for Campus service.
 // All implementations must embed UnimplementedCampusServer
 // for forward compatibility.
@@ -335,6 +361,10 @@ type CampusServer interface {
 	ListStudentClub(context.Context, *ListStudentClubRequest) (*ListStudentClubReply, error)
 	// List student clubs and student councils, as shown on the "Campus" tab
 	ListStudentGroup(context.Context, *ListStudentGroupRequest) (*ListStudentGroupReply, error)
+	// List TUM libraries with their latest live occupancy estimates.
+	ListLibraries(context.Context, *ListLibrariesRequest) (*ListLibrariesReply, error)
+	// Returns live library occupancy alongside typical 15-minute weekday busyness curves.
+	GetLibraryBusyness(context.Context, *GetLibraryBusynessRequest) (*GetLibraryBusynessReply, error)
 	mustEmbedUnimplementedCampusServer()
 }
 
@@ -407,6 +437,12 @@ func (UnimplementedCampusServer) ListStudentClub(context.Context, *ListStudentCl
 }
 func (UnimplementedCampusServer) ListStudentGroup(context.Context, *ListStudentGroupRequest) (*ListStudentGroupReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListStudentGroup not implemented")
+}
+func (UnimplementedCampusServer) ListLibraries(context.Context, *ListLibrariesRequest) (*ListLibrariesReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListLibraries not implemented")
+}
+func (UnimplementedCampusServer) GetLibraryBusyness(context.Context, *GetLibraryBusynessRequest) (*GetLibraryBusynessReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetLibraryBusyness not implemented")
 }
 func (UnimplementedCampusServer) mustEmbedUnimplementedCampusServer() {}
 func (UnimplementedCampusServer) testEmbeddedByValue()                {}
@@ -796,6 +832,42 @@ func _Campus_ListStudentGroup_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Campus_ListLibraries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLibrariesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).ListLibraries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_ListLibraries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).ListLibraries(ctx, req.(*ListLibrariesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Campus_GetLibraryBusyness_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLibraryBusynessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CampusServer).GetLibraryBusyness(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Campus_GetLibraryBusyness_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CampusServer).GetLibraryBusyness(ctx, req.(*GetLibraryBusynessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Campus_ServiceDesc is the grpc.ServiceDesc for Campus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -882,6 +954,14 @@ var Campus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListStudentGroup",
 			Handler:    _Campus_ListStudentGroup_Handler,
+		},
+		{
+			MethodName: "ListLibraries",
+			Handler:    _Campus_ListLibraries_Handler,
+		},
+		{
+			MethodName: "GetLibraryBusyness",
+			Handler:    _Campus_GetLibraryBusyness_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
