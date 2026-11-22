@@ -95,6 +95,7 @@ func main() {
 
 	httpMux.Handle("/", http.RedirectHandler("/swagger/", http.StatusTemporaryRedirect))
 	httpMux.Handle("/files/", http.StripPrefix("/files/", utils.PublicFileServer("/Storage")))
+	httpMux.Handle("/rating-images/", http.StripPrefix("/rating-images/", campusService.RatingImageHandler()))
 	httpMux.Handle("/swagger/", http.FileServer(http.FS(swagfs)))
 
 	// Main GRPC Server

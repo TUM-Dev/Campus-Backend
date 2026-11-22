@@ -1416,6 +1416,9 @@
           "type": "string",
           "format": "int64"
         },
+        "latestImageUrl": {
+          "type": "string"
+        },
         "soldOut": {
           "type": "boolean"
         },
@@ -1537,6 +1540,15 @@
         "distribution": {
           "$ref": "#/definitions/apiRatingDistribution"
         },
+        "totalMatching": {
+          "type": "string",
+          "format": "int64",
+          "title": "Total ratings matching the active filters (from/to, only_with_images, only_with_comments)"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "title": "True if additional ratings exist beyond offset + len(rating)"
+        },
         "soldOut": {
           "type": "boolean",
           "title": "True if enough distinct devices reported this dish sold out today"
@@ -1573,6 +1585,27 @@
           "type": "integer",
           "format": "int32",
           "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional pagination offset (0-based)"
+        },
+        "sortBy": {
+          "$ref": "#/definitions/apiRatingSortOrder",
+          "title": "Optional sort order for returned ratings (default: newest first)"
+        },
+        "onlyWithImages": {
+          "type": "boolean",
+          "title": "Optional filter: return only ratings with an attached photo"
+        },
+        "onlyWithComments": {
+          "type": "boolean",
+          "title": "Optional filter: return only ratings with a non-empty comment"
+        },
+        "omitInlineImages": {
+          "type": "boolean",
+          "title": "Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)"
         },
         "includeUnratedFallback": {
           "type": "boolean",
@@ -1723,6 +1756,15 @@
         },
         "distribution": {
           "$ref": "#/definitions/apiRatingDistribution"
+        },
+        "totalMatching": {
+          "type": "string",
+          "format": "int64",
+          "title": "Total ratings matching the active filters (from/to, only_with_images, only_with_comments)"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "title": "True if additional ratings exist beyond offset + len(rating)"
         }
       }
     },
@@ -1747,6 +1789,27 @@
           "type": "integer",
           "format": "int32",
           "title": "Optional Parameter defines how many ratings are queried. If all ratings should be queried, enter \"-1\""
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional pagination offset (0-based)"
+        },
+        "sortBy": {
+          "$ref": "#/definitions/apiRatingSortOrder",
+          "title": "Optional sort order for returned ratings (default: newest first)"
+        },
+        "onlyWithImages": {
+          "type": "boolean",
+          "title": "Optional filter: return only ratings with an attached photo"
+        },
+        "onlyWithComments": {
+          "type": "boolean",
+          "title": "Optional filter: return only ratings with a non-empty comment"
+        },
+        "omitInlineImages": {
+          "type": "boolean",
+          "title": "Optional: omit raw JPEG bytes from SingleRatingReply.image (use image_url instead)"
         }
       }
     },
@@ -2118,6 +2181,15 @@
         }
       }
     },
+    "apiRatingSortOrder": {
+      "type": "string",
+      "enum": [
+        "RATING_SORT_NEWEST",
+        "RATING_SORT_HIGHEST",
+        "RATING_SORT_LOWEST"
+      ],
+      "default": "RATING_SORT_NEWEST"
+    },
     "apiRatingTag": {
       "type": "object",
       "properties": {
@@ -2215,7 +2287,7 @@
         "image": {
           "type": "string",
           "format": "byte",
-          "title": "Optional JPEG image in Base64"
+          "title": "Optional JPEG image in Base64 (omitted when omit_inline_images is true)"
         },
         "comment": {
           "type": "string",
@@ -2237,9 +2309,13 @@
           "format": "int64",
           "title": "Unique identifier of the rating"
         },
+        "imageUrl": {
+          "type": "string",
+          "title": "URL to fetch the rating photo over HTTP with caching; empty if no photo attached"
+        },
         "isOwnRating": {
           "type": "boolean",
-          "title": "Field 7 is reserved for image_url.\nTrue if the rating was submitted by the calling device (x-device-id)"
+          "title": "True if the rating was submitted by the calling device (x-device-id)"
         },
         "updatedAt": {
           "type": "string",
@@ -2375,6 +2451,9 @@
         "latestImageRatingId": {
           "type": "string",
           "format": "int64"
+        },
+        "latestImageUrl": {
+          "type": "string"
         },
         "soldOut": {
           "type": "boolean"
