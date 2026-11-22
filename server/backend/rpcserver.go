@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"net/http"
 	"sync"
 	"time"
 
@@ -19,6 +20,8 @@ type CampusServer struct {
 	newsSourceCache           *expirable.LRU[string, []model.NewsSource]
 	newsCache                 *expirable.LRU[string, []model.News]
 	moviesCache               *expirable.LRU[string, []model.Movie]
+	moderationWebhookURL      string
+	moderationHTTPClient      *http.Client
 }
 
 // Verify that CampusServer implements the pb.CampusServer interface

@@ -68,6 +68,7 @@ func (s *CanteenSuite) SetupTest() {
 
 	s.prevStorageDir = cron.StorageDir
 	cron.StorageDir = s.T().TempDir()
+	s.T().Setenv(ratingImagesEnabledEnv, "true")
 }
 
 func (s *CanteenSuite) TearDownTest() {

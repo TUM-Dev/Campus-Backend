@@ -424,10 +424,17 @@ func queryTagRatingsOverviewForRating(dishID int64, ratingType model.ModelType, 
 // Allows to store a new canteen rating atomically after validating all fields, image bytes, and tags.
 func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.CreateCanteenRatingRequest) (*pb.CreateCanteenRatingReply, error) {
 	s.recordDeviceIfPresent(ctx)
+	if len(input.Image) > 0 && !ratingImagesEnabled() {
+		return nil, status.Error(codes.FailedPrecondition, "Rating image uploads are currently disabled.")
+	}
 	if err := validateRatingTagsInput(input.RatingTags); err != nil {
 		return nil, err
 	}
 	tx := s.db.WithContext(ctx)
+	deviceHash := callerDeviceHash(ctx)
+	if err := checkDeviceNotBanned(tx, deviceHash); err != nil {
+		return nil, err
+	}
 	canteenID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
 		return nil, errorRes
@@ -436,7 +443,6 @@ func (s *CampusServer) CreateCanteenRating(ctx context.Context, input *pb.Create
 		return nil, err
 	}
 
-	deviceHash := callerDeviceHash(ctx)
 	if deviceHash.Valid {
 		dayStart, dayEnd := berlinDayBounds(time.Now())
 		var existing int64
@@ -514,6 +520,13 @@ func cleanupUnusedDishRatingImage(db *gorm.DB, imagePath string) {
 
 // storeImage validates, resizes, and encodes an uploaded JPEG/PNG image as JPEG on disk.
 func storeImage(dir string, raw []byte) (string, error) {
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(raw))
+	if err != nil {
+		return "", status.Error(codes.InvalidArgument, "Invalid image format. Only JPEG and PNG images are supported.")
+	}
+	if cfg.Width <= 0 || cfg.Height <= 0 || cfg.Width > maxImageDecodeDimension || cfg.Height > maxImageDecodeDimension {
+		return "", status.Error(codes.InvalidArgument, "Image dimensions are out of allowed bounds.")
+	}
 	img, _, err := image.Decode(bytes.NewReader(raw))
 	if err != nil {
 		return "", status.Error(codes.InvalidArgument, "Invalid image format. Only JPEG and PNG images are supported.")
@@ -556,10 +569,17 @@ func storeImage(dir string, raw []byte) (string, error) {
 // Allows to store a new dish rating atomically after validating all fields, image bytes, and tags.
 func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDishRatingRequest) (*pb.CreateDishRatingReply, error) {
 	s.recordDeviceIfPresent(ctx)
+	if len(input.Image) > 0 && !ratingImagesEnabled() {
+		return nil, status.Error(codes.FailedPrecondition, "Rating image uploads are currently disabled.")
+	}
 	if err := validateRatingTagsInput(input.RatingTags); err != nil {
 		return nil, err
 	}
 	tx := s.db.WithContext(ctx)
+	deviceHash := callerDeviceHash(ctx)
+	if err := checkDeviceNotBanned(tx, deviceHash); err != nil {
+		return nil, err
+	}
 	canteenID, errorRes := inputSanitizationForNewRatingElements(input.Points, input.Comment, input.CanteenId, tx)
 	if errorRes != nil {
 		return nil, errorRes
@@ -578,7 +598,6 @@ func (s *CampusServer) CreateDishRating(ctx context.Context, input *pb.CreateDis
 		return nil, err
 	}
 
-	deviceHash := callerDeviceHash(ctx)
 	if deviceHash.Valid {
 		dayStart, dayEnd := berlinDayBounds(time.Now())
 		var existing int64
@@ -640,6 +659,9 @@ func (s *CampusServer) UpdateDishRating(ctx context.Context, input *pb.UpdateDis
 	if len(input.Image) > 0 && input.RemoveImage {
 		return nil, status.Error(codes.InvalidArgument, "Cannot provide both image and remove_image.")
 	}
+	if len(input.Image) > 0 && !ratingImagesEnabled() {
+		return nil, status.Error(codes.FailedPrecondition, "Rating image uploads are currently disabled.")
+	}
 	if err := validateRatingPointsAndComment(input.Points, input.Comment); err != nil {
 		return nil, err
 	}
@@ -648,6 +670,9 @@ func (s *CampusServer) UpdateDishRating(ctx context.Context, input *pb.UpdateDis
 	}
 
 	tx := s.db.WithContext(ctx)
+	if err := checkDeviceNotBanned(tx, deviceHash); err != nil {
+		return nil, err
+	}
 	var existing model.DishRating
 	if err := tx.First(&existing, "dishRating = ? AND status = ?", input.RatingId, model.RatingStatusVisible).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -776,7 +801,11 @@ func (s *CampusServer) ReportDishRating(ctx context.Context, input *pb.ReportDis
 	}
 
 	tx := s.db.WithContext(ctx)
+	if err := checkDeviceNotBanned(tx, deviceHash); err != nil {
+		return nil, err
+	}
 	var hidden bool
+	var alert moderationReportAlert
 	if err := tx.Transaction(func(dbTx *gorm.DB) error {
 		var rating model.DishRating
 		if err := dbTx.First(&rating, "dishRating = ? AND status = ?", input.RatingId, model.RatingStatusVisible).Error; err != nil {
@@ -825,10 +854,32 @@ func (s *CampusServer) ReportDishRating(ctx context.Context, input *pb.ReportDis
 			}
 			hidden = true
 		}
+
+		var dishMeta struct {
+			DishName    string `gorm:"column:dish_name"`
+			CanteenName string `gorm:"column:canteen_name"`
+		}
+		_ = dbTx.Table("dishes d").
+			Joins("JOIN canteens c ON c.cafeteria = d.cafeteriaID").
+			Select("d.name AS dish_name, c.name AS canteen_name").
+			Where("d.dish = ?", rating.DishID).
+			Scan(&dishMeta).Error
+		alert = moderationReportAlert{
+			RatingID:     rating.DishRating,
+			DishName:     dishMeta.DishName,
+			CanteenID:    model.CanteenEatAPIID(dishMeta.CanteenName),
+			Points:       rating.Points,
+			Comment:      rating.Comment,
+			Reason:       reason,
+			TotalReports: totalReports,
+			AutoHidden:   hidden,
+			DeviceHash:   rating.DeviceHash.String,
+		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
+	s.notifyModerationDiscordAsync(alert)
 	return &pb.ReportDishRatingReply{Hidden: hidden}, nil
 }
 
