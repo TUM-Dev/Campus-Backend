@@ -154,6 +154,7 @@ func deviceCtx(deviceID string) context.Context {
 }
 
 func TestDishRatingOwnershipDeduplicationAndModeration(t *testing.T) {
+	t.Setenv(ratingImagesEnabledEnv, "true")
 	ctx := context.Background()
 	db := utils.SetupTestContainer(ctx, t)
 	prevStorage := cron.StorageDir
