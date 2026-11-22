@@ -236,6 +236,7 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 	ratingTagsByDish := batchLoadDishRatingTags(canteenID, dishIDs, from, to, windowed, tx)
 	nameTagsByDish := batchLoadDishNameTags(canteenID, dishIDs, tx)
 	latestImgByDish := batchLoadLatestImageRatingIDs(dishIDs, tx)
+	soldOutByDish := batchLoadTodaySoldOutCounts(dishIDs, time.Now(), tx)
 
 	summaries := make([]*pb.DishRatingSummary, 0, len(orderedNames))
 	for _, name := range orderedNames {
@@ -249,6 +250,7 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 		}
 		st := statsByDish[d.Dish]
 		imgRatingID := latestImgByDish[d.Dish]
+		soldOutCnt := soldOutByDish[d.Dish]
 		summaries = append(summaries, &pb.DishRatingSummary{
 			Dish:                d.Name,
 			Avg:                 st.Average,
@@ -261,6 +263,8 @@ func (s *CampusServer) ListDishRatingSummaries(ctx context.Context, req *pb.List
 			NameTags:            nameTagsByDish[d.Dish],
 			LatestImageRatingId: imgRatingID,
 			LatestImageUrl:      dishRatingImageURL(imgRatingID),
+			SoldOut:             soldOutCnt >= soldOutConfirmThreshold,
+			SoldOutReportCount:  soldOutCnt,
 		})
 	}
 	return &pb.ListDishRatingSummariesReply{Summaries: summaries}, nil
@@ -477,6 +481,7 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 		dishIDs[i] = s.row.DishID
 	}
 	latestImgByDish := batchLoadLatestImageRatingIDs(dishIDs, tx)
+	soldOutByDish := batchLoadTodaySoldOutCounts(dishIDs, time.Now(), tx)
 
 	result := make([]*pb.TopRatedDish, 0, len(scored))
 	for _, item := range scored {
@@ -489,6 +494,7 @@ func (s *CampusServer) ListTopRatedDishes(ctx context.Context, req *pb.ListTopRa
 			RatingCount:         item.row.RatingCount,
 			LatestImageRatingId: imgRatingID,
 			LatestImageUrl:      dishRatingImageURL(imgRatingID),
+			SoldOut:             soldOutByDish[item.row.DishID] >= soldOutConfirmThreshold,
 		})
 	}
 	return &pb.ListTopRatedDishesReply{Dishes: result}, nil
