@@ -192,7 +192,7 @@ func (s *MovieSuite) TestDateFiltersDoNotShareCacheEntries() {
 	for _, date := range []time.Time{first, second} {
 
 		s.mock.ExpectQuery("SELECT .* FROM `movies`").WithArgs(date, int32(0)).WillReturnRows(sqlmock.NewRows([]string{"kino"}))
-		_, err := server.getMovies(context.Background(), 0, date)
+		_, err := server.getMovies(context.Background(), 0, date, pb.Cinema_CINEMA_UNSPECIFIED)
 
 		require.NoError(s.T(), err)
 	}
