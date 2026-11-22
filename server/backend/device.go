@@ -44,8 +44,12 @@ func (s *CampusServer) RunDeviceFlusher() error {
 func (b *deviceBuffer) add(deviceID string, method string, osVersion string, appVersion string) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	if _, exists := b.devices[deviceID]; exists {
-		b.devices[deviceID].Counter++
+	if existing, exists := b.devices[deviceID]; exists {
+		existing.Counter++
+		existing.LastAccess = time.Now()
+		existing.LastAPI = method
+		existing.OsVersion = osVersion
+		existing.AppVersion = appVersion
 	} else {
 		b.devices[deviceID] = &model.Device{
 			UUID:       deviceID,
@@ -58,35 +62,34 @@ func (b *deviceBuffer) add(deviceID string, method string, osVersion string, app
 	}
 }
 
-// flush writes all buffered devices to the database
+// flush writes all buffered devices to the database without holding the mutex across DB I/O.
 func (b *deviceBuffer) flush(tx *gorm.DB) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
+	if len(b.devices) == 0 {
+		b.lock.Unlock()
+		return nil
+	}
 	devices := make([]*model.Device, 0, len(b.devices))
 	for _, device := range b.devices {
 		devices = append(devices, device)
 	}
-	if len(b.devices) == 0 {
-		return nil
-	}
-	// store devices in database, update if exists
-	err := tx.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "uuid"}}, // conflict on uuid -> update
-		DoUpdates: clause.AssignmentColumns([]string{"lastApi", "lastAccess", "osVersion", "appVersion"}),
-	}).Create(devices).Error
-	if err != nil {
-		log.WithError(err).Error("failed to flush device buffer")
-	}
-
-	// update number of calls for each device
-	err = tx.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "uuid"}},
-		DoUpdates: clause.Assignments(map[string]interface{}{"counter": gorm.Expr("counter+VALUES(counter)")}),
-	}).Create(devices).Error
-	if err != nil {
-		log.WithError(err).Error("failed to flush device buffer")
-	}
 	b.devices = make(map[string]*model.Device)
+	b.lock.Unlock()
+
+	err := tx.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "uuid"}},
+		DoUpdates: clause.Assignments(map[string]any{
+			"lastApi":    gorm.Expr("VALUES(lastApi)"),
+			"lastAccess": gorm.Expr("VALUES(lastAccess)"),
+			"osVersion":  gorm.Expr("VALUES(osVersion)"),
+			"appVersion": gorm.Expr("VALUES(appVersion)"),
+			"counter":    gorm.Expr("counter + VALUES(counter)"),
+		}),
+	}).Create(devices).Error
+	if err != nil {
+		log.WithError(err).Error("failed to flush device buffer")
+		return err
+	}
 	return nil
 }
 

@@ -17,6 +17,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gofrs/uuid/v5"
 	"github.com/guregu/null"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -60,14 +61,13 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 	if feedback.Feedback == "" && feedback.ImageCount == 0 {
 		return status.Error(codes.InvalidArgument, "Please attach an image or feedback for us")
 	}
+	var rateLimitedEmail string
 	if feedback.ReplyToEmail.Valid {
-		now := time.Now()
-		fiveMinutesAgo := now.Add(time.Minute * -5).Unix()
-		lastFeedback, feedbackExisted := s.feedbackEmailLastReuestAt.LoadOrStore(feedback.ReplyToEmail.String, now.Unix())
-		if feedbackExisted && lastFeedback.(int64) >= fiveMinutesAgo {
+		if waitSeconds := s.checkAndRecordFeedbackRateLimit(feedback.ReplyToEmail.String, time.Now()); waitSeconds > 0 {
 			deleteUploaded(dbPath)
-			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", lastFeedback.(int64)-fiveMinutesAgo))
+			return status.Error(codes.ResourceExhausted, fmt.Sprintf("You have already send a feedback recently. Please wait %d seconds", waitSeconds))
 		}
+		rateLimitedEmail = feedback.ReplyToEmail.String
 	}
 	// save feedback to db
 	if err := s.db.WithContext(stream.Context()).Transaction(func(tx *gorm.DB) error {
@@ -90,6 +90,9 @@ func (s *CampusServer) CreateFeedback(stream pb.Campus_CreateFeedbackServer) err
 		}
 		return tx.Create(feedback).Error
 	}); err != nil {
+		if rateLimitedEmail != "" {
+			s.clearFeedbackRateLimit(rateLimitedEmail)
+		}
 		deleteUploaded(dbPath)
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return status.Error(codes.AlreadyExists, "Feedback already exists")
@@ -180,7 +183,31 @@ func mergeFeedback(feedback *model.Feedback, req *pb.CreateFeedbackRequest) {
 	}
 	sanitiseString(&req.FromName)
 	if req.FromName != "" {
-		feedback.ReplyToName = null.StringFrom(req.FromEmail)
+		feedback.ReplyToName = null.StringFrom(req.FromName)
+	}
+}
+
+func (s *CampusServer) checkAndRecordFeedbackRateLimit(email string, now time.Time) int64 {
+	s.feedbackRateLimitMu.Lock()
+	defer s.feedbackRateLimitMu.Unlock()
+	if s.feedbackEmailLastRequestAt == nil {
+		s.feedbackEmailLastRequestAt = expirable.NewLRU[string, time.Time](4096, nil, feedbackCooldown)
+	}
+	if lastFeedback, ok := s.feedbackEmailLastRequestAt.Get(email); ok {
+		remaining := feedbackCooldown - now.Sub(lastFeedback)
+		if remaining > 0 {
+			return int64(remaining.Seconds()) + 1
+		}
+	}
+	s.feedbackEmailLastRequestAt.Add(email, now)
+	return 0
+}
+
+func (s *CampusServer) clearFeedbackRateLimit(email string) {
+	s.feedbackRateLimitMu.Lock()
+	defer s.feedbackRateLimitMu.Unlock()
+	if s.feedbackEmailLastRequestAt != nil {
+		s.feedbackEmailLastRequestAt.Remove(email)
 	}
 }
 
