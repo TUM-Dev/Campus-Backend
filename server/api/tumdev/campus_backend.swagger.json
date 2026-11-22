@@ -501,6 +501,39 @@
         ]
       }
     },
+    "/dish/soldOut": {
+      "post": {
+        "summary": "Crowdsourced report that a dish is sold out today (resets automatically at midnight Berlin time).",
+        "operationId": "Campus_ReportDishSoldOut",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiReportDishSoldOutReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiReportDishSoldOutRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Campus"
+        ]
+      }
+    },
     "/dishes": {
       "get": {
         "summary": "Returns all dishes for a specific cafeteria, year, week and day",
@@ -1241,6 +1274,13 @@
         "latestImageRatingId": {
           "type": "string",
           "format": "int64"
+        },
+        "soldOut": {
+          "type": "boolean"
+        },
+        "soldOutReportCount": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -1320,6 +1360,15 @@
         },
         "distribution": {
           "$ref": "#/definitions/apiRatingDistribution"
+        },
+        "soldOut": {
+          "type": "boolean",
+          "title": "True if enough distinct devices reported this dish sold out today"
+        },
+        "soldOutReportCount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of distinct devices that reported this dish sold out today"
         }
       }
     },
@@ -1876,6 +1925,32 @@
         }
       }
     },
+    "apiReportDishSoldOutReply": {
+      "type": "object",
+      "properties": {
+        "reportCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "confirmed": {
+          "type": "boolean"
+        },
+        "alreadyReported": {
+          "type": "boolean"
+        }
+      }
+    },
+    "apiReportDishSoldOutRequest": {
+      "type": "object",
+      "properties": {
+        "canteenId": {
+          "type": "string"
+        },
+        "dish": {
+          "type": "string"
+        }
+      }
+    },
     "apiSingleRatingReply": {
       "type": "object",
       "properties": {
@@ -2047,6 +2122,9 @@
         "latestImageRatingId": {
           "type": "string",
           "format": "int64"
+        },
+        "soldOut": {
+          "type": "boolean"
         }
       }
     },
