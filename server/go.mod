@@ -9,7 +9,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/getsentry/sentry-go v0.50.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.7
-	github.com/go-sql-driver/mysql v1.10.2
+	github.com/go-sql-driver/mysql v1.11.0
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.34.0
 	github.com/guregu/null v4.0.0+incompatible
